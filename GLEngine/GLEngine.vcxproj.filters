@@ -1,0 +1,380 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="src\Core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GLEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rde\allocator.cpp">
+      <Filter>Source Files\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rde\intrusive_list.cpp">
+      <Filter>Source Files\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rde\intrusive_slist.cpp">
+      <Filter>Source Files\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rde\list.cpp">
+      <Filter>Source Files\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rde\slist.cpp">
+      <Filter>Source Files\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Input\Input.cpp">
+      <Filter>Source Files\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Graphics.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\ARBDebugOutput.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Camera.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\PerspectiveCamera.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Pixmap.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Frustum.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLVertexBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLTextureBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLTextureArray.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLTexture.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLStateBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLShader.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLFramebuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLConstantBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\GLMesh.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\FileHandle.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\rde\rde_string.cpp">
+      <Filter>Source Files\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\GLLightManager.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\SphereToSSBounds.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="include\Utils\FPSCameraController.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\CheckGLError.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GLEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\algorithm.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\alignment.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\allocator.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\basic_string.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\buffer_allocator.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\cow_string_storage.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\fixed_array.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\fixed_list.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\fixed_sorted_vector.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\fixed_substring.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\fixed_vector.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\functional.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\hash.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\hash_map.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\int_to_type.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\intrusive_list.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\intrusive_slist.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\iterator.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\list.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\map.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\pair.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\radix_sorter.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\rb_tree.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\rde_string.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\rdestl.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\rdestl_common.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\set.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\simple_string_storage.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\slist.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\sort.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\sorted_vector.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\sstream.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\stack.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\stack_allocator.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\string_utils.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\type_traits.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\utility.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\vector.h">
+      <Filter>Header Files\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\Input.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\Key.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\KeyListener.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\MouseButton.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\MouseListener.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Graphics.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\Viewport.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\WindowFlags.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\VecForward.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\ARBDebugOutput.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\WindowEventListener.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Camera.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Frustum.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\PerspectiveCamera.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Pixmap.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\stb_image.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\MatForward.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GL.h">
+      <Filter>Header Files\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLTexture.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLVertexBuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLTextureBuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLTextureArray.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLStateBuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLShader.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLFramebuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLMesh.h">
+      <Filter>Header Files\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\FileHandle.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLTextureManager.h">
+      <Filter>Header Files\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLTypes.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLDefines.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLLightManager.h">
+      <Filter>Header Files\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\Bounds2D.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\Bounds3D.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\SphereToSSBounds.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\FPSCameraController.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\CheckGLError.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{c3929a23-77d5-4d5d-bcd2-5b7d4849cb9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{ce916186-5d2f-42e7-b721-6d332aa7c9da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\rde">
+      <UniqueIdentifier>{fe024b94-f287-4ca6-9bff-003e4fbb4081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\rde">
+      <UniqueIdentifier>{0385059d-b9de-4467-b553-07009e1b8497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{cb1ddaf1-aedf-4453-b457-54817d26e244}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core">
+      <UniqueIdentifier>{b27c6e96-c869-40a7-bbe1-ce2928a5e759}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{b249c0a9-2602-4c93-be42-a4a3886608fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Input">
+      <UniqueIdentifier>{8a3f4f49-5797-4d5d-b59e-802b5e585ffb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{0ae545d4-3401-43fd-a78d-7486196b6c1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{bec5600e-bf8c-4af0-a279-1dbc737dcfe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Input">
+      <UniqueIdentifier>{b67d66d6-b553-4723-9bb4-2848fca31a51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{21df264a-d635-4382-aef5-fd92dfe50d29}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\GL">
+      <UniqueIdentifier>{eda25695-8fbe-4fe4-8c8a-f0dd55c52d66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\GL\Core">
+      <UniqueIdentifier>{9ae7c1fb-6b6b-45a0-bd9c-fbf7ac2dcbe9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\GL">
+      <UniqueIdentifier>{dfa02db1-8009-4425-858c-aad50a68dd1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\GL\Core">
+      <UniqueIdentifier>{d4e65135-cafc-4abf-8c55-8cd95328083e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\Graphics\GL\Core\GLConstantBuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </None>
+  </ItemGroup>
+</Project>
