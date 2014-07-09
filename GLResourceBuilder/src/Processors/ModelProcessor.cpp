@@ -248,5 +248,5 @@ void writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bo
 
 void ModelProcessor::process(const char* inResourcePath, const char* outResourcePath)
 {
-	writeRaw(inResourcePath, outResourcePath, false);
+	writeRaw(inResourcePath, outResourcePath, true);
 }

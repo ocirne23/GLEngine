@@ -15,8 +15,8 @@ int main()
 	const char* OUT_FILE_DIR = "C:\\Users\\Enrico\\Documents\\GitHub\\GLEngine\\GLApp\\assets";
 
 	ImageProcessor* imageProcessor = new ImageProcessor();
-	//ModelProcessor* modelProcessor = new ModelProcessor();
-	SimpleModelProcessor* modelProcessor = new SimpleModelProcessor();
+	ModelProcessor* modelProcessor = new ModelProcessor();
+	//SimpleModelProcessor* modelProcessor = new SimpleModelProcessor();
 
 	ResourceBuilder::registerProcessor("png", imageProcessor);
 	ResourceBuilder::registerProcessor("tga", imageProcessor);

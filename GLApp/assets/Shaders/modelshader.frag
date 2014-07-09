@@ -242,6 +242,7 @@ void main()
 	
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
+	//out_color = vec4(0.4, 0.4, 0.4, 1.0);
 #ifdef SSAO_ENABLED
 	out_normal = vec3(v_screenSpaceNormal);
 #endif

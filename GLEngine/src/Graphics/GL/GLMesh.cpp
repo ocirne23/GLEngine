@@ -69,7 +69,7 @@ void readVector(FileHandle& handle, rde::vector<T>& vector)
 	handle.readBytes(reinterpret_cast<char*>(&vector[0]), size * sizeof(vector[0]));
 }
 
-void GLMesh::loadFromFile(const char* filePath, bool flipUV, GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset)
+void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset)
 {
 	FileHandle file(filePath);
 	if (!file.exists())
@@ -193,15 +193,13 @@ void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterial
 		{
 			m_textureBinder->bindTextureArrays(m_textureDataLoc, m_textureBindOffset, GLEngine::graphics->getMaxTextureUnits());
 		}
-		m_vertexBuffer->bind();
-		m_indiceBuffer->bind();
 
 		CHECK_GL_ERROR();
 		if (renderOpague)
-			glMultiDrawElementsBaseVertex(GL_TRIANGLES, (const GLsizei*) &m_indiceCounts[0], GL_UNSIGNED_INT, &m_baseIndices[0], m_baseIndices.size() - m_numOpagueMeshes, (const GLsizei*) &m_baseVertices[0]);
+			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts[0], GL_UNSIGNED_INT, &m_baseIndices[0], m_baseIndices.size() - m_numOpagueMeshes, &m_baseVertices[0]);
 		CHECK_GL_ERROR();
 		if (renderTransparent)
-			glMultiDrawElementsBaseVertex(GL_TRIANGLES, (const GLsizei*) &m_indiceCounts.back() - m_numOpagueMeshes, GL_UNSIGNED_INT, &m_baseIndices.back() - m_numOpagueMeshes, m_numOpagueMeshes, (const GLsizei*) &m_baseVertices.back() - m_numOpagueMeshes);
+			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts.back() - m_numOpagueMeshes, GL_UNSIGNED_INT, &m_baseIndices.back() - m_numOpagueMeshes, m_numOpagueMeshes, &m_baseVertices.back() - m_numOpagueMeshes);
 	}
 	m_stateBuffer->end();
 }

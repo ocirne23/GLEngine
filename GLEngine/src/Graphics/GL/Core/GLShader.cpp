@@ -9,7 +9,7 @@
 
 bool GLShader::s_begun = false;
 
-#define SHADER_STRICT_UNIFORM_LOC
+//#define SHADER_STRICT_UNIFORM_LOC
 
 rde::string appendDefinesAfterVersion(const rde::string& str, const rde::vector<rde::string>& defines)
 {

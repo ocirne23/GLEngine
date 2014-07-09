@@ -1,30 +1,12 @@
 #version 330 core
 
-/* REQUIRED DEFINES /*
-* LIGHT_GRID_WIDTH
-* LIGHT_GRID_HEIGHT
-* LIGHT_GRID_TILE_WIDTH
-* LIGHT_GRID_TILE_HEIGHT
-* MAX_LIGHTS
-*/
-////////////////////////// IN / OUT //////////////////////////
-
 in vec3 v_position;
 in vec2 v_texcoord;
 in vec3 v_normal;
 in vec3 v_tangent;
 in vec3 v_bitangent;
 flat in uint v_materialID;
-#ifdef SSAO_ENABLED
-in vec3 v_screenSpaceNormal;
-#endif
 
-layout (location = 0) out vec4 out_color;
-#ifdef SSAO_ENABLED
-layout (location = 1) out vec3 out_normal;
-#endif
-
-////////////////////////// MATERIAL LIGHTING //////////////////////////
 
 #define NUM_TEXTURE_ARRAYS 16
 #define MaterialHandle uvec2
@@ -129,120 +111,12 @@ vec3 getBumpedNormal(MaterialProperty material)
 	return rotMat * vec3(bump);
 }
 
-////////////////////////// CLUSTERED SHADING //////////////////////////
-
-uniform isamplerBuffer u_lightIndices;
-uniform isamplerBuffer u_lightGrid;
-uniform vec3 u_ambient;
-uniform float u_recNear;
-uniform float u_recLogSD1;
-
-layout (std140) uniform LightPositionRanges
-{
-	vec4 u_lightPositionRanges[MAX_LIGHTS];
-};
-layout (std140) uniform LightColors
-{
-	vec4 u_lightColors[MAX_LIGHTS];
-};
-
-ivec2 getLightListBeginEnd(float viewspaceDepth)
-{
-	// i and j coordinates are just the same as tiled shading, and based on screen space position.
-	ivec2 tileXY = ivec2(int(gl_FragCoord.x) / LIGHT_GRID_TILE_WIDTH, int(gl_FragCoord.y) / LIGHT_GRID_TILE_HEIGHT);
-
-	// k is based on the log of the view space Z coordinate.
-	float tileZ = log(-viewspaceDepth * u_recNear) * u_recLogSD1;
-
-	ivec3 clusterPos = ivec3(tileXY, int(tileZ));
-	int offset = (clusterPos.z * LIGHT_GRID_HEIGHT + clusterPos.y) * LIGHT_GRID_WIDTH + clusterPos.x;
-
-	return texelFetch(u_lightGrid, offset).xy;
-}
-
-////////////////////////// MAIN //////////////////////////
-
-#define PI 3.1415926535
-
-uniform vec3 u_eyePos;
-
-float G1V(float dotNV, float k)
-{
-	return 1.0 / (dotNV * (1.0 - k ) + k);
-}
+layout (location = 0) out vec4 out_color;
 
 void main()
 {
 	MaterialProperty material = u_materialProperties[v_materialID];
-	
-	if (hasTexture(material.maskHandle) && sampleHandle(material.maskHandle, v_texcoord).r < 0.5)
-	{
-		discard;
-	}
-	
-	vec3 diffuse = sampleHandle(material.diffuseHandle, v_texcoord).rgb * material.diffuseColorAndAlpha.rgb;
-	vec3 normal = hasTexture(material.bumpHandle) ? getBumpedNormal(material) : v_normal;
-	float specular = hasTexture(material.specularHandle) ? sampleHandle(material.specularHandle, v_texcoord).r : DEFAULT_SPECULAR;
-	
-	vec3 diffuseAccum = vec3(0);
-	vec3 specularAccum = vec3(0);
-	
-	vec3 N = normalize(normal);
-	vec3 V = normalize(u_eyePos - v_position);
-		
-	ivec2 lightsBeginEnd = getLightListBeginEnd(v_position.z); 
+	vec3 diffuse = sampleHandle(material.diffuseHandle, v_texcoord).rgb;
 
-	int lightsBegin = lightsBeginEnd.x;
-	int lightsEnd = lightsBeginEnd.y;
-
-	for (int i = lightsBegin; i < lightsEnd; ++i)
-	{
-		int lightIndex = texelFetch(u_lightIndices, i).r; 
-
-		vec4 lightPosViewspaceRange = u_lightPositionRanges[lightIndex];
-		vec4 lightColor = u_lightColors[lightIndex];
-
-		vec3 lightPosViewspace = lightPosViewspaceRange.xyz;
-		float lightRange = lightPosViewspaceRange.w;
-
-		vec3 lightVec = (lightPosViewspace - v_position);
-		float dist = length(lightVec);
-		
-		/* Linear falloff, not physically based */
-		float atten = max(1.0 - max(0.0, dist / lightRange), 0.0);
-		
-		vec3 L = lightVec / dist;
-		vec3 H = normalize(L + V);
-		
-		float NoL = clamp(dot(N, L), 0.0, 1.0);
-		float NoH = clamp(dot(N, H), 0.0, 1.0);
-		float HoL = clamp(dot(H, L), 0.0, 1.0);
-
-		vec3 diffuseContrib = diffuse * atten * lightColor.rgb * NoL;
-		diffuseAccum += diffuseContrib;
-
-		float F, D, vis;
-		float roughness = 1.0 - specular;
-		float alpha = roughness * roughness;
-		float alphaSqr = alpha * alpha;
-		
-		float denom = NoH * NoH * (alphaSqr - 1.0) + 1.0;
-		D = alphaSqr / (PI * denom * denom);
-
-		float F0 = 0.04; // refraction index
-		float dotLH5 = exp2(-8.65617024533378044416 * HoL);
-		F = F0 + (1.0 - F0) * dotLH5;
-
-		float k = alpha / 2.0;
-		float visSqrt = G1V(NoL, k);
-		vis = visSqrt * visSqrt;
-
-		specularAccum += diffuseContrib * F * NoL * D * vis;
-	}
-	
-	diffuseAccum += diffuse * u_ambient;
-	out_color = vec4(diffuseAccum + specularAccum, 1.0);
-#ifdef SSAO_ENABLED
-	out_normal = vec3(v_screenSpaceNormal);
-#endif
+	out_color = vec4(diffuse, 1.0);
 }

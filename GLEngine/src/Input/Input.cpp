@@ -18,6 +18,11 @@ Input::~Input()
 
 }
 
+void Input::setMouseCaptured(bool captured)
+{
+	SDL_SetRelativeMouseMode((SDL_bool) captured);
+}
+
 void Input::registerKeyListener(KeyListener* listener)
 {
 	m_keyListeners.push_back(listener);

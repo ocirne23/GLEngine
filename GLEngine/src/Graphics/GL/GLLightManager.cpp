@@ -69,6 +69,7 @@ void GLLightManager::update(const PerspectiveCamera& camera, float deltaSec)
 	unsigned int numLights = glm::min(m_numUsedLights, m_maxLights);
 	if (numLights > 0)
 	{
+		print("numlights %i \n", numLights);
 		m_lightPositionRangeBuffer.upload(sizeof(m_viewspaceLightPositionRanges[0]) * numLights, &m_viewspaceLightPositionRanges[0]);
 		m_lightColorBuffer.upload(sizeof(m_lightColors[0]) * numLights, &m_lightColors[0]);
 	}

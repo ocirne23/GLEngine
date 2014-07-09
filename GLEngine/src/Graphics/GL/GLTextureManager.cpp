@@ -40,14 +40,13 @@ void GLTextureManager::initializeTextureBinders()
 	for (TextureArrayData* textureArrayData : m_textureArrayData)
 	{
 		textureArrayData->m_textureArray->initialize(textureArrayData->m_pixmaps);
-
+		
 		for (const Pixmap* pixmap : textureArrayData->m_pixmaps)
 		{
 			delete pixmap;
 		}
 	}
 }
-
 
 void GLTextureManager::TextureBinder::bindTextureArrays(int uniformLoc, uint fromTextureUnit, uint maxTextureUnit)
 {
@@ -60,6 +59,7 @@ void GLTextureManager::TextureBinder::bindTextureArrays(int uniformLoc, uint fro
 	for (uint i = 0; i < numUsedTextureUnits; ++i)
 	{
 		m_textureBinds[i] = i + fromTextureUnit;
+		m_textureArrays[i]->bind(i + fromTextureUnit);
 	}
 	if (m_textureArrays.size() > 0)
 	{
@@ -87,7 +87,9 @@ uint GLTextureManager::TextureBinder::addTextureArray(GLTextureArray* textureArr
 
 const GLTextureManager::TextureHandle GLTextureManager::TextureBinder::createTextureHandle(const char* filename)
 {
-	return m_textureManager.createTextureHandle(*this, filename);
+	GLTextureManager::TextureHandle handle = m_textureManager.createTextureHandle(*this, filename);
+	print("handle %i %i \n", handle.arrayIndex, handle.textureArrayNr);
+	return handle;
 }
 
 const GLTextureManager::TextureHandle GLTextureManager::createTextureHandle(GLTextureManager::TextureBinder& textureBinder, const char* filename)
@@ -124,8 +126,9 @@ const GLTextureManager::TextureHandle GLTextureManager::createTextureHandle(GLTe
 		m_textureArrayData.push_back(data);
 		data->m_textureArray = new GLTextureArray();
 		data->m_textureArray->setDimensions(pixmap->m_width, pixmap->m_height, pixmap->m_numComponents);
+		unsigned int arrayNr = textureBinder.addTextureArray(data->m_textureArray);
 		data->m_pixmaps.push_back(pixmap);
 
-		return { m_textureArrayData.size() - 1, 0 };
+		return{ m_textureArrayData.size() - 1, arrayNr };
 	}
 }

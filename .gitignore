@@ -11,6 +11,8 @@
 *.log
 *.idb
 *.opensdf
+*.ilk
+*.pdb
 
 ipch/
 GLEngine/gen/

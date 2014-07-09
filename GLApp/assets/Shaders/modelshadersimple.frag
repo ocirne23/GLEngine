@@ -7,8 +7,6 @@ in vec3 v_tangent;
 in vec3 v_bitangent;
 flat in uint v_materialID;
 
-
-
 const uint MAX_MATERIALS = 200u;
 
 #define MaterialHandle uvec2

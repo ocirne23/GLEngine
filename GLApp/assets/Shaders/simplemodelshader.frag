@@ -2,7 +2,9 @@
 
 layout (location = 0) out vec4 out_color;
 
+in vec3 v_position;
+
 void main()
 {
-	out_color = vec4(0.4, 0.4, 0.4, 1.0);
+	out_color = vec4(v_position, 1.0);
 }

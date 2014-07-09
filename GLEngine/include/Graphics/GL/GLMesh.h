@@ -32,7 +32,7 @@ public:
 	GLMesh(const GLMesh& copy) = delete;
 	~GLMesh();
 
-	void loadFromFile(const char* filePath, bool flipUV, GLShader& shader, GLuint matUBOBindingPoint = 0, GLuint textureBindOffset = 0);
+	void loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOBindingPoint = 0, GLuint textureBindOffset = 0);
 	void reloadShader(GLShader& shader);
 	void render(bool renderOpague = true, bool renderTransparent = true, bool bindMaterials = true);
 
