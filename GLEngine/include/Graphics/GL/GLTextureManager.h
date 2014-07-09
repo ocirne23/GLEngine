@@ -17,6 +17,9 @@ public:
 	{
 		uint textureArrayNr;
 		uint arrayIndex;
+
+		TextureHandle() : textureArrayNr(0xFFFFFFFF), arrayIndex(0xFFFFFFFF) {}
+		TextureHandle(uint textureArrayNr, uint arrayIndex) : textureArrayNr(textureArrayNr), arrayIndex(arrayIndex) {}
 	};
 	class TextureBinder
 	{

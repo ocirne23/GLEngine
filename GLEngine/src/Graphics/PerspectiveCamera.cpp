@@ -4,7 +4,6 @@
 
 void PerspectiveCamera::initialize(const glm::vec3& position, const glm::vec3& direction, float viewportWidth, float viewportHeight, float horizontalFov, float near, float far)
 {
-	printf("init camera: %f %f %f %f %f \n", viewportWidth, viewportHeight, horizontalFov, near, far);
 	Camera::initialize(position, direction, viewportWidth, viewportHeight, near, far);
 	setHorizontalFieldOfView(horizontalFov);
 }
@@ -22,7 +21,6 @@ void PerspectiveCamera::setHorizontalFieldOfView(float fovh)
 {
 	m_hFieldOfView = fovh;
 	m_vFieldOfView = glm::degrees(glm::atan(glm::tan(glm::radians(m_hFieldOfView) * (m_viewportHeight / m_viewportWidth))));
-	printf("fov: %f %f %f \n", m_vFieldOfView, m_viewportWidth, m_viewportHeight);
 	updateProjection();
 }
 

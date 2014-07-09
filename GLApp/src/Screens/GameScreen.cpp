@@ -1,5 +1,6 @@
 #include "GameScreen.h"
 
+#include "..\Core\ScreenManager.h"
 #include "GLEngine.h"
 #include "Graphics\Graphics.h"
 #include "Input\Input.h"
@@ -17,7 +18,7 @@
 #include "rde\rde_string.h"
 
 #include <glm\glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm\gtc\matrix_transform.hpp>
 
 GLMesh mesh;
 GLShader modelShader;
@@ -41,11 +42,12 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	GLEngine::input->registerKeyListener(&cameraController);
 	GLEngine::input->registerMouseListener(&cameraController);
 	GLEngine::input->registerKeyListener(this);
+	GLEngine::input->setMouseCaptured(true);
 
 	camera.initialize(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), (float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 	cameraController.initialize(camera, glm::vec3(0, 0, 1));
 
-	//lightManager.initialize(MAX_LIGHTS, TILE_WIDTH_PX, TILE_HEIGHT_PX, camera, GLEngine::graphics->getViewport());
+	lightManager.initialize(MAX_LIGHTS, TILE_WIDTH_PX, TILE_HEIGHT_PX, camera, GLEngine::graphics->getViewport());
 
 	rde::vector<rde::string> defines;
 
@@ -63,11 +65,11 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	defines.push_back(rde::string("LIGHT_GRID_TILE_WIDTH ").append(rde::to_string(TILE_WIDTH_PX)));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
 
-	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshadersimple2.frag", &defines);
+	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", &defines);
 	CHECK_GL_ERROR();
 
 	modelShader.begin();
-	//lightManager.setupShader(modelShader);
+	lightManager.setupShader(modelShader);
 	modelShader.setUniform3f("u_ambient", glm::vec3(0.15f));
 	modelShader.end();
 		
@@ -97,7 +99,7 @@ void GameScreen::render(float deltaSec)
 
 	modelShader.begin();
 	{
-		//lightManager.update(camera, deltaSec);
+		lightManager.update(camera, deltaSec);
 
 		modelShader.setUniform3f("u_eyePos", glm::vec3(camera.m_viewMatrix * glm::vec4(camera.m_position, 1.0f)));
 		modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);
@@ -135,9 +137,20 @@ bool GameScreen::keyDown(Key key)
 	{
 	case Key_T:
 		{
-			lightManager.createLight(camera.m_position, glm::vec3(1.0f), 50.0f);
+			lightManager.createLight(
+				camera.m_position,
+				glm::normalize(glm::vec3(
+				(rand() % 1000) / 1000.0f,
+				(rand() % 1000) / 1000.0f,
+				(rand() % 1000) / 1000.0f)),
+				25.0f);
 			return true;
 		}
+	case Key_ESCAPE:
+	{
+		m_screenManager->quit();
+		return true;
+	}
 	}
 	return false;
 }

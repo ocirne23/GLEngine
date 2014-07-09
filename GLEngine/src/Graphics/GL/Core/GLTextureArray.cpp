@@ -45,7 +45,6 @@ GLTextureArray::~GLTextureArray()
 void GLTextureArray::initialize(const rde::vector<Pixmap*>& pixmaps, uint numMipMaps,
 	GLint minFilter, GLint magFilter, GLint textureWrapS, GLint textureWrapT)
 {
-	print("Texture array initialize: %i \n", pixmaps.size());
 	assert(!pixmaps.empty());
 
 	m_numMipmaps = numMipMaps;

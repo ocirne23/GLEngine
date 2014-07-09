@@ -54,7 +54,6 @@ template <typename T>
 void writeVector(std::ostream& file, const std::vector<T>& vector)
 {
 	int size = (int) vector.size();
-	printf("Size: %i \n", size);
 	
 	file.write(reinterpret_cast<const char*>(&size), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&vector[0]), sizeof(vector[0]) * size);
@@ -189,7 +188,6 @@ void writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bo
 	baseIndices.reserve(entries.size());
 	baseVertices.reserve(entries.size());
 
-
 	for (unsigned int i = 0; i < entries.size(); i++)
 	{
 		const MeshEntry& entry = entries[i];
@@ -239,8 +237,6 @@ void writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bo
 	writeVector(file, matProperties);
 	writeVector(file, indices);
 	writeVector(file, vertices);
-
-	printf("%f %f %f %i %i %i\n", vertices[0].position.x, vertices[0].position.y, vertices[0].position.z, indices[0], indices[1], indices[2]);
 
 	file.close();
 }

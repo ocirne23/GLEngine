@@ -42,8 +42,6 @@ void GLConstantBuffer::upload(unsigned int numBytes, const void* data)
 {
 	if (m_initialized)
 	{
-		print("Uniform buffer upload: %f kb \n", numBytes / 1000.0f);
-
 		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
 		glBufferData(GL_UNIFORM_BUFFER, numBytes, data, m_drawUsage);
 	}

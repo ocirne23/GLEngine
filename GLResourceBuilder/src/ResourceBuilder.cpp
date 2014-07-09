@@ -15,12 +15,7 @@ void ResourceBuilder::registerProcessor(const char* fileExtension, ResourceProce
 	s_processors.insert(std::make_pair(std::string(fileExtension), processor));
 }
 
-void createDirectories(const std::string& directory, int offset)
-{
-
-}
-
-void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* outDirectoryPath)
+void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* outDirectoryPath, bool incremental)
 {
 	printf("Starting resource building\n");
 
@@ -68,12 +63,15 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 			const std::string& str = files[i];
 			const std::string& writeTime = writeTimes[i];
 
-			auto writeTimesIt = oldWriteTimesMap.find(str);
-			if (writeTimesIt != oldWriteTimesMap.end())
-			{	// Check if file was modified
-				if (writeTimesIt->second == writeTime)
-				{
-				//	continue;
+			if (incremental)
+			{
+				auto writeTimesIt = oldWriteTimesMap.find(str);
+				if (writeTimesIt != oldWriteTimesMap.end())
+				{	// Check if file was modified
+					if (writeTimesIt->second == writeTime)
+					{
+						continue;
+					}
 				}
 			}
 

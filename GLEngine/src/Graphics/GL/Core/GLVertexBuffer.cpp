@@ -22,7 +22,6 @@ void GLVertexBuffer::initialize(GLenum bufferType, GLenum drawUsage)
 
 void GLVertexBuffer::upload(uint numBytes, const void* data)
 {
-	print("Vertex buffer upload: %f kb \n", numBytes / 1000.0f);
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);
 	glBindBuffer(m_bufferType, m_id);

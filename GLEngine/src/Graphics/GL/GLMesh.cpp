@@ -64,7 +64,6 @@ void readVector(FileHandle& handle, rde::vector<T>& vector)
 {
 	int size;
 	handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int));
-	print("readVector %i \n", size);
 	vector.resize(size);
 	handle.readBytes(reinterpret_cast<char*>(&vector[0]), size * sizeof(vector[0]));
 }
@@ -100,25 +99,17 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 
 	file.close();
 
-	print("numvertices: %i numindices: %i \n", vertices.size(), indices.size());
-	print("%f %f %f %i %i %i\n", vertices[0].position.x, vertices[0].position.y, vertices[0].position.z, indices[0], indices[1], indices[2]);
-
-	CHECK_GL_ERROR();
-
 	m_stateBuffer = new GLStateBuffer();
 	m_stateBuffer->initialize();
 	m_stateBuffer->begin();
-	CHECK_GL_ERROR();
 
 	m_indiceBuffer = new GLVertexBuffer();
 	m_indiceBuffer->initialize(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
 	m_indiceBuffer->upload(sizeof(indices[0]) * indices.size(), &indices[0]);
-	CHECK_GL_ERROR();
 
 	m_vertexBuffer = new GLVertexBuffer();
 	m_vertexBuffer->initialize(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
 	m_vertexBuffer->upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
-	CHECK_GL_ERROR();
 
 	VertexAttribute attributes[] =
 	{
@@ -133,7 +124,6 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	m_vertexBuffer->setVertexAttributes(6, attributes);
 	m_stateBuffer->end();
 	
-	CHECK_GL_ERROR();
 	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
 	m_textureBinder = textureManager.createTextureBinder();
 
@@ -190,14 +180,9 @@ void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterial
 	m_stateBuffer->begin();
 	{
 		if (bindMaterials)
-		{
 			m_textureBinder->bindTextureArrays(m_textureDataLoc, m_textureBindOffset, GLEngine::graphics->getMaxTextureUnits());
-		}
-
-		CHECK_GL_ERROR();
 		if (renderOpague)
 			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts[0], GL_UNSIGNED_INT, &m_baseIndices[0], m_baseIndices.size() - m_numOpagueMeshes, &m_baseVertices[0]);
-		CHECK_GL_ERROR();
 		if (renderTransparent)
 			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts.back() - m_numOpagueMeshes, GL_UNSIGNED_INT, &m_baseIndices.back() - m_numOpagueMeshes, m_numOpagueMeshes, &m_baseVertices.back() - m_numOpagueMeshes);
 	}

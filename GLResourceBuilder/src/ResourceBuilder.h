@@ -8,7 +8,7 @@
 class ResourceBuilder
 {
 public:
-	static void buildResources(const char* inDirectoryPath, const char* outDirectoryPath);
+	static void buildResources(const char* inDirectoryPath, const char* outDirectoryPath, bool incremental);
 	static void registerProcessor(const char* fileExtension, ResourceProcessor* processor);
 
 private:

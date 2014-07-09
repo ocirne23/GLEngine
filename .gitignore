@@ -19,4 +19,5 @@ GLEngine/gen/
 GLEngine/bin/
 GLEngine/obj/
 GLApp/obj/
+GLApp/assets/modificationdates.txt
 GLResourceBuilder/x64/
