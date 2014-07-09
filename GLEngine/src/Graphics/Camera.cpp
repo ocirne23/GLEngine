@@ -18,6 +18,7 @@ void Camera::initialize(const glm::vec3& position, const glm::vec3& direction, f
 	m_viewportHeight = viewportHeight;
 	m_near = near;
 	m_far = far;
+	m_up = UP;
 }
 
 bool Camera::frustumContains(const glm::vec3* const vertices, unsigned int numVertices) const

@@ -35,6 +35,7 @@
     <ClCompile Include="src\Graphics\GL\Core\GLVertexBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\GLLightManager.cpp" />
     <ClCompile Include="src\Graphics\GL\GLMesh.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLSimpleMesh.cpp" />
     <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\PerspectiveCamera.cpp" />
@@ -67,6 +68,7 @@
     <ClInclude Include="include\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Graphics\GL\GLLightManager.h" />
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
+    <ClInclude Include="include\Graphics\GL\GLSimpleMesh.h" />
     <ClInclude Include="include\Graphics\GL\GLTextureManager.h" />
     <ClInclude Include="include\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Graphics\Graphics.h" />

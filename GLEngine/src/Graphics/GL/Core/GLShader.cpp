@@ -9,6 +9,8 @@
 
 bool GLShader::s_begun = false;
 
+#define SHADER_STRICT_UNIFORM_LOC
+
 rde::string appendDefinesAfterVersion(const rde::string& str, const rde::vector<rde::string>& defines)
 {
 	auto version = str.find("#version");
@@ -134,7 +136,7 @@ GLShader::GLShader()
 
 GLShader::~GLShader()
 {
-	if (m_shaderID != 0xFFFFFFFF)
+	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
 }
 
@@ -156,7 +158,7 @@ void GLShader::reloadProgram()
 	const char* vert = m_vertPath.c_str();
 	const char* frag = m_fragPath.c_str();
 
-	if (m_shaderID != 0xFFFFFFFF)
+	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
 
 	m_shaderID = createShaderProgram(vert, NULL, frag, m_defines);

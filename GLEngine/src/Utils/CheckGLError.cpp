@@ -39,7 +39,7 @@ bool checkGLError(const char *file, int line)
 			str = reinterpret_cast<const GLubyte *>("No Error message available.");
 		}
 
-		fprintf(stderr, "GL Error in file: %s at line %i Error %i: %s \n", file, line, glErr, str);
+		printf("GL Error in file: %s at line %i Error %i: %s \n", file, line, glErr, str);
 	}
 
 	return error;

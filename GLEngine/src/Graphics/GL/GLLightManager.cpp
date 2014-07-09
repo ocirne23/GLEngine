@@ -53,8 +53,8 @@ void GLLightManager::setupShader(GLShader& shader)
 	m_recLogSD1Loc = glGetUniformLocation(shader.getID(), "u_recLogSD1");
 	m_recNearLoc = glGetUniformLocation(shader.getID(), "u_recNear");
 
-	m_lightPositionRangeBuffer.initialize(shader, LIGHT_POSITION_RANGES_BINDING_POINT, "LightPositionRanges");
-	m_lightColorBuffer.initialize(shader, LIGHT_COLORS_BINDING_POINT, "LightColors");
+	m_lightPositionRangeBuffer.initialize(shader, LIGHT_POSITION_RANGES_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
+	m_lightColorBuffer.initialize(shader, LIGHT_COLORS_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
 	m_lightGridBuffer.initialize(shader, "u_lightGrid", LIGHT_GRID_TEXTURE_INDEX, GL_RG32I, GL_STREAM_DRAW);
 	m_lightIndiceBuffer.initialize(shader, "u_lightIndices", LIGHT_INDICES_TEXTURE_INDEX, GL_R32I, GL_STREAM_DRAW);
 

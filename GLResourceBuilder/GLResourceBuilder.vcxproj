@@ -143,12 +143,14 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Processors\ImageProcessor.cpp" />
     <ClCompile Include="src\Processors\ModelProcessor.cpp" />
+    <ClCompile Include="src\Processors\SimpleModelProcessor.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\listFiles.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Processors\ImageProcessor.h" />
     <ClInclude Include="src\Processors\ModelProcessor.h" />
+    <ClInclude Include="src\Processors\SimpleModelProcessor.h" />
     <ClInclude Include="src\ResourceBuilder.h" />
     <ClInclude Include="src\ResourceProcessor.h" />
     <ClInclude Include="src\Utils\listFiles.h" />

@@ -91,6 +91,9 @@
     <ClCompile Include="src\Utils\CheckGLError.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics\GL\GLSimpleMesh.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -320,6 +323,9 @@
     </ClInclude>
     <ClInclude Include="include\Utils\CheckGLError.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLSimpleMesh.h">
+      <Filter>Header Files\Graphics\GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

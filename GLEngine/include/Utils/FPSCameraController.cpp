@@ -10,7 +10,7 @@
 #include <glm\gtx\compatibility.hpp>
 
 static const float DEFAULT_CAMERA_SPEED = 100.0f;
-static const float MOUSE_LOOK_SENSITIVITY = glm::radians(0.2f);
+static const float MOUSE_LOOK_SENSITIVITY = 1.0f;
 static const glm::vec3 UP(0, 1, 0);
 
 FPSCameraController::FPSCameraController()

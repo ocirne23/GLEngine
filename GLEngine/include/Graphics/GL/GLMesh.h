@@ -2,9 +2,7 @@
 
 #include "Core.h"
 #include "Graphics\GL\GLTextureManager.h"
-
 #include "Graphics\GL\GLTypes.h"
-
 #include "rde\rde_string.h"
 #include "rde\vector.h"
 

@@ -99,7 +99,7 @@ bool Graphics::initialize(const char* windowName, uint screenWidth, uint screenH
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
 	m_maxTextureUnits = (uint) maxTextureUnits;
 
-	//m_textureManager = new GLTextureManager();
+	m_textureManager = new GLTextureManager();
 	CHECK_GL_ERROR();
 
 	print("OpenGL context version: %i.%i \nvendor: %s \nGPU: %s \nversion: %s\n", major, minor, m_glVendor.c_str(), m_glRenderer.c_str(), m_glDriverVersion.c_str());
@@ -107,8 +107,7 @@ bool Graphics::initialize(const char* windowName, uint screenWidth, uint screenH
 
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
-	//glEnable(GL_DEPTH_TEST);
-	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	return true;
 }

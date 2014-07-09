@@ -81,18 +81,28 @@ void GLMesh::loadFromFile(const char* filePath, bool flipUV, GLShader& shader, G
 	rde::vector<uint> indices;
 	rde::vector<Vertex> vertices;
 	rde::vector<IOMaterialProperty> matProperties;
+	rde::vector<uint> baseIndices;
 	
 	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint));
 	readVector(file, m_indiceCounts);
-	readVector(file, m_baseIndices);
+	readVector(file, baseIndices);
 	readVector(file, m_baseVertices);
 	readVector(file, matProperties);
 	readVector(file, indices);
 	readVector(file, vertices);
 
+	uint numBaseIndices = baseIndices.size();
+	m_baseIndices.resize(numBaseIndices);
+	for (uint i = 0; i < numBaseIndices; ++i)
+	{
+		m_baseIndices[i] = (GLvoid*) baseIndices[i];
+	}
+
 	file.close();
 
 	print("numvertices: %i numindices: %i \n", vertices.size(), indices.size());
+	print("%f %f %f %i %i %i\n", vertices[0].position.x, vertices[0].position.y, vertices[0].position.z, indices[0], indices[1], indices[2]);
+
 	CHECK_GL_ERROR();
 
 	m_stateBuffer = new GLStateBuffer();
@@ -122,9 +132,8 @@ void GLMesh::loadFromFile(const char* filePath, bool flipUV, GLShader& shader, G
 
 	m_vertexBuffer->setVertexAttributes(6, attributes);
 	m_stateBuffer->end();
-
+	
 	CHECK_GL_ERROR();
-	/*
 	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
 	m_textureBinder = textureManager.createTextureBinder();
 
@@ -154,14 +163,13 @@ void GLMesh::loadFromFile(const char* filePath, bool flipUV, GLShader& shader, G
 	}
 	
 	initUniforms(shader, matUBOBindingPoint, textureBindOffset);
-	*/
 }
 void GLMesh::initUniforms(GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset)
 {
 	m_stateBuffer->begin();
 
 	m_matUniformBuffer = new GLConstantBuffer();
-	m_matUniformBuffer->initialize(shader, matUBOBindingPoint, "MaterialProperties");
+	m_matUniformBuffer->initialize(shader, matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
 	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
 	m_matUBOBindingPoint = matUBOBindingPoint;
 	m_textureBindOffset = textureBindOffset;
@@ -183,19 +191,17 @@ void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterial
 	{
 		if (bindMaterials)
 		{
-	//		m_textureBinder->bindTextureArrays(m_textureDataLoc, m_textureBindOffset, GLEngine::graphics->getMaxTextureUnits());
+			m_textureBinder->bindTextureArrays(m_textureDataLoc, m_textureBindOffset, GLEngine::graphics->getMaxTextureUnits());
 		}
 		m_vertexBuffer->bind();
 		m_indiceBuffer->bind();
 
-		//print("rendarin: %i \n", m_baseIndices.size() - m_numOpagueMeshes);
-
-		//if (renderOpague)
-			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts[0], GL_UNSIGNED_INT, &m_baseIndices[0],
-			m_baseIndices.size() - m_numOpagueMeshes, &m_baseVertices[0]);
-		//if (renderTransparent)
-		//	glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts.back() - m_numOpagueMeshes, GL_UNSIGNED_INT,
-		//	&m_baseIndices.back() - m_numOpagueMeshes, m_numOpagueMeshes, &m_baseVertices.back() - m_numOpagueMeshes);
+		CHECK_GL_ERROR();
+		if (renderOpague)
+			glMultiDrawElementsBaseVertex(GL_TRIANGLES, (const GLsizei*) &m_indiceCounts[0], GL_UNSIGNED_INT, &m_baseIndices[0], m_baseIndices.size() - m_numOpagueMeshes, (const GLsizei*) &m_baseVertices[0]);
+		CHECK_GL_ERROR();
+		if (renderTransparent)
+			glMultiDrawElementsBaseVertex(GL_TRIANGLES, (const GLsizei*) &m_indiceCounts.back() - m_numOpagueMeshes, GL_UNSIGNED_INT, &m_baseIndices.back() - m_numOpagueMeshes, m_numOpagueMeshes, (const GLsizei*) &m_baseVertices.back() - m_numOpagueMeshes);
 	}
 	m_stateBuffer->end();
 }

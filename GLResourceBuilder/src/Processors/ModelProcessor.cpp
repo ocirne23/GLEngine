@@ -6,6 +6,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+namespace
+{
 enum { MAX_MATERIALS = 200 };
 
 struct vec4 { float x, y, z, w; };
@@ -52,6 +54,8 @@ template <typename T>
 void writeVector(std::ostream& file, const std::vector<T>& vector)
 {
 	int size = (int) vector.size();
+	printf("Size: %i \n", size);
+	
 	file.write(reinterpret_cast<const char*>(&size), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&vector[0]), sizeof(vector[0]) * size);
 }
@@ -179,7 +183,7 @@ void writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bo
 	indices.reserve(numIndicesInScene);
 
 	std::vector<unsigned int> indiceCounts;
-	std::vector<const void* const> baseIndices;
+	std::vector<unsigned int> baseIndices;
 	std::vector<int> baseVertices;
 	indiceCounts.reserve(entries.size());
 	baseIndices.reserve(entries.size());
@@ -191,8 +195,7 @@ void writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bo
 		const MeshEntry& entry = entries[i];
 
 		indiceCounts.push_back(entry.numIndices);
-		const void* const baseIndex = reinterpret_cast<const void* const>(sizeof(unsigned int) * entry.baseIndex);
-		baseIndices.push_back(baseIndex);
+		baseIndices.push_back(entry.baseIndex * sizeof(unsigned int));
 		baseVertices.push_back(entry.baseVertex);
 	}
 
@@ -237,7 +240,10 @@ void writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bo
 	writeVector(file, indices);
 	writeVector(file, vertices);
 
+	printf("%f %f %f %i %i %i\n", vertices[0].position.x, vertices[0].position.y, vertices[0].position.z, indices[0], indices[1], indices[2]);
+
 	file.close();
+}
 }
 
 void ModelProcessor::process(const char* inResourcePath, const char* outResourcePath)

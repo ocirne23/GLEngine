@@ -5,6 +5,7 @@
 #include "ResourceBuilder.h"
 #include "Processors\ImageProcessor.h"
 #include "Processors\ModelProcessor.h"
+#include "Processors\SimpleModelProcessor.h"
 
 #include <Windows.h>
 
@@ -14,7 +15,8 @@ int main()
 	const char* OUT_FILE_DIR = "C:\\Users\\Enrico\\Documents\\GitHub\\GLEngine\\GLApp\\assets";
 
 	ImageProcessor* imageProcessor = new ImageProcessor();
-	ModelProcessor* modelProcessor = new ModelProcessor();
+	//ModelProcessor* modelProcessor = new ModelProcessor();
+	SimpleModelProcessor* modelProcessor = new SimpleModelProcessor();
 
 	ResourceBuilder::registerProcessor("png", imageProcessor);
 	ResourceBuilder::registerProcessor("tga", imageProcessor);

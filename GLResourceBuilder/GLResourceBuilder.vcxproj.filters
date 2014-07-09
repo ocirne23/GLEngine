@@ -38,6 +38,9 @@
     <ClCompile Include="src\Processors\ModelProcessor.cpp">
       <Filter>Source Files\Processors</Filter>
     </ClCompile>
+    <ClCompile Include="src\Processors\SimpleModelProcessor.cpp">
+      <Filter>Source Files\Processors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ResourceBuilder.h">
@@ -56,6 +59,9 @@
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Processors\ModelProcessor.h">
+      <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Processors\SimpleModelProcessor.h">
       <Filter>Header Files\Processors</Filter>
     </ClInclude>
   </ItemGroup>
