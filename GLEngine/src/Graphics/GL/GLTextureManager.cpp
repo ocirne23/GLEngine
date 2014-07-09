@@ -13,7 +13,7 @@ inline uint min(uint a, uint b) { return a < b ? a : b; }
 
 GLTextureManager::~GLTextureManager()
 {
-	for (TextureArrayData* textureArrayData : m_textureArrayData)
+	for (TextureArrayConfig* textureArrayData : m_textureArrayConfigs)
 	{
 		for (const Pixmap* pixmap : textureArrayData->m_pixmaps)
 		{
@@ -37,7 +37,7 @@ GLTextureManager::TextureBinder* GLTextureManager::createTextureBinder()
 
 void GLTextureManager::initializeTextureBinders()
 {
-	for (TextureArrayData* textureArrayData : m_textureArrayData)
+	for (TextureArrayConfig* textureArrayData : m_textureArrayConfigs)
 	{
 		textureArrayData->m_textureArray->initialize(textureArrayData->m_pixmaps);
 		
@@ -106,27 +106,27 @@ const GLTextureManager::TextureHandle GLTextureManager::createTextureHandle(GLTe
 		pixmap->readRaw(filename);
 		assert(pixmap->exists());
 
-		for (int i = 0; i < m_textureArrayData.size(); ++i)
+		for (uint i = 0; i < m_textureArrayConfigs.size(); ++i)
 		{
-			TextureArrayData* textureArrayData = m_textureArrayData[i];
+			TextureArrayConfig* textureArrayConfig = m_textureArrayConfigs[i];
 
-			if (textureArrayData->m_textureArray->getWidth() == pixmap->m_width &&
-				textureArrayData->m_textureArray->getHeight() == pixmap->m_height &&
-				textureArrayData->m_textureArray->getNumComponents() == pixmap->m_numComponents)
+			if (textureArrayConfig->m_textureArray->getWidth() == pixmap->m_width &&
+				textureArrayConfig->m_textureArray->getHeight() == pixmap->m_height &&
+				textureArrayConfig->m_textureArray->getNumComponents() == pixmap->m_numComponents)
 			{
-				uint pixmapIndex = textureArrayData->m_pixmaps.size();
-				textureArrayData->m_pixmaps.push_back(pixmap);
+				uint pixmapIndex = textureArrayConfig->m_pixmaps.size();
+				textureArrayConfig->m_pixmaps.push_back(pixmap);
 				return { i, pixmapIndex };
 			}
 		}
 
-		TextureArrayData* data = new TextureArrayData();
-		m_textureArrayData.push_back(data);
-		data->m_textureArray = new GLTextureArray();
-		data->m_textureArray->setDimensions(pixmap->m_width, pixmap->m_height, pixmap->m_numComponents);
-		textureBinder.addTextureArray(data->m_textureArray);
-		data->m_pixmaps.push_back(pixmap);
+		TextureArrayConfig* config = new TextureArrayConfig();
+		m_textureArrayConfigs.push_back(config);
+		config->m_textureArray = new GLTextureArray();
+		config->m_textureArray->setDimensions(pixmap->m_width, pixmap->m_height, pixmap->m_numComponents);
+		textureBinder.addTextureArray(config->m_textureArray);
+		config->m_pixmaps.push_back(pixmap);
 
-		return{ m_textureArrayData.size() - 1, 0 };
+		return{ m_textureArrayConfigs.size() - 1u, 0u };
 	}
 }

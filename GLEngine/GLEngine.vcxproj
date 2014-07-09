@@ -67,7 +67,6 @@
     <ClInclude Include="include\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Graphics\GL\GLLightManager.h" />
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
-    <ClInclude Include="include\Graphics\GL\GLSimpleMesh.h" />
     <ClInclude Include="include\Graphics\GL\GLTextureManager.h" />
     <ClInclude Include="include\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Graphics\Graphics.h" />

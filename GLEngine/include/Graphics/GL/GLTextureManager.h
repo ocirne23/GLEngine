@@ -52,7 +52,7 @@ public:
 
 private:
 
-	struct TextureArrayData
+	struct TextureArrayConfig
 	{
 		GLTextureArray* m_textureArray;
 		rde::vector<Pixmap*> m_pixmaps;
@@ -70,7 +70,7 @@ private:
 private:
 
 	rde::vector<TextureBinder*> m_textureBinders;
-	rde::vector<TextureArrayData*> m_textureArrayData;
+	rde::vector<TextureArrayConfig*> m_textureArrayConfigs;
 	rde::hash_map<rde::string, ManagedTextureHandle> m_managedTextures;
 };
 

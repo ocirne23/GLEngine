@@ -2,7 +2,7 @@
 Win x64 required
 #endif
 
-#define INCREMENTAL_BUILDING
+#define INCREMENTAL_BUILDING false
 
 #include "ResourceBuilder.h"
 #include "Processors\ImageProcessor.h"
@@ -24,7 +24,7 @@ int main()
 	ResourceBuilder::registerProcessor("jpg", imageProcessor);
 	ResourceBuilder::registerProcessor("obj", modelProcessor);
 
-	ResourceBuilder::buildResources(IN_FILE_DIR, OUT_FILE_DIR);
+	ResourceBuilder::buildResources(IN_FILE_DIR, OUT_FILE_DIR, INCREMENTAL_BUILDING);
 
 	delete modelProcessor;
 	delete imageProcessor;
