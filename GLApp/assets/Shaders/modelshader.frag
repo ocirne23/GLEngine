@@ -155,7 +155,7 @@ ivec2 getLightListBeginEnd(float viewspaceDepth)
 	float tileZ = log(-viewspaceDepth * u_recNear) * u_recLogSD1;
 
 	ivec3 clusterPos = ivec3(tileXY, int(tileZ));
-	int offset = (clusterPos.z * LIGHT_GRID_HEIGHT + clusterPos.y) * LIGHT_GRID_WIDTH + clusterPos.x;
+	int offset = (clusterPos.x * LIGHT_GRID_HEIGHT + clusterPos.y) * LIGHT_GRID_DEPTH + clusterPos.z;
 
 	return texelFetch(u_lightGrid, offset).xy;
 }

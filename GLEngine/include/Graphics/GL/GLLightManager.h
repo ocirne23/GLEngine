@@ -70,8 +70,8 @@ private:
 		unsigned int end;
 	};
 	rde::vector<LightListRef> m_lightGrid;
-	rde::vector<rde::vector<unsigned int>> m_tileLightIndices;
-	rde::vector<unsigned int> m_lightIndices;
+	rde::vector<rde::vector<unsigned short>> m_tileLightIndices;
+	rde::vector<unsigned short> m_lightIndices;
 
 	Viewport m_viewport;
 	const PerspectiveCamera* m_camera;

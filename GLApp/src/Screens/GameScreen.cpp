@@ -62,6 +62,7 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string(MAX_LIGHTS)));
 	defines.push_back(rde::string("LIGHT_GRID_WIDTH ").append(rde::to_string(lightManager.getGridWidth())));
 	defines.push_back(rde::string("LIGHT_GRID_HEIGHT ").append(rde::to_string(lightManager.getGridHeight())));
+	defines.push_back(rde::string("LIGHT_GRID_DEPTH ").append(rde::to_string(lightManager.getGridDepth())));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_WIDTH ").append(rde::to_string(TILE_WIDTH_PX)));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
 

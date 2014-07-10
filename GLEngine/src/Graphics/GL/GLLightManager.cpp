@@ -55,8 +55,8 @@ void GLLightManager::setupShader(GLShader& shader)
 
 	m_lightPositionRangeBuffer.initialize(shader, LIGHT_POSITION_RANGES_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
 	m_lightColorBuffer.initialize(shader, LIGHT_COLORS_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
-	m_lightGridBuffer.initialize(shader, "u_lightGrid", LIGHT_GRID_TEXTURE_INDEX, GL_RG32I, GL_STREAM_DRAW);
-	m_lightIndiceBuffer.initialize(shader, "u_lightIndices", LIGHT_INDICES_TEXTURE_INDEX, GL_R32I, GL_STREAM_DRAW);
+	m_lightGridBuffer.initialize(shader, "u_lightGrid", LIGHT_GRID_TEXTURE_INDEX, GL_RG32UI, GL_STREAM_DRAW);
+	m_lightIndiceBuffer.initialize(shader, "u_lightIndices", LIGHT_INDICES_TEXTURE_INDEX, GL_R16UI, GL_STREAM_DRAW);
 
 	glUniform1f(m_recLogSD1Loc, m_recLogSD1);
 	glUniform1f(m_recNearLoc, 1.0f / m_camera->m_near);
@@ -87,7 +87,7 @@ void GLLightManager::updateTiles(const PerspectiveCamera& camera, float deltaSec
 	m_lightIndices.clear();
 
 	unsigned int indiceCount = 0;
-	for (unsigned int i = 0; i < m_numUsedLights; ++i)
+	for (unsigned short i = 0; i < m_numUsedLights; ++i)
 	{
 		/* Lights get animated here */
 		glm::vec4 offset = glm::vec4(glm::vec3(glm::sin(timePassed + i) * 9.0f), glm::cos(timePassed * 1.5f + i) * 5.0f);
@@ -109,14 +109,14 @@ void GLLightManager::updateTiles(const PerspectiveCamera& camera, float deltaSec
 		bounds3D.maxY = glm::clamp(bounds3D.maxY, 0, (int) m_gridHeight);
 		bounds3D.minZ = glm::clamp(bounds3D.minZ, 0, (int) m_gridDepth);
 		bounds3D.maxZ = glm::clamp(bounds3D.maxZ, 0, (int) m_gridDepth);
-
+		
 		for (int x = bounds3D.minX; x < bounds3D.maxX; ++x)
 		{
 			for (int y = bounds3D.minY; y < bounds3D.maxY; ++y)
 			{
 				for (int z = bounds3D.minZ; z < bounds3D.maxZ; ++z)
 				{
-					unsigned int gridIdx = (z * m_gridHeight + y) * m_gridWidth + x;
+					unsigned int gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
 					m_tileLightIndices[gridIdx].push_back(i);
 				}
 			}
@@ -125,8 +125,9 @@ void GLLightManager::updateTiles(const PerspectiveCamera& camera, float deltaSec
 
 	for (int i = 0; i < m_tileLightIndices.size(); ++i)
 	{
-		m_lightGrid[i].begin = m_lightIndices.size();
-		m_lightGrid[i].end = m_lightIndices.size() + m_tileLightIndices[i].size();
+		int lightIndicesSize = m_lightIndices.size();
+		m_lightGrid[i].begin = lightIndicesSize;
+		m_lightGrid[i].end = lightIndicesSize + m_tileLightIndices[i].size();
 		for (int j = 0; j < m_tileLightIndices[i].size(); ++j)
 		{
 			m_lightIndices.push_back(m_tileLightIndices[i][j]);
