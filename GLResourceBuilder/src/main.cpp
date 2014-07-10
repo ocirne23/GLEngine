@@ -12,8 +12,8 @@ Win x64 required
 
 int main()
 {	
-	const char* IN_FILE_DIR = "C:\\Users\\Enrico\\Documents\\GitHub\\GLEngine\\GLApp\\assets-source";
-	const char* OUT_FILE_DIR = "C:\\Users\\Enrico\\Documents\\GitHub\\GLEngine\\GLApp\\assets";
+	const char* IN_FILE_DIR = "..\\GLApp\\assets-source";
+	const char* OUT_FILE_DIR = "..\\GLApp\\assets";
 
 	ImageProcessor* imageProcessor = new ImageProcessor();
 	ModelProcessor* modelProcessor = new ModelProcessor();
