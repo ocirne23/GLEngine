@@ -2,8 +2,6 @@
 
 #include "Utils\FileHandle.h"
 
-#include "Utils\stb_image.h"
-
 void Pixmap::readRaw(const char* fileName)
 {
 	FileHandle file(fileName);

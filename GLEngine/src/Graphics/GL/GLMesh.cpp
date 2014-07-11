@@ -19,6 +19,10 @@
 
 enum { MAX_MATERIALS = 200 };
 
+#ifdef ANDROID
+#define _MAX_PATH 260
+#endif
+
 struct IOMaterialProperty
 {
 	IOMaterialProperty()
@@ -181,10 +185,15 @@ void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterial
 	{
 		if (bindMaterials)
 			m_textureBinder->bindTextureArrays(m_textureDataLoc, m_textureBindOffset, GLEngine::graphics->getMaxTextureUnits());
+		
+#ifdef ANDROID
+		glDrawElements(GL_TRIANGLES, m_indiceCounts[0], GL_UNSIGNED_INT, NULL);
+#else
 		if (renderOpague)
 			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts[0], GL_UNSIGNED_INT, &m_baseIndices[0], m_baseIndices.size() - m_numOpagueMeshes, &m_baseVertices[0]);
 		if (renderTransparent)
 			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts.back() - m_numOpagueMeshes, GL_UNSIGNED_INT, &m_baseIndices.back() - m_numOpagueMeshes, m_numOpagueMeshes, &m_baseVertices.back() - m_numOpagueMeshes);
+#endif
 	}
 	m_stateBuffer->end();
 }

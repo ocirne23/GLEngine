@@ -258,9 +258,6 @@
     <ClInclude Include="include\Graphics\Pixmap.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Utils\stb_image.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\Utils\MatForward.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>

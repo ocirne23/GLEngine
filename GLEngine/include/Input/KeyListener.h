@@ -1,6 +1,6 @@
 #pragma once
 
-enum Key;
+#include "Input\Key.h"
 
 class KeyListener
 {

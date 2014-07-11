@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef ANDROID
-
-#include <stdint.h>
-
 typedef unsigned int GLenum;
 typedef unsigned int GLbitfield;
 typedef unsigned int GLuint;
@@ -21,6 +17,10 @@ typedef float GLclampf;
 typedef double GLdouble;
 typedef double GLclampd;
 typedef void GLvoid;
+
+#ifndef ANDROID
+
+#include <stdint.h>
 
 typedef struct __GLsync* GLsync;
 typedef ptrdiff_t GLintptr;

@@ -103,7 +103,11 @@ void GLTextureBuffer::upload(unsigned int numBytes, const void* data)
 void GLTextureBuffer::bind()
 {
 	glActiveTexture(GL_TEXTURE0 + m_textureIdx);
+#ifdef ANDROID
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+#else
 	glBindTexture(GL_TEXTURE_BUFFER, m_textureID);
+#endif
 }
 
 /*

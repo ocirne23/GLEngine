@@ -106,7 +106,7 @@ const GLTextureManager::TextureHandle GLTextureManager::createTextureHandle(GLTe
 		pixmap->readRaw(filename);
 		assert(pixmap->exists());
 
-		for (uint i = 0; i < m_textureArrayConfigs.size(); ++i)
+		for (uint i = 0; i < (uint) m_textureArrayConfigs.size(); ++i)
 		{
 			TextureArrayConfig* textureArrayConfig = m_textureArrayConfigs[i];
 

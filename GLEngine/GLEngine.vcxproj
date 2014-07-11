@@ -124,7 +124,6 @@
     <ClInclude Include="include\Utils\FPSCameraController.h" />
     <ClInclude Include="include\Utils\MatForward.h" />
     <ClInclude Include="include\Utils\SphereToSSBounds.h" />
-    <ClInclude Include="include\Utils\stb_image.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
     <ClInclude Include="include\Utils\Viewport.h" />
   </ItemGroup>
