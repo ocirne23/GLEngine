@@ -51,6 +51,7 @@ private:
 	GLint m_textureDataLoc;
 
 	unsigned int m_numOpagueMeshes;
+	unsigned int m_numIndices;
 	rde::vector<GLsizei> m_indiceCounts;
 	rde::vector<GLvoid*> m_baseIndices;
 	rde::vector<GLint> m_baseVertices;

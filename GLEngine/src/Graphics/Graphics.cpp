@@ -99,11 +99,15 @@ bool Graphics::initialize(const char* windowName, uint screenWidth, uint screenH
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
 	m_maxTextureUnits = (uint) maxTextureUnits;
 
+	GLint uboMaxSize;
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &uboMaxSize);
+
 	m_textureManager = new GLTextureManager();
 	CHECK_GL_ERROR();
 
 	print("OpenGL context version: %i.%i \nvendor: %s \nGPU: %s \nversion: %s\n", major, minor, m_glVendor.c_str(), m_glRenderer.c_str(), m_glDriverVersion.c_str());
 	print("Max texture units %u \n", m_maxTextureUnits);
+	print("UBO max size: %i \n", uboMaxSize);
 
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);

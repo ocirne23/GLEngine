@@ -73,20 +73,19 @@ void attachShaderSource(GLuint prog, GLenum type, const char * source)
 }
 
 GLuint createShaderProgram(const char* vertexShaderFilePath,
-	const char* geometryShaderFilePath, const char* fragmentShaderFilePath,
+	const char* geometryShaderFilePath, const char* fragmentShaderFilePath, rde::string versionStr,
 	const rde::vector<rde::string>& defines)
 {
 	GLuint program = glCreateProgram();
 	if (vertexShaderFilePath)
 	{
-
-		rde::string contents = FileHandle(vertexShaderFilePath).readString();
+		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(FileHandle(vertexShaderFilePath).readString());
 		if (defines.size() > 0) contents = appendDefinesAfterVersion(contents, defines);
 		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
 	}
 	if (fragmentShaderFilePath)
 	{
-		rde::string contents = FileHandle(fragmentShaderFilePath).readString();
+		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(FileHandle(fragmentShaderFilePath).readString());
 		if (defines.size() > 0) contents = appendDefinesAfterVersion(contents, defines);
 		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());
 	}
@@ -140,10 +139,11 @@ GLShader::~GLShader()
 		glDeleteProgram(m_shaderID);
 }
 
-void GLShader::initialize(const char* vertexShaderPath, const char* fragShaderPath, const rde::vector<rde::string>* defines)
+void GLShader::initialize(const char* vertexShaderPath, const char* fragShaderPath, const char* versionStr, const rde::vector<rde::string>* defines)
 {
 	m_vertPath = vertexShaderPath;
 	m_fragPath = fragShaderPath;
+	m_versionStr = versionStr;
 
 	if (defines)
 	{
@@ -161,7 +161,7 @@ void GLShader::reloadProgram()
 	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
 
-	m_shaderID = createShaderProgram(vert, NULL, frag, m_defines);
+	m_shaderID = createShaderProgram(vert, NULL, frag, m_versionStr, m_defines);
 }
 
 void GLShader::begin()

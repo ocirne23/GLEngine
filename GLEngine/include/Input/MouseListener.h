@@ -1,6 +1,6 @@
 #pragma once
 
-enum MouseButton;
+#include "Input\MouseButton.h"
 
 class MouseListener
 {

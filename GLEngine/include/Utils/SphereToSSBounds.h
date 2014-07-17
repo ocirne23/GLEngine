@@ -10,4 +10,4 @@ class Camera;
 class PerspectiveCamera;
 
 IBounds2D findScreenSpaceBounds(const Camera& camera, glm::vec3 lightPosWorldSpace, float lightRadius, Viewport viewport);
-IBounds3D findScreenSpace3DTile(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport, glm::ivec2 pixelsPerTile, float recLogSD1);
+IBounds3D findScreenSpace3DTile(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport, uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1);

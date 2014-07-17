@@ -1,7 +1,6 @@
 /* REQUIRED DEFINES /*
 * LIGHT_GRID_WIDTH
 * LIGHT_GRID_HEIGHT
-* LIGHT_GRID_DEPTH
 * LIGHT_GRID_TILE_WIDTH
 * LIGHT_GRID_TILE_HEIGHT
 * MAX_LIGHTS
@@ -126,6 +125,7 @@ vec3 getBumpedNormal(MaterialProperty material)
 
 uniform isamplerBuffer u_lightIndices;
 uniform isamplerBuffer u_lightGrid;
+uniform vec3 u_ambient;
 uniform float u_recNear;
 uniform float u_recLogSD1;
 
@@ -157,7 +157,6 @@ ivec2 getLightListBeginEnd(float viewspaceDepth)
 #define PI 3.1415926535
 
 uniform vec3 u_eyePos;
-uniform vec3 u_ambient;
 
 float G1V(float dotNV, float k)
 {

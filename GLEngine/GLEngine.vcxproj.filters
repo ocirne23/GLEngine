@@ -85,11 +85,14 @@
     <ClCompile Include="src\Utils\SphereToSSBounds.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="include\Utils\FPSCameraController.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\CheckGLError.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\FPSCameraController.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\ClusteredShading.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -317,6 +320,9 @@
     </ClInclude>
     <ClInclude Include="include\Utils\CheckGLError.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\ClusteredShading.h">
+      <Filter>Header Files\Graphics\GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

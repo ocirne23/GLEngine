@@ -11,27 +11,24 @@
 typedef unsigned int LightHandle;
 
 class GLShader;
-class PerspectiveCamera;
+class ClusteredShading;
 
 class GLLightManager
 {
 public:
-	GLLightManager() : m_numUsedLights(0), m_gridWidth(0), m_gridHeight(0), m_gridDepth(0),
-		m_maxLights(0), m_numLightsLoc(0), m_camera(0)
+	GLLightManager() : m_numUsedLights(0), m_maxLights(0), m_numLightsLoc(0)
 	{};
 	~GLLightManager() {};
 
-	void initialize(unsigned int m_maxLights, unsigned int pixelsPerTileW, unsigned int pixelsPerTileH, const PerspectiveCamera& camera, const Viewport& viewport);
+	void initialize(unsigned int m_maxLights);
 	void setupShader(GLShader& shader);
+	void update();
 
-	void update(const PerspectiveCamera& camera, float deltaSec);
-
-	unsigned int getGridWidth() { return m_gridWidth; };
-	unsigned int getGridHeight() { return m_gridHeight; };
-	unsigned int getGridDepth() { return m_gridDepth; };
-
-
-	unsigned int getNumLights() { return m_numUsedLights; };
+	unsigned int getNumLights() { return m_numUsedLights; }
+	const glm::vec4* getLightPositionRangeListBegin()
+	{ 
+		return m_lightPositionRanges.size() ? &m_lightPositionRanges[0] : NULL;
+	}
 
 	LightHandle createLight(glm::vec3 pos, glm::vec3 color, float invRadius);
 	void deleteLight(LightHandle light);
@@ -46,8 +43,6 @@ public:
 
 private:
 
-	void updateTiles(const PerspectiveCamera& camera, float deltaSec);
-
 	static const unsigned int AVAILABLE_HANDLE = 0xFFFFFFFF;
 
 	unsigned int m_maxLights;
@@ -61,32 +56,7 @@ private:
 	rde::vector<unsigned short> m_lightHandleIndices;
 
 	GLint m_numLightsLoc;
-	GLint m_recLogSD1Loc;
-	GLint m_recNearLoc;
-
-	struct LightListRef
-	{
-		unsigned int begin;
-		unsigned int end;
-	};
-	rde::vector<LightListRef> m_lightGrid;
-	rde::vector<rde::vector<unsigned short>> m_tileLightIndices;
-	rde::vector<unsigned short> m_lightIndices;
-
-	Viewport m_viewport;
-	const PerspectiveCamera* m_camera;
-
-	float m_recLogSD1;
-
-	unsigned int m_gridWidth;
-	unsigned int m_gridHeight;
-	unsigned int m_gridDepth;
-	unsigned int m_gridSize;
-	glm::ivec2 m_pixelsPerTile;
-
-	GLTextureBuffer m_lightIndiceBuffer;
-	GLTextureBuffer m_lightGridBuffer;
-
+	
 	GLConstantBuffer m_lightPositionRangeBuffer;
 	GLConstantBuffer m_lightColorBuffer;
 };

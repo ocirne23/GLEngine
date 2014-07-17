@@ -4,6 +4,8 @@
 
 #include <assert.h>
 
+bool GLFramebuffer::s_begun = false;
+
 GLFramebuffer::GLFramebuffer() : m_depthTexture(0)
 {
 	glGenFramebuffers(1, &m_fbo);

@@ -23,7 +23,6 @@ public:
 	void deleteTextures();
 
 private:
-
 	static bool s_begun;
 	bool m_begun;
 

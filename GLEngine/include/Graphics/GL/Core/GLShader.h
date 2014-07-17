@@ -16,7 +16,7 @@ public:
 	~GLShader();
 	GLShader(const GLShader& copy) = delete;
 
-	void initialize(const char* vertexShaderPath, const char* fragShaderPath, const rde::vector<rde::string>* defines = NULL);
+	void initialize(const char* vertexShaderPath, const char* fragShaderPath, const char* versionStr, const rde::vector<rde::string>* defines = NULL);
 	void reloadProgram();
 
 	void begin();
@@ -63,5 +63,6 @@ private:
 	bool m_begun;
 	rde::string m_vertPath;
 	rde::string m_fragPath;
+	rde::string m_versionStr;
 	rde::vector<rde::string> m_defines;
 };

@@ -8,6 +8,7 @@
 #include "Graphics\PerspectiveCamera.h"
 #include "Graphics\GL\GLMesh.h"
 #include "Graphics\GL\GLLightManager.h"
+#include "Graphics\GL\ClusteredShading.h"
 #include "Graphics\GL\Core\GLShader.h"
 
 #include "Utils\FileHandle.h"
@@ -23,6 +24,7 @@
 GLMesh mesh;
 GLShader modelShader;
 GLLightManager lightManager;
+ClusteredShading clusteredShading;
 
 PerspectiveCamera camera;
 FPSCameraController cameraController;
@@ -47,7 +49,8 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	camera.initialize(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), (float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 	cameraController.initialize(camera, glm::vec3(0, 0, 1));
 
-	lightManager.initialize(MAX_LIGHTS, TILE_WIDTH_PX, TILE_HEIGHT_PX, camera, GLEngine::graphics->getViewport());
+	lightManager.initialize(MAX_LIGHTS);
+	clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewport(), camera);
 
 	rde::vector<rde::string> defines;
 
@@ -60,17 +63,28 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	}
 
 	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string(MAX_LIGHTS)));
-	defines.push_back(rde::string("LIGHT_GRID_WIDTH ").append(rde::to_string(lightManager.getGridWidth())));
-	defines.push_back(rde::string("LIGHT_GRID_HEIGHT ").append(rde::to_string(lightManager.getGridHeight())));
-	defines.push_back(rde::string("LIGHT_GRID_DEPTH ").append(rde::to_string(lightManager.getGridDepth())));
+	defines.push_back(rde::string("LIGHT_GRID_WIDTH ").append(rde::to_string(clusteredShading.getGridWidth())));
+	defines.push_back(rde::string("LIGHT_GRID_HEIGHT ").append(rde::to_string(clusteredShading.getGridHeight())));
+	defines.push_back(rde::string("LIGHT_GRID_DEPTH ").append(rde::to_string(clusteredShading.getGridDepth())));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_WIDTH ").append(rde::to_string(TILE_WIDTH_PX)));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
 
-	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", &defines);
+#if 0
+	defines.push_back(rde::string("GL_ES"));
+#endif
+
+	const char* versionStr;
+#ifdef ANDROID
+	versionStr = "300 es";
+#else
+	versionStr = "330 core";
+#endif
+	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", versionStr, &defines);
 	CHECK_GL_ERROR();
 
 	modelShader.begin();
 	lightManager.setupShader(modelShader);
+	clusteredShading.setupShader(modelShader, 0, 1);
 	modelShader.setUniform3f("u_ambient", glm::vec3(0.15f));
 	modelShader.end();
 		
@@ -100,7 +114,8 @@ void GameScreen::render(float deltaSec)
 
 	modelShader.begin();
 	{
-		lightManager.update(camera, deltaSec);
+		lightManager.update();
+		clusteredShading.update(camera, lightManager.getLightPositionRangeListBegin(), lightManager.getNumLights());
 
 		modelShader.setUniform3f("u_eyePos", glm::vec3(camera.m_viewMatrix * glm::vec4(camera.m_position, 1.0f)));
 		modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);

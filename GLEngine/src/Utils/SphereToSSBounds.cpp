@@ -24,6 +24,9 @@
 
 #include "Graphics\PerspectiveCamera.h"
 
+namespace
+{
+
 void updateClipRegionRoot(float nc,
 	float lc,
 	float lz,
@@ -48,6 +51,7 @@ void updateClipRegionRoot(float nc,
 		}
 	}
 }
+
 void updateClipRegion(float lc,
 	float lz,
 	float lightRadius,
@@ -90,6 +94,14 @@ glm::vec4 computeClipRegion(const glm::vec3 &lightPosView, float lightRadius, fl
 
 inline void swap(float& a, float& b) { float tmp = a; a = b; b = tmp; }
 
+float calcClusterZ(float viewSpaceZ, float recNear, float recLogSD1)
+{
+	float gridLocZ = logf(-viewSpaceZ * recNear) * recLogSD1;
+	return gridLocZ;
+}
+
+}
+
 IBounds2D findScreenSpaceBounds(const Camera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport)
 {
 	glm::vec4 reg = computeClipRegion(lightPosViewSpace, lightRadius, camera.m_near, camera.m_projectionMatrix);
@@ -112,13 +124,7 @@ IBounds2D findScreenSpaceBounds(const Camera& camera, glm::vec3 lightPosViewSpac
 	return result;
 }
 
-float calcClusterZ(float viewSpaceZ, float recNear, float recLogSD1)
-{
-	float gridLocZ = logf(-viewSpaceZ * recNear) * recLogSD1;
-	return gridLocZ;
-}
-
-IBounds3D findScreenSpace3DTile(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport, glm::ivec2 pixelsPerTile, float recLogSD1)
+IBounds3D findScreenSpace3DTile(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport, uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1)
 {
 	IBounds2D bounds2D = findScreenSpaceBounds(camera, lightPosViewSpace, lightRadius, viewport);
 	float recNear = 1.0f / camera.m_near;
@@ -128,10 +134,10 @@ IBounds3D findScreenSpace3DTile(const PerspectiveCamera& camera, glm::vec3 light
 	minZ = glm::min(minZ, maxZ);
 
 	IBounds3D bounds3D;
-	bounds3D.minX = bounds2D.minX / pixelsPerTile.x;
-	bounds3D.maxX = (bounds2D.maxX / pixelsPerTile.x) + 1;
-	bounds3D.minY = bounds2D.minY / pixelsPerTile.y;
-	bounds3D.maxY = (bounds2D.maxY / pixelsPerTile.y) + 1;
+	bounds3D.minX = bounds2D.minX / pixelsPerTileW;
+	bounds3D.maxX = (bounds2D.maxX / pixelsPerTileW) + 1;
+	bounds3D.minY = bounds2D.minY / pixelsPerTileH;
+	bounds3D.maxY = (bounds2D.maxY / pixelsPerTileH) + 1;
 	bounds3D.minZ = minZ;
 	bounds3D.maxZ = maxZ;
 

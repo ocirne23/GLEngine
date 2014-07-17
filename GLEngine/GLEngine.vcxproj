@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Utils\FPSCameraController.cpp" />
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\GLEngine.cpp" />
     <ClCompile Include="src\Graphics\ARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Camera.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
+    <ClCompile Include="src\Graphics\GL\ClusteredShading.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLConstantBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLFramebuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLShader.cpp" />
@@ -48,6 +48,7 @@
     <ClCompile Include="src\rde\slist.cpp" />
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
+    <ClCompile Include="src\Utils\FPSCameraController.cpp" />
     <ClCompile Include="src\Utils\SphereToSSBounds.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -56,6 +57,7 @@
     <ClInclude Include="include\Graphics\ARBDebugOutput.h" />
     <ClInclude Include="include\Graphics\Camera.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
+    <ClInclude Include="include\Graphics\GL\ClusteredShading.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLFramebuffer.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLShader.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLStateBuffer.h" />

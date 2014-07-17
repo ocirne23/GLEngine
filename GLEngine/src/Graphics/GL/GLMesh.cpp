@@ -14,6 +14,8 @@
 #include "Utils\CheckGLError.h"
 
 #include "rde\rde_string.h"
+#include "Input\Input.h"
+#include "Input\Key.h"
 
 #include <glm\glm.hpp>
 
@@ -85,14 +87,16 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	rde::vector<Vertex> vertices;
 	rde::vector<IOMaterialProperty> matProperties;
 	rde::vector<uint> baseIndices;
-	
+
 	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint));
 	readVector(file, m_indiceCounts);
 	readVector(file, baseIndices);
-	readVector(file, m_baseVertices);
 	readVector(file, matProperties);
 	readVector(file, indices);
 	readVector(file, vertices);
+	file.close();
+
+	m_numIndices = indices.size();
 
 	uint numBaseIndices = baseIndices.size();
 	m_baseIndices.resize(numBaseIndices);
@@ -101,7 +105,6 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 		m_baseIndices[i] = (GLvoid*) baseIndices[i];
 	}
 
-	file.close();
 
 	m_stateBuffer = new GLStateBuffer();
 	m_stateBuffer->initialize();
@@ -127,7 +130,7 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 
 	m_vertexBuffer->setVertexAttributes(6, attributes);
 	m_stateBuffer->end();
-	
+
 	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
 	m_textureBinder = textureManager.createTextureBinder();
 
@@ -137,9 +140,9 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 		idx = texturePathStr.find_index_of_last('\\');
 
 	texturePathStr = texturePathStr.substr(0, idx).append("\\");
-	
+
 	m_matProperties.resize(matProperties.size());
-	
+
 	for (int i = 0; i < matProperties.size(); ++i)
 	{
 		m_matProperties[i].diffuseColorAndAlpha = matProperties[i].diffuseColorAndAlpha;
@@ -155,7 +158,7 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 		if (matProperties[i].maskTex[0])
 			m_matProperties[i].maskHandle = m_textureBinder->createTextureHandle(rde::string(texturePathStr).append(matProperties[i].maskTex).c_str());
 	}
-	
+
 	initUniforms(shader, matUBOBindingPoint, textureBindOffset);
 }
 void GLMesh::initUniforms(GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset)
@@ -185,15 +188,7 @@ void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterial
 	{
 		if (bindMaterials)
 			m_textureBinder->bindTextureArrays(m_textureDataLoc, m_textureBindOffset, GLEngine::graphics->getMaxTextureUnits());
-		
-#ifdef ANDROID
-		glDrawElements(GL_TRIANGLES, m_indiceCounts[0], GL_UNSIGNED_INT, NULL);
-#else
-		if (renderOpague)
-			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts[0], GL_UNSIGNED_INT, &m_baseIndices[0], m_baseIndices.size() - m_numOpagueMeshes, &m_baseVertices[0]);
-		if (renderTransparent)
-			glMultiDrawElementsBaseVertex(GL_TRIANGLES, &m_indiceCounts.back() - m_numOpagueMeshes, GL_UNSIGNED_INT, &m_baseIndices.back() - m_numOpagueMeshes, m_numOpagueMeshes, &m_baseVertices.back() - m_numOpagueMeshes);
-#endif
+		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}
 	m_stateBuffer->end();
 }
