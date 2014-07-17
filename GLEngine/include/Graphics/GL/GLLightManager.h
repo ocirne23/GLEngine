@@ -11,6 +11,7 @@
 typedef unsigned int LightHandle;
 
 class GLShader;
+class PerspectiveCamera;
 class ClusteredShading;
 
 class GLLightManager
@@ -22,12 +23,12 @@ public:
 
 	void initialize(unsigned int m_maxLights);
 	void setupShader(GLShader& shader);
-	void update();
+	void update(const PerspectiveCamera& camera);
 
 	unsigned int getNumLights() { return m_numUsedLights; }
-	const glm::vec4* getLightPositionRangeListBegin()
+	const glm::vec4* getViewspaceLightPositionRangeListBegin()
 	{ 
-		return m_lightPositionRanges.size() ? &m_lightPositionRanges[0] : NULL;
+		return m_viewspaceLightPositionRanges.size() ? &m_viewspaceLightPositionRanges[0] : NULL;
 	}
 
 	LightHandle createLight(glm::vec3 pos, glm::vec3 color, float invRadius);

@@ -2,6 +2,7 @@
 
 #include "Graphics\GL\GL.h"
 #include "Graphics\GL\Core\GLShader.h"
+#include "Graphics\PerspectiveCamera.h"
 
 static const unsigned int LIGHT_POSITION_RANGES_BINDING_POINT = 1;
 static const unsigned int LIGHT_COLORS_BINDING_POINT = 2;
@@ -28,11 +29,16 @@ void GLLightManager::setupShader(GLShader& shader)
 	m_lightColorBuffer.initialize(shader, LIGHT_COLORS_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
 }
 
-void GLLightManager::update()
+void GLLightManager::update(const PerspectiveCamera& camera)
 {
 	unsigned int numLights = glm::min(m_numUsedLights, m_maxLights);
 	if (numLights > 0)
 	{
+		for (int i = 0; i < m_lightPositionRanges.size(); ++i)
+		{
+			m_viewspaceLightPositionRanges[i] = glm::vec4(glm::vec3(camera.m_viewMatrix * glm::vec4(glm::vec3(m_lightPositionRanges[i]), 1.0f)), m_lightPositionRanges[i].w);
+		}
+
 		m_lightPositionRangeBuffer.upload(sizeof(m_viewspaceLightPositionRanges[0]) * numLights, &m_viewspaceLightPositionRanges[0]);
 		m_lightColorBuffer.upload(sizeof(m_lightColors[0]) * numLights, &m_lightColors[0]);
 	}

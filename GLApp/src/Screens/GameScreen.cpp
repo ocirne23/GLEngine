@@ -114,8 +114,8 @@ void GameScreen::render(float deltaSec)
 
 	modelShader.begin();
 	{
-		lightManager.update();
-		clusteredShading.update(camera, lightManager.getLightPositionRangeListBegin(), lightManager.getNumLights());
+		lightManager.update(camera);
+		clusteredShading.update(camera, lightManager.getViewspaceLightPositionRangeListBegin(), lightManager.getNumLights());
 
 		modelShader.setUniform3f("u_eyePos", glm::vec3(camera.m_viewMatrix * glm::vec4(camera.m_position, 1.0f)));
 		modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);

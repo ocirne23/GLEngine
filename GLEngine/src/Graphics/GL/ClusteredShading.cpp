@@ -49,7 +49,7 @@ void ClusteredShading::setupShader(const GLShader& shader, uint gridTextureIdx, 
 	glUniform1f(m_recNearLoc, m_recNear);
 }
 
-void ClusteredShading::update(const PerspectiveCamera& camera, const glm::vec4* lightPositionRangeList, uint numLights)
+void ClusteredShading::update(const PerspectiveCamera& camera, const glm::vec4* viewspaceLightPositionRangeList, uint numLights)
 {
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
 	for (auto& tileIndices : m_tileLightIndices)
@@ -58,12 +58,11 @@ void ClusteredShading::update(const PerspectiveCamera& camera, const glm::vec4* 
 
 	for (unsigned short i = 0; i < numLights; ++i)
 	{
-		glm::vec4 lightPositionRange = lightPositionRangeList[i];
+		glm::vec4 lightPositionRange = viewspaceLightPositionRangeList[i];
 		float radius = lightPositionRange.w;
-		lightPositionRange.w = 1.0f;
-		glm::vec3 lightPositionViewSpace = glm::vec3(camera.m_viewMatrix * lightPositionRange);
+		glm::vec3 lightPosition = glm::vec3(lightPositionRange);
 
-		IBounds3D bounds3D = findScreenSpace3DTile(camera, lightPositionViewSpace, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
+		IBounds3D bounds3D = findScreenSpace3DTile(camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 
 		bounds3D.minX = glm::clamp(bounds3D.minX, 0, (int) m_gridWidth);
 		bounds3D.maxX = glm::clamp(bounds3D.maxX, 0, (int) m_gridWidth);
