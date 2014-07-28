@@ -1,0 +1,65 @@
+////////////////////////// CLUSTERED SHADING //////////////////////////
+
+/* REQUIRED DEFINES /*
+* LIGHT_GRID_WIDTH
+* LIGHT_GRID_HEIGHT
+* LIGHT_GRID_DEPTH
+* LIGHT_GRID_TILE_WIDTH
+* LIGHT_GRID_TILE_HEIGHT
+*/
+
+/* REQUIRED UNIFORMS /*
+* LightPositionRanges 	UBO
+* LightColors 		UBO
+* u_lightIndices 	isamplerBuffer
+* u_lightGrid 		isamplerBuffer 
+* u_recNear 		float
+* u_recLogSD1 		float
+*/
+
+#define FOR_LIGHT_ITERATOR(IT, VSDEPTH) for (ivec2 IT = getLightListBeginEnd(VSDEPTH); IT.x < IT.y; ++IT.x)
+#define GET_LIGHT(IT) getLight(IT.x);
+
+struct Light
+{
+	vec4 positionRange;
+	vec4 color;
+};
+
+uniform isamplerBuffer u_lightIndices;
+uniform isamplerBuffer u_lightGrid;
+uniform float u_recNear;
+uniform float u_recLogSD1;
+
+layout (std140) uniform LightPositionRanges
+{
+	vec4 u_lightPositionRanges[MAX_LIGHTS];
+};
+layout (std140) uniform LightColors
+{
+	vec4 u_lightColors[MAX_LIGHTS];
+};
+
+ivec2 getLightListBeginEnd(float viewspaceDepth)
+{
+	// i and j coordinates are just the same as tiled shading, and based on screen space position.
+	ivec2 tileXY = ivec2(int(gl_FragCoord.x) / LIGHT_GRID_TILE_WIDTH, int(gl_FragCoord.y) / LIGHT_GRID_TILE_HEIGHT);
+
+	// k is based on the log of the view space Z coordinate.
+	float tileZ = log(-viewspaceDepth * u_recNear) * u_recLogSD1;
+
+	ivec3 clusterPos = ivec3(tileXY, int(tileZ));
+	int offset = (clusterPos.x * LIGHT_GRID_HEIGHT + clusterPos.y) * LIGHT_GRID_DEPTH + clusterPos.z;
+
+	return texelFetch(u_lightGrid, offset).xy;
+}
+Light getLight(int iterator)
+{
+	int lightIndex = texelFetch(u_lightIndices, iterator).r;
+	Light light;
+	light.positionRange = u_lightPositionRanges[lightIndex];
+	light.color = u_lightColors[lightIndex];
+	return light;
+}
+
+//////////////////////////////////////////////////////////////////////

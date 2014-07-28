@@ -2,6 +2,11 @@
 
 #define NULL 0
 
+#define BEGIN_UNNAMED_NAMESPACE() namespace {
+#define END_UNNAMED_NAMESPACE() }
+#define BEGIN_NAMESPACE(X) namespace X {
+#define END_NAMESPACE(X) }
+
 #ifdef ANDROID
 #define OVERRIDE
 #else

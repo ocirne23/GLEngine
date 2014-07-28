@@ -1,11 +1,4 @@
-/* REQUIRED DEFINES /*
-* LIGHT_GRID_WIDTH
-* LIGHT_GRID_HEIGHT
-* LIGHT_GRID_DEPTH
-* LIGHT_GRID_TILE_WIDTH
-* LIGHT_GRID_TILE_HEIGHT
-* MAX_LIGHTS
-*/
+#include "Shaders/clusteredshading.txt"
 ////////////////////////// IN / OUT //////////////////////////
 
 in vec3 v_position;
@@ -122,35 +115,6 @@ vec3 getBumpedNormal(MaterialProperty material)
 	return rotMat * vec3(bump);
 }
 
-////////////////////////// CLUSTERED SHADING //////////////////////////
-
-uniform isamplerBuffer u_lightIndices;
-uniform isamplerBuffer u_lightGrid;
-uniform float u_recNear;
-uniform float u_recLogSD1;
-
-layout (std140) uniform LightPositionRanges
-{
-	vec4 u_lightPositionRanges[MAX_LIGHTS];
-};
-layout (std140) uniform LightColors
-{
-	vec4 u_lightColors[MAX_LIGHTS];
-};
-
-ivec2 getLightListBeginEnd(float viewspaceDepth)
-{
-	// i and j coordinates are just the same as tiled shading, and based on screen space position.
-	ivec2 tileXY = ivec2(int(gl_FragCoord.x) / LIGHT_GRID_TILE_WIDTH, int(gl_FragCoord.y) / LIGHT_GRID_TILE_HEIGHT);
-
-	// k is based on the log of the view space Z coordinate.
-	float tileZ = log(-viewspaceDepth * u_recNear) * u_recLogSD1;
-
-	ivec3 clusterPos = ivec3(tileXY, int(tileZ));
-	int offset = (clusterPos.x * LIGHT_GRID_HEIGHT + clusterPos.y) * LIGHT_GRID_DEPTH + clusterPos.z;
-
-	return texelFetch(u_lightGrid, offset).xy;
-}
 
 ////////////////////////// MAIN //////////////////////////
 
@@ -162,6 +126,56 @@ uniform vec3 u_ambient;
 float G1V(float dotNV, float k)
 {
 	return 1.0 / (dotNV * (1.0 - k ) + k);
+}
+
+vec2 GGX_FV_helper(float HdotL, float roughnessSquared)
+{
+	float OneMinusHdotLPow5 = exp2(-8.65617024533378044416 * HdotL); //F == pow(1.0 - HdotL, 5);
+	
+	float alpha = roughnessSquared;
+	float k = alpha / 2.0;
+	float k2 = k * k;
+	float invK2 = 1.0 - k2;
+	float V = 1.0 / (HdotL * HdotL * invK2 + k2);
+
+	return vec2((1.0 - OneMinusHdotLPow5) * V, OneMinusHdotLPow5 * V);
+}
+
+float GGX_D(float NdotH, float roughnessSquared)
+{
+	float alpha = roughnessSquared;
+	float alphaSqr = alpha * alpha;
+	float denom = NdotH * NdotH * (alphaSqr - 1.0) + 1.0;
+	
+	float D = alphaSqr / (PI * denom * denom);
+	return D;
+}
+
+void doLightGGX(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse, float roughness, float F0, vec3 P, vec3 N, vec3 V, Light light)
+{
+	vec3 lightPos = light.positionRange.xyz;
+	float lightRange = light.positionRange.w;
+	vec4 lightColor = light.color;
+
+	vec3 L = lightPos - P;
+	float dist = length(L);
+	L /= dist;
+	vec3 H = normalize(L + V);
+	
+	float NdotL = clamp(dot(N, L), 0.0, 1.0);
+	float NdotH = clamp(dot(N, H), 0.0, 1.0);
+	float HdotL = clamp(dot(H, L), 0.0, 1.0);
+	float atten = max(1.0 - ((dist * dist) / (lightRange * lightRange)), 0.0);
+	
+	float roughnessSquared = roughness * roughness;
+	float D = GGX_D(NdotH, roughnessSquared);
+	vec2 FVhelper = GGX_FV_helper(HdotL, roughnessSquared);
+	float FV = F0 * FVhelper.x + FVhelper.y;
+	
+	vec3 lightContrib = lightColor.rgb * atten * NdotL;
+	
+	specularContrib = lightContrib * D * FV;
+	diffuseContrib = lightContrib * diffuse;
 }
 
 void main()
@@ -182,27 +196,28 @@ void main()
 	
 	vec3 N = normalize(normal);
 	vec3 V = normalize(u_eyePos - v_position);
-		
-	ivec2 lightsBeginEnd = getLightListBeginEnd(v_position.z); 
-
-	int lightsBegin = lightsBeginEnd.x;
-	int lightsEnd = lightsBeginEnd.y;
-
-	for (int i = lightsBegin; i < lightsEnd; ++i)
+	
+	FOR_LIGHT_ITERATOR(i, v_position.z)
 	{
-		int lightIndex = texelFetch(u_lightIndices, i).r; 
-
-		vec4 lightPosViewspaceRange = u_lightPositionRanges[lightIndex];
-		vec4 lightColor = u_lightColors[lightIndex];
-
-		vec3 lightPosViewspace = lightPosViewspaceRange.xyz;
-		float lightRange = lightPosViewspaceRange.w;
+		Light light = GET_LIGHT(i);
+		
+		float F0 = 0.04; // refraction index;
+		float roughness = 1.0 - specular;
+		
+		vec3 diffuseContrib, specularContrib;
+		doLightGGX(diffuseContrib, specularContrib, diffuse, roughness, F0, v_position, N, V, light);
+		
+		diffuseAccum += diffuseContrib;
+		specularAccum += specularContrib;
+		/*
+		vec3 lightPosViewspace = light.positionRange.xyz;
+		float lightRange = light.positionRange.w;
+		vec4 lightColor = light.color;
 
 		vec3 lightVec = (lightPosViewspace - v_position);
 		float dist = length(lightVec);
 		
-		/* Linear falloff, not physically based */
-		float atten = max(1.0 - max(0.0, dist / lightRange), 0.0);
+		float atten = max(1.0 - ((dist * dist) / (lightRange * lightRange)), 0.0);
 		
 		vec3 L = lightVec / dist;
 		vec3 H = normalize(L + V);
@@ -215,7 +230,7 @@ void main()
 		diffuseAccum += diffuseContrib;
 
 		float F, D, vis;
-		float roughness = 1.0 - specular;
+		float roughness = specular;
 		float alpha = roughness * roughness;
 		float alphaSqr = alpha * alpha;
 		
@@ -231,6 +246,7 @@ void main()
 		vis = visSqrt * visSqrt;
 
 		specularAccum += diffuseContrib * F * NoL * D * vis;
+		*/
 	}
 	
 	diffuseAccum += diffuse * u_ambient;

@@ -82,17 +82,20 @@
     <ClCompile Include="src\Graphics\GL\GLLightManager.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\SphereToSSBounds.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\CheckGLError.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils\FPSCameraController.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\ClusteredShading.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
+    <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp">
+      <Filter>Source Files\Graphics\GL\Tech</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Tech\TiledShading.cpp">
+      <Filter>Source Files\Graphics\GL\Tech</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -312,17 +315,20 @@
     <ClInclude Include="include\Utils\Bounds3D.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Utils\SphereToSSBounds.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\Utils\FPSCameraController.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Utils\CheckGLError.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics\GL\ClusteredShading.h">
-      <Filter>Header Files\Graphics\GL</Filter>
+    <ClInclude Include="include\Graphics\GL\Tech\ClusteredShading.h">
+      <Filter>Header Files\Graphics\GL\Tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Tech\TiledShading.h">
+      <Filter>Header Files\Graphics\GL\Tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -373,6 +379,12 @@
     </Filter>
     <Filter Include="Source Files\Graphics\GL\Core">
       <UniqueIdentifier>{d4e65135-cafc-4abf-8c55-8cd95328083e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\GL\Tech">
+      <UniqueIdentifier>{545e9a04-f1ac-451c-9b83-e258e8b003a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\GL\Tech">
+      <UniqueIdentifier>{59c56805-b4e3-4e2f-a3b4-26c566273747}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

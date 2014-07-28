@@ -1,11 +1,11 @@
-#include "Graphics\GL\ClusteredShading.h"
+#include "Graphics\GL\Tech\ClusteredShading.h"
 
 #include "Utils\Viewport.h"
 #include "Graphics\PerspectiveCamera.h"
 #include "Graphics\GL\GL.h"
 #include "Graphics\GL\Core\GLShader.h"
 #include "Utils\Bounds3D.h"
-#include "Utils\SphereToSSBounds.h"
+#include "Utils\sphereToScreenSpaceBounds.h"
 
 #include <assert.h>
 
@@ -62,7 +62,7 @@ void ClusteredShading::update(const PerspectiveCamera& camera, const glm::vec4* 
 		float radius = lightPositionRange.w;
 		glm::vec3 lightPosition = glm::vec3(lightPositionRange);
 
-		IBounds3D bounds3D = findScreenSpace3DTile(camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
+		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 
 		bounds3D.minX = glm::clamp(bounds3D.minX, 0, (int) m_gridWidth);
 		bounds3D.maxX = glm::clamp(bounds3D.maxX, 0, (int) m_gridWidth);

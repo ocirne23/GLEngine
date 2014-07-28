@@ -1,5 +1,7 @@
 #pragma once
 
+#ifndef ANDROID
+
 #include "Graphics\GL\GLTypes.h"
 #include "Graphics\GL\GLDefines.h"
 
@@ -29,3 +31,5 @@ private:
 	GLuint m_bufferID;
 	GLenum m_sizedInternalFormat;
 };
+
+#endif

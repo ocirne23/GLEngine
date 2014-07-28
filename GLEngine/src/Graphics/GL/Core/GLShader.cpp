@@ -9,7 +9,30 @@
 
 bool GLShader::s_begun = false;
 
+static const char* INCLUDE_STR = "#include \"";
+static const uint INCLUDE_STR_LEN = (uint) strlen(INCLUDE_STR);
+
 //#define SHADER_STRICT_UNIFORM_LOC
+
+BEGIN_UNNAMED_NAMESPACE()
+
+rde::string processIncludes(const rde::string& str)
+{
+	rde::string src = str;
+
+	auto includePos = src.find(INCLUDE_STR);
+	while (includePos != src.npos)
+	{
+		auto fileStartPos = includePos + INCLUDE_STR_LEN;
+		auto fileEndPos = src.find("\"", fileStartPos) + fileStartPos;
+		rde::string path = src.substr(fileStartPos, fileEndPos);
+		src = src.substr(0, includePos).append(FileHandle(path.c_str()).readString()).append(src.substr(fileEndPos + 1, src.length()));
+		auto next = src.find(INCLUDE_STR, includePos);
+		includePos = next == src.npos ? next : next + includePos;
+	}
+
+	return src;
+} 
 
 rde::string appendDefinesAfterVersion(const rde::string& str, const rde::vector<rde::string>& defines)
 {
@@ -80,12 +103,14 @@ GLuint createShaderProgram(const char* vertexShaderFilePath,
 	if (vertexShaderFilePath)
 	{
 		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(FileHandle(vertexShaderFilePath).readString());
+		contents = processIncludes(contents);
 		if (defines.size() > 0) contents = appendDefinesAfterVersion(contents, defines);
 		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
 	}
 	if (fragmentShaderFilePath)
 	{
 		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(FileHandle(fragmentShaderFilePath).readString());
+		contents = processIncludes(contents);
 		if (defines.size() > 0) contents = appendDefinesAfterVersion(contents, defines);
 		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());
 	}
@@ -124,6 +149,7 @@ GLuint createShaderProgram(const char* vertexShaderFilePath,
 
 	return program;
 }
+END_UNNAMED_NAMESPACE()
 
 GLShader::GLShader()
 : m_shaderID(0)

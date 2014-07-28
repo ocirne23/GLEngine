@@ -19,6 +19,7 @@ int main()
 	ModelProcessor* modelProcessor = new ModelProcessor();
 
 	ResourceBuilder::registerProcessor("png", imageProcessor);
+	ResourceBuilder::registerProcessor("hdr", imageProcessor);
 	ResourceBuilder::registerProcessor("tga", imageProcessor);
 	ResourceBuilder::registerProcessor("bmp", imageProcessor);
 	ResourceBuilder::registerProcessor("jpg", imageProcessor);

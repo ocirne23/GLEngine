@@ -8,7 +8,7 @@
 #include "Graphics\PerspectiveCamera.h"
 #include "Graphics\GL\GLMesh.h"
 #include "Graphics\GL\GLLightManager.h"
-#include "Graphics\GL\ClusteredShading.h"
+#include "Graphics\GL\Tech\ClusteredShading.h"
 #include "Graphics\GL\Core\GLShader.h"
 
 #include "Utils\FileHandle.h"
@@ -20,6 +20,8 @@
 
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
+
+#include "Graphics\Pixmap.h"
 
 GLMesh mesh;
 GLShader modelShader;
@@ -37,9 +39,19 @@ static const unsigned int NUM_TEXTURE_ARRAYS = 16;
 static const unsigned int MESH_MATERIAL_UBO_BINDING = 0;
 static const unsigned int MESH_TEXTURE_INDEX_OFFSET = 3;
 
+BEGIN_NAMESPACE(da)
+
+END_NAMESPACE(da)
+
 GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 {
 	CHECK_GL_ERROR();
+
+	Pixmap p;
+	p.readRaw("Utils/ggx-helper-dfv.da");
+	assert(p.exists());
+
+	print("Pixmap: %i %i %i %i \n", p.m_width, p.m_height, p.m_numComponents, p.m_data);
 
 	GLEngine::input->registerKeyListener(&cameraController);
 	GLEngine::input->registerMouseListener(&cameraController);
@@ -163,10 +175,10 @@ bool GameScreen::keyDown(Key key)
 			return true;
 		}
 	case Key_ESCAPE:
-	{
-		m_screenManager->quit();
-		return true;
-	}
+		{
+			m_screenManager->quit();
+			return true;
+		}
 	}
 	return false;
 }

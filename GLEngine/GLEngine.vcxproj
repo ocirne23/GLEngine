@@ -24,7 +24,6 @@
     <ClCompile Include="src\Graphics\ARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Camera.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
-    <ClCompile Include="src\Graphics\GL\ClusteredShading.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLConstantBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLFramebuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLShader.cpp" />
@@ -36,6 +35,8 @@
     <ClCompile Include="src\Graphics\GL\GLLightManager.cpp" />
     <ClCompile Include="src\Graphics\GL\GLMesh.cpp" />
     <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\TiledShading.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Graphics\Pixmap.cpp" />
@@ -49,7 +50,7 @@
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
     <ClCompile Include="src\Utils\FPSCameraController.cpp" />
-    <ClCompile Include="src\Utils\SphereToSSBounds.cpp" />
+    <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h" />
@@ -57,7 +58,6 @@
     <ClInclude Include="include\Graphics\ARBDebugOutput.h" />
     <ClInclude Include="include\Graphics\Camera.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
-    <ClInclude Include="include\Graphics\GL\ClusteredShading.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLFramebuffer.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLShader.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLStateBuffer.h" />
@@ -71,6 +71,8 @@
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Graphics\GL\GLTextureManager.h" />
     <ClInclude Include="include\Graphics\GL\GLTypes.h" />
+    <ClInclude Include="include\Graphics\GL\Tech\ClusteredShading.h" />
+    <ClInclude Include="include\Graphics\GL\Tech\TiledShading.h" />
     <ClInclude Include="include\Graphics\Graphics.h" />
     <ClInclude Include="include\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Graphics\Pixmap.h" />
@@ -125,7 +127,7 @@
     <ClInclude Include="include\Utils\FileHandle.h" />
     <ClInclude Include="include\Utils\FPSCameraController.h" />
     <ClInclude Include="include\Utils\MatForward.h" />
-    <ClInclude Include="include\Utils\SphereToSSBounds.h" />
+    <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
     <ClInclude Include="include\Utils\Viewport.h" />
   </ItemGroup>

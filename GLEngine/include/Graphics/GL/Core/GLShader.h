@@ -49,6 +49,9 @@ public:
 			return hash & (0x7FFFFFFF);
 		}
 	};
+
+public:
+
 	typedef rde::hash_map<const char*, GLint, StrHash> UniformLocMap;
 	GLuint m_shaderID;
 	UniformLocMap m_uniformLocMap;

@@ -20,7 +20,7 @@
 * THE SOFTWARE.
 */
 /****************************************************************************/
-#include "Utils\SphereToSSBounds.h"
+#include "Utils\sphereToScreenSpaceBounds.h"
 
 #include "Graphics\PerspectiveCamera.h"
 
@@ -92,17 +92,21 @@ glm::vec4 computeClipRegion(const glm::vec3 &lightPosView, float lightRadius, fl
 	return clipRegion;
 }
 
-inline void swap(float& a, float& b) { float tmp = a; a = b; b = tmp; }
+inline void swap(float& a, float& b) 
+{ 
+	float tmp = a; 
+	a = b; 
+	b = tmp; 
+}
 
-float calcClusterZ(float viewSpaceZ, float recNear, float recLogSD1)
+inline float calcClusterZ(float viewSpaceZ, float recNear, float recLogSD1)
 {
-	float gridLocZ = logf(-viewSpaceZ * recNear) * recLogSD1;
-	return gridLocZ;
+	return logf(-viewSpaceZ * recNear) * recLogSD1;
 }
 
 }
 
-IBounds2D findScreenSpaceBounds(const Camera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport)
+IBounds2D sphereToScreenSpaceBounds2D(const Camera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport)
 {
 	glm::vec4 reg = computeClipRegion(lightPosViewSpace, lightRadius, camera.m_near, camera.m_projectionMatrix);
 	reg = -reg;
@@ -124,9 +128,9 @@ IBounds2D findScreenSpaceBounds(const Camera& camera, glm::vec3 lightPosViewSpac
 	return result;
 }
 
-IBounds3D findScreenSpace3DTile(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport, uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1)
+IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport, uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1)
 {
-	IBounds2D bounds2D = findScreenSpaceBounds(camera, lightPosViewSpace, lightRadius, viewport);
+	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(camera, lightPosViewSpace, lightRadius, viewport);
 	float recNear = 1.0f / camera.m_near;
 
 	int minZ = glm::max(int(calcClusterZ(lightPosViewSpace.z + lightRadius, recNear, recLogSD1)), 0);

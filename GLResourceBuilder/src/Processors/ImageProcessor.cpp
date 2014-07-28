@@ -14,7 +14,7 @@ void ImageProcessor::process(const char* inResourcePath, const char* outResource
 		return;
 	}
 	std::fstream file(outResourcePath, std::ios::out | std::ios::binary);
-	
+
 	assert(file.is_open());
 	file.write(reinterpret_cast<const char*>(&width), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&height), sizeof(int));
