@@ -6,6 +6,7 @@
 #include "Graphics\GL\GLDefines.h"
 
 class Pixmap;
+class FileHandle;
 
 class GLTexture
 {
@@ -14,7 +15,7 @@ public:
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
-	void initialize(const char* fileName,
+	void initialize(const FileHandle& filePath,
 		GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR,
 		GLint GLTextureWrapS = GL_REPEAT, GLint GLTextureWrapT = GL_REPEAT);
 

@@ -2,6 +2,9 @@
 
 #include "Graphics\Pixmap.h"
 #include "Graphics\GL\GL.h"
+#include "Utils\getGLTextureFormat.h"
+
+#include <functional>
 
 #include <assert.h>
 
@@ -26,19 +29,19 @@ bool isMipMapFilter(GLenum filter)
 {
 	switch (filter)
 	{
-	case GL_NEAREST_MIPMAP_LINEAR: return true;
+	case GL_NEAREST_MIPMAP_LINEAR:	return true;
 	case GL_NEAREST_MIPMAP_NEAREST: return true;
-	case GL_LINEAR_MIPMAP_LINEAR: return true;
-	case GL_LINEAR_MIPMAP_NEAREST: return true;
-	default: return false;
+	case GL_LINEAR_MIPMAP_LINEAR:	return true;
+	case GL_LINEAR_MIPMAP_NEAREST:	return true;
+	default:						return false;
 	}
 }
 
-void GLTexture::initialize(const char* fileName, GLint minFilter, GLint magFilter,
+void GLTexture::initialize(const FileHandle& file, GLint minFilter, GLint magFilter,
 	GLint textureWrapS, GLint textureWrapT)
 {
 	Pixmap pixmap;
-	pixmap.readRaw(fileName);
+	pixmap.read(file);
 
 	if (!pixmap.exists())
 		return;
@@ -47,20 +50,9 @@ void GLTexture::initialize(const char* fileName, GLint minFilter, GLint magFilte
 	m_height = pixmap.m_height;
 	m_numComponents = pixmap.m_numComponents;
 
-	GLint internalFormat;
-	switch (pixmap.m_numComponents)
-	{
-	case 1: internalFormat = GL_RED;
-		break;
-	case 2: internalFormat = GL_RG;
-		break;
-	case 3: internalFormat = GL_RGB;
-		break;
-	case 4: internalFormat = GL_RGBA;
-		break;
-	default: internalFormat = -1;
-		break;
-	}
+	GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, pixmap.m_isFloatData);
+	GLint format = getFormatForNumComponents(m_numComponents);
+
 	bool generateMipMaps = isMipMapFilter(minFilter);
 
 	glGenTextures(1, &m_textureID);
@@ -72,12 +64,12 @@ void GLTexture::initialize(const char* fileName, GLint minFilter, GLint magFilte
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureWrapT);
 	if (generateMipMaps)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, internalFormat, GL_UNSIGNED_BYTE, pixmap.m_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, pixmap.m_isFloatData ? GL_FLOAT : GL_UNSIGNED_BYTE, pixmap.m_data.b);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, internalFormat, GL_UNSIGNED_BYTE, pixmap.m_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, pixmap.m_isFloatData ? GL_FLOAT : GL_UNSIGNED_BYTE, pixmap.m_data.b);
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

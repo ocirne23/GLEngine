@@ -8,7 +8,7 @@
 #include <assert.h>
 #include <SDL\SDL_syswm.h>
 
-void APIENTRY debugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)
+void APIENTRY debugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
 	char debSource[32], debType[32], debSev[32];
 

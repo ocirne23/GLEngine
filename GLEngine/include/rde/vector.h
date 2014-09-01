@@ -226,7 +226,7 @@ public:
         RDE_ASSERT(i < size());
 		return m_begin[i];
     }
-    
+
 	void push_back(const T& v)
 	{
 		if (m_end < m_capacityEnd)

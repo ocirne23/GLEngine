@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Utils\FileHandle.h"
-
+#include "rde\rde_string.h"
 #include "Graphics\GL\GL.h"
 
 #include <glm\glm.hpp>
@@ -34,18 +34,30 @@ rde::string processIncludes(const rde::string& str)
 	return src;
 } 
 
-rde::string appendDefinesAfterVersion(const rde::string& str, const rde::vector<rde::string>& defines)
+rde::string appendAfterVersion(const rde::string& str, const rde::vector<rde::string>* defines, const rde::vector<rde::string>* extensions)
 {
 	auto version = str.find("#version");
 	auto at = str.find("\n", version) + 1; // find first newline after #version
 	rde::string first = str.substr(0, at);
 	rde::string last = str.substr(at, str.length());
 
-	for (const rde::string& define : defines)
+	if (defines)
 	{
-		first += rde::string("#define ");
-		first += define;
-		first += rde::string("\n");
+		for (const rde::string& define : *defines)
+		{
+			first += rde::string("#define ");
+			first += define;
+			first += rde::string("\n");
+		}
+	}
+	if (extensions)
+	{
+		for (const rde::string& define : *extensions)
+		{
+			first += rde::string("#extension ");
+			first += define;
+			first += rde::string(" : require\n");
+		}
 	}
 	first += last;
 
@@ -95,23 +107,21 @@ void attachShaderSource(GLuint prog, GLenum type, const char * source)
 	glDeleteShader(sh);
 }
 
-GLuint createShaderProgram(const char* vertexShaderFilePath,
-	const char* geometryShaderFilePath, const char* fragmentShaderFilePath, rde::string versionStr,
-	const rde::vector<rde::string>& defines)
+GLuint createShaderProgram(const FileHandle& vertexShaderFile, const FileHandle& fragmentShaderFile, rde::string versionStr,
+	const rde::vector<rde::string>* defines, const rde::vector<rde::string>* extensions)
 {
 	GLuint program = glCreateProgram();
-	if (vertexShaderFilePath)
+
 	{
-		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(FileHandle(vertexShaderFilePath).readString());
+		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(vertexShaderFile.readString());
 		contents = processIncludes(contents);
-		if (defines.size() > 0) contents = appendDefinesAfterVersion(contents, defines);
+		contents = appendAfterVersion(contents, defines, extensions);
 		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
 	}
-	if (fragmentShaderFilePath)
 	{
-		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(FileHandle(fragmentShaderFilePath).readString());
+		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(fragmentShaderFile.readString());
 		contents = processIncludes(contents);
-		if (defines.size() > 0) contents = appendDefinesAfterVersion(contents, defines);
+		contents = appendAfterVersion(contents, defines, extensions);
 		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());
 	}
 
@@ -154,8 +164,6 @@ END_UNNAMED_NAMESPACE()
 GLShader::GLShader()
 : m_shaderID(0)
 , m_begun(false)
-, m_vertPath("")
-, m_fragPath("")
 {
 }
 
@@ -165,29 +173,13 @@ GLShader::~GLShader()
 		glDeleteProgram(m_shaderID);
 }
 
-void GLShader::initialize(const char* vertexShaderPath, const char* fragShaderPath, const char* versionStr, const rde::vector<rde::string>* defines)
+void GLShader::initialize(const FileHandle& vertexShaderFile, const FileHandle& fragmentShaderFile, const rde::string& versionStr, 
+	const rde::vector<rde::string>* defines, const rde::vector<rde::string>* extensions)
 {
-	m_vertPath = vertexShaderPath;
-	m_fragPath = fragShaderPath;
-	m_versionStr = versionStr;
-
-	if (defines)
-	{
-		m_defines = *defines;
-	}
-
-	reloadProgram();
-}
-
-void GLShader::reloadProgram()
-{
-	const char* vert = m_vertPath.c_str();
-	const char* frag = m_fragPath.c_str();
-
 	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
 
-	m_shaderID = createShaderProgram(vert, NULL, frag, m_versionStr, m_defines);
+	m_shaderID = createShaderProgram(vertexShaderFile, fragmentShaderFile, rde::string(versionStr), defines, extensions);
 }
 
 void GLShader::begin()
@@ -208,15 +200,6 @@ void GLShader::end()
 	glUseProgram(0);
 }
 
-bool GLShader::isBegun() const
-{
-	return m_begun;
-}
-
-unsigned int GLShader::getID() const
-{
-	return m_shaderID;
-}
 //#define SHADER_STRICT_UNIFORM_LOC
 void GLShader::setUniform1i(const char* uniformName, int val)
 {

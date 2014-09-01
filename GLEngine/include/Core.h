@@ -6,12 +6,13 @@
 #define END_UNNAMED_NAMESPACE() }
 #define BEGIN_NAMESPACE(X) namespace X {
 #define END_NAMESPACE(X) }
+#define FORWARD_DECLARE(NAMESPACE, CLASS) BEGIN_NAMESPACE(NAMESPACE) class CLASS; END_NAMESPACE(NAMESPACE)
 
 #ifdef ANDROID
 #define OVERRIDE
 #else
 #define OVERRIDE override
-#endif //ANDROID
+#endif
 
 typedef unsigned int uint;
 typedef unsigned short ushort;

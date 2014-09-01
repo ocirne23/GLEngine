@@ -6,27 +6,42 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "../Utils/stb_image.h"
+#include "../Utils/TextureAtlas.h"
+
 namespace
 {
-	enum { MAX_MATERIALS = 200 };
+	enum { MAX_ATLAS_WIDTH = 2048, MAX_ATLAS_HEIGHT = 2048 };
 
 	struct vec4 { float x, y, z, w; };
 	struct vec3 { float x, y, z; };
 	struct vec2 { float x, y; };
 
-	struct IOMaterialProperty
+	struct MaterialProperty
 	{
-		IOMaterialProperty()
-		{
-			memset(this, 0, sizeof(IOMaterialProperty));
-		};
-		vec4 diffuseColorAndAlpha;
-		vec4 specularColorAndExp;
-		vec4 materialEmissiveAndPower;
-		char diffuseTex[_MAX_PATH];
-		char bumpTex[_MAX_PATH];
-		char specularTex[_MAX_PATH];
-		char maskTex[_MAX_PATH];
+		MaterialProperty() : diffuseAtlasNr(-1), bumpAtlasNr(-1), specularAtlasNr(-1), maskAtlasNr(-1) {};
+		vec4 diffuseTexMapping;
+		vec4 bumpTexMapping;
+		vec4 specTexMapping;
+		vec4 maskTexMapping;
+		int diffuseAtlasNr;
+		int bumpAtlasNr;
+		int specularAtlasNr;
+		int maskAtlasNr;
+	};
+	struct MaterialFiles
+	{
+		std::string diffuse;
+		std::string bump;
+		std::string spec;
+		std::string mask;
+	};
+	struct AtlasRegion
+	{
+		std::string image;
+		int atlasNr;
+		texture_atlas_t* atlas;
+		ivec4 region;
 	};
 	struct MeshEntry
 	{
@@ -54,12 +69,30 @@ namespace
 	void writeVector(std::ostream& file, const std::vector<T>& vector)
 	{
 		int size = (int) vector.size();
-
 		file.write(reinterpret_cast<const char*>(&size), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&vector[0]), sizeof(vector[0]) * size);
 	}
+	vec4 getTextureOffset(const AtlasRegion& reg)
+	{
+		int atlasWidth = (int) reg.atlas->width;
+		int atlasHeight = (int) reg.atlas->height;
 
-	void writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bool flipUV)
+		int regionWidth = reg.region.width;
+		int regionHeight = reg.region.height;
+
+		int regionX = reg.region.x;
+		int regionY = reg.region.y;
+
+		float wScale = regionWidth / (float) atlasWidth;
+		float hScale = regionHeight / (float) atlasHeight;
+
+		float xOffset = regionX / (float) atlasWidth;
+		float yOffset = regionY / (float) atlasHeight;
+
+		return { xOffset, yOffset, wScale, hScale };
+	}
+
+	bool writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bool flipUV)
 	{
 		unsigned int flags = 0
 			| aiPostProcessSteps::aiProcess_Triangulate
@@ -72,70 +105,191 @@ namespace
 		if (!scene)
 		{
 			printf("Error parsing scene '%s' : %s\n", srcFilePath.c_str(), aiGetErrorString());
-			return;
+			return false;
 		}
 
-		std::vector<IOMaterialProperty> matProperties;
-		matProperties.resize(scene->mNumMaterials);
+		std::string texturePathStr(srcFilePath);
+		std::string::size_type idx = texturePathStr.find_last_of('/');
+		if (idx == std::string::npos)
+			idx = texturePathStr.find_last_of('\\');
+		texturePathStr = texturePathStr.substr(0, idx).append("\\");
+		
+		std::vector<MaterialFiles> matFiles(scene->mNumMaterials);
+		std::vector<std::string> textures;
+
+		printf("Num materials in scene: %i \n", scene->mNumMaterials);
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 		{
 			aiMaterial* material = scene->mMaterials[i];
-
+			/*
 			assert(i <= MAX_MATERIALS && "Cannot have more than MAX_MATERIALS materials in mesh");
 			if (i > MAX_MATERIALS)
 				break;
-			IOMaterialProperty& matProperty = matProperties[i];
+			*/
+			MaterialFiles& matProperty = matFiles[i];
 
 			int numDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
 			int numBump = material->GetTextureCount(aiTextureType_HEIGHT);
 			int numSpecular = material->GetTextureCount(aiTextureType_SPECULAR);
 			int numMask = material->GetTextureCount(aiTextureType_OPACITY);
 
-			aiColor3D difCol(1.0f, 1.0f, 1.0f);
-			material->Get(AI_MATKEY_COLOR_DIFFUSE, difCol);
-			float alpha = 1.0f;
-			material->Get(AI_MATKEY_OPACITY, alpha);
-			matProperty.diffuseColorAndAlpha = { difCol.r, difCol.g, difCol.b, alpha };
-
-			aiColor3D specCol(1.0f, 1.0f, 1.0f);
-			material->Get(AI_MATKEY_COLOR_SPECULAR, specCol);
-			float specPow = 0.0f;
-			material->Get(AI_MATKEY_SHININESS_STRENGTH, specPow);
-			matProperty.specularColorAndExp = { specCol.r, specCol.g, specCol.b, specPow };
-
-			aiColor3D emisCol(1.0f, 1.0f, 1.0f);
-			material->Get(AI_MATKEY_COLOR_EMISSIVE, emisCol);
-			matProperty.materialEmissiveAndPower = { emisCol.r, emisCol.g, emisCol.b, 1.0 };
+			//assert(numDiffuse || numBump || numSpecular || numMask);
 
 			aiString path;
 			if (numDiffuse > 0 && material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
 			{
-				std::string img(path.data);
-				img = img.substr(0, img.find_last_of(".")).append(".da");
-				strcpy_s(matProperty.diffuseTex, img.c_str());
+				 matProperty.diffuse = texturePathStr;
+				 matProperty.diffuse.append(path.C_Str());
+				 if (std::find(textures.begin(), textures.end(), matProperty.diffuse) == textures.end())
+					 textures.push_back(matProperty.diffuse);
 			}
 			if (numBump > 0 && material->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
 			{
-				std::string img(path.data);
-				img = img.substr(0, img.find_last_of(".")).append(".da");
-				strcpy_s(matProperty.bumpTex, img.c_str());
+				matProperty.bump = texturePathStr;
+				matProperty.bump.append(path.C_Str());
+				if (std::find(textures.begin(), textures.end(), matProperty.bump) == textures.end())
+					textures.push_back(matProperty.bump);
 			}
 			if (numSpecular > 0 && material->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
 			{
-				std::string img(path.data);
-				img = img.substr(0, img.find_last_of(".")).append(".da");
-				strcpy_s(matProperty.specularTex, img.c_str());
+				matProperty.spec = texturePathStr;
+				matProperty.spec.append(path.C_Str());				
+				if (std::find(textures.begin(), textures.end(), matProperty.spec) == textures.end())
+					textures.push_back(matProperty.spec);
 			}
 			if (numMask > 0 && material->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
 			{
-				std::string img(path.data);
-				img = img.substr(0, img.find_last_of(".")).append(".da");
-				strcpy_s(matProperty.maskTex, img.c_str());
+				matProperty.mask = texturePathStr;
+				matProperty.mask.append(path.C_Str());				
+				if (std::find(textures.begin(), textures.end(), matProperty.mask) == textures.end())
+					textures.push_back(matProperty.mask);
 			}
 		}
 
 		std::vector<MeshEntry> entries;
 		std::vector<MeshEntry> transparentEntries;
+
+		std::vector<AtlasRegion> atlasRegions;
+		std::vector<texture_atlas_t*> atlasses;
+
+		for (const std::string& str : textures)
+		{
+			int width, height, numComp;
+			int result = stbi_info(str.c_str(), &width, &height, &numComp);
+			if (!result)
+			{
+				printf("Cannot open file: %s \n", str.c_str());
+				continue;
+			}
+
+			bool contained = false;
+			for (int i = 0; i < atlasses.size(); ++i)
+			{
+				texture_atlas_t* atlas = atlasses[i];
+
+				if (atlas->width == width && atlas->height == height && atlas->depth == numComp)
+				{
+					ivec4 region = texture_atlas_get_region(atlas, width, height);
+					if (region.width && region.height)
+					{
+						contained = true;
+						atlasRegions.push_back({ str, i, atlas, region });
+						break;
+					}
+				}
+			}
+			if (!contained)
+			{
+				texture_atlas_t* atlas = texture_atlas_new(MAX_ATLAS_WIDTH, MAX_ATLAS_HEIGHT, numComp);
+				ivec4 region = texture_atlas_get_region(atlas, width, height);
+				assert(region.width && region.height);
+				atlasses.push_back(atlas);
+				atlasRegions.push_back({ str, (int) atlasses.size() - 1, atlas, region });
+			}
+		}
+
+		std::vector<MaterialProperty> matProperties(matFiles.size());
+
+		for (int i = 0; i < matFiles.size(); ++i)
+		{
+			MaterialFiles& files = matFiles[i];
+			MaterialProperty& prop = matProperties[i];
+
+			for (const AtlasRegion& reg : atlasRegions)
+			{
+				if (files.diffuse == reg.image)
+				{
+					prop.diffuseTexMapping = getTextureOffset(reg);
+					prop.diffuseAtlasNr = reg.atlasNr;
+				}
+				else if (files.bump == reg.image)
+				{
+					prop.bumpTexMapping = getTextureOffset(reg);
+					prop.bumpAtlasNr = reg.atlasNr;
+				}
+				else if (files.spec == reg.image)
+				{
+					prop.specTexMapping = getTextureOffset(reg);
+					prop.specularAtlasNr = reg.atlasNr;
+				}
+				else if (files.mask == reg.image)
+				{
+					prop.maskTexMapping = getTextureOffset(reg);
+					prop.maskAtlasNr = reg.atlasNr;
+				}
+				else
+				{
+				//	assert(false);
+				}
+			}
+			
+			printf("dif %i %f %f %f %f\n", prop.diffuseAtlasNr, prop.diffuseTexMapping.x, prop.diffuseTexMapping.y, prop.diffuseTexMapping.z, prop.diffuseTexMapping.w);
+			printf("bump %i %f %f %f %f\n", prop.bumpAtlasNr, prop.bumpTexMapping.x, prop.bumpTexMapping.y, prop.bumpTexMapping.z, prop.bumpTexMapping.w);
+			printf("spec %i %f %f %f %f\n", prop.specularAtlasNr, prop.specTexMapping.x, prop.specTexMapping.y, prop.specTexMapping.z, prop.specTexMapping.w);
+			printf("mask %i %f %f %f %f\n\n", prop.maskAtlasNr, prop.maskTexMapping.x, prop.maskTexMapping.y, prop.maskTexMapping.z, prop.maskTexMapping.w);
+			
+		}
+
+		for (const AtlasRegion& region : atlasRegions)
+		{
+			int width, height, numComponents;
+			const unsigned char* data = stbi_load(region.image.c_str(), &width, &height, &numComponents, 0);
+			if (!data)
+			{
+				printf("FAILED TO LOAD IMAGE: %s \n", region.image.c_str());
+				continue;
+			}
+
+			texture_atlas_set_region(region.atlas, region.region.x, region.region.y, region.region.width, region.region.height, data, numComponents);
+		}
+
+		std::string dstTexturePathStr(dstFilePath);
+		dstTexturePathStr = dstTexturePathStr.substr(0, dstTexturePathStr.find_last_of('.'));
+
+		for (int i = 0; i < atlasses.size(); ++i)
+		{
+			texture_atlas_t* atlas = atlasses[i];
+			
+			std::string atlasFileName = dstTexturePathStr.c_str();
+			atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");
+
+			std::ofstream file(atlasFileName.c_str(), std::ios::out | std::ios::binary);
+			assert(file.is_open());
+
+			int type, width, height, numComponents;
+			type = ResourceType_BYTEIMAGE;
+			width = (int) atlas->width;
+			height = (int) atlas->height;
+			numComponents = (int) atlas->depth;
+
+			file.write(reinterpret_cast<const char*>(&type), sizeof(int));
+			file.write(reinterpret_cast<const char*>(&width), sizeof(int));
+			file.write(reinterpret_cast<const char*>(&height), sizeof(int));
+			file.write(reinterpret_cast<const char*>(&numComponents), sizeof(int));
+			file.write(reinterpret_cast<const char*>(atlas->data), width * height * numComponents);
+
+			file.close();
+		}
 
 		entries.reserve(scene->mNumMeshes);
 
@@ -151,7 +305,7 @@ namespace
 			entry.meshIndex = i;
 			entry.materialIndex = scene->mMeshes[i]->mMaterialIndex;
 			entry.numIndices = scene->mMeshes[i]->mNumFaces * 3;
-			if (matProperties[entry.materialIndex].maskTex[0])
+			if (matProperties[entry.materialIndex].maskAtlasNr != -1)
 			{
 				entry.baseVertex = numTransparentVerticesInScene;
 				entry.baseIndex = numTransparentIndicesInScene;
@@ -215,17 +369,19 @@ namespace
 				vertices.emplace_back(
 					mesh->mVertices[j],
 					mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][j] : aiVector3D(0.0f),
-					mesh->HasNormals() ? mesh->mNormals[j] : aiVector3D(0.0f),
-					mesh->HasTangentsAndBitangents() ? mesh->mTangents[j] : aiVector3D(0.0f),
-					mesh->HasTangentsAndBitangents() ? mesh->mBitangents[j] : aiVector3D(0.0f),
+					mesh->mNormals[j],
+					mesh->mTangents[j],
+					mesh->mBitangents[j],
 					entry.materialIndex);
 			}
 		}
 		aiReleaseImport(scene);
 
-		std::ofstream file;
-		file.open(dstFilePath.c_str(), std::ios::out | std::ios::binary);
+		std::ofstream file(dstFilePath.c_str(), std::ios::out | std::ios::binary);
+		assert(file.is_open());
 
+		int type = ResourceType_MODEL;
+		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 		int numOpague = (int) transparentEntries.size();
 		file.write(reinterpret_cast<const char*>(&numOpague), sizeof(int));
 		writeVector(file, indiceCounts);
@@ -235,10 +391,12 @@ namespace
 		writeVector(file, vertices);
 
 		file.close();
+
+		return true;
 	}
 }
 
-void ModelProcessor::process(const char* inResourcePath, const char* outResourcePath)
+bool ModelProcessor::process(const char* inResourcePath, const char* outResourcePath)
 {
-	writeRaw(inResourcePath, outResourcePath, true);
+	return writeRaw(inResourcePath, outResourcePath, true);
 }

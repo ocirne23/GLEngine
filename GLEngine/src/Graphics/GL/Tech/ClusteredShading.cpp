@@ -60,7 +60,7 @@ void ClusteredShading::update(const PerspectiveCamera& camera, const glm::vec4* 
 	{
 		glm::vec4 lightPositionRange = viewspaceLightPositionRangeList[i];
 		float radius = lightPositionRange.w;
-		glm::vec3 lightPosition = glm::vec3(lightPositionRange);
+		glm::vec3 lightPosition(lightPositionRange);
 
 		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 

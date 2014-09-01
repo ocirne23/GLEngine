@@ -11,7 +11,6 @@ void GLTextureBuffer::initialize(const GLShader& shader, const char* samplerName
 	m_drawUsage = drawUsage;
 	m_textureIdx = textureIdx;
 	m_sizedInternalFormat = sizedFormat;
-
 	m_textureLoc = glGetUniformLocation(shader.getID(), samplerName);
 	assert(m_textureLoc != GL_INVALID_INDEX);
 	if (m_textureLoc == GL_INVALID_INDEX)

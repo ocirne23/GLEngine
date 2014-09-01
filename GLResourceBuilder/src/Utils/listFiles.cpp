@@ -9,6 +9,7 @@ bool listFiles(std::string path, std::string mask, std::vector<std::string>& fil
 {
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA ffd;
+
 	std::string spec;
 	std::stack<std::string> directories;
 	std::string root = path;
@@ -23,7 +24,7 @@ bool listFiles(std::string path, std::string mask, std::vector<std::string>& fil
 		directories.pop();
 		const char* da = "wa";
 		hFind = FindFirstFile(spec.c_str(), &ffd);
-
+		
 		if (hFind == INVALID_HANDLE_VALUE)  
 			return false;
 

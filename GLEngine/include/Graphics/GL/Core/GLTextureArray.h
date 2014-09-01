@@ -24,7 +24,7 @@ public:
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 
-	void setDimensions(uint width, uint height, uint numComponents);
+	void setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture);
 
 	inline uint getWidth() const		{ return m_width; }
 	inline uint getHeight() const		{ return m_height; }
@@ -39,6 +39,8 @@ private:
 	uint m_height;
 	uint m_numMipmaps;
 	uint m_numComponents;
+	bool m_isFloatTexture;
+
 	bool m_generateMipMaps;
 
 	GLuint m_textureID;

@@ -38,17 +38,13 @@ public:
 
 private:
 
-	void initUniforms(GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset);
-
+	bool m_initialized;
 	GLStateBuffer* m_stateBuffer;
 	GLVertexBuffer* m_indiceBuffer;
 	GLVertexBuffer* m_vertexBuffer;
 	GLConstantBuffer* m_matUniformBuffer;
 
-	GLTextureManager::TextureBinder* m_textureBinder;
-	unsigned int m_textureBindOffset;
 	unsigned int m_matUBOBindingPoint;
-	GLint m_textureDataLoc;
 
 	unsigned int m_numOpagueMeshes;
 	unsigned int m_numIndices;

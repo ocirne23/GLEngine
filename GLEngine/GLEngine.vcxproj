@@ -35,6 +35,7 @@
     <ClCompile Include="src\Graphics\GL\GLLightManager.cpp" />
     <ClCompile Include="src\Graphics\GL\GLMesh.cpp" />
     <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp" />
+    <ClCompile Include="src\Graphics\GL\OLD_GLTextureManager.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\TiledShading.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
@@ -49,7 +50,10 @@
     <ClCompile Include="src\rde\slist.cpp" />
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
+    <ClCompile Include="src\Utils\FileModificationListener.cpp" />
+    <ClCompile Include="src\Utils\FileModificationManager.cpp" />
     <ClCompile Include="src\Utils\FPSCameraController.cpp" />
+    <ClCompile Include="src\Utils\getGLTextureFormat.cpp" />
     <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +74,7 @@
     <ClInclude Include="include\Graphics\GL\GLLightManager.h" />
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Graphics\GL\GLTextureManager.h" />
+    <ClInclude Include="include\Graphics\GL\OLD_GLTextureManager.h" />
     <ClInclude Include="include\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Graphics\GL\Tech\ClusteredShading.h" />
     <ClInclude Include="include\Graphics\GL\Tech\TiledShading.h" />
@@ -117,6 +122,7 @@
     <ClInclude Include="include\rde\sstream.h" />
     <ClInclude Include="include\rde\stack.h" />
     <ClInclude Include="include\rde\stack_allocator.h" />
+    <ClInclude Include="include\rde\stringforward.h" />
     <ClInclude Include="include\rde\string_utils.h" />
     <ClInclude Include="include\rde\type_traits.h" />
     <ClInclude Include="include\rde\utility.h" />
@@ -125,8 +131,12 @@
     <ClInclude Include="include\Utils\Bounds3D.h" />
     <ClInclude Include="include\Utils\CheckGLError.h" />
     <ClInclude Include="include\Utils\FileHandle.h" />
+    <ClInclude Include="include\Utils\FileModificationListener.h" />
+    <ClInclude Include="include\Utils\FileModificationManager.h" />
     <ClInclude Include="include\Utils\FPSCameraController.h" />
+    <ClInclude Include="include\Utils\getGLTextureFormat.h" />
     <ClInclude Include="include\Utils\MatForward.h" />
+    <ClInclude Include="include\Utils\ResourceType.h" />
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
     <ClInclude Include="include\Utils\Viewport.h" />
@@ -218,6 +228,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -240,6 +251,7 @@
       </ForcedIncludeFiles>
       <AdditionalOptions>
       </AdditionalOptions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -260,6 +272,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -282,6 +295,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

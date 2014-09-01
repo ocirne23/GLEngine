@@ -12,6 +12,7 @@
 
 #include "Utils\FileHandle.h"
 #include "Utils\CheckGLError.h"
+#include "Utils\ResourceType.h"
 
 #include "rde\rde_string.h"
 #include "Input\Input.h"
@@ -57,25 +58,36 @@ struct Vertex
 	unsigned int materialID;
 };
 
-GLMesh::GLMesh() : m_numOpagueMeshes(0)
+GLMesh::GLMesh() : m_numOpagueMeshes(0), m_initialized(false)
 {
 }
 
 GLMesh::~GLMesh()
 {
+	if (m_initialized)
+	{
+		delete m_vertexBuffer;
+		delete m_indiceBuffer;
+		delete m_stateBuffer;
+		delete m_matUniformBuffer;
+	}
 }
 
 template <typename T>
-void readVector(FileHandle& handle, rde::vector<T>& vector)
+uint readVector(const FileHandle& handle, rde::vector<T>& vector, uint offset)
 {
 	int size;
-	handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int));
+	handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), offset);
 	vector.resize(size);
-	handle.readBytes(reinterpret_cast<char*>(&vector[0]), size * sizeof(vector[0]));
+	handle.readBytes(reinterpret_cast<char*>(&vector[0]), size * sizeof(vector[0]), offset + sizeof(int));
+
+	return offset + sizeof(int) + size * sizeof(vector[0]);
 }
 
 void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset)
 {
+	assert(!m_initialized);
+
 	FileHandle file(filePath);
 	if (!file.exists())
 	{
@@ -88,12 +100,18 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	rde::vector<IOMaterialProperty> matProperties;
 	rde::vector<uint> baseIndices;
 
-	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint));
-	readVector(file, m_indiceCounts);
-	readVector(file, baseIndices);
-	readVector(file, matProperties);
-	readVector(file, indices);
-	readVector(file, vertices);
+	int type;
+	file.readBytes(reinterpret_cast<char*>(&type), sizeof(uint), 0);
+	assert(type == ResourceType_MODEL);
+
+	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint), sizeof(uint));
+	uint offset = sizeof(uint) * 2;
+
+	offset = readVector(file, m_indiceCounts, offset);
+	offset = readVector(file, baseIndices, offset);
+	offset = readVector(file, matProperties, offset);
+	offset = readVector(file, indices, offset);
+	offset = readVector(file, vertices, offset);
 	file.close();
 
 	m_numIndices = indices.size();
@@ -104,7 +122,6 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	{
 		m_baseIndices[i] = (GLvoid*) baseIndices[i];
 	}
-
 
 	m_stateBuffer = new GLStateBuffer();
 	m_stateBuffer->initialize();
@@ -132,7 +149,6 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	m_stateBuffer->end();
 
 	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
-	m_textureBinder = textureManager.createTextureBinder();
 
 	rde::string texturePathStr(filePath);
 	rde::string::size_type idx = texturePathStr.find_index_of_last('/');
@@ -150,44 +166,31 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 		m_matProperties[i].materialEmissiveAndPower = matProperties[i].materialEmissiveAndPower;
 
 		if (matProperties[i].diffuseTex[0])
-			m_matProperties[i].diffuseHandle = m_textureBinder->createTextureHandle(rde::string(texturePathStr).append(matProperties[i].diffuseTex).c_str());
+			m_matProperties[i].diffuseHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].diffuseTex));
 		if (matProperties[i].specularTex[0])
-			m_matProperties[i].specularHandle = m_textureBinder->createTextureHandle(rde::string(texturePathStr).append(matProperties[i].specularTex).c_str());
+			m_matProperties[i].specularHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].specularTex));
 		if (matProperties[i].bumpTex[0])
-			m_matProperties[i].bumpHandle = m_textureBinder->createTextureHandle(rde::string(texturePathStr).append(matProperties[i].bumpTex).c_str());
+			m_matProperties[i].bumpHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].bumpTex));
 		if (matProperties[i].maskTex[0])
-			m_matProperties[i].maskHandle = m_textureBinder->createTextureHandle(rde::string(texturePathStr).append(matProperties[i].maskTex).c_str());
+			m_matProperties[i].maskHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].maskTex));
 	}
 
-	initUniforms(shader, matUBOBindingPoint, textureBindOffset);
-}
-void GLMesh::initUniforms(GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset)
-{
 	m_stateBuffer->begin();
 
 	m_matUniformBuffer = new GLConstantBuffer();
 	m_matUniformBuffer->initialize(shader, matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
 	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
 	m_matUBOBindingPoint = matUBOBindingPoint;
-	m_textureBindOffset = textureBindOffset;
-
-	m_textureDataLoc = glGetUniformLocation(shader.getID(), "u_textureData");
 
 	m_stateBuffer->end();
-}
 
-void GLMesh::reloadShader(GLShader& shader)
-{
-	assert(shader.isBegun());
-	initUniforms(shader, m_matUBOBindingPoint, m_textureBindOffset);
+	m_initialized = true;
 }
 
 void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterials)
 {
 	m_stateBuffer->begin();
 	{
-		if (bindMaterials)
-			m_textureBinder->bindTextureArrays(m_textureDataLoc, m_textureBindOffset, GLEngine::graphics->getMaxTextureUnits());
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}
 	m_stateBuffer->end();

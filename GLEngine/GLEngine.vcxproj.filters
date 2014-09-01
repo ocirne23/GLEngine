@@ -76,9 +76,6 @@
     <ClCompile Include="src\rde\rde_string.cpp">
       <Filter>Source Files\rde</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLLightManager.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
@@ -96,6 +93,21 @@
     </ClCompile>
     <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\getGLTextureFormat.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\FileModificationListener.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\FileModificationManager.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\OLD_GLTextureManager.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -297,9 +309,6 @@
     <ClInclude Include="include\Utils\FileHandle.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics\GL\GLTextureManager.h">
-      <Filter>Header Files\Graphics\GL</Filter>
-    </ClInclude>
     <ClInclude Include="include\Graphics\GL\GLTypes.h">
       <Filter>Header Files\Graphics\GL\Core</Filter>
     </ClInclude>
@@ -329,6 +338,27 @@
     </ClInclude>
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\ResourceType.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\getGLTextureFormat.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\FileModificationListener.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\FileModificationManager.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\OLD_GLTextureManager.h">
+      <Filter>Header Files\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLTextureManager.h">
+      <Filter>Header Files\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rde\stringforward.h">
+      <Filter>Source Files\rde</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

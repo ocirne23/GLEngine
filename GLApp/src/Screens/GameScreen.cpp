@@ -6,27 +6,17 @@
 #include "Input\Input.h"
 
 #include "Graphics\PerspectiveCamera.h"
-#include "Graphics\GL\GLMesh.h"
-#include "Graphics\GL\GLLightManager.h"
-#include "Graphics\GL\Tech\ClusteredShading.h"
-#include "Graphics\GL\Core\GLShader.h"
 
 #include "Utils\FileHandle.h"
 #include "Utils\FPSCameraController.h"
 #include "Utils\CheckGLError.h"
+#include "Utils\FileModificationManager.h"
 
 #include "rde\vector.h"
 #include "rde\rde_string.h"
 
 #include <glm\glm.hpp>
 #include <glm\gtc\matrix_transform.hpp>
-
-#include "Graphics\Pixmap.h"
-
-GLMesh mesh;
-GLShader modelShader;
-GLLightManager lightManager;
-ClusteredShading clusteredShading;
 
 PerspectiveCamera camera;
 FPSCameraController cameraController;
@@ -39,19 +29,9 @@ static const unsigned int NUM_TEXTURE_ARRAYS = 16;
 static const unsigned int MESH_MATERIAL_UBO_BINDING = 0;
 static const unsigned int MESH_TEXTURE_INDEX_OFFSET = 3;
 
-BEGIN_NAMESPACE(da)
-
-END_NAMESPACE(da)
-
 GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 {
 	CHECK_GL_ERROR();
-
-	Pixmap p;
-	p.readRaw("Utils/ggx-helper-dfv.da");
-	assert(p.exists());
-
-	print("Pixmap: %i %i %i %i \n", p.m_width, p.m_height, p.m_numComponents, p.m_data);
 
 	GLEngine::input->registerKeyListener(&cameraController);
 	GLEngine::input->registerMouseListener(&cameraController);
@@ -64,7 +44,10 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	lightManager.initialize(MAX_LIGHTS);
 	clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewport(), camera);
 
+	rde::vector<rde::string> extensions;
 	rde::vector<rde::string> defines;
+
+	defines.push_back(rde::string("BINDLESS"));
 
 	if (rde::string(GLEngine::graphics->getVendorStr()).find("NVIDIA") != rde::string::npos
 		&& GLEngine::graphics->getGLMajorVersion() >= 4
@@ -81,31 +64,33 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	defines.push_back(rde::string("LIGHT_GRID_TILE_WIDTH ").append(rde::to_string(TILE_WIDTH_PX)));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
 
-#if 0
-	defines.push_back(rde::string("GL_ES"));
-#endif
-
-	const char* versionStr;
 #ifdef ANDROID
-	versionStr = "300 es";
+	rde::string versionStr("300 es");
+	defines.push_back(rde::string("GL_ES"));
 #else
-	versionStr = "330 core";
+	rde::string versionStr("440 core");
 #endif
-	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", versionStr, &defines);
+	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", versionStr, &defines, &extensions);
 	CHECK_GL_ERROR();
 
 	modelShader.begin();
 	lightManager.setupShader(modelShader);
-	clusteredShading.setupShader(modelShader, 0, 1);
+	clusteredShading.setupShader(modelShader, 1, 2);
 	modelShader.setUniform3f("u_ambient", glm::vec3(0.15f));
 	modelShader.end();
 		
 	modelShader.begin();
-	mesh.loadFromFile("Models/crytek-sponza/sponza.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
+	modelShader.setUniform1i("u_dfvTexture", 0);
+	mesh.loadFromFile("Models/palace/palace.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
+	//mesh.loadFromFile("Models/crytek-sponza/sponza.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
+	//mesh.loadFromFile("Models/lost-empire/lost_empire.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
+	//mesh.loadFromFile("Models/san-miguel/san-miguel.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
+
 	CHECK_GL_ERROR();
 	modelShader.end();
 
-	GLEngine::graphics->getTextureManager().initializeTextureBinders();
+	dfvTexture.initialize("Utils/ggx-helper-dfv.da", GL_LINEAR, GL_LINEAR,
+		GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 }
 
 GameScreen::~GameScreen()
@@ -120,10 +105,10 @@ void GameScreen::render(float deltaSec)
 	cameraController.update(deltaSec);
 	camera.update();
 
-	static const glm::mat4 modelMatrix = glm::scale(glm::mat4(1), glm::vec3(0.1f));
+	static const glm::mat4 modelMatrix = glm::scale(glm::mat4(1), glm::vec3(1.0));
 
 	//print("%f %f %f \n", camera.m_position.x, camera.m_position.y, camera.m_position.z);
-
+	dfvTexture.bind(0);
 	modelShader.begin();
 	{
 		lightManager.update(camera);
@@ -138,7 +123,7 @@ void GameScreen::render(float deltaSec)
 		mesh.render();
 	}
 	modelShader.end();
-
+	FileModificationManager::update();
 	CHECK_GL_ERROR();
 	
 	GLEngine::graphics->swap();

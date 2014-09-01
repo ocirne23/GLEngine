@@ -17,8 +17,7 @@
 * u_recLogSD1 		float
 */
 
-#define FOR_LIGHT_ITERATOR(IT, VSDEPTH) for (ivec2 IT = getLightListBeginEnd(VSDEPTH); IT.x < IT.y; ++IT.x)
-#define GET_LIGHT(IT) getLight(IT.x);
+#define FOR_LIGHT_ITERATOR(LIGHT, VSDEPTH) Light LIGHT; for (ivec2 _lightIterator = getLightListBeginEnd(VSDEPTH); _lightIterator.x <= _lightIterator.y; ++_lightIterator.x, LIGHT = getLight(_lightIterator.x))
 
 struct Light
 {

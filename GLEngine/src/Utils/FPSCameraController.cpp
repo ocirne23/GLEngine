@@ -9,7 +9,7 @@
 #include <glm\gtx\rotate_vector.hpp>
 #include <glm\gtx\compatibility.hpp>
 
-static const float DEFAULT_CAMERA_SPEED = 100.0f;
+static const float DEFAULT_CAMERA_SPEED = 10.0f;
 static const float MOUSE_LOOK_SENSITIVITY = 0.7f;
 static const glm::vec3 UP(0, 1, 0);
 

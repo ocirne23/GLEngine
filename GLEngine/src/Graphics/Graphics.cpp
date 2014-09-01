@@ -13,17 +13,14 @@
 #include <SDL\SDL_syswm.h>
 
 #ifdef ANDROID
-
 static const uint MAX_GL_MAJOR_VERSION = 3;
 static const uint MAX_GL_MINOR_VERSION = 0;
-
 #else
 
-#define ENABLE_ARB_DEBUG_OUTPUT
 #include "Graphics\ARBDebugOutput.h"
 
 static const uint MAX_GL_MAJOR_VERSION = 4;
-static const uint MAX_GL_MINOR_VERSION = 4;
+static const uint MAX_GL_MINOR_VERSION = 5;
 
 #endif // ANDROID
 
@@ -81,9 +78,7 @@ bool Graphics::initialize(const char* windowName, uint screenWidth, uint screenH
 		for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
 	}
 
-#ifdef ENABLE_ARB_DEBUG_OUTPUT
 	tryEnableARBDebugOutput();
-#endif
 
 #endif //ANDROID
 	CHECK_GL_ERROR();
@@ -109,8 +104,8 @@ bool Graphics::initialize(const char* windowName, uint screenWidth, uint screenH
 	print("Max texture units %u \n", m_maxTextureUnits);
 	print("UBO max size: %i \n", uboMaxSize);
 
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	glEnable(GL_DEPTH_TEST);
 
 	return true;

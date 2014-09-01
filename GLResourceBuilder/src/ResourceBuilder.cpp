@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <assert.h>
 #include <fstream>
+#include <algorithm>
 
 std::unordered_map<std::string, ResourceProcessor*> ResourceBuilder::s_processors;
 
@@ -58,7 +59,9 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 
 	if (listFiles(inDirectoryPath, "*", files, writeTimes))
 	{
-		for (unsigned int i = 0; i < files.size(); ++i)
+		int count = (int) files.size();
+#pragma omp parallel for
+		for (int i = 0; i < count; ++i)
 		{
 			const std::string& str = files[i];
 			const std::string& writeTime = writeTimes[i];
@@ -84,7 +87,8 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 			std::string inDirectoryPathStr(inDirectoryPath);
 			std::string outDirectoryPathStr(outDirectoryPath);
 			std::string extension = str.substr(extIdx + 1, str.length() - extIdx - 1);
-				
+			std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
+
 			auto it = s_processors.find(extension);
 			if (it != s_processors.end())
 			{	// if a processor exists for this extension, process.
@@ -100,12 +104,17 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 					CreateDirectory(makeDirPath.c_str(), NULL);
 				}
 
-				printf("%s\n", str.c_str());
-
-				it->second->process(inFilePath.c_str(), outFilePath.c_str());
-
-				std::string line = str + ":" + writeTime + "\n";
-				writeTimesFile.write(line.c_str(), line.length());
+				printf("starting %s\n", str.c_str());
+				if (it->second->process(inFilePath.c_str(), outFilePath.c_str()))
+				{
+					printf("finished %s\n", str.c_str());
+					std::string line = str + ":" + writeTime + "\n";
+					writeTimesFile.write(line.c_str(), line.length());
+				}
+				else
+				{
+					printf("failed %s\n", str.c_str());
+				}
 			}
 		}
 	}

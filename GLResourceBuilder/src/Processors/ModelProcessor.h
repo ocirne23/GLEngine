@@ -5,5 +5,5 @@
 class ModelProcessor : public ResourceProcessor
 {
 public:
-	virtual void process(const char* inResourcePath, const char* outResourcePath);
+	virtual bool process(const char* inResourcePath, const char* outResourcePath);
 };
