@@ -84,8 +84,10 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
 	assert(type == ResourceType_MODEL);
 
-	int numAtlasses;
-	file.readBytes(reinterpret_cast<char*>(&numAtlasses), sizeof(int), 0);
+	int num1CompAtlasses, num3CompAtlasses, num4CompAtlasses;
+	file.readBytes(reinterpret_cast<char*>(&num1CompAtlasses), sizeof(int), 0);
+	file.readBytes(reinterpret_cast<char*>(&num3CompAtlasses), sizeof(int), 0);
+	file.readBytes(reinterpret_cast<char*>(&num4CompAtlasses), sizeof(int), 0);
 
 	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint), sizeof(uint));
 	uint offset = sizeof(uint) * 2;
@@ -132,13 +134,28 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 
 	rde::string atlasBasePath(filePath);
 	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.') - 1);
+	atlasBasePath.append("-atlas-");
 
-	rde::vector<Pixmap> atlasPixmaps(numAtlasses);
-	for (int i = 0; i < numAtlasses; ++i)
+	rde::vector<Pixmap*> pixmaps1c, pixmaps2c, pixmaps3c;
+	int atlasCounter = 0;
+
+	for (int i = 0; i < num1CompAtlasses; ++i, ++atlasCounter)
 	{
-		rde::string atlasPath = atlasBasePath.append("-atlas-").append(rde::to_string(i)).append(".da");
-		atlasPixmaps[i].read(FileHandle(atlasPath));
-		assert(atlasPixmaps[i].exists());
+		pixmaps1c[i] = new Pixmap();
+		pixmaps1c[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
+		assert(pixmaps1c[i]->exists());
+	}
+	for (int i = 0; i < num3CompAtlasses; ++i, ++atlasCounter)
+	{
+		pixmaps2c[i] = new Pixmap();
+		pixmaps2c[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
+		assert(pixmaps2c[i]->exists());
+	}
+	for (int i = 0; i < num4CompAtlasses; ++i, ++atlasCounter)
+	{
+		pixmaps3c[i] = new Pixmap();
+		pixmaps3c[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
+		assert(pixmaps3c[i]->exists());
 	}
 
 	m_stateBuffer.begin();

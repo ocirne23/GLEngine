@@ -266,9 +266,27 @@ namespace
 		std::string dstTexturePathStr(dstFilePath);
 		dstTexturePathStr = dstTexturePathStr.substr(0, dstTexturePathStr.find_last_of('.'));
 
+		std::sort(atlasses.begin(), atlasses.end(), [](const TextureAtlas*& a, const TextureAtlas*& b)
+		{
+			return a->m_numComponents < b->m_numComponents;
+		});
+
+		int num1CompAtlasses, num3CompAtlasses, num4CompAtlasses;
+		for (const TextureAtlas* atlas : atlasses)
+		{
+			switch (atlas->m_numComponents)
+			{
+			case 1: num1CompAtlasses++; break;
+			case 3: num3CompAtlasses++; break;
+			case 4: num4CompAtlasses++; break;
+			default: assert(false); break;
+			}
+		}
+
 		for (int i = 0; i < atlasses.size(); ++i)
 		{
 			TextureAtlas* atlas = atlasses[i];
+			printf("a: %i \n", atlas->m_numComponents);
 			
 			std::string atlasFileName = dstTexturePathStr.c_str();
 			atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");
@@ -381,9 +399,10 @@ namespace
 		assert(file.is_open());
 
 		int type = ResourceType_MODEL;
-		int numAtlasses = atlasses.size();
 		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
-		file.write(reinterpret_cast<const char*>(&numAtlasses), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&num1CompAtlasses), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&num3CompAtlasses), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&num4CompAtlasses), sizeof(int));
 		int numOpague = (int) transparentEntries.size();
 		file.write(reinterpret_cast<const char*>(&numOpague), sizeof(int));
 		writeVector(file, indiceCounts);
