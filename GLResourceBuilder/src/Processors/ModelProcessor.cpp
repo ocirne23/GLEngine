@@ -40,8 +40,8 @@ namespace
 	{
 		std::string image;
 		int atlasNr;
-		texture_atlas_t* atlas;
-		ivec4 region;
+		TextureAtlas* atlas;
+		TextureAtlas::AtlasRegion region;
 	};
 	struct MeshEntry
 	{
@@ -74,8 +74,8 @@ namespace
 	}
 	vec4 getTextureOffset(const AtlasRegion& reg)
 	{
-		int atlasWidth = (int) reg.atlas->width;
-		int atlasHeight = (int) reg.atlas->height;
+		int atlasWidth = (int) reg.atlas->m_width;
+		int atlasHeight = (int) reg.atlas->m_height;
 
 		int regionWidth = reg.region.width;
 		int regionHeight = reg.region.height;
@@ -170,7 +170,7 @@ namespace
 		std::vector<MeshEntry> transparentEntries;
 
 		std::vector<AtlasRegion> atlasRegions;
-		std::vector<texture_atlas_t*> atlasses;
+		std::vector<TextureAtlas*> atlasses;
 
 		for (const std::string& str : textures)
 		{
@@ -185,11 +185,11 @@ namespace
 			bool contained = false;
 			for (int i = 0; i < atlasses.size(); ++i)
 			{
-				texture_atlas_t* atlas = atlasses[i];
+				TextureAtlas* atlas = atlasses[i];
 
-				if (atlas->width == width && atlas->height == height && atlas->depth == numComp)
+				if (atlas->m_numComponents == numComp)
 				{
-					ivec4 region = texture_atlas_get_region(atlas, width, height);
+					TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
 					if (region.width && region.height)
 					{
 						contained = true;
@@ -200,8 +200,8 @@ namespace
 			}
 			if (!contained)
 			{
-				texture_atlas_t* atlas = texture_atlas_new(MAX_ATLAS_WIDTH, MAX_ATLAS_HEIGHT, numComp);
-				ivec4 region = texture_atlas_get_region(atlas, width, height);
+				TextureAtlas* atlas = new TextureAtlas(MAX_ATLAS_WIDTH, MAX_ATLAS_HEIGHT, numComp);
+				TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
 				assert(region.width && region.height);
 				atlasses.push_back(atlas);
 				atlasRegions.push_back({ str, (int) atlasses.size() - 1, atlas, region });
@@ -260,7 +260,7 @@ namespace
 				continue;
 			}
 
-			texture_atlas_set_region(region.atlas, region.region.x, region.region.y, region.region.width, region.region.height, data, numComponents);
+			region.atlas->setRegion(region.region.x, region.region.y, region.region.width, region.region.height, data, numComponents);
 		}
 
 		std::string dstTexturePathStr(dstFilePath);
@@ -268,7 +268,7 @@ namespace
 
 		for (int i = 0; i < atlasses.size(); ++i)
 		{
-			texture_atlas_t* atlas = atlasses[i];
+			TextureAtlas* atlas = atlasses[i];
 			
 			std::string atlasFileName = dstTexturePathStr.c_str();
 			atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");
@@ -278,15 +278,15 @@ namespace
 
 			int type, width, height, numComponents;
 			type = ResourceType_BYTEIMAGE;
-			width = (int) atlas->width;
-			height = (int) atlas->height;
-			numComponents = (int) atlas->depth;
+			width = (int) atlas->m_width;
+			height = (int) atlas->m_height;
+			numComponents = (int) atlas->m_numComponents;
 
 			file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 			file.write(reinterpret_cast<const char*>(&width), sizeof(int));
 			file.write(reinterpret_cast<const char*>(&height), sizeof(int));
 			file.write(reinterpret_cast<const char*>(&numComponents), sizeof(int));
-			file.write(reinterpret_cast<const char*>(atlas->data), width * height * numComponents);
+			file.write(reinterpret_cast<const char*>(atlas->m_data), width * height * numComponents);
 
 			file.close();
 		}
@@ -381,7 +381,9 @@ namespace
 		assert(file.is_open());
 
 		int type = ResourceType_MODEL;
+		int numAtlasses = atlasses.size();
 		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&numAtlasses), sizeof(int));
 		int numOpague = (int) transparentEntries.size();
 		file.write(reinterpret_cast<const char*>(&numOpague), sizeof(int));
 		writeVector(file, indiceCounts);

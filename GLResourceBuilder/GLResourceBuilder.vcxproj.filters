@@ -44,6 +44,9 @@
     <ClCompile Include="src\Utils\stb_image.c">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utils\TextureAtlas.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ResourceBuilder.h">
@@ -66,6 +69,9 @@
     </ClInclude>
     <ClInclude Include="src\Processors\FloatImageProcessor.h">
       <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\TextureAtlas.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

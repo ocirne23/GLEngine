@@ -4,6 +4,7 @@
 #include "Graphics\GL\GL.h"
 #include "Graphics\Graphics.h"
 
+#include "Graphics\Pixmap.h"
 #include "Graphics\GL\Core\GLShader.h"
 #include "Graphics\GL\Core\GLTextureArray.h"
 #include "Graphics\GL\Core\GLVertexBuffer.h"
@@ -26,20 +27,6 @@ enum { MAX_MATERIALS = 200 };
 #define _MAX_PATH 260
 #endif
 
-struct IOMaterialProperty
-{
-	IOMaterialProperty()
-	{
-		memset(this, 0, sizeof(IOMaterialProperty));
-	};
-	glm::vec4 diffuseColorAndAlpha;
-	glm::vec4 specularColorAndExp;
-	glm::vec4 materialEmissiveAndPower;
-	char diffuseTex[_MAX_PATH];
-	char bumpTex[_MAX_PATH];
-	char specularTex[_MAX_PATH];
-	char maskTex[_MAX_PATH];
-};
 struct MeshEntry
 {
 	unsigned int meshIndex;
@@ -64,13 +51,7 @@ GLMesh::GLMesh() : m_numOpagueMeshes(0), m_initialized(false)
 
 GLMesh::~GLMesh()
 {
-	if (m_initialized)
-	{
-		delete m_vertexBuffer;
-		delete m_indiceBuffer;
-		delete m_stateBuffer;
-		delete m_matUniformBuffer;
-	}
+
 }
 
 template <typename T>
@@ -97,19 +78,21 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 
 	rde::vector<uint> indices;
 	rde::vector<Vertex> vertices;
-	rde::vector<IOMaterialProperty> matProperties;
 	rde::vector<uint> baseIndices;
 
 	int type;
-	file.readBytes(reinterpret_cast<char*>(&type), sizeof(uint), 0);
+	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
 	assert(type == ResourceType_MODEL);
+
+	int numAtlasses;
+	file.readBytes(reinterpret_cast<char*>(&numAtlasses), sizeof(int), 0);
 
 	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint), sizeof(uint));
 	uint offset = sizeof(uint) * 2;
 
 	offset = readVector(file, m_indiceCounts, offset);
 	offset = readVector(file, baseIndices, offset);
-	offset = readVector(file, matProperties, offset);
+	offset = readVector(file, m_matProperties, offset);
 	offset = readVector(file, indices, offset);
 	offset = readVector(file, vertices, offset);
 	file.close();
@@ -123,17 +106,14 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 		m_baseIndices[i] = (GLvoid*) baseIndices[i];
 	}
 
-	m_stateBuffer = new GLStateBuffer();
-	m_stateBuffer->initialize();
-	m_stateBuffer->begin();
+	m_stateBuffer.initialize();
+	m_stateBuffer.begin();
 
-	m_indiceBuffer = new GLVertexBuffer();
-	m_indiceBuffer->initialize(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
-	m_indiceBuffer->upload(sizeof(indices[0]) * indices.size(), &indices[0]);
+	m_indiceBuffer.initialize(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+	m_indiceBuffer.upload(sizeof(indices[0]) * indices.size(), &indices[0]);
 
-	m_vertexBuffer = new GLVertexBuffer();
-	m_vertexBuffer->initialize(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-	m_vertexBuffer->upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
+	m_vertexBuffer.initialize(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+	m_vertexBuffer.upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
 
 	VertexAttribute attributes[] =
 	{
@@ -145,53 +125,38 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 		VertexAttribute(5, "MaterialID", VertexAttribute::Format::UNSIGNED_INT, 1)
 	};
 
-	m_vertexBuffer->setVertexAttributes(6, attributes);
-	m_stateBuffer->end();
+	m_vertexBuffer.setVertexAttributes(6, attributes);
+	m_stateBuffer.end();
 
 	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
 
-	rde::string texturePathStr(filePath);
-	rde::string::size_type idx = texturePathStr.find_index_of_last('/');
-	if (idx == rde::string::npos)
-		idx = texturePathStr.find_index_of_last('\\');
+	rde::string atlasBasePath(filePath);
+	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.') - 1);
 
-	texturePathStr = texturePathStr.substr(0, idx).append("\\");
-
-	m_matProperties.resize(matProperties.size());
-
-	for (int i = 0; i < matProperties.size(); ++i)
+	rde::vector<Pixmap> atlasPixmaps(numAtlasses);
+	for (int i = 0; i < numAtlasses; ++i)
 	{
-		m_matProperties[i].diffuseColorAndAlpha = matProperties[i].diffuseColorAndAlpha;
-		m_matProperties[i].specularColorAndExp = matProperties[i].specularColorAndExp;
-		m_matProperties[i].materialEmissiveAndPower = matProperties[i].materialEmissiveAndPower;
-
-		if (matProperties[i].diffuseTex[0])
-			m_matProperties[i].diffuseHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].diffuseTex));
-		if (matProperties[i].specularTex[0])
-			m_matProperties[i].specularHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].specularTex));
-		if (matProperties[i].bumpTex[0])
-			m_matProperties[i].bumpHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].bumpTex));
-		if (matProperties[i].maskTex[0])
-			m_matProperties[i].maskHandle = textureManager.getTextureHandle(rde::string(texturePathStr).append(matProperties[i].maskTex));
+		rde::string atlasPath = atlasBasePath.append("-atlas-").append(rde::to_string(i)).append(".da");
+		atlasPixmaps[i].read(FileHandle(atlasPath));
+		assert(atlasPixmaps[i].exists());
 	}
 
-	m_stateBuffer->begin();
+	m_stateBuffer.begin();
 
-	m_matUniformBuffer = new GLConstantBuffer();
-	m_matUniformBuffer->initialize(shader, matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
-	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
+	m_matUniformBuffer.initialize(shader, matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
+	m_matUniformBuffer.upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
 	m_matUBOBindingPoint = matUBOBindingPoint;
 
-	m_stateBuffer->end();
+	m_stateBuffer.end();
 
 	m_initialized = true;
 }
 
 void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterials)
 {
-	m_stateBuffer->begin();
+	m_stateBuffer.begin();
 	{
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}
-	m_stateBuffer->end();
+	m_stateBuffer.end();
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-class RectangleBinPack
+class TextureAtlas
 {
 public:
 	struct AtlasRegion
@@ -8,15 +8,18 @@ public:
 		int x, y, width, height;
 	};
 
-	void init(int width, int height);
+	TextureAtlas(int width, int height, int numComponents);
+	~TextureAtlas();
 
-	AtlasRegion insert(int width, int height)
-	{
-		return insert(&root, width, height);
-	}
+	AtlasRegion getRegion(int width, int height);
+	void setRegion(int x, int y, int width, int height, const unsigned char* data, int stride);
 
-	/// Computes the ratio of used surface area.
-	float occupancy() const;
+public:
+
+	int m_width;
+	int m_height;
+	int m_numComponents;
+	unsigned char* m_data;
 
 private:
 	struct Node
@@ -31,15 +34,8 @@ private:
 		int height;
 	};
 
-	Node root;
+	Node* getRegion(Node *node, int width, int height);
+private:
 
-	// The total size of the bin we started with.
-	int binWidth;
-	int binHeight;
-
-	/// @return The surface area used by the subtree rooted at node.
-	unsigned long usedSurfaceArea(const Node &node) const;
-
-	/// Inserts a new rectangle in the subtree rooted at the given node.
-	AtlasRegion insert(Node *node, int width, int height);
+	Node m_root;
 };

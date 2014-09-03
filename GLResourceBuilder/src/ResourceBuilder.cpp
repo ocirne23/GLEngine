@@ -110,6 +110,9 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 					printf("finished %s\n", str.c_str());
 					std::string line = str + ":" + writeTime + "\n";
 					writeTimesFile.write(line.c_str(), line.length());
+					auto at = oldWriteTimesMap.find(str);
+					if (at != oldWriteTimesMap.end())
+						oldWriteTimesMap.erase(at);
 				}
 				else
 				{
@@ -117,6 +120,12 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 				}
 			}
 		}
+	}
+
+	for (const auto& oldWriteTimes : oldWriteTimesMap)
+	{
+		std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second + "\n";
+		writeTimesFile.write(line.c_str(), line.length());
 	}
 
 	writeTimesFile.close();

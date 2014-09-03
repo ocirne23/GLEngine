@@ -1,65 +1,59 @@
 #include "TextureAtlas.h"
 
-void RectangleBinPack::init(int width, int height)
+#include <assert.h>
+#include <memory>
+
+TextureAtlas::TextureAtlas(int width, int height, int numComponents)
+	: m_width(width), m_height(height), m_numComponents(numComponents)
 {
-	binWidth = width;
-	binHeight = height;
-	root.left = root.right = 0;
-	root.x = root.y = 0;
-	root.width = width;
-	root.height = height;
+	m_root.left = m_root.right = 0;
+	m_root.x = m_root.y = 0;
+	m_root.width = width;
+	m_root.height = height;
+
+	m_data = new unsigned char[m_width * m_height * m_numComponents];
 }
 
-float RectangleBinPack::occupancy() const
+TextureAtlas::~TextureAtlas()
 {
-	unsigned long totalSurfaceArea = binWidth * binHeight;
-	unsigned long area = usedSurfaceArea(root);
-
-	return (float) area / totalSurfaceArea;
+	delete[] m_data;
 }
 
-unsigned long RectangleBinPack::usedSurfaceArea(const Node &node) const
+TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
 {
-	if (node.left || node.right)
-	{
-		unsigned long area = node.width * node.height;
-		if (node.left)
-			area += usedSurfaceArea(*node.left);
-		if (node.right)
-			area += usedSurfaceArea(*node.right);
-
-		return area;
-	}
-
-	return 0;
+	Node* node = getRegion(&m_root, width, height);
+	if (node)
+		return{ node->x, node->y, node->width, node->height };
+	else
+		return { 0, 0, 0, 0 };
 }
 
-RectangleBinPack::AtlasRegion RectangleBinPack::insert(RectangleBinPack::Node *node, int width, int height)
+TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int width, int height)
 {
 	if (node->left || node->right)
 	{
 		if (node->left)
 		{
-			AtlasRegion region = insert(node->left, width, height);
-			if (region.width && region.height)
-				return region;
+			Node* newNode = getRegion(node->left, width, height);
+			if (newNode)
+				return newNode;
 		}
 		if (node->right)
 		{
-			AtlasRegion region = insert(node->right, width, height);
-			if (region.width && region.height)
-				return region;
+			Node* newNode = getRegion(node->right, width, height);
+			if (newNode)
+				return newNode;
 		}
-		return{ 0, 0, 0, 0 };
+		return 0;
 	}
 
 	if (width > node->width || height > node->height)
-		return{ 0, 0, 0, 0 };
+		return 0;
 
 	int w = node->width - width;
 	int h = node->height - height;
-	node->left = new Node;
-	node->right = new Node;
+	node->left = new Node();
+	node->right = new Node();
 	if (w <= h)
 	{
 		node->left->x = node->x + width;
@@ -87,5 +81,25 @@ RectangleBinPack::AtlasRegion RectangleBinPack::insert(RectangleBinPack::Node *n
 
 	node->width = width;
 	node->height = height;
-	return{ node->x, node->y, node->width, node->height };
+	return node;
+}
+
+void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned char* data, int stride)
+{
+	int i, depth, charsize;
+
+	assert(x >= 0);
+	assert(y >= 0);
+	assert(x < (m_width));
+	assert((x + width) <= (m_width));
+	assert(y < (m_height));
+	assert((y + height) <= (m_height));
+
+	depth = m_numComponents;
+	charsize = sizeof(char);
+	for (i = 0; i<height; ++i)
+	{
+		memcpy(m_data + ((y + i)*m_width + x) * charsize * depth,
+			data + (i*stride) * charsize, width * charsize * depth);
+	}
 }

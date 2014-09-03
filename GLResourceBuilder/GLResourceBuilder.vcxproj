@@ -155,6 +155,7 @@
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\listFiles.cpp" />
     <ClCompile Include="src\Utils\stb_image.c" />
+    <ClCompile Include="src\Utils\TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Processors\ByteImageProcessor.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="src\ResourceProcessor.h" />
     <ClInclude Include="src\Utils\listFiles.h" />
     <ClInclude Include="src\Utils\stb_image.h" />
+    <ClInclude Include="src\Utils\TextureAtlas.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

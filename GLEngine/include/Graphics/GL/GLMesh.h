@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Core.h"
-#include "Graphics\GL\GLTextureManager.h"
 #include "Graphics\GL\GLTypes.h"
 #include "rde\rde_string.h"
 #include "rde\vector.h"
+#include "Graphics\GL\Core\GLTextureArray.h"
 
 #include <glm\glm.hpp>
 
@@ -15,14 +15,15 @@ class GLVertexBuffer;
 
 struct MaterialProperty
 {
-	MaterialProperty() : diffuseColorAndAlpha(0), specularColorAndExp(0), materialEmissiveAndPower(0) {};
-	glm::vec4 diffuseColorAndAlpha;
-	glm::vec4 specularColorAndExp;
-	glm::vec4 materialEmissiveAndPower;
-	GLTextureManager::TextureHandle diffuseHandle;
-	GLTextureManager::TextureHandle bumpHandle;
-	GLTextureManager::TextureHandle specularHandle;
-	GLTextureManager::TextureHandle maskHandle;
+	MaterialProperty() : diffuseAtlasNr(-1), bumpAtlasNr(-1), specularAtlasNr(-1), maskAtlasNr(-1) {};
+	glm::vec4 diffuseTexMapping;
+	glm::vec4 bumpTexMapping;
+	glm::vec4 specTexMapping;
+	glm::vec4 maskTexMapping;
+	int diffuseAtlasNr;
+	int bumpAtlasNr;
+	int specularAtlasNr;
+	int maskAtlasNr;
 };
 
 class GLMesh
@@ -39,10 +40,12 @@ public:
 private:
 
 	bool m_initialized;
-	GLStateBuffer* m_stateBuffer;
-	GLVertexBuffer* m_indiceBuffer;
-	GLVertexBuffer* m_vertexBuffer;
-	GLConstantBuffer* m_matUniformBuffer;
+	GLStateBuffer m_stateBuffer;
+	GLVertexBuffer m_indiceBuffer;
+	GLVertexBuffer m_vertexBuffer;
+	GLConstantBuffer m_matUniformBuffer;
+
+	rde::vector<GLTextureArray> m_textureArrays;
 
 	unsigned int m_matUBOBindingPoint;
 
