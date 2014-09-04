@@ -24,6 +24,8 @@ public:
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 
+	bool isInitialized() { return m_initialized; }
+
 	void setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture);
 
 	inline uint getWidth() const		{ return m_width; }

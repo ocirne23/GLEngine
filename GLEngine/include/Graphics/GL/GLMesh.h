@@ -4,12 +4,12 @@
 #include "Graphics\GL\GLTypes.h"
 #include "rde\rde_string.h"
 #include "rde\vector.h"
+#include "Graphics\GL\Core\GLStateBuffer.h"
 #include "Graphics\GL\Core\GLTextureArray.h"
 
 #include <glm\glm.hpp>
 
 class GLShader;
-class GLStateBuffer;
 class GLConstantBuffer;
 class GLVertexBuffer;
 
@@ -41,9 +41,9 @@ private:
 
 	bool m_initialized;
 	GLStateBuffer m_stateBuffer;
-	GLVertexBuffer m_indiceBuffer;
-	GLVertexBuffer m_vertexBuffer;
-	GLConstantBuffer m_matUniformBuffer;
+	GLVertexBuffer* m_indiceBuffer;
+	GLVertexBuffer* m_vertexBuffer;
+	GLConstantBuffer* m_matUniformBuffer;
 
 	uint m_1cTextureUnit;
 	uint m_3cTextureUnit;

@@ -182,6 +182,11 @@ namespace
 				continue;
 			}
 
+			if (!(numComp == 1 || numComp == 3))
+			{
+				printf("Invalid number of components: %i in texture: %s \n", numComp, str.c_str());
+			}
+
 			bool contained = false;
 			for (int i = 0; i < atlasses.size(); ++i)
 			{
@@ -239,7 +244,7 @@ namespace
 				}
 				else
 				{
-				//	assert(false);
+				//	assert(false); // no textures in material?
 				}
 			}
 			
@@ -247,7 +252,6 @@ namespace
 			printf("bump %i %f %f %f %f\n", prop.bumpAtlasNr, prop.bumpTexMapping.x, prop.bumpTexMapping.y, prop.bumpTexMapping.z, prop.bumpTexMapping.w);
 			printf("spec %i %f %f %f %f\n", prop.specularAtlasNr, prop.specTexMapping.x, prop.specTexMapping.y, prop.specTexMapping.z, prop.specTexMapping.w);
 			printf("mask %i %f %f %f %f\n\n", prop.maskAtlasNr, prop.maskTexMapping.x, prop.maskTexMapping.y, prop.maskTexMapping.z, prop.maskTexMapping.w);
-			
 		}
 
 		for (const AtlasRegion& region : atlasRegions)
@@ -266,12 +270,12 @@ namespace
 		std::string dstTexturePathStr(dstFilePath);
 		dstTexturePathStr = dstTexturePathStr.substr(0, dstTexturePathStr.find_last_of('.'));
 
-		std::sort(atlasses.begin(), atlasses.end(), [](const TextureAtlas*& a, const TextureAtlas*& b)
+		std::sort(atlasses.begin(), atlasses.end(), [](const TextureAtlas* a, const TextureAtlas* b)
 		{
 			return a->m_numComponents < b->m_numComponents;
 		});
 
-		int num1CompAtlasses, num3CompAtlasses, num4CompAtlasses;
+		int num1CompAtlasses = 0, num3CompAtlasses = 0, num4CompAtlasses = 0;
 		for (const TextureAtlas* atlas : atlasses)
 		{
 			switch (atlas->m_numComponents)
@@ -286,7 +290,6 @@ namespace
 		for (int i = 0; i < atlasses.size(); ++i)
 		{
 			TextureAtlas* atlas = atlasses[i];
-			printf("a: %i \n", atlas->m_numComponents);
 			
 			std::string atlasFileName = dstTexturePathStr.c_str();
 			atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");

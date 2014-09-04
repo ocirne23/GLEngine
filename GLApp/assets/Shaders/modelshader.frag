@@ -1,5 +1,3 @@
-#extension GL_ARB_bindless_texture : enable
-
 #include "Shaders/clusteredshading.txt"
 
 
@@ -16,9 +14,6 @@ layout (location = 0) out vec4 out_color;
 
 ////////////////////////// MATERIAL LIGHTING //////////////////////////
 
-#define NUM_TEXTURE_ARRAYS 16
-#define MaterialHandle uvec2
-
 const uint MAX_MATERIALS = 409u;
 const uint INVALID_MATERIAL = 0xFFFFFFFFu;
 const float DEFAULT_SPECULAR = 0.2;
@@ -28,60 +23,37 @@ const float BUMP_MAP_STRENGTH = 1.2;
 
 struct MaterialProperty
 {
-	vec4 da;
-	vec4 wa;
-	vec4 ba;
-	MaterialHandle diffuseHandle;
-	MaterialHandle bumpHandle;
-	MaterialHandle specularHandle;
-	MaterialHandle maskHandle;
+	vec4 diffuseTexMapping;
+	vec4 bumpTexMapping;
+	vec4 specTexMapping;
+	vec4 maskTexMapping;
+	int diffuseAtlasNr;
+	int bumpAtlasNr;
+	int specularAtlasNr;
+	int maskAtlasNr;
 };
 
-uniform sampler2DArray u_textureData[NUM_TEXTURE_ARRAYS];
+uniform sampler2DArray u_1cTextureArray;
+uniform sampler2DArray u_3cTextureArray;
+
+vec3 sampleAtlasArray(int atlasNr, vec4 texMapping, vec2 uv)
+{
+	return texture(u_3cTextureArray, vec3(fract(uv) * texMapping.zw + texMapping.xy, atlasNr)).rgb;	
+}
+
+float sampleMaskAtlasArray(int maskAtlasNr, vec4 maskTexMapping, vec2 uv)
+{
+	return texture(u_1cTextureArray, vec3(uv * maskTexMapping.zw + maskTexMapping.xy, maskAtlasNr)).r;
+}
 
 layout (std140) uniform MaterialProperties
 {
 	MaterialProperty u_materialProperties[MAX_MATERIALS];
 };
 
-bool hasTexture(MaterialHandle handle)
+vec3 getBumpedNormal(vec3 normalSample)
 {
-	return handle.x != INVALID_MATERIAL;
-}
-
-vec4 sampleHandle(MaterialHandle handle, vec2 texcoord)
-{
-#ifdef BINDLESS
-	return texture(sampler2D(handle), texcoord);
-#else
-#ifdef DYNAMIC_INDEXING
-	return texture(u_textureData[handle.x], vec3(texcoord, handle.y));
-#else
-	uint index = handle.x;
-	if (index == 0u) return texture(u_textureData[0], vec3(texcoord, handle.y));
-	else if (index == 1u) return texture(u_textureData[1], vec3(texcoord, handle.y));
-	else if (index == 2u) return texture(u_textureData[2], vec3(texcoord, handle.y));
-	else if (index == 3u) return texture(u_textureData[3], vec3(texcoord, handle.y));
-	else if (index == 4u) return texture(u_textureData[4], vec3(texcoord, handle.y));
-	else if (index == 5u) return texture(u_textureData[5], vec3(texcoord, handle.y));
-	else if (index == 6u) return texture(u_textureData[6], vec3(texcoord, handle.y));
-	else if (index == 7u) return texture(u_textureData[7], vec3(texcoord, handle.y));
-	else if (index == 8u) return texture(u_textureData[8], vec3(texcoord, handle.y));
-	else if (index == 9u) return texture(u_textureData[9], vec3(texcoord, handle.y));
-	else if (index == 10u) return texture(u_textureData[10], vec3(texcoord, handle.y));
-	else if (index == 11u) return texture(u_textureData[11], vec3(texcoord, handle.y));
-	else if (index == 12u) return texture(u_textureData[12], vec3(texcoord, handle.y));
-	else if (index == 13u) return texture(u_textureData[13], vec3(texcoord, handle.y));
-	else if (index == 14u) return texture(u_textureData[14], vec3(texcoord, handle.y));
-	else if (index == 15u) return texture(u_textureData[15], vec3(texcoord, handle.y));
-	else return texture(u_textureData[0], vec3(texcoord, handle.y));
-#endif
-#endif
-}
-
-vec3 getBumpedNormal(MaterialProperty material)
-{
-	vec3 normal = sampleHandle(material.bumpHandle, v_texcoord).rgb * 2.0 - 1;
+	vec3 normal = normalSample * 2.0 - 1;
 	mat3 rotMat = mat3(v_tangent, v_bitangent, v_normal);
 	return rotMat * vec3(normal);
 }
@@ -173,18 +145,39 @@ void doLightGGX(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse,
 	diffuseContrib = lightContrib * Diffuse_OrenNayar(diffuse, roughness, NdotV, NdotL, VdotH);
 }
 
+
+struct MaterialProperty
+{
+	vec4 diffuseTexMapping;
+	vec4 bumpTexMapping;
+	vec4 specTexMapping;
+	vec4 maskTexMapping;
+	int diffuseAtlasNr;
+	int bumpAtlasNr;
+	int specularAtlasNr;
+	int maskAtlasNr;
+};
+
 void main()
 {
 	MaterialProperty material = u_materialProperties[v_materialID];
 	
-	if (hasTexture(material.maskHandle) && sampleHandle(material.maskHandle, v_texcoord).r < 0.5)
+	if (material.maskAtlasNr != -1 && sampleMaskAtlasArray(material.maskAtlasNr, material.maskTexMapping, v_texcoord) < 0.5)
 	{
-		discard;
+		//discard;
 	}
 	
-	vec3 diffuse = sampleHandle(material.diffuseHandle, v_texcoord).rgb;// * material.diffuseColorAndAlpha.rgb;
-	vec3 normal = hasTexture(material.bumpHandle) ? getBumpedNormal(material) : v_normal;
-	float specular = hasTexture(material.specularHandle) ? sampleHandle(material.specularHandle, v_texcoord).r : DEFAULT_SPECULAR;
+	vec3 diffuse = sampleAtlasArray(material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord);
+	vec3 normal;
+	if (material.bumpAtlasNr != -1)
+	{
+		normal = getBumpedNormal(sampleAtlasArray(material.bumpAtlasNr, material.bumpTexMapping, v_texcoord));
+	}
+	else
+	{
+		normal = v_normal;
+	}
+	float specular = DEFAULT_SPECULAR;
 	
 	vec3 diffuseAccum = vec3(0);
 	vec3 specularAccum = vec3(0);
@@ -207,6 +200,6 @@ void main()
 	
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
-	
-	//out_color = vec4(vec3(normal), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001;
+	//out_color = vec4(diffuse, 1.0);
+	//out_color = vec4(vec3(diffuse), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001;
 }

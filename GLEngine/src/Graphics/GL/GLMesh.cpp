@@ -51,7 +51,12 @@ GLMesh::GLMesh() : m_numOpagueMeshes(0), m_initialized(false)
 
 GLMesh::~GLMesh()
 {
-
+	if (m_indiceBuffer)
+		delete m_indiceBuffer;
+	if (m_vertexBuffer)
+		delete m_vertexBuffer;
+	if (m_matUniformBuffer)
+		delete m_matUniformBuffer;
 }
 
 template <typename T>
@@ -65,7 +70,7 @@ uint readVector(const FileHandle& handle, rde::vector<T>& vector, uint offset)
 	return offset + sizeof(int) + size * sizeof(vector[0]);
 }
 
-void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUnit1, uint textureUnit2, GLuint matUBOBindingPoint = 0)
+void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUnit1, uint textureUnit2, GLuint matUBOBindingPoint)
 {
 	assert(!m_initialized);
 
@@ -88,11 +93,10 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUn
 	assert(type == ResourceType_MODEL);
 
 	int num1CompAtlasses, num3CompAtlasses;
-	file.readBytes(reinterpret_cast<char*>(&num1CompAtlasses), sizeof(int), 0);
-	file.readBytes(reinterpret_cast<char*>(&num3CompAtlasses), sizeof(int), 0);
-
-	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint), sizeof(uint));
-	uint offset = sizeof(uint) * 2;
+	file.readBytes(reinterpret_cast<char*>(&num1CompAtlasses), sizeof(int), sizeof(int));
+	file.readBytes(reinterpret_cast<char*>(&num3CompAtlasses), sizeof(int), sizeof(int) * 2);
+	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint), sizeof(int) * 3);
+	uint offset = sizeof(uint) * 4;
 
 	offset = readVector(file, m_indiceCounts, offset);
 	offset = readVector(file, baseIndices, offset);
@@ -113,11 +117,13 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUn
 	m_stateBuffer.initialize();
 	m_stateBuffer.begin();
 
-	m_indiceBuffer.initialize(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
-	m_indiceBuffer.upload(sizeof(indices[0]) * indices.size(), &indices[0]);
+	m_indiceBuffer = new GLVertexBuffer();
+	m_indiceBuffer->initialize(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+	m_indiceBuffer->upload(sizeof(indices[0]) * indices.size(), &indices[0]);
 
-	m_vertexBuffer.initialize(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
-	m_vertexBuffer.upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
+	m_vertexBuffer = new GLVertexBuffer();
+	m_vertexBuffer->initialize(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+	m_vertexBuffer->upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
 
 	VertexAttribute attributes[] =
 	{
@@ -129,16 +135,16 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUn
 		VertexAttribute(5, "MaterialID", VertexAttribute::Format::UNSIGNED_INT, 1)
 	};
 
-	m_vertexBuffer.setVertexAttributes(6, attributes);
+	m_vertexBuffer->setVertexAttributes(6, attributes);
 	m_stateBuffer.end();
 
 	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
 
 	rde::string atlasBasePath(filePath);
-	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.') - 1);
+	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
 	atlasBasePath.append("-atlas-");
 
-	rde::vector<Pixmap*> pixmaps1c, pixmaps3c;
+	rde::vector<Pixmap*> pixmaps1c(num1CompAtlasses), pixmaps3c(num3CompAtlasses);
 	int atlasCounter = 0;
 
 	for (int i = 0; i < num1CompAtlasses; ++i, ++atlasCounter)
@@ -154,13 +160,16 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUn
 		assert(pixmaps3c[i]->exists());
 	}
 
-	m_1cTextureArray.initialize(pixmaps1c);
-	m_3cTextureArray.initialize(pixmaps3c);
+	if (pixmaps1c.size())
+		m_1cTextureArray.initialize(pixmaps1c);
+	if (pixmaps3c.size())
+		m_3cTextureArray.initialize(pixmaps3c);
 
 	m_stateBuffer.begin();
 
-	m_matUniformBuffer.initialize(shader, matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
-	m_matUniformBuffer.upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
+	m_matUniformBuffer = new GLConstantBuffer();
+	m_matUniformBuffer->initialize(shader, matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
+	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
 	m_matUBOBindingPoint = matUBOBindingPoint;
 
 	m_stateBuffer.end();
@@ -172,8 +181,10 @@ void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterial
 {
 	m_stateBuffer.begin();
 	{
-		m_1cTextureArray.bind(m_1cTextureUnit);
-		m_3cTextureArray.bind(m_3cTextureUnit);
+		if (m_1cTextureArray.isInitialized())
+			m_1cTextureArray.bind(m_1cTextureUnit);
+		if (m_3cTextureArray.isInitialized())
+			m_3cTextureArray.bind(m_3cTextureUnit);
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}
 	m_stateBuffer.end();

@@ -26,9 +26,6 @@ static const unsigned int TILE_WIDTH_PX = 32;
 static const unsigned int TILE_HEIGHT_PX = 32;
 static const unsigned int NUM_TEXTURE_ARRAYS = 16;
 
-static const unsigned int MESH_MATERIAL_UBO_BINDING = 0;
-static const unsigned int MESH_TEXTURE_INDEX_OFFSET = 3;
-
 GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 {
 	CHECK_GL_ERROR();
@@ -81,10 +78,9 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 		
 	modelShader.begin();
 	modelShader.setUniform1i("u_dfvTexture", 0);
-	mesh.loadFromFile("Models/palace/palace.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
-	//mesh.loadFromFile("Models/crytek-sponza/sponza.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
-	//mesh.loadFromFile("Models/lost-empire/lost_empire.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
-	//mesh.loadFromFile("Models/san-miguel/san-miguel.da", modelShader, MESH_MATERIAL_UBO_BINDING, MESH_TEXTURE_INDEX_OFFSET);
+	modelShader.setUniform1i("u_1cTextureArray", 3);
+	modelShader.setUniform1i("u_3cTextureArray", 4);
+	mesh.loadFromFile("Models/palace/palace.da", modelShader, 3, 4);
 
 	CHECK_GL_ERROR();
 	modelShader.end();

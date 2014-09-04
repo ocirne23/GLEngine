@@ -86,20 +86,25 @@ TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int width,
 
 void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned char* data, int stride)
 {
-	int i, depth, charsize;
-
 	assert(x >= 0);
 	assert(y >= 0);
 	assert(x < (m_width));
 	assert((x + width) <= (m_width));
 	assert(y < (m_height));
 	assert((y + height) <= (m_height));
+	assert(stride == m_numComponents);
 
-	depth = m_numComponents;
-	charsize = sizeof(char);
-	for (i = 0; i<height; ++i)
+	if (width == m_width && height == m_height)
 	{
-		memcpy(m_data + ((y + i)*m_width + x) * charsize * depth,
-			data + (i*stride) * charsize, width * charsize * depth);
+		memcpy(m_data, data, width * height * m_numComponents);
+	}
+	else
+	{
+		int depth = m_numComponents;
+		for (int i = 0; i < height; ++i)
+		{
+			memcpy(m_data + ((y + i) * m_width + x) * m_numComponents,
+				data + (i * width * stride), width * m_numComponents);
+		}
 	}
 }
