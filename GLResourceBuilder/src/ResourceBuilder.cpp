@@ -6,19 +6,11 @@
 #include <fstream>
 #include <algorithm>
 
-std::unordered_map<std::string, ResourceProcessor*> ResourceBuilder::s_processors;
-
 static const char* BUILT_FILE_EXTENSION = ".da";
 
-void ResourceBuilder::registerProcessor(const char* fileExtension, ResourceProcessor* processor)
+void ResourceBuilder::buildResources(const std::unordered_map<std::string, ResourceProcessor*>& processors, const char* inDirectoryPath, const char* outDirectoryPath, bool incremental)
 {
-	assert(s_processors.find(std::string(fileExtension)) == s_processors.end());
-	s_processors.insert(std::make_pair(std::string(fileExtension), processor));
-}
-
-void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* outDirectoryPath, bool incremental)
-{
-	printf("Starting resource building\n");
+	printf("Starting resource building in folder: \t %s \n", inDirectoryPath);
 
 	std::unordered_map<std::string, std::string> oldWriteTimesMap;
 	std::fstream writeTimesFile;
@@ -89,8 +81,8 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 			std::string extension = str.substr(extIdx + 1, str.length() - extIdx - 1);
 			std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
 
-			auto it = s_processors.find(extension);
-			if (it != s_processors.end())
+			auto it = processors.find(extension);
+			if (it != processors.end())
 			{	// if a processor exists for this extension, process.
 				std::string inFilePath = inDirectoryPathStr + "\\" + str;
 				std::string outFilePath = outDirectoryPathStr + "\\" + str.substr(0, extIdx) + BUILT_FILE_EXTENSION;
@@ -130,5 +122,5 @@ void ResourceBuilder::buildResources(const char* inDirectoryPath, const char* ou
 
 	writeTimesFile.close();
 
-	printf("Done building resources\n");
+	printf("Done building resources in folder: \t %s \n", inDirectoryPath);
 }

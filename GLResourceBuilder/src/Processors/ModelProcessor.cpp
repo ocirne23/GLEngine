@@ -11,7 +11,7 @@
 
 namespace
 {
-	enum { MAX_ATLAS_WIDTH = 2048, MAX_ATLAS_HEIGHT = 2048 };
+	enum { MAX_ATLAS_WIDTH = 4096, MAX_ATLAS_HEIGHT = 4096 };
 
 	struct vec4 { float x, y, z, w; };
 	struct vec3 { float x, y, z; };
@@ -117,15 +117,9 @@ namespace
 		std::vector<MaterialFiles> matFiles(scene->mNumMaterials);
 		std::vector<std::string> textures;
 
-		printf("Num materials in scene: %i \n", scene->mNumMaterials);
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 		{
 			aiMaterial* material = scene->mMaterials[i];
-			/*
-			assert(i <= MAX_MATERIALS && "Cannot have more than MAX_MATERIALS materials in mesh");
-			if (i > MAX_MATERIALS)
-				break;
-			*/
 			MaterialFiles& matProperty = matFiles[i];
 
 			int numDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
@@ -247,11 +241,12 @@ namespace
 				//	assert(false); // no textures in material?
 				}
 			}
-			
+			/*
 			printf("dif %i %f %f %f %f\n", prop.diffuseAtlasNr, prop.diffuseTexMapping.x, prop.diffuseTexMapping.y, prop.diffuseTexMapping.z, prop.diffuseTexMapping.w);
 			printf("bump %i %f %f %f %f\n", prop.bumpAtlasNr, prop.bumpTexMapping.x, prop.bumpTexMapping.y, prop.bumpTexMapping.z, prop.bumpTexMapping.w);
 			printf("spec %i %f %f %f %f\n", prop.specularAtlasNr, prop.specTexMapping.x, prop.specTexMapping.y, prop.specTexMapping.z, prop.specTexMapping.w);
 			printf("mask %i %f %f %f %f\n\n", prop.maskAtlasNr, prop.maskTexMapping.x, prop.maskTexMapping.y, prop.maskTexMapping.z, prop.maskTexMapping.w);
+			*/
 		}
 
 		for (const AtlasRegion& region : atlasRegions)
