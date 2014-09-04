@@ -65,7 +65,7 @@ uint readVector(const FileHandle& handle, rde::vector<T>& vector, uint offset)
 	return offset + sizeof(int) + size * sizeof(vector[0]);
 }
 
-void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOBindingPoint, GLuint textureBindOffset)
+void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUnit1, uint textureUnit2, GLuint matUBOBindingPoint = 0)
 {
 	assert(!m_initialized);
 
@@ -76,6 +76,9 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 		return;
 	}
 
+	m_1cTextureUnit = textureUnit1;
+	m_3cTextureUnit = textureUnit2;
+
 	rde::vector<uint> indices;
 	rde::vector<Vertex> vertices;
 	rde::vector<uint> baseIndices;
@@ -84,10 +87,9 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
 	assert(type == ResourceType_MODEL);
 
-	int num1CompAtlasses, num3CompAtlasses, num4CompAtlasses;
+	int num1CompAtlasses, num3CompAtlasses;
 	file.readBytes(reinterpret_cast<char*>(&num1CompAtlasses), sizeof(int), 0);
 	file.readBytes(reinterpret_cast<char*>(&num3CompAtlasses), sizeof(int), 0);
-	file.readBytes(reinterpret_cast<char*>(&num4CompAtlasses), sizeof(int), 0);
 
 	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint), sizeof(uint));
 	uint offset = sizeof(uint) * 2;
@@ -136,7 +138,7 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.') - 1);
 	atlasBasePath.append("-atlas-");
 
-	rde::vector<Pixmap*> pixmaps1c, pixmaps2c, pixmaps3c;
+	rde::vector<Pixmap*> pixmaps1c, pixmaps3c;
 	int atlasCounter = 0;
 
 	for (int i = 0; i < num1CompAtlasses; ++i, ++atlasCounter)
@@ -147,16 +149,13 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, GLuint matUBOB
 	}
 	for (int i = 0; i < num3CompAtlasses; ++i, ++atlasCounter)
 	{
-		pixmaps2c[i] = new Pixmap();
-		pixmaps2c[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
-		assert(pixmaps2c[i]->exists());
-	}
-	for (int i = 0; i < num4CompAtlasses; ++i, ++atlasCounter)
-	{
 		pixmaps3c[i] = new Pixmap();
 		pixmaps3c[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
 		assert(pixmaps3c[i]->exists());
 	}
+
+	m_1cTextureArray.initialize(pixmaps1c);
+	m_3cTextureArray.initialize(pixmaps3c);
 
 	m_stateBuffer.begin();
 
@@ -173,6 +172,8 @@ void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterial
 {
 	m_stateBuffer.begin();
 	{
+		m_1cTextureArray.bind(m_1cTextureUnit);
+		m_3cTextureArray.bind(m_3cTextureUnit);
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}
 	m_stateBuffer.end();

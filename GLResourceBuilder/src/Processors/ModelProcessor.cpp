@@ -402,7 +402,6 @@ namespace
 		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&num1CompAtlasses), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&num3CompAtlasses), sizeof(int));
-		file.write(reinterpret_cast<const char*>(&num4CompAtlasses), sizeof(int));
 		int numOpague = (int) transparentEntries.size();
 		file.write(reinterpret_cast<const char*>(&numOpague), sizeof(int));
 		writeVector(file, indiceCounts);
