@@ -19,7 +19,7 @@ public:
 
 	void initialize(const rde::vector<Pixmap*>& pixmaps, uint numMipMaps = 5,
 		GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR,
-		GLint textureWrapS = GL_REPEAT, GLint textureWrapT = GL_REPEAT);
+		GLint textureWrapS = GL_CLAMP_TO_BORDER, GLint textureWrapT = GL_CLAMP_TO_BORDER);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);

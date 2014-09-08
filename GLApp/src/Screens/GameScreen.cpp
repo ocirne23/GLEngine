@@ -44,13 +44,10 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	rde::vector<rde::string> extensions;
 	rde::vector<rde::string> defines;
 
-	defines.push_back(rde::string("BINDLESS"));
-
 	if (rde::string(GLEngine::graphics->getVendorStr()).find("NVIDIA") != rde::string::npos
 		&& GLEngine::graphics->getGLMajorVersion() >= 4
 		&& GLEngine::graphics->getGLMinorVersion() >= 2)
 	{
-		printf("DYNAMIC_INDEXING enabled \n");
 		defines.push_back(rde::string("DYNAMIC_INDEXING"));
 	}
 
@@ -65,7 +62,7 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	rde::string versionStr("300 es");
 	defines.push_back(rde::string("GL_ES"));
 #else
-	rde::string versionStr("440 core");
+	rde::string versionStr("330 core");
 #endif
 	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", versionStr, &defines, &extensions);
 	CHECK_GL_ERROR();
@@ -116,7 +113,15 @@ void GameScreen::render(float deltaSec)
 		modelShader.setUniformMatrix3f("u_normalMat", glm::mat3(glm::inverse(glm::transpose(camera.m_viewMatrix))));
 		modelShader.setUniformMatrix4f("u_transform", modelMatrix);
 
-		mesh.render();
+		for (int x = 0; x < 250; x += 50)
+		{
+			for (int z = 0; z < 500; z += 100)
+			{
+				modelShader.setUniformMatrix4f("u_transform", glm::translate(modelMatrix, glm::vec3(x, 0, z)));
+				mesh.render();
+			}
+		}
+
 	}
 	modelShader.end();
 	FileModificationManager::update();
