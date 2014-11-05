@@ -5,7 +5,7 @@
 extern "C" int SDL_main(int argc, char *argv[]);
 #else
 #define MAIN main
-#endif // ANDROID
+#endif
 
 #include "Core.h"
 

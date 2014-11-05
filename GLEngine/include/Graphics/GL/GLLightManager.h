@@ -36,10 +36,7 @@ public:
 	float getLightRange(LightHandle light);
 	glm::vec3 getLightColor(LightHandle light);
 
-	unsigned int getNumLights()
-	{
-		return m_numUsedLights;
-	}
+	unsigned int getNumLights() { return m_numUsedLights; }
 
 	const glm::vec4* getViewspaceLightPositionRangeListBegin()
 	{

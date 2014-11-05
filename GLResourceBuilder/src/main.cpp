@@ -2,14 +2,14 @@
 Win x64 required
 #endif
 
-#define INCREMENTAL_BUILDING true
-
 #include "ResourceBuilder.h"
 #include "Processors\ByteImageProcessor.h"
 #include "Processors\FloatImageProcessor.h"
 #include "Processors\ModelProcessor.h"
 
 #include <iostream>
+
+enum { INCREMENTAL_BUILDING = false };
 
 int main()
 {	

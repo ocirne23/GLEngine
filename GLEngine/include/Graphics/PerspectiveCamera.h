@@ -19,6 +19,7 @@ public:
 	void setHorizontalFieldOfView(float fovh);
 
 private:
+
 	float m_hFieldOfView;
 	float m_vFieldOfView;
 

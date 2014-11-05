@@ -8,7 +8,7 @@ public:
 		int x, y, width, height;
 	};
 
-	TextureAtlas(int width, int height, int numComponents);
+	TextureAtlas(int width, int height, int numComponents, int numMipMaps);
 	~TextureAtlas();
 
 	AtlasRegion getRegion(int width, int height);
@@ -19,6 +19,8 @@ public:
 	int m_width;
 	int m_height;
 	int m_numComponents;
+	int m_numMipMaps;
+	int m_padding;
 	unsigned char* m_data;
 
 private:

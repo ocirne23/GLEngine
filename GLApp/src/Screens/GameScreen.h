@@ -16,18 +16,16 @@ public:
 	virtual ~GameScreen() OVERRIDE;
 
 	virtual void render(float deltaSec) OVERRIDE;
-
 	virtual void show(uint width, uint height) OVERRIDE;
 	virtual void resize(uint width, uint height) OVERRIDE;
 	virtual void hide() OVERRIDE;
-
 	virtual bool keyDown(Key key) OVERRIDE;
 
 private:
+
 	GLTexture dfvTexture;
 	GLMesh mesh;
 	GLShader modelShader;
 	GLLightManager lightManager;
 	ClusteredShading clusteredShading;
-
 };

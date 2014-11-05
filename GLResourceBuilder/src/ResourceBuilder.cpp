@@ -62,7 +62,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 			{
 				auto writeTimesIt = oldWriteTimesMap.find(str);
 				if (writeTimesIt != oldWriteTimesMap.end())
-				{	// Check if file was modified
+				{	// check if file was modified
 					if (writeTimesIt->second == writeTime)
 					{
 						continue;
@@ -90,7 +90,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 
 				std::string::size_type from = outDirectoryPathString.length();
 				while (from != std::string::npos)
-				{	//create sub directories for file if not exists
+				{	// create sub directories for file if not exists
 					from = outDirectoryFilePath.find_first_of("\\", from + 1);
 					std::string makeDirPath = outDirectoryFilePath.substr(0, from);
 					CreateDirectory(makeDirPath.c_str(), NULL);

@@ -103,9 +103,6 @@
     <ClCompile Include="src\Utils\FileModificationManager.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\OLD_GLTextureManager.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
@@ -350,9 +347,6 @@
     </ClInclude>
     <ClInclude Include="include\Utils\FileModificationManager.h">
       <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\GL\OLD_GLTextureManager.h">
-      <Filter>Header Files\Graphics\GL</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\GL\GLTextureManager.h">
       <Filter>Header Files\Graphics\GL</Filter>

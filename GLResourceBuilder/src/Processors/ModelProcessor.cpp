@@ -11,7 +11,7 @@
 
 namespace
 {
-	enum { MAX_ATLAS_WIDTH = 4096, MAX_ATLAS_HEIGHT = 4096 };
+	enum { MAX_ATLAS_WIDTH = 4096, MAX_ATLAS_HEIGHT = 4096, NUM_ATLAS_MIPS = 4 };
 
 	struct vec4 { float x, y, z, w; };
 	struct vec3 { float x, y, z; };
@@ -199,7 +199,7 @@ namespace
 			}
 			if (!contained)
 			{
-				TextureAtlas* atlas = new TextureAtlas(MAX_ATLAS_WIDTH, MAX_ATLAS_HEIGHT, numComp);
+				TextureAtlas* atlas = new TextureAtlas(MAX_ATLAS_WIDTH, MAX_ATLAS_HEIGHT, numComp, NUM_ATLAS_MIPS);
 				TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
 				assert(region.width && region.height);
 				atlasses.push_back(atlas);

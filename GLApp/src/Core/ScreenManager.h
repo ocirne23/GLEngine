@@ -29,6 +29,7 @@ private:
 	void swapScreen(IScreen* screen);
 
 private:
+
 	IScreen* m_currentScreen;
 	IScreen* m_screens[ScreenType_NUM_SCREENTYPES];
 

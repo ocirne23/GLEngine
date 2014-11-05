@@ -4,8 +4,6 @@
 #include "Graphics\Graphics.h"
 #include "Graphics\WindowFlags.h"
 
-#include "Graphics\GL\GL.h"
-
 #include <SDL\SDL.h>
 
 static const char* const PROGRAM_NAME = "GLEngine";

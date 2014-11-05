@@ -70,7 +70,7 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	modelShader.begin();
 	lightManager.setupShader(modelShader);
 	clusteredShading.setupShader(modelShader, 1, 2);
-	modelShader.setUniform3f("u_ambient", glm::vec3(0.15f));
+	modelShader.setUniform3f("u_ambient", glm::vec3(1.0f));
 	modelShader.end();
 		
 	modelShader.begin();

@@ -9,6 +9,7 @@ struct SDL_RWops;
 class FileHandle
 {
 public:
+
 	enum FileMode { FileMode_READ, FileMode_WRITE, FileMode_READWRITE };
 
 	FileHandle(const rde::string& filePath, FileMode fileMode = FileMode_READ);

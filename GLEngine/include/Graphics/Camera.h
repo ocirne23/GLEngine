@@ -30,6 +30,8 @@ public:
 	float getRotationRadXZ();
 	float getRotationRadYZ();
 
+public:
+
 	glm::mat4 m_combinedMatrix;
 	glm::mat4 m_projectionMatrix;
 	glm::mat4 m_viewMatrix;
