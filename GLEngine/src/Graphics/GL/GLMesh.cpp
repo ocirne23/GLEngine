@@ -70,7 +70,7 @@ uint readVector(const FileHandle& handle, rde::vector<T>& vector, uint offset)
 	return offset + sizeof(int) + size * sizeof(vector[0]);
 }
 
-void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUnit1, uint textureUnit2, GLuint matUBOBindingPoint)
+void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureArray1CUnit, uint textureArray3CUnit, GLuint matUBOBindingPoint)
 {
 	assert(!m_initialized);
 
@@ -81,8 +81,8 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureUn
 		return;
 	}
 
-	m_1cTextureUnit = textureUnit1;
-	m_3cTextureUnit = textureUnit2;
+	m_1cTextureUnit = textureArray1CUnit;
+	m_3cTextureUnit = textureArray3CUnit;
 
 	rde::vector<uint> indices;
 	rde::vector<Vertex> vertices;

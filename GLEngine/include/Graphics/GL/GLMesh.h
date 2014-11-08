@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Core.h"
+#include "Graphics\GL\GLAppVars.h"
 #include "Graphics\GL\GLTypes.h"
-#include "rde\rde_string.h"
-#include "rde\vector.h"
 #include "Graphics\GL\Core\GLStateBuffer.h"
 #include "Graphics\GL\Core\GLTextureArray.h"
+
+#include "rde\rde_string.h"
+#include "rde\vector.h"
 
 #include <glm\glm.hpp>
 
@@ -33,7 +35,8 @@ public:
 	GLMesh(const GLMesh& copy) = delete;
 	~GLMesh();
 
-	void loadFromFile(const char* filePath, GLShader& shader, uint textureUnit1, uint textureUnit2, GLuint matUBOBindingPoint = 0);
+	void loadFromFile(const char* filePath, GLShader& shader, uint textureArray1CUnit, 
+		uint textureArray3CUnit, GLuint matUBOBindingPoint);
 	void reloadShader(GLShader& shader);
 	void render(bool renderOpague = true, bool renderTransparent = true, bool bindMaterials = true);
 
@@ -43,17 +46,18 @@ private:
 	GLStateBuffer m_stateBuffer;
 	GLVertexBuffer* m_indiceBuffer;
 	GLVertexBuffer* m_vertexBuffer;
+
+	uint m_matUBOBindingPoint;
 	GLConstantBuffer* m_matUniformBuffer;
 
 	uint m_1cTextureUnit;
-	uint m_3cTextureUnit;
 	GLTextureArray m_1cTextureArray;
+
+	uint m_3cTextureUnit;
 	GLTextureArray m_3cTextureArray;
 
-	unsigned int m_matUBOBindingPoint;
-
-	unsigned int m_numOpagueMeshes;
-	unsigned int m_numIndices;
+	uint m_numOpagueMeshes;
+	uint m_numIndices;
 	rde::vector<GLsizei> m_indiceCounts;
 	rde::vector<GLvoid*> m_baseIndices;
 	rde::vector<GLint> m_baseVertices;

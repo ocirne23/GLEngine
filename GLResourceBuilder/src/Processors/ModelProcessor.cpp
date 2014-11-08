@@ -11,7 +11,7 @@
 
 namespace
 {
-	enum { MAX_ATLAS_WIDTH = 4096, MAX_ATLAS_HEIGHT = 4096, NUM_ATLAS_MIPS = 4 };
+	enum { MAX_ATLAS_WIDTH = 8192, MAX_ATLAS_HEIGHT = 8192, NUM_ATLAS_MIPS = 4 };
 
 	struct vec4 { float x, y, z, w; };
 	struct vec3 { float x, y, z; };
@@ -115,7 +115,16 @@ namespace
 		texturePathStr = texturePathStr.substr(0, idx).append("\\");
 		
 		std::vector<MaterialFiles> matFiles(scene->mNumMaterials);
-		std::vector<std::string> textures;
+		struct TextureTypePath
+		{
+			enum TextureType 
+			{
+				DIFFUSE, SPECULAR, BUMP, MASK
+			};
+			std::string path;
+			TextureType type;
+		};
+		std::vector<TextureTypePath> textures;
 
 		for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 		{
@@ -128,35 +137,35 @@ namespace
 			int numMask = material->GetTextureCount(aiTextureType_OPACITY);
 
 			//assert(numDiffuse || numBump || numSpecular || numMask);
-
+ 
 			aiString path;
 			if (numDiffuse > 0 && material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
 			{
 				 matProperty.diffuse = texturePathStr;
 				 matProperty.diffuse.append(path.C_Str());
-				 if (std::find(textures.begin(), textures.end(), matProperty.diffuse) == textures.end())
-					 textures.push_back(matProperty.diffuse);
+				 if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.diffuse; }) == textures.end())
+					 textures.push_back({ matProperty.diffuse, TextureTypePath::DIFFUSE });
 			}
 			if (numBump > 0 && material->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
 			{
 				matProperty.bump = texturePathStr;
 				matProperty.bump.append(path.C_Str());
-				if (std::find(textures.begin(), textures.end(), matProperty.bump) == textures.end())
-					textures.push_back(matProperty.bump);
+				if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.bump; }) == textures.end())
+					textures.push_back({ matProperty.bump, TextureTypePath::BUMP });
 			}
 			if (numSpecular > 0 && material->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
 			{
 				matProperty.spec = texturePathStr;
 				matProperty.spec.append(path.C_Str());				
-				if (std::find(textures.begin(), textures.end(), matProperty.spec) == textures.end())
-					textures.push_back(matProperty.spec);
+				if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.spec; }) == textures.end())
+					textures.push_back({ matProperty.spec, TextureTypePath::SPECULAR });
 			}
 			if (numMask > 0 && material->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
 			{
 				matProperty.mask = texturePathStr;
 				matProperty.mask.append(path.C_Str());				
-				if (std::find(textures.begin(), textures.end(), matProperty.mask) == textures.end())
-					textures.push_back(matProperty.mask);
+				if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.mask; }) == textures.end())
+					textures.push_back({ matProperty.mask, TextureTypePath::MASK });
 			}
 		}
 
@@ -166,19 +175,23 @@ namespace
 		std::vector<AtlasRegion> atlasRegions;
 		std::vector<TextureAtlas*> atlasses;
 
-		for (const std::string& str : textures)
+		for (const TextureTypePath& tex: textures)
 		{
 			int width, height, numComp;
-			int result = stbi_info(str.c_str(), &width, &height, &numComp);
+			int result = stbi_info(tex.path.c_str(), &width, &height, &numComp);
+			
 			if (!result)
 			{
-				printf("Cannot open file: %s \n", str.c_str());
+				printf("Cannot open file: %s \n", tex.path.c_str());
 				continue;
 			}
 
-			if (!(numComp == 1 || numComp == 3))
+			switch (tex.type)
 			{
-				printf("Invalid number of components: %i in texture: %s \n", numComp, str.c_str());
+			case TextureTypePath::DIFFUSE:  numComp = 3; break;
+			case TextureTypePath::BUMP:     numComp = 3; break;
+			case TextureTypePath::SPECULAR: numComp = 1; break;
+			case TextureTypePath::MASK:     numComp = 1; break;
 			}
 
 			bool contained = false;
@@ -192,7 +205,7 @@ namespace
 					if (region.width && region.height)
 					{
 						contained = true;
-						atlasRegions.push_back({ str, i, atlas, region });
+						atlasRegions.push_back({ tex.path, i, atlas, region });
 						break;
 					}
 				}
@@ -203,7 +216,7 @@ namespace
 				TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
 				assert(region.width && region.height);
 				atlasses.push_back(atlas);
-				atlasRegions.push_back({ str, (int) atlasses.size() - 1, atlas, region });
+				atlasRegions.push_back({ tex.path, (int) atlasses.size() - 1, atlas, region });
 			}
 		}
 
@@ -252,14 +265,14 @@ namespace
 		for (const AtlasRegion& region : atlasRegions)
 		{
 			int width, height, numComponents;
-			const unsigned char* data = stbi_load(region.image.c_str(), &width, &height, &numComponents, 0);
+			const unsigned char* data = stbi_load(region.image.c_str(), &width, &height, &numComponents, region.atlas->m_numComponents);
 			if (!data)
 			{
 				printf("FAILED TO LOAD IMAGE: %s \n", region.image.c_str());
 				continue;
 			}
 
-			region.atlas->setRegion(region.region.x, region.region.y, region.region.width, region.region.height, data, numComponents);
+			region.atlas->setRegion(region.region.x, region.region.y, region.region.width, region.region.height, data, region.atlas->m_numComponents);
 		}
 
 		std::string dstTexturePathStr(dstFilePath);

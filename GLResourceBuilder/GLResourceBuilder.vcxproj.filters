@@ -41,10 +41,10 @@
     <ClCompile Include="src\Processors\FloatImageProcessor.cpp">
       <Filter>Source Files\Processors</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\stb_image.c">
+    <ClCompile Include="src\Utils\TextureAtlas.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\TextureAtlas.cpp">
+    <ClCompile Include="src\Utils\stb_image.c">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>

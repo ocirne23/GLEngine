@@ -7,6 +7,8 @@
 
 #include "Graphics\PerspectiveCamera.h"
 
+#include "Graphics\GL\GLAppVars.h"
+
 #include "Utils\FileHandle.h"
 #include "Utils\FPSCameraController.h"
 #include "Utils\CheckGLError.h"
@@ -69,15 +71,20 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 
 	modelShader.begin();
 	lightManager.setupShader(modelShader);
-	clusteredShading.setupShader(modelShader, 1, 2);
-	modelShader.setUniform3f("u_ambient", glm::vec3(1.0f));
+	clusteredShading.setupShader(modelShader, 
+		GLAppVars::TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, 
+		GLAppVars::TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
+	modelShader.setUniform3f("u_ambient", glm::vec3(0.2f));
 	modelShader.end();
 		
 	modelShader.begin();
-	modelShader.setUniform1i("u_dfvTexture", 0);
-	modelShader.setUniform1i("u_1cTextureArray", 3);
-	modelShader.setUniform1i("u_3cTextureArray", 4);
-	mesh.loadFromFile("Models/palace/palace.da", modelShader, 3, 4);
+	modelShader.setUniform1i("u_dfvTexture", GLAppVars::TextureUnits_DFV_TEXTURE);
+	modelShader.setUniform1i("u_1cTextureArray", GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY);
+	modelShader.setUniform1i("u_3cTextureArray", GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY);
+	mesh.loadFromFile("Models/palace/palace.da", modelShader, 
+		GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY,
+		GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY,
+		GLAppVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	CHECK_GL_ERROR();
 	modelShader.end();
@@ -100,8 +107,7 @@ void GameScreen::render(float deltaSec)
 
 	static const glm::mat4 modelMatrix = glm::scale(glm::mat4(1), glm::vec3(1.0));
 
-	//print("%f %f %f \n", camera.m_position.x, camera.m_position.y, camera.m_position.z);
-	dfvTexture.bind(0);
+	dfvTexture.bind(GLAppVars::TextureUnits_DFV_TEXTURE);
 	modelShader.begin();
 	{
 		lightManager.update(camera);
@@ -111,17 +117,9 @@ void GameScreen::render(float deltaSec)
 		modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);
 		modelShader.setUniformMatrix4f("u_mvp", camera.m_combinedMatrix);
 		modelShader.setUniformMatrix3f("u_normalMat", glm::mat3(glm::inverse(glm::transpose(camera.m_viewMatrix))));
+
 		modelShader.setUniformMatrix4f("u_transform", modelMatrix);
-
-		for (int x = 0; x < 250; x += 50)
-		{
-			for (int z = 0; z < 500; z += 100)
-			{
-				modelShader.setUniformMatrix4f("u_transform", glm::translate(modelMatrix, glm::vec3(x, 0, z)));
-				mesh.render();
-			}
-		}
-
+		mesh.render();
 	}
 	modelShader.end();
 	FileModificationManager::update();

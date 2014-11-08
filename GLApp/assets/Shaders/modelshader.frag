@@ -1,6 +1,5 @@
 #include "Shaders/clusteredshading.txt"
 
-
 ////////////////////////// IN / OUT //////////////////////////
 
 in vec3 v_position;
@@ -36,14 +35,14 @@ struct MaterialProperty
 uniform sampler2DArray u_1cTextureArray;
 uniform sampler2DArray u_3cTextureArray;
 
-vec3 sampleAtlasArray(int atlasNr, vec4 texMapping, vec2 uv)
+vec3 sample3CAtlasArray(int atlasNr, vec4 texMapping, vec2 uv)
 {
 	return texture(u_3cTextureArray, vec3(fract(uv) * texMapping.zw + texMapping.xy, atlasNr)).rgb;	
 }
 
-float sampleMaskAtlasArray(int maskAtlasNr, vec4 maskTexMapping, vec2 uv)
+float sample1CAtlasArray(int maskAtlasNr, vec4 maskTexMapping, vec2 uv)
 {
-	return texture(u_1cTextureArray, vec3(uv * maskTexMapping.zw + maskTexMapping.xy, maskAtlasNr)).r;
+	return texture(u_1cTextureArray, vec3(fract(uv) * maskTexMapping.zw + maskTexMapping.xy, maskAtlasNr)).r;
 }
 
 layout (std140) uniform MaterialProperties
@@ -162,23 +161,23 @@ void main()
 {
 	MaterialProperty material = u_materialProperties[v_materialID];
 	
-	if (material.maskAtlasNr != -1 && sampleMaskAtlasArray(material.maskAtlasNr, material.maskTexMapping, v_texcoord) < 0.5)
+	if (material.maskAtlasNr != -1 && sample1CAtlasArray(material.maskAtlasNr, material.maskTexMapping, v_texcoord) < 0.5)
 	{
-		//discard;
+		discard;
 	}
 	
-	vec3 diffuse = sampleAtlasArray(material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord);
+	vec3 diffuse = sample3CAtlasArray(material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord);
 	vec3 normal;
 	if (material.bumpAtlasNr != -1)
 	{
-		normal = getBumpedNormal(sampleAtlasArray(material.bumpAtlasNr, material.bumpTexMapping, v_texcoord));
+		normal = getBumpedNormal(sample3CAtlasArray(material.bumpAtlasNr, material.bumpTexMapping, v_texcoord));
 	}
 	else
 	{
 		normal = v_normal;
 	}
-	float specular = DEFAULT_SPECULAR;
-	
+	float specular = sample1CAtlasArray(material.specularAtlasNr, material.specTexMapping, v_texcoord);
+
 	vec3 diffuseAccum = vec3(0);
 	vec3 specularAccum = vec3(0);
 	
@@ -201,5 +200,5 @@ void main()
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
 	//out_color = vec4(diffuse, 1.0);
-	//out_color = vec4(vec3(diffuse), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001;
+	//out_color = vec4(vec3(normal), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001;
 }
