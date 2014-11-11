@@ -89,8 +89,7 @@ GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
 	CHECK_GL_ERROR();
 	modelShader.end();
 
-	dfvTexture.initialize("Utils/ggx-helper-dfv.da", GL_LINEAR, GL_LINEAR,
-		GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	dfvTexture.initialize("Utils/ggx-helper-dfv.da", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 }
 
 GameScreen::~GameScreen()

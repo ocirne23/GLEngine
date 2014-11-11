@@ -106,6 +106,9 @@
     <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics\Scene\Scene.cpp">
+      <Filter>Source Files\Graphics\Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -354,6 +357,18 @@
     <ClInclude Include="include\rde\stringforward.h">
       <Filter>Source Files\rde</Filter>
     </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLAppVars.h">
+      <Filter>Header Files\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Scene\Scene.h">
+      <Filter>Header Files\Graphics\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Scene\Model.h">
+      <Filter>Header Files\Graphics\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\Scene\Light.h">
+      <Filter>Header Files\Graphics\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -409,6 +424,12 @@
     </Filter>
     <Filter Include="Source Files\Graphics\GL\Tech">
       <UniqueIdentifier>{59c56805-b4e3-4e2f-a3b4-26c566273747}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\Scene">
+      <UniqueIdentifier>{d00ffcb0-aee5-41ca-9117-18898943420a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics\Scene">
+      <UniqueIdentifier>{28c792c5-9955-43ee-bdcb-e01bfc7223ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

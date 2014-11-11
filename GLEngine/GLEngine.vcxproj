@@ -40,6 +40,7 @@
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Graphics\Pixmap.cpp" />
+    <ClCompile Include="src\Graphics\Scene\Scene.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\rde\allocator.cpp" />
     <ClCompile Include="src\rde\intrusive_list.cpp" />
@@ -69,6 +70,7 @@
     <ClInclude Include="include\Graphics\GL\Core\GLTextureBuffer.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLVertexBuffer.h" />
     <ClInclude Include="include\Graphics\GL\GL.h" />
+    <ClInclude Include="include\Graphics\GL\GLAppVars.h" />
     <ClInclude Include="include\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Graphics\GL\GLLightManager.h" />
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
@@ -79,6 +81,9 @@
     <ClInclude Include="include\Graphics\Graphics.h" />
     <ClInclude Include="include\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Graphics\Pixmap.h" />
+    <ClInclude Include="include\Graphics\Scene\Light.h" />
+    <ClInclude Include="include\Graphics\Scene\Model.h" />
+    <ClInclude Include="include\Graphics\Scene\Scene.h" />
     <ClInclude Include="include\Graphics\WindowEventListener.h" />
     <ClInclude Include="include\Graphics\WindowFlags.h" />
     <ClInclude Include="include\Input\Input.h" />

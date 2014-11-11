@@ -15,5 +15,4 @@ private:
 
 	glm::mat4 transform;
 	GLMesh* mesh;
-
 };
