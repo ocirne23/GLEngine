@@ -34,8 +34,8 @@ public:
 	Handle<Model> createModel(const glm::mat4& transform, const char* filePath);
 	Handle<Light> createLight(const glm::vec3& position, const glm::vec3& color, float range);
 
-	template <typename T>
-	void remove(Handle<T>& handle);
+	void remove(Handle<Model>& handle);
+	void remove(Handle<Light>& handle);
 
 private:
 

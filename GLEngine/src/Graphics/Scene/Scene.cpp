@@ -9,22 +9,10 @@ Scene::Scene()
 
 Handle<Model> Scene::createModel(const glm::mat4& transform, const char* filePath)
 {
-
+	return Handle<Model>();
 }
 
 Handle<Light> Scene::createLight(const glm::vec3& position, const glm::vec3& color, float range)
 {
-
-}
-
-template<>
-void Scene::remove(Handle<Model>& handle)
-{
-
-}
-
-template<>
-void Scene::remove(Handle<Light>& handle)
-{
-
+	return Handle<Light>();
 }
