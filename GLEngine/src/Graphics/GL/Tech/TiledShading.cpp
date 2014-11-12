@@ -1,22 +1,23 @@
 #include "Graphics\GL\Tech\TiledShading.h"
+
+#include "Graphics\PerspectiveCamera.h"
 #include "Graphics\GL\GL.h"
 #include "Graphics\GL\Core\GLShader.h"
 #include "Utils\sphereToScreenSpaceBounds.h"
-#include "Graphics\PerspectiveCamera.h"
 
 #include <glm\glm.hpp>
 
 #include <assert.h>
 
-void TiledShading::initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Viewport& viewport, const PerspectiveCamera& camera)
+void TiledShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, const Viewport& a_viewport, const PerspectiveCamera& a_camera)
 {
-	m_viewport = viewport;
+	m_viewport = a_viewport;
 
-	m_pixelsPerTileW = pixelsPerTileW;
-	m_pixelsPerTileH = pixelsPerTileH;
+	m_pixelsPerTileW = a_pixelsPerTileW;
+	m_pixelsPerTileH = a_pixelsPerTileH;
 
-	m_gridWidth = viewport.width / pixelsPerTileW;
-	m_gridHeight = viewport.height / pixelsPerTileH;
+	m_gridWidth = a_viewport.width / a_pixelsPerTileW;
+	m_gridHeight = a_viewport.height / a_pixelsPerTileH;
 
 	m_gridSize = m_gridWidth * m_gridHeight;
 
@@ -24,28 +25,28 @@ void TiledShading::initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Vi
 	m_tileLightIndices.resize(m_gridSize);
 }
 
-void TiledShading::setupShader(const GLShader& shader)
+void TiledShading::setupShader(const GLShader& a_shader)
 {
-	assert(shader.isBegun());
+	assert(a_shader.isBegun());
 
-	m_lightGridBuffer.initialize(shader, 0, "LightGrid", GL_STREAM_DRAW);
-	m_lightIndiceBuffer.initialize(shader, 1, "LightIndices", GL_STREAM_DRAW);
+	m_lightGridBuffer.initialize(a_shader, 0, "LightGrid", GL_STREAM_DRAW);
+	m_lightIndiceBuffer.initialize(a_shader, 1, "LightIndices", GL_STREAM_DRAW);
 }
 
-void TiledShading::update(const PerspectiveCamera& camera, const glm::vec4* viewspaceLightPositionRangeList, uint numLights)
+void TiledShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_viewspaceLightPositionRangeList, uint a_numLights)
 {
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
 	for (auto& tileIndices : m_tileLightIndices)
 		tileIndices.clear();
 	m_lightIndices.clear();
 
-	for (unsigned short i = 0; i < numLights; ++i)
+	for (ushort i = 0; i < a_numLights; ++i)
 	{
-		glm::vec4 lightPositionRange = viewspaceLightPositionRangeList[i];
+		glm::vec4 lightPositionRange = a_viewspaceLightPositionRangeList[i];
 		float radius = lightPositionRange.w;
 		glm::vec3 lightPosition = glm::vec3(lightPositionRange);
 
-		IBounds2D bounds2D = sphereToScreenSpaceBounds2D(camera, lightPosition, radius, m_viewport);
+		IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, lightPosition, radius, m_viewport);
 
 		bounds2D.minX = glm::clamp(bounds2D.minX, 0, (int) m_gridWidth);
 		bounds2D.maxX = glm::clamp(bounds2D.maxX, 0, (int) m_gridWidth);
@@ -56,7 +57,7 @@ void TiledShading::update(const PerspectiveCamera& camera, const glm::vec4* view
 		{
 			for (int y = bounds2D.minY; y < bounds2D.maxY; ++y)
 			{
-				unsigned int gridIdx = x * m_gridHeight + y;
+				uint gridIdx = x * m_gridHeight + y;
 				m_tileLightIndices[gridIdx].push_back(i);
 			}
 		}

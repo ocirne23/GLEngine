@@ -28,7 +28,7 @@ static const unsigned int TILE_WIDTH_PX = 32;
 static const unsigned int TILE_HEIGHT_PX = 32;
 static const unsigned int NUM_TEXTURE_ARRAYS = 16;
 
-GameScreen::GameScreen(ScreenManager* screenManager) : IScreen(screenManager)
+GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager)
 {
 	CHECK_GL_ERROR();
 
@@ -97,11 +97,11 @@ GameScreen::~GameScreen()
 
 }
 
-void GameScreen::render(float deltaSec)
+void GameScreen::render(float a_deltaSec)
 {
 	GLEngine::graphics->clear(glm::vec4(0.4f, 0.7f, 1.0f, 1.0f));
 
-	cameraController.update(deltaSec);
+	cameraController.update(a_deltaSec);
 	camera.update();
 
 	static const glm::mat4 modelMatrix = glm::scale(glm::mat4(1), glm::vec3(1.0));
@@ -127,12 +127,12 @@ void GameScreen::render(float deltaSec)
 	GLEngine::graphics->swap();
 }
 
-void GameScreen::show(uint width, uint height)
+void GameScreen::show(uint a_width, uint a_height)
 {
 
 }
 
-void GameScreen::resize(uint width, uint height)
+void GameScreen::resize(uint a_width, uint a_height)
 {
 
 }
@@ -142,9 +142,9 @@ void GameScreen::hide()
 
 }
 
-bool GameScreen::keyDown(Key key)
+bool GameScreen::keyDown(Key a_key)
 {
-	switch (key)
+	switch (a_key)
 	{
 	case Key_T:
 		{

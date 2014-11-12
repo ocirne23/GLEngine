@@ -5,7 +5,6 @@
 #include "Utils\getGLTextureFormat.h"
 
 #include <functional>
-
 #include <assert.h>
 
 GLTexture::~GLTexture()
@@ -13,15 +12,15 @@ GLTexture::~GLTexture()
 	glDeleteTextures(1, &m_textureID);
 }
 
-void GLTexture::bind(unsigned int index)
+void GLTexture::bind(uint a_index)
 {
-	glActiveTexture(GL_TEXTURE0 + index);
+	glActiveTexture(GL_TEXTURE0 + a_index);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 }
 
-void GLTexture::unbind(unsigned int index)
+void GLTexture::unbind(uint a_index)
 {
-	glActiveTexture(GL_TEXTURE0 + index);
+	glActiveTexture(GL_TEXTURE0 + a_index);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
@@ -37,11 +36,11 @@ bool isMipMapFilter(GLenum filter)
 	}
 }
 
-void GLTexture::initialize(const FileHandle& file, GLint minFilter, GLint magFilter,
-	GLint textureWrapS, GLint textureWrapT)
+void GLTexture::initialize(const FileHandle& a_file, GLint a_minFilter, GLint a_magFilter,
+	GLint a_textureWrapS, GLint a_textureWrapT)
 {
 	Pixmap pixmap;
-	pixmap.read(file);
+	pixmap.read(a_file);
 
 	if (!pixmap.exists())
 		return;
@@ -53,15 +52,15 @@ void GLTexture::initialize(const FileHandle& file, GLint minFilter, GLint magFil
 	GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, pixmap.m_isFloatData);
 	GLint format = getFormatForNumComponents(m_numComponents);
 
-	bool generateMipMaps = isMipMapFilter(minFilter);
+	bool generateMipMaps = isMipMapFilter(a_minFilter);
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, textureWrapS);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, textureWrapT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, a_minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, a_magFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, a_textureWrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, a_textureWrapT);
 	if (generateMipMaps)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, pixmap.m_isFloatData ? GL_FLOAT : GL_UNSIGNED_BYTE, pixmap.m_data.b);

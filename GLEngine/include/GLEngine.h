@@ -20,7 +20,7 @@ public:
 
 	static void doEngineTick();
 
-	static void sleep(unsigned int timeMs);
+	static void sleep(uint timeMs);
 	static uint getTimeMs();
 
 private:

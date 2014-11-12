@@ -4,28 +4,31 @@
 #include "rde/vector.h"
 #include "Model.h"
 #include "Light.h"
+
 #include "Graphics\GL\GLMesh.h"
+#include "Graphics\GL\Core\GLShader.h"
+#include "Graphics\GL\GLLightManager.h"
 
 #include "Utils\MatForward.h"
 #include "Utils\VecForward.h"
 
 class Camera;
 
-class Scene;
-
-template <typename T>
-class Handle
-{
-public:
-	T& get();
-private:
-	Scene* m_scene;
-	uint m_itemIndex;
-};
-
 class Scene
 {
 public:
+
+	template <typename T>
+	class Handle
+	{
+	public:
+		T& get();
+	private:
+		Scene* m_scene;
+		uint m_itemIndex;
+	};
+public:
+
 	Scene();
 	~Scene();
 	Scene(const Scene& copy) = delete;
@@ -38,6 +41,8 @@ public:
 	void remove(Handle<Light>& handle);
 
 private:
+
+	GLShader m_uberShader;
 
 	rde::vector<Model> m_models;
 	rde::vector<Light> m_lights;

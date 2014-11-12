@@ -2,6 +2,7 @@
 
 #ifndef ANDROID
 
+#include "Core.h"
 #include "Graphics\GL\GLTypes.h"
 #include "Graphics\GL\GLDefines.h"
 
@@ -17,7 +18,7 @@ public:
 	~GLTextureBuffer();
 
 	void initialize(const GLShader& shader, const char* samplerName, GLint textureIdx, GLenum sizedFormat, GLenum drawUsage = GL_STATIC_DRAW);
-	void upload(unsigned int numBytes, const void* data);
+	void upload(uint numBytes, const void* data);
 	void bind();
 private:
 

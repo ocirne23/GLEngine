@@ -4,39 +4,39 @@
 #include "Graphics\GL\Core\GLShader.h"
 #include "Graphics\PerspectiveCamera.h"
 
-static const unsigned int LIGHT_POSITION_RANGES_BINDING_POINT = 1;
-static const unsigned int LIGHT_COLORS_BINDING_POINT = 2;
+static const uint LIGHT_POSITION_RANGES_BINDING_POINT = 1;
+static const uint LIGHT_COLORS_BINDING_POINT = 2;
 
 #define INVALID_LIGHT_LINK 0xFFFFFFFFu
-static const unsigned int MAX_INDICES = 0xFFFFu;
+static const uint MAX_INDICES = 0xFFFFu;
 
-void GLLightManager::initialize(unsigned int maxLights)
+void GLLightManager::initialize(uint a_maxLights)
 {
-	m_maxLights = maxLights;
+	m_maxLights = a_maxLights;
 
 	m_lightPositionRanges.reserve(m_maxLights);
 	m_viewspaceLightPositionRanges.resize(m_maxLights);
 	m_lightColors.reserve(m_maxLights);
 }
 
-void GLLightManager::setupShader(GLShader& shader)
+void GLLightManager::setupShader(GLShader& a_shader)
 {
-	assert(shader.isBegun());
+	assert(a_shader.isBegun());
 
-	m_numLightsLoc = glGetUniformLocation(shader.getID(), "u_numLights");
+	m_numLightsLoc = glGetUniformLocation(a_shader.getID(), "u_numLights");
 
-	m_lightPositionRangeBuffer.initialize(shader, LIGHT_POSITION_RANGES_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
-	m_lightColorBuffer.initialize(shader, LIGHT_COLORS_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
+	m_lightPositionRangeBuffer.initialize(a_shader, LIGHT_POSITION_RANGES_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
+	m_lightColorBuffer.initialize(a_shader, LIGHT_COLORS_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
 }
 
-void GLLightManager::update(const PerspectiveCamera& camera)
+void GLLightManager::update(const PerspectiveCamera& a_camera)
 {
-	unsigned int numLights = glm::min(m_numUsedLights, m_maxLights);
+	uint numLights = glm::min(m_numUsedLights, m_maxLights);
 	if (numLights > 0)
 	{
 		for (int i = 0; i < m_lightPositionRanges.size(); ++i)
 		{
-			m_viewspaceLightPositionRanges[i] = glm::vec4(glm::vec3(camera.m_viewMatrix * glm::vec4(glm::vec3(m_lightPositionRanges[i]), 1.0f)), m_lightPositionRanges[i].w);
+			m_viewspaceLightPositionRanges[i] = glm::vec4(glm::vec3(a_camera.m_viewMatrix * glm::vec4(glm::vec3(m_lightPositionRanges[i]), 1.0f)), m_lightPositionRanges[i].w);
 		}
 
 		m_lightPositionRangeBuffer.upload(sizeof(m_viewspaceLightPositionRanges[0]) * numLights, &m_viewspaceLightPositionRanges[0]);
@@ -45,7 +45,7 @@ void GLLightManager::update(const PerspectiveCamera& camera)
 	glUniform1ui(m_numLightsLoc, numLights);
 }
 
-LightHandle GLLightManager::createLight(glm::vec3 pos, glm::vec3 color, float radius)
+LightHandle GLLightManager::createLight(glm::vec3 a_pos, glm::vec3 a_color, float a_radius)
 {
 	m_numUsedLights++;
 
@@ -53,21 +53,21 @@ LightHandle GLLightManager::createLight(glm::vec3 pos, glm::vec3 color, float ra
 	m_lightHandleIndices.push_back(m_usedLightRefs.size());
 	m_usedLightRefs.push_back(m_lightPositionRanges.size());
 
-	m_lightPositionRanges.push_back(glm::vec4(pos, glm::abs(radius)));
-	m_lightColors.push_back(glm::vec4(color, 0.0f));
+	m_lightPositionRanges.push_back(glm::vec4(a_pos, glm::abs(a_radius)));
+	m_lightColors.push_back(glm::vec4(a_color, 0.0f));
 
 	return handle;
 }
 
-void GLLightManager::deleteLight(LightHandle handle)
+void GLLightManager::deleteLight(LightHandle a_handle)
 {
 	m_numUsedLights--;
 
-	unsigned short lightIndex = m_usedLightRefs[handle];
+	unsigned short lightIndex = m_usedLightRefs[a_handle];
 	unsigned short lastLightIndex = m_lightPositionRanges.size() - 1;
 	unsigned short lastHandleIndex = m_lightHandleIndices[lastLightIndex];
 
-	rde::swap(m_usedLightRefs[handle], m_usedLightRefs[lastHandleIndex]);
+	rde::swap(m_usedLightRefs[a_handle], m_usedLightRefs[lastHandleIndex]);
 	rde::swap(m_lightPositionRanges[lightIndex], m_lightPositionRanges[lastLightIndex]);
 	rde::swap(m_lightColors[lightIndex], m_lightColors[lastLightIndex]);
 
@@ -87,38 +87,38 @@ void GLLightManager::deleteLights()
 	m_lightColors.clear();
 }
 
-void GLLightManager::setLightPosition(LightHandle light, const glm::vec3& position)
+void GLLightManager::setLightPosition(LightHandle a_light, const glm::vec3& a_position)
 {
-	glm::vec4& posRange = m_lightPositionRanges[m_usedLightRefs[light]];
-	posRange.x = position.x;
-	posRange.y = position.y;
-	posRange.z = position.z;
+	glm::vec4& posRange = m_lightPositionRanges[m_usedLightRefs[a_light]];
+	posRange.x = a_position.x;
+	posRange.y = a_position.y;
+	posRange.z = a_position.z;
 }
 
-void GLLightManager::setLightRange(LightHandle light, float range)
+void GLLightManager::setLightRange(LightHandle a_light, float a_range)
 {
-	m_lightPositionRanges[m_usedLightRefs[light]].w = range;
+	m_lightPositionRanges[m_usedLightRefs[a_light]].w = a_range;
 }
 
-void GLLightManager::setLightColor(LightHandle light, const glm::vec3& color)
+void GLLightManager::setLightColor(LightHandle a_light, const glm::vec3& a_color)
 {
-	glm::vec4& col = m_lightColors[m_usedLightRefs[light]];
-	col.r = color.r;
-	col.g = color.g;
-	col.b = color.b;
+	glm::vec4& col = m_lightColors[m_usedLightRefs[a_light]];
+	col.r = a_color.r;
+	col.g = a_color.g;
+	col.b = a_color.b;
 }
 
-glm::vec3 GLLightManager::getLightPosition(LightHandle light)
+glm::vec3 GLLightManager::getLightPosition(LightHandle a_light)
 {
-	return glm::vec3(m_lightPositionRanges[m_usedLightRefs[light]]);
+	return glm::vec3(m_lightPositionRanges[m_usedLightRefs[a_light]]);
 }
 
-float GLLightManager::getLightRange(LightHandle light)
+float GLLightManager::getLightRange(LightHandle a_light)
 {
-	return m_lightPositionRanges[m_usedLightRefs[light]].w;
+	return m_lightPositionRanges[m_usedLightRefs[a_light]].w;
 }
 
-glm::vec3 GLLightManager::getLightColor(LightHandle light)
+glm::vec3 GLLightManager::getLightColor(LightHandle a_light)
 {
-	return glm::vec3(m_lightColors[m_usedLightRefs[light]]);
+	return glm::vec3(m_lightColors[m_usedLightRefs[a_light]]);
 }

@@ -8,7 +8,7 @@
 
 #include <glm\glm.hpp>
 
-typedef unsigned int LightHandle;
+typedef uint LightHandle;
 
 class GLShader;
 class PerspectiveCamera;
@@ -20,7 +20,7 @@ public:
 	GLLightManager() : m_numUsedLights(0), m_maxLights(0), m_numLightsLoc(0) {};
 	~GLLightManager() {};
 
-	void initialize(unsigned int m_maxLights);
+	void initialize(uint m_maxLights);
 	void setupShader(GLShader& shader);
 	void update(const PerspectiveCamera& camera);
 
@@ -36,7 +36,7 @@ public:
 	float getLightRange(LightHandle light);
 	glm::vec3 getLightColor(LightHandle light);
 
-	unsigned int getNumLights() { return m_numUsedLights; }
+	uint getNumLights() { return m_numUsedLights; }
 
 	const glm::vec4* getViewspaceLightPositionRangeListBegin()
 	{
@@ -45,10 +45,10 @@ public:
 
 private:
 
-	static const unsigned int AVAILABLE_HANDLE = 0xFFFFFFFF;
+	static const uint AVAILABLE_HANDLE = 0xFFFFFFFF;
 
-	unsigned int m_maxLights;
-	unsigned int m_numUsedLights;
+	uint m_maxLights;
+	uint m_numUsedLights;
 
 	rde::vector<glm::vec4> m_lightPositionRanges;
 	rde::vector<glm::vec4> m_viewspaceLightPositionRanges;

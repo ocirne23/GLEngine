@@ -19,14 +19,14 @@ public:
 		GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR,
 		GLint GLTextureWrapS = GL_REPEAT, GLint GLTextureWrapT = GL_REPEAT);
 
-	void bind(unsigned int index = 0);
-	void unbind(unsigned int index = 0);
+	void bind(uint index = 0);
+	void unbind(uint index = 0);
 
 	bool isLoaded() const					{ return m_textureID != 0; };
 	GLuint getTextureID() const				{ return m_textureID; }
-	unsigned int getWidth() const			{ return m_width; }
-	unsigned int getHeight() const			{ return m_height; }
-	unsigned char getNumComponents() const	{ return m_numComponents; }
+	uint getWidth() const			{ return m_width; }
+	uint getHeight() const			{ return m_height; }
+	byte getNumComponents() const	{ return m_numComponents; }
 
 private:
 	void setupGLTexture(const Pixmap& pixmap, GLint minFilter, GLint magFilter,

@@ -8,61 +8,61 @@
 #include <assert.h>
 #include <SDL\SDL_syswm.h>
 
-void APIENTRY debugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_severity, GLsizei a_length, const GLchar* a_message, const void* a_userParam)
 {
 	char debSource[32], debType[32], debSev[32];
 
-	if (source == GL_DEBUG_SOURCE_API_ARB)
+	if (a_source == GL_DEBUG_SOURCE_API_ARB)
 		strcpy_s(debSource, "OpenGL");
-	else if (source == GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB)
+	else if (a_source == GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB)
 		strcpy_s(debSource, "Windows");
-	else if (source == GL_DEBUG_SOURCE_SHADER_COMPILER_ARB)
+	else if (a_source == GL_DEBUG_SOURCE_SHADER_COMPILER_ARB)
 		strcpy_s(debSource, "Shader Compiler");
-	else if (source == GL_DEBUG_SOURCE_THIRD_PARTY_ARB)
+	else if (a_source == GL_DEBUG_SOURCE_THIRD_PARTY_ARB)
 		strcpy_s(debSource, "Third Party");
-	else if (source == GL_DEBUG_SOURCE_APPLICATION_ARB)
+	else if (a_source == GL_DEBUG_SOURCE_APPLICATION_ARB)
 		strcpy_s(debSource, "Application");
-	else if (source == GL_DEBUG_SOURCE_OTHER_ARB)
+	else if (a_source == GL_DEBUG_SOURCE_OTHER_ARB)
 		strcpy_s(debSource, "Other");
 	else
 		assert(0);
 
-	if (type == GL_DEBUG_TYPE_ERROR)
+	if (a_type == GL_DEBUG_TYPE_ERROR)
 		strcpy_s(debType, "error");
-	else if (type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR)
+	else if (a_type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR)
 		strcpy_s(debType, "deprecated behavior");
-	else if (type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
+	else if (a_type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
 		strcpy_s(debType, "undefined behavior");
-	else if (type == GL_DEBUG_TYPE_PORTABILITY)
+	else if (a_type == GL_DEBUG_TYPE_PORTABILITY)
 		strcpy_s(debType, "portability");
-	else if (type == GL_DEBUG_TYPE_PERFORMANCE)
+	else if (a_type == GL_DEBUG_TYPE_PERFORMANCE)
 		strcpy_s(debType, "performance");
-	else if (type == GL_DEBUG_TYPE_OTHER)
+	else if (a_type == GL_DEBUG_TYPE_OTHER)
 		strcpy_s(debType, "message");
-	else if (type == GL_DEBUG_TYPE_MARKER)
+	else if (a_type == GL_DEBUG_TYPE_MARKER)
 		strcpy_s(debType, "marker");
-	else if (type == GL_DEBUG_TYPE_PUSH_GROUP)
+	else if (a_type == GL_DEBUG_TYPE_PUSH_GROUP)
 		strcpy_s(debType, "push group");
-	else if (type == GL_DEBUG_TYPE_POP_GROUP)
+	else if (a_type == GL_DEBUG_TYPE_POP_GROUP)
 		strcpy_s(debType, "pop group");
 	else
 		assert(0);
 
-	if (severity == GL_DEBUG_SEVERITY_HIGH_ARB)
+	if (a_severity == GL_DEBUG_SEVERITY_HIGH_ARB)
 		strcpy_s(debSev, "high");
-	else if (severity == GL_DEBUG_SEVERITY_MEDIUM_ARB)
+	else if (a_severity == GL_DEBUG_SEVERITY_MEDIUM_ARB)
 		strcpy_s(debSev, "medium");
-	else if (severity == GL_DEBUG_SEVERITY_LOW_ARB)
+	else if (a_severity == GL_DEBUG_SEVERITY_LOW_ARB)
 		strcpy_s(debSev, "low");
-	else if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+	else if (a_severity == GL_DEBUG_SEVERITY_NOTIFICATION)
 		strcpy_s(debSev, "notification");
 	else
 		assert(0);
 
-	if (id == 131218)	//TODO:? gl state recompile mismatch 
+	if (a_id == 131218)	//TODO:? gl state recompile mismatch 
 		return;
 
-	print("%s: %s(%s) %d: %s\n", debSource, debType, debSev, id, message);
+	print("%s: %s(%s) %d: %s\n", debSource, debType, debSev, a_id, a_message);
 }
 #endif // ANDROID
 

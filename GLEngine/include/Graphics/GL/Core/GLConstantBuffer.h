@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core.h"
 #include "Graphics\GL\GLTypes.h"
 
 class GLShader;
@@ -14,7 +15,7 @@ public:
 	GLConstantBuffer(const GLConstantBuffer& copy) = delete;
 
 	void initialize(const GLShader& shader, GLuint bindingPoint, const char* blockName, GLenum drawUsage);
-	void upload(unsigned int numBytes, const void* data);
+	void upload(uint numBytes, const void* data);
 
 	void bind();
 

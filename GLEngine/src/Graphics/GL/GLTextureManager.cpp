@@ -1,11 +1,8 @@
-#pragma once
-
 #include "Graphics\GL\GLTextureManager.h"
 
-#include "Graphics\GL\Core\GLTexture.h"
 #include "Graphics\GL\GL.h"
+#include "Graphics\GL\Core\GLTexture.h"
 #include "Utils\FileHandle.h"
-
 #include "rde\rde_string.h"
 
 GLTextureManager::GLTextureManager()
@@ -18,9 +15,9 @@ GLTextureManager::~GLTextureManager()
 
 }
 
-GLTextureManager::TextureHandle GLTextureManager::getTextureHandle(const rde::string& filePath)
+GLTextureManager::TextureHandle GLTextureManager::getTextureHandle(const rde::string& a_filePath)
 {
-	auto at = m_handleMap.find(filePath);
+	auto at = m_handleMap.find(a_filePath);
 	if (at != m_handleMap.end())
 	{
 		return at->second.second;
@@ -28,7 +25,7 @@ GLTextureManager::TextureHandle GLTextureManager::getTextureHandle(const rde::st
 	else
 	{
 		GLTexture* texture = new GLTexture();
-		texture->initialize(FileHandle(filePath));
+		texture->initialize(FileHandle(a_filePath));
 		assert(texture->isLoaded());
 
 		TextureHandle handle;

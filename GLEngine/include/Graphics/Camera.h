@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core.h"
 #include "Frustum.h"
 
 #include <glm\glm.hpp>
@@ -10,7 +11,7 @@ public:
 	Camera() {};
 	virtual ~Camera();
 
-	void initialize(const glm::vec3& position, const glm::vec3& direction, float viewportWidth, float viewportHeight, float near, float far);
+	void initialize(const glm::vec3& position, const glm::vec3& direction, float viewportWidth, float viewportHeight, float near, float a_far);
 
 	virtual void translate(float x, float y, float z);
 	/** Translates the camera position relative to the view of the camera */
@@ -21,10 +22,10 @@ public:
 	virtual void lookAtDir(const glm::vec3& dir);
 	virtual void resize(int width, int height);
 	virtual void update();
-	virtual void setNearFar(float near, float far);
+	virtual void setNearFar(float near, float a_far);
 
-	bool frustumContains(const glm::vec3* const vertices, unsigned int numVertices) const;
-	bool frustumContainsSpheres(const glm::vec3* const spherePositions, unsigned int numSpheres, float sphereRadius) const;
+	bool frustumContains(const glm::vec3* const vertices, uint numVertices) const;
+	bool frustumContainsSpheres(const glm::vec3* const spherePositions, uint numSpheres, float sphereRadius) const;
 
 	float getRotationRadXY();
 	float getRotationRadXZ();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core.h"
 #include "Graphics\GL\GLTypes.h"
 
 #include "rde\vector.h"
@@ -11,15 +12,15 @@ public:
 	~GLFramebuffer();
 	GLFramebuffer(const GLFramebuffer& copy) = delete;
 
-	void addFramebufferTexture(GLenum format, GLenum attachment, unsigned int width, unsigned int height);
-	void setDepthbufferTexture(GLenum format, unsigned int width, unsigned int height);
+	void addFramebufferTexture(GLenum format, GLenum attachment, uint width, uint height);
+	void setDepthbufferTexture(GLenum format, uint width, uint height);
 
 	void end();
 	void begin();
 
-	void bindTextures(unsigned int fromTextureUnit = 0);
-	void bindDepthTexture(unsigned int textureUnit = 0);
-	void bindTexture(unsigned int textureIndex, unsigned int textureUnit);
+	void bindTextures(uint fromTextureUnit = 0);
+	void bindDepthTexture(uint textureUnit = 0);
+	void bindTexture(uint textureIndex, uint textureUnit);
 	void deleteTextures();
 
 private:

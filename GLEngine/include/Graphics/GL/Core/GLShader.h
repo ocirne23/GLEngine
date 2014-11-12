@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core.h"
+
 #include "Utils\VecForward.h"
 #include "Utils\MatForward.h"
 #include "Utils\FileHandle.h"
@@ -33,7 +35,7 @@ public:
 	void setUniform2i(const char* uniformName, const glm::ivec2& vec);
 	void setUniform1f(const char* uniformName, float val);
 	void setUniform2f(const char* uniformName, const glm::vec2& vec);
-	void setUniform2fv(const char* uniformName, unsigned int count, const glm::vec2* vecs);
+	void setUniform2fv(const char* uniformName, uint count, const glm::vec2* vecs);
 	void setUniform3f(const char* uniformName, const glm::vec3& vec);
 	void setUniformMatrix4f(const char* uniformName, const glm::mat4& mat);
 	void setUniformMatrix3f(const char* uniformName, const glm::mat3& mat);

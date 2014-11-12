@@ -1,23 +1,24 @@
 #include "Graphics\GL\GLMesh.h"
 
 #include "GLEngine.h"
-#include "Graphics\GL\GL.h"
 #include "Graphics\Graphics.h"
-
 #include "Graphics\Pixmap.h"
+
+#include "Graphics\GL\GL.h"
 #include "Graphics\GL\Core\GLShader.h"
-#include "Graphics\GL\Core\GLTextureArray.h"
-#include "Graphics\GL\Core\GLVertexBuffer.h"
 #include "Graphics\GL\Core\GLConstantBuffer.h"
 #include "Graphics\GL\Core\GLStateBuffer.h"
+#include "Graphics\GL\Core\GLTextureArray.h"
+#include "Graphics\GL\Core\GLVertexBuffer.h"
 
 #include "Utils\FileHandle.h"
 #include "Utils\CheckGLError.h"
 #include "Utils\ResourceType.h"
 
-#include "rde\rde_string.h"
 #include "Input\Input.h"
 #include "Input\Key.h"
+
+#include "rde\rde_string.h"
 
 #include <glm\glm.hpp>
 
@@ -29,11 +30,11 @@ enum { MAX_MATERIALS = 200 };
 
 struct MeshEntry
 {
-	unsigned int meshIndex;
-	unsigned int numIndices;
-	unsigned int baseVertex;
-	unsigned int baseIndex;
-	unsigned int materialIndex;
+	uint meshIndex;
+	uint numIndices;
+	uint baseVertex;
+	uint baseIndex;
+	uint materialIndex;
 };
 struct Vertex
 {
@@ -42,7 +43,7 @@ struct Vertex
 	glm::vec3 normal;
 	glm::vec3 tangents;
 	glm::vec3 bitangents;
-	unsigned int materialID;
+	uint materialID;
 };
 
 GLMesh::GLMesh() : m_numOpagueMeshes(0), m_initialized(false)
@@ -60,29 +61,29 @@ GLMesh::~GLMesh()
 }
 
 template <typename T>
-uint readVector(const FileHandle& handle, rde::vector<T>& vector, uint offset)
+uint readVector(const FileHandle& a_handle, rde::vector<T>& a_vector, uint a_offset)
 {
 	int size;
-	handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), offset);
-	vector.resize(size);
-	handle.readBytes(reinterpret_cast<char*>(&vector[0]), size * sizeof(vector[0]), offset + sizeof(int));
+	a_handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), a_offset);
+	a_vector.resize(size);
+	a_handle.readBytes(reinterpret_cast<char*>(&a_vector[0]), size * sizeof(a_vector[0]), a_offset + sizeof(int));
 
-	return offset + sizeof(int) + size * sizeof(vector[0]);
+	return a_offset + sizeof(int) + size * sizeof(a_vector[0]);
 }
 
-void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureArray1CUnit, uint textureArray3CUnit, GLuint matUBOBindingPoint)
+void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_textureArray1CUnit, uint a_textureArray3CUnit, GLuint a_matUBOBindingPoint)
 {
 	assert(!m_initialized);
 
-	FileHandle file(filePath);
+	FileHandle file(a_filePath);
 	if (!file.exists())
 	{
-		print("Mesh file does not exist: %s \n", filePath);
+		print("Mesh file does not exist: %s \n", a_filePath);
 		return;
 	}
 
-	m_1cTextureUnit = textureArray1CUnit;
-	m_3cTextureUnit = textureArray3CUnit;
+	m_1cTextureUnit = a_textureArray1CUnit;
+	m_3cTextureUnit = a_textureArray3CUnit;
 
 	rde::vector<uint> indices;
 	rde::vector<Vertex> vertices;
@@ -140,7 +141,7 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureAr
 
 	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
 
-	rde::string atlasBasePath(filePath);
+	rde::string atlasBasePath(a_filePath);
 	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
 	atlasBasePath.append("-atlas-");
 
@@ -168,16 +169,16 @@ void GLMesh::loadFromFile(const char* filePath, GLShader& shader, uint textureAr
 	m_stateBuffer.begin();
 
 	m_matUniformBuffer = new GLConstantBuffer();
-	m_matUniformBuffer->initialize(shader, matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
+	m_matUniformBuffer->initialize(a_shader, a_matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
 	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
-	m_matUBOBindingPoint = matUBOBindingPoint;
+	m_matUBOBindingPoint = a_matUBOBindingPoint;
 
 	m_stateBuffer.end();
 
 	m_initialized = true;
 }
 
-void GLMesh::render(bool renderOpague, bool renderTransparent, bool bindMaterials)
+void GLMesh::render(bool a_renderOpague, bool a_renderTransparent, bool a_bindMaterials)
 {
 	m_stateBuffer.begin();
 	{

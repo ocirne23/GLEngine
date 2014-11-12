@@ -4,11 +4,11 @@
 #include "Graphics\GL\GL.h"
 #include <assert.h>
 
-GLint getInternalFormatForNumComponents(uint numComponents, bool isFloatTexture)
+GLint getInternalFormatForNumComponents(uint a_numComponents, bool a_isFloatTexture)
 {
-	if (isFloatTexture)
+	if (a_isFloatTexture)
 	{
-		switch (numComponents)
+		switch (a_numComponents)
 		{
 		case 1: return GL_R32F;
 		case 2: return GL_RG32F;
@@ -21,7 +21,7 @@ GLint getInternalFormatForNumComponents(uint numComponents, bool isFloatTexture)
 	}
 	else
 	{
-		switch (numComponents)
+		switch (a_numComponents)
 		{
 		case 1: return GL_R8;
 		case 2: return GL_RG8;
@@ -34,9 +34,9 @@ GLint getInternalFormatForNumComponents(uint numComponents, bool isFloatTexture)
 	}
 }
 
-GLenum getFormatForNumComponents(uint numComponents)
+GLenum getFormatForNumComponents(uint a_numComponents)
 {
-	switch (numComponents)
+	switch (a_numComponents)
 	{
 	case 1: return GL_RED;
 	case 2: return GL_RG;

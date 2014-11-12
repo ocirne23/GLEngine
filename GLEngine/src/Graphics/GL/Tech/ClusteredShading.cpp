@@ -11,22 +11,22 @@
 
 #include <glm\glm.hpp>
 
-void ClusteredShading::initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Viewport& viewport, 
-	const PerspectiveCamera& camera)
+void ClusteredShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, const Viewport& a_viewport,
+	const PerspectiveCamera& a_camera)
 {
-	m_viewport = viewport;
+	m_viewport = a_viewport;
 
-	m_pixelsPerTileW = pixelsPerTileW;
-	m_pixelsPerTileH = pixelsPerTileH;
+	m_pixelsPerTileW = a_pixelsPerTileW;
+	m_pixelsPerTileH = a_pixelsPerTileH;
 
-	m_gridWidth = viewport.width / pixelsPerTileW;
-	m_gridHeight = viewport.height / pixelsPerTileH;
+	m_gridWidth = a_viewport.width / a_pixelsPerTileW;
+	m_gridHeight = a_viewport.height / a_pixelsPerTileH;
 
-	uint grid2dDimY = (viewport.height + pixelsPerTileH - 1) / pixelsPerTileH;
-	float sD = 2.0f * glm::tan(glm::radians(camera.getVFov()) * 0.5f) / float(grid2dDimY);
+	uint grid2dDimY = (a_viewport.height + a_pixelsPerTileH - 1) / a_pixelsPerTileH;
+	float sD = 2.0f * glm::tan(glm::radians(a_camera.getVFov()) * 0.5f) / float(grid2dDimY);
 	m_recLogSD1 = 1.0f / logf(sD + 1.0f);
-	m_recNear = 1.0f / camera.m_near;
-	float zGridLocFar = logf(camera.m_far / camera.m_near) / logf(1.0f + sD);
+	m_recNear = 1.0f / a_camera.m_near;
+	float zGridLocFar = logf(a_camera.m_far / a_camera.m_near) / logf(1.0f + sD);
 
 	m_gridDepth = uint(ceilf(zGridLocFar) + 0.5f);
 	m_gridSize = m_gridWidth * m_gridHeight * m_gridDepth;
@@ -35,34 +35,34 @@ void ClusteredShading::initialize(uint pixelsPerTileW, uint pixelsPerTileH, cons
 	m_tileLightIndices.resize(m_gridSize);
 }
 
-void ClusteredShading::setupShader(const GLShader& shader, uint gridTextureIdx, uint lightIdTextureIdx)
+void ClusteredShading::setupShader(const GLShader& a_shader, uint a_gridTextureIdx, uint a_lightIdTextureIdx)
 {
-	assert(shader.isBegun());
+	assert(a_shader.isBegun());
 
-	m_lightGridBuffer.initialize(shader, "u_lightGrid", gridTextureIdx, GL_RG32UI, GL_STREAM_DRAW);
-	m_lightIndiceBuffer.initialize(shader, "u_lightIndices", lightIdTextureIdx, GL_R16UI, GL_STREAM_DRAW);
+	m_lightGridBuffer.initialize(a_shader, "u_lightGrid", a_gridTextureIdx, GL_RG32UI, GL_STREAM_DRAW);
+	m_lightIndiceBuffer.initialize(a_shader, "u_lightIndices", a_lightIdTextureIdx, GL_R16UI, GL_STREAM_DRAW);
 
-	m_recLogSD1Loc = glGetUniformLocation(shader.getID(), "u_recLogSD1");
-	m_recNearLoc = glGetUniformLocation(shader.getID(), "u_recNear");
+	m_recLogSD1Loc = glGetUniformLocation(a_shader.getID(), "u_recLogSD1");
+	m_recNearLoc = glGetUniformLocation(a_shader.getID(), "u_recNear");
 
 	glUniform1f(m_recLogSD1Loc, m_recLogSD1);
 	glUniform1f(m_recNearLoc, m_recNear);
 }
 
-void ClusteredShading::update(const PerspectiveCamera& camera, const glm::vec4* viewspaceLightPositionRangeList, uint numLights)
+void ClusteredShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_viewspaceLightPositionRangeList, uint a_numLights)
 {
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
 	for (auto& tileIndices : m_tileLightIndices)
 		tileIndices.clear();
 	m_lightIndices.clear();
 
-	for (unsigned short i = 0; i < numLights; ++i)
+	for (ushort i = 0; i < a_numLights; ++i)
 	{
-		glm::vec4 lightPositionRange = viewspaceLightPositionRangeList[i];
+		glm::vec4 lightPositionRange = a_viewspaceLightPositionRangeList[i];
 		float radius = lightPositionRange.w;
 		glm::vec3 lightPosition(lightPositionRange);
 
-		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
+		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(a_camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 
 		bounds3D.minX = glm::clamp(bounds3D.minX, 0, (int) m_gridWidth);
 		bounds3D.maxX = glm::clamp(bounds3D.maxX, 0, (int) m_gridWidth);
@@ -77,7 +77,7 @@ void ClusteredShading::update(const PerspectiveCamera& camera, const glm::vec4* 
 			{
 				for (int z = bounds3D.minZ; z < bounds3D.maxZ; ++z)
 				{
-					unsigned int gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
+					uint gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
 					m_tileLightIndices[gridIdx].push_back(i);
 				}
 			}

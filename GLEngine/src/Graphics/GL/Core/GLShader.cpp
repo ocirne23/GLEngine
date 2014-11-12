@@ -1,9 +1,9 @@
 #include "Graphics\GL\Core\GLShader.h"
 
 #include "Core.h"
+#include "Graphics\GL\GL.h"
 #include "Utils\FileHandle.h"
 #include "rde\rde_string.h"
-#include "Graphics\GL\GL.h"
 
 #include <glm\glm.hpp>
 
@@ -12,13 +12,14 @@ bool GLShader::s_begun = false;
 static const char* INCLUDE_STR = "#include \"";
 static const uint INCLUDE_STR_LEN = (uint) strlen(INCLUDE_STR);
 
+// If an error should be printed if a uniform is set which isnt present in the shader.
 //#define SHADER_STRICT_UNIFORM_LOC
 
 BEGIN_UNNAMED_NAMESPACE()
 
-rde::string processIncludes(const rde::string& str)
+rde::string processIncludes(const rde::string& a_str)
 {
-	rde::string src = str;
+	rde::string src = a_str;
 
 	auto includePos = src.find(INCLUDE_STR);
 	while (includePos != src.npos)
@@ -34,25 +35,25 @@ rde::string processIncludes(const rde::string& str)
 	return src;
 } 
 
-rde::string appendAfterVersion(const rde::string& str, const rde::vector<rde::string>* defines, const rde::vector<rde::string>* extensions)
+rde::string appendAfterVersion(const rde::string& a_str, const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
 {
-	auto version = str.find("#version");
-	auto at = str.find("\n", version) + 1; // find first newline after #version
-	rde::string first = str.substr(0, at);
-	rde::string last = str.substr(at, str.length());
+	auto version = a_str.find("#version");
+	auto at = a_str.find("\n", version) + 1; // find first newline after #version
+	rde::string first = a_str.substr(0, at);
+	rde::string last = a_str.substr(at, a_str.length());
 
-	if (defines)
+	if (a_defines)
 	{
-		for (const rde::string& define : *defines)
+		for (const rde::string& define : *a_defines)
 		{
 			first += rde::string("#define ");
 			first += define;
 			first += rde::string("\n");
 		}
 	}
-	if (extensions)
+	if (a_extensions)
 	{
-		for (const rde::string& define : *extensions)
+		for (const rde::string& define : *a_extensions)
 		{
 			first += rde::string("#extension ");
 			first += define;
@@ -64,16 +65,16 @@ rde::string appendAfterVersion(const rde::string& str, const rde::vector<rde::st
 	return first;
 }
 
-void attachShaderSource(GLuint prog, GLenum type, const char * source)
+void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 {
-	GLuint sh = glCreateShader(type);
+	GLuint sh = glCreateShader(a_type);
 
 	if (!sh)
 	{
-		print("Could not create shader %i \n", type);
+		print("Could not create shader %i \n", a_type);
 	}
 
-	glShaderSource(sh, 1, &source, NULL);
+	glShaderSource(sh, 1, &a_source, NULL);
 	glCompileShader(sh);
 
 	GLint logLen;
@@ -83,7 +84,7 @@ void attachShaderSource(GLuint prog, GLenum type, const char * source)
 		char buffer[4096];
 		glGetShaderInfoLog(sh, sizeof(buffer), NULL, buffer);
 		const char* typeString;
-		switch (type) {
+		switch (a_type) {
 		case GL_FRAGMENT_SHADER:
 			typeString = "fragment";
 			break;
@@ -94,7 +95,7 @@ void attachShaderSource(GLuint prog, GLenum type, const char * source)
 			typeString = "nan";
 			break;
 		}
-		print("Error in %s shader: %s : %s \n", typeString, buffer, source);
+		print("Error in %s shader: %s : %s \n", typeString, buffer, a_source);
 	}
 	int compileStatus;
 	glGetShaderiv(sh, GL_COMPILE_STATUS, &compileStatus);
@@ -103,25 +104,25 @@ void attachShaderSource(GLuint prog, GLenum type, const char * source)
 		printf("shader failed to compile \n");
 	}
 
-	glAttachShader(prog, sh);
+	glAttachShader(a_prog, sh);
 	glDeleteShader(sh);
 }
 
-GLuint createShaderProgram(const FileHandle& vertexShaderFile, const FileHandle& fragmentShaderFile, rde::string versionStr,
-	const rde::vector<rde::string>* defines, const rde::vector<rde::string>* extensions)
+GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandle& a_fragmentShaderFile, rde::string a_versionStr,
+	const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
 {
 	GLuint program = glCreateProgram();
 
 	{
-		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(vertexShaderFile.readString());
+		rde::string contents = rde::string("#version ").append(a_versionStr).append("\n").append(a_vertexShaderFile.readString());
 		contents = processIncludes(contents);
-		contents = appendAfterVersion(contents, defines, extensions);
+		contents = appendAfterVersion(contents, a_defines, a_extensions);
 		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
 	}
 	{
-		rde::string contents = rde::string("#version ").append(versionStr).append("\n").append(fragmentShaderFile.readString());
+		rde::string contents = rde::string("#version ").append(a_versionStr).append("\n").append(a_fragmentShaderFile.readString());
 		contents = processIncludes(contents);
-		contents = appendAfterVersion(contents, defines, extensions);
+		contents = appendAfterVersion(contents, a_defines, a_extensions);
 		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());
 	}
 
@@ -266,7 +267,7 @@ void GLShader::setUniform2i(const char* uniformName, const glm::ivec2& vec)
 	else
 		glUniform2i(it->second, vec.x, vec.y);
 }
-void GLShader::setUniform2fv(const char* uniformName, unsigned int count, const glm::vec2* vecs)
+void GLShader::setUniform2fv(const char* uniformName, uint count, const glm::vec2* vecs)
 {
 	assert(m_begun);
 	auto it = m_uniformLocMap.find(uniformName);

@@ -20,4 +20,4 @@ typedef unsigned char byte;
 typedef long long int64;
 typedef unsigned long long uint64;
 
-void print(const char* format, ...);
+void print(const char* a_format, ...);

@@ -1,7 +1,6 @@
 #include "Graphics\GL\Core\GLTextureArray.h"
 
 #include "Graphics\Pixmap.h"
-
 #include "Graphics\GL\GL.h"
 #include "Utils\getGLTextureFormat.h"
 
@@ -15,45 +14,45 @@ GLTextureArray::~GLTextureArray()
 		glDeleteTextures(1, &m_textureID);
 }
 
-void GLTextureArray::initialize(const rde::vector<Pixmap*>& pixmaps, uint numMipMaps,
-	GLint minFilter, GLint magFilter, GLint textureWrapS, GLint textureWrapT)
+void GLTextureArray::initialize(const rde::vector<Pixmap*>& a_pixmaps, uint a_numMipMaps,
+	GLint a_minFilter, GLint a_magFilter, GLint a_textureWrapS, GLint a_textureWrapT)
 {
-	assert(!pixmaps.empty());
+	assert(!a_pixmaps.empty());
 
-	m_numMipmaps = numMipMaps;
+	m_numMipmaps = a_numMipMaps;
 
 	// If setDimensions was not used before, use the dimensions of the first pixmap;
 	if (m_width == 0 || m_height == 0 || m_numComponents == 0)
 	{
-		m_width = pixmaps[0]->m_width;
-		m_height = pixmaps[0]->m_height;
-		m_numComponents = pixmaps[0]->m_numComponents;
-		m_isFloatTexture = pixmaps[0]->m_isFloatData;
+		m_width = a_pixmaps[0]->m_width;
+		m_height = a_pixmaps[0]->m_height;
+		m_numComponents = a_pixmaps[0]->m_numComponents;
+		m_isFloatTexture = a_pixmaps[0]->m_isFloatData;
 	}
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, m_textureID);
 
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, minFilter);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, magFilter);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, textureWrapS);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, textureWrapT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, a_minFilter);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, a_magFilter);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, a_textureWrapS);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, a_textureWrapT);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, numMipMaps);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, a_numMipMaps);
 
 	m_generateMipMaps = (
-		minFilter == GL_NEAREST_MIPMAP_LINEAR ||
-		minFilter == GL_NEAREST_MIPMAP_NEAREST ||
-		minFilter == GL_LINEAR_MIPMAP_LINEAR ||
-		minFilter == GL_LINEAR_MIPMAP_NEAREST);
+		a_minFilter == GL_NEAREST_MIPMAP_LINEAR ||
+		a_minFilter == GL_NEAREST_MIPMAP_NEAREST ||
+		a_minFilter == GL_LINEAR_MIPMAP_LINEAR ||
+		a_minFilter == GL_LINEAR_MIPMAP_NEAREST);
 
 	GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, m_isFloatTexture);
 	GLenum format = getFormatForNumComponents(m_numComponents);
 
 	int width = m_width;
 	int height = m_height;
-	int depth = pixmaps.size();
-	for (unsigned int i = 0; i < m_numMipmaps; i++)
+	int depth = a_pixmaps.size();
+	for (uint i = 0; i < m_numMipmaps; i++)
 	{
 		glTexImage3D(GL_TEXTURE_2D_ARRAY, i, internalFormat, width, height, depth, 0,
 			format, m_isFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE, NULL);
@@ -61,14 +60,14 @@ void GLTextureArray::initialize(const rde::vector<Pixmap*>& pixmaps, uint numMip
 		height = max(1, (int) (height / 2.0f));
 	}
 
-	for (int i = 0; i < pixmaps.size(); ++i)
+	for (int i = 0; i < a_pixmaps.size(); ++i)
 	{
-		assert(pixmaps[i]->m_width == m_width);
-		assert(pixmaps[i]->m_height == m_height);
-		assert(pixmaps[i]->m_numComponents == m_numComponents);
-		assert(pixmaps[i]->m_isFloatData == m_isFloatTexture);
+		assert(a_pixmaps[i]->m_width == m_width);
+		assert(a_pixmaps[i]->m_height == m_height);
+		assert(a_pixmaps[i]->m_numComponents == m_numComponents);
+		assert(a_pixmaps[i]->m_isFloatData == m_isFloatTexture);
 
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, m_isFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE, pixmaps[i]->m_data.b);
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, m_isFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE, a_pixmaps[i]->m_data.b);
 		if (m_generateMipMaps)
 			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 	}
@@ -77,26 +76,26 @@ void GLTextureArray::initialize(const rde::vector<Pixmap*>& pixmaps, uint numMip
 	m_initialized = true;
 }
 
-void GLTextureArray::setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture)
+void GLTextureArray::setDimensions(uint a_width, uint a_height, uint a_numComponents, bool a_isFloatTexture)
 {
 	assert(!m_initialized);
-	m_width = width;
-	m_height = height;
-	m_numComponents = numComponents;
-	m_isFloatTexture = isFloatTexture;
+	m_width = a_width;
+	m_height = a_height;
+	m_numComponents = a_numComponents;
+	m_isFloatTexture = a_isFloatTexture;
 }
 
 
-void GLTextureArray::bind(uint index)
+void GLTextureArray::bind(uint a_index)
 {
 	assert(m_initialized);
-	glActiveTexture(GL_TEXTURE0 + index);
+	glActiveTexture(GL_TEXTURE0 + a_index);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, m_textureID);
 }
 
-void GLTextureArray::unbind(uint index)
+void GLTextureArray::unbind(uint a_index)
 {
 	assert(m_initialized);
-	glActiveTexture(GL_TEXTURE0 + index);
+	glActiveTexture(GL_TEXTURE0 + a_index);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }

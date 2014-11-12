@@ -25,7 +25,7 @@
 #include "Graphics\GL\GL.h"
 #include <iostream>
 
-bool checkGLError(const char *file, int line)
+bool checkGLError(const char *a_file, int a_line)
 {
 	bool error = false;
 
@@ -44,7 +44,7 @@ bool checkGLError(const char *file, int line)
 		}
 #endif
 
-		printf("GL Error in file: %s at line %i Error %i: %s \n", file, line, glErr, str);
+		printf("GL Error in file: %s at line %i Error %i: %s \n", a_file, a_line, glErr, str);
 	}
 
 	return error;

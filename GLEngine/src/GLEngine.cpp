@@ -74,9 +74,9 @@ void GLEngine::doEngineTick()
 	}
 }
 
-void GLEngine::sleep(uint timeMs)
+void GLEngine::sleep(uint a_timeMs)
 {
-	SDL_Delay(timeMs);
+	SDL_Delay(a_timeMs);
 }
 
 uint GLEngine::getTimeMs()

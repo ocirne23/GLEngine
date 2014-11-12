@@ -1,11 +1,9 @@
 #include "Graphics\Graphics.h"
 
-#include "Core.h"
-#include "Graphics\GL\GL.h"
 #include "Graphics\WindowEventListener.h"
-#include "rde\rde_string.h"
-
+#include "Graphics\GL\GL.h"
 #include "Utils\CheckGLError.h"
+#include "rde\rde_string.h"
 
 #include <assert.h>
 #include <glm\glm.hpp>
@@ -24,9 +22,9 @@ static const uint MAX_GL_MINOR_VERSION = 5;
 
 #endif // ANDROID
 
-bool Graphics::initialize(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, WindowFlags flags)
+bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
 {
-	m_window = SDL_CreateWindow(windowName, screenXPos, screenYPos, screenWidth, screenHeight, flags);
+	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, a_flags);
 	if (!m_window)
 	{
 		print("Unable to create window: %s\n", SDL_GetError());
@@ -111,16 +109,16 @@ bool Graphics::initialize(const char* windowName, uint screenWidth, uint screenH
 	return true;
 }
 
-void Graphics::clear(const glm::vec4& color, bool clearColor, bool clearDepth)
+void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)
 {
 	CHECK_GL_ERROR();
 
 	assert(m_window);
-	glClearColor(color.r, color.g, color.b, color.a);
+	glClearColor(a_color.r, a_color.g, a_color.b, a_color.a);
 	uint clearFlags = 0;
-	if (clearColor)
+	if (a_clearColor)
 		clearFlags |= GL_COLOR_BUFFER_BIT;
-	if (clearDepth)
+	if (a_clearDepth)
 		clearFlags |= GL_DEPTH_BUFFER_BIT;
 	glClear(clearFlags);
 }
@@ -131,34 +129,34 @@ void Graphics::swap()
 	SDL_GL_SwapWindow(m_window);
 }
 
-void Graphics::setVsync(bool enabled)
+void Graphics::setVsync(bool a_enabled)
 {
 	assert(m_window);
-	SDL_GL_SetSwapInterval(enabled);
-	m_vsyncEnabled = enabled;
+	SDL_GL_SetSwapInterval(a_enabled);
+	m_vsyncEnabled = a_enabled;
 }
 
-void Graphics::registerWindowEventListener(WindowEventListener* listener)
+void Graphics::registerWindowEventListener(WindowEventListener* a_listener)
 {
-	m_windowEventListeners.push_back(listener);
+	m_windowEventListeners.push_back(a_listener);
 }
 
-void Graphics::unregisterWindowEventListener(WindowEventListener* listener)
+void Graphics::unregisterWindowEventListener(WindowEventListener* a_listener)
 {
-	m_windowEventListeners.erase(m_windowEventListeners.find(listener));
+	m_windowEventListeners.erase(m_windowEventListeners.find(a_listener));
 }
 
-void Graphics::resizeScreen(uint screenWidth, uint screenHeight)
+void Graphics::resizeScreen(uint a_screenWidth, uint a_screenHeight)
 {
 	assert(m_window);
-	m_screenWidth = screenWidth;
-	m_screenHeight = screenHeight;
+	m_screenWidth = a_screenWidth;
+	m_screenHeight = a_screenHeight;
 
-	m_viewport = { 0, 0, screenWidth, screenHeight };
-	glViewport(0, 0, screenWidth, screenHeight);
+	m_viewport = { 0, 0, a_screenWidth, a_screenHeight };
+	glViewport(0, 0, a_screenWidth, a_screenHeight);
 
 	for (WindowEventListener* listener : m_windowEventListeners)
-		listener->resize(screenWidth, screenHeight);
+		listener->resize(a_screenWidth, a_screenHeight);
 }
 
 void Graphics::windowQuit()
@@ -179,17 +177,17 @@ void Graphics::destroyWindow()
 	}
 }
 
-void Graphics::setWindowTitle(const char* title)
+void Graphics::setWindowTitle(const char* a_title)
 {
 	assert(m_window);
-	SDL_SetWindowTitle(m_window, title);
+	SDL_SetWindowTitle(m_window, a_title);
 }
 
-SDL_GLContext Graphics::createGLContext(uint majorVersion, uint minorVersion)
+SDL_GLContext Graphics::createGLContext(uint a_majorVersion, uint a_minorVersion)
 {
 	assert(m_window);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, majorVersion);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minorVersion);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, a_majorVersion);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, a_minorVersion);
 
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -202,8 +200,8 @@ SDL_GLContext Graphics::createGLContext(uint majorVersion, uint minorVersion)
 	return context;
 }
 
-void Graphics::disposeGLContext(SDL_GLContext context)
+void Graphics::disposeGLContext(SDL_GLContext a_context)
 {
 	assert(m_window);
-	SDL_GL_DeleteContext(context);
+	SDL_GL_DeleteContext(a_context);
 }

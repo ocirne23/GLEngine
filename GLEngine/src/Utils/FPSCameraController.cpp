@@ -26,20 +26,20 @@ FPSCameraController::~FPSCameraController()
 {
 }
 
-void FPSCameraController::initialize(PerspectiveCamera& camera, const glm::vec3& lookDir)
+void FPSCameraController::initialize(PerspectiveCamera& a_camera, const glm::vec3& a_lookDir)
 {
-	m_camera = &camera;
-	m_lookDir = lookDir;
+	m_camera = &a_camera;
+	m_lookDir = a_lookDir;
 	m_initialized = true;
 }
 
-void FPSCameraController::setCameraSpeed(float cameraSpeed)
+void FPSCameraController::setCameraSpeed(float a_cameraSpeed)
 {
-	m_cameraSpeed = cameraSpeed;
-	m_diagonalCameraSpeed = glm::sqrt((cameraSpeed * cameraSpeed) * 0.5f);
+	m_cameraSpeed = a_cameraSpeed;
+	m_diagonalCameraSpeed = glm::sqrt((a_cameraSpeed * a_cameraSpeed) * 0.5f);
 }
 
-void FPSCameraController::update(float deltaSec)
+void FPSCameraController::update(float a_deltaSec)
 {
 	if (!m_initialized)
 		return;
@@ -61,39 +61,39 @@ void FPSCameraController::update(float deltaSec)
 	if (w)
 	{
 		if (a)
-			m_camera->translateRelative(-m_diagonalCameraSpeed * deltaSec, 0.0f, -m_diagonalCameraSpeed * deltaSec);
+			m_camera->translateRelative(-m_diagonalCameraSpeed * a_deltaSec, 0.0f, -m_diagonalCameraSpeed * a_deltaSec);
 		else if (d)
-			m_camera->translateRelative(m_diagonalCameraSpeed * deltaSec, 0.0f, -m_diagonalCameraSpeed * deltaSec);
+			m_camera->translateRelative(m_diagonalCameraSpeed * a_deltaSec, 0.0f, -m_diagonalCameraSpeed * a_deltaSec);
 		else
-			m_camera->translateRelative(0.0f, 0.0f, -m_cameraSpeed * deltaSec);
+			m_camera->translateRelative(0.0f, 0.0f, -m_cameraSpeed * a_deltaSec);
 	}
 	else if (s)
 	{
 		if (a)
-			m_camera->translateRelative(-m_diagonalCameraSpeed * deltaSec, 0.0f, m_diagonalCameraSpeed * deltaSec);
+			m_camera->translateRelative(-m_diagonalCameraSpeed * a_deltaSec, 0.0f, m_diagonalCameraSpeed * a_deltaSec);
 		else if (d)
-			m_camera->translateRelative(m_diagonalCameraSpeed * deltaSec, 0.0f, m_diagonalCameraSpeed * deltaSec);
+			m_camera->translateRelative(m_diagonalCameraSpeed * a_deltaSec, 0.0f, m_diagonalCameraSpeed * a_deltaSec);
 		else
-			m_camera->translateRelative(0.0f, 0.0f, m_cameraSpeed * deltaSec);
+			m_camera->translateRelative(0.0f, 0.0f, m_cameraSpeed * a_deltaSec);
 	}
 	else if (a)
-		m_camera->translateRelative(-m_cameraSpeed * deltaSec, 0.0f, 0.0f);
+		m_camera->translateRelative(-m_cameraSpeed * a_deltaSec, 0.0f, 0.0f);
 	else if (d)
-		m_camera->translateRelative(m_cameraSpeed * deltaSec, 0.0f, 0.0f);
+		m_camera->translateRelative(m_cameraSpeed * a_deltaSec, 0.0f, 0.0f);
 
 	if (space)
-		m_camera->translateRelative(0.0f, m_cameraSpeed * deltaSec, 0.0f);
+		m_camera->translateRelative(0.0f, m_cameraSpeed * a_deltaSec, 0.0f);
 	else if (shift)
-		m_camera->translateRelative(0.0f, -m_cameraSpeed * deltaSec, 0.0f);
+		m_camera->translateRelative(0.0f, -m_cameraSpeed * a_deltaSec, 0.0f);
 
 	m_camera->lookAtDir(m_lookDir);
 }
 
-bool FPSCameraController::mouseDown(MouseButton key, int xPos, int yPos)
+bool FPSCameraController::mouseDown(MouseButton a_key, int a_xPos, int a_yPos)
 {
-	if (key == 1)
+	if (a_key == 1)
 		m_lmbPressed = true;
-	if (key == 3)
+	if (a_key == 3)
 		m_rmbPressed = true;
 	return false;
 }

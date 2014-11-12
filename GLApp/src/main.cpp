@@ -3,7 +3,7 @@
 #include "Core\ScreenManager.h"
 #include "Screens\GameScreen.h"
 
-int MAIN(int argc, char* argv[])
+int MAIN(int a_argc, char* a_argv[])
 {
 	GLEngine::initialize();
 	{

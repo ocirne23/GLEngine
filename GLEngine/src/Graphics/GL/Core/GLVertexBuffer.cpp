@@ -11,21 +11,21 @@ GLVertexBuffer::~GLVertexBuffer()
 		glDeleteBuffers(1, &m_id);
 }
 
-void GLVertexBuffer::initialize(GLenum bufferType, GLenum drawUsage)
+void GLVertexBuffer::initialize(GLenum a_bufferType, GLenum a_drawUsage)
 {
 	assert(!m_initialized);
 	glGenBuffers(1, &m_id);
-	m_bufferType = bufferType;
-	m_drawUsage = drawUsage;
+	m_bufferType = a_bufferType;
+	m_drawUsage = a_drawUsage;
 	m_initialized = true;
 }
 
-void GLVertexBuffer::upload(uint numBytes, const void* data)
+void GLVertexBuffer::upload(uint a_numBytes, const void* a_data)
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);
 	glBindBuffer(m_bufferType, m_id);
-	glBufferData(m_bufferType, numBytes, data, m_drawUsage);
+	glBufferData(m_bufferType, a_numBytes, a_data, m_drawUsage);
 }
 
 void GLVertexBuffer::bind()
@@ -35,29 +35,29 @@ void GLVertexBuffer::bind()
 	glBindBuffer(m_bufferType, m_id);
 }
 
-void GLVertexBuffer::setVertexAttributes(uint numAttributes, VertexAttribute* attributes)
+void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, VertexAttribute* a_attributes)
 {
 	assert(m_initialized);
 
 	uint offset = 0;
 	uint stride = 0;
 
-	if (numAttributes == 1)
+	if (a_numAttributes == 1)
 	{
 		stride = 0;
 	}
 	else
 	{
-		for (uint i = 0; i < numAttributes; ++i)
+		for (uint i = 0; i < a_numAttributes; ++i)
 		{
-			const VertexAttribute* attribute = attributes + i;
+			const VertexAttribute* attribute = a_attributes + i;
 			stride += attribute->m_numElements * (attribute->m_format == VertexAttribute::Format::UNSIGNED_BYTE ? 1 : 4);
 		}
 	}
 
-	for (uint i = 0; i < numAttributes; ++i)
+	for (uint i = 0; i < a_numAttributes; ++i)
 	{
-		const VertexAttribute* attribute = attributes + i;
+		const VertexAttribute* attribute = a_attributes + i;
 
 		GLenum type;
 		uint dataSize;
@@ -98,17 +98,17 @@ void GLVertexBuffer::setVertexAttributes(uint numAttributes, VertexAttribute* at
 	}
 }
 
-void GLVertexBuffer::setAttribPointer(GLuint attributeIdx, GLenum type, uint valuesPerVertex,
-	GLboolean normalized, GLboolean isIntegerType, GLuint stride, GLuint offset)
+void GLVertexBuffer::setAttribPointer(GLuint a_attributeIdx, GLenum a_type, uint a_valuesPerVertex,
+	GLboolean a_normalized, GLboolean a_isIntegerType, GLuint a_stride, GLuint a_offset)
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);
 
 	glBindBuffer(m_bufferType, m_id);
-	if (isIntegerType)
-		glVertexAttribIPointer(attributeIdx, valuesPerVertex, type, stride, (const GLvoid*) offset);
+	if (a_isIntegerType)
+		glVertexAttribIPointer(a_attributeIdx, a_valuesPerVertex, a_type, a_stride, (const GLvoid*) a_offset);
 	else
-		glVertexAttribPointer(attributeIdx, valuesPerVertex, type, normalized, stride, (const GLvoid*) offset);
+		glVertexAttribPointer(a_attributeIdx, a_valuesPerVertex, a_type, a_normalized, a_stride, (const GLvoid*) a_offset);
 
-	glEnableVertexAttribArray(attributeIdx);
+	glEnableVertexAttribArray(a_attributeIdx);
 }

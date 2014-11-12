@@ -5,26 +5,26 @@
 
 #include <assert.h>
 
-void Pixmap::read(const FileHandle& file)
+void Pixmap::read(const FileHandle& a_file)
 {
 	int type;
-	file.readBytes(reinterpret_cast<char*>(&type), sizeof(uint), 0);
+	a_file.readBytes(reinterpret_cast<char*>(&type), sizeof(uint), 0);
 	assert(type == ResourceType_BYTEIMAGE || type == ResourceType_FLOATIMAGE);
 	m_isFloatData = (type == ResourceType_FLOATIMAGE);
 
-	file.readBytes(reinterpret_cast<char*>(&m_width), sizeof(uint), sizeof(uint));
-	file.readBytes(reinterpret_cast<char*>(&m_height), sizeof(uint), sizeof(uint) * 2);
-	file.readBytes(reinterpret_cast<char*>(&m_numComponents), sizeof(uint), sizeof(uint) * 3);
+	a_file.readBytes(reinterpret_cast<char*>(&m_width), sizeof(uint), sizeof(uint));
+	a_file.readBytes(reinterpret_cast<char*>(&m_height), sizeof(uint), sizeof(uint) * 2);
+	a_file.readBytes(reinterpret_cast<char*>(&m_numComponents), sizeof(uint), sizeof(uint) * 3);
 
 	if (type == ResourceType_BYTEIMAGE)
 	{
 		m_data.b = new byte[m_width * m_height * m_numComponents];
-		file.readBytes(reinterpret_cast<char*>(m_data.b), m_width * m_height * m_numComponents, sizeof(uint) * 4);
+		a_file.readBytes(reinterpret_cast<char*>(m_data.b), m_width * m_height * m_numComponents, sizeof(uint) * 4);
 	}
 	else
 	{
 		m_data.f = new float[m_width * m_height * m_numComponents];
-		file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * 4, sizeof(uint) * 4);
+		a_file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * 4, sizeof(uint) * 4);
 	}
 }
 

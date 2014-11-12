@@ -27,7 +27,7 @@
 namespace
 {
 
-void updateClipRegionRoot(float nc,
+void updateClipRegionRoot(float a_nc,
 	float lc,
 	float lz,
 	float lightRadius,
@@ -35,13 +35,13 @@ void updateClipRegionRoot(float nc,
 	float &clipMin,
 	float &clipMax)
 {
-	float nz = (lightRadius - nc * lc) / lz;
-	float pz = (lc * lc + lz * lz - lightRadius * lightRadius) / (lz - (nz / nc) * lc);
+	float nz = (lightRadius - a_nc * lc) / lz;
+	float pz = (lc * lc + lz * lz - lightRadius * lightRadius) / (lz - (nz / a_nc) * lc);
 
 	if (pz < 0.0f)
 	{
-		float c = -nz * cameraScale / nc;
-		if (nc < 0.0f)
+		float c = -nz * cameraScale / a_nc;
+		if (a_nc < 0.0f)
 		{
 			clipMin = glm::max(clipMin, c);
 		}
@@ -52,39 +52,39 @@ void updateClipRegionRoot(float nc,
 	}
 }
 
-void updateClipRegion(float lc,
-	float lz,
-	float lightRadius,
-	float cameraScale,
-	float &clipMin,
-	float &clipMax)
+void updateClipRegion(float a_lc,
+	float a_lz,
+	float a_lightRadius,
+	float a_cameraScale,
+	float &a_clipMin,
+	float &a_clipMax)
 {
-	float rSq = lightRadius * lightRadius;
-	float lcSqPluslzSq = lc * lc + lz * lz;
-	float d = rSq * lc * lc - lcSqPluslzSq * (rSq - lz * lz);
+	float rSq = a_lightRadius * a_lightRadius;
+	float lcSqPluslzSq = a_lc * a_lc + a_lz * a_lz;
+	float d = rSq * a_lc * a_lc - lcSqPluslzSq * (rSq - a_lz * a_lz);
 
 	if (d >= 0.0f)
 	{
-		float a = lightRadius * lc;
+		float a = a_lightRadius * a_lc;
 		float b = sqrt(d);
 		float nx0 = (a + b) / lcSqPluslzSq;
 		float nx1 = (a - b) / lcSqPluslzSq;
 
-		updateClipRegionRoot(nx0, lc, lz, lightRadius, cameraScale, clipMin, clipMax);
-		updateClipRegionRoot(nx1, lc, lz, lightRadius, cameraScale, clipMin, clipMax);
+		updateClipRegionRoot(nx0, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
+		updateClipRegionRoot(nx1, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
 	}
 }
 
-glm::vec4 computeClipRegion(const glm::vec3 &lightPosView, float lightRadius, float cameraNear, const glm::mat4 &projection)
+glm::vec4 computeClipRegion(const glm::vec3& a_lightPosView, float a_lightRadius, float a_cameraNear, const glm::mat4 &a_projection)
 {
 	glm::vec4 clipRegion(1.0f, 1.0f, -1.0f, -1.0f);
-	if (lightPosView.z - lightRadius <= -cameraNear)
+	if (a_lightPosView.z - a_lightRadius <= -a_cameraNear)
 	{
 		glm::vec2 clipMin(-1.0f, -1.0f);
 		glm::vec2 clipMax(1.0f, 1.0f);
 
-		updateClipRegion(lightPosView.x, lightPosView.z, lightRadius, projection[0][0], clipMin.x, clipMax.x);
-		updateClipRegion(lightPosView.y, lightPosView.z, lightRadius, projection[1][1], clipMin.y, clipMax.y);
+		updateClipRegion(a_lightPosView.x, a_lightPosView.z, a_lightRadius, a_projection[0][0], clipMin.x, clipMax.x);
+		updateClipRegion(a_lightPosView.y, a_lightPosView.z, a_lightRadius, a_projection[1][1], clipMin.y, clipMax.y);
 
 		clipRegion = glm::vec4(clipMin, clipMax);
 	}
@@ -92,23 +92,23 @@ glm::vec4 computeClipRegion(const glm::vec3 &lightPosView, float lightRadius, fl
 	return clipRegion;
 }
 
-inline void swap(float& a, float& b) 
+inline void swap(float& a_a, float& a_b) 
 { 
-	float tmp = a; 
-	a = b; 
-	b = tmp; 
+	float tmp = a_a; 
+	a_a = a_b; 
+	a_b = tmp; 
 }
 
-inline float calcClusterZ(float viewSpaceZ, float recNear, float recLogSD1)
+inline float calcClusterZ(float a_viewSpaceZ, float a_recNear, float a_recLogSD1)
 {
-	return logf(-viewSpaceZ * recNear) * recLogSD1;
+	return logf(-a_viewSpaceZ * a_recNear) * a_recLogSD1;
 }
 
 }
 
-IBounds2D sphereToScreenSpaceBounds2D(const Camera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport)
+IBounds2D sphereToScreenSpaceBounds2D(const Camera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, Viewport a_viewport)
 {
-	glm::vec4 reg = computeClipRegion(lightPosViewSpace, lightRadius, camera.m_near, camera.m_projectionMatrix);
+	glm::vec4 reg = computeClipRegion(a_lightPosViewSpace, a_lightRadius, a_camera.m_near, a_camera.m_projectionMatrix);
 	reg = -reg;
 
 	swap(reg.x, reg.z);
@@ -118,30 +118,30 @@ IBounds2D sphereToScreenSpaceBounds2D(const Camera& camera, glm::vec3 lightPosVi
 
 	IBounds2D result;
 
-	result.minX = int(reg.x * float(viewport.width));
-	result.minY = int(reg.y * float(viewport.height));
-	result.maxX = int(reg.z * float(viewport.width));
-	result.maxY = int(reg.w * float(viewport.height));
+	result.minX = int(reg.x * float(a_viewport.width));
+	result.minY = int(reg.y * float(a_viewport.height));
+	result.maxX = int(reg.z * float(a_viewport.width));
+	result.maxY = int(reg.w * float(a_viewport.height));
 	result.minX = glm::min(result.minX, result.maxX);
 	result.minY = glm::min(result.minY, result.maxY);
 
 	return result;
 }
 
-IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, Viewport viewport, uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1)
+IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, Viewport a_viewport, uint a_pixelsPerTileW, uint a_pixelsPerTileH, float a_recLogSD1)
 {
-	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(camera, lightPosViewSpace, lightRadius, viewport);
-	float recNear = 1.0f / camera.m_near;
+	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, a_lightPosViewSpace, a_lightRadius, a_viewport);
+	float recNear = 1.0f / a_camera.m_near;
 
-	int minZ = glm::max(int(calcClusterZ(lightPosViewSpace.z + lightRadius, recNear, recLogSD1)), 0);
-	int maxZ = glm::max(int(ceilf(calcClusterZ(lightPosViewSpace.z - lightRadius, recNear, recLogSD1)) + 0.5f), 0);
+	int minZ = glm::max(int(calcClusterZ(a_lightPosViewSpace.z + a_lightRadius, recNear, a_recLogSD1)), 0);
+	int maxZ = glm::max(int(ceilf(calcClusterZ(a_lightPosViewSpace.z - a_lightRadius, recNear, a_recLogSD1)) + 0.5f), 0);
 	minZ = glm::min(minZ, maxZ);
 
 	IBounds3D bounds3D;
-	bounds3D.minX = bounds2D.minX / pixelsPerTileW;
-	bounds3D.maxX = (bounds2D.maxX / pixelsPerTileW) + 1;
-	bounds3D.minY = bounds2D.minY / pixelsPerTileH;
-	bounds3D.maxY = (bounds2D.maxY / pixelsPerTileH) + 1;
+	bounds3D.minX = bounds2D.minX / a_pixelsPerTileW;
+	bounds3D.maxX = (bounds2D.maxX / a_pixelsPerTileW) + 1;
+	bounds3D.minY = bounds2D.minY / a_pixelsPerTileH;
+	bounds3D.maxY = (bounds2D.maxY / a_pixelsPerTileH) + 1;
 	bounds3D.minZ = minZ;
 	bounds3D.maxZ = maxZ;
 

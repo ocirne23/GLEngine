@@ -24,20 +24,20 @@ ScreenManager::~ScreenManager()
 		m_currentScreen->hide();
 }
 
-void ScreenManager::render(float deltaSec)
+void ScreenManager::render(float a_deltaSec)
 {
 	if (m_currentScreen)
-		m_currentScreen->render(deltaSec);
+		m_currentScreen->render(a_deltaSec);
 }
 
-void ScreenManager::setScreen(ScreenType screenType)
+void ScreenManager::setScreen(ScreenType a_screenType)
 {
-	if (!m_screens[screenType])
+	if (!m_screens[a_screenType])
 	{
-		switch (screenType)
+		switch (a_screenType)
 		{
 		case ScreenType_GAMESCREEN:
-			m_screens[screenType] = new GameScreen(this);
+			m_screens[a_screenType] = new GameScreen(this);
 			break;
 		default:
 			assert(0);
@@ -45,23 +45,23 @@ void ScreenManager::setScreen(ScreenType screenType)
 		}
 	}
 
-	swapScreen(m_screens[screenType]);
+	swapScreen(m_screens[a_screenType]);
 }
 
-void ScreenManager::swapScreen(IScreen* screen)
+void ScreenManager::swapScreen(IScreen* a_screen)
 {
 	if (m_currentScreen)
 		m_currentScreen->hide();
-	screen->show(m_width, m_height);
-	m_currentScreen = screen;
+	a_screen->show(m_width, m_height);
+	m_currentScreen = a_screen;
 }
 
-void ScreenManager::resize(uint width, uint height)
+void ScreenManager::resize(uint a_width, uint a_height)
 {
-	m_width = width;
-	m_height = height;
+	m_width = a_width;
+	m_height = a_height;
 	if (m_currentScreen)
-		m_currentScreen->resize(width, height);
+		m_currentScreen->resize(a_width, a_height);
 }
 
 void ScreenManager::quit()

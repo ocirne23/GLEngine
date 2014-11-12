@@ -7,12 +7,29 @@ Scene::Scene()
 	remove(h);
 }
 
-Handle<Model> Scene::createModel(const glm::mat4& transform, const char* filePath)
+void Scene::render(const Camera& camera)
+{
+
+}
+
+Scene::Handle<Model> Scene::createModel(const glm::mat4& a_transform, const char* a_filePath)
 {
 	return Handle<Model>();
 }
 
-Handle<Light> Scene::createLight(const glm::vec3& position, const glm::vec3& color, float range)
+Scene::Handle<Light> Scene::createLight(const glm::vec3& a_position, const glm::vec3& a_color, float a_range)
 {
 	return Handle<Light>();
+}
+
+template<>
+Light& Scene::Handle<Light>::get() 
+{
+	return m_scene->m_lights[m_itemIndex];
+}
+
+template<>
+Model& Scene::Handle<Model>::get()
+{
+	return m_scene->m_models[m_itemIndex];
 }

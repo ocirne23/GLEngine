@@ -26,9 +26,9 @@ void FileModificationManager::update()
 	}
 }
 
-FileModificationListener* FileModificationManager::createModificationListener(const FileHandle& handle, std::function<void()> func)
+FileModificationListener* FileModificationManager::createModificationListener(const FileHandle& a_handle, std::function<void()> a_func)
 {
-	FileModificationListener* listener = new FileModificationListener(handle, func);
+	FileModificationListener* listener = new FileModificationListener(a_handle, a_func);
 	s_listeners.push_back(listener);
 
 	WIN32_FILE_ATTRIBUTE_DATA data;
@@ -41,10 +41,10 @@ FileModificationListener* FileModificationManager::createModificationListener(co
 	return listener;
 }
 
-void FileModificationManager::removeModificationListener(FileModificationListener* listener)
+void FileModificationManager::removeModificationListener(FileModificationListener* a_listener)
 {
-	auto it = s_listeners.find(listener);
+	auto it = s_listeners.find(a_listener);
 	assert(it != s_listeners.end());
 	s_listeners.erase(it);
-	delete listener;
+	delete a_listener;
 }

@@ -2,7 +2,7 @@
 
 #include <glm\gtx\fast_square_root.hpp>
 
-void Frustum::calculateFrustum(const glm::mat4& mvp)
+void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 {
 	float t;
 	float m00, m01, m02, m03;
@@ -10,7 +10,7 @@ void Frustum::calculateFrustum(const glm::mat4& mvp)
 	float m20, m21, m22, m23;
 	float m30, m31, m32, m33;
 
-	glm::mat4 trans = glm::transpose(mvp);
+	glm::mat4 trans = glm::transpose(a_mvp);
 
 	m00 = trans[0][0];
 	m01 = trans[0][1];
@@ -105,55 +105,55 @@ void Frustum::calculateFrustum(const glm::mat4& mvp)
 	m_planes[5].w *= t;
 }
 
-bool Frustum::pointInFrustum(const glm::vec3& point) const
+bool Frustum::pointInFrustum(const glm::vec3& a_point) const
 {
 	for (int p = 0; p < 6; p++)
-	if (m_planes[p].x * point.x + m_planes[p].y * point.y + m_planes[p].z * point.z + m_planes[p].w <= 0)
+	if (m_planes[p].x * a_point.x + m_planes[p].y * a_point.y + m_planes[p].z * a_point.z + m_planes[p].w <= 0)
 		return false;
 
 	return true;
 }
 
-bool Frustum::sphereInFrustum(const glm::vec3& point, float radius) const
+bool Frustum::sphereInFrustum(const glm::vec3& a_point, float a_radius) const
 {
 	for (int p = 0; p < 6; p++)
-	if (m_planes[p].x * point.x + m_planes[p].y * point.y + m_planes[p].z * point.z + m_planes[p].w + radius <= 0)
+	if (m_planes[p].x * a_point.x + m_planes[p].y * a_point.y + m_planes[p].z * a_point.z + m_planes[p].w + a_radius <= 0)
 		return false;
 
 	return true;
 }
 
-static inline bool extentSignedTest(const glm::vec4& p, const glm::vec3& center, const glm::vec3& extent)
+static inline bool extentSignedTest(const glm::vec4& a_p, const glm::vec3& a_center, const glm::vec3& a_extent)
 {
-	return (glm::dot(glm::vec3(p), center) + glm::dot(glm::abs(glm::vec3(p)), extent) < -p.w);
+	return (glm::dot(glm::vec3(a_p), a_center) + glm::dot(glm::abs(glm::vec3(a_p)), a_extent) < -a_p.w);
 }
 
-bool Frustum::aabbInFrustum(const glm::vec3& center, const glm::vec3& extent, const glm::mat4& frustumMatrix)
+bool Frustum::aabbInFrustum(const glm::vec3& a_center, const glm::vec3& a_extent, const glm::mat4& a_frustumMatrix)
 {
-	const glm::vec4& rowX = frustumMatrix[0];
-	const glm::vec4& rowY = frustumMatrix[1];
-	const glm::vec4& rowZ = frustumMatrix[2];
-	const glm::vec4& rowW = frustumMatrix[3];
+	const glm::vec4& rowX = a_frustumMatrix[0];
+	const glm::vec4& rowY = a_frustumMatrix[1];
+	const glm::vec4& rowZ = a_frustumMatrix[2];
+	const glm::vec4& rowW = a_frustumMatrix[3];
 
 	// Left and right planes              
-	if (extentSignedTest(rowW + rowX, center, extent))
+	if (extentSignedTest(rowW + rowX, a_center, a_extent))
 		return false;
 
-	if (extentSignedTest(rowW - rowX, center, extent))
+	if (extentSignedTest(rowW - rowX, a_center, a_extent))
 		return false;
 
 	// Bottom and top planes
-	if (extentSignedTest(rowW + rowY, center, extent))
+	if (extentSignedTest(rowW + rowY, a_center, a_extent))
 		return false;
 
-	if (extentSignedTest(rowW - rowY, center, extent))
+	if (extentSignedTest(rowW - rowY, a_center, a_extent))
 		return false;
 
 	// Near and far planes
-	if (extentSignedTest(rowW + rowZ, center, extent))
+	if (extentSignedTest(rowW + rowZ, a_center, a_extent))
 		return false;
 
-	if (extentSignedTest(rowW - rowZ, center, extent))
+	if (extentSignedTest(rowW - rowZ, a_center, a_extent))
 		return false;
 
 	return true;

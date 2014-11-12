@@ -52,4 +52,4 @@ void outputFailure(const char *file, const int line, const char *conditionString
 /**
 * Internal function used by macro CHECK_GL_ERROR, use that instead.
 */
-bool checkGLError(const char *file, int line);
+bool checkGLError(const char *file, int a_line);
