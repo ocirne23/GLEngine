@@ -1,10 +1,10 @@
-#include "Utils\FileHandle.h"
+#include "Utils/FileHandle.h"
 
 #include "Core.h"
-#include "rde\vector.h"
-#include "rde\rde_string.h"
+#include "rde/vector.h"
+#include "rde/rde_string.h"
 
-#include <SDL\SDL_rwops.h>
+#include <SDL/SDL_rwops.h>
 
 #include <conio.h>
 #include <stdlib.h>

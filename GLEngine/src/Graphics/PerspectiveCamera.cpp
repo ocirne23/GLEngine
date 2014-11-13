@@ -1,6 +1,6 @@
-#include "Graphics\PerspectiveCamera.h"
+#include "Graphics/PerspectiveCamera.h"
 
-#include <glm\gtc\matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 void PerspectiveCamera::initialize(const glm::vec3& a_position, const glm::vec3& a_direction, float a_viewportWidth, float a_viewportHeight, float a_horizontalFov, float a_near, float a_far)
 {

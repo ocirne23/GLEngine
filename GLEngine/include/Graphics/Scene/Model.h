@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glm\glm.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 class GLMesh;
 
@@ -11,8 +11,7 @@ public:
 	~Model();
 	Model(const Model& copy) = delete;
 
-private:
-
+public:
 	glm::mat4 transform;
 	GLMesh* mesh;
 };

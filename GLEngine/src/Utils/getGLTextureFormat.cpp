@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Utils\getGLTextureFormat.h"
-#include "Graphics\GL\GL.h"
+#include "Utils/getGLTextureFormat.h"
+#include "Graphics/GL/GL.h"
 #include <assert.h>
 
 GLint getInternalFormatForNumComponents(uint a_numComponents, bool a_isFloatTexture)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ResourceProcessor.h"
+#include "ResourceProcessor.h"
 
 class ModelProcessor : public ResourceProcessor
 {

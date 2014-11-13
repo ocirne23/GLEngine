@@ -20,9 +20,9 @@
 * THE SOFTWARE.
 */
 /****************************************************************************/
-#include "Utils\CheckGLError.h"
+#include "Utils/CheckGLError.h"
 
-#include "Graphics\GL\GL.h"
+#include "Graphics/GL/GL.h"
 #include <iostream>
 
 bool checkGLError(const char *a_file, int a_line)

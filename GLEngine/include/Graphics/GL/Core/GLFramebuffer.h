@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Core.h"
-#include "Graphics\GL\GLTypes.h"
+#include "Graphics/GL/GLTypes.h"
 
-#include "rde\vector.h"
+#include "rde/vector.h"
 
 class GLFramebuffer
 {

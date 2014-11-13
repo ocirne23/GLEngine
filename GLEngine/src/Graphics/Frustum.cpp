@@ -1,6 +1,6 @@
-#include "Graphics\Frustum.h"
+#include "Graphics/Frustum.h"
 
-#include <glm\gtx\fast_square_root.hpp>
+#include <glm/gtx/fast_square_root.hpp>
 
 void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 {

@@ -1,9 +1,9 @@
-#include "Graphics\GL\GLTextureManager.h"
+#include "Graphics/GL/GLTextureManager.h"
 
-#include "Graphics\GL\GL.h"
-#include "Graphics\GL\Core\GLTexture.h"
-#include "Utils\FileHandle.h"
-#include "rde\rde_string.h"
+#include "Graphics/GL/GL.h"
+#include "Graphics/GL/Core/GLTexture.h"
+#include "Utils/FileHandle.h"
+#include "rde/rde_string.h"
 
 GLTextureManager::GLTextureManager()
 {

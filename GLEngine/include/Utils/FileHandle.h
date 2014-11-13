@@ -4,7 +4,7 @@
 
 struct SDL_RWops;
 
-#include "rde\rde_string.h"
+#include "rde/rde_string.h"
 
 class FileHandle
 {

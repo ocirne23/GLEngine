@@ -1,7 +1,7 @@
-#include "Graphics\Camera.h"
+#include "Graphics/Camera.h"
 
-#include <glm\gtx\rotate_vector.hpp>
-#include <glm\gtx\compatibility.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 static const glm::vec3 UP(0, 1, 0);
 

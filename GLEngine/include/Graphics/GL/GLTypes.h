@@ -41,6 +41,6 @@ typedef GLuint64EXT GLuint64;
 
 #else // ANDROID
 
-#include <GLES3\gl3platform.h>
+#include <GLES3/gl3platform.h>
 
 #endif

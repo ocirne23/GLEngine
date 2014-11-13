@@ -1,7 +1,7 @@
-#include "Graphics\Pixmap.h"
+#include "Graphics/Pixmap.h"
 
-#include "Utils\FileHandle.h"
-#include "Utils\ResourceType.h"
+#include "Utils/FileHandle.h"
+#include "Utils/ResourceType.h"
 
 #include <assert.h>
 

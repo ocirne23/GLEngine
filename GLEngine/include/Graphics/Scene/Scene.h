@@ -1,19 +1,16 @@
-#pragma once
+#pragma once 
 
 #include "Core.h"
 #include "Light.h"
 #include "Model.h"
 
-#include "Graphics\GL\GLLightManager.h"
-#include "Graphics\GL\GLMesh.h"
-#include "Graphics\GL\Core\GLShader.h"
-
 #include "Utils\MatForward.h"
 #include "Utils\VecForward.h"
 
-#include "rde/vector.h"
+#include "rde\vector.h"
 
-class Camera;
+class GLScene;
+class PerspectiveCamera;
 
 class Scene
 {
@@ -34,7 +31,7 @@ public:
 	~Scene();
 	Scene(const Scene& copy) = delete;
 
-	void render(const Camera& camera);
+	void render(const PerspectiveCamera& camera);
 	Handle<Model> createModel(const glm::mat4& transform, const char* filePath);
 	Handle<Light> createLight(const glm::vec3& position, const glm::vec3& color, float range);
 
@@ -43,9 +40,8 @@ public:
 
 private:
 
-	GLShader m_uberShader;
+	GLScene* m_glScene;
 
 	rde::vector<Model> m_models;
 	rde::vector<Light> m_lights;
-	rde::vector<GLMesh> m_meshes;
 };

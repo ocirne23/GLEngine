@@ -2,10 +2,10 @@
 
 #include "Core.h"
 
-#include "rde\vector.h"
+#include "rde/vector.h"
 
-#include "Graphics\GL\GLTypes.h"
-#include "Graphics\GL\GLDefines.h"
+#include "Graphics/GL/GLTypes.h"
+#include "Graphics/GL/GLDefines.h"
 
 class Pixmap;
 

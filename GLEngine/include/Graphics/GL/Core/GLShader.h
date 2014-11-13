@@ -2,15 +2,15 @@
 
 #include "Core.h"
 
-#include "Utils\VecForward.h"
-#include "Utils\MatForward.h"
-#include "Utils\FileHandle.h"
+#include "Utils/VecForward.h"
+#include "Utils/MatForward.h"
+#include "Utils/FileHandle.h"
 
-#include "rde\hash_map.h"
-#include "rde\vector.h"
-#include "rde\rde_string.h"
+#include "rde/hash_map.h"
+#include "rde/vector.h"
+#include "rde/rde_string.h"
 
-#include "Graphics\GL\GLTypes.h"
+#include "Graphics/GL/GLTypes.h"
 
 class FileHandle;
 

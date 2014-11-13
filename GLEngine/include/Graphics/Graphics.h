@@ -2,13 +2,13 @@
 
 #include "Core.h"
 
-#include "Graphics\GL\GLTextureManager.h"
+#include "Graphics/GL/GLTextureManager.h"
 
-#include "Utils\Viewport.h"
-#include "Utils\VecForward.h"
+#include "Utils/Viewport.h"
+#include "Utils/VecForward.h"
 
-#include "rde\rde_string.h"
-#include "rde\vector.h"
+#include "rde/rde_string.h"
+#include "rde/vector.h"
 
 struct SDL_Window;
 class WindowEventListener;

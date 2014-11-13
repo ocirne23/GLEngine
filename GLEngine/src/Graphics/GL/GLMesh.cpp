@@ -1,26 +1,26 @@
-#include "Graphics\GL\GLMesh.h"
+#include "Graphics/GL/GLMesh.h"
 
 #include "GLEngine.h"
-#include "Graphics\Graphics.h"
-#include "Graphics\Pixmap.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/Pixmap.h"
 
-#include "Graphics\GL\GL.h"
-#include "Graphics\GL\Core\GLShader.h"
-#include "Graphics\GL\Core\GLConstantBuffer.h"
-#include "Graphics\GL\Core\GLStateBuffer.h"
-#include "Graphics\GL\Core\GLTextureArray.h"
-#include "Graphics\GL\Core\GLVertexBuffer.h"
+#include "Graphics/GL/GL.h"
+#include "Graphics/GL/Core/GLShader.h"
+#include "Graphics/GL/Core/GLConstantBuffer.h"
+#include "Graphics/GL/Core/GLStateBuffer.h"
+#include "Graphics/GL/Core/GLTextureArray.h"
+#include "Graphics/GL/Core/GLVertexBuffer.h"
 
-#include "Utils\FileHandle.h"
-#include "Utils\CheckGLError.h"
-#include "Utils\ResourceType.h"
+#include "Utils/FileHandle.h"
+#include "Utils/CheckGLError.h"
+#include "Utils/ResourceType.h"
 
-#include "Input\Input.h"
-#include "Input\Key.h"
+#include "Input/Input.h"
+#include "Input/Key.h"
 
-#include "rde\rde_string.h"
+#include "rde/rde_string.h"
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 enum { MAX_MATERIALS = 200 };
 

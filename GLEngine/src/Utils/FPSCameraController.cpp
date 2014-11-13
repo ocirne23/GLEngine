@@ -1,13 +1,13 @@
-#include "Utils\FPSCameraController.h"
+#include "Utils/FPSCameraController.h"
 
-#include "Graphics\PerspectiveCamera.h"
+#include "Graphics/PerspectiveCamera.h"
 
-#include "Input\Key.h"
-#include "Input\MouseButton.h"
+#include "Input/Key.h"
+#include "Input/MouseButton.h"
 
-#include <glm\glm.hpp>
-#include <glm\gtx\rotate_vector.hpp>
-#include <glm\gtx\compatibility.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 static const float DEFAULT_CAMERA_SPEED = 10.0f;
 static const float MOUSE_LOOK_SENSITIVITY = 0.7f;

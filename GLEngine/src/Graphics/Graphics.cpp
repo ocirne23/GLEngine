@@ -1,9 +1,9 @@
-#include "Graphics\Graphics.h"
+#include "Graphics/Graphics.h"
 
-#include "Graphics\WindowEventListener.h"
-#include "Graphics\GL\GL.h"
-#include "Utils\CheckGLError.h"
-#include "rde\rde_string.h"
+#include "Graphics/WindowEventListener.h"
+#include "Graphics/GL/GL.h"
+#include "Utils/CheckGLError.h"
+#include "rde/rde_string.h"
 
 #include <assert.h>
 #include <glm\glm.hpp>
@@ -15,7 +15,7 @@ static const uint MAX_GL_MAJOR_VERSION = 3;
 static const uint MAX_GL_MINOR_VERSION = 0;
 #else
 
-#include "Graphics\ARBDebugOutput.h"
+#include "Graphics/ARBDebugOutput.h"
 
 static const uint MAX_GL_MAJOR_VERSION = 4;
 static const uint MAX_GL_MINOR_VERSION = 5;

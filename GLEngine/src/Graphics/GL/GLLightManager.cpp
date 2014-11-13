@@ -1,8 +1,8 @@
-#include "Graphics\GL\GLLightManager.h"
+#include "Graphics/GL/GLLightManager.h"
 
-#include "Graphics\GL\GL.h"
-#include "Graphics\GL\Core\GLShader.h"
-#include "Graphics\PerspectiveCamera.h"
+#include "Graphics/GL/GL.h"
+#include "Graphics/GL/Core/GLShader.h"
+#include "Graphics/PerspectiveCamera.h"
 
 static const uint LIGHT_POSITION_RANGES_BINDING_POINT = 1;
 static const uint LIGHT_COLORS_BINDING_POINT = 2;

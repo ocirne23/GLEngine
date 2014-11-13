@@ -2,8 +2,8 @@
 
 #include "Core.h"
 
-#include "rde\hash_map.h"
-#include "rde\rde_string.h"
+#include "rde/hash_map.h"
+#include "rde/rde_string.h"
 
 class GLTexture;
 

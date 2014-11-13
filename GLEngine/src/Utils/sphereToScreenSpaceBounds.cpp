@@ -20,9 +20,9 @@
 * THE SOFTWARE.
 */
 /****************************************************************************/
-#include "Utils\sphereToScreenSpaceBounds.h"
+#include "Utils/sphereToScreenSpaceBounds.h"
 
-#include "Graphics\PerspectiveCamera.h"
+#include "Graphics/PerspectiveCamera.h"
 
 namespace
 {

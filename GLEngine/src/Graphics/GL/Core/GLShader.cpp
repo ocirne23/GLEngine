@@ -1,11 +1,11 @@
-#include "Graphics\GL\Core\GLShader.h"
+#include "Graphics/GL/Core/GLShader.h"
 
 #include "Core.h"
-#include "Graphics\GL\GL.h"
-#include "Utils\FileHandle.h"
-#include "rde\rde_string.h"
+#include "Graphics/GL/GL.h"
+#include "Utils/FileHandle.h"
+#include "rde/rde_string.h"
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 bool GLShader::s_begun = false;
 

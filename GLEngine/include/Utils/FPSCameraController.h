@@ -2,10 +2,10 @@
 
 #include "Core.h"
 
-#include "Input\KeyListener.h"
-#include "Input\MouseListener.h"
+#include "Input/KeyListener.h"
+#include "Input/MouseListener.h"
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 class PerspectiveCamera;
 enum Key;

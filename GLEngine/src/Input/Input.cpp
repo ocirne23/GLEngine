@@ -1,12 +1,12 @@
-#include "Input\Input.h"
+#include "Input/Input.h"
 
-#include "Input\KeyListener.h"
-#include "Input\MouseListener.h"
-#include "Input\Key.h"
-#include "Input\MouseButton.h"
+#include "Input/KeyListener.h"
+#include "Input/MouseListener.h"
+#include "Input/Key.h"
+#include "Input/MouseButton.h"
 
-#include <SDL\SDL_events.h>
-#include <SDL\SDL_keyboard.h>
+#include <SDL/SDL_events.h>
+#include <SDL/SDL_keyboard.h>
 
 Input::Input()
 {

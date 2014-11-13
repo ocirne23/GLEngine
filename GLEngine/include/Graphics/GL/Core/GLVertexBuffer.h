@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-#include "Graphics\GL\GLTypes.h"
+#include "Graphics/GL/GLTypes.h"
 
 struct VertexAttribute
 {

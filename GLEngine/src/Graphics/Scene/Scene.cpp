@@ -1,5 +1,7 @@
 #include "Graphics\Scene\Scene.h"
 
+#include "Graphics\PerspectiveCamera.h"
+
 Scene::Scene()
 {
 	Handle<Model> h = createModel(glm::mat4(), "da");
@@ -7,9 +9,9 @@ Scene::Scene()
 	remove(h);
 }
 
-void Scene::render(const Camera& camera)
+void Scene::render(const PerspectiveCamera& camera)
 {
-
+	m_glScene->render(camera, m_models);
 }
 
 Scene::Handle<Model> Scene::createModel(const glm::mat4& a_transform, const char* a_filePath)

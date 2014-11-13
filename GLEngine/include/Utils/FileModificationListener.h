@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rde\rde_string.h"
+#include "rde/rde_string.h"
 
 #include <functional>
 

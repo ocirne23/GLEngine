@@ -1,8 +1,8 @@
 #include "GLEngine.h"
 
-#include "Input\Input.h"
-#include "Graphics\Graphics.h"
-#include "Graphics\WindowFlags.h"
+#include "Input/Input.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/WindowFlags.h"
 
 #include <SDL\SDL.h>
 

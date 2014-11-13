@@ -1,7 +1,7 @@
-#include "Graphics\GL\Core\GLTextureBuffer.h"
+#include "Graphics/GL/Core/GLTextureBuffer.h"
 
-#include "Graphics\GL\GL.h"
-#include "Graphics\GL\Core\GLShader.h"
+#include "Graphics/GL/GL.h"
+#include "Graphics/GL/Core/GLShader.h"
 
 #include <assert.h>
 

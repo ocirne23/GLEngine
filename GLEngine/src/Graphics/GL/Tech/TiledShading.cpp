@@ -1,11 +1,11 @@
-#include "Graphics\GL\Tech\TiledShading.h"
+#include "Graphics/GL/Tech/TiledShading.h"
 
-#include "Graphics\PerspectiveCamera.h"
-#include "Graphics\GL\GL.h"
-#include "Graphics\GL\Core\GLShader.h"
-#include "Utils\sphereToScreenSpaceBounds.h"
+#include "Graphics/PerspectiveCamera.h"
+#include "Graphics/GL/GL.h"
+#include "Graphics/GL/Core/GLShader.h"
+#include "Utils/sphereToScreenSpaceBounds.h"
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 #include <assert.h>
 

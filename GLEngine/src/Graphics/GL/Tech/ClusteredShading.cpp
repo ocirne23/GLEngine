@@ -1,15 +1,15 @@
-#include "Graphics\GL\Tech\ClusteredShading.h"
+#include "Graphics/GL/Tech/ClusteredShading.h"
 
-#include "Utils\Viewport.h"
-#include "Graphics\PerspectiveCamera.h"
-#include "Graphics\GL\GL.h"
-#include "Graphics\GL\Core\GLShader.h"
-#include "Utils\Bounds3D.h"
-#include "Utils\sphereToScreenSpaceBounds.h"
+#include "Utils/Viewport.h"
+#include "Graphics/PerspectiveCamera.h"
+#include "Graphics/GL/GL.h"
+#include "Graphics/GL/Core/GLShader.h"
+#include "Utils/Bounds3D.h"
+#include "Utils/sphereToScreenSpaceBounds.h"
 
 #include <assert.h>
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 void ClusteredShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, const Viewport& a_viewport,
 	const PerspectiveCamera& a_camera)

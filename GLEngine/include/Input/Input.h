@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rde\vector.h"
+#include "rde/vector.h"
 
 class KeyListener;
 class MouseListener;

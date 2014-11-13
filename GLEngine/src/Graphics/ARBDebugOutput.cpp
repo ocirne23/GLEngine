@@ -1,12 +1,13 @@
-#include "Graphics\ARBDebugOutput.h"
+#include "Graphics/ARBDebugOutput.h"
 
 #ifndef ANDROID
 #include "Core.h"
 
-#include <GLEW\glew.h>
+#include <GLEW/glew.h>
+#include <SDL/SDL_syswm.h>
+
 #include <string>
 #include <assert.h>
-#include <SDL\SDL_syswm.h>
 
 void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_severity, GLsizei a_length, const GLchar* a_message, const void* a_userParam)
 {

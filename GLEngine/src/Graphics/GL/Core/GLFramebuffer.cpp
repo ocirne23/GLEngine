@@ -1,6 +1,6 @@
-#include "Graphics\GL\Core\GLFramebuffer.h"
+#include "Graphics/GL/Core/GLFramebuffer.h"
 
-#include "Graphics\GL\GL.h"
+#include "Graphics/GL/GL.h"
 
 #include <assert.h>
 

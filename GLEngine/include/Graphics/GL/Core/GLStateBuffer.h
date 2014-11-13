@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Graphics\GL\GLTypes.h"
-#include "rde\vector.h"
+#include "Graphics/GL/GLTypes.h"
+#include "rde/vector.h"
 
 class GLConstantBuffer;
 class GLTextureBuffer;

@@ -3,8 +3,8 @@
 #include "..\Screens\GameScreen.h"
 
 #include "GLEngine.h"
-#include "Graphics\Graphics.h"
-#include "Graphics\WindowEventListener.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/WindowEventListener.h"
 
 ScreenManager::ScreenManager() : m_currentScreen(0), m_width(0), m_height(0), hasQuit(false)
 {

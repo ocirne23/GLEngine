@@ -2,12 +2,12 @@
 
 #include "Core.h"
 #include "../Core/IScreen.h"
-#include "Input\KeyListener.h"
-#include "Graphics\GL\Core\GLTexture.h"
-#include "Graphics\GL\GLMesh.h"
-#include "Graphics\GL\GLLightManager.h"
-#include "Graphics\GL\Tech\ClusteredShading.h"
-#include "Graphics\GL\Core\GLShader.h"
+#include "Input/KeyListener.h"
+#include "Graphics/GL/Core/GLTexture.h"
+#include "Graphics/GL/GLMesh.h"
+#include "Graphics/GL/GLLightManager.h"
+#include "Graphics/GL/Tech/ClusteredShading.h"
+#include "Graphics/GL/Core/GLShader.h"
 
 class GameScreen : public IScreen, public KeyListener
 {

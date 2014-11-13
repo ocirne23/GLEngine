@@ -1,8 +1,8 @@
-#include "Graphics\GL\Core\GLTexture.h"
+#include "Graphics/GL/Core/GLTexture.h"
 
-#include "Graphics\Pixmap.h"
-#include "Graphics\GL\GL.h"
-#include "Utils\getGLTextureFormat.h"
+#include "Graphics/Pixmap.h"
+#include "Graphics/GL/GL.h"
+#include "Utils/getGLTextureFormat.h"
 
 #include <functional>
 #include <assert.h>

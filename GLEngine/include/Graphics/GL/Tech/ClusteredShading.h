@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Core.h"
-#include "rde\vector.h"
-#include "Utils\VecForward.h"
-#include "Utils\Viewport.h"
+#include "rde/vector.h"
+#include "Utils/VecForward.h"
+#include "Utils/Viewport.h"
 
-#include "Graphics\GL\Core\GLTextureBuffer.h"
+#include "Graphics/GL/Core/GLTextureBuffer.h"
 
 class PerspectiveCamera;
 class GLShader;

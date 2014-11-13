@@ -3,8 +3,8 @@
 #ifndef ANDROID
 
 #include "Core.h"
-#include "Graphics\GL\GLTypes.h"
-#include "Graphics\GL\GLDefines.h"
+#include "Graphics/GL/GLTypes.h"
+#include "Graphics/GL/GLDefines.h"
 
 class GLShader;
 

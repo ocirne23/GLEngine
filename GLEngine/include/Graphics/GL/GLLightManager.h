@@ -1,12 +1,12 @@
 #pragma once
 
-#include "rde\vector.h"
-#include "Graphics\GL\GLTypes.h"
-#include "Graphics\GL\Core\GLConstantBuffer.h"
-#include "Graphics\GL\Core\GLTextureBuffer.h"
-#include "Utils\Viewport.h"
+#include "rde/vector.h"
+#include "Graphics/GL/GLTypes.h"
+#include "Graphics/GL/Core/GLConstantBuffer.h"
+#include "Graphics/GL/Core/GLTextureBuffer.h"
+#include "Utils/Viewport.h"
 
-#include <glm\glm.hpp>
+#include <glm/glm.hpp>
 
 typedef uint LightHandle;
 

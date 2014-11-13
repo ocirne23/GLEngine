@@ -1,7 +1,7 @@
-#include "Graphics\GL\Core\GLVertexBuffer.h"
+#include "Graphics/GL/Core/GLVertexBuffer.h"
 
-#include "Graphics\GL\GL.h"
-#include "Graphics\GL\Core\GLStateBuffer.h"
+#include "Graphics/GL/GL.h"
+#include "Graphics/GL/Core/GLStateBuffer.h"
 
 #include <assert.h>
 

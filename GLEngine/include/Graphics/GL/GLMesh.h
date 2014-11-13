@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Core.h"
-#include "Graphics\GL\GLAppVars.h"
-#include "Graphics\GL\GLTypes.h"
-#include "Graphics\GL\Core\GLStateBuffer.h"
-#include "Graphics\GL\Core\GLTextureArray.h"
+#include "Graphics/GL/GLAppVars.h"
+#include "Graphics/GL/GLTypes.h"
+#include "Graphics/GL/Core/GLStateBuffer.h"
+#include "Graphics/GL/Core/GLTextureArray.h"
 
-#include "rde\rde_string.h"
-#include "rde\vector.h"
+#include "rde/rde_string.h"
+#include "rde/vector.h"
 
 #include <glm\glm.hpp>
 

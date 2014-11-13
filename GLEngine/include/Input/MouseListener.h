@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Input\MouseButton.h"
+#include "Input/MouseButton.h"
 
 class MouseListener
 {
