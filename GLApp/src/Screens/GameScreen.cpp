@@ -40,8 +40,8 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	camera.initialize(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), (float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 	cameraController.initialize(camera, glm::vec3(0, 0, 1));
 
-	lightManager.initialize(MAX_LIGHTS);
-	clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewport(), camera);
+	m_lightManager.initialize(MAX_LIGHTS);
+	m_clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewport(), camera);
 
 	rde::vector<rde::string> extensions;
 	rde::vector<rde::string> defines;
@@ -54,9 +54,9 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	}
 
 	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string(MAX_LIGHTS)));
-	defines.push_back(rde::string("LIGHT_GRID_WIDTH ").append(rde::to_string(clusteredShading.getGridWidth())));
-	defines.push_back(rde::string("LIGHT_GRID_HEIGHT ").append(rde::to_string(clusteredShading.getGridHeight())));
-	defines.push_back(rde::string("LIGHT_GRID_DEPTH ").append(rde::to_string(clusteredShading.getGridDepth())));
+	defines.push_back(rde::string("LIGHT_GRID_WIDTH ").append(rde::to_string(m_clusteredShading.getGridWidth())));
+	defines.push_back(rde::string("LIGHT_GRID_HEIGHT ").append(rde::to_string(m_clusteredShading.getGridHeight())));
+	defines.push_back(rde::string("LIGHT_GRID_DEPTH ").append(rde::to_string(m_clusteredShading.getGridDepth())));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_WIDTH ").append(rde::to_string(TILE_WIDTH_PX)));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
 
@@ -66,30 +66,30 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 #else
 	rde::string versionStr("330 core");
 #endif
-	modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", versionStr, &defines, &extensions);
+	m_modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", versionStr, &defines, &extensions);
 	CHECK_GL_ERROR();
 
-	modelShader.begin();
-	lightManager.setupShader(modelShader);
-	clusteredShading.setupShader(modelShader, 
+	m_modelShader.begin();
+	m_lightManager.setupShader(m_modelShader);
+	m_clusteredShading.setupShader(m_modelShader, 
 		GLAppVars::TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, 
 		GLAppVars::TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
-	modelShader.setUniform3f("u_ambient", glm::vec3(0.2f));
-	modelShader.end();
+	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.2f));
+	m_modelShader.end();
 		
-	modelShader.begin();
-	modelShader.setUniform1i("u_dfvTexture", GLAppVars::TextureUnits_DFV_TEXTURE);
-	modelShader.setUniform1i("u_1cTextureArray", GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY);
-	modelShader.setUniform1i("u_3cTextureArray", GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY);
-	mesh.loadFromFile("Models/palace/palace.da", modelShader, 
+	m_modelShader.begin();
+	m_modelShader.setUniform1i("u_dfvTexture", GLAppVars::TextureUnits_DFV_TEXTURE);
+	m_modelShader.setUniform1i("u_1cTextureArray", GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY);
+	m_modelShader.setUniform1i("u_3cTextureArray", GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY);
+	m_mesh.loadFromFile("Models/palace/palace.da", m_modelShader, 
 		GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY,
 		GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY,
 		GLAppVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	CHECK_GL_ERROR();
-	modelShader.end();
+	m_modelShader.end();
 
-	dfvTexture.initialize("Utils/ggx-helper-dfv.da", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 }
 
 GameScreen::~GameScreen()
@@ -104,23 +104,21 @@ void GameScreen::render(float a_deltaSec)
 	cameraController.update(a_deltaSec);
 	camera.update();
 
-	static const glm::mat4 modelMatrix = glm::scale(glm::mat4(1), glm::vec3(1.0));
-
-	dfvTexture.bind(GLAppVars::TextureUnits_DFV_TEXTURE);
-	modelShader.begin();
+	m_dfvTexture.bind(GLAppVars::TextureUnits_DFV_TEXTURE);
+	m_modelShader.begin();
 	{
-		lightManager.update(camera);
-		clusteredShading.update(camera, lightManager.getViewspaceLightPositionRangeListBegin(), lightManager.getNumLights());
+		m_lightManager.update(camera);
+		m_clusteredShading.update(camera, m_lightManager.getViewspaceLightPositionRangeListBegin(), m_lightManager.getNumLights());
 
-		modelShader.setUniform3f("u_eyePos", glm::vec3(camera.m_viewMatrix * glm::vec4(camera.m_position, 1.0f)));
-		modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);
-		modelShader.setUniformMatrix4f("u_mvp", camera.m_combinedMatrix);
-		modelShader.setUniformMatrix3f("u_normalMat", glm::mat3(glm::inverse(glm::transpose(camera.m_viewMatrix))));
+		m_modelShader.setUniform3f("u_eyePos", glm::vec3(camera.m_viewMatrix * glm::vec4(camera.m_position, 1.0f)));
+		m_modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);
+		m_modelShader.setUniformMatrix4f("u_mvp", camera.m_combinedMatrix);
+		m_modelShader.setUniformMatrix3f("u_normalMat", glm::mat3(glm::inverse(glm::transpose(camera.m_viewMatrix))));
 
-		modelShader.setUniformMatrix4f("u_transform", modelMatrix);
-		mesh.render();
+		m_modelShader.setUniformMatrix4f("u_transform", glm::mat4(1));
+		m_mesh.render();
 	}
-	modelShader.end();
+	m_modelShader.end();
 	FileModificationManager::update();
 	CHECK_GL_ERROR();
 	
@@ -148,7 +146,7 @@ bool GameScreen::keyDown(Key a_key)
 	{
 	case Key_T:
 		{
-			lightManager.createLight(
+			m_lightManager.createLight(
 				camera.m_position,
 				glm::normalize(glm::vec3(
 				(rand() % 1000) / 1000.0f,

@@ -23,9 +23,9 @@ public:
 
 private:
 
-	GLTexture dfvTexture;
-	GLMesh mesh;
-	GLShader modelShader;
-	GLLightManager lightManager;
-	ClusteredShading clusteredShading;
+	GLTexture m_dfvTexture;
+	GLMesh m_mesh;
+	GLShader m_modelShader;
+	GLLightManager m_lightManager;
+	ClusteredShading m_clusteredShading;
 };

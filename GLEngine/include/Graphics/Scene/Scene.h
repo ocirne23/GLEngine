@@ -1,16 +1,17 @@
 #pragma once
 
 #include "Core.h"
-#include "rde/vector.h"
-#include "Model.h"
 #include "Light.h"
+#include "Model.h"
 
+#include "Graphics\GL\GLLightManager.h"
 #include "Graphics\GL\GLMesh.h"
 #include "Graphics\GL\Core\GLShader.h"
-#include "Graphics\GL\GLLightManager.h"
 
 #include "Utils\MatForward.h"
 #include "Utils\VecForward.h"
+
+#include "rde/vector.h"
 
 class Camera;
 
