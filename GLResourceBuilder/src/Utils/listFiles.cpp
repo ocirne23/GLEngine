@@ -5,22 +5,22 @@
 #include <codecvt>
 #include <assert.h>
 
-bool listFiles(std::string path, std::string mask, std::vector<std::string>& files, std::vector<std::string>& lastWriteTimesStr)
+bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>& a_files, std::vector<std::string>& a_lastWriteTimesStr)
 {
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA ffd;
 
 	std::string spec;
 	std::stack<std::string> directories;
-	std::string root = path;
+	std::string root = a_path;
 
-	directories.push(path);
-	files.clear();
+	directories.push(a_path);
+	a_files.clear();
 	
 	while (!directories.empty()) 
 	{
-		path = directories.top();
-		spec = path + "\\" + mask;
+		a_path = directories.top();
+		spec = a_path + "\\" + a_mask;
 		directories.pop();
 		const char* da = "wa";
 		hFind = FindFirstFile(spec.c_str(), &ffd);
@@ -34,12 +34,12 @@ bool listFiles(std::string path, std::string mask, std::vector<std::string>& fil
 			{
 				if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) 
 				{
-					directories.push(path + "\\" + ffd.cFileName);
+					directories.push(a_path + "\\" + ffd.cFileName);
 				}
 				else 
 				{
-					std::string fullPath = path + "\\" + ffd.cFileName;
-					files.push_back(fullPath.substr(root.length() + 1, fullPath.length() - (root.length() + 1)));
+					std::string fullPath = a_path + "\\" + ffd.cFileName;
+					a_files.push_back(fullPath.substr(root.length() + 1, fullPath.length() - (root.length() + 1)));
 
 					SYSTEMTIME sysWriteTime;
 					FileTimeToSystemTime(&ffd.ftLastWriteTime, &sysWriteTime);
@@ -53,7 +53,7 @@ bool listFiles(std::string path, std::string mask, std::vector<std::string>& fil
 					time += std::to_string((int) sysWriteTime.wMonth) + ":";
 					time += std::to_string((int) sysWriteTime.wYear);
 
-					lastWriteTimesStr.push_back(time);
+					a_lastWriteTimesStr.push_back(time);
 				}
 			}
 		} while (FindNextFile(hFind, &ffd) != 0);

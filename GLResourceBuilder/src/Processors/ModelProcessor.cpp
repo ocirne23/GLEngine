@@ -54,9 +54,9 @@ namespace
 	struct Vertex
 	{
 		Vertex() {};
-		Vertex(aiVector3D& position, aiVector3D& texcoords, aiVector3D& normal, aiVector3D& tangents, aiVector3D& bitangents, unsigned int materialID)
-			: position((vec3&) position), texcoords((vec2&) texcoords), normal((vec3&) normal)
-			, tangents((vec3&) tangents), bitangents((vec3&) bitangents), materialID(materialID) {}
+		Vertex(aiVector3D& a_position, aiVector3D& a_texcoords, aiVector3D& a_normal, aiVector3D& a_tangents, aiVector3D& a_bitangents, unsigned int a_materialID)
+			: position((vec3&) a_position), texcoords((vec2&) a_texcoords), normal((vec3&) a_normal)
+			, tangents((vec3&) a_tangents), bitangents((vec3&)a_bitangents), materialID(a_materialID) {}
 		vec3 position;
 		vec2 texcoords;
 		vec3 normal;

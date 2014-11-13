@@ -5,18 +5,18 @@
 #include <fstream>
 #include <assert.h>
 
-bool FloatImageProcessor::process(const char* inResourcePath, const char* outResourcePath)
+bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
 {
 	int type = ResourceType_FLOATIMAGE;
 	int width, height, numComponents;
 
-	const float* data = stbi_loadf(inResourcePath, &width, &height, &numComponents, 0);
+	const float* data = stbi_loadf(a_inResourcePath, &width, &height, &numComponents, 0);
 	if (!data)
 	{
-		printf("FAILED TO LOAD IMAGE: %s \n", inResourcePath);
+		printf("FAILED TO LOAD IMAGE: %s \n", a_inResourcePath);
 		return false;
 	}
-	std::fstream file(outResourcePath, std::ios::out | std::ios::binary);
+	std::fstream file(a_outResourcePath, std::ios::out | std::ios::binary);
 
 	assert(file.is_open());
 	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
