@@ -1,4 +1,4 @@
-#include "Graphics/ARBDebugOutput.h"
+#include "Graphics/tryEnableARBDebugOutput.h"
 
 #ifndef ANDROID
 #include "Core.h"
@@ -69,7 +69,6 @@ void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_
 
 void tryEnableARBDebugOutput()
 {
-	return;
 #if !defined(ANDROID) && defined(GL_ARB_debug_output)
 	if (glewIsExtensionSupported("GL_ARB_debug_output"))
 	{

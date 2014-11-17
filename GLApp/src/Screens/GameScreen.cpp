@@ -28,7 +28,7 @@ static const unsigned int TILE_WIDTH_PX = 32;
 static const unsigned int TILE_HEIGHT_PX = 32;
 static const unsigned int NUM_TEXTURE_ARRAYS = 16;
 
-GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager)
+GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager), m_lightManager(MAX_LIGHTS)
 {
 	CHECK_GL_ERROR();
 
@@ -40,7 +40,6 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	camera.initialize(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), (float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 	cameraController.initialize(camera, glm::vec3(0, 0, 1));
 
-	m_lightManager.initialize(MAX_LIGHTS);
 	m_clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewport(), camera);
 
 	rde::vector<rde::string> extensions;
@@ -70,10 +69,6 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	CHECK_GL_ERROR();
 
 	m_modelShader.begin();
-	m_lightManager.setupShader(m_modelShader);
-	m_clusteredShading.setupShader(m_modelShader, 
-		GLAppVars::TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, 
-		GLAppVars::TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
 	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.2f));
 	m_modelShader.end();
 		

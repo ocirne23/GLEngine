@@ -1,17 +1,16 @@
-#include "Graphics\Scene\Scene.h"
+#include "Graphics/Scene/Scene.h"
 
-#include "Graphics\PerspectiveCamera.h"
+#include "Graphics/PerspectiveCamera.h"
+#include "Graphics/Scene/GL/GLScene.h"
 
 Scene::Scene()
 {
-	Handle<Model> h = createModel(glm::mat4(), "da");
-	h.get();
-	remove(h);
+	m_glScene = new GLScene();
 }
 
 void Scene::render(const PerspectiveCamera& camera)
 {
-	m_glScene->render(camera, m_models);
+	m_glScene->render(camera, m_models, m_lights);
 }
 
 Scene::Handle<Model> Scene::createModel(const glm::mat4& a_transform, const char* a_filePath)
@@ -22,6 +21,16 @@ Scene::Handle<Model> Scene::createModel(const glm::mat4& a_transform, const char
 Scene::Handle<Light> Scene::createLight(const glm::vec3& a_position, const glm::vec3& a_color, float a_range)
 {
 	return Handle<Light>();
+}
+
+void Scene::removeModel(Scene::Handle<Model>& a_modelHandle)
+{
+	
+}
+
+void Scene::removeLight(Scene::Handle<Light>& a_lightHandle)
+{
+
 }
 
 template<>

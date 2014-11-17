@@ -15,7 +15,6 @@ class PerspectiveCamera;
 class Scene
 {
 public:
-
 	template <typename T>
 	class Handle
 	{
@@ -33,10 +32,10 @@ public:
 
 	void render(const PerspectiveCamera& camera);
 	Handle<Model> createModel(const glm::mat4& transform, const char* filePath);
-	Handle<Light> createLight(const glm::vec3& position, const glm::vec3& color, float range);
+	Handle<Light> creatóeLight(const glm::vec3& position, const glm::vec3& color, float range);
 
-	void remove(Handle<Model>& handle);
-	void remove(Handle<Light>& handle);
+	void removeModel(Handle<Model>& modelHandle);
+	void removeLight(Handle<Light>& lightHandle);
 
 private:
 

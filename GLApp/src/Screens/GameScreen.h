@@ -3,9 +3,12 @@
 #include "Core.h"
 #include "../Core/IScreen.h"
 #include "Input/KeyListener.h"
+
+#include "Graphics/LightManager.h"
+
+
 #include "Graphics/GL/Core/GLTexture.h"
 #include "Graphics/GL/GLMesh.h"
-#include "Graphics/GL/GLLightManager.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
 #include "Graphics/GL/Core/GLShader.h"
 
@@ -26,6 +29,6 @@ private:
 	GLTexture m_dfvTexture;
 	GLMesh m_mesh;
 	GLShader m_modelShader;
-	GLLightManager m_lightManager;
+	LightManager m_lightManager;
 	ClusteredShading m_clusteredShading;
 };

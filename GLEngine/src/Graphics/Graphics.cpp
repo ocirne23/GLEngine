@@ -5,17 +5,19 @@
 #include "Utils/CheckGLError.h"
 #include "rde/rde_string.h"
 
-#include <assert.h>
 #include <glm\glm.hpp>
 #include <SDL\SDL.h>
 #include <SDL\SDL_syswm.h>
+
+#include <assert.h>
+
 
 #ifdef ANDROID
 static const uint MAX_GL_MAJOR_VERSION = 3;
 static const uint MAX_GL_MINOR_VERSION = 0;
 #else
 
-#include "Graphics/ARBDebugOutput.h"
+#include "Graphics/tryEnableARBDebugOutput.h"
 
 static const uint MAX_GL_MAJOR_VERSION = 4;
 static const uint MAX_GL_MINOR_VERSION = 5;
@@ -31,74 +33,28 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 		return false;
 	}
 
-	SDL_GetWindowSize(m_window, (int*) &m_screenWidth, (int*) &m_screenHeight);
-
-	resizeScreen(m_screenWidth, m_screenHeight);
-
-	int major = MAX_GL_MAJOR_VERSION;
-	int minor = MAX_GL_MINOR_VERSION;
-	for (; major >= 0; --major)
-	{
-		minor = MAX_GL_MINOR_VERSION;
-
-		for (; minor >= 0; --minor)
-		{
-			m_glContext = createGLContext(major, minor);
-			if (m_glContext) break;
-			//SDL_ClearError();
-		}
-		if (m_glContext) break;
-	}
-	if (!m_glContext)
-	{
-		print("Failed to create OpenGL context\n"); 
-		return false;
-	}
-	CHECK_GL_ERROR();
-
-	m_glMajorVersion = major;
-	m_glMinorVersion = minor;
-
+	createHighestGLContext(MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
 	SDL_GL_SetSwapInterval(m_vsyncEnabled);	//1 is vsync 0 is uncapped
-	CHECK_GL_ERROR();
+
+	SDL_GetWindowSize(m_window, (int*)&m_screenWidth, (int*)&m_screenHeight);
+	resizeScreen(m_screenWidth, m_screenHeight);
+	glViewport(0, 0, m_screenWidth, m_screenHeight);
 
 #ifndef ANDROID
-
-	glewExperimental = GL_TRUE;
-	GLenum err = glewInit();
-
-	if (GLEW_OK != err)
-	{
-		print("GLEW error: %s\n", glewGetErrorString(err));
-	}
-	else
-	{
-		for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
-	}
-
+	initGLEW();
 	tryEnableARBDebugOutput();
-
 #endif //ANDROID
-	CHECK_GL_ERROR();
 
 	m_glVendor = (const char*) glGetString(GL_VENDOR);
 	m_glRenderer = (const char*) glGetString(GL_RENDERER);
 	m_glDriverVersion = (const char*) glGetString(GL_VERSION);
 	m_viewport = { 0, 0, m_screenWidth, m_screenHeight };
-
-	glViewport(0, 0, m_screenWidth, m_screenHeight);
-
-	GLint maxTextureUnits;
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
-	m_maxTextureUnits = (uint) maxTextureUnits;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &m_maxTextureUnits);
 
 	GLint uboMaxSize;
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &uboMaxSize);
 
-	m_textureManager = new GLTextureManager();
-	CHECK_GL_ERROR();
-
-	print("OpenGL context version: %i.%i \nvendor: %s \nGPU: %s \nversion: %s\n", major, minor, m_glVendor.c_str(), m_glRenderer.c_str(), m_glDriverVersion.c_str());
+	print("OpenGL context version: %i.%i \nvendor: %s \nGPU: %s \nversion: %s\n", m_glMajorVersion, m_glMinorVersion, m_glVendor.c_str(), m_glRenderer.c_str(), m_glDriverVersion.c_str());
 	print("Max texture units %u \n", m_maxTextureUnits);
 	print("UBO max size: %i \n", uboMaxSize);
 
@@ -196,8 +152,50 @@ SDL_GLContext Graphics::createGLContext(uint a_majorVersion, uint a_minorVersion
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-	SDL_GLContext context = SDL_GL_CreateContext(m_window);
-	return context;
+	return SDL_GL_CreateContext(m_window);
+}
+
+void Graphics::createHighestGLContext(uint maxMajorVersion, uint maxMinorVersion)
+{
+	int major = maxMajorVersion;
+	int minor;
+	for (; major >= 0; --major)
+	{
+		minor = maxMinorVersion;
+		for (; minor >= 0; --minor)
+		{
+			m_glContext = createGLContext(major, minor);
+			if (m_glContext)
+				goto breakLoop;
+		}
+	}
+breakLoop:
+
+	if (!m_glContext)
+	{
+		print("Failed to create OpenGL context\n");
+		m_glMajorVersion = 0;
+		m_glMinorVersion = 0;
+		return;
+	}
+
+	m_glMajorVersion = major;
+	m_glMinorVersion = minor;
+}
+
+void Graphics::initGLEW()
+{
+	glewExperimental = GL_TRUE;
+	GLenum err = glewInit();
+
+	if (GLEW_OK != err)
+	{
+		print("GLEW error: %s\n", glewGetErrorString(err));
+	}
+	else
+	{
+		for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
+	}
 }
 
 void Graphics::disposeGLContext(SDL_GLContext a_context)

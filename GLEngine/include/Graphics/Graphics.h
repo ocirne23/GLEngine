@@ -2,8 +2,6 @@
 
 #include "Core.h"
 
-#include "Graphics/GL/GLTextureManager.h"
-
 #include "Utils/Viewport.h"
 #include "Utils/VecForward.h"
 
@@ -12,7 +10,6 @@
 
 struct SDL_Window;
 class WindowEventListener;
-class GLTextureManager;
 
 typedef void* SDL_GLContext;
 typedef uint WindowFlags;
@@ -46,8 +43,6 @@ public:
 	uint getMaxTextureUnits() const					{ return m_maxTextureUnits; }
 	bool getVsyncEnabled() const					{ return m_vsyncEnabled; }
 
-	GLTextureManager& getTextureManager()			{ return *m_textureManager; }
-
 private:
 	Graphics() :
 		m_window(0), m_screenWidth(0), m_screenHeight(0),
@@ -64,6 +59,8 @@ private:
 	SDL_GLContext getGLContext();
 	SDL_GLContext createGLContext(uint majorVersion, uint minorVersion);
 	void disposeGLContext(SDL_GLContext context);
+	void createHighestGLContext(uint maxMajorVersion, uint maxMinorVersion);
+	void initGLEW();
 
 private:
 
@@ -84,6 +81,4 @@ private:
 	rde::string m_glDriverVersion;
 
 	rde::vector<WindowEventListener*> m_windowEventListeners;
-
-	GLTextureManager* m_textureManager;
 };

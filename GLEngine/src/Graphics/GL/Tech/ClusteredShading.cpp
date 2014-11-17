@@ -31,36 +31,25 @@ void ClusteredShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, 
 	m_gridDepth = uint(ceilf(zGridLocFar) + 0.5f);
 	m_gridSize = m_gridWidth * m_gridHeight * m_gridDepth;
 
-	m_lightGrid.resize(m_gridSize);
-	m_tileLightIndices.resize(m_gridSize);
+	m_lightGrid = new glm::uvec2[m_gridSize];
+	m_tileLightIndices = new rde::vector<ushort>[m_gridSize];
 }
 
-void ClusteredShading::setupShader(const GLShader& a_shader, uint a_gridTextureIdx, uint a_lightIdTextureIdx)
-{
-	assert(a_shader.isBegun());
-
-	m_lightGridBuffer.initialize(a_shader, "u_lightGrid", a_gridTextureIdx, GL_RG32UI, GL_STREAM_DRAW);
-	m_lightIndiceBuffer.initialize(a_shader, "u_lightIndices", a_lightIdTextureIdx, GL_R16UI, GL_STREAM_DRAW);
-
-	m_recLogSD1Loc = glGetUniformLocation(a_shader.getID(), "u_recLogSD1");
-	m_recNearLoc = glGetUniformLocation(a_shader.getID(), "u_recNear");
-
-	glUniform1f(m_recLogSD1Loc, m_recLogSD1);
-	glUniform1f(m_recNearLoc, m_recNear);
-}
-
-void ClusteredShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_viewspaceLightPositionRangeList, uint a_numLights)
+void ClusteredShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_lightPositionRangeList, uint a_numLights)
 {
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
-	for (auto& tileIndices : m_tileLightIndices)
-		tileIndices.clear();
+
+	for (uint i = 0; i < m_gridSize; ++i)
+	{
+		m_tileLightIndices[i].clear();
+	}
 	m_lightIndices.clear();
 
 	for (ushort i = 0; i < a_numLights; ++i)
 	{
-		glm::vec4 lightPositionRange = a_viewspaceLightPositionRangeList[i];
+		glm::vec4 lightPositionRange = a_lightPositionRangeList[i];
 		float radius = lightPositionRange.w;
-		glm::vec3 lightPosition(lightPositionRange);
+		glm::vec3 lightPosition(a_camera.m_viewMatrix * glm::vec4(glm::vec3(lightPositionRange), 1.0f);
 
 		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(a_camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 
@@ -84,21 +73,14 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const glm::vec4
 		}
 	}
 
-	for (int i = 0; i < m_tileLightIndices.size(); ++i)
+	for (uint i = 0; i < m_gridSize; ++i)
 	{
 		int lightIndicesSize = m_lightIndices.size();
-		m_lightGrid[i].begin = lightIndicesSize;
-		m_lightGrid[i].end = lightIndicesSize + m_tileLightIndices[i].size();
+		m_lightGrid[i].x = lightIndicesSize;
+		m_lightGrid[i].y = lightIndicesSize + m_tileLightIndices[i].size();
 		for (int j = 0; j < m_tileLightIndices[i].size(); ++j)
 		{
 			m_lightIndices.push_back(m_tileLightIndices[i][j]);
 		}
 	}
-	if (m_lightIndices.size() > 0)
-	{
-		m_lightIndiceBuffer.upload(m_lightIndices.size() * sizeof(m_lightIndices[0]), &m_lightIndices[0]);
-		m_lightIndiceBuffer.bind();
-	}
-	m_lightGridBuffer.upload(m_lightGrid.size() * sizeof(m_lightGrid[0]), &m_lightGrid[0]);
-	m_lightGridBuffer.bind();
 }

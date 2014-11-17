@@ -5,7 +5,7 @@
 #include "Utils/VecForward.h"
 #include "Utils/Viewport.h"
 
-#include "Graphics/GL/Core/GLTextureBuffer.h"
+#include <glm/glm.hpp>
 
 class PerspectiveCamera;
 class GLShader;
@@ -17,12 +17,15 @@ public:
 	~ClusteredShading() {};
 
 	void initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Viewport& viewport, const PerspectiveCamera& camera);
-	void setupShader(const GLShader& shader, uint gridTextureIdx, uint lightIdTextureIdx);
-	void update(const PerspectiveCamera& camera, const glm::vec4* viewspaceLightPositionRangeList, uint numLights);
+	void update(const PerspectiveCamera& camera, const glm::vec4* lightPositionRangeList, uint numLights);
 
-	uint getGridWidth() { return m_gridWidth; };
-	uint getGridHeight() { return m_gridHeight; };
-	uint getGridDepth() { return m_gridDepth; };
+	uint getGridWidth() const	{ return m_gridWidth; };
+	uint getGridHeight() const	{ return m_gridHeight; };
+	uint getGridDepth() const	{ return m_gridDepth; };
+	uint getGridSize() const	{ return m_gridSize; }
+
+	const glm::uvec2* getLightGrid() const				{ return m_lightGrid; }
+	const rde::vector<ushort>& getLightIndices() const	{ return m_lightIndices; }
 
 private:
 
@@ -42,15 +45,8 @@ private:
 
 	Viewport m_viewport;
 
-	struct LightListRef
-	{
-		uint begin;
-		uint end;
-	};
-	rde::vector<LightListRef> m_lightGrid;
-	rde::vector<rde::vector<ushort>> m_tileLightIndices;
-	rde::vector<ushort> m_lightIndices;
+	glm::uvec2* m_lightGrid;
+	rde::vector<ushort>* m_tileLightIndices;
 
-	GLTextureBuffer m_lightIndiceBuffer;
-	GLTextureBuffer m_lightGridBuffer;
+	rde::vector<ushort> m_lightIndices;
 };

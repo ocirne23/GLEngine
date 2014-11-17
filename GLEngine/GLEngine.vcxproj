@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\GLEngine.cpp" />
-    <ClCompile Include="src\Graphics\ARBDebugOutput.cpp" />
+    <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Camera.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLConstantBuffer.cpp" />
@@ -32,14 +32,14 @@
     <ClCompile Include="src\Graphics\GL\Core\GLTextureArray.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLTextureBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLVertexBuffer.cpp" />
-    <ClCompile Include="src\Graphics\GL\GLLightManager.cpp" />
     <ClCompile Include="src\Graphics\GL\GLMesh.cpp" />
-    <ClCompile Include="src\Graphics\GL\GLTextureManager.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\TiledShading.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
+    <ClCompile Include="src\Graphics\LightManager.cpp" />
     <ClCompile Include="src\Graphics\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Graphics\Pixmap.cpp" />
+    <ClCompile Include="src\Graphics\Scene\GL\GLScene.cpp" />
     <ClCompile Include="src\Graphics\Scene\Scene.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\rde\allocator.cpp" />
@@ -59,9 +59,11 @@
   <ItemGroup>
     <ClInclude Include="include\Core.h" />
     <ClInclude Include="include\GLEngine.h" />
-    <ClInclude Include="include\Graphics\ARBDebugOutput.h" />
+    <ClInclude Include="include\Graphics\Scene\GL\GLScene.h" />
+    <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Graphics\Camera.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
+    <ClInclude Include="include\Graphics\LightManager.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLFramebuffer.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLShader.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLStateBuffer.h" />
@@ -72,9 +74,7 @@
     <ClInclude Include="include\Graphics\GL\GL.h" />
     <ClInclude Include="include\Graphics\GL\GLAppVars.h" />
     <ClInclude Include="include\Graphics\GL\GLDefines.h" />
-    <ClInclude Include="include\Graphics\GL\GLLightManager.h" />
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
-    <ClInclude Include="include\Graphics\GL\GLTextureManager.h" />
     <ClInclude Include="include\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Graphics\GL\Tech\ClusteredShading.h" />
     <ClInclude Include="include\Graphics\GL\Tech\TiledShading.h" />
