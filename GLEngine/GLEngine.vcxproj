@@ -81,8 +81,6 @@
     <ClInclude Include="include\Graphics\Graphics.h" />
     <ClInclude Include="include\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Graphics\Pixmap.h" />
-    <ClInclude Include="include\Graphics\Scene\Light.h" />
-    <ClInclude Include="include\Graphics\Scene\Model.h" />
     <ClInclude Include="include\Graphics\Scene\Scene.h" />
     <ClInclude Include="include\Graphics\WindowEventListener.h" />
     <ClInclude Include="include\Graphics\WindowFlags.h" />
@@ -130,6 +128,10 @@
     <ClInclude Include="include\rde\type_traits.h" />
     <ClInclude Include="include\rde\utility.h" />
     <ClInclude Include="include\rde\vector.h" />
+    <ClInclude Include="include\Scene\Actor.h" />
+    <ClInclude Include="include\Scene\Scene.h" />
+    <ClInclude Include="include\Scene\Systems\ScenegraphSystem.h" />
+    <ClInclude Include="include\Scene\Systems\System.h" />
     <ClInclude Include="include\Utils\Bounds2D.h" />
     <ClInclude Include="include\Utils\Bounds3D.h" />
     <ClInclude Include="include\Utils\CheckGLError.h" />

@@ -354,12 +354,6 @@
     <ClInclude Include="include\Graphics\Scene\Scene.h">
       <Filter>Header Files\Graphics\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics\Scene\Model.h">
-      <Filter>Header Files\Graphics\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\Scene\Light.h">
-      <Filter>Header Files\Graphics\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="include\Graphics\LightManager.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
@@ -368,6 +362,18 @@
     </ClInclude>
     <ClInclude Include="include\Graphics\Scene\GL\GLScene.h">
       <Filter>Header Files\Graphics\Scene\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\Actor.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\Scene.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\Systems\ScenegraphSystem.h">
+      <Filter>Header Files\Scene\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\Systems\System.h">
+      <Filter>Header Files\Scene\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -436,6 +442,12 @@
     </Filter>
     <Filter Include="Header Files\Graphics\Scene\GL">
       <UniqueIdentifier>{3e81d4fc-9487-4ad3-9e35-1fa6239b33bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{bbd706cf-5644-4e83-b4e8-2f61b4664b9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Scene\Systems">
+      <UniqueIdentifier>{d88afa22-ed94-4905-ace8-9222901341a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

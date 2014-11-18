@@ -66,22 +66,22 @@ namespace
 	};
 
 	template <typename T>
-	void writeVector(std::ostream& file, const std::vector<T>& vector)
+	void writeVector(std::ostream& a_file, const std::vector<T>& a_vector)
 	{
-		int size = (int) vector.size();
-		file.write(reinterpret_cast<const char*>(&size), sizeof(int));
-		file.write(reinterpret_cast<const char*>(&vector[0]), sizeof(vector[0]) * size);
+		int size = (int) a_vector.size();
+		a_file.write(reinterpret_cast<const char*>(&size), sizeof(int));
+		a_file.write(reinterpret_cast<const char*>(&a_vector[0]), sizeof(a_vector[0]) * size);
 	}
-	vec4 getTextureOffset(const AtlasRegion& reg)
+	vec4 getTextureOffset(const AtlasRegion& a_reg)
 	{
-		int atlasWidth = (int) reg.atlas->m_width;
-		int atlasHeight = (int) reg.atlas->m_height;
+		int atlasWidth = (int) a_reg.atlas->m_width;
+		int atlasHeight = (int) a_reg.atlas->m_height;
 
-		int regionWidth = reg.region.width;
-		int regionHeight = reg.region.height;
+		int regionWidth = a_reg.region.width;
+		int regionHeight = a_reg.region.height;
 
-		int regionX = reg.region.x;
-		int regionY = reg.region.y;
+		int regionX = a_reg.region.x;
+		int regionY = a_reg.region.y;
 
 		float wScale = regionWidth / (float) atlasWidth;
 		float hScale = regionHeight / (float) atlasHeight;
@@ -92,23 +92,23 @@ namespace
 		return { xOffset, yOffset, wScale, hScale };
 	}
 
-	bool writeRaw(const std::string& srcFilePath, const std::string& dstFilePath, bool flipUV)
+	bool writeRaw(const std::string& a_srcFilePath, const std::string& a_dstFilePath, bool a_flipUV)
 	{
 		unsigned int flags = 0
 			| aiPostProcessSteps::aiProcess_Triangulate
 			| aiPostProcessSteps::aiProcess_CalcTangentSpace
 			| aiPostProcessSteps::aiProcess_GenNormals;
-		if (flipUV)
+		if (a_flipUV)
 			flags |= aiPostProcessSteps::aiProcess_FlipUVs;
-		const aiScene* scene = aiImportFile(srcFilePath.c_str(), flags);
+		const aiScene* scene = aiImportFile(a_srcFilePath.c_str(), flags);
 
 		if (!scene)
 		{
-			printf("Error parsing scene '%s' : %s\n", srcFilePath.c_str(), aiGetErrorString());
+			printf("Error parsing scene '%s' : %s\n", a_srcFilePath.c_str(), aiGetErrorString());
 			return false;
 		}
 
-		std::string texturePathStr(srcFilePath);
+		std::string texturePathStr(a_srcFilePath);
 		std::string::size_type idx = texturePathStr.find_last_of('/');
 		if (idx == std::string::npos)
 			idx = texturePathStr.find_last_of('\\');
@@ -275,7 +275,7 @@ namespace
 			region.atlas->setRegion(region.region.x, region.region.y, region.region.width, region.region.height, data, region.atlas->m_numComponents);
 		}
 
-		std::string dstTexturePathStr(dstFilePath);
+		std::string dstTexturePathStr(a_dstFilePath);
 		dstTexturePathStr = dstTexturePathStr.substr(0, dstTexturePathStr.find_last_of('.'));
 
 		std::sort(atlasses.begin(), atlasses.end(), [](const TextureAtlas* a, const TextureAtlas* b)
@@ -406,7 +406,7 @@ namespace
 		}
 		aiReleaseImport(scene);
 
-		std::ofstream file(dstFilePath.c_str(), std::ios::out | std::ios::binary);
+		std::ofstream file(a_dstFilePath.c_str(), std::ios::out | std::ios::binary);
 		assert(file.is_open());
 
 		int type = ResourceType_MODEL;
@@ -427,7 +427,7 @@ namespace
 	}
 }
 
-bool ModelProcessor::process(const char* inResourcePath, const char* outResourcePath)
+bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
 {
-	return writeRaw(inResourcePath, outResourcePath, true);
+	return writeRaw(a_inResourcePath, a_outResourcePath, true);
 }

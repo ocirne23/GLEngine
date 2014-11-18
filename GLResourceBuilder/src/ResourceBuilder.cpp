@@ -1,6 +1,6 @@
 #include "ResourceBuilder.h"
 
-#include "Utils\listFiles.h"
+#include "Utils/listFiles.h"
 #include <Windows.h>
 #include <assert.h>
 #include <fstream>
@@ -8,14 +8,14 @@
 
 static const char* BUILT_FILE_EXTENSION = ".da";
 
-void ResourceBuilder::buildResources(const std::unordered_map<std::string, ResourceProcessor*>& processors, const char* inDirectoryPath, const char* outDirectoryPath, bool incremental)
+void ResourceBuilder::buildResources(const std::unordered_map<std::string, ResourceProcessor*>& a_processors, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
 {
-	printf("Starting resource building in folder: \t %s \n", inDirectoryPath);
+	printf("Starting resource building in folder: \t %s \n", a_inDirectoryPath);
 
 	std::unordered_map<std::string, std::string> oldWriteTimesMap;
 	std::fstream writeTimesFile;
 
-	writeTimesFile.open(std::string(outDirectoryPath) + "\\modificationdates.txt", std::ios::in);
+	writeTimesFile.open(std::string(a_outDirectoryPath) + "\\modificationdates.txt", std::ios::in);
 	if (writeTimesFile.is_open())
 	{	// Read modification file
 		std::string line;
@@ -34,7 +34,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 	std::vector<std::string> files;
 	std::vector<std::string> writeTimes;
 
-	std::string outDirectoryPathString(outDirectoryPath);
+	std::string outDirectoryPathString(a_outDirectoryPath);
 	{	// Create out directory if not exists
 		std::string::size_type from = 0;
 		while (from != std::string::npos)
@@ -45,11 +45,11 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 		}
 	}
 
-	writeTimesFile.open(std::string(outDirectoryPath) + "\\modificationdates.txt", std::ios::out);
+	writeTimesFile.open(std::string(a_outDirectoryPath) + "\\modificationdates.txt", std::ios::out);
 	assert(writeTimesFile.is_open());
 	writeTimesFile.clear();
 
-	if (listFiles(inDirectoryPath, "*", files, writeTimes))
+	if (listFiles(a_inDirectoryPath, "*", files, writeTimes))
 	{
 		int count = (int) files.size();
 #pragma omp parallel for
@@ -58,7 +58,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 			const std::string& str = files[i];
 			const std::string& writeTime = writeTimes[i];
 
-			if (incremental)
+			if (a_incremental)
 			{
 				auto writeTimesIt = oldWriteTimesMap.find(str);
 				if (writeTimesIt != oldWriteTimesMap.end())
@@ -76,13 +76,13 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 				continue; 
 			}
 
-			std::string inDirectoryPathStr(inDirectoryPath);
-			std::string outDirectoryPathStr(outDirectoryPath);
+			std::string inDirectoryPathStr(a_inDirectoryPath);
+			std::string outDirectoryPathStr(a_outDirectoryPath);
 			std::string extension = str.substr(extIdx + 1, str.length() - extIdx - 1);
 			std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
 
-			auto it = processors.find(extension);
-			if (it != processors.end())
+			auto it = a_processors.find(extension);
+			if (it != a_processors.end())
 			{	// if a processor exists for this extension, process.
 				std::string inFilePath = inDirectoryPathStr + "\\" + str;
 				std::string outFilePath = outDirectoryPathStr + "\\" + str.substr(0, extIdx) + BUILT_FILE_EXTENSION;
@@ -122,5 +122,5 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 
 	writeTimesFile.close();
 
-	printf("Done building resources in folder: \t %s \n", inDirectoryPath);
+	printf("Done building resources in folder: \t %s \n", a_inDirectoryPath);
 }

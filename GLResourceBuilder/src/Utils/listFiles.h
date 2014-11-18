@@ -3,4 +3,4 @@
 #include <vector>
 #include <string>
 
-bool listFiles(std::string path, std::string mask, std::vector<std::string>& files, std::vector<std::string>& lastWriteTimesStr);
+bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>& a_files, std::vector<std::string>& a_lastWriteTimesStr);
