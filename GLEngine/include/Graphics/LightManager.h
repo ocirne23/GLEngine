@@ -30,7 +30,7 @@ public:
 
 	uint getNumLights() const						{ return m_numUsedLights; }
 	const glm::vec4* getLightPositionRanges() const	{ return m_lightPositionRanges; }
-	const glm::vec4* getLightColors() const 		{ return m_lightColors; }
+	const glm::vec4* getLightColors() const 			{ return m_lightColors; }
 
 private:
 

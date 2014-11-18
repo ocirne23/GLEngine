@@ -25,9 +25,12 @@ public:
 	~GLScene();
 	GLScene(const GLScene& copy) = delete;
 
-	void render(const PerspectiveCamera& camera, const rde::vector<Model>& models, const rde::vector<Light>& lights);
+	void begin(const PerspectiveCamera& camera);
+	void end();
+	void render(const PerspectiveCamera& camera);
 
 private:
+
 
 	GLShader m_uberShader;
 	GLTexture m_dfvTexture;
