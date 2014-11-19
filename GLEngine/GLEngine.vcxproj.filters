@@ -109,6 +109,9 @@
     <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene\Systems\ScenegraphSystem.cpp">
+      <Filter>Source Files\Scene\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -448,6 +451,12 @@
     </Filter>
     <Filter Include="Header Files\Scene\Systems">
       <UniqueIdentifier>{d88afa22-ed94-4905-ace8-9222901341a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{0198196e-5fdb-413f-a45e-e073e19734d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene\Systems">
+      <UniqueIdentifier>{cf3fa06b-a698-4e4b-86d0-d91a38342286}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

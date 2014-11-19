@@ -48,6 +48,7 @@
     <ClCompile Include="src\rde\list.cpp" />
     <ClCompile Include="src\rde\rde_string.cpp" />
     <ClCompile Include="src\rde\slist.cpp" />
+    <ClCompile Include="src\Scene\Systems\ScenegraphSystem.cpp" />
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />

@@ -10,14 +10,20 @@ public:
 	ScenegraphSystem();
 	~ScenegraphSystem();
 
+	void reserve(uint count);
 	void update(float deltaSec) OVERRIDE;
+
 private:
 
 	struct Node
 	{
+		glm::mat4 worldSpacePosition;
 		glm::mat4 transform;
-		Node* parent;
+		byte numChildren;
+		bool dirty;
 	};
 
-	rde::vector<Node> m_rootNodes;
+	void transform(uint& it, const Node& parent);
+
+	rde::vector<Node> m_nodes;
 };
