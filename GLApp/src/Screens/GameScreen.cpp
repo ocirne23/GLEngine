@@ -82,6 +82,16 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 		GLAppVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	CHECK_GL_ERROR();
+
+	m_lightPositionRangeBuffer.initialize(m_modelShader, GLAppVars::UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
+	m_lightColorBuffer.initialize(m_modelShader, GLAppVars::UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
+	m_lightGridBuffer.initialize(m_modelShader, "u_lightGrid", GLAppVars::TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
+	m_lightIndiceBuffer.initialize(m_modelShader, "u_lightIndices", GLAppVars::TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
+
+	m_recLogSD1Uniform.initialize(m_modelShader, "u_recLogSD1");
+	m_recNearUniform.initialize(m_modelShader, "u_recNear");
+	CHECK_GL_ERROR();
+
 	m_modelShader.end();
 
 	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
@@ -102,8 +112,16 @@ void GameScreen::render(float a_deltaSec)
 	m_dfvTexture.bind(GLAppVars::TextureUnits_DFV_TEXTURE);
 	m_modelShader.begin();
 	{
-		m_lightManager.update(camera);
-		m_clusteredShading.update(camera, m_lightManager.getViewspaceLightPositionRangeListBegin(), m_lightManager.getNumLights());
+		m_clusteredShading.update(camera, m_lightManager.getLightPositionRanges(), m_lightManager.getNumLights());
+
+		m_recLogSD1Uniform.set(m_clusteredShading.getRecLogSD1());
+		m_recNearUniform.set(m_clusteredShading.getRecNear());
+
+		m_lightPositionRangeBuffer.upload(m_lightManager.getNumLights(), m_lightManager.getLightPositionRanges());
+		m_lightColorBuffer.upload(m_lightManager.getNumLights(), m_lightManager.getLightColors());
+
+		m_lightGridBuffer.upload(m_clusteredShading.getGridSize(), m_clusteredShading.getLightGrid());
+		m_lightIndiceBuffer.upload(m_clusteredShading.getNumLightIndices(), m_clusteredShading.getLightIndices());
 
 		m_modelShader.setUniform3f("u_eyePos", glm::vec3(camera.m_viewMatrix * glm::vec4(camera.m_position, 1.0f)));
 		m_modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);

@@ -139,8 +139,6 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 	m_vertexBuffer->setVertexAttributes(6, attributes);
 	m_stateBuffer.end();
 
-	GLTextureManager& textureManager = GLEngine::graphics->getTextureManager();
-
 	rde::string atlasBasePath(a_filePath);
 	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
 	atlasBasePath.append("-atlas-");

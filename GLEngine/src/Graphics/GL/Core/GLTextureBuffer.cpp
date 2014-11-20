@@ -44,8 +44,11 @@ GLTextureBuffer::~GLTextureBuffer()
 
 void GLTextureBuffer::upload(uint a_numBytes, const void* a_data)
 {
-	glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
-	glBufferData(GL_TEXTURE_BUFFER, a_numBytes, a_data, m_drawUsage);
+	if (a_numBytes > 0)
+	{
+		glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
+		glBufferData(GL_TEXTURE_BUFFER, a_numBytes, a_data, m_drawUsage);
+	}
 }
 
 void GLTextureBuffer::bind()

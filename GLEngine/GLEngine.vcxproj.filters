@@ -97,20 +97,17 @@
     <ClCompile Include="src\Utils\FileModificationManager.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\Scene\Scene.cpp">
-      <Filter>Source Files\Graphics\Scene</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Scene\GL\GLScene.cpp">
-      <Filter>Source Files\Graphics\Scene\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\LightManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\Systems\ScenegraphSystem.cpp">
+    <ClCompile Include="src\Scene\Systems\StaticScenegraphSystem.cpp">
       <Filter>Source Files\Scene\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -354,17 +351,11 @@
     <ClInclude Include="include\Graphics\GL\GLAppVars.h">
       <Filter>Header Files\Graphics\GL</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics\Scene\Scene.h">
-      <Filter>Header Files\Graphics\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="include\Graphics\LightManager.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h">
       <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\Scene\GL\GLScene.h">
-      <Filter>Header Files\Graphics\Scene\GL</Filter>
     </ClInclude>
     <ClInclude Include="include\Scene\Actor.h">
       <Filter>Header Files\Scene</Filter>
@@ -372,11 +363,14 @@
     <ClInclude Include="include\Scene\Scene.h">
       <Filter>Header Files\Scene</Filter>
     </ClInclude>
-    <ClInclude Include="include\Scene\Systems\ScenegraphSystem.h">
-      <Filter>Header Files\Scene\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="include\Scene\Systems\System.h">
       <Filter>Header Files\Scene\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\Systems\StaticScenegraphSystem.h">
+      <Filter>Header Files\Scene\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Core\GLUniform.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -433,18 +427,6 @@
     </Filter>
     <Filter Include="Source Files\Graphics\GL\Tech">
       <UniqueIdentifier>{59c56805-b4e3-4e2f-a3b4-26c566273747}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\Scene">
-      <UniqueIdentifier>{d00ffcb0-aee5-41ca-9117-18898943420a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Graphics\Scene">
-      <UniqueIdentifier>{28c792c5-9955-43ee-bdcb-e01bfc7223ce}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\Scene\GL">
-      <UniqueIdentifier>{8603de56-ed40-4c79-a04c-a43daae3bc8f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Graphics\Scene\GL">
-      <UniqueIdentifier>{3e81d4fc-9487-4ad3-9e35-1fa6239b33bc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Scene">
       <UniqueIdentifier>{bbd706cf-5644-4e83-b4e8-2f61b4664b9d}</UniqueIdentifier>

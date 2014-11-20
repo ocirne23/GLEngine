@@ -193,6 +193,8 @@ void main()
 		vec3 diffuseContrib, specularContrib;
 		doLightGGX(diffuseContrib, specularContrib, diffuse, roughness, F0, v_position, N, V, light);
 		
+		diffuseAccum += light.color.rgb;
+		
 		diffuseAccum += diffuseContrib;
 		specularAccum += specularContrib;
 	}

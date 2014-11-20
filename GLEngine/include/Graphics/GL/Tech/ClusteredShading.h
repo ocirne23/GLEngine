@@ -4,8 +4,7 @@
 #include "rde/vector.h"
 #include "Utils/VecForward.h"
 #include "Utils/Viewport.h"
-
-#include <glm/glm.hpp>
+#include "Graphics/GL/GLTypes.h"
 
 class PerspectiveCamera;
 class GLShader;
@@ -22,15 +21,16 @@ public:
 	uint getGridWidth() const	{ return m_gridWidth; };
 	uint getGridHeight() const	{ return m_gridHeight; };
 	uint getGridDepth() const	{ return m_gridDepth; };
-	uint getGridSize() const	{ return m_gridSize; }
+	uint getGridSize() const		{ return m_gridSize; }
 
-	const glm::uvec2* getLightGrid() const				{ return m_lightGrid; }
-	const rde::vector<ushort>& getLightIndices() const	{ return m_lightIndices; }
+	uint getNumLightIndices() const { return m_lightIndices.size(); }
+
+	const glm::uvec2* getLightGrid() const	{ return m_lightGrid; }
+	const ushort* getLightIndices() const	{ return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
+	float getRecLogSD1() const				{ return m_recLogSD1; }
+	float getRecNear() const					{ return m_recNear; }
 
 private:
-
-	GLint m_recLogSD1Loc;
-	GLint m_recNearLoc;
 
 	float m_recLogSD1;
 	float m_recNear;
@@ -47,6 +47,5 @@ private:
 
 	glm::uvec2* m_lightGrid;
 	rde::vector<ushort>* m_tileLightIndices;
-
 	rde::vector<ushort> m_lightIndices;
 };

@@ -6,11 +6,13 @@
 
 #include "Graphics/LightManager.h"
 
-
-#include "Graphics/GL/Core/GLTexture.h"
 #include "Graphics/GL/GLMesh.h"
-#include "Graphics/GL/Tech/ClusteredShading.h"
+#include "Graphics/GL/Core/GLConstantBuffer.h"
 #include "Graphics/GL/Core/GLShader.h"
+#include "Graphics/GL/Core/GLTexture.h"
+#include "Graphics/GL/Core/GLTextureBuffer.h"
+#include "Graphics/GL/Core/GLUniform.h"
+#include "Graphics/GL/Tech/ClusteredShading.h"
 
 class GameScreen : public IScreen, public KeyListener
 {
@@ -29,6 +31,15 @@ private:
 	GLTexture m_dfvTexture;
 	GLMesh m_mesh;
 	GLShader m_modelShader;
+
 	LightManager m_lightManager;
+	GLConstantBuffer m_lightPositionRangeBuffer;
+	GLConstantBuffer m_lightColorBuffer;
+
 	ClusteredShading m_clusteredShading;
+	GLTextureBuffer m_lightIndiceBuffer;
+	GLTextureBuffer m_lightGridBuffer;
+
+	GLUniform<float> m_recLogSD1Uniform;
+	GLUniform<float> m_recNearUniform;
 };

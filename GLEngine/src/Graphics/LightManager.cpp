@@ -1,5 +1,6 @@
 #include "Graphics/LightManager.h"
 
+#include "Graphics/GL/GLMesh.h"
 #include "rde/algorithm.h"
 #include <glm/glm.hpp>
 
@@ -71,17 +72,17 @@ void LightManager::setLightColor(LightHandle a_light, const glm::vec3& a_color)
 	col.b = a_color.b;
 }
 
-const glm::vec3& LightManager::getLightPosition(LightHandle a_light)
+const glm::vec3& LightManager::getLightPosition(LightHandle a_light) const
 {
-	return glm::vec3(m_lightPositionRanges[m_usedLightRefs[a_light]]);
+	return (glm::vec3&) m_lightPositionRanges[m_usedLightRefs[a_light]];
 }
 
-float LightManager::getLightRange(LightHandle a_light)
+float LightManager::getLightRange(LightHandle a_light) const
 {
 	return m_lightPositionRanges[m_usedLightRefs[a_light]].w;
 }
 
-const glm::vec3& LightManager::getLightColor(LightHandle a_light)
+const glm::vec3& LightManager::getLightColor(LightHandle a_light) const
 {
-	return glm::vec3(m_lightColors[m_usedLightRefs[a_light]]);
+	return (glm::vec3&) m_lightColors[m_usedLightRefs[a_light]];
 }

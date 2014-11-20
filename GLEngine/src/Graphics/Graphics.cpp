@@ -2,12 +2,13 @@
 
 #include "Graphics/WindowEventListener.h"
 #include "Graphics/GL/GL.h"
+#include "Graphics/GL/GLTypes.h"
 #include "Utils/CheckGLError.h"
 #include "rde/rde_string.h"
 
-#include <glm\glm.hpp>
-#include <SDL\SDL.h>
-#include <SDL\SDL_syswm.h>
+#include <glm/glm.hpp>
+#include <SDL/SDL.h>
+#include <SDL/SDL_syswm.h>
 
 #include <assert.h>
 
@@ -49,7 +50,7 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 	m_glRenderer = (const char*) glGetString(GL_RENDERER);
 	m_glDriverVersion = (const char*) glGetString(GL_VERSION);
 	m_viewport = { 0, 0, m_screenWidth, m_screenHeight };
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &m_maxTextureUnits);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*) &m_maxTextureUnits);
 
 	GLint uboMaxSize;
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &uboMaxSize);
