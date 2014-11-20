@@ -31,11 +31,11 @@ void ClusteredShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, 
 	m_gridDepth = uint(ceilf(zGridLocFar) + 0.5f);
 	m_gridSize = m_gridWidth * m_gridHeight * m_gridDepth;
 
-	m_lightGrid = new glm::uvec2[m_gridSize];
-	m_tileLightIndices = new rde::vector<ushort>[m_gridSize];
+	m_lightGrid = new glm::uvec2[m_gridSize]; //TODO: delete
+	m_tileLightIndices = new rde::vector<ushort>[m_gridSize]; // ^
 }
 
-void ClusteredShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_lightPositionRangeList, uint a_numLights)
+void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLights, const glm::vec4* a_viewSpaceLightPositionRangeList)
 {
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
 
@@ -47,10 +47,9 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const glm::vec4
 
 	for (ushort i = 0; i < a_numLights; ++i)
 	{
-		glm::vec4 lightPositionRange = a_lightPositionRangeList[i];
+		glm::vec4 lightPositionRange = a_viewSpaceLightPositionRangeList[i];
 		float radius = lightPositionRange.w;
-		glm::vec3 lightPosition(a_camera.m_viewMatrix * glm::vec4(glm::vec3(lightPositionRange), 1.0f));
-		print("LightPosition: %f %f %f \n", lightPositionRange.x, lightPositionRange.y, lightPosition.z);
+		glm::vec3 lightPosition(lightPositionRange);
 
 		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(a_camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 

@@ -69,7 +69,7 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	CHECK_GL_ERROR();
 
 	m_modelShader.begin();
-	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.2f));
+	//m_modelShader.setUniform3f("u_ambient", glm::vec3(0.2f));
 	m_modelShader.end();
 		
 	m_modelShader.begin();
@@ -112,16 +112,18 @@ void GameScreen::render(float a_deltaSec)
 	m_dfvTexture.bind(GLAppVars::TextureUnits_DFV_TEXTURE);
 	m_modelShader.begin();
 	{
-		m_clusteredShading.update(camera, m_lightManager.getLightPositionRanges(), m_lightManager.getNumLights());
+		const glm::vec4* viewspaceLightPositionRanges = m_lightManager.updateViewspaceLightPositionRangeList(camera);
+		m_clusteredShading.update(camera, m_lightManager.getNumLights(), viewspaceLightPositionRanges);
 
+		m_lightGridBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
+		m_lightIndiceBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
+		m_lightGridBuffer.bind();
+		m_lightIndiceBuffer.bind();
 		m_recLogSD1Uniform.set(m_clusteredShading.getRecLogSD1());
 		m_recNearUniform.set(m_clusteredShading.getRecNear());
 
-		m_lightPositionRangeBuffer.upload(m_lightManager.getNumLights(), m_lightManager.getLightPositionRanges());
-		m_lightColorBuffer.upload(m_lightManager.getNumLights(), m_lightManager.getLightColors());
-
-		m_lightGridBuffer.upload(m_clusteredShading.getGridSize(), m_clusteredShading.getLightGrid());
-		m_lightIndiceBuffer.upload(m_clusteredShading.getNumLightIndices(), m_clusteredShading.getLightIndices());
+		m_lightPositionRangeBuffer.upload(m_lightManager.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
+		m_lightColorBuffer.upload(m_lightManager.getNumLights() * sizeof(glm::vec4), m_lightManager.getLightColors());
 
 		m_modelShader.setUniform3f("u_eyePos", glm::vec3(camera.m_viewMatrix * glm::vec4(camera.m_position, 1.0f)));
 		m_modelShader.setUniformMatrix4f("u_mv", camera.m_viewMatrix);
@@ -165,7 +167,7 @@ bool GameScreen::keyDown(Key a_key)
 				(rand() % 1000) / 1000.0f,
 				(rand() % 1000) / 1000.0f,
 				(rand() % 1000) / 1000.0f)),
-				25.0f);
+				15.0f);
 			return true;
 		}
 	case Key_ESCAPE:

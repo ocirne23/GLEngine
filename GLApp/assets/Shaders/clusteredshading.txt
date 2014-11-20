@@ -17,7 +17,9 @@
 * u_recLogSD1 		float
 */
 
-#define FOR_LIGHT_ITERATOR(LIGHT, VSDEPTH) Light LIGHT; for (ivec2 _lightIterator = getLightListBeginEnd(VSDEPTH); _lightIterator.x <= _lightIterator.y; ++_lightIterator.x, LIGHT = getLight(_lightIterator.x))
+#define FOR_LIGHT_ITERATOR(LIGHT, VSDEPTH) \
+ 	Light LIGHT; \
+	for (ivec2 _lightIterator = _getLightListBeginEnd(VSDEPTH); _checkIterator(_lightIterator, LIGHT); ++_lightIterator.x) \
 
 struct Light
 {
@@ -39,7 +41,7 @@ layout (std140) uniform LightColors
 	vec4 u_lightColors[MAX_LIGHTS];
 };
 
-ivec2 getLightListBeginEnd(float viewspaceDepth)
+ivec2 _getLightListBeginEnd(float viewspaceDepth)
 {
 	// i and j coordinates are just the same as tiled shading, and based on screen space position.
 	ivec2 tileXY = ivec2(int(gl_FragCoord.x) / LIGHT_GRID_TILE_WIDTH, int(gl_FragCoord.y) / LIGHT_GRID_TILE_HEIGHT);
@@ -52,13 +54,19 @@ ivec2 getLightListBeginEnd(float viewspaceDepth)
 
 	return texelFetch(u_lightGrid, offset).xy;
 }
-Light getLight(int iterator)
+Light _getLight(int iterator)
 {
 	int lightIndex = texelFetch(u_lightIndices, iterator).r;
 	Light light;
 	light.positionRange = u_lightPositionRanges[lightIndex];
 	light.color = u_lightColors[lightIndex];
 	return light;
+}
+
+bool _checkIterator(ivec2 iterator, out Light light)
+{
+	light = _getLight(iterator.x);
+	return iterator.x < iterator.y;
 }
 
 //////////////////////////////////////////////////////////////////////

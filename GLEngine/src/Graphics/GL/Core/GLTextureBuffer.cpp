@@ -11,6 +11,7 @@ void GLTextureBuffer::initialize(const GLShader& a_shader, const char* a_sampler
 	m_drawUsage = a_drawUsage;
 	m_textureIdx = a_textureIdx;
 	m_sizedInternalFormat = a_sizedFormat;
+	m_shader = &a_shader;
 	m_textureLoc = glGetUniformLocation(a_shader.getID(), a_samplerName);
 	assert(m_textureLoc != GL_INVALID_INDEX);
 	if (m_textureLoc == GL_INVALID_INDEX)
@@ -44,6 +45,7 @@ GLTextureBuffer::~GLTextureBuffer()
 
 void GLTextureBuffer::upload(uint a_numBytes, const void* a_data)
 {
+	assert(m_shader->isBegun());
 	if (a_numBytes > 0)
 	{
 		glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
@@ -53,6 +55,7 @@ void GLTextureBuffer::upload(uint a_numBytes, const void* a_data)
 
 void GLTextureBuffer::bind()
 {
+	assert(m_shader->isBegun());
 	glActiveTexture(GL_TEXTURE0 + m_textureIdx);
 	glBindTexture(GL_TEXTURE_BUFFER, m_textureID);
 }

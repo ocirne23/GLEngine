@@ -8,7 +8,7 @@ template <typename T>
 class GLUniform
 {
 public:
-	GLUniform() : m_shader(NULL) {}
+	GLUniform() : m_shader(0) {}
 	~GLUniform() {}
 	GLUniform(const GLUniform& copy) = delete;
 

@@ -183,7 +183,7 @@ void main()
 	
 	vec3 N = normalize(normal);
 	vec3 V = normalize(u_eyePos - v_position);
-	
+
 	FOR_LIGHT_ITERATOR(light, v_position.z)
 	{
 		float roughness = clamp(specular, 0.01, 0.99);
@@ -193,12 +193,9 @@ void main()
 		vec3 diffuseContrib, specularContrib;
 		doLightGGX(diffuseContrib, specularContrib, diffuse, roughness, F0, v_position, N, V, light);
 		
-		diffuseAccum += light.color.rgb;
-		
 		diffuseAccum += diffuseContrib;
 		specularAccum += specularContrib;
 	}
-	
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
 	//out_color = vec4(diffuse, 1.0);

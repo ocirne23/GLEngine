@@ -1,11 +1,13 @@
 #include "Graphics/LightManager.h"
 
+#include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GLMesh.h"
 #include "rde/algorithm.h"
 #include <glm/glm.hpp>
 
 LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights), m_numUsedLights(0)
 {
+	m_viewspaceLightPositionRanges = new glm::vec4[m_maxLights];
 	m_lightPositionRanges = new glm::vec4[m_maxLights];
 	m_lightColors = new glm::vec4[m_maxLights];
 
@@ -15,6 +17,7 @@ LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights), m_numUs
 
 LightManager::~LightManager()
 {
+	delete[] m_viewspaceLightPositionRanges;
 	delete[] m_lightPositionRanges;
 	delete[] m_lightColors;
 	
@@ -24,6 +27,7 @@ LightManager::~LightManager()
 
 LightHandle LightManager::createLight(const glm::vec3& a_pos, const glm::vec3& a_color, float a_radius)
 {
+	print("da: %i \n", m_numUsedLights);
 	m_lightHandleIndices[m_numUsedLights] = m_numUsedLights;
 	m_usedLightRefs[m_numUsedLights] = m_numUsedLights;
 
@@ -85,4 +89,14 @@ float LightManager::getLightRange(LightHandle a_light) const
 const glm::vec3& LightManager::getLightColor(LightHandle a_light) const
 {
 	return (glm::vec3&) m_lightColors[m_usedLightRefs[a_light]];
+}
+
+const glm::vec4* LightManager::updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera)
+{
+	for (uint i = 0; i < m_numUsedLights; ++i)
+	{
+		m_viewspaceLightPositionRanges[i] = glm::vec4(a_camera.m_viewMatrix * glm::vec4(glm::vec3(m_lightPositionRanges[i]), 1.0));
+		m_viewspaceLightPositionRanges[i].w = m_lightPositionRanges[i].w;
+	}
+	return m_numUsedLights ? &m_viewspaceLightPositionRanges[0] : NULL;
 }

@@ -14,7 +14,7 @@ class GLTextureBuffer
 public:
 	friend class GLStateBuffer;
 
-	GLTextureBuffer() : m_drawUsage(0), m_textureLoc(0), m_textureID(0) {}
+	GLTextureBuffer() : m_shader(0), m_drawUsage(0), m_textureLoc(0), m_textureID(0) {}
 	GLTextureBuffer(const GLTextureBuffer& copy) = delete;
 	~GLTextureBuffer();
 
@@ -22,6 +22,8 @@ public:
 	void upload(uint numBytes, const void* data);
 	void bind();
 private:
+
+	const GLShader* m_shader;
 
 	bool m_initialized;
 
