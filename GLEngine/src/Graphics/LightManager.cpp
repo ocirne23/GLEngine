@@ -27,7 +27,6 @@ LightManager::~LightManager()
 
 LightHandle LightManager::createLight(const glm::vec3& a_pos, const glm::vec3& a_color, float a_radius)
 {
-	print("da: %i \n", m_numUsedLights);
 	m_lightHandleIndices[m_numUsedLights] = m_numUsedLights;
 	m_usedLightRefs[m_numUsedLights] = m_numUsedLights;
 
