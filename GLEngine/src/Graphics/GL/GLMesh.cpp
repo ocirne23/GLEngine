@@ -1,18 +1,18 @@
 #include "Graphics/GL/GLMesh.h"
 
 #include "GLEngine.h"
+
 #include "Graphics/Graphics.h"
 #include "Graphics/Pixmap.h"
-
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/Core/GLShader.h"
 #include "Graphics/GL/Core/GLConstantBuffer.h"
+#include "Graphics/GL/Core/GLShader.h"
 #include "Graphics/GL/Core/GLStateBuffer.h"
 #include "Graphics/GL/Core/GLTextureArray.h"
 #include "Graphics/GL/Core/GLVertexBuffer.h"
 
-#include "Utils/FileHandle.h"
 #include "Utils/CheckGLError.h"
+#include "Utils/FileHandle.h"
 #include "Utils/ResourceType.h"
 
 #include "Input/Input.h"
@@ -21,6 +21,8 @@
 #include "rde/rde_string.h"
 
 #include <glm/glm.hpp>
+
+BEGIN_UNNAMED_NAMESPACE()
 
 enum { MAX_MATERIALS = 200 };
 
@@ -36,6 +38,7 @@ struct MeshEntry
 	uint baseIndex;
 	uint materialIndex;
 };
+
 struct Vertex
 {
 	glm::vec3 position;
@@ -45,6 +48,19 @@ struct Vertex
 	glm::vec3 bitangents;
 	uint materialID;
 };
+
+template <typename T>
+uint readVector(const FileHandle& a_handle, rde::vector<T>& a_vector, uint a_offset)
+{
+	int size;
+	a_handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), a_offset);
+	a_vector.resize(size);
+	a_handle.readBytes(reinterpret_cast<char*>(&a_vector[0]), size * sizeof(a_vector[0]), a_offset + sizeof(int));
+
+	return a_offset + sizeof(int) + size * sizeof(a_vector[0]);
+}
+
+END_UNNAMED_NAMESPACE()
 
 GLMesh::GLMesh() : m_numOpagueMeshes(0), m_initialized(false)
 {
@@ -58,17 +74,6 @@ GLMesh::~GLMesh()
 		delete m_vertexBuffer;
 	if (m_matUniformBuffer)
 		delete m_matUniformBuffer;
-}
-
-template <typename T>
-uint readVector(const FileHandle& a_handle, rde::vector<T>& a_vector, uint a_offset)
-{
-	int size;
-	a_handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), a_offset);
-	a_vector.resize(size);
-	a_handle.readBytes(reinterpret_cast<char*>(&a_vector[0]), size * sizeof(a_vector[0]), a_offset + sizeof(int));
-
-	return a_offset + sizeof(int) + size * sizeof(a_vector[0]);
 }
 
 void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_textureArray1CUnit, uint a_textureArray3CUnit, GLuint a_matUBOBindingPoint)

@@ -8,8 +8,8 @@ template <typename T>
 class GLUniform
 {
 public:
-	GLUniform() {};
-	~GLUniform() {};
+	GLUniform() : m_shader(NULL) {}
+	~GLUniform() {}
 	GLUniform(const GLUniform& copy) = delete;
 
 	void initialize(const GLShader& shader, const char* uniformName);
@@ -18,6 +18,7 @@ public:
 
 private:
 
+	const GLShader* m_shader;
 	GLint m_uniformLoc;
 	T m_value;
 };

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Core.h"
-#include "Frustum.h"
+
+#include "Graphics/Frustum.h"
 
 #include <glm/glm.hpp>
 

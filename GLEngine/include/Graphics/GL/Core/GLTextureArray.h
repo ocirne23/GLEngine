@@ -2,10 +2,10 @@
 
 #include "Core.h"
 
-#include "rde/vector.h"
-
-#include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLDefines.h"
+#include "Graphics/GL/GLTypes.h"
+
+#include "rde/vector.h"
 
 class Pixmap;
 
@@ -43,7 +43,6 @@ private:
 	uint m_numMipmaps;
 	uint m_numComponents;
 	bool m_isFloatTexture;
-
 	bool m_generateMipMaps;
 
 	GLuint m_textureID;
