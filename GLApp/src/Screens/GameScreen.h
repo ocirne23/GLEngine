@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Core.h"
-#include "../Core/IScreen.h"
+#include "Core/IScreen.h"
 #include "Input/KeyListener.h"
 
 #include "Graphics/LightManager.h"
-
+#include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GLMesh.h"
 #include "Graphics/GL/Core/GLConstantBuffer.h"
 #include "Graphics/GL/Core/GLShader.h"
@@ -13,6 +13,8 @@
 #include "Graphics/GL/Core/GLTextureBuffer.h"
 #include "Graphics/GL/Core/GLUniform.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
+
+#include "Utils/FPSCameraController.h"
 
 class GameScreen : public IScreen, public KeyListener
 {
@@ -28,6 +30,9 @@ public:
 
 private:
 
+	PerspectiveCamera m_camera;
+	FPSCameraController m_cameraController;
+
 	GLTexture m_dfvTexture;
 	GLMesh m_mesh;
 	GLShader m_modelShader;
@@ -42,4 +47,9 @@ private:
 
 	GLUniform<float> m_recLogSD1Uniform;
 	GLUniform<float> m_recNearUniform;
+	GLUniform<glm::vec3> m_eyePosUniform;
+	GLUniform<glm::mat3> m_normalMatrixUniform;
+	GLUniform<glm::mat4> m_transformMatrixUniform;
+	GLUniform<glm::mat4> m_viewMatrixUniform;
+	GLUniform<glm::mat4> m_mvpMatrixUniform;
 };

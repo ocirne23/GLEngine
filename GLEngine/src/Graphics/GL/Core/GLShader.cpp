@@ -1,25 +1,48 @@
 #include "Graphics/GL/Core/GLShader.h"
 
 #include "Core.h"
+#include "GLEngine.h"
+#include "Graphics/Graphics.h"
 #include "Graphics/GL/GL.h"
-#include "Utils/FileHandle.h"
 #include "rde/rde_string.h"
+#include "Utils/FileHandle.h"
 
 #include <glm/glm.hpp>
 
 bool GLShader::s_begun = false;
-
-static const char* INCLUDE_STR = "#include \"";
-static const uint INCLUDE_STR_LEN = (uint) strlen(INCLUDE_STR);
 
 // If an error should be printed if a uniform is set which isnt present in the shader.
 //#define SHADER_STRICT_UNIFORM_LOC
 
 BEGIN_UNNAMED_NAMESPACE()
 
+rde::string getVersionStr()
+{
+#ifdef ANDROID
+	return rde::string("#version 300 es \n");
+#else
+	return rde::string("#version 330 core \n");
+#endif
+}
+
+rde::string getSystemDefines()
+{
+	rde::string str;
+	if (rde::string(GLEngine::graphics->getVendorStr()).find("NVIDIA") != rde::string::npos
+		&& GLEngine::graphics->getGLMajorVersion() >= 4
+		&& GLEngine::graphics->getGLMinorVersion() >= 2)
+	{
+		str.append("#define ").append(rde::string("GLE_DYNAMIC_INDEXING")).append("\n");
+	}
+	return str;
+}
+
 rde::string processIncludes(const rde::string& a_str)
 {
 	rde::string src = a_str;
+
+	static const char* INCLUDE_STR = "#include \"";
+	static const uint INCLUDE_STR_LEN = (uint) strlen(INCLUDE_STR);
 
 	auto includePos = src.find(INCLUDE_STR);
 	while (includePos != src.npos)
@@ -34,36 +57,6 @@ rde::string processIncludes(const rde::string& a_str)
 
 	return src;
 } 
-
-rde::string appendAfterVersion(const rde::string& a_str, const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
-{
-	auto version = a_str.find("#version");
-	auto at = a_str.find("\n", version) + 1; // find first newline after #version
-	rde::string first = a_str.substr(0, at);
-	rde::string last = a_str.substr(at, a_str.length());
-
-	if (a_defines)
-	{
-		for (const rde::string& define : *a_defines)
-		{
-			first += rde::string("#define ");
-			first += define;
-			first += rde::string("\n");
-		}
-	}
-	if (a_extensions)
-	{
-		for (const rde::string& define : *a_extensions)
-		{
-			first += rde::string("#extension ");
-			first += define;
-			first += rde::string(" : require\n");
-		}
-	}
-	first += last;
-
-	return first;
-}
 
 void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 {
@@ -84,7 +77,8 @@ void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 		char buffer[4096];
 		glGetShaderInfoLog(sh, sizeof(buffer), NULL, buffer);
 		const char* typeString;
-		switch (a_type) {
+		switch (a_type) 
+		{
 		case GL_FRAGMENT_SHADER:
 			typeString = "fragment";
 			break;
@@ -101,28 +95,37 @@ void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 	glGetShaderiv(sh, GL_COMPILE_STATUS, &compileStatus);
 	if (compileStatus != GL_TRUE)
 	{
-		printf("shader failed to compile \n");
+		print("shader failed to compile \n");
 	}
 
 	glAttachShader(a_prog, sh);
 	glDeleteShader(sh);
 }
 
-GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandle& a_fragmentShaderFile, rde::string a_versionStr,
+GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandle& a_fragmentShaderFile, 
 	const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
 {
 	GLuint program = glCreateProgram();
-
 	{
-		rde::string contents = rde::string("#version ").append(a_versionStr).append("\n").append(a_vertexShaderFile.readString());
+		rde::string contents = getVersionStr();
+		contents.append(getSystemDefines());
+		for (const rde::string& str : *a_defines)
+			contents.append("#define ").append(str).append("\n");
+		for (const rde::string& str : *a_extensions)
+			contents.append("#extension ").append(str).append(" : require\n");
+		contents.append(a_vertexShaderFile.readString());
 		contents = processIncludes(contents);
-		contents = appendAfterVersion(contents, a_defines, a_extensions);
 		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
 	}
 	{
-		rde::string contents = rde::string("#version ").append(a_versionStr).append("\n").append(a_fragmentShaderFile.readString());
+		rde::string contents = getVersionStr();
+		contents.append(getSystemDefines());
+		for (const rde::string& str : *a_defines)
+			contents.append("#define ").append(str).append("\n");
+		for (const rde::string& str : *a_extensions)
+			contents.append("#extension ").append(str).append(" : require\n");
+		contents.append(a_fragmentShaderFile.readString());
 		contents = processIncludes(contents);
-		contents = appendAfterVersion(contents, a_defines, a_extensions);
 		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());
 	}
 
@@ -132,7 +135,7 @@ GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandl
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	if (success != GL_TRUE)
 	{
-		printf("Shader program was not linked.!\n");
+		print("Shader program was not linked.!\n");
 	}
 
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
@@ -143,19 +146,19 @@ GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandl
 
 		rde::vector<GLchar> infoLog(maxLength);
 		glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-		printf("link error: %s \n", &infoLog[0]);
+		print("link error: %s \n", &infoLog[0]);
 	}
 
 	glValidateProgram(program);
 	glGetProgramiv(program, GL_VALIDATE_STATUS, &success);
 	if (success != GL_TRUE)
 	{
-		printf("Shader program was not validated.!\n");
+		print("Shader program was not validated.!\n");
 	}
 
 	if (!glIsProgram(program))
 	{
-		printf("failed to create shader \n");
+		print("failed to create shader \n");
 	}
 
 	return program;
@@ -174,13 +177,13 @@ GLShader::~GLShader()
 		glDeleteProgram(m_shaderID);
 }
 
-void GLShader::initialize(const FileHandle& vertexShaderFile, const FileHandle& fragmentShaderFile, const rde::string& versionStr, 
+void GLShader::initialize(const FileHandle& vertexShaderFile, const FileHandle& fragmentShaderFile, 
 	const rde::vector<rde::string>* defines, const rde::vector<rde::string>* extensions)
 {
 	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
 
-	m_shaderID = createShaderProgram(vertexShaderFile, fragmentShaderFile, rde::string(versionStr), defines, extensions);
+	m_shaderID = createShaderProgram(vertexShaderFile, fragmentShaderFile, defines, extensions);
 }
 
 void GLShader::begin()
