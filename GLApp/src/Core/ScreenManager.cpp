@@ -1,6 +1,6 @@
 #include "ScreenManager.h"
 
-#include "..\Screens\GameScreen.h"
+#include "Screens/GameScreen.h"
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"

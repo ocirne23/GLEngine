@@ -42,14 +42,10 @@ private:
 	GLConstantBuffer m_lightColorBuffer;
 
 	ClusteredShading m_clusteredShading;
-	GLTextureBuffer m_lightIndiceBuffer;
-	GLTextureBuffer m_lightGridBuffer;
+	GLTextureBuffer m_lightIndiceTextureBuffer;
+	GLTextureBuffer m_lightGridTextureBuffer;
 
-	GLUniform<float> m_recLogSD1Uniform;
-	GLUniform<float> m_recNearUniform;
-	GLUniform<glm::vec3> m_eyePosUniform;
 	GLUniform<glm::mat3> m_normalMatrixUniform;
-	GLUniform<glm::mat4> m_transformMatrixUniform;
 	GLUniform<glm::mat4> m_viewMatrixUniform;
 	GLUniform<glm::mat4> m_mvpMatrixUniform;
 };

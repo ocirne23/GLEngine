@@ -109,10 +109,12 @@ GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandl
 	{
 		rde::string contents = getVersionStr();
 		contents.append(getSystemDefines());
-		for (const rde::string& str : *a_defines)
-			contents.append("#define ").append(str).append("\n");
-		for (const rde::string& str : *a_extensions)
-			contents.append("#extension ").append(str).append(" : require\n");
+		if (a_defines)
+			for (const rde::string& str : *a_defines)
+				contents.append("#define ").append(str).append("\n");
+		if (a_extensions)
+			for (const rde::string& str : *a_extensions)
+				contents.append("#extension ").append(str).append(" : require\n");
 		contents.append(a_vertexShaderFile.readString());
 		contents = processIncludes(contents);
 		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
@@ -120,10 +122,12 @@ GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandl
 	{
 		rde::string contents = getVersionStr();
 		contents.append(getSystemDefines());
-		for (const rde::string& str : *a_defines)
-			contents.append("#define ").append(str).append("\n");
-		for (const rde::string& str : *a_extensions)
-			contents.append("#extension ").append(str).append(" : require\n");
+		if (a_defines)
+			for (const rde::string& str : *a_defines)
+				contents.append("#define ").append(str).append("\n");
+		if (a_extensions)
+			for (const rde::string& str : *a_extensions)
+				contents.append("#extension ").append(str).append(" : require\n");
 		contents.append(a_fragmentShaderFile.readString());
 		contents = processIncludes(contents);
 		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());

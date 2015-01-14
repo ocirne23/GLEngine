@@ -36,7 +36,7 @@ bool isMipMapFilter(GLenum filter)
 	}
 }
 
-void GLTexture::initialize(const FileHandle& a_file, GLint a_minFilter, GLint a_magFilter,
+void GLTexture::initialize(const FileHandle& a_file, GLint a_textureIdx, GLint a_minFilter, GLint a_magFilter,
 	GLint a_textureWrapS, GLint a_textureWrapT)
 {
 	Pixmap pixmap;

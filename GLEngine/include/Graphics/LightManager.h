@@ -41,6 +41,5 @@ private:
 	glm::vec4* m_lightPositionRanges;
 	glm::vec4* m_lightColors;
 
-	ushort* m_usedLightRefs;
-	ushort* m_lightHandleIndices;
+	ushort* m_lightHandles;
 };
