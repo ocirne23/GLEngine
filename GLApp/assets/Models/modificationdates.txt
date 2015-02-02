@@ -1,2 +1,1 @@
 palace\palace.obj:23:16:26:239-1:9:2014
-crytek-sponza\sponza.obj:23:16:28:645-1:9:2014

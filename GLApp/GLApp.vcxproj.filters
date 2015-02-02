@@ -43,5 +43,8 @@
     <ClInclude Include="src\Screens\GameScreen.h">
       <Filter>Header Files\Screens</Filter>
     </ClInclude>
+    <ClInclude Include="src\Screens\EScreenType.h">
+      <Filter>Header Files\Screens</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

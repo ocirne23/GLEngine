@@ -8,7 +8,7 @@ int MAIN(int a_argc, char* a_argv[])
 	GLEngine::initialize();
 	{
 		ScreenManager screenManager;
-		screenManager.setScreen(ScreenType_GAMESCREEN);
+		screenManager.setScreen(EScreenType_GAMESCREEN);
 
 		uint startTime = GLEngine::getTimeMs();
 		uint fpsCounter = 0;

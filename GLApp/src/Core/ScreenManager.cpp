@@ -30,13 +30,13 @@ void ScreenManager::render(float a_deltaSec)
 		m_currentScreen->render(a_deltaSec);
 }
 
-void ScreenManager::setScreen(ScreenType a_screenType)
+void ScreenManager::setScreen(EScreenType a_screenType)
 {
 	if (!m_screens[a_screenType])
 	{
 		switch (a_screenType)
 		{
-		case ScreenType_GAMESCREEN:
+		case EScreenType_GAMESCREEN:
 			m_screens[a_screenType] = new GameScreen(this);
 			break;
 		default:

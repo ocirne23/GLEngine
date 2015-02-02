@@ -5,17 +5,18 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/GL/GLAppVars.h"
 #include "Input/Input.h"
+#include "rde/vector.h"
+#include "rde/rde_string.h"
 #include "Utils/FileHandle.h"
 #include "Utils/CheckGLError.h"
 #include "Utils/FileModificationManager.h"
-#include "rde/vector.h"
-#include "rde/rde_string.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 
+static const char* const MODEL_FILE_PATH = "Models/palace/palace.da";
 static const unsigned int MAX_LIGHTS = 1024;
 static const unsigned int TILE_WIDTH_PX = 32;
 static const unsigned int TILE_HEIGHT_PX = 32;
@@ -64,7 +65,7 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	m_lightGridTextureBuffer.bind();
 	m_lightIndiceTextureBuffer.bind();
 
-	m_mesh.loadFromFile("Models/palace/palace.da", m_modelShader,
+	m_mesh.loadFromFile(MODEL_FILE_PATH, m_modelShader,
 		GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY,
 		GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY,
 		GLAppVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
@@ -122,7 +123,6 @@ bool GameScreen::keyDown(Key a_key)
 		lights.push_back(h);
 		return true;
 	}
-
 	case Key_Y:
 	{
 		if (lights.size())

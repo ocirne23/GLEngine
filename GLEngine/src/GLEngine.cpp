@@ -1,16 +1,20 @@
 #include "GLEngine.h"
 
-#include "Input/Input.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/WindowFlags.h"
+#include "Input/Input.h"
 
 #include <SDL/SDL.h>
+
+BEGIN_UNNAMED_NAMESPACE()
 
 static const char* const PROGRAM_NAME = "GLEngine";
 static const uint INIT_WINDOW_WIDTH = 1024;
 static const uint INIT_WINDOW_HEIGHT = 768;
 static const uint INIT_WINDOW_XPOS = 5;// +1920;
 static const uint INIT_WINDOW_YPOS = 25;
+
+END_UNNAMED_NAMESPACE()
 
 Input* GLEngine::input = NULL;
 Graphics* GLEngine::graphics = NULL;
@@ -20,7 +24,6 @@ void GLEngine::initialize()
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
 		print("%s: %s\n", "Unable to initialize SDL", SDL_GetError());
-		assert(false);
 		SDL_Quit();
 	}
 

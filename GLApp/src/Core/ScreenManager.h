@@ -1,14 +1,9 @@
 #pragma once
 
 #include "Graphics/WindowEventListener.h"
+#include "Screens/EScreenType.h"
 
 class IScreen;
-
-enum ScreenType
-{
-	ScreenType_GAMESCREEN,
-	ScreenType_NUM_SCREENTYPES
-};
 
 class ScreenManager : public WindowEventListener
 {
@@ -18,7 +13,7 @@ public:
 
 	bool hasQuitWindow() const { return hasQuit; }
 
-	void setScreen(ScreenType screenType);
+	void setScreen(EScreenType screenType);
 	void render(float deltaSec);
 
 	virtual void resize(uint width, uint height) OVERRIDE;
@@ -31,7 +26,7 @@ private:
 private:
 
 	IScreen* m_currentScreen;
-	IScreen* m_screens[ScreenType_NUM_SCREENTYPES];
+	IScreen* m_screens[EScreenType_NUM_SCREENTYPES];
 
 	uint m_width;
 	uint m_height;

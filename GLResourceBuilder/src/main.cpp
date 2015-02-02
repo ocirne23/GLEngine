@@ -1,6 +1,4 @@
-#ifndef _WIN64
-Win x64 required
-#endif
+#ifdef _WIN64 // Resource builder only works on 64 bit platforms because it requires more than 2GB memory
 
 #include "ResourceBuilder.h"
 #include "Processors\ByteImageProcessor.h"
@@ -34,3 +32,7 @@ int main()
 
 	return 0;
 }
+
+#else // !_WIN64
+You shall not pass!
+#endif //_WIN64

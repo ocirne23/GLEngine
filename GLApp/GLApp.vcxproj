@@ -34,6 +34,7 @@
   <ItemGroup>
     <ClInclude Include="src\Core\IScreen.h" />
     <ClInclude Include="src\Core\ScreenManager.h" />
+    <ClInclude Include="src\Screens\EScreenType.h" />
     <ClInclude Include="src\Screens\GameScreen.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
