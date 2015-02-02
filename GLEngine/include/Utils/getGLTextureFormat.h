@@ -5,5 +5,4 @@
 #include "Graphics/GL/GLDefines.h"
 
 GLint getInternalFormatForNumComponents(uint a_numComponents, bool a_isFloatTexture);
-
 GLenum getFormatForNumComponents(uint numComponents);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+
 #include "Graphics/GL/GLTypes.h"
 
 class GLShader;
@@ -16,15 +17,13 @@ public:
 
 	void initialize(const GLShader& shader, GLuint bindingPoint, const char* blockName, GLenum drawUsage);
 	void upload(uint numBytes, const void* data);
-
 	void bind();
 
 private:
 
-	const GLShader* m_shader;
-
 	bool m_initialized;
 
+	const GLShader* m_shader;
 	GLenum m_drawUsage;
 	GLuint m_ubo;
 	GLuint m_bindingPoint;

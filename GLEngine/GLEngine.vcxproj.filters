@@ -109,6 +109,7 @@
     <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp">
       <Filter>Source Files\Graphics\GL\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Scene\Actor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -333,9 +334,6 @@
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Utils\ResourceType.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\Utils\getGLTextureFormat.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
@@ -371,6 +369,12 @@
     </ClInclude>
     <ClInclude Include="include\Graphics\GL\Core\GLUniform.h">
       <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Scene\System.h" />
+    <ClInclude Include="include\Scene\Systems\AnimationSystem.h" />
+    <ClInclude Include="src\Scene\Scene.cpp" />
+    <ClInclude Include="include\Utils\EResourceType.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 
 void StaticScenegraphSystem::transform(uint& a_it, const Node& a_parent)
 {
-	uint numChildren = a_parent.flags & Node::NUM_CHILDREN_MASK;
+	const uint numChildren = a_parent.flags & Node::NUM_CHILDREN_MASK;
 	for (uint i = 0; i < numChildren; ++i)
 	{
 		Node& child = m_nodes[++a_it];
@@ -36,7 +36,7 @@ uint StaticScenegraphSystem::addNode(uint a_maxHierarchySize, uint a_parent)
 {
 	if (a_parent == NO_PARENT)
 	{
-		int idx = m_nodes.size();
+		const int idx = m_nodes.size();
 		m_nodes.resize(idx + a_maxHierarchySize);
 		m_nodes[idx].flags |= Node::INITIALIZED_FLAG_MASK;
 		m_nodes[idx].flags |= (a_maxHierarchySize << 16);
@@ -45,8 +45,8 @@ uint StaticScenegraphSystem::addNode(uint a_maxHierarchySize, uint a_parent)
 	else 
 	{
 		// Find first free spot within max hierarchy size
-		Node& parent = m_nodes[a_parent];
-		int maxHierarchySize = (parent.flags & Node::MAX_HIERARCHY_SIZE_MASK) >> 16;
+		const Node& parent = m_nodes[a_parent];
+		const int maxHierarchySize = (parent.flags & Node::MAX_HIERARCHY_SIZE_MASK) >> 16;
 		for (uint i = a_parent; i < a_parent + maxHierarchySize; ++i)
 		{
 			Node& child = m_nodes[i];
@@ -72,12 +72,24 @@ uint StaticScenegraphSystem::addNode(uint a_maxHierarchySize, uint a_parent)
 	}
 }
 
-void StaticScenegraphSystem::setTransform(uint a_node, const glm::mat4& a_transform)
+void StaticScenegraphSystem::setTransform(uint a_node, const glm::quat& a_transform)
 {
+	m_nodes[a_node].flags |= Node::DIRTY_FLAG_MASK;
 	m_nodes[a_node].transform = a_transform;
 }
 
-const glm::mat4& StaticScenegraphSystem::getWorldspacePosition(uint a_node)
+void StaticScenegraphSystem::setTransform(uint a_node, const glm::mat4& a_transform)
+{
+	m_nodes[a_node].flags |= Node::DIRTY_FLAG_MASK;
+	m_nodes[a_node].transform = glm::quat_cast(a_transform);
+}
+
+const glm::quat& StaticScenegraphSystem::getWorldspacePosition(uint a_node)
 {
 	return m_nodes[a_node].worldSpacePosition;
+}
+
+const glm::mat4& StaticScenegraphSystem::getWorldspacePositionMatrix(uint a_node)
+{
+	return glm::mat4_cast(m_nodes[a_node].worldSpacePosition);
 }

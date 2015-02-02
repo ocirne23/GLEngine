@@ -1,6 +1,5 @@
 #include "Graphics/GL/Core/GLConstantBuffer.h"
 
-#include "Core.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/Core/GLShader.h"
 

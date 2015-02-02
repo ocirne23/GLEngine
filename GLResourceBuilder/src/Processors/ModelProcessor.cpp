@@ -1,13 +1,14 @@
 #include "ModelProcessor.h"
 
+#include "EResourceType.h"
+#include "Utils/stb_image.h"
+#include "Utils/TextureAtlas.h"
+
 #include <vector>
 #include <fstream>
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#include "../Utils/stb_image.h"
-#include "../Utils/TextureAtlas.h"
 
 namespace
 {
@@ -306,7 +307,7 @@ namespace
 			assert(file.is_open());
 
 			int type, width, height, numComponents;
-			type = ResourceType_BYTEIMAGE;
+			type = EResourceType_BYTEIMAGE;
 			width = (int) atlas->m_width;
 			height = (int) atlas->m_height;
 			numComponents = (int) atlas->m_numComponents;
@@ -409,7 +410,7 @@ namespace
 		std::ofstream file(a_dstFilePath.c_str(), std::ios::out | std::ios::binary);
 		assert(file.is_open());
 
-		int type = ResourceType_MODEL;
+		int type = EResourceType_MODEL;
 		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&num1CompAtlasses), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&num3CompAtlasses), sizeof(int));

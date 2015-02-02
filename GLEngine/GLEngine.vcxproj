@@ -47,6 +47,7 @@
     <ClCompile Include="src\rde\list.cpp" />
     <ClCompile Include="src\rde\rde_string.cpp" />
     <ClCompile Include="src\rde\slist.cpp" />
+    <ClCompile Include="src\Scene\Actor.cpp" />
     <ClCompile Include="src\Scene\Systems\StaticScenegraphSystem.cpp" />
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
@@ -129,6 +130,8 @@
     <ClInclude Include="include\rde\vector.h" />
     <ClInclude Include="include\Scene\Actor.h" />
     <ClInclude Include="include\Scene\Scene.h" />
+    <ClInclude Include="include\Scene\System.h" />
+    <ClInclude Include="include\Scene\Systems\AnimationSystem.h" />
     <ClInclude Include="include\Scene\Systems\StaticScenegraphSystem.h" />
     <ClInclude Include="include\Scene\Systems\System.h" />
     <ClInclude Include="include\Utils\Bounds2D.h" />
@@ -140,10 +143,11 @@
     <ClInclude Include="include\Utils\FPSCameraController.h" />
     <ClInclude Include="include\Utils\getGLTextureFormat.h" />
     <ClInclude Include="include\Utils\MatForward.h" />
-    <ClInclude Include="include\Utils\ResourceType.h" />
+    <ClInclude Include="include\Utils\EResourceType.h" />
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
     <ClInclude Include="include\Utils\Viewport.h" />
+    <ClInclude Include="src\Scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Graphics\GL\Core\GLConstantBuffer.h" />

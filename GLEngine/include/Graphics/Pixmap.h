@@ -7,7 +7,7 @@ class FileHandle;
 class Pixmap
 {
 public:
-	Pixmap() : m_width(0), m_height(0), m_numComponents(0), m_data() {}
+	Pixmap() : m_isFloatData(false), m_width(0), m_height(0), m_numComponents(0), m_data() {}
 	~Pixmap();
 
 	void read(const FileHandle& handle);

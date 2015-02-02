@@ -1,13 +1,14 @@
 #include "ByteImageProcessor.h"
 
-#include "../Utils/stb_image.h"
+#include "EResourceType.h"
+#include "Utils/stb_image.h"
 
 #include <fstream>
 #include <assert.h>
 
 bool ByteImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
 {
-	int type = ResourceType_BYTEIMAGE;
+	int type = EResourceType_BYTEIMAGE;
 	int width, height, numComponents;
 
 	const unsigned char* data = stbi_load(a_inResourcePath, &width, &height, &numComponents, 0);

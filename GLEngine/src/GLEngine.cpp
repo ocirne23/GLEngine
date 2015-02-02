@@ -4,7 +4,7 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/WindowFlags.h"
 
-#include <SDL\SDL.h>
+#include <SDL/SDL.h>
 
 static const char* const PROGRAM_NAME = "GLEngine";
 static const uint INIT_WINDOW_WIDTH = 1024;
@@ -87,9 +87,7 @@ uint GLEngine::getTimeMs()
 void GLEngine::shutdown()
 {
 	if (graphics->hasWindow())
-	{
 		graphics->windowQuit();
-	}
 
 	delete input;
 	delete graphics;

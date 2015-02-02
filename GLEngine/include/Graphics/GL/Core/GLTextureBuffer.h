@@ -23,15 +23,13 @@ public:
 	void bind();
 private:
 
-	const GLShader* m_shader;
-
 	bool m_initialized;
 
+	const GLShader* m_shader;
 	GLenum m_drawUsage;
 	GLint m_textureLoc;
 	GLint m_textureIdx;
 	GLuint m_textureID;
-
 	GLuint m_bufferID;
 	GLenum m_sizedInternalFormat;
 };

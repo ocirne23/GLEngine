@@ -6,7 +6,7 @@ class System
 {
 public:
 
-	System(uint systemID) : m_systemID(systemID) {}
+	System() : m_systemID(0xFFFF) {}
 	~System() {}
 	System(const System& copy) = delete;
 
@@ -14,5 +14,5 @@ public:
 
 private:
 
-	const ushort m_systemID;
+	ushort m_systemID;
 };

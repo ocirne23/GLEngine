@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Core.h"
+#include "rde/rde_string.h"
 
 struct SDL_RWops;
-
-#include "rde/rde_string.h"
 
 class FileHandle
 {
@@ -17,7 +16,6 @@ public:
 	~FileHandle();
 
 	void close();
-
 	void readBytes(char* buffer, uint numBytes, uint offset) const;
 	void writeBytes(const char* bytes, uint numBytes);
 
@@ -25,7 +23,7 @@ public:
 	rde::string readString() const;
 
 	const rde::string& getFilePath() const	{ return m_filePath; }
-	uint getFileSize() const				{ return m_size; }
+	uint getFileSize() const					{ return m_size; }
 	bool exists() const						{ return m_rwops != NULL; }
 
 private:

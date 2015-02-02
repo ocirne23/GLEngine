@@ -3,8 +3,8 @@
 #include "Graphics/WindowEventListener.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
-#include "Utils/CheckGLError.h"
 #include "rde/rde_string.h"
+#include "Utils/CheckGLError.h"
 
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
@@ -12,18 +12,14 @@
 
 #include <assert.h>
 
-
 #ifdef ANDROID
 static const uint MAX_GL_MAJOR_VERSION = 3;
 static const uint MAX_GL_MINOR_VERSION = 0;
-#else
-
+#else // !ANDROID
 #include "Graphics/tryEnableARBDebugOutput.h"
-
 static const uint MAX_GL_MAJOR_VERSION = 4;
 static const uint MAX_GL_MINOR_VERSION = 5;
-
-#endif // ANDROID
+#endif // !ANDROID
 
 bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
 {
@@ -44,7 +40,7 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 #ifndef ANDROID
 	initGLEW();
 	tryEnableARBDebugOutput();
-#endif //ANDROID
+#endif // ANDROID
 
 	m_glVendor = (const char*) glGetString(GL_VENDOR);
 	m_glRenderer = (const char*) glGetString(GL_RENDERER);

@@ -4,8 +4,8 @@
 #include "Graphics/GL/GL.h"
 #include "Utils/getGLTextureFormat.h"
 
-#include <functional>
 #include <assert.h>
+#include <functional>
 
 GLTexture::~GLTexture()
 {
@@ -32,7 +32,7 @@ bool isMipMapFilter(GLenum filter)
 	case GL_NEAREST_MIPMAP_NEAREST: return true;
 	case GL_LINEAR_MIPMAP_LINEAR:	return true;
 	case GL_LINEAR_MIPMAP_NEAREST:	return true;
-	default:						return false;
+	default:							return false;
 	}
 }
 
@@ -49,10 +49,10 @@ void GLTexture::initialize(const FileHandle& a_file, GLint a_textureIdx, GLint a
 	m_height = pixmap.m_height;
 	m_numComponents = pixmap.m_numComponents;
 
-	GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, pixmap.m_isFloatData);
-	GLint format = getFormatForNumComponents(m_numComponents);
+	const GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, pixmap.m_isFloatData);
+	const GLint format = getFormatForNumComponents(m_numComponents);
 
-	bool generateMipMaps = isMipMapFilter(a_minFilter);
+	const bool generateMipMaps = isMipMapFilter(a_minFilter);
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);

@@ -6,14 +6,15 @@
 class Actor
 {
 public:
-	Actor();
-	~Actor();
+	friend class Scene;
+
 	Actor(const Actor& copy) = delete;
 private:
 
-	uint64 m_uuid;
+	Actor();
+	~Actor();
+
+private:
+
 	uint m_id;
-	
-	ushort* m_systemIDs;
-	ushort m_numSystems;
 };

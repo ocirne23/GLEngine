@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Core.h"
+
+#include "Graphics/GL/GLTypes.h"
 #include "rde/vector.h"
 #include "Utils/VecForward.h"
 #include "Utils/Viewport.h"
-#include "Graphics/GL/GLTypes.h"
 
 class PerspectiveCamera;
 class GLShader;
@@ -12,23 +13,23 @@ class GLShader;
 class ClusteredShading
 {
 public:
-	ClusteredShading() {};
-	~ClusteredShading() {};
+	ClusteredShading() {}
+	~ClusteredShading() {}
 
 	void initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Viewport& viewport, const PerspectiveCamera& camera);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* lightPositionRangeList);
 
-	uint getGridWidth() const	{ return m_gridWidth; };
-	uint getGridHeight() const	{ return m_gridHeight; };
-	uint getGridDepth() const	{ return m_gridDepth; };
-	uint getGridSize() const	{ return m_gridSize; }
+	uint getGridWidth() const				{ return m_gridWidth; }
+	uint getGridHeight() const				{ return m_gridHeight; }
+	uint getGridDepth() const				{ return m_gridDepth; }
+	uint getGridSize() const					{ return m_gridSize; }
 
-	uint getNumLightIndices() const { return m_lightIndices.size(); }
+	uint getNumLightIndices() const			{ return m_lightIndices.size(); }
 
 	const glm::uvec2* getLightGrid() const	{ return m_lightGrid; }
 	const ushort* getLightIndices() const	{ return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
 	float getRecLogSD1() const				{ return m_recLogSD1; }
-	float getRecNear() const				{ return m_recNear; }
+	float getRecNear() const					{ return m_recNear; }
 
 private:
 

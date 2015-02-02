@@ -4,7 +4,6 @@
 
 #include "Graphics/GL/GLDefines.h"
 #include "Graphics/GL/GLTypes.h"
-
 #include "rde/vector.h"
 
 class Pixmap;
@@ -26,7 +25,6 @@ public:
 	void unbind(uint index = 0);
 
 	bool isInitialized() { return m_initialized; }
-
 	void setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture);
 
 	inline uint getWidth() const		{ return m_width; }
@@ -44,6 +42,5 @@ private:
 	uint m_numComponents;
 	bool m_isFloatTexture;
 	bool m_generateMipMaps;
-
 	GLuint m_textureID;
 };

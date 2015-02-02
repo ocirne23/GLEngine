@@ -11,7 +11,7 @@ class FileHandle;
 class GLTexture
 {
 public:
-	GLTexture() : m_textureID(0), m_width(0), m_height(0), m_numComponents(0), m_initialized(false) {};
+	GLTexture() : m_textureID(0), m_width(0), m_height(0), m_numComponents(0), m_initialized(false) {}
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
@@ -22,7 +22,7 @@ public:
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 
-	bool isLoaded() const			{ return m_textureID != 0; };
+	bool isLoaded() const			{ return m_textureID != 0; }
 	GLuint getTextureID() const		{ return m_textureID; }
 	uint getWidth() const			{ return m_width; }
 	uint getHeight() const			{ return m_height; }

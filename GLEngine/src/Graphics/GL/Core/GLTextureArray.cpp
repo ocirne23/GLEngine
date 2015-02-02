@@ -6,7 +6,9 @@
 
 #include <assert.h>
 
+BEGIN_UNNAMED_NAMESPACE()
 inline int max(int a, int b) { return a > b ? a : b; }
+END_UNNAMED_NAMESPACE()
 
 GLTextureArray::~GLTextureArray()
 {
@@ -46,8 +48,8 @@ void GLTextureArray::initialize(const rde::vector<Pixmap*>& a_pixmaps, uint a_nu
 		a_minFilter == GL_LINEAR_MIPMAP_LINEAR ||
 		a_minFilter == GL_LINEAR_MIPMAP_NEAREST);
 
-	GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, m_isFloatTexture);
-	GLenum format = getFormatForNumComponents(m_numComponents);
+	const GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, m_isFloatTexture);
+	const GLenum format = getFormatForNumComponents(m_numComponents);
 
 	int width = m_width;
 	int height = m_height;
@@ -84,7 +86,6 @@ void GLTextureArray::setDimensions(uint a_width, uint a_height, uint a_numCompon
 	m_numComponents = a_numComponents;
 	m_isFloatTexture = a_isFloatTexture;
 }
-
 
 void GLTextureArray::bind(uint a_index)
 {

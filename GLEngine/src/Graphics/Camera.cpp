@@ -3,12 +3,9 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/compatibility.hpp>
 
+BEGIN_UNNAMED_NAMESPACE()
 static const glm::vec3 UP(0, 1, 0);
-
-Camera::~Camera()
-{
-
-}
+END_UNNAMED_NAMESPACE()
 
 void Camera::initialize(const glm::vec3& a_position, const glm::vec3& a_direction, float a_viewportWidth, float a_viewportHeight, float a_near, float a_far)
 {
@@ -24,16 +21,16 @@ void Camera::initialize(const glm::vec3& a_position, const glm::vec3& a_directio
 bool Camera::frustumContains(const glm::vec3* const a_vertices, uint a_numVertices) const
 {
 	for (uint i = 0; i < a_numVertices; ++i)
-	if (m_frustum.pointInFrustum(a_vertices[i]))
-		return true;
+		if (m_frustum.pointInFrustum(a_vertices[i]))
+			return true;
 	return false;
 }
 
 bool Camera::frustumContainsSpheres(const glm::vec3* const a_vertices, uint a_numVertices, float a_sphereRadius) const
 {
 	for (uint i = 0; i < a_numVertices; ++i)
-	if (m_frustum.sphereInFrustum(a_vertices[i], a_sphereRadius))
-		return true;
+		if (m_frustum.sphereInFrustum(a_vertices[i], a_sphereRadius))
+			return true;
 	return false;
 }
 
@@ -85,23 +82,17 @@ void Camera::rotate(float a_angleRad, const glm::vec3& a_axis)
 
 void Camera::rotateRelative(float a_xRot, float a_yRot)
 {
-	//rotate x component
-	rotate(a_xRot, UP);
-
-	//rotate y component
+	rotate(a_xRot, UP); //rotate x component
 	float angle = getRotationRadXZ();
-	rotate(a_yRot, glm::vec3(glm::cos(angle), 0.0f, glm::sin(angle)));
+	rotate(a_yRot, glm::vec3(glm::cos(angle), 0.0f, glm::sin(angle))); //rotate y component
 }
 
 void Camera::update()
 {
 	m_viewMatrix = glm::lookAt(m_position, m_position + m_direction, m_up);
 	m_combinedMatrix = m_projectionMatrix * m_viewMatrix;
-
 	m_frustum.calculateFrustum(m_combinedMatrix);
 }
-
-
 
 void Camera::lookAt(float a_x, float a_y, float a_z)
 {

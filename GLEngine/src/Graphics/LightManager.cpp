@@ -3,6 +3,7 @@
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GLMesh.h"
 #include "rde/algorithm.h"
+
 #include <glm/glm.hpp>
 
 LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights), m_numUsedLights(0)

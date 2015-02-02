@@ -1,7 +1,6 @@
 #pragma once
 
 #include <rde\vector.h>
-
 #include <functional>
 
 class FileHandle;
@@ -13,12 +12,10 @@ public:
 	friend class FileModificationListener;
 	
 	static void update();
-
 	static FileModificationListener* createModificationListener(const FileHandle& handle, std::function<void()> func);
 	static void removeModificationListener(FileModificationListener* listener);
 
 private:
-
 
 	FileModificationManager() {}
 	~FileModificationManager() {}

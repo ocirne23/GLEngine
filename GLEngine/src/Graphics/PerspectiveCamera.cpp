@@ -8,10 +8,6 @@ void PerspectiveCamera::initialize(const glm::vec3& a_position, const glm::vec3&
 	setHorizontalFieldOfView(a_horizontalFov);
 }
 
-PerspectiveCamera::~PerspectiveCamera()
-{
-}
-
 void PerspectiveCamera::updateProjection()
 {
 	m_projectionMatrix = glm::perspective(m_vFieldOfView, m_viewportWidth / m_viewportHeight, m_near, m_far);

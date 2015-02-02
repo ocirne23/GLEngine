@@ -6,18 +6,18 @@
 
 struct VertexAttribute
 {
-	enum Format
+	enum EFormat
 	{
-		UNSIGNED_BYTE, UNSIGNED_INT, INT, FLOAT
+		EFormat_UNSIGNED_BYTE, EFormat_UNSIGNED_INT, EFormat_INT, EFormat_FLOAT
 	};
 
 	uint m_attributeIndex;
 	const char* m_attributeName;
-	Format m_format;
+	EFormat m_format;
 	uint m_numElements;
 	bool m_normalize;
 
-	VertexAttribute(uint idx, const char* name, Format format, uint numElements, bool normalize = false) :
+	VertexAttribute(uint idx, const char* name, EFormat format, uint numElements, bool normalize = false) :
 		m_attributeIndex(idx),
 		m_attributeName(name),
 		m_format(format),
@@ -38,9 +38,7 @@ public:
 
 	void initialize(GLenum bufferType, GLenum drawUsage);
 	void upload(uint numBytes, const void* data = 0);
-
 	void bind();
-
 	void setVertexAttributes(uint numAttributes, VertexAttribute* attributes);
 	void setAttribPointer(GLuint attributeIdx, GLenum type, uint valuesPerVertex,
 		GLboolean normalized = false, GLboolean isIntegerType = false, GLuint stride = 0,
@@ -49,7 +47,6 @@ public:
 private:
 
 	bool m_initialized;
-
 	GLuint m_id;
 	GLenum m_bufferType;
 	GLenum m_drawUsage;

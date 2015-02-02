@@ -68,20 +68,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LibraryPath>$(ProjectDir)\libs\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs;$(ProjectDir)\libs\$(Platform);</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(ProjectDir)\libs\$(Platform);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(ProjectDir)\libs\$(Platform);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -158,6 +162,7 @@
     <ClCompile Include="src\Utils\TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\EResourceType.h" />
     <ClInclude Include="src\Processors\ByteImageProcessor.h" />
     <ClInclude Include="src\Processors\FloatImageProcessor.h" />
     <ClInclude Include="src\Processors\ModelProcessor.h" />

@@ -12,8 +12,8 @@
 #include "Graphics/GL/Core/GLVertexBuffer.h"
 
 #include "Utils/CheckGLError.h"
+#include "Utils/EResourceType.h"
 #include "Utils/FileHandle.h"
-#include "Utils/ResourceType.h"
 
 #include "Input/Input.h"
 #include "Input/Key.h"
@@ -96,7 +96,7 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 
 	int type;
 	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
-	assert(type == ResourceType_MODEL);
+	assert(type == EResourceType_MODEL);
 
 	int num1CompAtlasses, num3CompAtlasses;
 	file.readBytes(reinterpret_cast<char*>(&num1CompAtlasses), sizeof(int), sizeof(int));
@@ -133,12 +133,12 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 
 	VertexAttribute attributes[] =
 	{
-		VertexAttribute(0, "Position", VertexAttribute::Format::FLOAT, 3),
-		VertexAttribute(1, "Texcoords", VertexAttribute::Format::FLOAT, 2),
-		VertexAttribute(2, "Normals", VertexAttribute::Format::FLOAT, 3),
-		VertexAttribute(3, "Tangents", VertexAttribute::Format::FLOAT, 3),
-		VertexAttribute(4, "Bitangents", VertexAttribute::Format::FLOAT, 3),
-		VertexAttribute(5, "MaterialID", VertexAttribute::Format::UNSIGNED_INT, 1)
+		VertexAttribute(0, "Position", VertexAttribute::EFormat::EFormat_FLOAT, 3),
+		VertexAttribute(1, "Texcoords", VertexAttribute::EFormat::EFormat_FLOAT, 2),
+		VertexAttribute(2, "Normals", VertexAttribute::EFormat::EFormat_FLOAT, 3),
+		VertexAttribute(3, "Tangents", VertexAttribute::EFormat::EFormat_FLOAT, 3),
+		VertexAttribute(4, "Bitangents", VertexAttribute::EFormat::EFormat_FLOAT, 3),
+		VertexAttribute(5, "MaterialID", VertexAttribute::EFormat::EFormat_UNSIGNED_INT, 1)
 	};
 
 	m_vertexBuffer->setVertexAttributes(6, attributes);

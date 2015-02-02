@@ -108,8 +108,8 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 bool Frustum::pointInFrustum(const glm::vec3& a_point) const
 {
 	for (int p = 0; p < 6; p++)
-	if (m_planes[p].x * a_point.x + m_planes[p].y * a_point.y + m_planes[p].z * a_point.z + m_planes[p].w <= 0)
-		return false;
+		if (m_planes[p].x * a_point.x + m_planes[p].y * a_point.y + m_planes[p].z * a_point.z + m_planes[p].w <= 0)
+			return false;
 
 	return true;
 }
@@ -117,8 +117,8 @@ bool Frustum::pointInFrustum(const glm::vec3& a_point) const
 bool Frustum::sphereInFrustum(const glm::vec3& a_point, float a_radius) const
 {
 	for (int p = 0; p < 6; p++)
-	if (m_planes[p].x * a_point.x + m_planes[p].y * a_point.y + m_planes[p].z * a_point.z + m_planes[p].w + a_radius <= 0)
-		return false;
+		if (m_planes[p].x * a_point.x + m_planes[p].y * a_point.y + m_planes[p].z * a_point.z + m_planes[p].w + a_radius <= 0)
+			return false;
 
 	return true;
 }

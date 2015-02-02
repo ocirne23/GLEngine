@@ -4,7 +4,6 @@
 #include "Graphics/GL/Core/GLShader.h"
 
 #include <glm/glm.hpp>
-
 #include <assert.h>
 
 template <typename T>

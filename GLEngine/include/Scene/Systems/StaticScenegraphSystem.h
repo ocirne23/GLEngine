@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Scene/Systems/System.h"
+#include "Scene/System.h"
 #include "rde/vector.h"
+#include "rde/hash_map.h"
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 class StaticScenegraphSystem : public System
 {
@@ -16,8 +18,10 @@ public:
 	void update(float deltaSec) OVERRIDE;
 	
 	uint addNode(uint maxHierarchySize, uint parent = NO_PARENT);
+	void setTransform(uint node, const glm::quat& transform);
 	void setTransform(uint node, const glm::mat4& transform);
-	const glm::mat4& getWorldspacePosition(uint node);
+	const glm::quat& getWorldspacePosition(uint node);
+	const glm::mat4& getWorldspacePositionMatrix(uint node);
 
 private:
 
@@ -30,8 +34,8 @@ private:
 		static const uint IS_CHILD_FLAG_MASK			= 0x00000400; // 11
 		static const uint MAX_HIERARCHY_SIZE_MASK	= 0xFFFF0000; // 16-32
 
-		glm::mat4 worldSpacePosition;
-		glm::mat4 transform;
+		glm::quat worldSpacePosition;
+		glm::quat transform;
 		uint flags;
 	};
 

@@ -13,15 +13,15 @@ class GLShader;
 class TiledShading
 {
 public:
-	TiledShading() {};
-	~TiledShading() {};
+	TiledShading() {}
+	~TiledShading() {}
 
 	void initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Viewport& viewport, const PerspectiveCamera& camera);
 	void setupShader(const GLShader& shader);
 	void update(const PerspectiveCamera& camera, const glm::vec4* viewspaceLightPositionRangeList, uint numLights);
 
-	uint getGridWidth() { return m_gridWidth; };
-	uint getGridHeight() { return m_gridHeight; };
+	uint getGridWidth() { return m_gridWidth; }
+	uint getGridHeight() { return m_gridHeight; }
 
 private:
 

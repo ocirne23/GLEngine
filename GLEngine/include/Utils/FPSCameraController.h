@@ -11,9 +11,6 @@ class PerspectiveCamera;
 enum Key;
 enum MouseButton;
 
-/**
-Mouse/key listener which moves the given camera like a first person game would.
-*/
 class FPSCameraController : public MouseListener, public KeyListener
 {
 public:
@@ -21,9 +18,7 @@ public:
 	~FPSCameraController();
 
 	void initialize(PerspectiveCamera& camera, const glm::vec3& startDir);
-
 	void update(float deltaSec);
-
 	void setCameraSpeed(float cameraSpeed);
 
 	virtual bool keyDown(Key key) OVERRIDE;
@@ -35,6 +30,7 @@ public:
 	virtual bool mouseScrolled(int amount) OVERRIDE;
 
 private:
+
 	bool m_initialized;
 	PerspectiveCamera* m_camera;
 	bool m_lmbPressed, m_rmbPressed;

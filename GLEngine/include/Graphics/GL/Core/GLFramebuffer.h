@@ -24,11 +24,14 @@ public:
 	void deleteTextures();
 
 private:
-	static bool s_begun;
+
 	bool m_begun;
 
 	GLuint m_fbo;
 	rde::vector<GLuint> m_textures;
 	rde::vector<GLenum> m_drawBuffers;
 	GLuint m_depthTexture;
+
+private:
+	static bool s_begun;
 };
