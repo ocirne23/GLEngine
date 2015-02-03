@@ -24,19 +24,15 @@ public:
 	unsigned char* m_data;
 
 private:
+
 	struct Node
 	{
 		Node* left;
 		Node* right;
-
-		int x;
-		int y;
-
-		int width;
-		int height;
+		int x, y, width, height;
 	};
-
 	Node* getRegion(Node *node, int width, int height);
+
 private:
 
 	Node m_root;

@@ -110,6 +110,7 @@
       <Filter>Source Files\Graphics\GL\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Scene\Actor.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -376,6 +377,7 @@
     <ClInclude Include="include\Utils\EResourceType.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="include\Graphics\GL\GLVars.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

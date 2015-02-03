@@ -45,17 +45,12 @@ TextureAtlas::~TextureAtlas()
 TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
 {
 	Node* node = NULL;
-	if (!m_root.left && !m_root.right)
-	{
-		if (width == m_root.width || height == m_root.height)
-		{	// if no region has been used yet and region size is equal to atlas size, no need for padding
-			m_padding = 0;
-		}
+	if (!m_root.left && !m_root.right && (width == m_root.width || height == m_root.height))
+	{	// if no region has been used yet and region size is equal to atlas size, no need for padding
+		m_padding = 0;
 	}
 	
-	{
-		node = getRegion(&m_root, width + m_padding * 2, height + m_padding * 2);
-	}
+	node = getRegion(&m_root, width + m_padding * 2, height + m_padding * 2);
 
 	if (node)
 		return{ node->x + m_padding, node->y + m_padding, node->width - m_padding * 2, node->height - m_padding * 2 };
@@ -143,7 +138,6 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 			for (int yPix = 0; yPix < height; ++yPix)
 			{
 				getPixel(data, width, height, xPix, yPix, m_numComponents, pixel);
-				//printf("%i %i %i \n", pixel[0], pixel[1], pixel[2]);
 				setPixel(m_data, m_width, m_height, x + xPix, y + yPix, m_numComponents, pixel);
 			}
 		}

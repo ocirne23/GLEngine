@@ -22,14 +22,14 @@ public:
 	uint getGridWidth() const				{ return m_gridWidth; }
 	uint getGridHeight() const				{ return m_gridHeight; }
 	uint getGridDepth() const				{ return m_gridDepth; }
-	uint getGridSize() const					{ return m_gridSize; }
+	uint getGridSize() const				{ return m_gridSize; }
 
 	uint getNumLightIndices() const			{ return m_lightIndices.size(); }
 
 	const glm::uvec2* getLightGrid() const	{ return m_lightGrid; }
 	const ushort* getLightIndices() const	{ return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
 	float getRecLogSD1() const				{ return m_recLogSD1; }
-	float getRecNear() const					{ return m_recNear; }
+	float getRecNear() const				{ return m_recNear; }
 
 private:
 

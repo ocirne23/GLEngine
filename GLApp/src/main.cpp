@@ -10,11 +10,11 @@ int MAIN(int a_argc, char* a_argv[])
 		ScreenManager screenManager;
 		screenManager.setScreen(EScreenType_GAMESCREEN);
 
+		const float fpsLogDelay = 5.0f;
+
 		uint startTime = GLEngine::getTimeMs();
 		uint fpsCounter = 0;
 		float fpsTimeAccumulator = 0.0f;
-		const float fpsLogDelay = 5.0f;
-
 		while (!screenManager.hasQuitWindow())
 		{
 			GLEngine::doEngineTick();

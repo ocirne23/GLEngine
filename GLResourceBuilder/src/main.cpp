@@ -23,7 +23,7 @@ int main()
 	ResourceBuilder::ResourceProcessorMap modelProcessors = {
 		{ "obj", &modelProcessor }
 	};
-
+	
 	ResourceBuilder::buildResources(imageProcessors, "..\\GLApp\\assets-source\\Utils", "..\\GLApp\\assets\\Utils", INCREMENTAL_BUILDING);
 	ResourceBuilder::buildResources(modelProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
 

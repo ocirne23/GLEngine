@@ -9,10 +9,9 @@
 ScreenManager::ScreenManager() : m_currentScreen(0), m_width(0), m_height(0), hasQuit(false)
 {
 	memset(m_screens, 0, sizeof(m_screens));
-	m_currentScreen = NULL;
+
 	m_width = GLEngine::graphics->getScreenWidth();
 	m_height = GLEngine::graphics->getScreenHeight();
-
 	GLEngine::graphics->registerWindowEventListener(this);
 }
 
@@ -40,7 +39,7 @@ void ScreenManager::setScreen(EScreenType a_screenType)
 			m_screens[a_screenType] = new GameScreen(this);
 			break;
 		default:
-			assert(0);
+			assert(false);
 			break;
 		}
 	}

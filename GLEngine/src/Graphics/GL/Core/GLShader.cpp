@@ -1,9 +1,12 @@
 #include "Graphics/GL/Core/GLShader.h"
 
 #include "Core.h"
+
 #include "GLEngine.h"
-#include "Graphics/Graphics.h"
+
 #include "Graphics/GL/GL.h"
+#include "Graphics/GL/GLVars.h"
+
 #include "rde/rde_string.h"
 #include "Utils/FileHandle.h"
 
@@ -28,9 +31,9 @@ rde::string getVersionStr()
 rde::string getSystemDefines()
 {
 	rde::string str;
-	if (rde::string(GLEngine::graphics->getVendorStr()).find("NVIDIA") != rde::string::npos
-		&& GLEngine::graphics->getGLMajorVersion() >= 4
-		&& GLEngine::graphics->getGLMinorVersion() >= 2)
+	if (rde::string(GLVars::getVendorStr()).find("NVIDIA") != rde::string::npos
+		&& GLVars::getGLMajorVersion() >= 4
+		&& GLVars::getGLMinorVersion() >= 2)
 	{
 		str.append("#define ").append(rde::string("GLE_DYNAMIC_INDEXING")).append("\n");
 	}

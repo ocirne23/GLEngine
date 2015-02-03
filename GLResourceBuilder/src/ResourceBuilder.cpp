@@ -14,8 +14,8 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 	printf("Starting resource building in folder: \t %s \n", a_inDirectoryPath);
 
 	std::unordered_map<std::string, std::string> oldWriteTimesMap;
-	
 	std::fstream writeTimesFile;
+
 	writeTimesFile.open(std::string(a_outDirectoryPath) + "\\modificationdates.txt", std::ios::in);
 	if (writeTimesFile.is_open())
 	{	// Read modification file
@@ -104,7 +104,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 			}
 		}
 	}
-
+	
 	for (const auto& oldWriteTimes : oldWriteTimesMap)
 	{
 		std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second + "\n";
