@@ -39,20 +39,20 @@ void GLFramebuffer::addFramebufferTexture(GLenum a_format, GLenum a_attachment, 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
 	GLuint textureID;
-
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
+
 	glTexStorage2D(GL_TEXTURE_2D, 1, a_format, a_width, a_height);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, a_attachment, GL_TEXTURE_2D, textureID, 0);
+
 	m_textures.push_back(textureID);
-
 	m_drawBuffers.push_back(a_attachment);
-	glDrawBuffers(m_drawBuffers.size(), &m_drawBuffers[0]);
 
+	glDrawBuffers(m_drawBuffers.size(), &m_drawBuffers[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -102,9 +102,7 @@ void GLFramebuffer::bindDepthTexture(uint a_textureUnit)
 void GLFramebuffer::deleteTextures()
 {
 	if (m_textures.size() > 0)
-	{
 		glDeleteTextures(m_textures.size(), &m_textures[0]);
-	}
 	m_textures.clear();
 
 	if (m_depthTexture)

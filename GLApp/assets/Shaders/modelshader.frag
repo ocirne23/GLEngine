@@ -18,7 +18,7 @@ const uint INVALID_MATERIAL = 0xFFFFFFFFu;
 const float DEFAULT_SPECULAR = 0.2;
 const float SPECULAR_POWER = 1.2;
 const float ATTENUATION = 0.004;
-const float BUMP_MAP_STRENGTH = 1.2;
+const float BUMP_MAP_STRENGTH = 2.0;
 
 struct MaterialProperty
 {
@@ -35,14 +35,23 @@ struct MaterialProperty
 uniform sampler2DArray u_1cTextureArray;
 uniform sampler2DArray u_3cTextureArray;
 
-vec3 sample3CAtlasArray(int atlasNr, vec4 texMapping, vec2 uv)
+float getMipMapLevel(vec2 texture_coordinate)
 {
-	return texture(u_3cTextureArray, vec3(fract(uv) * texMapping.zw + texMapping.xy, atlasNr)).rgb;	
+    vec2  dx_vtc        = dFdx(texture_coordinate);
+    vec2  dy_vtc        = dFdy(texture_coordinate);
+    float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
+    return 0.5 * log2(delta_max_sqr);
 }
 
-float sample1CAtlasArray(int maskAtlasNr, vec4 maskTexMapping, vec2 uv)
+vec4 sampleAtlasArray(sampler2DArray sampler, int atlasNr, vec4 texMapping, vec2 uv)
 {
-	return texture(u_1cTextureArray, vec3(fract(uv) * maskTexMapping.zw + maskTexMapping.xy, maskAtlasNr)).r;
+	// We have to manually calculate the mipmap level because using fract() throws off
+	// the default mipmap calculation
+	vec2 mipmapTexCoord = uv * texMapping.zw + texMapping.xy;
+	float mipmapLevel = getMipMapLevel(mipmapTexCoord * textureSize(sampler, 0).xy);
+	
+	vec3 texCoord = vec3(fract(uv) * texMapping.zw + texMapping.xy, atlasNr);
+    return textureLod(sampler, texCoord, mipmapLevel);
 }
 
 layout (std140) uniform MaterialProperties
@@ -144,40 +153,16 @@ void doLightGGX(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse,
 	diffuseContrib = lightContrib * Diffuse_OrenNayar(diffuse, roughness, NdotV, NdotL, VdotH);
 }
 
-
-struct MaterialProperty
-{
-	vec4 diffuseTexMapping;
-	vec4 bumpTexMapping;
-	vec4 specTexMapping;
-	vec4 maskTexMapping;
-	int diffuseAtlasNr;
-	int bumpAtlasNr;
-	int specularAtlasNr;
-	int maskAtlasNr;
-};
-
 void main()
 {
 	MaterialProperty material = u_materialProperties[v_materialID];
 	
-	if (material.maskAtlasNr != -1 && sample1CAtlasArray(material.maskAtlasNr, material.maskTexMapping, v_texcoord) < 0.5)
-	{
+	if (material.maskAtlasNr != -1 && sampleAtlasArray(u_1cTextureArray, material.maskAtlasNr, material.maskTexMapping, v_texcoord).r < 0.5)
 		discard;
-	}
+	vec3 diffuse = sampleAtlasArray(u_3cTextureArray, material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord).rgb;
+	vec3 normal = material.bumpAtlasNr != -1 ? getBumpedNormal(sampleAtlasArray(u_3cTextureArray, material.bumpAtlasNr, material.bumpTexMapping, v_texcoord).rgb) : v_normal;
+	float specular = sampleAtlasArray(u_1cTextureArray, material.specularAtlasNr, material.specTexMapping, v_texcoord).r;
 	
-	vec3 diffuse = sample3CAtlasArray(material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord);
-	vec3 normal;
-	if (material.bumpAtlasNr != -1)
-	{
-		normal = getBumpedNormal(sample3CAtlasArray(material.bumpAtlasNr, material.bumpTexMapping, v_texcoord));
-	}
-	else
-	{
-		normal = v_normal;
-	}
-	float specular = sample1CAtlasArray(material.specularAtlasNr, material.specTexMapping, v_texcoord);
-
 	vec3 diffuseAccum = vec3(0);
 	vec3 specularAccum = vec3(0);
 	
@@ -189,7 +174,7 @@ void main()
 		float roughness = clamp(specular, 0.01, 0.99);
 		float albedo = (diffuse.r + diffuse.g + diffuse.b) / 3.0;
 		float F0 = mix(0.04, albedo, roughness); //replace roughness with metalness //0.04; // refraction index;
-
+		
 		vec3 diffuseContrib, specularContrib;
 		doLightGGX(diffuseContrib, specularContrib, diffuse, roughness, F0, v_position, N, V, light);
 		
@@ -198,6 +183,6 @@ void main()
 	}
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
-	//out_color = vec4(diffuse, 1.0);
-	//out_color = vec4(vec3(normal), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001;
+	
+	//out_color = vec4(vec3(n), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001; // for testing values without unused errors
 }

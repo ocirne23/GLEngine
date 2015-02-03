@@ -32,7 +32,7 @@ bool isMipMapFilter(GLenum filter)
 	case GL_NEAREST_MIPMAP_NEAREST: return true;
 	case GL_LINEAR_MIPMAP_LINEAR:	return true;
 	case GL_LINEAR_MIPMAP_NEAREST:	return true;
-	default:							return false;
+	default:						return false;
 	}
 }
 

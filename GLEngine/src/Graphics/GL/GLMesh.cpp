@@ -189,6 +189,7 @@ void GLMesh::render(bool a_renderOpague, bool a_renderTransparent, bool a_bindMa
 			m_1cTextureArray.bind(m_1cTextureUnit);
 		if (m_3cTextureArray.isInitialized())
 			m_3cTextureArray.bind(m_3cTextureUnit);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}
 	m_stateBuffer.end();

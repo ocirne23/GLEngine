@@ -74,8 +74,8 @@ namespace
 
 	vec4 getTextureOffset(const AtlasRegion& a_reg)
 	{
-		const int atlasWidth = (int) a_reg.atlas->m_width;
-		const int atlasHeight = (int)a_reg.atlas->m_height;
+		const int atlasWidth = a_reg.atlas->m_width;
+		const int atlasHeight = a_reg.atlas->m_height;
 
 		const int regionWidth = a_reg.region.width;
 		const int regionHeight = a_reg.region.height;
@@ -217,7 +217,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 			TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
 			assert(region.width && region.height);
 			atlasses.push_back(atlas);
-			atlasRegions.push_back({ tex.path, (int)atlasses.size() - 1, atlas, region });
+			atlasRegions.push_back({ tex.path, (int) atlasses.size() - 1, atlas, region });
 		}
 	}
 

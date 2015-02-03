@@ -50,7 +50,7 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	m_modelShader.setUniform1i("u_3cTextureArray", GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY);
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
-	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.2f));
+	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
 	m_modelShader.setUniformMatrix4f("u_transform", glm::mat4(1));
 
 	m_viewMatrixUniform.initialize(m_modelShader, "u_mv");
@@ -83,6 +83,13 @@ void GameScreen::render(float a_deltaSec)
 	m_cameraController.update(a_deltaSec);
 	m_camera.update();
 
+	glm::vec4* lights = m_lightManager.getLightPositionRanges();
+	for (uint i = 0; i < m_lightManager.getNumLights(); ++i)
+	{
+		lights[i].w = 2.0f + 10.0f * (((GLEngine::getTimeMs() + i * 12345) % 2000) / 2000.0f);
+	}
+
+
 	m_modelShader.begin();
 	{
 		const glm::vec4* viewspaceLightPositionRanges = m_lightManager.updateViewspaceLightPositionRangeList(m_camera);
@@ -113,13 +120,9 @@ bool GameScreen::keyDown(Key a_key)
 	{
 	case Key_T:
 	{
-		LightHandle h = m_lightManager.createLight(
-			m_camera.m_position,
-			glm::normalize(glm::vec3(
-			(rand() % 1000) / 1000.0f,
-			(rand() % 1000) / 1000.0f,
-			(rand() % 1000) / 1000.0f)),
-			5.0f);
+		glm::vec3 lightColor = glm::normalize(glm::vec3((rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f));
+		lightColor *= rand() % 1000 / 200.0f;
+		LightHandle h = m_lightManager.createLight(m_camera.m_position, lightColor, 5.0f);
 		lights.push_back(h);
 		return true;
 	}

@@ -16,10 +16,10 @@ public:
 	~GLTextureArray();
 	GLTextureArray(const GLTextureArray& copyMe) = delete;
 
-	void initialize(const rde::vector<Pixmap*>& pixmaps, uint numMipMaps = 5,
+	void initialize(const rde::vector<Pixmap*>& pixmaps, uint numMipMaps = 4,
 		GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, 
 		GLint magFilter = GL_LINEAR,
-		GLint textureWrapS = GL_CLAMP_TO_BORDER, GLint textureWrapT = GL_CLAMP_TO_BORDER);
+		GLint textureWrapS = GL_CLAMP_TO_EDGE, GLint textureWrapT = GL_CLAMP_TO_EDGE);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
@@ -27,10 +27,10 @@ public:
 	bool isInitialized() { return m_initialized; }
 	void setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture);
 
-	inline uint getWidth() const		{ return m_width; }
-	inline uint getHeight() const		{ return m_height; }
-	inline uint getNumComponents() const{ return m_numComponents; }
-	inline uint getTextureID() const	{ return m_textureID; }
+	uint getWidth() const			{ return m_width; }
+	uint getHeight() const			{ return m_height; }
+	uint getNumComponents() const	{ return m_numComponents; }
+	uint getTextureID() const		{ return m_textureID; }
 
 private:
 

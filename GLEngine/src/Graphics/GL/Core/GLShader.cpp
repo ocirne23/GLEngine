@@ -24,7 +24,7 @@ rde::string getVersionStr()
 #ifdef ANDROID
 	return rde::string("#version 300 es \n");
 #else // !ANDROID
-	return rde::string("#version 330 core \n");
+	return rde::string("#version 400\n");
 #endif // !ANDROID
 }
 
@@ -63,22 +63,20 @@ rde::string processIncludes(const rde::string& a_str)
 
 void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 {
-	const GLuint sh = glCreateShader(a_type);
+	const GLuint shader = glCreateShader(a_type);
 
-	if (!sh)
-	{
+	if (!shader)
 		print("Could not create shader %i \n", a_type);
-	}
 
-	glShaderSource(sh, 1, &a_source, NULL);
-	glCompileShader(sh);
+	glShaderSource(shader, 1, &a_source, NULL);
+	glCompileShader(shader);
 
 	GLint logLen;
-	glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &logLen);
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLen);
 	if (logLen > 1)
 	{
 		char buffer[4096];
-		glGetShaderInfoLog(sh, sizeof(buffer), NULL, buffer);
+		glGetShaderInfoLog(shader, sizeof(buffer), NULL, buffer);
 		const char* typeString;
 		switch (a_type) 
 		{
@@ -95,14 +93,14 @@ void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 		print("Error in %s shader: %s : %s \n", typeString, buffer, a_source);
 	}
 	int compileStatus;
-	glGetShaderiv(sh, GL_COMPILE_STATUS, &compileStatus);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
 	if (compileStatus != GL_TRUE)
 	{
 		print("shader failed to compile \n");
 	}
 
-	glAttachShader(a_prog, sh);
-	glDeleteShader(sh);
+	glAttachShader(a_prog, shader);
+	glDeleteShader(shader);
 }
 
 GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandle& a_fragmentShaderFile, 
