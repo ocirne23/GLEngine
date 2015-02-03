@@ -18,13 +18,6 @@ SDL_GLContext createHighestGLContext(SDL_Window* a_window, uint& a_outMaxMajorVe
 {
 	SDL_GLContext context = NULL;
 
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-#ifdef ENABLE_ARB_DEBUG_OUTPUT
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-#endif
-
 	int major = MAX_GL_MAJOR_VERSION;
 	int minor;
 	for (; major >= 0; --major)
