@@ -22,9 +22,9 @@ BEGIN_UNNAMED_NAMESPACE()
 rde::string getVersionStr()
 {
 #ifdef ANDROID
-	return rde::string("#version 300 es \n");
+	return rde::string("#version 300 es\n");
 #else // !ANDROID
-	return rde::string("#version 400\n");
+	return rde::string("#version 330 core\n");
 #endif // !ANDROID
 }
 
