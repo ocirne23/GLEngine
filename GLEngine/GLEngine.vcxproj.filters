@@ -347,9 +347,6 @@
     <ClInclude Include="include\rde\stringforward.h">
       <Filter>Source Files\rde</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics\GL\GLAppVars.h">
-      <Filter>Header Files\Graphics\GL</Filter>
-    </ClInclude>
     <ClInclude Include="include\Graphics\LightManager.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>

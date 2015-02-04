@@ -8,7 +8,7 @@
 
 bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
 {
-	int type = EResourceType_FLOATIMAGE;
+	const int type = EResourceType_FLOATIMAGE;
 	int width, height, numComponents;
 
 	const float* data = stbi_loadf(a_inResourcePath, &width, &height, &numComponents, 0);

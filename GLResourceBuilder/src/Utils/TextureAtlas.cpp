@@ -31,7 +31,7 @@ TextureAtlas::TextureAtlas(int width, int height, int numComponents, int numMipM
 	m_data = new unsigned char[size];
 
 	// Initialize atlas color to red
-	unsigned char red[] = { 255, 0, 0, 255 };
+	const unsigned char red[] = { 255, 0, 0, 255 };
 	for (int x = 0; x < m_width; ++x)
 		for (int y = 0; y < m_height; ++y)
 			setPixel(m_data, m_width, m_height, x, y, m_numComponents, red);
@@ -44,10 +44,10 @@ TextureAtlas::~TextureAtlas()
 
 TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
 {
-	Node* node = NULL;
+	const Node* node = NULL;
 	if (!m_root.left && !m_root.right && (width == m_root.width || height == m_root.height))
 	{	// if no region has been used yet and region size is equal to atlas size, no need for padding
-		//m_padding = 0;
+		m_padding = 0;
 	}
 	
 	node = getRegion(&m_root, width + m_padding * 2, height + m_padding * 2);
@@ -58,19 +58,19 @@ TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
 		return { 0, 0, 0, 0 };
 }
 
-TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int width, int height)
+const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int width, int height)
 {
 	if (node->left || node->right)
 	{
 		if (node->left)
 		{
-			Node* newNode = getRegion(node->left, width, height);
+			const Node* newNode = getRegion(node->left, width, height);
 			if (newNode)
 				return newNode;
 		}
 		if (node->right)
 		{
-			Node* newNode = getRegion(node->right, width, height);
+			const Node* newNode = getRegion(node->right, width, height);
 			if (newNode)
 				return newNode;
 		}
@@ -80,8 +80,8 @@ TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int width,
 	if (width > node->width || height > node->height)
 		return 0;
 
-	int w = node->width - width;
-	int h = node->height - height;
+	const int w = node->width - width;
+	const int h = node->height - height;
 	node->left = new Node();
 	node->right = new Node();
 	if (w <= h)
@@ -143,21 +143,20 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 			}
 		}
 		// top
-		
 		for (int xPix = 0; xPix < width; ++xPix)
 		{
+			getPixel(data, width, height, xPix, 0, m_numComponents, pixel);
 			for (int yPix = 0; yPix < m_padding; ++yPix)
 			{
-				getPixel(data, width, height, xPix, 0, m_numComponents, pixel);
 				setPixel(m_data, m_width, m_height, x + xPix, y - yPix - 1, m_numComponents, pixel);
 			}
 		}
 		//bottom
 		for (int xPix = 0; xPix < width; ++xPix)
 		{
+			getPixel(data, width, height, xPix, height - 1, m_numComponents, pixel);
 			for (int yPix = 0; yPix < m_padding; ++yPix)
 			{
-				getPixel(data, width, height, xPix, height - 1, m_numComponents, pixel);
 				setPixel(m_data, m_width, m_height, x + xPix, y + yPix + height, m_numComponents, pixel);
 			}
 		}
@@ -215,6 +214,5 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 				setPixel(m_data, m_width, m_height, x + xPix + width, y + yPix + height, m_numComponents, pixel);
 			}
 		}
-		
 	}
 }

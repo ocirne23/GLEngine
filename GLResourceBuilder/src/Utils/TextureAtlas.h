@@ -31,7 +31,7 @@ private:
 		Node* right;
 		int x, y, width, height;
 	};
-	Node* getRegion(Node *node, int width, int height);
+	const Node* getRegion(Node *node, int width, int height);
 
 private:
 

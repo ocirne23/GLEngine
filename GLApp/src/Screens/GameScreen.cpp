@@ -3,7 +3,7 @@
 #include "Core/ScreenManager.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/GL/GLAppVars.h"
+#include "Graphics/GL/GLVars.h"
 #include "Input/Input.h"
 #include "rde/vector.h"
 #include "rde/rde_string.h"
@@ -45,9 +45,9 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	m_modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", &defines);
 	
 	m_modelShader.begin();
-	m_modelShader.setUniform1i("u_dfvTexture", GLAppVars::TextureUnits_DFV_TEXTURE);
-	m_modelShader.setUniform1i("u_1cTextureArray", GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY);
-	m_modelShader.setUniform1i("u_3cTextureArray", GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY);
+	m_modelShader.setUniform1i("u_dfvTexture", GLVars::TextureUnits_DFV_TEXTURE);
+	m_modelShader.setUniform1i("u_1cTextureArray", GLVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY);
+	m_modelShader.setUniform1i("u_3cTextureArray", GLVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY);
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
 	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
@@ -57,22 +57,22 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	m_mvpMatrixUniform.initialize(m_modelShader, "u_mvp");
 	m_normalMatrixUniform.initialize(m_modelShader, "u_normalMat");
 
-	m_lightPositionRangeBuffer.initialize(m_modelShader, GLAppVars::UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
-	m_lightColorBuffer.initialize(m_modelShader, GLAppVars::UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
+	m_lightPositionRangeBuffer.initialize(m_modelShader, GLVars::UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
+	m_lightColorBuffer.initialize(m_modelShader, GLVars::UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
 	
-	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid", GLAppVars::TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
-	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", GLAppVars::TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
+	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid", GLVars::TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
+	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", GLVars::TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
 	m_lightGridTextureBuffer.bind();
 	m_lightIndiceTextureBuffer.bind();
 
 	m_mesh.loadFromFile(MODEL_FILE_PATH, m_modelShader,
-		GLAppVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY,
-		GLAppVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY,
-		GLAppVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
+		GLVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY,
+		GLVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY,
+		GLVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	m_modelShader.end();
 
-	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", GLAppVars::TextureUnits_DFV_TEXTURE, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", GLVars::TextureUnits_DFV_TEXTURE, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	m_dfvTexture.bind();
 }
 
@@ -88,7 +88,6 @@ void GameScreen::render(float a_deltaSec)
 	{
 		lights[i].w = 2.0f + 10.0f * (((GLEngine::getTimeMs() + i * 12345) % 2000) / 2000.0f);
 	}
-
 
 	m_modelShader.begin();
 	{

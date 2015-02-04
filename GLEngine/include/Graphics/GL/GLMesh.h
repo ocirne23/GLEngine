@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core.h"
-#include "Graphics/GL/GLAppVars.h"
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/Core/GLStateBuffer.h"
 #include "Graphics/GL/Core/GLTextureArray.h"

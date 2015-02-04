@@ -95,12 +95,11 @@ namespace
 
 bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
 {
-	unsigned int flags = 0
+	const unsigned int flags = 0
 		| aiPostProcessSteps::aiProcess_Triangulate
 		| aiPostProcessSteps::aiProcess_CalcTangentSpace
-		| aiPostProcessSteps::aiProcess_GenNormals;
-	// Flip uv's because OpenGL
-	flags |= aiPostProcessSteps::aiProcess_FlipUVs;
+		| aiPostProcessSteps::aiProcess_GenNormals
+		| aiPostProcessSteps::aiProcess_FlipUVs; // Flip uv's because OpenGL
 
 	const aiScene* scene = aiImportFile(a_inResourcePath, flags);
 
@@ -133,10 +132,10 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		const aiMaterial* material = scene->mMaterials[i];
 		MaterialFiles& matProperty = matFiles[i];
 
-		int numDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
-		int numBump = material->GetTextureCount(aiTextureType_HEIGHT);
-		int numSpecular = material->GetTextureCount(aiTextureType_SPECULAR);
-		int numMask = material->GetTextureCount(aiTextureType_OPACITY);
+		const int numDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
+		const int numBump = material->GetTextureCount(aiTextureType_HEIGHT);
+		const int numSpecular = material->GetTextureCount(aiTextureType_SPECULAR);
+		const int numMask = material->GetTextureCount(aiTextureType_OPACITY);
 
 		// assert(numDiffuse || numBump || numSpecular || numMask); // Check that there are textures?
 
@@ -179,7 +178,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	for (const TextureTypePath& tex : textures)
 	{
 		int width, height, numComp;
-		int result = stbi_info(tex.path.c_str(), &width, &height, &numComp);
+		const int result = stbi_info(tex.path.c_str(), &width, &height, &numComp);
 
 		if (!result)
 		{
@@ -202,7 +201,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 
 			if (atlas->m_numComponents == numComp)
 			{
-				TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
+				const TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
 				if (region.width && region.height)
 				{
 					contained = true;
@@ -214,7 +213,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		if (!contained)
 		{
 			TextureAtlas* atlas = new TextureAtlas(MAX_ATLAS_WIDTH, MAX_ATLAS_HEIGHT, numComp, NUM_ATLAS_MIPS);
-			TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
+			const TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
 			assert(region.width && region.height);
 			atlasses.push_back(atlas);
 			atlasRegions.push_back({ tex.path, (int) atlasses.size() - 1, atlas, region });
@@ -225,7 +224,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 
 	for (int i = 0; i < matFiles.size(); ++i)
 	{
-		MaterialFiles& files = matFiles[i];
+		const MaterialFiles& files = matFiles[i];
 		MaterialProperty& prop = matProperties[i];
 
 		for (const AtlasRegion& reg : atlasRegions)
@@ -266,7 +265,6 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 			printf("FAILED TO LOAD IMAGE: %s \n", region.image.c_str());
 			continue;
 		}
-
 		region.atlas->setRegion(region.region.x, region.region.y, region.region.width, region.region.height, data, region.atlas->m_numComponents);
 	}
 
@@ -292,7 +290,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 
 	for (int i = 0; i < atlasses.size(); ++i)
 	{
-		TextureAtlas* atlas = atlasses[i];
+		const TextureAtlas* atlas = atlasses[i];
 
 		std::string atlasFileName = dstTexturePathStr.c_str();
 		atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");
@@ -300,11 +298,10 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		std::ofstream file(atlasFileName.c_str(), std::ios::out | std::ios::binary);
 		assert(file.is_open());
 
-		int type, width, height, numComponents;
-		type = EResourceType_BYTEIMAGE;
-		width = (int)atlas->m_width;
-		height = (int)atlas->m_height;
-		numComponents = (int)atlas->m_numComponents;
+		const int type = EResourceType_BYTEIMAGE;
+		const int width = atlas->m_width;
+		const int height = atlas->m_height;
+		const int numComponents = atlas->m_numComponents;
 
 		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&width), sizeof(int));
@@ -406,8 +403,8 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&num1CompAtlasses), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&num3CompAtlasses), sizeof(int));
-	const int numOpague = (int)transparentEntries.size();
-	file.write(reinterpret_cast<const char*>(&numOpague), sizeof(int));
+	const int numTransparent = (int) transparentEntries.size();
+	file.write(reinterpret_cast<const char*>(&numTransparent), sizeof(int));
 	writeVector(file, indiceCounts);
 	writeVector(file, baseIndices);
 	writeVector(file, matProperties);

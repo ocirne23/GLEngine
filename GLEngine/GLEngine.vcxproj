@@ -75,7 +75,6 @@
     <ClInclude Include="include\Graphics\GL\Core\GLTextureBuffer.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLVertexBuffer.h" />
     <ClInclude Include="include\Graphics\GL\GL.h" />
-    <ClInclude Include="include\Graphics\GL\GLAppVars.h" />
     <ClInclude Include="include\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Graphics\GL\GLTypes.h" />

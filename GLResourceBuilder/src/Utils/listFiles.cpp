@@ -38,7 +38,7 @@ bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>&
 				}
 				else 
 				{
-					std::string fullPath = a_path + "\\" + ffd.cFileName;
+					const std::string fullPath = a_path + "\\" + ffd.cFileName;
 					a_files.push_back(fullPath.substr(root.length() + 1, fullPath.length() - (root.length() + 1)));
 
 					SYSTEMTIME sysWriteTime;
