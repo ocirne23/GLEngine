@@ -22,10 +22,10 @@ namespace
 	{
 		vec4 diffuseTexMapping;
 		vec4 normalTexMapping;
-		int diffuseAtlasNr = -1;
-		int normalAtlasNr = -1;
-		int padding = -1;
-		int padding2 = -1;
+		int diffuseAtlasNr	= -1;
+		int normalAtlasNr	= -1;
+		int padding			= -1;
+		int padding2		= -1;
 	};
 	struct TextureInfo
 	{
