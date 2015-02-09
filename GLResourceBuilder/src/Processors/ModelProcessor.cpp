@@ -150,24 +150,41 @@ namespace
 		for (TextureAtlas* a : a_atlases)
 			a->clear();
 
-		for (TextureAtlasRegion& tar : a_textureAtlasRegions)
+		for (unsigned int i = 0; i < a_textureAtlasRegions.size(); ++i)
 		{
-			bool contained = false;
-			for (unsigned int i = 0; i < a_atlases.size(); ++i)
+			bool alreadyAdded = false;
+			TextureAtlasRegion& tar = a_textureAtlasRegions[i];
+			for (unsigned int j = 0; j < i; ++j)
 			{
-				TextureAtlas* atlas = a_atlases[i];
-
-				TextureAtlas::AtlasRegion region = atlas->getRegion(tar.texture.width, tar.texture.height);
-				if (region.width && region.height)
+				TextureAtlasRegion& prev = a_textureAtlasRegions[j];
+				if (prev.texture.filePath == tar.texture.filePath)
 				{
-					tar.atlasIdx = i;
-					tar.region = region;
-					contained = true;
+					alreadyAdded = true;
+					tar.atlasIdx = prev.atlasIdx;
+					tar.region = prev.region;
 					break;
 				}
 			}
-			if (!contained)
-				return false;
+
+			if (!alreadyAdded)
+			{
+				bool contained = false;
+				for (unsigned int j = 0; j < a_atlases.size(); ++j)
+				{
+					TextureAtlas* atlas = a_atlases[j];
+
+					TextureAtlas::AtlasRegion region = atlas->getRegion(tar.texture.width, tar.texture.height);
+					if (region.width && region.height)
+					{
+						tar.atlasIdx = j;
+						tar.region = region;
+						contained = true;
+						break;
+					}
+				}
+				if (!contained)
+					return false;
+			}
 		}
 		return true;
 	}
@@ -217,7 +234,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 	{
 		const aiMaterial* material = scene->mMaterials[i];
-
+		
 		const int numDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
 		const int numNormal = material->GetTextureCount(aiTextureType_HEIGHT);
 		const int numSpecular = material->GetTextureCount(aiTextureType_SPECULAR);
@@ -229,23 +246,11 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 			std::string filePath(baseTexturePath);
 			filePath.append(a_imageName);
 
-			bool contained = false;
-			std::for_each(textureAtlasRegions.begin(), textureAtlasRegions.end(), [&](TextureAtlasRegion& t) 
-			{
-				if (t.texture.filePath == filePath)
-				{
-					contained = true;
-					return;
-				}
-			});
-			if (!contained)
-			{
-				TextureAtlasRegion tar;
-				tar.materialID = a_materialID;
-				tar.type = a_type;
-				tar.texture = getTextureInfo(filePath);
-				textureAtlasRegions.push_back(tar);
-			}
+			TextureAtlasRegion tar;
+			tar.materialID = a_materialID;
+			tar.type = a_type;
+			tar.texture = getTextureInfo(filePath);
+			textureAtlasRegions.push_back(tar);
 		};
 
 		aiString path;
@@ -271,18 +276,20 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	for (const TextureAtlasRegion& tar : textureAtlasRegions)
 	{
 		const TextureAtlas* atlas = atlases[tar.atlasIdx];
-		printf("material: %i in atlas: %i type: %i \n", tar.materialID, tar.atlasIdx, tar.type);
-
 		switch (tar.type)
 		{
 		case aiTextureType_DIFFUSE:
+		{
 			matProperties[tar.materialID].diffuseAtlasNr = tar.atlasIdx;
 			matProperties[tar.materialID].diffuseTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tar.region);
 			break;
+		}
 		case aiTextureType_NORMALS:
+		{
 			matProperties[tar.materialID].normalAtlasNr = tar.atlasIdx;
 			matProperties[tar.materialID].normalTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tar.region);
 			break;
+		}
 		}
 	}
 

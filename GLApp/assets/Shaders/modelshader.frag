@@ -23,9 +23,9 @@ const float BUMP_MAP_STRENGTH = 2.0;
 struct MaterialProperty
 {
 	vec4 diffuseTexMapping;
-	vec4 bumpTexMapping;
+	vec4 normalTexMapping;
 	int diffuseAtlasNr;
-	int bumpAtlasNr;
+	int normalAtlasNr;
 	int padding;
 	int padding2;
 };
@@ -40,14 +40,14 @@ float getMipMapLevel(vec2 texture_coordinate)
     return 0.5 * log2(delta_max_sqr);
 }
 
-vec4 sampleAtlasArray(sampler2DArray sampler, int atlasNr, vec4 texMapping, vec2 uv)
+vec4 sampleAtlasArray(sampler2DArray sampler, vec3 coords, vec4 texMapping)
 {
 	// We have to manually calculate the mipmap level because using fract() throws off
 	// the default mipmap calculation
-	vec2 mipmapTexCoord = uv * texMapping.zw + texMapping.xy;
+	vec2 mipmapTexCoord = coords.xy * texMapping.zw + texMapping.xy;
 	float mipmapLevel = getMipMapLevel(mipmapTexCoord * textureSize(sampler, 0).xy);
 	
-	vec3 texCoord = vec3(fract(uv) * texMapping.zw + texMapping.xy, atlasNr);
+	vec3 texCoord = vec3(fract(coords.xy) * texMapping.zw + texMapping.xy, coords.z);
     return textureLod(sampler, texCoord, mipmapLevel);
 }
 
@@ -56,9 +56,9 @@ layout (std140) uniform MaterialProperties
 	MaterialProperty u_materialProperties[MAX_MATERIALS];
 };
 
-vec3 getBumpedNormal(vec3 normalSample)
+vec3 getNormal(vec3 tangentSpaceNormal)
 {
-	vec3 normal = normalSample * 2.0 - 1;
+	vec3 normal = tangentSpaceNormal * 2.0 - 1;
 	mat3 rotMat = mat3(v_tangent, v_bitangent, v_normal);
 	return rotMat * vec3(normal);
 }
@@ -154,9 +154,11 @@ void main()
 {
 	MaterialProperty material = u_materialProperties[v_materialID];
 
-	vec3 diffuse = sampleAtlasArray(u_textureArray, material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord).rgb;
-	vec3 normal = material.bumpAtlasNr != -1 ? getBumpedNormal(sampleAtlasArray(u_textureArray, material.bumpAtlasNr, material.bumpTexMapping, v_texcoord).rgb) : v_normal;
-	float specular = 0.0; //sampleAtlasArray(u_1cTextureArray, material.specularAtlasNr, material.specTexMapping, v_texcoord).r;
+	vec3 diffuse = sampleAtlasArray(u_textureArray, vec3(v_texcoord, material.diffuseAtlasNr), material.diffuseTexMapping).rgb;
+	vec3 tangentSpaceNormal = sampleAtlasArray(u_textureArray, vec3(v_texcoord, material.normalAtlasNr), material.normalTexMapping).rgb;
+	
+	vec3 normal = getNormal(tangentSpaceNormal);
+	float specular = 0.0;
 	
 	vec3 diffuseAccum = vec3(0);
 	vec3 specularAccum = vec3(0);
@@ -179,5 +181,5 @@ void main()
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
 	
-	//out_color = vec4(vec3(diffuse), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001; // for testing values without unused errors
+	//out_color = vec4(vec3(v_materialID == 3u ? 1.0 : 0.0), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001; // for testing values without unused errors
 }
