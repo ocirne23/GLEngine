@@ -46,8 +46,7 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	
 	m_modelShader.begin();
 	m_modelShader.setUniform1i("u_dfvTexture", GLVars::TextureUnits_DFV_TEXTURE);
-	m_modelShader.setUniform1i("u_1cTextureArray", GLVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY);
-	m_modelShader.setUniform1i("u_3cTextureArray", GLVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY);
+	m_modelShader.setUniform1i("u_textureArray", GLVars::TextureUnits_MODEL_TEXTURE_ARRAY);
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
 	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
@@ -65,10 +64,7 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 	m_lightGridTextureBuffer.bind();
 	m_lightIndiceTextureBuffer.bind();
 
-	m_mesh.loadFromFile(MODEL_FILE_PATH, m_modelShader,
-		GLVars::TextureUnits_MODEL_1_COMPONENT_TEXTURE_ARRAY,
-		GLVars::TextureUnits_MODEL_3_COMPONENT_TEXTURE_ARRAY,
-		GLVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
+	m_mesh.loadFromFile(MODEL_FILE_PATH, m_modelShader, GLVars::TextureUnits_MODEL_TEXTURE_ARRAY, GLVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	m_modelShader.end();
 
@@ -111,6 +107,7 @@ void GameScreen::render(float a_deltaSec)
 	GLEngine::graphics->swap();
 }
 
+// tmp
 rde::vector<LightHandle> lights;
 
 bool GameScreen::keyDown(Key a_key)

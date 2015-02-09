@@ -62,7 +62,7 @@ uint readVector(const FileHandle& a_handle, rde::vector<T>& a_vector, uint a_off
 
 END_UNNAMED_NAMESPACE()
 
-GLMesh::GLMesh() : m_numOpagueMeshes(0), m_initialized(false)
+GLMesh::GLMesh() : m_numTransparentMeshes(0), m_initialized(false)
 {
 }
 
@@ -76,7 +76,7 @@ GLMesh::~GLMesh()
 		delete m_matUniformBuffer;
 }
 
-void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_textureArray1CUnit, uint a_textureArray3CUnit, GLuint a_matUBOBindingPoint)
+void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_textureUnit, GLuint a_matUBOBindingPoint)
 {
 	assert(!m_initialized);
 
@@ -87,8 +87,7 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 		return;
 	}
 
-	m_1cTextureUnit = a_textureArray1CUnit;
-	m_3cTextureUnit = a_textureArray3CUnit;
+	m_textureUnit = a_textureUnit;
 
 	rde::vector<uint> indices;
 	rde::vector<Vertex> vertices;
@@ -98,11 +97,10 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
 	assert(type == EResourceType_MODEL);
 
-	int num1CompAtlasses, num3CompAtlasses;
-	file.readBytes(reinterpret_cast<char*>(&num1CompAtlasses), sizeof(int), sizeof(int));
-	file.readBytes(reinterpret_cast<char*>(&num3CompAtlasses), sizeof(int), sizeof(int) * 2);
-	file.readBytes(reinterpret_cast<char*>(&m_numOpagueMeshes), sizeof(uint), sizeof(int) * 3);
-	uint offset = sizeof(uint) * 4;
+	int numAtlases;
+	file.readBytes(reinterpret_cast<char*>(&numAtlases), sizeof(int), sizeof(int) * 1);
+	file.readBytes(reinterpret_cast<char*>(&m_numTransparentMeshes), sizeof(uint), sizeof(int) * 2);
+	uint offset = sizeof(uint) * 3;
 
 	offset = readVector(file, m_indiceCounts, offset);
 	offset = readVector(file, baseIndices, offset);
@@ -148,26 +146,18 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
 	atlasBasePath.append("-atlas-");
 
-	rde::vector<Pixmap*> pixmaps1c(num1CompAtlasses), pixmaps3c(num3CompAtlasses);
+	rde::vector<Pixmap*> pixmaps(numAtlases);
 	int atlasCounter = 0;
 
-	for (int i = 0; i < num1CompAtlasses; ++i, ++atlasCounter)
+	for (int i = 0; i < numAtlases; ++i, ++atlasCounter)
 	{
-		pixmaps1c[i] = new Pixmap();
-		pixmaps1c[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
-		assert(pixmaps1c[i]->exists());
-	}
-	for (int i = 0; i < num3CompAtlasses; ++i, ++atlasCounter)
-	{
-		pixmaps3c[i] = new Pixmap();
-		pixmaps3c[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
-		assert(pixmaps3c[i]->exists());
+		pixmaps[i] = new Pixmap();
+		pixmaps[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
+		assert(pixmaps[i]->exists());
 	}
 
-	if (pixmaps1c.size())
-		m_1cTextureArray.initialize(pixmaps1c);
-	if (pixmaps3c.size())
-		m_3cTextureArray.initialize(pixmaps3c);
+	if (pixmaps.size())
+		m_textureArray.initialize(pixmaps);
 
 	m_stateBuffer.begin();
 
@@ -177,7 +167,7 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 	m_matUBOBindingPoint = a_matUBOBindingPoint;
 
 	m_stateBuffer.end();
-
+	assert(m_textureArray.isInitialized());
 	m_initialized = true;
 }
 
@@ -185,10 +175,8 @@ void GLMesh::render(bool a_renderOpague, bool a_renderTransparent, bool a_bindMa
 {
 	m_stateBuffer.begin();
 	{
-		if (m_1cTextureArray.isInitialized())
-			m_1cTextureArray.bind(m_1cTextureUnit);
-		if (m_3cTextureArray.isInitialized())
-			m_3cTextureArray.bind(m_3cTextureUnit);
+		if (m_textureArray.isInitialized())
+			m_textureArray.bind(m_textureUnit);
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}

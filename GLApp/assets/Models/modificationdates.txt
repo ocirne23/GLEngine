@@ -1,1 +1,2 @@
+skybox\skybox.obj:15:14:33:647-4:2:2015
 palace\palace.obj:22:19:29:133-30:7:2014

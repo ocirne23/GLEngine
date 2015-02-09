@@ -17,24 +17,8 @@ namespace
 }
 
 TextureAtlas::TextureAtlas(int width, int height, int numComponents, int numMipMaps)
-: m_width(width), m_height(height), m_numComponents(numComponents), m_numMipMaps(numMipMaps), m_padding(numMipMaps * numMipMaps)
 {
-	assert(width % 2 == 0 && height % 2 == 0 && "Atlas width and height must be divideable by 2");
-
-	m_root.left = m_root.right = 0;
-	m_root.x = m_root.y = 0;
-	m_root.width = width;
-	m_root.height = height;
-
-	unsigned int size = m_width * m_height * m_numComponents;
-
-	m_data = new unsigned char[size];
-
-	// Initialize atlas color to red
-	const unsigned char red[] = { 255, 0, 0, 255 };
-	for (int x = 0; x < m_width; ++x)
-		for (int y = 0; y < m_height; ++y)
-			setPixel(m_data, m_width, m_height, x, y, m_numComponents, red);
+	initialize(width, height, numComponents, numMipMaps);
 }
 
 TextureAtlas::~TextureAtlas()
@@ -42,15 +26,27 @@ TextureAtlas::~TextureAtlas()
 	delete[] m_data;
 }
 
+TextureAtlas::Node::~Node()
+{
+	if (left)
+		delete left;
+	if (right)
+		delete right;
+}
+
 TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
 {
-	const Node* node = NULL;
+	if (width > m_width || height > m_height)
+		return { 0, 0, 0, 0 };
+
 	if (!m_root.left && !m_root.right && (width == m_root.width || height == m_root.height))
-	{	// if no region has been used yet and region size is equal to atlas size, no need for padding
-		m_padding = 0;
+	{	// if no region has been used yet and region size is equal to atlas size, use entire atlas
+		m_root.left = new Node();
+		m_root.right = new Node();
+		return { 0, 0, m_width, m_height };
 	}
 	
-	node = getRegion(&m_root, width + m_padding * 2, height + m_padding * 2);
+	const Node* node = getRegion(&m_root, width + m_padding * 2, height + m_padding * 2);
 
 	if (node)
 		return { node->x + m_padding, node->y + m_padding, width, height };
@@ -123,16 +119,25 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 	assert(y < m_height);
 	assert((y + height) <= m_height);
 	assert(stride == m_numComponents);
-	unsigned char red[] = { 255, 0, 0, 255 };
+
+	if (m_data == NULL)
+	{
+		m_data = new unsigned char[m_width * m_height * m_numComponents];
+		
+		unsigned char red[] = { 255, 0, 0, 255 };
+		// Initialize atlas color to red
+		for (int xa = 0; xa < m_width; ++xa)
+			for (int ya = 0; ya < m_height; ++ya)
+				setPixel(m_data, m_width, m_height, xa, ya, m_numComponents, red);
+	}
 
 	if (width == m_width && height == m_height)
 	{
 		memcpy(m_data, data, width * height * m_numComponents);
 	}
 	else
-	{
+	{	// NOTE: can optimize a whole lot
 		unsigned char pixel[] = { 0, 0, 0, 0 };
-		// NOTE: can optimize a whole lot
 		// center
 		for (int xPix = 0; xPix < width; ++xPix)
 		{
@@ -215,4 +220,39 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 			}
 		}
 	}
+}
+
+void TextureAtlas::clear()
+{
+	initialize(m_width, m_height, m_numComponents, m_numMipMaps);
+}
+
+void TextureAtlas::initialize(int width, int height, int numComponents, int numMipMaps)
+{
+	assert(width % 2 == 0 && height % 2 == 0 && "Atlas width and height must be divideable by 2");
+
+	if (m_width != width || m_height != height || m_numComponents != numComponents || numMipMaps != m_numMipMaps)
+	{
+		if (m_data)
+		{
+			delete[] m_data;
+			m_data = NULL;
+		}
+
+		m_width = width;
+		m_height = height;
+		m_numComponents = numComponents;
+		m_numMipMaps = numMipMaps;
+		m_padding = numMipMaps * numMipMaps;
+	}
+
+	if (m_root.left)
+		delete m_root.left;
+	if (m_root.right)
+		delete m_root.right;
+	m_root.left = m_root.right = NULL;
+
+	m_root.x = m_root.y = 0;
+	m_root.width = width;
+	m_root.height = height;
 }

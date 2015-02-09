@@ -24,16 +24,13 @@ struct MaterialProperty
 {
 	vec4 diffuseTexMapping;
 	vec4 bumpTexMapping;
-	vec4 specTexMapping;
-	vec4 maskTexMapping;
 	int diffuseAtlasNr;
 	int bumpAtlasNr;
-	int specularAtlasNr;
-	int maskAtlasNr;
+	int padding;
+	int padding2;
 };
 
-uniform sampler2DArray u_1cTextureArray;
-uniform sampler2DArray u_3cTextureArray;
+uniform sampler2DArray u_textureArray;
 
 float getMipMapLevel(vec2 texture_coordinate)
 {
@@ -156,12 +153,10 @@ void doLightGGX(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse,
 void main()
 {
 	MaterialProperty material = u_materialProperties[v_materialID];
-	
-	if (material.maskAtlasNr != -1 && sampleAtlasArray(u_1cTextureArray, material.maskAtlasNr, material.maskTexMapping, v_texcoord).r < 0.5)
-		discard;
-	vec3 diffuse = sampleAtlasArray(u_3cTextureArray, material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord).rgb;
-	vec3 normal = material.bumpAtlasNr != -1 ? getBumpedNormal(sampleAtlasArray(u_3cTextureArray, material.bumpAtlasNr, material.bumpTexMapping, v_texcoord).rgb) : v_normal;
-	float specular = sampleAtlasArray(u_1cTextureArray, material.specularAtlasNr, material.specTexMapping, v_texcoord).r;
+
+	vec3 diffuse = sampleAtlasArray(u_textureArray, material.diffuseAtlasNr, material.diffuseTexMapping, v_texcoord).rgb;
+	vec3 normal = material.bumpAtlasNr != -1 ? getBumpedNormal(sampleAtlasArray(u_textureArray, material.bumpAtlasNr, material.bumpTexMapping, v_texcoord).rgb) : v_normal;
+	float specular = 0.0; //sampleAtlasArray(u_1cTextureArray, material.specularAtlasNr, material.specTexMapping, v_texcoord).r;
 	
 	vec3 diffuseAccum = vec3(0);
 	vec3 specularAccum = vec3(0);
@@ -184,5 +179,5 @@ void main()
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
 	
-	//out_color = vec4(vec3(n), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001; // for testing values without unused errors
+	//out_color = vec4(vec3(diffuse), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001; // for testing values without unused errors
 }

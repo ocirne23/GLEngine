@@ -10,36 +10,35 @@
 #include <vector>
 #include <fstream>
 
+#include <iostream>
+
 namespace
 {
-	enum { MAX_ATLAS_WIDTH = 8192, MAX_ATLAS_HEIGHT = 8192, NUM_ATLAS_MIPS = 4 };
+	enum { ATLAS_MAX_WIDTH = 8192, ATLAS_MAX_HEIGHT = 8192, ATLAS_NUM_MIPS = 4, ATLAS_NUM_COMPONENTS = 3, ATLAS_START_WIDTH = 256, ATLAS_START_HEIGHT = 256, ATLAS_INCREMENT = 256 };
 	struct vec4 { float x, y, z, w; };
 	struct vec3 { float x, y, z; };
 	struct vec2 { float x, y; };
 	struct MaterialProperty
 	{
-		MaterialProperty() : diffuseAtlasNr(-1), bumpAtlasNr(-1), specularAtlasNr(-1), maskAtlasNr(-1) {};
 		vec4 diffuseTexMapping;
-		vec4 bumpTexMapping;
-		vec4 specTexMapping;
-		vec4 maskTexMapping;
-		int diffuseAtlasNr;
-		int bumpAtlasNr;
-		int specularAtlasNr;
-		int maskAtlasNr;
+		vec4 normalTexMapping;
+		int diffuseAtlasNr = -1;
+		int normalAtlasNr = -1;
+		int padding = -1;
+		int padding2 = -1;
 	};
-	struct MaterialFiles
+	struct TextureInfo
 	{
-		std::string diffuse;
-		std::string bump;
-		std::string spec;
-		std::string mask;
+		std::string filePath;
+		int result, width, height, numComp;
 	};
-	struct AtlasRegion
+	struct TextureAtlasRegion
 	{
-		std::string image;
-		int atlasNr;
-		TextureAtlas* atlas;
+		aiTextureType type;
+		unsigned int materialID;
+		
+		unsigned int atlasIdx;
+		TextureInfo texture;
 		TextureAtlas::AtlasRegion region;
 	};
 	struct MeshEntry
@@ -72,29 +71,130 @@ namespace
 		a_file.write(reinterpret_cast<const char*>(&a_vector[0]), sizeof(a_vector[0]) * size);
 	}
 
-	vec4 getTextureOffset(const AtlasRegion& a_reg)
+	vec4 getTextureOffset(unsigned int a_atlasWidth, unsigned int a_atlasHeight, const TextureAtlas::AtlasRegion& a_reg)
 	{
-		const int atlasWidth = a_reg.atlas->m_width;
-		const int atlasHeight = a_reg.atlas->m_height;
+		const int regionWidth = a_reg.width;
+		const int regionHeight = a_reg.height;
 
-		const int regionWidth = a_reg.region.width;
-		const int regionHeight = a_reg.region.height;
+		const int regionX = a_reg.x;
+		const int regionY = a_reg.y;
 
-		const int regionX = a_reg.region.x;
-		const int regionY = a_reg.region.y;
+		const float wScale = regionWidth / (float) a_atlasWidth;
+		const float hScale = regionHeight / (float) a_atlasHeight;
 
-		const float wScale = regionWidth / (float) atlasWidth;
-		const float hScale = regionHeight / (float) atlasHeight;
-
-		const float xOffset = regionX / (float) atlasWidth;
-		const float yOffset = regionY / (float) atlasHeight;
+		const float xOffset = regionX / (float) a_atlasWidth;
+		const float yOffset = regionY / (float) a_atlasHeight;
 
 		return { xOffset, yOffset, wScale, hScale };
+	}
+
+	TextureInfo getTextureInfo(const std::string& a_path)
+	{
+		TextureInfo info;
+		info.filePath = a_path;
+		info.result = stbi_info(a_path.c_str(), &info.width, &info.height, &info.numComp);
+		return info;
+	}
+
+	void increaseAtlasesSize(std::vector<TextureAtlas*>& a_atlases)
+	{
+		if (!a_atlases.size())
+		{
+			a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, 4, ATLAS_NUM_MIPS));
+		}
+		else
+		{
+			TextureAtlas* last = a_atlases.back();
+			if (last->m_width >= ATLAS_MAX_WIDTH && last->m_height >= ATLAS_MAX_HEIGHT)
+			{
+				for (TextureAtlas* atlas : a_atlases)
+					atlas->initialize(ATLAS_MAX_WIDTH / 2, ATLAS_MAX_HEIGHT / 2, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
+				a_atlases.push_back(new TextureAtlas(ATLAS_MAX_WIDTH / 2, ATLAS_MAX_HEIGHT / 2, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS));
+			}
+			else
+			{
+				int totalWidth = 0;
+				int totalHeight = 0;
+				for (TextureAtlas* atlas : a_atlases)
+				{
+					totalWidth += atlas->m_width;
+					totalHeight += atlas->m_height;
+				}
+				int numAtlasses = (int) a_atlases.size();
+				int avgWidth = totalWidth / numAtlasses;
+				int avgHeight = totalHeight / numAtlasses;
+				if (avgWidth < avgHeight)
+					avgWidth += ATLAS_INCREMENT;
+				else
+					avgHeight += ATLAS_INCREMENT;
+
+				if (avgHeight % 2 != 0)
+					avgHeight++;
+				if (avgWidth % 2 != 0)
+					avgWidth++;
+
+				avgWidth = std::min(avgWidth, (int) ATLAS_MAX_WIDTH);
+				avgHeight = std::min(avgHeight, (int) ATLAS_MAX_HEIGHT);
+
+				for (TextureAtlas* a : a_atlases)
+					a->initialize(avgWidth, avgHeight, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
+			}
+		}
+	}
+
+	bool containTexturesInAtlases(std::vector<TextureAtlasRegion>& a_textureAtlasRegions, std::vector<TextureAtlas*>& a_atlases)
+	{
+		if (!a_atlases.size())
+			return false;
+
+		for (TextureAtlas* a : a_atlases)
+			a->clear();
+
+		for (TextureAtlasRegion& tar : a_textureAtlasRegions)
+		{
+			bool contained = false;
+			for (unsigned int i = 0; i < a_atlases.size(); ++i)
+			{
+				TextureAtlas* atlas = a_atlases[i];
+
+				TextureAtlas::AtlasRegion region = atlas->getRegion(tar.texture.width, tar.texture.height);
+				if (region.width && region.height)
+				{
+					tar.atlasIdx = i;
+					tar.region = region;
+					contained = true;
+					break;
+				}
+			}
+			if (!contained)
+				return false;
+		}
+		return true;
+	}
+
+	void fillAtlasTextures(const std::vector<TextureAtlasRegion>& a_textureAtlasRegions, std::vector<TextureAtlas*>& a_atlases)
+	{
+		for (const TextureAtlasRegion& tar : a_textureAtlasRegions)
+		{
+			TextureAtlas* atlas = a_atlases[tar.atlasIdx];
+
+			int width, height, numComponents;
+			const unsigned char* data = stbi_load(tar.texture.filePath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
+			if (!data)
+			{
+				printf("FAILED TO LOAD IMAGE: %s \n", tar.texture.filePath.c_str());
+				continue;
+			}
+			atlas->setRegion(tar.region.x, tar.region.y, tar.region.width, tar.region.height, data, atlas->m_numComponents);
+		}
 	}
 }
 
 bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
 {
+	const std::string inResourcePathStr(a_inResourcePath);
+	const std::string outResourcePathstr(a_outResourcePath);
+
 	const unsigned int flags = 0
 		| aiPostProcessSteps::aiProcess_Triangulate
 		| aiPostProcessSteps::aiProcess_CalcTangentSpace
@@ -109,190 +209,88 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		return false;
 	}
 
-	std::string texturePathStr(a_inResourcePath);
-	std::string::size_type idx = texturePathStr.find_last_of('/');
-	if (idx == std::string::npos)
-		idx = texturePathStr.find_last_of('\\');
-	texturePathStr = texturePathStr.substr(0, idx).append("\\");
+	const std::string extension = inResourcePathStr.substr(inResourcePathStr.find_last_of('.') + 1, inResourcePathStr.length() - 1);
+	const std::string baseTexturePath = inResourcePathStr.substr(0, std::min(inResourcePathStr.find_last_of('/'), inResourcePathStr.find_last_of('\\'))).append("\\");
 
-	std::vector<MaterialFiles> matFiles(scene->mNumMaterials);
-	struct TextureTypePath
-	{
-		enum ETextureType
-		{
-			ETextureType_DIFFUSE, ETextureType_SPECULAR, ETextureType_BUMP, ETextureType_MASK
-		};
-		std::string path;
-		ETextureType type;
-	};
-	std::vector<TextureTypePath> textures;
+	std::vector<TextureAtlasRegion> textureAtlasRegions;
 
 	for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 	{
 		const aiMaterial* material = scene->mMaterials[i];
-		MaterialFiles& matProperty = matFiles[i];
 
 		const int numDiffuse = material->GetTextureCount(aiTextureType_DIFFUSE);
-		const int numBump = material->GetTextureCount(aiTextureType_HEIGHT);
+		const int numNormal = material->GetTextureCount(aiTextureType_HEIGHT);
 		const int numSpecular = material->GetTextureCount(aiTextureType_SPECULAR);
 		const int numMask = material->GetTextureCount(aiTextureType_OPACITY);
+		assert(numDiffuse <= 1 && numNormal <= 1 && numSpecular <= 1 && numMask <= 1 && "More than one texture of the same type in material");
+		//assert((numDiffuse || numNormal || numSpecular || numMask) && "No textures in material"); // Check that there are textures?
 
-		// assert(numDiffuse || numBump || numSpecular || numMask); // Check that there are textures?
+		auto addTextureAtlasRegion = [&](const char* a_imageName, int a_materialID, aiTextureType a_type) {
+			std::string filePath(baseTexturePath);
+			filePath.append(a_imageName);
+
+			bool contained = false;
+			std::for_each(textureAtlasRegions.begin(), textureAtlasRegions.end(), [&](TextureAtlasRegion& t) 
+			{
+				if (t.texture.filePath == filePath)
+				{
+					contained = true;
+					return;
+				}
+			});
+			if (!contained)
+			{
+				TextureAtlasRegion tar;
+				tar.materialID = a_materialID;
+				tar.type = a_type;
+				tar.texture = getTextureInfo(filePath);
+				textureAtlasRegions.push_back(tar);
+			}
+		};
 
 		aiString path;
 		if (numDiffuse > 0 && material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
-		{
-			matProperty.diffuse = texturePathStr;
-			matProperty.diffuse.append(path.C_Str());
-			if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.diffuse; }) == textures.end())
-				textures.push_back({ matProperty.diffuse, TextureTypePath::ETextureType_DIFFUSE });
-		}
-		if (numBump > 0 && material->GetTexture(aiTextureType_HEIGHT, 0, &path) == AI_SUCCESS)
-		{
-			matProperty.bump = texturePathStr;
-			matProperty.bump.append(path.C_Str());
-			if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.bump; }) == textures.end())
-				textures.push_back({ matProperty.bump, TextureTypePath::ETextureType_BUMP });
-		}
+			addTextureAtlasRegion(path.C_Str(), i, aiTextureType_DIFFUSE);
+		if (numNormal > 0 && material->GetTexture(extension == "obj" ? aiTextureType_HEIGHT : aiTextureType_NORMALS, 0, &path) == AI_SUCCESS)
+			addTextureAtlasRegion(path.C_Str(), i, aiTextureType_NORMALS);
+		
+		/* TODO: specular and mask maps
 		if (numSpecular > 0 && material->GetTexture(aiTextureType_SPECULAR, 0, &path) == AI_SUCCESS)
-		{
-			matProperty.spec = texturePathStr;
-			matProperty.spec.append(path.C_Str());
-			if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.spec; }) == textures.end())
-				textures.push_back({ matProperty.spec, TextureTypePath::ETextureType_SPECULAR });
-		}
+			addTextureAtlasRegion(path.C_Str(), i);
 		if (numMask > 0 && material->GetTexture(aiTextureType_OPACITY, 0, &path) == AI_SUCCESS)
+			addTextureAtlasRegion(path.C_Str(), i);
+		*/
+	}
+
+	std::vector<TextureAtlas*> atlases;
+	while (!containTexturesInAtlases(textureAtlasRegions, atlases))
+		increaseAtlasesSize(atlases);
+	fillAtlasTextures(textureAtlasRegions, atlases);
+
+	std::vector<MaterialProperty> matProperties(scene->mNumMaterials);
+	for (const TextureAtlasRegion& tar : textureAtlasRegions)
+	{
+		const TextureAtlas* atlas = atlases[tar.atlasIdx];
+		printf("material: %i in atlas: %i type: %i \n", tar.materialID, tar.atlasIdx, tar.type);
+
+		switch (tar.type)
 		{
-			matProperty.mask = texturePathStr;
-			matProperty.mask.append(path.C_Str());
-			if (std::find_if(textures.begin(), textures.end(), [&](const TextureTypePath& t) { return t.path == matProperty.mask; }) == textures.end())
-				textures.push_back({ matProperty.mask, TextureTypePath::ETextureType_MASK });
+		case aiTextureType_DIFFUSE:
+			matProperties[tar.materialID].diffuseAtlasNr = tar.atlasIdx;
+			matProperties[tar.materialID].diffuseTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tar.region);
+			break;
+		case aiTextureType_NORMALS:
+			matProperties[tar.materialID].normalAtlasNr = tar.atlasIdx;
+			matProperties[tar.materialID].normalTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tar.region);
+			break;
 		}
 	}
 
-	std::vector<MeshEntry> entries;
-	std::vector<MeshEntry> transparentEntries;
-	std::vector<AtlasRegion> atlasRegions;
-	std::vector<TextureAtlas*> atlasses;
-
-	for (const TextureTypePath& tex : textures)
+	for (int i = 0; i < atlases.size(); ++i)
 	{
-		int width, height, numComp;
-		const int result = stbi_info(tex.path.c_str(), &width, &height, &numComp);
+		const TextureAtlas* atlas = atlases[i];
 
-		if (!result)
-		{
-			printf("Cannot open file: %s \n", tex.path.c_str());
-			continue;
-		}
-
-		switch (tex.type)
-		{
-		case TextureTypePath::ETextureType_DIFFUSE:  numComp = 3; break;
-		case TextureTypePath::ETextureType_BUMP:     numComp = 3; break;
-		case TextureTypePath::ETextureType_SPECULAR: numComp = 1; break;
-		case TextureTypePath::ETextureType_MASK:     numComp = 1; break;
-		}
-
-		bool contained = false;
-		for (int i = 0; i < atlasses.size(); ++i)
-		{
-			TextureAtlas* atlas = atlasses[i];
-
-			if (atlas->m_numComponents == numComp)
-			{
-				const TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
-				if (region.width && region.height)
-				{
-					contained = true;
-					atlasRegions.push_back({ tex.path, i, atlas, region });
-					break;
-				}
-			}
-		}
-		if (!contained)
-		{
-			TextureAtlas* atlas = new TextureAtlas(MAX_ATLAS_WIDTH, MAX_ATLAS_HEIGHT, numComp, NUM_ATLAS_MIPS);
-			const TextureAtlas::AtlasRegion region = atlas->getRegion(width, height);
-			assert(region.width && region.height);
-			atlasses.push_back(atlas);
-			atlasRegions.push_back({ tex.path, (int) atlasses.size() - 1, atlas, region });
-		}
-	}
-
-	std::vector<MaterialProperty> matProperties(matFiles.size());
-
-	for (int i = 0; i < matFiles.size(); ++i)
-	{
-		const MaterialFiles& files = matFiles[i];
-		MaterialProperty& prop = matProperties[i];
-
-		for (const AtlasRegion& reg : atlasRegions)
-		{
-			if (files.diffuse == reg.image)
-			{
-				prop.diffuseTexMapping = getTextureOffset(reg);
-				prop.diffuseAtlasNr = reg.atlasNr;
-			}
-			else if (files.bump == reg.image)
-			{
-				prop.bumpTexMapping = getTextureOffset(reg);
-				prop.bumpAtlasNr = reg.atlasNr;
-			}
-			else if (files.spec == reg.image)
-			{
-				prop.specTexMapping = getTextureOffset(reg);
-				prop.specularAtlasNr = reg.atlasNr;
-			}
-			else if (files.mask == reg.image)
-			{
-				prop.maskTexMapping = getTextureOffset(reg);
-				prop.maskAtlasNr = reg.atlasNr;
-			}
-			else
-			{
-				//	assert(false); // no textures in material?
-			}
-		}
-	}
-
-	for (const AtlasRegion& region : atlasRegions)
-	{
-		int width, height, numComponents;
-		const unsigned char* data = stbi_load(region.image.c_str(), &width, &height, &numComponents, region.atlas->m_numComponents);
-		if (!data)
-		{
-			printf("FAILED TO LOAD IMAGE: %s \n", region.image.c_str());
-			continue;
-		}
-		region.atlas->setRegion(region.region.x, region.region.y, region.region.width, region.region.height, data, region.atlas->m_numComponents);
-	}
-
-	std::string dstTexturePathStr(a_outResourcePath);
-	dstTexturePathStr = dstTexturePathStr.substr(0, dstTexturePathStr.find_last_of('.'));
-
-	std::sort(atlasses.begin(), atlasses.end(), [](const TextureAtlas* a, const TextureAtlas* b)
-	{
-		return a->m_numComponents < b->m_numComponents;
-	});
-
-	int num1CompAtlasses = 0, num3CompAtlasses = 0, num4CompAtlasses = 0;
-	for (const TextureAtlas* atlas : atlasses)
-	{
-		switch (atlas->m_numComponents)
-		{
-		case 1: num1CompAtlasses++; break;
-		case 3: num3CompAtlasses++; break;
-		case 4: num4CompAtlasses++; break;
-		default: assert(false); break;
-		}
-	}
-
-	for (int i = 0; i < atlasses.size(); ++i)
-	{
-		const TextureAtlas* atlas = atlasses[i];
-
-		std::string atlasFileName = dstTexturePathStr.c_str();
+		std::string atlasFileName(outResourcePathstr.substr(0, outResourcePathstr.find_last_of('.')));
 		atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");
 
 		std::ofstream file(atlasFileName.c_str(), std::ios::out | std::ios::binary);
@@ -312,6 +310,14 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		file.close();
 	}
 
+	const int numAtlases = (int) atlases.size();
+
+	for (TextureAtlas* a : atlases)
+		delete a;
+	atlases.clear();
+
+	std::vector<MeshEntry> transparentEntries;
+	std::vector<MeshEntry> entries;
 	entries.reserve(scene->mNumMeshes);
 
 	unsigned int numVerticesInScene = 0;
@@ -326,6 +332,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		entry.meshIndex = i;
 		entry.materialIndex = scene->mMeshes[i]->mMaterialIndex;
 		entry.numIndices = scene->mMeshes[i]->mNumFaces * 3;
+		/*
 		if (matProperties[entry.materialIndex].maskAtlasNr != -1)
 		{
 			entry.baseVertex = numTransparentVerticesInScene;
@@ -335,13 +342,13 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 			transparentEntries.push_back(entry);
 		}
 		else
-		{
+		{ */
 			entry.baseVertex = numVerticesInScene;
 			entry.baseIndex = numIndicesInScene;
 			numVerticesInScene += scene->mMeshes[i]->mNumVertices;
 			numIndicesInScene += entry.numIndices;
 			entries.push_back(entry);
-		}
+		//}
 	}
 
 	for (MeshEntry& entry : transparentEntries)
@@ -400,10 +407,10 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	assert(file.is_open());
 
 	const int type = EResourceType_MODEL;
-	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
-	file.write(reinterpret_cast<const char*>(&num1CompAtlasses), sizeof(int));
-	file.write(reinterpret_cast<const char*>(&num3CompAtlasses), sizeof(int));
 	const int numTransparent = (int) transparentEntries.size();
+
+	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
+	file.write(reinterpret_cast<const char*>(&numAtlases), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&numTransparent), sizeof(int));
 	writeVector(file, indiceCounts);
 	writeVector(file, baseIndices);
