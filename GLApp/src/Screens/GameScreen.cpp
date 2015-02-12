@@ -1,6 +1,6 @@
 #include "GameScreen.h"
 
-#include "Core/ScreenManager.h"
+#include "Model/ScreenManager.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/GL/GLVars.h"
@@ -32,7 +32,7 @@ GameScreen::GameScreen(ScreenManager* a_screenManager) : IScreen(a_screenManager
 
 	m_camera.initialize(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), (float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 	m_cameraController.initialize(m_camera, glm::vec3(0, 0, 1));
-	m_clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewport(), m_camera);
+	m_clusteredShading.resize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getScreenWidth(), GLEngine::graphics->getScreenHeight(), m_camera);
 
 	rde::vector<rde::string> defines;
 	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string(MAX_LIGHTS)));

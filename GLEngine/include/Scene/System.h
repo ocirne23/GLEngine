@@ -7,7 +7,7 @@ class System
 public:
 
 	System() : m_systemID(0xFFFF) {}
-	~System() {}
+	virtual ~System() {}
 	System(const System& copy) = delete;
 
 	virtual void update(float deltaSec) = 0;

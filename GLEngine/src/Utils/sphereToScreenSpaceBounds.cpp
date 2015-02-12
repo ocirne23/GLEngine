@@ -106,7 +106,7 @@ inline float calcClusterZ(float a_viewSpaceZ, float a_recNear, float a_recLogSD1
 
 }
 
-IBounds2D sphereToScreenSpaceBounds2D(const Camera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, Viewport a_viewport)
+IBounds2D sphereToScreenSpaceBounds2D(const Camera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, uint a_screenWidth, uint a_screenHeight)
 {
 	glm::vec4 reg = computeClipRegion(a_lightPosViewSpace, a_lightRadius, a_camera.m_near, a_camera.m_projectionMatrix);
 	reg = -reg;
@@ -118,19 +118,20 @@ IBounds2D sphereToScreenSpaceBounds2D(const Camera& a_camera, glm::vec3 a_lightP
 
 	IBounds2D result;
 
-	result.minX = int(reg.x * float(a_viewport.width));
-	result.minY = int(reg.y * float(a_viewport.height));
-	result.maxX = int(reg.z * float(a_viewport.width));
-	result.maxY = int(reg.w * float(a_viewport.height));
+	result.minX = int(reg.x * float(a_screenWidth));
+	result.minY = int(reg.y * float(a_screenHeight));
+	result.maxX = int(reg.z * float(a_screenWidth));
+	result.maxY = int(reg.w * float(a_screenHeight));
 	result.minX = glm::min(result.minX, result.maxX);
 	result.minY = glm::min(result.minY, result.maxY);
 
 	return result;
 }
 
-IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, Viewport a_viewport, uint a_pixelsPerTileW, uint a_pixelsPerTileH, float a_recLogSD1)
+IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, 
+	uint a_screenWidth, uint a_screenHeight, uint a_pixelsPerTileW, uint a_pixelsPerTileH, float a_recLogSD1)
 {
-	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, a_lightPosViewSpace, a_lightRadius, a_viewport);
+	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, a_lightPosViewSpace, a_lightRadius, a_screenWidth, a_screenHeight);
 	float recNear = 1.0f / a_camera.m_near;
 
 	int minZ = glm::max(int(calcClusterZ(a_lightPosViewSpace.z + a_lightRadius, recNear, a_recLogSD1)), 0);

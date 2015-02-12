@@ -102,7 +102,6 @@ void Graphics::resizeScreen(uint a_screenWidth, uint a_screenHeight)
 	m_screenWidth = a_screenWidth;
 	m_screenHeight = a_screenHeight;
 
-	m_viewport = { 0, 0, a_screenWidth, a_screenHeight };
 	glViewport(0, 0, a_screenWidth, a_screenHeight);
 
 	for (WindowEventListener* listener : m_windowEventListeners)

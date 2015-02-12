@@ -5,7 +5,6 @@
 #include "Graphics/GL/GLTypes.h"
 #include "rde/vector.h"
 #include "Utils/VecForward.h"
-#include "Utils/Viewport.h"
 
 class PerspectiveCamera;
 class GLShader;
@@ -16,7 +15,7 @@ public:
 	ClusteredShading() {}
 	~ClusteredShading() {}
 
-	void initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Viewport& viewport, const PerspectiveCamera& camera);
+	void resize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* lightPositionRangeList);
 
 	uint getGridWidth() const				{ return m_gridWidth; }
@@ -33,20 +32,19 @@ public:
 
 private:
 
-	float m_recLogSD1;
-	float m_recNear;
+	float m_recLogSD1	= 0.0f;
+	float m_recNear		= 0.0f;
 
-	uint m_gridWidth;
-	uint m_gridHeight;
-	uint m_gridDepth;
-	uint m_gridSize;
+	uint m_screenWidth	= 0;
+	uint m_screenHeight = 0;
+	uint m_gridWidth		= 0;
+	uint m_gridHeight	= 0;
+	uint m_gridDepth		= 0;
+	uint m_gridSize		= 0;
+	uint m_pixelsPerTileW	= 0;
+	uint m_pixelsPerTileH	= 0;
 
-	uint m_pixelsPerTileW;
-	uint m_pixelsPerTileH;
-
-	Viewport m_viewport;
-
-	glm::uvec2* m_lightGrid;
-	rde::vector<ushort>* m_tileLightIndices;
+	glm::uvec2* m_lightGrid					= NULL;
+	rde::vector<ushort>* m_tileLightIndices = NULL;
 	rde::vector<ushort> m_lightIndices;
 };

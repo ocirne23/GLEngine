@@ -7,6 +7,8 @@
 #define BEGIN_NAMESPACE(X) namespace X {
 #define END_NAMESPACE(X) }
 #define FORWARD_DECLARE(NAMESPACE, CLASS) BEGIN_NAMESPACE(NAMESPACE) class CLASS; END_NAMESPACE(NAMESPACE)
+#define SAFE_DELETE(X) if (X) {delete X; X = NULL; }
+#define SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = NULL; }
 
 #ifdef ANDROID
 #define OVERRIDE

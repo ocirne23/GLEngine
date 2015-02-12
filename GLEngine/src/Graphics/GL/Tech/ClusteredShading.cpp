@@ -6,33 +6,36 @@
 
 #include "Utils/Bounds3D.h"
 #include "Utils/sphereToScreenSpaceBounds.h"
-#include "Utils/Viewport.h"
 
 #include <assert.h>
 #include <glm/glm.hpp>
 
-void ClusteredShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, const Viewport& a_viewport,
+void ClusteredShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight,
 	const PerspectiveCamera& a_camera)
 {
-	m_viewport = a_viewport;
+	SAFE_DELETE_ARRAY(m_lightGrid);
+	SAFE_DELETE_ARRAY(m_tileLightIndices);
 
+	m_screenWidth = a_screenWidth;
+	m_screenHeight = a_screenHeight;
 	m_pixelsPerTileW = a_pixelsPerTileW;
 	m_pixelsPerTileH = a_pixelsPerTileH;
 
-	m_gridWidth = a_viewport.width / a_pixelsPerTileW;
-	m_gridHeight = a_viewport.height / a_pixelsPerTileH;
+	m_gridWidth = a_screenWidth / a_pixelsPerTileW;
+	m_gridHeight = a_screenHeight / a_pixelsPerTileH;
 
-	const uint grid2dDimY = (a_viewport.height + a_pixelsPerTileH - 1) / a_pixelsPerTileH;
+	m_recNear = 1.0f / a_camera.m_near;
+
+	const uint grid2dDimY = (a_screenHeight + a_pixelsPerTileH - 1) / a_pixelsPerTileH;
 	const float sD = 2.0f * glm::tan(glm::radians(a_camera.getVFov()) * 0.5f) / float(grid2dDimY);
 	m_recLogSD1 = 1.0f / logf(sD + 1.0f);
-	m_recNear = 1.0f / a_camera.m_near;
+	
 	const float zGridLocFar = logf(a_camera.m_far / a_camera.m_near) / logf(1.0f + sD);
-
 	m_gridDepth = uint(ceilf(zGridLocFar) + 0.5f);
 	m_gridSize = m_gridWidth * m_gridHeight * m_gridDepth;
 
-	m_lightGrid = new glm::uvec2[m_gridSize]; //TODO: delete
-	m_tileLightIndices = new rde::vector<ushort>[m_gridSize]; // ^
+	m_lightGrid = new glm::uvec2[m_gridSize];
+	m_tileLightIndices = new rde::vector<ushort>[m_gridSize];
 }
 
 void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLights, const glm::vec4* a_viewSpaceLightPositionRangeList)
@@ -49,7 +52,7 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLight
 		const float radius = lightPositionRange.w;
 		const glm::vec3 lightPosition(lightPositionRange);
 
-		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(a_camera, lightPosition, radius, m_viewport, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
+		IBounds3D bounds3D = sphereToScreenSpaceBounds3D(a_camera, lightPosition, radius, m_screenWidth, m_screenHeight, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 
 		bounds3D.minX = glm::clamp(bounds3D.minX, 0, (int) m_gridWidth);
 		bounds3D.maxX = glm::clamp(bounds3D.maxX, 0, (int) m_gridWidth);

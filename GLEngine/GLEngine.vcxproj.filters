@@ -111,6 +111,7 @@
     </ClCompile>
     <ClCompile Include="src\Scene\Actor.cpp" />
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
+    <ClCompile Include="src\Graphics\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -251,9 +252,6 @@
     <ClInclude Include="include\Graphics\Graphics.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Utils\Viewport.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\Graphics\WindowFlags.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
@@ -375,6 +373,7 @@
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\GL\GLVars.h" />
+    <ClInclude Include="include\Graphics\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

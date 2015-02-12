@@ -27,13 +27,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Core\ScreenManager.cpp" />
+    <ClCompile Include="src\Model\ScreenManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Screens\GameScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Core\IScreen.h" />
-    <ClInclude Include="src\Core\ScreenManager.h" />
+    <ClInclude Include="src\Model\IScreen.h" />
+    <ClInclude Include="src\Model\ScreenManager.h" />
     <ClInclude Include="src\Screens\EScreenType.h" />
     <ClInclude Include="src\Screens\GameScreen.h" />
   </ItemGroup>

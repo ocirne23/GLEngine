@@ -2,7 +2,6 @@
 
 #include "Core.h"
 
-#include "Utils/Viewport.h"
 #include "Utils/VecForward.h"
 
 #include "rde/rde_string.h"
@@ -33,9 +32,8 @@ public:
 	bool hasWindow() const			{ return m_window != NULL; }
 
 	uint getScreenWidth() const		{ return m_screenWidth; }
-	uint getScreenHeight() const	{ return m_screenHeight; }
-	Viewport getViewport() const	{ return m_viewport; }
-	bool getVsyncEnabled() const	{ return m_vsyncEnabled; }
+	uint getScreenHeight() const		{ return m_screenHeight; }
+	bool getVsyncEnabled() const		{ return m_vsyncEnabled; }
 
 private:
 	Graphics() :
@@ -55,6 +53,5 @@ private:
 	uint m_screenHeight;
 	bool m_vsyncEnabled;
 
-	Viewport m_viewport;
 	rde::vector<WindowEventListener*> m_windowEventListeners;
 };

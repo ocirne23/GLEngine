@@ -1,7 +1,8 @@
 #pragma once
 
+#include "Core.h"
+
 #include "Utils/VecForward.h"
-#include "Utils/Viewport.h"
 
 typedef uint LightHandle;
 

@@ -3,7 +3,6 @@
 #include "Core.h"
 #include "rde/vector.h"
 #include "Utils/VecForward.h"
-#include "Utils/Viewport.h"
 
 #include "Graphics/GL/Core/GLConstantBuffer.h"
 
@@ -16,7 +15,7 @@ public:
 	TiledShading() {}
 	~TiledShading() {}
 
-	void initialize(uint pixelsPerTileW, uint pixelsPerTileH, const Viewport& viewport, const PerspectiveCamera& camera);
+	void resize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
 	void setupShader(const GLShader& shader);
 	void update(const PerspectiveCamera& camera, const glm::vec4* viewspaceLightPositionRangeList, uint numLights);
 
@@ -25,14 +24,13 @@ public:
 
 private:
 
-	uint m_gridWidth;
-	uint m_gridHeight;
-	uint m_gridSize;
-
-	uint m_pixelsPerTileW;
-	uint m_pixelsPerTileH;
-
-	Viewport m_viewport;
+	uint m_screenWidth	= 0;
+	uint m_screenHeight = 0;
+	uint m_gridWidth		= 0;
+	uint m_gridHeight	= 0;
+	uint m_gridSize		= 0;
+	uint m_pixelsPerTileW = 0;
+	uint m_pixelsPerTileH = 0;
 
 	struct LightListRef
 	{

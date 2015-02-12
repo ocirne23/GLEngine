@@ -23,6 +23,7 @@
     <ClCompile Include="src\GLEngine.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp" />
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
+    <ClCompile Include="src\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Camera.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="include\GLEngine.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLUniform.h" />
     <ClInclude Include="include\Graphics\GL\GLVars.h" />
+    <ClInclude Include="include\Graphics\Renderer.h" />
     <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Graphics\Camera.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
@@ -147,7 +149,6 @@
     <ClInclude Include="include\Utils\EResourceType.h" />
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
-    <ClInclude Include="include\Utils\Viewport.h" />
     <ClInclude Include="src\Scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>

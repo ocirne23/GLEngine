@@ -8,15 +8,15 @@
 #include <assert.h>
 #include <glm/glm.hpp>
 
-void TiledShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, const Viewport& a_viewport, const PerspectiveCamera& a_camera)
+void TiledShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight, const PerspectiveCamera& a_camera)
 {
-	m_viewport = a_viewport;
-
+	m_screenWidth = a_screenWidth;
+	m_screenHeight = a_screenHeight;
 	m_pixelsPerTileW = a_pixelsPerTileW;
 	m_pixelsPerTileH = a_pixelsPerTileH;
 
-	m_gridWidth = a_viewport.width / a_pixelsPerTileW;
-	m_gridHeight = a_viewport.height / a_pixelsPerTileH;
+	m_gridWidth = a_screenWidth / a_pixelsPerTileW;
+	m_gridHeight = a_screenHeight / a_pixelsPerTileH;
 
 	m_gridSize = m_gridWidth * m_gridHeight;
 
@@ -45,7 +45,7 @@ void TiledShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_
 		float radius = lightPositionRange.w;
 		glm::vec3 lightPosition = glm::vec3(lightPositionRange);
 
-		IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, lightPosition, radius, m_viewport);
+		IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, lightPosition, radius, m_screenWidth, m_screenHeight);
 
 		bounds2D.minX = glm::clamp(bounds2D.minX, 0, (int) m_gridWidth);
 		bounds2D.maxX = glm::clamp(bounds2D.maxX, 0, (int) m_gridWidth);
