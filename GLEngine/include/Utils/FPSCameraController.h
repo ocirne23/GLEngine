@@ -31,19 +31,19 @@ public:
 
 private:
 
-	bool m_initialized;
-	PerspectiveCamera* m_camera;
-	bool m_lmbPressed, m_rmbPressed;
-	float m_cameraSpeed;
-	float m_diagonalCameraSpeed;
+	bool m_initialized			= false;
+	PerspectiveCamera* m_camera	= NULL;
+	float m_cameraSpeed			= 0.0f;
+	float m_diagonalCameraSpeed	= 0.0f;
 
-	bool
-		m_isWPressed,
-		m_isAPressed,
-		m_isSPressed,
-		m_isDPressed,
-		m_isSpacePressed,
-		m_isShiftPressed;
+	bool m_lmbPressed		= false;
+	bool m_rmbPressed		= false;
+	bool m_isWPressed		= false;
+	bool m_isAPressed		= false;
+	bool m_isSPressed		= false;
+	bool m_isDPressed		= false;
+	bool m_isSpacePressed	= false;
+	bool m_isShiftPressed	= false;
 
 	glm::vec3 m_lookDir;
 };

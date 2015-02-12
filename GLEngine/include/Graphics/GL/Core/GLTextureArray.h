@@ -11,8 +11,7 @@ class Pixmap;
 class GLTextureArray
 {
 public:
-	GLTextureArray() : m_initialized(false), m_width(0), m_height(0),
-		m_numMipmaps(0), m_numComponents(0), m_generateMipMaps(0), m_textureID(0) {}
+	GLTextureArray() {}
 	~GLTextureArray();
 	GLTextureArray(const GLTextureArray& copyMe) = delete;
 
@@ -34,13 +33,12 @@ public:
 
 private:
 
-	bool m_initialized;
-
-	uint m_width;
-	uint m_height;
-	uint m_numMipmaps;
-	uint m_numComponents;
-	bool m_isFloatTexture;
-	bool m_generateMipMaps;
-	GLuint m_textureID;
+	bool m_initialized		= false;
+	uint m_width			= 0;
+	uint m_height			= 0;
+	uint m_numMipmaps		= 0;
+	uint m_numComponents	= 0;
+	bool m_isFloatTexture	= false;
+	bool m_generateMipMaps	= false;
+	GLuint m_textureID		= 0;
 };

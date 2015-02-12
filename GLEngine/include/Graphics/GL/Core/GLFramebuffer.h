@@ -25,13 +25,14 @@ public:
 
 private:
 
-	bool m_begun;
+	bool m_begun			= false;
+	GLuint m_fbo			= 0;
+	GLuint m_depthTexture	= 0;
 
-	GLuint m_fbo;
 	rde::vector<GLuint> m_textures;
 	rde::vector<GLenum> m_drawBuffers;
-	GLuint m_depthTexture;
 
 private:
+
 	static bool s_begun;
 };

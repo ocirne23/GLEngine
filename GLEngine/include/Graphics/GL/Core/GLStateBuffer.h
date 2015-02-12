@@ -11,7 +11,7 @@ class GLVertexBuffer;
 class GLStateBuffer
 {
 public:
-	GLStateBuffer() : m_initialized(false), m_isBegun(false), m_vao(0) {}
+	GLStateBuffer() {}
 	~GLStateBuffer();
 	GLStateBuffer(const GLStateBuffer& copy) = delete;
 
@@ -23,9 +23,11 @@ public:
 
 private:
 
-	static bool s_isBegun;
+	bool m_initialized	= false;
+	bool m_isBegun		= false;
+	GLuint m_vao		= 0;
 
-	bool m_initialized;
-	bool m_isBegun;
-	GLuint m_vao;
+private:
+
+	static bool s_isBegun;
 };

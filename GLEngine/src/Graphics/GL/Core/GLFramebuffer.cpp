@@ -6,7 +6,7 @@
 
 bool GLFramebuffer::s_begun = false;
 
-GLFramebuffer::GLFramebuffer() : m_depthTexture(0)
+GLFramebuffer::GLFramebuffer()
 {
 	glGenFramebuffers(1, &m_fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);

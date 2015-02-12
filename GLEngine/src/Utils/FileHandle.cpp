@@ -37,10 +37,10 @@ void FileHandle::initialize(const char* a_filePath, FileMode a_fileMode)
 	const char* fileModeStr;
 	switch (a_fileMode)
 	{
-	case FileMode_READ:				fileModeStr = "rb";	break;
-	case FileMode_WRITE:			fileModeStr = "wb";	break;
-	case FileMode_READWRITE:		fileModeStr = "w+b"; break;
-	default:						fileModeStr = "w+b"; break;
+	case FileMode_READ:			fileModeStr = "rb";	break;
+	case FileMode_WRITE:		fileModeStr = "wb";	break;
+	case FileMode_READWRITE:	fileModeStr = "w+b"; break;
+	default:					return;
 	}
 
 	m_rwops = SDL_RWFromFile(a_filePath, fileModeStr);

@@ -11,7 +11,7 @@ class GLConstantBuffer
 public:
 	friend class GLStateBuffer;
 
-	GLConstantBuffer() : m_shader(0), m_initialized(false), m_drawUsage(0), m_ubo(0), m_bindingPoint(0), m_uboIndex(0) {}
+	GLConstantBuffer() {}
 	~GLConstantBuffer();
 	GLConstantBuffer(const GLConstantBuffer& copy) = delete;
 
@@ -21,11 +21,10 @@ public:
 
 private:
 
-	bool m_initialized;
-
-	const GLShader* m_shader;
-	GLenum m_drawUsage;
-	GLuint m_ubo;
-	GLuint m_bindingPoint;
-	GLuint m_uboIndex;
+	bool m_initialized			= false;
+	const GLShader* m_shader	= NULL;
+	GLenum m_drawUsage			= 0;
+	GLuint m_ubo				= 0;
+	GLuint m_bindingPoint		= 0;
+	GLuint m_uboIndex			= 0;
 };

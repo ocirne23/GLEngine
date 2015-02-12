@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+
 #include "rde/rde_string.h"
 
 struct SDL_RWops;
@@ -22,9 +23,9 @@ public:
 	rde::string readString(uint numChars) const;
 	rde::string readString() const;
 
-	const rde::string& getFilePath() const	{ return m_filePath; }
+	const rde::string& getFilePath() const		{ return m_filePath; }
 	uint getFileSize() const					{ return m_size; }
-	bool exists() const						{ return m_rwops != NULL; }
+	bool exists() const							{ return m_rwops != NULL; }
 
 private:
 
@@ -33,9 +34,8 @@ private:
 private:
 
 	rde::string m_filePath;
-	FileMode m_fileMode;
-	uint m_size;
-	bool m_isOpen;
-
-	SDL_RWops* m_rwops;
+	FileMode m_fileMode = FileMode_READ;
+	uint m_size			= 0;
+	bool m_isOpen		= false;
+	SDL_RWops* m_rwops	= NULL;
 };

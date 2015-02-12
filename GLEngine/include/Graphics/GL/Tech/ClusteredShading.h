@@ -35,12 +35,12 @@ private:
 	float m_recLogSD1	= 0.0f;
 	float m_recNear		= 0.0f;
 
-	uint m_screenWidth	= 0;
-	uint m_screenHeight = 0;
+	uint m_screenWidth		= 0;
+	uint m_screenHeight		= 0;
 	uint m_gridWidth		= 0;
-	uint m_gridHeight	= 0;
+	uint m_gridHeight		= 0;
 	uint m_gridDepth		= 0;
-	uint m_gridSize		= 0;
+	uint m_gridSize			= 0;
 	uint m_pixelsPerTileW	= 0;
 	uint m_pixelsPerTileH	= 0;
 

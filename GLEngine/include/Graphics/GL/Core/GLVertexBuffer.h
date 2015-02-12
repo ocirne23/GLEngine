@@ -11,12 +11,6 @@ struct VertexAttribute
 		EFormat_UNSIGNED_BYTE, EFormat_UNSIGNED_INT, EFormat_INT, EFormat_FLOAT
 	};
 
-	uint m_attributeIndex;
-	const char* m_attributeName;
-	EFormat m_format;
-	uint m_numElements;
-	bool m_normalize;
-
 	VertexAttribute(uint idx, const char* name, EFormat format, uint numElements, bool normalize = false) :
 		m_attributeIndex(idx),
 		m_attributeName(name),
@@ -24,6 +18,12 @@ struct VertexAttribute
 		m_numElements(numElements),
 		m_normalize(normalize)
 	{}
+
+	uint m_attributeIndex			= 0;
+	const char* m_attributeName		= NULL;
+	EFormat m_format				= EFormat_UNSIGNED_BYTE;
+	uint m_numElements				= 0;
+	bool m_normalize				= false;
 };
 
 
@@ -32,7 +32,7 @@ class GLVertexBuffer
 public:
 	friend class GLStateBuffer;
 
-	GLVertexBuffer() : m_id(0), m_bufferType(0), m_drawUsage(0), m_initialized(false) {}
+	GLVertexBuffer() {}
 	~GLVertexBuffer();
 	GLVertexBuffer(const GLVertexBuffer& copy) = delete;
 
@@ -46,8 +46,8 @@ public:
 
 private:
 
-	bool m_initialized;
-	GLuint m_id;
-	GLenum m_bufferType;
-	GLenum m_drawUsage;
+	bool m_initialized	= false;
+	GLuint m_id			= 0;
+	GLenum m_bufferType	= 0;
+	GLenum m_drawUsage	= 0;
 };

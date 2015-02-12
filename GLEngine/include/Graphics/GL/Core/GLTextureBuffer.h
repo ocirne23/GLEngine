@@ -14,24 +14,24 @@ class GLTextureBuffer
 public:
 	friend class GLStateBuffer;
 
-	GLTextureBuffer() : m_shader(0), m_drawUsage(0), m_textureLoc(0), m_textureID(0) {}
-	GLTextureBuffer(const GLTextureBuffer& copy) = delete;
+	GLTextureBuffer() {}
 	~GLTextureBuffer();
+	GLTextureBuffer(const GLTextureBuffer& copy) = delete;
 
 	void initialize(const GLShader& shader, const char* samplerName, GLint textureIdx, GLenum sizedFormat, GLenum drawUsage = GL_STATIC_DRAW);
 	void upload(uint numBytes, const void* data);
 	void bind();
+
 private:
 
-	bool m_initialized;
-
-	const GLShader* m_shader;
-	GLenum m_drawUsage;
-	GLint m_textureLoc;
-	GLint m_textureIdx;
-	GLuint m_textureID;
-	GLuint m_bufferID;
-	GLenum m_sizedInternalFormat;
+	bool m_initialized				= false;
+	const GLShader* m_shader		= NULL;
+	GLenum m_drawUsage				= 0;
+	GLint m_textureLoc				= 0;
+	GLint m_textureIdx				= 0;
+	GLuint m_textureID				= 0;
+	GLuint m_bufferID				= 0;
+	GLenum m_sizedInternalFormat	= 0;
 };
 
 #endif

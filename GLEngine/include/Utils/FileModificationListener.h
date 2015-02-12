@@ -9,6 +9,7 @@ class FileHandle;
 class FileModificationListener
 {
 public:
+
 	friend class FileModificationManager;
 
 private:
@@ -16,12 +17,17 @@ private:
 	FileModificationListener(const FileHandle& handle, std::function<void()> onFileModification);
 	~FileModificationListener() {};
 
-	rde::string m_filePath;
+private:
 
-	std::function<void()> m_onFileModification;
 	struct WriteTime
 	{
-		unsigned long dwLowDateTime;
-		unsigned long dwHighDateTime;
-	} m_lastWriteTime;
+		unsigned long dwLowDateTime		= 0;
+		unsigned long dwHighDateTime	= 0;
+	};
+
+private:
+
+	rde::string m_filePath;
+	std::function<void()> m_onFileModification;
+	WriteTime m_lastWriteTime;
 };

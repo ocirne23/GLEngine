@@ -36,11 +36,9 @@ public:
 	bool getVsyncEnabled() const		{ return m_vsyncEnabled; }
 
 private:
-	Graphics() :
-		m_window(0), m_screenWidth(0), m_screenHeight(0), m_vsyncEnabled(false)
-	{}
-	Graphics(const Graphics& copy) {}
+	Graphics() {}
 	~Graphics() {}
+	Graphics(const Graphics& copy) = delete;
 
 	bool initialize(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, WindowFlags flags);
 	void windowQuit();
@@ -48,10 +46,10 @@ private:
 
 private:
 
-	SDL_Window* m_window;
-	uint m_screenWidth;
-	uint m_screenHeight;
-	bool m_vsyncEnabled;
+	SDL_Window* m_window	= NULL;
+	uint m_screenWidth		= 0;
+	uint m_screenHeight		= 0;
+	bool m_vsyncEnabled		= false;
 
 	rde::vector<WindowEventListener*> m_windowEventListeners;
 };

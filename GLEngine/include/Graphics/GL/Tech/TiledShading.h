@@ -24,13 +24,13 @@ public:
 
 private:
 
-	uint m_screenWidth	= 0;
-	uint m_screenHeight = 0;
+	uint m_screenWidth		= 0;
+	uint m_screenHeight		= 0;
 	uint m_gridWidth		= 0;
-	uint m_gridHeight	= 0;
-	uint m_gridSize		= 0;
-	uint m_pixelsPerTileW = 0;
-	uint m_pixelsPerTileH = 0;
+	uint m_gridHeight		= 0;
+	uint m_gridSize			= 0;
+	uint m_pixelsPerTileW	= 0;
+	uint m_pixelsPerTileH	= 0;
 
 	struct LightListRef
 	{

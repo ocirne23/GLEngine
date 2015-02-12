@@ -62,18 +62,11 @@ uint readVector(const FileHandle& a_handle, rde::vector<T>& a_vector, uint a_off
 
 END_UNNAMED_NAMESPACE()
 
-GLMesh::GLMesh() : m_numTransparentMeshes(0), m_initialized(false)
-{
-}
-
 GLMesh::~GLMesh()
 {
-	if (m_indiceBuffer)
-		delete m_indiceBuffer;
-	if (m_vertexBuffer)
-		delete m_vertexBuffer;
-	if (m_matUniformBuffer)
-		delete m_matUniformBuffer;
+	SAFE_DELETE(m_indiceBuffer);
+	SAFE_DELETE(m_vertexBuffer);
+	SAFE_DELETE(m_matUniformBuffer);
 }
 
 void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_textureUnit, GLuint a_matUBOBindingPoint)
@@ -177,6 +170,7 @@ void GLMesh::render(bool a_renderOpague, bool a_renderTransparent, bool a_bindMa
 	{
 		if (m_textureArray.isInitialized())
 			m_textureArray.bind(m_textureUnit);
+		
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 	}

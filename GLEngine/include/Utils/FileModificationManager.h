@@ -20,6 +20,12 @@ private:
 	FileModificationManager() {}
 	~FileModificationManager() {}
 
+	struct WriteTime
+	{
+		unsigned long dwLowDateTime;
+		unsigned long dwHighDateTime;
+	} m_lastWriteTime;
+
 private:
 
 	static rde::vector<FileModificationListener*> s_listeners;

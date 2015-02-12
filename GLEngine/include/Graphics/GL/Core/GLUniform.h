@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core.h"
 #include "Graphics/GL/GLTypes.h"
 
 class GLShader;
@@ -8,7 +9,7 @@ template <typename T>
 class GLUniform
 {
 public:
-	GLUniform() : m_shader(0) {}
+	GLUniform() {}
 	~GLUniform() {}
 	GLUniform(const GLUniform& copy) = delete;
 
@@ -18,7 +19,7 @@ public:
 
 private:
 
-	const GLShader* m_shader;
-	GLint m_uniformLoc;
-	T m_value;
+	const GLShader* m_shader	= NULL;
+	GLint m_uniformLoc			= 0;
+	T m_value					= (T) 0;
 };

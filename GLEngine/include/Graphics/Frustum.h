@@ -14,8 +14,10 @@ public:
 	bool sphereInFrustum(const glm::vec3& point, float radius) const;
 
 public:
+
 	glm::vec4 m_planes[6];
 
 public:
+
 	static bool aabbInFrustum(const glm::vec3& point, const glm::vec3& extents, const glm::mat4& frustumMatrix);
 };

@@ -7,18 +7,21 @@ class FileHandle;
 class Pixmap
 {
 public:
-	Pixmap() : m_isFloatData(false), m_width(0), m_height(0), m_numComponents(0), m_data() {}
-	~Pixmap();
+	Pixmap() {}
+	~Pixmap() {	SAFE_DELETE_ARRAY(m_data.b); }
 
 	void read(const FileHandle& handle);
 	bool exists() const { return m_data.b != NULL; }
 	
 public:
 
-	bool m_isFloatData;
-	int m_width;
-	int m_height;
-	int m_numComponents;
-	union PixmapData { byte* b; float* f; };
+	union PixmapData { byte* b = NULL; float* f; };
+
+public:
+
+	bool m_isFloatData	= false;
+	int m_width			= 0;
+	int m_height		= 0;
+	int m_numComponents = 0;
 	PixmapData m_data;
 };

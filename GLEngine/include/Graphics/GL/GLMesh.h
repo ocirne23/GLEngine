@@ -12,13 +12,14 @@
 
 struct MaterialProperty
 {
-	MaterialProperty() : diffuseAtlasNr(-1), bumpAtlasNr(-1) {};
+	MaterialProperty() {}
+
 	glm::vec4 diffuseTexMapping;
 	glm::vec4 bumpTexMapping;
-	int diffuseAtlasNr;
-	int bumpAtlasNr;
-	int padding;
-	int padding2;
+	int diffuseAtlasNr	= -1;
+	int bumpAtlasNr		= -1;
+	int padding			= 0;
+	int padding2		= 0;
 };
 
 class GLShader;
@@ -28,7 +29,7 @@ class GLVertexBuffer;
 class GLMesh
 {
 public:
-	GLMesh();
+	GLMesh() {}
 	GLMesh(const GLMesh& copy) = delete;
 	~GLMesh();
 
@@ -38,19 +39,21 @@ public:
 
 private:
 
-	bool m_initialized;
+	bool m_initialized	= false;
+
 	GLStateBuffer m_stateBuffer;
-	GLVertexBuffer* m_indiceBuffer;
-	GLVertexBuffer* m_vertexBuffer;
+	GLVertexBuffer* m_indiceBuffer			= NULL;
+	GLVertexBuffer* m_vertexBuffer			= NULL;
 
-	uint m_matUBOBindingPoint;
-	GLConstantBuffer* m_matUniformBuffer;
+	uint m_matUBOBindingPoint				= 0;
+	GLConstantBuffer* m_matUniformBuffer	= NULL;
 
-	uint m_textureUnit;
+	uint m_textureUnit = 0;
 	GLTextureArray m_textureArray;
 
-	uint m_numTransparentMeshes;
-	uint m_numIndices;
+	uint m_numTransparentMeshes = 0;
+	uint m_numIndices			= 0;
+
 	rde::vector<GLsizei> m_indiceCounts;
 	rde::vector<GLvoid*> m_baseIndices;
 	rde::vector<GLint> m_baseVertices;

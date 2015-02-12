@@ -29,8 +29,6 @@ public:
 	bool isBegun() const { return m_begun; }
 	GLuint getID() const { return m_shaderID; }
 
-	//TODO: moar uniforms
-
 	void setUniform1i(const char* uniformName, int val);
 	void setUniform2i(const char* uniformName, const glm::ivec2& vec);
 	void setUniform1f(const char* uniformName, float val);
@@ -44,12 +42,13 @@ public:
 
 private:
 
-	bool m_initialized;
+	bool m_initialized	= false;
+	bool m_begun		= false;
+	GLuint m_shaderID = 0;
+	UniformLocMap m_uniformLocMap;
+
+private:
 
 	/* Global state to avoid mixing multiple shaders. */
 	static bool s_begun;
-	bool m_begun;
-
-	GLuint m_shaderID;
-	UniformLocMap m_uniformLocMap;
 };

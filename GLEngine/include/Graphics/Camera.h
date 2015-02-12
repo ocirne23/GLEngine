@@ -10,7 +10,7 @@ class Camera
 {
 public:
 	Camera() {}
-	virtual ~Camera() {};
+	virtual ~Camera() {}
 
 	void initialize(const glm::vec3& position, const glm::vec3& direction, float viewportWidth, float viewportHeight, float near, float a_far);
 
@@ -44,8 +44,8 @@ public:
 
 	Frustum m_frustum;
 
-	float m_viewportWidth;
-	float m_viewportHeight;
-	float m_near;
-	float m_far;
+	float m_viewportWidth	= 0.0f;
+	float m_viewportHeight	= 0.0f;
+	float m_near			= 0.0f;
+	float m_far				= 0.0f;
 };

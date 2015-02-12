@@ -11,7 +11,7 @@ class FileHandle;
 class GLTexture
 {
 public:
-	GLTexture() : m_textureID(0), m_width(0), m_height(0), m_numComponents(0), m_initialized(false) {}
+	GLTexture() {}
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
@@ -34,10 +34,9 @@ private:
 
 private:
 
-	bool m_initialized;
-
-	GLuint m_textureID;
-	uint m_width;
-	uint m_height;
-	byte m_numComponents;
+	bool m_initialized		= false;
+	GLuint m_textureID		= 0;
+	uint m_width			= 0;
+	uint m_height			= 0;
+	byte m_numComponents	= 0;
 };

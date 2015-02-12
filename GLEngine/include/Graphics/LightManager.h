@@ -39,12 +39,11 @@ public:
 
 private:
 
-	uint m_maxLights;
-	uint m_numUsedLights;
+	uint m_maxLights		= 0;
+	uint m_numUsedLights	= 0;
+	ushort* m_lightHandles	= NULL;
 
-	glm::vec4* m_viewspaceLightPositionRanges;
-	glm::vec4* m_lightPositionRanges;
-	glm::vec4* m_lightColors;
-
-	ushort* m_lightHandles;
+	glm::vec4* m_viewspaceLightPositionRanges	= NULL;
+	glm::vec4* m_lightPositionRanges			= NULL;
+	glm::vec4* m_lightColors					= NULL;
 };

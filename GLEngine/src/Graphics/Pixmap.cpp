@@ -30,9 +30,3 @@ void Pixmap::read(const FileHandle& a_file)
 		a_file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * 4, sizeof(uint) * 4);
 	}
 }
-
-Pixmap::~Pixmap()
-{
-	if (m_data.b)
-		delete[] ((void*) m_data.b);
-}
