@@ -4,8 +4,8 @@ class PerspectiveCamera;
 
 struct CameraComponent
 {
-	CameraComponent() : camera(0) {}
+	CameraComponent() {}
 	CameraComponent(PerspectiveCamera* camera) : camera(camera) {}
 
-	PerspectiveCamera* camera;
+	PerspectiveCamera* camera = NULL;
 };

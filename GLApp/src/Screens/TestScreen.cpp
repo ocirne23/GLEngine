@@ -1,7 +1,9 @@
 #include "Screens/TestScreen.h"
 
 #include "Components/CameraComponent.h"
+#include "Components/FPSControlledComponent.h"
 #include "Components/ModelComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/TransformComponent.h"
 
 #include "GLEngine.h"
@@ -10,9 +12,12 @@
 #include "Graphics/GL/GLMesh.h"
 #include "Graphics/GL/GLVars.h"
 
+#include "Input/Input.h"
+
 #include "Model/ScreenManager.h"
 
 #include "Systems/CameraSystem.h"
+#include "Systems/FPSControlSystem.h"
 #include "Systems/LightSystem.h"
 #include "Systems/RenderSystem.h"
 
@@ -24,6 +29,7 @@ END_UNNAMED_NAMESPACE()
 
 TestScreen::TestScreen()
 {
+	m_entityx.systems.add<FPSControlSystem>();
 	m_entityx.systems.add<CameraSystem>();
 	m_entityx.systems.add<LightSystem>();
 	m_entityx.systems.add<RenderSystem>(*m_entityx.systems.system<LightSystem>());
@@ -39,18 +45,45 @@ TestScreen::TestScreen()
 	entityx::Entity modelEntity = m_entityx.entities.create();
 
 	cameraEntity.assign<CameraComponent>(m_camera);
+	cameraEntity.assign<TransformComponent>(0.0f, 0.0f, 0.0f);
+	cameraEntity.assign<FPSControlledComponent>(10.0f, 0.7f);
+
 	modelEntity.assign<ModelComponent>(m_mesh);
-	modelEntity.assign<TransformComponent>(-10.0f, -10.0f, 50.0f);
+	modelEntity.assign<TransformComponent>(0.0f, -10.0f, -70.0f);
+
+	GLEngine::input->registerKeyListener(this);
 }
 
 TestScreen::~TestScreen() 
 {
 	SAFE_DELETE(m_mesh);
 	SAFE_DELETE(m_camera);
+	GLEngine::input->unregisterKeyListener(this);
 }
+
+bool TestScreen::keyDown(Key a_key)
+{
+	if (a_key == Key_T)
+	{
+		entityx::Entity lightEntity = m_entityx.entities.create();
+		lightEntity.assign<TransformComponent>(m_camera->m_position + m_camera->m_direction);
+		lightEntity.assign<PointLightComponent>();
+	}
+	if (a_key == Key_Y)
+	{
+		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
+		{
+			e.component<PointLightComponent>().remove();
+			e.destroy();
+		}
+	}
+	return false;
+}
+
 
 void TestScreen::render(float a_deltaSec)
 {
+	m_entityx.systems.update<FPSControlSystem>(a_deltaSec);
 	m_entityx.systems.update<CameraSystem>(a_deltaSec);
 	m_entityx.systems.update<LightSystem>(a_deltaSec);
 	m_entityx.systems.update<RenderSystem>(a_deltaSec);

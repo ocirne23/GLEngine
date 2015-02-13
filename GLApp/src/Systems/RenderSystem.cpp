@@ -34,7 +34,6 @@ RenderSystem::~RenderSystem()
 void RenderSystem::configure(entityx::EventManager& a_eventManager)
 {
 	a_eventManager.subscribe<entityx::ComponentAddedEvent<CameraComponent>>(*this);
-	a_eventManager.subscribe<entityx::ComponentRemovedEvent<CameraComponent>>(*this);
 }
 
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
@@ -78,15 +77,8 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 
 void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a_cameraComponentAddedEvent)
 {
-	assert(!m_activeCamera);
 	m_activeCamera = a_cameraComponentAddedEvent.component->camera;
 	initializeShaderForCamera(*m_activeCamera);
-}
-
-void RenderSystem::receive(const entityx::ComponentRemovedEvent<CameraComponent>& a_cameraComponentRemovedEvent)
-{
-	assert(m_activeCamera == a_cameraComponentRemovedEvent.component->camera);
-	m_activeCamera = NULL;
 }
 
 void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)

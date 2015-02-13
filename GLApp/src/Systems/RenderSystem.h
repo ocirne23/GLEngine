@@ -26,7 +26,6 @@ public:
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
 	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
-	void receive(const entityx::ComponentRemovedEvent<CameraComponent>& cameraComponentRemovedEvent);
 	void configure(entityx::EventManager& eventManager);
 
 	const GLShader& getModelShader() { return m_modelShader; }

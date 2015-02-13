@@ -4,5 +4,7 @@
 
 struct PointLightComponent
 {
+	PointLightComponent() {}
+
 	uint lightHandle = 0;
 };
