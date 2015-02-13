@@ -2,7 +2,7 @@
 
 #include "Components/CameraComponent.h"
 #include "Components/ModelComponent.h"
-#include "Components/PositionComponent.h"
+#include "Components/TransformComponent.h"
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
@@ -40,7 +40,7 @@ TestScreen::TestScreen()
 
 	cameraEntity.assign<CameraComponent>(m_camera);
 	modelEntity.assign<ModelComponent>(m_mesh);
-	modelEntity.assign<PositionComponent>(-10.0f, -10.0f, 50.0f);
+	modelEntity.assign<TransformComponent>(-10.0f, -10.0f, 50.0f);
 }
 
 TestScreen::~TestScreen() 

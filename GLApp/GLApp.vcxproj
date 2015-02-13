@@ -38,7 +38,7 @@
     <ClInclude Include="src\Components\CameraComponent.h" />
     <ClInclude Include="src\Components\ModelComponent.h" />
     <ClInclude Include="src\Components\PointLightComponent.h" />
-    <ClInclude Include="src\Components\PositionComponent.h" />
+    <ClInclude Include="src\Components\TransformComponent.h" />
     <ClInclude Include="src\Model\IScreen.h" />
     <ClInclude Include="src\Model\ScreenManager.h" />
     <ClInclude Include="src\Screens\EScreenType.h" />

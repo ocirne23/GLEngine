@@ -1,7 +1,7 @@
 #include "RenderSystem.h"
 
 #include "Components/CameraComponent.h"
-#include "Components/PositionComponent.h"
+#include "Components/TransformComponent.h"
 #include "Components/ModelComponent.h"
 
 #include "entityx/Entity.h"
@@ -111,12 +111,11 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		m_viewMatrixUniform.set(camera.m_viewMatrix);
 		m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.m_viewMatrix))));
 
-		entityx::ComponentHandle<PositionComponent> position;
+		entityx::ComponentHandle<TransformComponent> transform;
 		entityx::ComponentHandle<ModelComponent> model;
-		for (entityx::Entity entity : a_entities.entities_with_components(position, model))
+		for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
 		{
-			glm::mat4 transform = glm::translate(glm::mat4(1), position->pos);
-			m_transformUniform.set(transform);
+			m_transformUniform.set(transform->transform);
 			model->mesh->render(m_modelShader);
 		}
 
