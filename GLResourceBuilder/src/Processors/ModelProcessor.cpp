@@ -419,8 +419,8 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&numAtlases), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&numTransparent), sizeof(int));
-	writeVector(file, indiceCounts);
-	writeVector(file, baseIndices);
+	//writeVector(file, indiceCounts);
+	//writeVector(file, baseIndices);
 	writeVector(file, matProperties);
 	writeVector(file, indices);
 	writeVector(file, vertices);

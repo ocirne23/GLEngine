@@ -2,6 +2,6 @@
 
 enum EScreenType
 {
-	EScreenType_GAMESCREEN,
+	EScreenType_TESTSCREEN,
 	EScreenType_NUM_SCREENTYPES
 };

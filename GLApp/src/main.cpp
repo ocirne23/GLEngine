@@ -1,14 +1,13 @@
 #include "GLEngine.h"
 
 #include "Model/ScreenManager.h"
-#include "Screens/GameScreen.h"
 
 int MAIN(int a_argc, char* a_argv[])
 {
 	GLEngine::initialize();
 	{
 		ScreenManager screenManager;
-		screenManager.setScreen(EScreenType_GAMESCREEN);
+		screenManager.setScreen(EScreenType_TESTSCREEN);
 
 		const float fpsLogDelay = 5.0f;
 

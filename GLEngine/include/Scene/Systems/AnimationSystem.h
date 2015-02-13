@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include "Scene/System.h"
 
 #include "rde/vector.h"
@@ -28,4 +28,4 @@ private:
 private:
 
 	rde::vector<Animation> m_animations;
-};
+	};*/

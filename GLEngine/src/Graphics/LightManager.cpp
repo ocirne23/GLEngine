@@ -20,7 +20,6 @@ LightManager::~LightManager()
 	delete[] m_viewspaceLightPositionRanges;
 	delete[] m_lightPositionRanges;
 	delete[] m_lightColors;
-	
 	delete[] m_lightHandles;
 }
 

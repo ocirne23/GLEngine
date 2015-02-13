@@ -1,12 +1,12 @@
 #include "ScreenManager.h"
 
-#include "Screens/GameScreen.h"
+#include "Screens/TestScreen.h"
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/WindowEventListener.h"
 
-ScreenManager::ScreenManager() : m_currentScreen(0), m_width(0), m_height(0), hasQuit(false)
+ScreenManager::ScreenManager()
 {
 	memset(m_screens, 0, sizeof(m_screens));
 
@@ -35,8 +35,9 @@ void ScreenManager::setScreen(EScreenType a_screenType)
 	{
 		switch (a_screenType)
 		{
-		case EScreenType_GAMESCREEN:
-			m_screens[a_screenType] = new GameScreen(this);
+		case EScreenType_TESTSCREEN:
+			m_screens[a_screenType] = new TestScreen();
+			m_screens[a_screenType]->m_screenManager = this;
 			break;
 		default:
 			assert(false);

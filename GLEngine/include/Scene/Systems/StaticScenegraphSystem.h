@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include "Scene/System.h"
 #include "rde/vector.h"
 #include "rde/hash_map.h"
@@ -42,4 +42,4 @@ private:
 	void transform(uint& it, const Node& parent);
 
 	rde::vector<Node> m_nodes;
-};
+	};*/

@@ -22,6 +22,7 @@ public:
 	void keyDown(Key key);
 	void keyUp(Key key);
 	bool isKeyPressed(Key key);
+	bool isMousePressed(MouseButton button);
 	void mouseMoved(int xPos, int yPos, int deltaX, int deltaY);
 	void mouseDown(MouseButton button, int xPos, int yPos);
 	void mouseUp(MouseButton button, int xPos, int yPos);

@@ -69,7 +69,7 @@ GLMesh::~GLMesh()
 	SAFE_DELETE(m_matUniformBuffer);
 }
 
-void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_textureUnit, GLuint a_matUBOBindingPoint)
+void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, GLuint a_matUBOBindingPoint)
 {
 	assert(!m_initialized);
 
@@ -81,6 +81,7 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 	}
 
 	m_textureUnit = a_textureUnit;
+	m_matUBOBindingPoint = a_matUBOBindingPoint;
 
 	rde::vector<uint> indices;
 	rde::vector<Vertex> vertices;
@@ -95,21 +96,12 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 	file.readBytes(reinterpret_cast<char*>(&m_numTransparentMeshes), sizeof(uint), sizeof(int) * 2);
 	uint offset = sizeof(uint) * 3;
 
-	offset = readVector(file, m_indiceCounts, offset);
-	offset = readVector(file, baseIndices, offset);
 	offset = readVector(file, m_matProperties, offset);
 	offset = readVector(file, indices, offset);
 	offset = readVector(file, vertices, offset);
 	file.close();
 
 	m_numIndices = indices.size();
-
-	uint numBaseIndices = baseIndices.size();
-	m_baseIndices.resize(numBaseIndices);
-	for (uint i = 0; i < numBaseIndices; ++i)
-	{
-		m_baseIndices[i] = (GLvoid*) baseIndices[i];
-	}
 
 	m_stateBuffer.initialize();
 	m_stateBuffer.begin();
@@ -151,21 +143,26 @@ void GLMesh::loadFromFile(const char* a_filePath, GLShader& a_shader, uint a_tex
 
 	if (pixmaps.size())
 		m_textureArray.initialize(pixmaps);
-
-	m_stateBuffer.begin();
-
-	m_matUniformBuffer = new GLConstantBuffer();
-	m_matUniformBuffer->initialize(a_shader, a_matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
-	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
-	m_matUBOBindingPoint = a_matUBOBindingPoint;
-
-	m_stateBuffer.end();
 	assert(m_textureArray.isInitialized());
 	m_initialized = true;
 }
 
-void GLMesh::render(bool a_renderOpague, bool a_renderTransparent, bool a_bindMaterials)
+void GLMesh::uploadMaterialUBO(const GLShader& a_shader)
 {
+	m_stateBuffer.begin();
+	m_matUniformBuffer = new GLConstantBuffer();
+	m_matUniformBuffer->initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
+	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
+	m_stateBuffer.end();
+}
+
+void GLMesh::render(const GLShader& shader, bool a_renderOpague, bool a_renderTransparent, bool a_bindMaterials)
+{
+	if (!m_matUniformBuffer)
+	{
+		uploadMaterialUBO(shader);
+	}
+
 	m_stateBuffer.begin();
 	{
 		if (m_textureArray.isInitialized())

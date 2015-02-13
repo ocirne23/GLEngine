@@ -34,6 +34,18 @@ bool Camera::frustumContainsSpheres(const glm::vec3* const a_vertices, uint a_nu
 	return false;
 }
 
+void Camera::setPosition(const glm::vec3& a_position)
+{
+	m_position = a_position;
+}
+
+void Camera::setPosition(float a_x, float a_y, float a_z)
+{
+	m_position.x = a_x;
+	m_position.y = a_y;
+	m_position.z = a_z;
+}
+
 void Camera::translate(float a_x, float a_y, float a_z)
 {
 	m_position.x += a_x;
@@ -48,6 +60,11 @@ void Camera::translateRelative(float a_x, float a_y, float a_z)
 	float zTrans = a_z * glm::cos(angle) - a_x * glm::sin(angle);
 
 	translate(-xTrans, a_y, -zTrans);
+}
+
+void Camera::translateRelative(const glm::vec3& a_trans)
+{
+	translateRelative(a_trans.x, a_trans.y, a_trans.z);
 }
 
 float Camera::getRotationRadXY()

@@ -109,9 +109,12 @@
     <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp">
       <Filter>Source Files\Graphics\GL\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\Actor.cpp" />
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
-    <ClCompile Include="src\Graphics\Renderer.cpp" />
+    <ClCompile Include="src\entityx\help\Pool.cc" />
+    <ClCompile Include="src\entityx\help\Timer.cc" />
+    <ClCompile Include="src\entityx\Entity.cc" />
+    <ClCompile Include="src\entityx\Event.cc" />
+    <ClCompile Include="src\entityx\System.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -351,12 +354,6 @@
     <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Scene\Actor.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Scene\Scene.h">
-      <Filter>Header Files\Scene</Filter>
-    </ClInclude>
     <ClInclude Include="include\Scene\Systems\System.h">
       <Filter>Header Files\Scene\Systems</Filter>
     </ClInclude>
@@ -366,14 +363,24 @@
     <ClInclude Include="include\Graphics\GL\Core\GLUniform.h">
       <Filter>Header Files\Graphics\GL\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Scene\System.h" />
     <ClInclude Include="include\Scene\Systems\AnimationSystem.h" />
-    <ClInclude Include="src\Scene\Scene.cpp" />
     <ClInclude Include="include\Utils\EResourceType.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\GL\GLVars.h" />
-    <ClInclude Include="include\Graphics\Renderer.h" />
+    <ClInclude Include="include\entityx\3rdparty\deps\Dependencies.h" />
+    <ClInclude Include="include\entityx\3rdparty\help\NonCopyable.h" />
+    <ClInclude Include="include\entityx\3rdparty\help\Pool.h" />
+    <ClInclude Include="include\entityx\3rdparty\help\Timer.h" />
+    <ClInclude Include="include\entityx\3rdparty\tags\TagsComponent.h" />
+    <ClInclude Include="include\entityx\3rdparty\catch.hpp" />
+    <ClInclude Include="include\entityx\3rdparty\simplesignal.h" />
+    <ClInclude Include="include\entityx\Entity.h" />
+    <ClInclude Include="include\entityx\entityx.h" />
+    <ClInclude Include="include\entityx\Event.h" />
+    <ClInclude Include="include\entityx\quick.h" />
+    <ClInclude Include="include\entityx\System.h" />
+    <ClInclude Include="include\entityx\config.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

@@ -5,7 +5,8 @@ class ScreenManager;
 class IScreen
 {
 public:
-	IScreen(ScreenManager* screenManager) : m_screenManager(screenManager) {}
+	friend class ScreenManager;
+
 	virtual ~IScreen() {}
 
 	virtual void render(float deltaSec) = 0;
@@ -14,6 +15,6 @@ public:
 	virtual void hide() = 0;
 
 protected:
-	ScreenManager* m_screenManager;
+	ScreenManager* m_screenManager; // Set by ScreenManager
 private:
 };

@@ -174,7 +174,9 @@ void main()
 		
 		vec3 diffuseContrib, specularContrib;
 		doLightGGX(diffuseContrib, specularContrib, diffuse, roughness, F0, v_position, N, V, light);
-		// diffuseAccum += vec3(0.0, 0.1, 0.0); // Show clustered shading culling
+#ifdef VISUALIZE_LIGHT_CULLING
+		diffuseAccum += vec3(0.0, 0.1, 0.0);
+#endif //VISUALIZE_LIGHT_CULLING
 		diffuseAccum += diffuseContrib;
 		specularAccum += specularContrib;
 	}

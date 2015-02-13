@@ -1,2 +1,3 @@
-skybox\skybox.obj:9:12:3:634-10:2:2015
-palace\palace.obj:23:16:26:239-1:9:2014
+skybox\skybox.obj:15:14:33:647-4:2:2015
+palace\palace.obj:15:7:23:758-12:2:2015
+crytek-sponza\sponza.obj:16:33:32:0-27:7:2011

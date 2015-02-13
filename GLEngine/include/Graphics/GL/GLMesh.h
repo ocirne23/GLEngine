@@ -33,11 +33,12 @@ public:
 	GLMesh(const GLMesh& copy) = delete;
 	~GLMesh();
 
-	void loadFromFile(const char* filePath, GLShader& shader, uint textureUnit, GLuint matUBOBindingPoint);
-	void reloadShader(GLShader& shader);
-	void render(bool renderOpague = true, bool renderTransparent = true, bool bindMaterials = true);
+	void loadFromFile(const char* filePath, uint textureUnit, GLuint matUBOBindingPoint);
+	void render(const GLShader& shader, bool renderOpague = true, bool renderTransparent = true, bool bindMaterials = true);
 
 private:
+
+	void uploadMaterialUBO(const GLShader& shader);
 
 	bool m_initialized	= false;
 
@@ -54,8 +55,5 @@ private:
 	uint m_numTransparentMeshes = 0;
 	uint m_numIndices			= 0;
 
-	rde::vector<GLsizei> m_indiceCounts;
-	rde::vector<GLvoid*> m_baseIndices;
-	rde::vector<GLint> m_baseVertices;
 	rde::vector<MaterialProperty> m_matProperties;
 };

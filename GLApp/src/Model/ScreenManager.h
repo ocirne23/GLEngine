@@ -12,7 +12,6 @@ public:
 	virtual ~ScreenManager() OVERRIDE;
 
 	bool hasQuitWindow() const { return hasQuit; }
-
 	void setScreen(EScreenType screenType);
 	void render(float deltaSec);
 
@@ -25,10 +24,9 @@ private:
 
 private:
 
-	IScreen* m_currentScreen;
 	IScreen* m_screens[EScreenType_NUM_SCREENTYPES];
-
-	uint m_width;
-	uint m_height;
-	bool hasQuit;
+	IScreen* m_currentScreen	= NULL;
+	uint m_width				= 0;
+	uint m_height				= 0;
+	bool hasQuit				= false;
 };

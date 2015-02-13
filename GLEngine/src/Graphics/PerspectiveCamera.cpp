@@ -6,6 +6,7 @@ void PerspectiveCamera::initialize(const glm::vec3& a_position, const glm::vec3&
 {
 	Camera::initialize(a_position, a_direction, a_viewportWidth, a_viewportHeight, a_near, a_far);
 	setHorizontalFieldOfView(a_horizontalFov);
+	update();
 }
 
 void PerspectiveCamera::updateProjection()

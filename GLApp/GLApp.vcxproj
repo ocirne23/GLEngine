@@ -29,13 +29,23 @@
   <ItemGroup>
     <ClCompile Include="src\Model\ScreenManager.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Screens\GameScreen.cpp" />
+    <ClCompile Include="src\Screens\TestScreen.cpp" />
+    <ClCompile Include="src\Systems\CameraSystem.cpp" />
+    <ClCompile Include="src\Systems\LightSystem.cpp" />
+    <ClCompile Include="src\Systems\RenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Components\CameraComponent.h" />
+    <ClInclude Include="src\Components\ModelComponent.h" />
+    <ClInclude Include="src\Components\PointLightComponent.h" />
+    <ClInclude Include="src\Components\PositionComponent.h" />
     <ClInclude Include="src\Model\IScreen.h" />
     <ClInclude Include="src\Model\ScreenManager.h" />
     <ClInclude Include="src\Screens\EScreenType.h" />
-    <ClInclude Include="src\Screens\GameScreen.h" />
+    <ClInclude Include="src\Screens\TestScreen.h" />
+    <ClInclude Include="src\Systems\CameraSystem.h" />
+    <ClInclude Include="src\Systems\LightSystem.h" />
+    <ClInclude Include="src\Systems\RenderSystem.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{32AF2187-50FC-4685-A220-4495A570641A}</ProjectGuid>

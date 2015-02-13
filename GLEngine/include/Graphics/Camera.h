@@ -14,16 +14,20 @@ public:
 
 	void initialize(const glm::vec3& position, const glm::vec3& direction, float viewportWidth, float viewportHeight, float near, float a_far);
 
-	virtual void translate(float x, float y, float z);
-	/** Translates the camera position relative to the view of the camera */
-	virtual void translateRelative(float x, float y, float z);
-	virtual void rotate(float angle, const glm::vec3& axis);
-	virtual void rotateRelative(float xRot, float yRot);
-	virtual void lookAt(float x, float y, float z);
-	virtual void lookAtDir(const glm::vec3& dir);
 	virtual void resize(int width, int height);
 	virtual void update();
 	virtual void setNearFar(float near, float a_far);
+
+	void setPosition(float x, float y, float z);
+	void setPosition(const glm::vec3& position);
+	void translate(float x, float y, float z);
+	/** Translates the camera position relative to the view of the camera */
+	void translateRelative(float x, float y, float z);
+	void translateRelative(const glm::vec3& trans);
+	void rotate(float angle, const glm::vec3& axis);
+	void rotateRelative(float xRot, float yRot);
+	void lookAt(float x, float y, float z);
+	void lookAtDir(const glm::vec3& dir);
 
 	bool frustumContains(const glm::vec3* const vertices, uint numVertices) const;
 	bool frustumContainsSpheres(const glm::vec3* const spherePositions, uint numSpheres, float sphereRadius) const;

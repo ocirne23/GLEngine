@@ -61,6 +61,11 @@ bool Input::isKeyPressed(Key a_key)
 	return SDL_GetKeyboardState(NULL)[a_key] == 1;
 }
 
+bool Input::isMousePressed(MouseButton a_button)
+{
+	return (SDL_BUTTON(a_button) & SDL_GetMouseState(NULL, NULL)) != 0;
+}
+
 void Input::mouseMoved(int a_xPos, int a_yPos, int a_deltaX, int a_deltaY)
 {
 	for (MouseListener* listener : m_mouseListeners)

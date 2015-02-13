@@ -1,5 +1,5 @@
 #include "Scene/Systems/StaticScenegraphSystem.h"
-
+/*
 void StaticScenegraphSystem::transform(uint& a_it, const Node& a_parent)
 {
 	const uint numChildren = a_parent.flags & Node::NUM_CHILDREN_MASK;
@@ -15,7 +15,7 @@ void StaticScenegraphSystem::transform(uint& a_it, const Node& a_parent)
 	}
 }
 
-void StaticScenegraphSystem::update(float /*a_deltaSec*/)
+void StaticScenegraphSystem::update(float a_deltaSec)
 {
 	for (uint i = 0; i < (uint) m_nodes.size(); ++i)
 	{
@@ -92,4 +92,4 @@ const glm::quat& StaticScenegraphSystem::getWorldspacePosition(uint a_node)
 const glm::mat4& StaticScenegraphSystem::getWorldspacePositionMatrix(uint a_node)
 {
 	return glm::mat4_cast(m_nodes[a_node].worldSpacePosition);
-}
+}*/

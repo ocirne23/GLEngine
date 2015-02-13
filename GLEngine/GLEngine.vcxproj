@@ -20,10 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core.cpp" />
+    <ClCompile Include="src\entityx\Entity.cc" />
+    <ClCompile Include="src\entityx\Event.cc" />
+    <ClCompile Include="src\entityx\help\Pool.cc" />
+    <ClCompile Include="src\entityx\help\Timer.cc" />
+    <ClCompile Include="src\entityx\System.cc" />
     <ClCompile Include="src\GLEngine.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp" />
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
-    <ClCompile Include="src\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Camera.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
@@ -49,7 +53,6 @@
     <ClCompile Include="src\rde\list.cpp" />
     <ClCompile Include="src\rde\rde_string.cpp" />
     <ClCompile Include="src\rde\slist.cpp" />
-    <ClCompile Include="src\Scene\Actor.cpp" />
     <ClCompile Include="src\Scene\Systems\StaticScenegraphSystem.cpp" />
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
@@ -61,10 +64,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h" />
+    <ClInclude Include="include\entityx\3rdparty\catch.hpp" />
+    <ClInclude Include="include\entityx\3rdparty\deps\Dependencies.h" />
+    <ClInclude Include="include\entityx\3rdparty\help\NonCopyable.h" />
+    <ClInclude Include="include\entityx\3rdparty\help\Pool.h" />
+    <ClInclude Include="include\entityx\3rdparty\help\Timer.h" />
+    <ClInclude Include="include\entityx\3rdparty\simplesignal.h" />
+    <ClInclude Include="include\entityx\3rdparty\tags\TagsComponent.h" />
+    <ClInclude Include="include\entityx\config.h" />
+    <ClInclude Include="include\entityx\Entity.h" />
+    <ClInclude Include="include\entityx\entityx.h" />
+    <ClInclude Include="include\entityx\Event.h" />
+    <ClInclude Include="include\entityx\quick.h" />
+    <ClInclude Include="include\entityx\System.h" />
     <ClInclude Include="include\GLEngine.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLUniform.h" />
     <ClInclude Include="include\Graphics\GL\GLVars.h" />
-    <ClInclude Include="include\Graphics\Renderer.h" />
     <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Graphics\Camera.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
@@ -131,9 +146,6 @@
     <ClInclude Include="include\rde\type_traits.h" />
     <ClInclude Include="include\rde\utility.h" />
     <ClInclude Include="include\rde\vector.h" />
-    <ClInclude Include="include\Scene\Actor.h" />
-    <ClInclude Include="include\Scene\Scene.h" />
-    <ClInclude Include="include\Scene\System.h" />
     <ClInclude Include="include\Scene\Systems\AnimationSystem.h" />
     <ClInclude Include="include\Scene\Systems\StaticScenegraphSystem.h" />
     <ClInclude Include="include\Scene\Systems\System.h" />
@@ -149,7 +161,6 @@
     <ClInclude Include="include\Utils\EResourceType.h" />
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
-    <ClInclude Include="src\Scene\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Graphics\GL\Core\GLConstantBuffer.h" />
