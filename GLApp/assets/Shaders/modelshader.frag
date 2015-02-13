@@ -156,22 +156,22 @@ void main()
 
 	vec3 diffuse = sampleAtlasArray(u_textureArray, vec3(v_texcoord, material.diffuseAtlasNr), material.diffuseTexMapping).rgb;
 	vec3 tangentSpaceNormal = sampleAtlasArray(u_textureArray, vec3(v_texcoord, material.normalAtlasNr), material.normalTexMapping).rgb;
-	
 	vec3 normal = getNormal(tangentSpaceNormal);
-	float specular = 0.0;
-	
-	vec3 diffuseAccum = vec3(0);
-	vec3 specularAccum = vec3(0);
 	
 	vec3 N = normalize(normal);
 	vec3 V = normalize(u_eyePos - v_position);
+	
+	float specular = 0.1;
+	float roughness = clamp(specular, 0.0, 1.0);
+	float metalness = 0.0;
+	float albedo = (diffuse.r + diffuse.g + diffuse.b) / 3.0;
+	float F0 = mix(0.035, albedo, metalness);
 
+	vec3 diffuseAccum = vec3(0);
+	vec3 specularAccum = vec3(0);
+	
 	FOR_LIGHT_ITERATOR(light, v_position.z)
 	{
-		float roughness = clamp(specular, 0.01, 0.99);
-		float albedo = (diffuse.r + diffuse.g + diffuse.b) / 3.0;
-		float F0 = mix(0.04, albedo, roughness); //replace roughness with metalness //0.04; // refraction index;
-		
 		vec3 diffuseContrib, specularContrib;
 		doLightGGX(diffuseContrib, specularContrib, diffuse, roughness, F0, v_position, N, V, light);
 #ifdef VISUALIZE_LIGHT_CULLING

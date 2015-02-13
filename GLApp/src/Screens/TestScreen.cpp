@@ -68,6 +68,7 @@ bool TestScreen::keyDown(Key a_key)
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<TransformComponent>(m_camera->m_position + m_camera->m_direction);
 		lightEntity.assign<PointLightComponent>();
+		return true;
 	}
 	if (a_key == Key_Y)
 	{
@@ -76,6 +77,7 @@ bool TestScreen::keyDown(Key a_key)
 			e.component<PointLightComponent>().remove();
 			e.destroy();
 		}
+		return true;
 	}
 	return false;
 }

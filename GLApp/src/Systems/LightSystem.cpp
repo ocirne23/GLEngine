@@ -17,7 +17,6 @@ LightSystem::~LightSystem()
 void LightSystem::configure(entityx::EventManager& a_eventManager)
 {
 	a_eventManager.subscribe<entityx::ComponentAddedEvent<CameraComponent>>(*this);
-	a_eventManager.subscribe<entityx::ComponentRemovedEvent<CameraComponent>>(*this);
 
 	a_eventManager.subscribe<entityx::ComponentAddedEvent<PointLightComponent>>(*this);
 	a_eventManager.subscribe<entityx::ComponentRemovedEvent<PointLightComponent>>(*this);
@@ -27,12 +26,6 @@ void LightSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a
 {
 	assert(!m_activeCamera);
 	m_activeCamera = a_cameraComponentAddedEvent.component->camera;
-}
-
-void LightSystem::receive(const entityx::ComponentRemovedEvent<CameraComponent>& a_cameraComponentRemovedEvent)
-{
-	assert(m_activeCamera == a_cameraComponentRemovedEvent.component->camera);
-	m_activeCamera = NULL;
 }
 
 void LightSystem::receive(const entityx::ComponentAddedEvent<PointLightComponent>& pointLightComponentAddedEvent)

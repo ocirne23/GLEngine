@@ -24,8 +24,6 @@ public:
 	void configure(entityx::EventManager& eventManager);
 
 	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
-	void receive(const entityx::ComponentRemovedEvent<CameraComponent>& cameraComponentRemovedEvent);
-
 	void receive(const entityx::ComponentAddedEvent<PointLightComponent>& pointLightComponentAddedEvent);
 	void receive(const entityx::ComponentRemovedEvent<PointLightComponent>& pointLightComponentRemovedEvent);
 
