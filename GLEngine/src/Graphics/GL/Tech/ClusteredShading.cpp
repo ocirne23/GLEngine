@@ -24,13 +24,13 @@ void ClusteredShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint
 	m_gridWidth = a_screenWidth / a_pixelsPerTileW;
 	m_gridHeight = a_screenHeight / a_pixelsPerTileH;
 
-	m_recNear = 1.0f / a_camera.m_near;
+	m_recNear = 1.0f / a_camera.getNear();
 
 	const uint grid2dDimY = (a_screenHeight + a_pixelsPerTileH - 1) / a_pixelsPerTileH;
 	const float sD = 2.0f * glm::tan(glm::radians(a_camera.getVFov()) * 0.5f) / float(grid2dDimY);
 	m_recLogSD1 = 1.0f / logf(sD + 1.0f);
 	
-	const float zGridLocFar = logf(a_camera.m_far / a_camera.m_near) / logf(1.0f + sD);
+	const float zGridLocFar = logf(a_camera.getFar() / a_camera.getNear()) / logf(1.0f + sD);
 	m_gridDepth = uint(ceilf(zGridLocFar) + 0.5f);
 	m_gridSize = m_gridWidth * m_gridHeight * m_gridDepth;
 

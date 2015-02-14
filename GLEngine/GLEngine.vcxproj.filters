@@ -28,9 +28,6 @@
     <ClCompile Include="src\Graphics\Graphics.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\Camera.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\PerspectiveCamera.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -262,9 +259,6 @@
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\WindowEventListener.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\Camera.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\Frustum.h">

@@ -36,7 +36,7 @@ TestScreen::TestScreen()
 	m_entityx.systems.configure();
 
 	m_camera = new PerspectiveCamera();
-	m_camera->initialize(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1), (float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
+	m_camera->initialize((float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 
 	m_mesh = new GLMesh();
 	m_mesh->loadFromFile(MODEL_FILE_PATH, GLVars::TextureUnits_MODEL_TEXTURE_ARRAY, GLVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
@@ -66,7 +66,7 @@ bool TestScreen::keyDown(Key a_key)
 	if (a_key == Key_T)
 	{
 		entityx::Entity lightEntity = m_entityx.entities.create();
-		lightEntity.assign<TransformComponent>(m_camera->m_position + m_camera->m_direction);
+		lightEntity.assign<TransformComponent>(m_camera->getPosition() + m_camera->getDirection());
 		lightEntity.assign<PointLightComponent>();
 		return true;
 	}
@@ -81,7 +81,6 @@ bool TestScreen::keyDown(Key a_key)
 	}
 	return false;
 }
-
 
 void TestScreen::render(float a_deltaSec)
 {

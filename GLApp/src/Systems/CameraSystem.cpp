@@ -31,6 +31,6 @@ void CameraSystem::update(entityx::EntityManager& entities, entityx::EventManage
 
 		camera->camera->setPosition(position);
 		camera->camera->lookAtDir(direction);
-		camera->camera->update();
+		camera->camera->updateMatrices();
 	}
 }

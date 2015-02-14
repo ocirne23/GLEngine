@@ -106,9 +106,9 @@ inline float calcClusterZ(float a_viewSpaceZ, float a_recNear, float a_recLogSD1
 
 }
 
-IBounds2D sphereToScreenSpaceBounds2D(const Camera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, uint a_screenWidth, uint a_screenHeight)
+IBounds2D sphereToScreenSpaceBounds2D(const PerspectiveCamera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, uint a_screenWidth, uint a_screenHeight)
 {
-	glm::vec4 reg = computeClipRegion(a_lightPosViewSpace, a_lightRadius, a_camera.m_near, a_camera.m_projectionMatrix);
+	glm::vec4 reg = computeClipRegion(a_lightPosViewSpace, a_lightRadius, a_camera.getNear(), a_camera.getProjectionMatrix());
 	reg = -reg;
 
 	swap(reg.x, reg.z);
@@ -132,7 +132,7 @@ IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& a_camera, glm::ve
 	uint a_screenWidth, uint a_screenHeight, uint a_pixelsPerTileW, uint a_pixelsPerTileH, float a_recLogSD1)
 {
 	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, a_lightPosViewSpace, a_lightRadius, a_screenWidth, a_screenHeight);
-	float recNear = 1.0f / a_camera.m_near;
+	float recNear = 1.0f / a_camera.getNear();
 
 	int minZ = glm::max(int(calcClusterZ(a_lightPosViewSpace.z + a_lightRadius, recNear, a_recLogSD1)), 0);
 	int maxZ = glm::max(int(ceilf(calcClusterZ(a_lightPosViewSpace.z - a_lightRadius, recNear, a_recLogSD1)) + 0.5f), 0);

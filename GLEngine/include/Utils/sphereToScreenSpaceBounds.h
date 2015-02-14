@@ -9,5 +9,5 @@
 class Camera;
 class PerspectiveCamera;
 
-IBounds2D sphereToScreenSpaceBounds2D(const Camera& camera, glm::vec3 lightPosWorldSpace, float lightRadius, uint screenWidth, uint screenHeight);
+IBounds2D sphereToScreenSpaceBounds2D(const PerspectiveCamera& camera, glm::vec3 lightPosWorldSpace, float lightRadius, uint screenWidth, uint screenHeight);
 IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& camera, glm::vec3 lightPosViewSpace, float lightRadius, uint screenWidth, uint screenHeight, uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1);

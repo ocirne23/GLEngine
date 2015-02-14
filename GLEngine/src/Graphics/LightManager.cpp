@@ -89,7 +89,7 @@ const glm::vec4* LightManager::updateViewspaceLightPositionRangeList(const Persp
 {
 	for (uint i = 0; i < m_numUsedLights; ++i)
 	{
-		m_viewspaceLightPositionRanges[i] = glm::vec4(a_camera.m_viewMatrix * glm::vec4(glm::vec3(m_lightPositionRanges[i]), 1.0));
+		m_viewspaceLightPositionRanges[i] = glm::vec4(a_camera.getViewMatrix() * glm::vec4(glm::vec3(m_lightPositionRanges[i]), 1.0));
 		m_viewspaceLightPositionRanges[i].w = m_lightPositionRanges[i].w;
 	}
 	return m_numUsedLights ? &m_viewspaceLightPositionRanges[0] : NULL;

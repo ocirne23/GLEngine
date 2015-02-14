@@ -99,9 +99,9 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
 		m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
 
-		m_mvpMatrixUniform.set(camera.m_combinedMatrix);
-		m_viewMatrixUniform.set(camera.m_viewMatrix);
-		m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.m_viewMatrix))));
+		m_mvpMatrixUniform.set(camera.getCombinedMatrix());
+		m_viewMatrixUniform.set(camera.getViewMatrix());
+		m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
 
 		entityx::ComponentHandle<TransformComponent> transform;
 		entityx::ComponentHandle<ModelComponent> model;

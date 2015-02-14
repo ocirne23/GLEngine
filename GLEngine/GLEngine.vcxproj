@@ -29,7 +29,6 @@
     <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp" />
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
     <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp" />
-    <ClCompile Include="src\Graphics\Camera.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLConstantBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Core\GLFramebuffer.cpp" />
@@ -81,7 +80,6 @@
     <ClInclude Include="include\Graphics\GL\Core\GLUniform.h" />
     <ClInclude Include="include\Graphics\GL\GLVars.h" />
     <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h" />
-    <ClInclude Include="include\Graphics\Camera.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
     <ClInclude Include="include\Graphics\LightManager.h" />
     <ClInclude Include="include\Graphics\GL\Core\GLFramebuffer.h" />
