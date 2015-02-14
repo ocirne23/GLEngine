@@ -21,6 +21,25 @@ class LightSystem;
 class RenderSystem : public entityx::System<RenderSystem>, public entityx::Receiver<RenderSystem>
 {
 public:
+
+	enum UBOBindingPoints
+	{
+		UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT = 0,
+		UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT,
+		UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT,
+		UBOBindingPoints_NUM_ENGINE_RESERVED_UBO_BINDING_POINTS
+	};
+
+	enum TextureUnits
+	{
+		TextureUnits_DFV_TEXTURE = 0,
+		TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE,
+		TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE,
+		TextureUnits_MODEL_TEXTURE_ARRAY,
+		TextureUnits_NUM_ENGINE_RESERVED_TEXTURE_UNITS
+	};
+
+public:
 	RenderSystem(LightSystem& lightSystem);
 	virtual ~RenderSystem() OVERRIDE;
 

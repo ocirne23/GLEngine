@@ -52,11 +52,9 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 	entityx::ComponentHandle<TransformComponent> transform;
 	for (entityx::Entity entity : a_entities.entities_with_components(control, transform))
 	{
-		
-		glm::vec3 direction(FORWARD);
 		glm::vec3 position(transform->transform[3]);
 		glm::mat3 rotation(transform->transform);
-		direction = direction * rotation;
+		glm::vec3 direction(FORWARD * rotation);
 
 		direction = glm::rotate(direction, -m_xMoveAmount * control->lookSensitivity, UP); //rotate horizontally
 		float xzAngle = glm::atan2(direction.x, direction.z); //calculate axis to rotate vertically on

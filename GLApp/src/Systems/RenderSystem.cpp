@@ -23,7 +23,7 @@ END_UNNAMED_NAMESPACE()
 
 RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
 {
-	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", GLVars::TextureUnits_DFV_TEXTURE, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", TextureUnits_DFV_TEXTURE, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	m_dfvTexture.bind();
 }
 
@@ -53,8 +53,8 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", &defines);
 
 	m_modelShader.begin();
-	m_modelShader.setUniform1i("u_dfvTexture", GLVars::TextureUnits_DFV_TEXTURE);
-	m_modelShader.setUniform1i("u_textureArray", GLVars::TextureUnits_MODEL_TEXTURE_ARRAY);
+	m_modelShader.setUniform1i("u_dfvTexture", TextureUnits_DFV_TEXTURE);
+	m_modelShader.setUniform1i("u_textureArray", TextureUnits_MODEL_TEXTURE_ARRAY);
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
 	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
@@ -64,11 +64,11 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_normalMatrixUniform.initialize(m_modelShader, "u_normalMat");
 	m_transformUniform.initialize(m_modelShader, "u_transform");
 
-	m_lightPositionRangeBuffer.initialize(m_modelShader, GLVars::UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
-	m_lightColorBuffer.initialize(m_modelShader, GLVars::UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
+	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
+	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
 
-	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid", GLVars::TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
-	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", GLVars::TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
+	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid",TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
+	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
 	m_lightGridTextureBuffer.bind();
 	m_lightIndiceTextureBuffer.bind();
 

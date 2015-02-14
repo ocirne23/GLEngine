@@ -46,7 +46,6 @@ public:
 	const glm::vec3& getPosition() const			{ return m_position; }
 	const glm::vec3& getDirection() const			{ return m_direction; }
 	const glm::vec3& getUp() const					{ return m_up; }
-
 	float getVFov() const							{ return m_vFieldOfView; }
 	float getHFov() const							{ return m_hFieldOfView; }
 	float getNear() const							{ return m_near; }

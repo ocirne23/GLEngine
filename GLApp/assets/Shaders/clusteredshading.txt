@@ -10,16 +10,12 @@
 
 /* REQUIRED UNIFORMS /*
 * LightPositionRanges 	UBO
-* LightColors 		UBO
-* u_lightIndices 	isamplerBuffer
-* u_lightGrid 		isamplerBuffer 
-* u_recNear 		float
-* u_recLogSD1 		float
+* LightColors 			UBO
+* u_lightIndices 		isamplerBuffer
+* u_lightGrid 			isamplerBuffer 
+* u_recNear 			float
+* u_recLogSD1 			float
 */
-
-#define FOR_LIGHT_ITERATOR(LIGHT, VSDEPTH) \
- 	Light LIGHT; \
-	for (ivec2 _lightIterator = _getLightListBeginEnd(VSDEPTH); _checkIterator(_lightIterator, LIGHT); ++_lightIterator.x) \
 
 struct Light
 {
@@ -41,17 +37,16 @@ layout (std140) uniform LightColors
 	vec4 u_lightColors[MAX_LIGHTS];
 };
 
+#define FOR_LIGHT_ITERATOR(LIGHT, VSDEPTH) \
+ 	Light LIGHT; \
+	for (ivec2 _lightIterator = _getLightListBeginEnd(VSDEPTH); _lightIteratorCheck(_lightIterator, LIGHT); ++_lightIterator.x) \
+
+
 ivec2 _getLightListBeginEnd(float viewspaceDepth)
 {
-	// i and j coordinates are just the same as tiled shading, and based on screen space position.
 	ivec2 tileXY = ivec2(int(gl_FragCoord.x) / LIGHT_GRID_TILE_WIDTH, int(gl_FragCoord.y) / LIGHT_GRID_TILE_HEIGHT);
-
-	// k is based on the log of the view space Z coordinate.
 	float tileZ = log(-viewspaceDepth * u_recNear) * u_recLogSD1;
-
-	ivec3 clusterPos = ivec3(tileXY, int(tileZ));
-	int offset = (clusterPos.x * LIGHT_GRID_HEIGHT + clusterPos.y) * LIGHT_GRID_DEPTH + clusterPos.z;
-
+	int offset = (tileXY.x * LIGHT_GRID_HEIGHT + tileXY.y) * LIGHT_GRID_DEPTH + int(tileZ);
 	return texelFetch(u_lightGrid, offset).xy;
 }
 Light _getLight(int iterator)
@@ -63,7 +58,7 @@ Light _getLight(int iterator)
 	return light;
 }
 
-bool _checkIterator(ivec2 iterator, out Light light)
+bool _lightIteratorCheck(ivec2 iterator, out Light light)
 {
 	light = _getLight(iterator.x);
 	return iterator.x < iterator.y;

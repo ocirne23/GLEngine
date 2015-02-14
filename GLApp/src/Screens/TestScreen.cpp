@@ -39,7 +39,7 @@ TestScreen::TestScreen()
 	m_camera->initialize((float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 
 	m_mesh = new GLMesh();
-	m_mesh->loadFromFile(MODEL_FILE_PATH, GLVars::TextureUnits_MODEL_TEXTURE_ARRAY, GLVars::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
+	m_mesh->loadFromFile(MODEL_FILE_PATH, RenderSystem::TextureUnits_MODEL_TEXTURE_ARRAY, RenderSystem::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
 	
 	entityx::Entity cameraEntity = m_entityx.entities.create();
 	entityx::Entity modelEntity = m_entityx.entities.create();
