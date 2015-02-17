@@ -6,13 +6,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-#ifdef ANDROID
-static const uint MAX_GL_MAJOR_VERSION = 3;
-static const uint MAX_GL_MINOR_VERSION = 0;
-#else // !ANDROID
 static const uint MAX_GL_MAJOR_VERSION = 4;
 static const uint MAX_GL_MINOR_VERSION = 5;
-#endif // !ANDROID
 
 SDL_GLContext createHighestGLContext(SDL_Window* a_window, uint& a_outMaxMajorVersion, uint& a_outMaxMinorVersion)
 {

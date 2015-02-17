@@ -17,23 +17,27 @@ public:
 	~LightManager();
 	LightManager(const LightManager& copy) = delete;
 
-	LightHandle createLight(const glm::vec3& pos, const glm::vec3& color, float invRadius);
+	LightHandle createLight();
+	LightHandle createLight(const glm::vec3& pos, float radius, const glm::vec3& color, float intensity);
 	void deleteLight(LightHandle light);
 	void deleteLights();
 
+	void setLight(LightHandle light, const glm::vec3& pos, float radius, const glm::vec3& color, float intensity);
 	void setLightPosition(LightHandle light, const glm::vec3& position);
 	void setLightRange(LightHandle light, float range);
 	void setLightColor(LightHandle light, const glm::vec3& color);
+	void setLightIntensity(LightHandle light, float intensity);
 
 	const glm::vec3& getLightPosition(LightHandle light) const;
 	float getLightRange(LightHandle light) const;
 	const glm::vec3& getLightColor(LightHandle light) const;
+	float getLightIntensity(LightHandle light) const;
 
-	uint getNumLights() const						{ return m_numUsedLights; }
-	const glm::vec4* getLightColors() const			{ return m_lightColors; }
-	const glm::vec4* getLightPositionRanges() const { return m_lightPositionRanges; }
-	glm::vec4* getLightColors()						{ return m_lightColors; }
-	glm::vec4* getLightPositionRanges()				{ return m_lightPositionRanges; }
+	uint getNumLights() const							{ return m_numUsedLights; }
+	const glm::vec4* getLightColorIntensities() const	{ return m_lightColorIntensities; }
+	const glm::vec4* getLightPositionRanges() const		{ return m_lightPositionRanges; }
+	glm::vec4* getLightColorIntensities()				{ return m_lightColorIntensities; }
+	glm::vec4* getLightPositionRanges()					{ return m_lightPositionRanges; }
 
 	const glm::vec4* updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera);
 
@@ -45,5 +49,5 @@ private:
 
 	glm::vec4* m_viewspaceLightPositionRanges	= NULL;
 	glm::vec4* m_lightPositionRanges			= NULL;
-	glm::vec4* m_lightColors					= NULL;
+	glm::vec4* m_lightColorIntensities			= NULL;
 };

@@ -15,7 +15,7 @@ struct MaterialProperty
 	MaterialProperty() {}
 
 	glm::vec4 diffuseTexMapping;
-	glm::vec4 bumpTexMapping;
+	glm::vec4 normalTexMapping;
 	int diffuseAtlasNr	= -1;
 	int bumpAtlasNr		= -1;
 	int padding			= 0;
@@ -38,7 +38,7 @@ public:
 
 private:
 
-	void uploadMaterialUBO(const GLShader& shader);
+	void initializeUBO(const GLShader& shader);
 
 	bool m_initialized	= false;
 

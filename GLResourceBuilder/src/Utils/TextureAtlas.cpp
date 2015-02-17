@@ -39,11 +39,11 @@ TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
 	if (width > m_width || height > m_height)
 		return { 0, 0, 0, 0 };
 
-	if (!m_root.left && !m_root.right && (width == m_root.width || height == m_root.height))
+	if (!m_root.left && !m_root.right && (width == m_root.width && height == m_root.height))
 	{	// if no region has been used yet and region size is equal to atlas size, use entire atlas
 		m_root.left = new Node();
 		m_root.right = new Node();
-		return { 0, 0, m_width, m_height };
+		return { 0, 0, width, height };
 	}
 	
 	const Node* node = getRegion(&m_root, width + m_padding * 2, height + m_padding * 2);

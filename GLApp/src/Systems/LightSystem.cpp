@@ -30,39 +30,18 @@ void LightSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a
 
 void LightSystem::receive(const entityx::ComponentAddedEvent<PointLightComponent>& pointLightComponentAddedEvent)
 {
-	m_addedPointLightEntities.push_back(pointLightComponentAddedEvent.entity);
+	auto light = pointLightComponentAddedEvent.component;
+	light->m_lightManager = &m_lightManager;
+	light->m_lightHandle = m_lightManager.createLight();
 }
 
 void LightSystem::receive(const entityx::ComponentRemovedEvent<PointLightComponent>& pointLightComponentRemovedEvent)
 {
-	m_lightManager.deleteLight(pointLightComponentRemovedEvent.component->lightHandle);
+	m_lightManager.deleteLight(pointLightComponentRemovedEvent.component->m_lightHandle);
 }
 
 void LightSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
 {
-	if (m_addedPointLightEntities.size())
-	{
-		for (entityx::Entity& e : m_addedPointLightEntities)
-		{
-			assert(e.valid());
-			entityx::ComponentHandle<TransformComponent> transform = e.component<TransformComponent>();
-			entityx::ComponentHandle<PointLightComponent> light = e.component<PointLightComponent>();
-			assert(transform.valid());
-			assert(light.valid());
-
-			glm::vec3 pos(transform->transform[3]);
-			glm::vec3 lightColor = glm::normalize(glm::vec3((rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f)) * (rand() % 1000 / 200.0f);
-			light->lightHandle = m_lightManager.createLight(pos, lightColor, 5.0f);
-		}
-		m_addedPointLightEntities.clear();
-	}
-
-	// TMP Light range oscilation
-	glm::vec4* lights = m_lightManager.getLightPositionRanges();
-	for (uint i = 0; i < m_lightManager.getNumLights(); ++i)
-		lights[i].w = 2.0f + 10.0f * (((GLEngine::getTimeMs() + i * 12345) % 2000) / 2000.0f);
-	//
-
 	m_viewspaceLightPositionRangeList = m_lightManager.updateViewspaceLightPositionRangeList(*m_activeCamera);
 }
 
@@ -76,7 +55,7 @@ const glm::vec4* LightSystem::getViewspaceLightPositionRangeList()
 	return m_viewspaceLightPositionRangeList;
 }
 
-const glm::vec4* LightSystem::getLightColorList()
+const glm::vec4* LightSystem::getLightColorIntensityList()
 {
-	return m_lightManager.getLightColors();
+	return m_lightManager.getLightColorIntensities();
 }

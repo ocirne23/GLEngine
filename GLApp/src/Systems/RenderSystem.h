@@ -40,13 +40,14 @@ public:
 	};
 
 public:
+
 	RenderSystem(LightSystem& lightSystem);
-	virtual ~RenderSystem() OVERRIDE;
+	~RenderSystem();
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
 	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
 	void configure(entityx::EventManager& eventManager);
-
+	
 	const GLShader& getModelShader() { return m_modelShader; }
 
 private:
@@ -74,4 +75,9 @@ private:
 	GLUniform<glm::mat4> m_mvpMatrixUniform;
 	GLUniform<glm::mat4> m_transformUniform;
 
+	GLShader m_skyboxShader;
+	GLUniform<glm::mat3> m_skyboxNormalMatrixUniform;
+	GLUniform<glm::mat4> m_skyboxViewMatrixUniform;
+	GLUniform<glm::mat4> m_skyboxMvpMatrixUniform;
+	GLUniform<glm::mat4> m_skyboxTransformUniform;
 };

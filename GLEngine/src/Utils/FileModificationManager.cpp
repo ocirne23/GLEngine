@@ -1,8 +1,8 @@
 #include "Utils/FileModificationManager.h"
 
-#include "Utils/FileModificationListener.h"
-
 #include "Core.h"
+#include "rde/rde_string.h"
+#include "Utils/FileModificationListener.h"
 
 #include <Windows.h>
 
@@ -26,15 +26,15 @@ void FileModificationManager::update()
 	}
 }
 
-FileModificationListener* FileModificationManager::createModificationListener(const FileHandle& a_handle, std::function<void()> a_func)
+FileModificationListener* FileModificationManager::createModificationListener(const rde::string& a_filePath, std::function<void()> a_func)
 {
-	FileModificationListener* listener = new FileModificationListener(a_handle, a_func);
+	FileModificationListener* listener = new FileModificationListener(a_filePath, a_func);
 	s_listeners.push_back(listener);
 
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	BOOL result = GetFileAttributesEx(listener->m_filePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
-
 	assert(result);
+
 	listener->m_lastWriteTime.dwLowDateTime = data.ftLastWriteTime.dwLowDateTime;
 	listener->m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
 

@@ -3,6 +3,7 @@
 #include "Components/CameraComponent.h"
 #include "Components/TransformComponent.h"
 #include "Components/ModelComponent.h"
+#include "Components/SkyComponent.h"
 
 #include "entityx/Entity.h"
 #include "GLEngine.h"
@@ -11,10 +12,16 @@
 #include "Graphics/GL/GLMesh.h"
 #include "Graphics/GL/GLVars.h"
 #include "Systems/LightSystem.h"
+#include "Utils/FileModificationManager.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
+
+static const char* CLUSTERED_SHADING_PATH = "Shaders/clusteredshading.txt";
+static const char* MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
+static const char* MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
+static const char* SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
 
 static const unsigned int TILE_WIDTH_PX = 32;
 static const unsigned int TILE_HEIGHT_PX = 32;
@@ -25,6 +32,17 @@ RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSy
 {
 	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", TextureUnits_DFV_TEXTURE, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	m_dfvTexture.bind();
+
+	auto onShaderEdited = [&]()
+	{
+		print("shader edited \n");
+		if (m_activeCamera)
+			initializeShaderForCamera(*m_activeCamera);
+	};
+
+	FileModificationManager::createModificationListener(rde::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(rde::string(MODEL_FRAG_SHADER_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(rde::string(CLUSTERED_SHADING_PATH), onShaderEdited);
 }
 
 RenderSystem::~RenderSystem()
@@ -38,7 +56,6 @@ void RenderSystem::configure(entityx::EventManager& a_eventManager)
 
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 {
-	print("RenderSystem::initializeShaderForCamera\n");
 	m_clusteredShading.resize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getScreenWidth(), GLEngine::graphics->getScreenHeight(), camera);
 
 	rde::vector<rde::string> defines;
@@ -50,14 +67,14 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	defines.push_back(rde::string("LIGHT_GRID_TILE_WIDTH ").append(rde::to_string(TILE_WIDTH_PX)));
 	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
 
-	m_modelShader.initialize("Shaders/modelshader.vert", "Shaders/modelshader.frag", &defines);
+	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &defines);
 
 	m_modelShader.begin();
 	m_modelShader.setUniform1i("u_dfvTexture", TextureUnits_DFV_TEXTURE);
 	m_modelShader.setUniform1i("u_textureArray", TextureUnits_MODEL_TEXTURE_ARRAY);
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
-	m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
+	//m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
 
 	m_viewMatrixUniform.initialize(m_modelShader, "u_mv");
 	m_mvpMatrixUniform.initialize(m_modelShader, "u_mvp");
@@ -65,7 +82,7 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_transformUniform.initialize(m_modelShader, "u_transform");
 
 	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
-	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColors", GL_STREAM_DRAW);
+	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GL_STREAM_DRAW);
 
 	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid",TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
 	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
@@ -73,6 +90,17 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_lightIndiceTextureBuffer.bind();
 
 	m_modelShader.end();
+
+	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH);
+	m_skyboxShader.begin();
+	m_skyboxShader.setUniform1i("u_textureArray", TextureUnits_MODEL_TEXTURE_ARRAY);
+	
+	m_skyboxViewMatrixUniform.initialize(m_skyboxShader, "u_mv");
+	m_skyboxMvpMatrixUniform.initialize(m_skyboxShader, "u_mvp");
+	m_skyboxNormalMatrixUniform.initialize(m_skyboxShader, "u_normalMat");
+	m_skyboxTransformUniform.initialize(m_skyboxShader, "u_transform");
+	
+	m_skyboxShader.end();
 }
 
 void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a_cameraComponentAddedEvent)
@@ -84,18 +112,43 @@ void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& 
 void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
 {
 	GLEngine::graphics->clear(glm::vec4(0.4f, 0.7f, 1.0f, 1.0f));
+	//GLEngine::graphics->clear(glm::vec4(0.1f, 0.0f, 0.0f, 1.0f));
 
 	if (m_activeCamera)
 	{
+		const PerspectiveCamera& camera = *m_activeCamera;
+		const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
+
+		GLEngine::graphics->setDepthTest(false);
+
+		m_skyboxShader.begin();
+
+		m_skyboxMvpMatrixUniform.set(camera.getCombinedMatrix());
+		m_skyboxViewMatrixUniform.set(camera.getViewMatrix());
+		m_skyboxNormalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
+
+		entityx::ComponentHandle<TransformComponent> skyboxTrans;
+		entityx::ComponentHandle<SkyComponent> skybox;
+		for (entityx::Entity entity : a_entities.entities_with_components(skyboxTrans, skybox))
+		{
+			glm::mat4 trans = skyboxTrans->transform;
+			glm::vec3 pos = camera.getPosition();
+
+			if (skybox->centerOnCamera)
+				trans[3] = glm::vec4(pos, 1.0f);
+
+			m_skyboxTransformUniform.set(trans);
+			skybox->mesh->render(m_skyboxShader);
+		}
+		m_skyboxShader.end();
+
+		GLEngine::graphics->setDepthTest(true);
+
 		m_modelShader.begin();
 
-		const PerspectiveCamera& camera = *m_activeCamera;
-		
-		const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
 		m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
-
 		m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
-		m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorList());
+		m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorIntensityList());
 		m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
 		m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
 

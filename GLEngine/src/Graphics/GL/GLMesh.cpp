@@ -26,10 +26,6 @@ BEGIN_UNNAMED_NAMESPACE()
 
 enum { MAX_MATERIALS = 200 };
 
-#ifdef ANDROID
-#define _MAX_PATH 260
-#endif
-
 struct MeshEntry
 {
 	uint meshIndex;
@@ -147,29 +143,30 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, GLuint a_m
 	m_initialized = true;
 }
 
-void GLMesh::uploadMaterialUBO(const GLShader& a_shader)
+void GLMesh::initializeUBO(const GLShader& a_shader)
 {
 	m_stateBuffer.begin();
 	m_matUniformBuffer = new GLConstantBuffer();
 	m_matUniformBuffer->initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
 	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
+
 	m_stateBuffer.end();
 }
 
 void GLMesh::render(const GLShader& shader, bool a_renderOpague, bool a_renderTransparent, bool a_bindMaterials)
 {
+	assert(shader.isBegun());
+
 	if (!m_matUniformBuffer)
-	{
-		uploadMaterialUBO(shader);
-	}
+		initializeUBO(shader);
+
+	m_matUniformBuffer->bind();
 
 	m_stateBuffer.begin();
-	{
-		if (m_textureArray.isInitialized())
-			m_textureArray.bind(m_textureUnit);
-		
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
-	}
+	if (m_textureArray.isInitialized())
+		m_textureArray.bind(m_textureUnit);
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe rendering
+	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
+
 	m_stateBuffer.end();
 }

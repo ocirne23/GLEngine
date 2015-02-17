@@ -10,7 +10,7 @@ LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights), m_numUs
 {
 	m_viewspaceLightPositionRanges = new glm::vec4[m_maxLights];
 	m_lightPositionRanges = new glm::vec4[m_maxLights];
-	m_lightColors = new glm::vec4[m_maxLights];
+	m_lightColorIntensities = new glm::vec4[m_maxLights];
 
 	m_lightHandles = new ushort[m_maxLights];
 }
@@ -19,17 +19,22 @@ LightManager::~LightManager()
 {
 	delete[] m_viewspaceLightPositionRanges;
 	delete[] m_lightPositionRanges;
-	delete[] m_lightColors;
+	delete[] m_lightColorIntensities;
 	delete[] m_lightHandles;
 }
 
-LightHandle LightManager::createLight(const glm::vec3& a_pos, const glm::vec3& a_color, float a_radius)
+LightHandle LightManager::createLight()
+{
+	return createLight(glm::vec3(0), 0.0f, glm::vec3(0), 0.0f);
+}
+
+LightHandle LightManager::createLight(const glm::vec3& a_pos, float a_radius, const glm::vec3& a_color, float a_intensity)
 {
 	assert(m_numUsedLights < m_maxLights - 1);
 	m_lightHandles[m_numUsedLights] = m_numUsedLights;
 
 	m_lightPositionRanges[m_numUsedLights] = glm::vec4(a_pos, a_radius);
-	m_lightColors[m_numUsedLights] = glm::vec4(a_color, 0.0f);
+	m_lightColorIntensities[m_numUsedLights] = glm::vec4(glm::normalize(a_color), a_intensity);
 
 	return m_numUsedLights++;
 }
@@ -40,13 +45,20 @@ void LightManager::deleteLight(LightHandle a_handle)
 	--m_numUsedLights;
 	ushort last = m_lightHandles[m_numUsedLights];
 	rde::swap(m_lightPositionRanges[last], m_lightPositionRanges[m_lightHandles[a_handle]]);
-	rde::swap(m_lightColors[last], m_lightColors[m_lightHandles[a_handle]]);
+	rde::swap(m_lightColorIntensities[last], m_lightColorIntensities[m_lightHandles[a_handle]]);
 	m_lightHandles[a_handle] = m_maxLights;
 }
 
 void LightManager::deleteLights()
 {
 	m_numUsedLights = 0;
+}
+
+void LightManager::setLight(LightHandle a_light, const glm::vec3& a_pos, float a_radius, const glm::vec3& a_color, float a_intensity)
+{
+	ushort idx = m_lightHandles[a_light];
+	m_lightPositionRanges[idx] = glm::vec4(a_pos, a_radius);
+	m_lightColorIntensities[idx] = glm::vec4(a_color, a_intensity);
 }
 
 void LightManager::setLightPosition(LightHandle a_light, const glm::vec3& a_position)
@@ -64,10 +76,15 @@ void LightManager::setLightRange(LightHandle a_light, float a_range)
 
 void LightManager::setLightColor(LightHandle a_light, const glm::vec3& a_color)
 {
-	glm::vec4& col = m_lightColors[m_lightHandles[a_light]];
+	glm::vec4& col = m_lightColorIntensities[m_lightHandles[a_light]];
 	col.r = a_color.r;
 	col.g = a_color.g;
 	col.b = a_color.b;
+}
+
+void LightManager::setLightIntensity(LightHandle a_light, float a_intensity)
+{
+	m_lightColorIntensities[m_lightHandles[a_light]].a = a_intensity;
 }
 
 const glm::vec3& LightManager::getLightPosition(LightHandle a_light) const
@@ -82,7 +99,12 @@ float LightManager::getLightRange(LightHandle a_light) const
 
 const glm::vec3& LightManager::getLightColor(LightHandle a_light) const
 {
-	return (glm::vec3&) m_lightColors[m_lightHandles[a_light]];
+	return (glm::vec3&) m_lightColorIntensities[m_lightHandles[a_light]];
+}
+
+float LightManager::getLightIntensity(LightHandle a_light) const
+{
+	return m_lightColorIntensities[m_lightHandles[a_light]].a;
 }
 
 const glm::vec4* LightManager::updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera)

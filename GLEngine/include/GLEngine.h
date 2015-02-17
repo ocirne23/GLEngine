@@ -1,12 +1,5 @@
 #pragma once
 
-#ifdef ANDROID
-#define MAIN SDL_main
-extern "C" int SDL_main(int argc, char *argv[]);
-#else
-#define MAIN main
-#endif
-
 #include "Core.h"
 
 class Input;

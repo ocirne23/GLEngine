@@ -22,8 +22,7 @@ FileHandle::FileHandle(const char* a_filePath, FileMode a_fileMode) : m_rwops(0)
 
 void FileHandle::initialize(const char* a_filePath, FileMode a_fileMode)
 {
-#ifndef ANDROID
-	rde::string dir("assets/");
+	rde::string dir(ASSETS_DIR);
 	dir.append(a_filePath);
 	a_filePath = dir.c_str();
 
@@ -31,8 +30,6 @@ void FileHandle::initialize(const char* a_filePath, FileMode a_fileMode)
 	if (!_fullpath(fullPath, a_filePath, _MAX_PATH))
 		print("Could not construct full path %s \n", a_filePath);
 	m_filePath = fullPath;
-
-#endif
 
 	const char* fileModeStr;
 	switch (a_fileMode)

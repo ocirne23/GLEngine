@@ -9,12 +9,8 @@
 #define FORWARD_DECLARE(NAMESPACE, CLASS) BEGIN_NAMESPACE(NAMESPACE) class CLASS; END_NAMESPACE(NAMESPACE)
 #define SAFE_DELETE(X) if (X) {delete X; X = NULL; }
 #define SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = NULL; }
-
-#ifdef ANDROID
-#define OVERRIDE
-#else
+#define ASSETS_DIR "assets/"
 #define OVERRIDE override
-#endif
 
 typedef unsigned int uint;
 typedef unsigned short ushort;

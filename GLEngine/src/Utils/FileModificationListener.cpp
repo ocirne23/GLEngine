@@ -2,9 +2,9 @@
 
 #include "Utils/FileModificationListener.h"
 
-#include "Utils/FileHandle.h"
+#include "Core.h"
 
-FileModificationListener::FileModificationListener(const FileHandle& a_handle, std::function<void()> a_onFileModification) 
-	: m_filePath(a_handle.getFilePath()), m_onFileModification(a_onFileModification)
+FileModificationListener::FileModificationListener(const rde::string& a_filePath, std::function<void()> a_onFileModification) 
+	: m_filePath(rde::string(ASSETS_DIR).append(a_filePath)), m_onFileModification(a_onFileModification)
 {
 }

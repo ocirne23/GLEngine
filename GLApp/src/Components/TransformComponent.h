@@ -6,10 +6,12 @@
 struct TransformComponent
 {
 	TransformComponent() {}
+	TransformComponent(const glm::mat4& transform) : transform(transform) {}
 	TransformComponent(float x, float y, float z) 
 	{
 		setPosition(glm::vec3(x, y, z));
 	}
+
 	TransformComponent(const glm::vec3& pos)
 	{
 		setPosition(pos);
@@ -30,6 +32,11 @@ struct TransformComponent
 	void rotate(const glm::vec3& axis, float angle)
 	{
 		transform *= glm::rotate(angle, axis);
+	}
+
+	void scale(const glm::vec3& scale)
+	{
+		transform *= glm::scale(scale);
 	}
 
 	void setRotation(const glm::vec3& axis, float angle)

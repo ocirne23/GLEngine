@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 typedef unsigned int GLenum;
 typedef unsigned int GLbitfield;
 typedef unsigned int GLuint;
@@ -18,10 +20,6 @@ typedef double GLdouble;
 typedef double GLclampd;
 typedef void GLvoid;
 
-#ifndef ANDROID
-
-#include <stdint.h>
-
 typedef struct __GLsync* GLsync;
 typedef ptrdiff_t GLintptr;
 typedef ptrdiff_t GLsizeiptr;
@@ -38,9 +36,3 @@ typedef uint64_t GLuint64EXT;
 #endif
 typedef GLint64EXT  GLint64;
 typedef GLuint64EXT GLuint64;
-
-#else // ANDROID
-
-#include <GLES3/gl3platform.h>
-
-#endif

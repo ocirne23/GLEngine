@@ -21,6 +21,12 @@
     <Filter Include="Source Files\Utils">
       <UniqueIdentifier>{01fdfdca-e711-4b18-b4b5-2b560ca8acca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Generators">
+      <UniqueIdentifier>{49d26323-3a6f-496d-9fd0-af2af16f2570}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Generators">
+      <UniqueIdentifier>{76038aca-8430-45aa-8d39-6097958a68f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -74,6 +80,9 @@
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\EResourceType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ResourceGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

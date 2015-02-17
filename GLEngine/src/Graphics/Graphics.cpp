@@ -13,9 +13,7 @@
 
 #include <assert.h>
 
-#ifndef ANDROID
 #include "Graphics/tryEnableARBDebugOutput.h"
-#endif
 
 bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
 {
@@ -36,7 +34,6 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 
 	GLVars::init(m_window);
 
-#ifndef ANDROID
 	glewExperimental = GL_TRUE;
 	GLenum res = glewInit();
 	if (res != GLEW_OK)
@@ -45,8 +42,8 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 		return false;
 	}
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
+	
 	tryEnableARBDebugOutput();
-#endif // ANDROID
 
 	SDL_GL_SetSwapInterval(m_vsyncEnabled);
 
@@ -55,8 +52,8 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
+	setDepthTest(true);
 
 	resizeScreen(m_screenWidth, m_screenHeight);
 
@@ -85,6 +82,14 @@ void Graphics::setVsync(bool a_enabled)
 {
 	SDL_GL_SetSwapInterval(a_enabled);
 	m_vsyncEnabled = a_enabled;
+}
+
+void Graphics::setDepthTest(bool a_enabled)
+{
+	if (a_enabled)
+		glEnable(GL_DEPTH_TEST);
+	else
+		glDisable(GL_DEPTH_TEST);
 }
 
 void Graphics::registerWindowEventListener(WindowEventListener* a_listener)

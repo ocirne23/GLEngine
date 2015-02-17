@@ -2,7 +2,7 @@
 
 #include "Model/ScreenManager.h"
 
-int MAIN(int a_argc, char* a_argv[])
+int main(int a_argc, char* a_argv[])
 {
 	GLEngine::initialize();
 	{

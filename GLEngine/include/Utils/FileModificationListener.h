@@ -4,8 +4,6 @@
 
 #include <functional>
 
-class FileHandle;
-
 class FileModificationListener
 {
 public:
@@ -14,7 +12,7 @@ public:
 
 private:
 
-	FileModificationListener(const FileHandle& handle, std::function<void()> onFileModification);
+	FileModificationListener(const rde::string& filePath, std::function<void()> onFileModification);
 	~FileModificationListener() {};
 
 private:

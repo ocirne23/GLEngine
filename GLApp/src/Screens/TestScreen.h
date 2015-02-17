@@ -25,6 +25,7 @@ public:
 private:
 
 	entityx::EntityX m_entityx;
-	GLMesh* m_mesh;
-	PerspectiveCamera* m_camera;
+	GLMesh* m_building			= NULL;
+	GLMesh* m_skybox			= NULL;
+	PerspectiveCamera* m_camera	= NULL;
 };

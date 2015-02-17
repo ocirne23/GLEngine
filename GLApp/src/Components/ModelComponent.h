@@ -4,8 +4,8 @@ class GLMesh;
 
 struct ModelComponent
 {
-	ModelComponent() : mesh(0) {}
+	ModelComponent() {}
 	ModelComponent(GLMesh* mesh) : mesh(mesh) {}
 
-	GLMesh* mesh;
+	GLMesh* mesh = NULL;
 };

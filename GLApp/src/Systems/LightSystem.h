@@ -5,12 +5,10 @@
 #include "entityx/System.h"
 #include "Graphics/LightManager.h"
 
-#include "rde/vector.h"
-
 #include <glm/glm.hpp>
 
 struct CameraComponent;
-struct PointLightComponent;
+class PointLightComponent;
 
 class LightSystem : public entityx::System<LightSystem>, public entityx::Receiver<LightSystem>
 {
@@ -27,15 +25,14 @@ public:
 	void receive(const entityx::ComponentAddedEvent<PointLightComponent>& pointLightComponentAddedEvent);
 	void receive(const entityx::ComponentRemovedEvent<PointLightComponent>& pointLightComponentRemovedEvent);
 
+	LightManager& getLightManager();
 	uint getNumLights();
 	const glm::vec4* getViewspaceLightPositionRangeList();
-	const glm::vec4* getLightColorList();
+	const glm::vec4* getLightColorIntensityList();
 
 private:
 
 	LightManager m_lightManager;
-
-	rde::vector<entityx::Entity> m_addedPointLightEntities;
 
 	const PerspectiveCamera* m_activeCamera				= NULL;
 	const glm::vec4* m_viewspaceLightPositionRangeList	= NULL;

@@ -15,6 +15,5 @@ public:
 	virtual void hide() = 0;
 
 protected:
-	ScreenManager* m_screenManager; // Set by ScreenManager
-private:
+	ScreenManager* m_screenManager = NULL; // Set by ScreenManager
 };

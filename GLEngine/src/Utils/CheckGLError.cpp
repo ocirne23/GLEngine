@@ -33,16 +33,9 @@ bool checkGLError(const char *a_file, int a_line)
 	{
 		error = true;
 		const GLubyte* str;
-#ifdef ANDROID
-		str = (const GLubyte*) "No error string available on Android yet.";
-#else
 		str = gluErrorString(glErr);
-
 		if (!str)
-		{
 			str = reinterpret_cast<const GLubyte *>("No Error message available.");
-		}
-#endif
 
 		printf("GL Error in file: %s at line %i Error %i: %s \n", a_file, a_line, glErr, str);
 	}

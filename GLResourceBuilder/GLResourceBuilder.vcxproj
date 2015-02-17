@@ -163,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\EResourceType.h" />
+    <ClInclude Include="src\ResourceGenerator.h" />
     <ClInclude Include="src\Processors\ByteImageProcessor.h" />
     <ClInclude Include="src\Processors\FloatImageProcessor.h" />
     <ClInclude Include="src\Processors\ModelProcessor.h" />

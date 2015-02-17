@@ -202,6 +202,9 @@ namespace
 				printf("FAILED TO LOAD IMAGE: %s \n", tar.texture.filePath.c_str());
 				continue;
 			}
+			assert(tar.texture.width == tar.region.width);
+			assert(tar.texture.height == tar.region.height);
+			assert(atlas->m_numComponents == tar.texture.numComp);
 			atlas->setRegion(tar.region.x, tar.region.y, tar.region.width, tar.region.height, data, atlas->m_numComponents);
 		}
 	}
@@ -216,6 +219,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		| aiPostProcessSteps::aiProcess_Triangulate
 		| aiPostProcessSteps::aiProcess_CalcTangentSpace
 		| aiPostProcessSteps::aiProcess_GenNormals
+		| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
 		| aiPostProcessSteps::aiProcess_FlipUVs; // Flip uv's because OpenGL
 
 	const aiScene* scene = aiImportFile(a_inResourcePath, flags);
@@ -268,8 +272,19 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	}
 
 	std::vector<TextureAtlas*> atlases;
-	while (!containTexturesInAtlases(textureAtlasRegions, atlases))
-		increaseAtlasesSize(atlases);
+	if (textureAtlasRegions.size() == 1)
+	{
+		TextureAtlasRegion& tar = textureAtlasRegions.back();
+		atlases.push_back(new TextureAtlas(tar.texture.width, tar.texture.height, tar.texture.numComp, ATLAS_NUM_MIPS));
+		tar.atlasIdx = 0;
+		tar.region = atlases.back()->getRegion(tar.texture.width, tar.texture.height);
+	}
+	else
+	{
+		while (!containTexturesInAtlases(textureAtlasRegions, atlases))
+			increaseAtlasesSize(atlases);
+	}
+
 	fillAtlasTextures(textureAtlasRegions, atlases);
 
 	std::vector<MaterialProperty> matProperties(scene->mNumMaterials);

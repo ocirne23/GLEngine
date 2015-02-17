@@ -51,5 +51,7 @@ void GLConstantBuffer::bind()
 {
 	assert(m_shader->isBegun());
 	if (m_initialized)
-		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
+	{
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
+	}
 }

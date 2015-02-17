@@ -1,9 +1,10 @@
 #pragma once
 
-#include <rde\vector.h>
+#include "rde/rde_string.h"
+#include "rde/vector.h"
+
 #include <functional>
 
-class FileHandle;
 class FileModificationListener;
 
 class FileModificationManager
@@ -12,7 +13,7 @@ public:
 	friend class FileModificationListener;
 	
 	static void update();
-	static FileModificationListener* createModificationListener(const FileHandle& handle, std::function<void()> func);
+	static FileModificationListener* createModificationListener(const rde::string& filePath, std::function<void()> func);
 	static void removeModificationListener(FileModificationListener* listener);
 
 private:

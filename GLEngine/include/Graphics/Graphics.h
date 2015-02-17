@@ -27,6 +27,7 @@ public:
 
 	void setWindowTitle(const char* title);
 	void setVsync(bool enabled);
+	void setDepthTest(bool enabled);
 
 	SDL_Window* getWindow()			{ return m_window; }
 	bool hasWindow() const			{ return m_window != NULL; }
