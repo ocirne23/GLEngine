@@ -23,6 +23,7 @@
 #include "Systems/RenderSystem.h"
 
 #include "Utils/FileModificationManager.h"
+#include "Utils/Listener.h"
 
 BEGIN_UNNAMED_NAMESPACE()
 
@@ -32,7 +33,7 @@ END_UNNAMED_NAMESPACE()
 
 TestScreen::TestScreen()
 {
-	GLEngine::input->registerKeyListener(this);
+	REGISTER_LISTENER(GLEngine::input, &Input::keyDownListenerRegister, this, &TestScreen::keyDown);
 
 	m_entityx.systems.add<FPSControlSystem>();
 	m_entityx.systems.add<CameraSystem>();
@@ -42,6 +43,8 @@ TestScreen::TestScreen()
 
 	m_camera = new PerspectiveCamera();
 	m_camera->initialize((float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
+	
+	//m_camera->initialize(600.0f, 600.0f, 90.0f, 0.5f, 1500.0f);
 
 	m_building = new GLMesh();
 	m_building->loadFromFile(MODEL_FILE_PATH, RenderSystem::TextureUnits_MODEL_TEXTURE_ARRAY, RenderSystem::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
@@ -70,7 +73,8 @@ TestScreen::~TestScreen()
 {
 	SAFE_DELETE(m_building);
 	SAFE_DELETE(m_camera);
-	GLEngine::input->unregisterKeyListener(this);
+
+	UNREGISTER_LISTENER(GLEngine::input, &Input::keyDownListenerUnregister, this);
 }
 
 bool TestScreen::keyDown(Key a_key)
@@ -118,6 +122,5 @@ void TestScreen::render(float a_deltaSec)
 	FileModificationManager::update();
 }
 
-void TestScreen::show(uint a_width, uint a_height) {}
-void TestScreen::resize(uint a_width, uint a_height) {}
+void TestScreen::show() {}
 void TestScreen::hide() {}

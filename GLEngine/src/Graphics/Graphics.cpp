@@ -1,6 +1,5 @@
 #include "Graphics/Graphics.h"
 
-#include "Graphics/WindowEventListener.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLVars.h"
@@ -92,16 +91,6 @@ void Graphics::setDepthTest(bool a_enabled)
 		glDisable(GL_DEPTH_TEST);
 }
 
-void Graphics::registerWindowEventListener(WindowEventListener* a_listener)
-{
-	m_windowEventListeners.push_back(a_listener);
-}
-
-void Graphics::unregisterWindowEventListener(WindowEventListener* a_listener)
-{
-	m_windowEventListeners.erase(m_windowEventListeners.find(a_listener));
-}
-
 void Graphics::resizeScreen(uint a_screenWidth, uint a_screenHeight)
 {
 	m_screenWidth = a_screenWidth;
@@ -109,14 +98,14 @@ void Graphics::resizeScreen(uint a_screenWidth, uint a_screenHeight)
 
 	glViewport(0, 0, a_screenWidth, a_screenHeight);
 
-	for (WindowEventListener* listener : m_windowEventListeners)
-		listener->resize(a_screenWidth, a_screenHeight);
+	for (auto& listener : m_windowResizeListeners)
+		listener.second(a_screenWidth, a_screenHeight);
 }
 
 void Graphics::windowQuit()
 {
-	for (WindowEventListener* listener : m_windowEventListeners)
-		listener->quit();
+	for (auto& listener : m_windowQuitListeners)
+		listener.second();
 }
 
 void Graphics::destroyWindow()
@@ -132,4 +121,24 @@ void Graphics::destroyWindow()
 void Graphics::setWindowTitle(const char* a_title)
 {
 	SDL_SetWindowTitle(m_window, a_title);
+}
+
+void Graphics::registerWindowResizeListener(void* ownerPtr, std::function<void(float, float)> func)
+{
+	m_windowResizeListeners.insert({ ownerPtr, func });
+}
+
+void Graphics::unregisterWindowResizeListener(void* ownerPtr)
+{
+	m_windowResizeListeners.erase(ownerPtr);
+}
+
+void Graphics::registerWindowQuitListener(void* ownerPtr, std::function<void()> func)
+{
+	m_windowQuitListeners.insert({ ownerPtr, func });
+}
+
+void Graphics::unregisterWindowQuitListener(void* ownerPtr)
+{
+	m_windowQuitListeners.erase(ownerPtr);
 }

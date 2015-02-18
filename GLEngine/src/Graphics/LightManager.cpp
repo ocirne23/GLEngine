@@ -17,10 +17,11 @@ LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights), m_numUs
 
 LightManager::~LightManager()
 {
-	delete[] m_viewspaceLightPositionRanges;
-	delete[] m_lightPositionRanges;
-	delete[] m_lightColorIntensities;
-	delete[] m_lightHandles;
+	SAFE_DELETE_ARRAY(m_viewspaceLightPositionRanges);
+	SAFE_DELETE_ARRAY(m_viewspaceLightPositionRanges);
+	SAFE_DELETE_ARRAY(m_lightPositionRanges);
+	SAFE_DELETE_ARRAY(m_lightColorIntensities);
+	SAFE_DELETE_ARRAY(m_lightHandles);
 }
 
 LightHandle LightManager::createLight()

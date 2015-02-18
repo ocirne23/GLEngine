@@ -34,5 +34,5 @@ int main()
 }
 
 #else // !_WIN64
-You shall not pass!
+#error 64 bit required
 #endif //_WIN64

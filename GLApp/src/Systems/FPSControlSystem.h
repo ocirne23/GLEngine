@@ -3,16 +3,15 @@
 #include "Core.h"
 
 #include "entityx/System.h"
-#include "Input/MouseListener.h"
 
-class FPSControlSystem : public entityx::System<FPSControlSystem>, public MouseListener
+class FPSControlSystem : public entityx::System<FPSControlSystem>
 {
 public:
 	FPSControlSystem();
 	~FPSControlSystem();
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
-	virtual bool mouseMoved(int xPos, int yPos, int xMove, int yMove) OVERRIDE;
+	bool mouseMoved(uint xPos, uint yPos, int xMove, int yMove);
 
 private:
 

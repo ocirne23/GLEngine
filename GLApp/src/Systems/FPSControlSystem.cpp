@@ -22,12 +22,12 @@ END_UNNAMED_NAMESPACE()
 
 FPSControlSystem::FPSControlSystem()
 {
-	GLEngine::input->registerMouseListener(this);
+	REGISTER_LISTENER(GLEngine::input, &Input::mouseMovedListenerRegister, this, &FPSControlSystem::mouseMoved);
 }
 
 FPSControlSystem::~FPSControlSystem()
 {
-	GLEngine::input->unregisterMouseListener(this);
+	UNREGISTER_LISTENER(GLEngine::input, &Input::mouseMovedListenerUnregister, this);
 }
 
 void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
@@ -79,7 +79,7 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 	m_yMoveAmount = 0;
 }
 
-bool FPSControlSystem::mouseMoved(int xPos, int yPos, int xMove, int yMove)
+bool FPSControlSystem::mouseMoved(uint xPos, uint yPos, int xMove, int yMove)
 {
 	if (GLEngine::input->isMousePressed(MouseButton_LEFT))
 	{

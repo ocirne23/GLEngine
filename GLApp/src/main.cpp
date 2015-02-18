@@ -14,7 +14,7 @@ int main(int a_argc, char* a_argv[])
 		uint startTime = GLEngine::getTimeMs();
 		uint fpsCounter = 0;
 		float fpsTimeAccumulator = 0.0f;
-		while (!screenManager.hasQuitWindow())
+		while (!screenManager.hasQuit())
 		{
 			GLEngine::doEngineTick();
 

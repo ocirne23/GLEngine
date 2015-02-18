@@ -1,39 +1,35 @@
 #pragma once
 
-#include "rde/vector.h"
-
-class KeyListener;
-class MouseListener;
-class WindowEventListener;
+#include "Core.h"
 
 #include "Key.h"
 #include "MouseButton.h"
 
+#include "Utils/Listener.h"
+
 class Input
 {
 public:
-	Input();
-	~Input();
+	friend class GLEngine;
 
-	void registerKeyListener(KeyListener* listener);
-	void registerMouseListener(MouseListener* listener);
-	void unregisterKeyListener(KeyListener* listener);
-	void unregisterMouseListener(MouseListener* listener);
-	void keyDown(Key key);
-	void keyUp(Key key);
 	bool isKeyPressed(Key key);
 	bool isMousePressed(MouseButton button);
-	void mouseMoved(int xPos, int yPos, int deltaX, int deltaY);
-	void mouseDown(MouseButton button, int xPos, int yPos);
-	void mouseUp(MouseButton button, int xPos, int yPos);
-	void mouseScrolled(int amount);
 	void setMouseCaptured(bool captured);
-	void windowResize(int width, int height);
-	void windowQuit();
+
+	DECLARE_LISTENER_H(keyDown, bool, Key);
+	DECLARE_LISTENER_H(keyUp, bool, Key);
+	DECLARE_LISTENER_H(mouseDown, bool, MouseButton, int, int);
+	DECLARE_LISTENER_H(mouseUp, bool, MouseButton, int, int);
+	DECLARE_LISTENER_H(mouseMoved, bool, uint, uint, int, int)
+	DECLARE_LISTENER_H(mouseScrolled, bool, int);
 
 private:
 
-	rde::vector<KeyListener*> m_keyListeners;
-	rde::vector<MouseListener*> m_mouseListeners;
-	rde::vector<WindowEventListener*> m_windowEventListeners;
+	void keyDown(Key key);
+	void keyUp(Key key);
+
+	void mouseDown(MouseButton button, int xPos, int yPos);
+	void mouseUp(MouseButton button, int xPos, int yPos);
+	void mouseMoved(uint xPos, uint yPos, int deltaX, int deltaY);
+	void mouseScrolled(int amount);
 };

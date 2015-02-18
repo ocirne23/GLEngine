@@ -178,6 +178,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>Core.h;</ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -216,6 +217,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>Core.h;</ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -250,6 +252,7 @@
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <SDLCheck>true</SDLCheck>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>

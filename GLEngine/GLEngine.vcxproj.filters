@@ -240,13 +240,7 @@
     <ClInclude Include="include\Input\Key.h">
       <Filter>Header Files\Input</Filter>
     </ClInclude>
-    <ClInclude Include="include\Input\KeyListener.h">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
     <ClInclude Include="include\Input\MouseButton.h">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Input\MouseListener.h">
       <Filter>Header Files\Input</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\Graphics.h">
@@ -257,9 +251,6 @@
     </ClInclude>
     <ClInclude Include="include\Utils\VecForward.h">
       <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\WindowEventListener.h">
-      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Graphics\Frustum.h">
       <Filter>Header Files\Graphics</Filter>
@@ -375,6 +366,7 @@
     <ClInclude Include="include\entityx\quick.h" />
     <ClInclude Include="include\entityx\System.h" />
     <ClInclude Include="include\entityx\config.h" />
+    <ClInclude Include="include\Utils\Listener.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

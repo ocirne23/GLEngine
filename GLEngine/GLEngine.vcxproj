@@ -98,13 +98,10 @@
     <ClInclude Include="include\Graphics\Graphics.h" />
     <ClInclude Include="include\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Graphics\Pixmap.h" />
-    <ClInclude Include="include\Graphics\WindowEventListener.h" />
     <ClInclude Include="include\Graphics\WindowFlags.h" />
     <ClInclude Include="include\Input\Input.h" />
     <ClInclude Include="include\Input\Key.h" />
-    <ClInclude Include="include\Input\KeyListener.h" />
     <ClInclude Include="include\Input\MouseButton.h" />
-    <ClInclude Include="include\Input\MouseListener.h" />
     <ClInclude Include="include\rde\algorithm.h" />
     <ClInclude Include="include\rde\alignment.h" />
     <ClInclude Include="include\rde\allocator.h" />
@@ -155,6 +152,7 @@
     <ClInclude Include="include\Utils\FileModificationManager.h" />
     <ClInclude Include="include\Utils\FPSCameraController.h" />
     <ClInclude Include="include\Utils\getGLTextureFormat.h" />
+    <ClInclude Include="include\Utils\Listener.h" />
     <ClInclude Include="include\Utils\MatForward.h" />
     <ClInclude Include="include\Utils\EResourceType.h" />
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
@@ -271,6 +269,7 @@
       <AdditionalOptions>
       </AdditionalOptions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -315,6 +314,7 @@
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

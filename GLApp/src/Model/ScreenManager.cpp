@@ -4,23 +4,20 @@
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/WindowEventListener.h"
 
 ScreenManager::ScreenManager()
 {
 	memset(m_screens, 0, sizeof(m_screens));
 
-	m_width = GLEngine::graphics->getScreenWidth();
-	m_height = GLEngine::graphics->getScreenHeight();
-	GLEngine::graphics->registerWindowEventListener(this);
+	GLEngine::graphics->registerWindowQuitListener(this, [&]() { m_hasQuit = true; });
 }
 
 ScreenManager::~ScreenManager()
 {
-	GLEngine::graphics->unregisterWindowEventListener(this);
+	GLEngine::graphics->unregisterWindowQuitListener(this);
 
-	if (m_currentScreen)
-		m_currentScreen->hide();
+	for (IScreen* screen : m_screens)
+		SAFE_DELETE(screen);
 }
 
 void ScreenManager::render(float a_deltaSec)
@@ -52,19 +49,6 @@ void ScreenManager::swapScreen(IScreen* a_screen)
 {
 	if (m_currentScreen)
 		m_currentScreen->hide();
-	a_screen->show(m_width, m_height);
+	a_screen->show();
 	m_currentScreen = a_screen;
-}
-
-void ScreenManager::resize(uint a_width, uint a_height)
-{
-	m_width = a_width;
-	m_height = a_height;
-	if (m_currentScreen)
-		m_currentScreen->resize(a_width, a_height);
-}
-
-void ScreenManager::quit()
-{
-	hasQuit = true;
 }
