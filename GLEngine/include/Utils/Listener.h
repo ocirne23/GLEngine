@@ -14,22 +14,18 @@ static std::function<ReturnType(Args...)> bindFunction(ReturnType(Object::*MemPt
 
 END_NAMESPACE(ListenerUtils)
 
-#define DECLARE_LISTENER_H(NAME, RETTYPE, ...) \
+#define DECLARE_LISTENER(NAME, RETTYPE, ...) \
 	public:	\
-		void NAME##ListenerRegister(void* ownerPtr, std::function<RETTYPE(__VA_ARGS__)> func); \
-		void NAME##ListenerUnregister(void* ownerPtr); \
+		void NAME##ListenerRegister(void* ownerPtr, std::function<RETTYPE(__VA_ARGS__)> func) \
+		{ \
+			m_##NAME##Listeners.insert({ ownerPtr, func }); \
+		} \
+		void NAME##ListenerUnregister(void* ownerPtr) \
+		{ \
+			m_##NAME##Listeners.erase(ownerPtr); \
+		} \
 	private: \
 		rde::hash_map<void*, std::function<RETTYPE(__VA_ARGS__)>> m_##NAME##Listeners;
-
-#define DECLARE_LISTENER_CPP(CLASSNAME, NAME, RETTYPE, ...) \
-	void CLASSNAME::##NAME##ListenerRegister(void* a_ownerPtr, std::function<RETTYPE(__VA_ARGS__)> a_func) \
-	{ \
-		m_##NAME##Listeners.insert({ a_ownerPtr, a_func }); \
-	} \
-	void CLASSNAME::##NAME##ListenerUnregister(void* a_ownerPtr) \
-	{ \
-		m_##NAME##Listeners.erase(a_ownerPtr); \
-	}
 
 #define REGISTER_LISTENER(LISTENEE, LISTENEEFUNC, LISTENER, LISTENERFUNC) \
 	{ \

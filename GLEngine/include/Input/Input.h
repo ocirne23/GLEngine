@@ -16,12 +16,12 @@ public:
 	bool isMousePressed(MouseButton button);
 	void setMouseCaptured(bool captured);
 
-	DECLARE_LISTENER_H(keyDown, bool, Key);
-	DECLARE_LISTENER_H(keyUp, bool, Key);
-	DECLARE_LISTENER_H(mouseDown, bool, MouseButton, int, int);
-	DECLARE_LISTENER_H(mouseUp, bool, MouseButton, int, int);
-	DECLARE_LISTENER_H(mouseMoved, bool, uint, uint, int, int)
-	DECLARE_LISTENER_H(mouseScrolled, bool, int);
+	DECLARE_LISTENER(keyDown, bool, Key);
+	DECLARE_LISTENER(keyUp, bool, Key);
+	DECLARE_LISTENER(mouseDown, bool, MouseButton, int, int);
+	DECLARE_LISTENER(mouseUp, bool, MouseButton, int, int);
+	DECLARE_LISTENER(mouseMoved, bool, uint, uint, int, int)
+	DECLARE_LISTENER(mouseScrolled, bool, int);
 
 private:
 

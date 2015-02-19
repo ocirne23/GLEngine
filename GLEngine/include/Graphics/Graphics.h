@@ -34,8 +34,8 @@ public:
 	uint getScreenHeight() const		{ return m_screenHeight; }
 	bool getVsyncEnabled() const		{ return m_vsyncEnabled; }
 
-	DECLARE_LISTENER_H(windowResize, void, uint, uint)
-	DECLARE_LISTENER_H(windowQuit, void)
+	DECLARE_LISTENER(windowResize, void, uint, uint)
+	DECLARE_LISTENER(windowQuit, void)
 
 private:
 	Graphics() {}

@@ -47,9 +47,9 @@ RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSy
 
 RenderSystem::~RenderSystem()
 {
-	FileModificationManager::removeModificationListener(this);
-	FileModificationManager::removeModificationListener(this);
-	FileModificationManager::removeModificationListener(this);
+	FileModificationManager::removeModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH));
+	FileModificationManager::removeModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH));
+	FileModificationManager::removeModificationListener(this, rde::string(CLUSTERED_SHADING_PATH));
 }
 
 void RenderSystem::configure(entityx::EventManager& a_eventManager)

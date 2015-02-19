@@ -6,7 +6,7 @@
 
 #include <Windows.h>
 
-rde::hash_map<void*, FileModificationListener*> FileModificationManager::s_listeners;
+rde::hash_map<rde::string, FileModificationListener*> FileModificationManager::s_listeners;
 
 void FileModificationManager::update()
 {
@@ -29,7 +29,8 @@ void FileModificationManager::update()
 void FileModificationManager::createModificationListener(void* a_ownerPtr, const rde::string& a_filePath, std::function<void()> a_func)
 {
 	FileModificationListener* listener = new FileModificationListener(a_filePath, a_func);
-	s_listeners.insert({ a_ownerPtr, listener });
+	rde::string key = rde::string(a_filePath).append(":").append(rde::to_string((uint64)a_ownerPtr));
+	s_listeners.insert({ key , listener });
 
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	BOOL result = GetFileAttributesEx(listener->m_filePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
@@ -39,9 +40,11 @@ void FileModificationManager::createModificationListener(void* a_ownerPtr, const
 	listener->m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
 }
 
-void FileModificationManager::removeModificationListener(void* a_ownerPtr)
+void FileModificationManager::removeModificationListener(void* a_ownerPtr, const rde::string& a_filePath)
 {
-	auto it = s_listeners.find(a_ownerPtr);
+	rde::string key = rde::string(a_filePath).append(":").append(rde::to_string((uint64) a_ownerPtr));
+
+	auto it = s_listeners.find(key);
 	assert(it != s_listeners.end());
 	s_listeners.erase(it);
 	delete it->second;

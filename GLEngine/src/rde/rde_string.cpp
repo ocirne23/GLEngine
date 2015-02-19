@@ -23,4 +23,10 @@ namespace rde
 		sprintf_s(buf, "%f", f);
 		return rde::string(buf);
 	}
+	rde::string to_string(uint64 i)
+	{
+		char buf[40];
+		sprintf_s(buf, "%i64u", i);
+		return rde::string(buf);
+	}
 }

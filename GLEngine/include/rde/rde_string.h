@@ -1,6 +1,7 @@
 #ifndef RDESTL_STRING_H
 #define RDESTL_STRING_H
 
+#include "Core.h"
 #include "basic_string.h"
 #include "hash.h"
 
@@ -45,6 +46,7 @@ string operator+(const string::value_type* lhs, const string& rhs)
 string to_string(int i);
 string to_string(unsigned int u);
 string to_string(float f);
+string to_string(uint64 i);
 
 }
 

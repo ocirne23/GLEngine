@@ -122,6 +122,3 @@ void Graphics::setWindowTitle(const char* a_title)
 {
 	SDL_SetWindowTitle(m_window, a_title);
 }
-
-DECLARE_LISTENER_CPP(Graphics, windowResize, void, uint, uint)
-DECLARE_LISTENER_CPP(Graphics, windowQuit, void)
