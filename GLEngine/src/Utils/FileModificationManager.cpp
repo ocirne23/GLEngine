@@ -6,30 +6,30 @@
 
 #include <Windows.h>
 
-rde::vector<FileModificationListener*> FileModificationManager::s_listeners;
+rde::hash_map<void*, FileModificationListener*> FileModificationManager::s_listeners;
 
 void FileModificationManager::update()
 {
-	for (FileModificationListener* listener : s_listeners)
+	for (auto& listener : s_listeners)
 	{
 		WIN32_FILE_ATTRIBUTE_DATA data;
-		BOOL result = GetFileAttributesEx(listener->m_filePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
+		BOOL result = GetFileAttributesEx(listener.second->m_filePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
 		assert(result);
 
-		if (listener->m_lastWriteTime.dwLowDateTime != data.ftLastWriteTime.dwLowDateTime ||
-			listener->m_lastWriteTime.dwHighDateTime != data.ftLastWriteTime.dwHighDateTime)
+		if (listener.second->m_lastWriteTime.dwLowDateTime != data.ftLastWriteTime.dwLowDateTime ||
+			listener.second->m_lastWriteTime.dwHighDateTime != data.ftLastWriteTime.dwHighDateTime)
 		{
-			listener->m_onFileModification();
-			listener->m_lastWriteTime.dwLowDateTime = data.ftLastWriteTime.dwLowDateTime;
-			listener->m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
+			listener.second->m_onFileModification();
+			listener.second->m_lastWriteTime.dwLowDateTime = data.ftLastWriteTime.dwLowDateTime;
+			listener.second->m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
 		}
 	}
 }
 
-FileModificationListener* FileModificationManager::createModificationListener(const rde::string& a_filePath, std::function<void()> a_func)
+void FileModificationManager::createModificationListener(void* a_ownerPtr, const rde::string& a_filePath, std::function<void()> a_func)
 {
 	FileModificationListener* listener = new FileModificationListener(a_filePath, a_func);
-	s_listeners.push_back(listener);
+	s_listeners.insert({ a_ownerPtr, listener });
 
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	BOOL result = GetFileAttributesEx(listener->m_filePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
@@ -37,14 +37,12 @@ FileModificationListener* FileModificationManager::createModificationListener(co
 
 	listener->m_lastWriteTime.dwLowDateTime = data.ftLastWriteTime.dwLowDateTime;
 	listener->m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
-
-	return listener;
 }
 
-void FileModificationManager::removeModificationListener(FileModificationListener* a_listener)
+void FileModificationManager::removeModificationListener(void* a_ownerPtr)
 {
-	auto it = s_listeners.find(a_listener);
+	auto it = s_listeners.find(a_ownerPtr);
 	assert(it != s_listeners.end());
 	s_listeners.erase(it);
-	delete a_listener;
+	delete it->second;
 }

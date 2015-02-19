@@ -15,8 +15,8 @@ class LightSystem : public entityx::System<LightSystem>, public entityx::Receive
 public:
 	enum { MAX_LIGHTS = 1024 };
 
-	LightSystem();
-	~LightSystem();
+	LightSystem() : m_lightManager(MAX_LIGHTS) {};
+	~LightSystem() {}
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
 	void configure(entityx::EventManager& eventManager);

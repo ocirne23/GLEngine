@@ -6,18 +6,9 @@
 
 #include "GLEngine.h"
 
-LightSystem::LightSystem() : m_lightManager(MAX_LIGHTS)
-{
-}
-
-LightSystem::~LightSystem()
-{
-}
-
 void LightSystem::configure(entityx::EventManager& a_eventManager)
 {
 	a_eventManager.subscribe<entityx::ComponentAddedEvent<CameraComponent>>(*this);
-
 	a_eventManager.subscribe<entityx::ComponentAddedEvent<PointLightComponent>>(*this);
 	a_eventManager.subscribe<entityx::ComponentRemovedEvent<PointLightComponent>>(*this);
 }

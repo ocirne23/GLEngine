@@ -63,9 +63,9 @@ bool Input::isMousePressed(MouseButton a_button)
 	return (SDL_BUTTON(a_button) & SDL_GetMouseState(NULL, NULL)) != 0;
 }
 
-DECLARE_LISTENER_CPP(keyDown, bool, Key);
-DECLARE_LISTENER_CPP(keyUp, bool, Key);
-DECLARE_LISTENER_CPP(mouseDown, bool, MouseButton, int, int);
-DECLARE_LISTENER_CPP(mouseUp, bool, MouseButton, int, int);
-DECLARE_LISTENER_CPP(mouseMoved, bool, uint, uint, int, int)
-DECLARE_LISTENER_CPP(mouseScrolled, bool, int);
+DECLARE_LISTENER_CPP(Input, keyDown, bool, Key);
+DECLARE_LISTENER_CPP(Input, keyUp, bool, Key);
+DECLARE_LISTENER_CPP(Input, mouseDown, bool, MouseButton, int, int);
+DECLARE_LISTENER_CPP(Input, mouseUp, bool, MouseButton, int, int);
+DECLARE_LISTENER_CPP(Input, mouseMoved, bool, uint, uint, int, int)
+DECLARE_LISTENER_CPP(Input, mouseScrolled, bool, int);

@@ -54,7 +54,7 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 	glEnable(GL_MULTISAMPLE);
 	setDepthTest(true);
 
-	resizeScreen(m_screenWidth, m_screenHeight);
+	windowResize(m_screenWidth, m_screenHeight);
 
 	return true;
 }
@@ -91,7 +91,7 @@ void Graphics::setDepthTest(bool a_enabled)
 		glDisable(GL_DEPTH_TEST);
 }
 
-void Graphics::resizeScreen(uint a_screenWidth, uint a_screenHeight)
+void Graphics::windowResize(uint a_screenWidth, uint a_screenHeight)
 {
 	m_screenWidth = a_screenWidth;
 	m_screenHeight = a_screenHeight;
@@ -123,22 +123,5 @@ void Graphics::setWindowTitle(const char* a_title)
 	SDL_SetWindowTitle(m_window, a_title);
 }
 
-void Graphics::registerWindowResizeListener(void* ownerPtr, std::function<void(float, float)> func)
-{
-	m_windowResizeListeners.insert({ ownerPtr, func });
-}
-
-void Graphics::unregisterWindowResizeListener(void* ownerPtr)
-{
-	m_windowResizeListeners.erase(ownerPtr);
-}
-
-void Graphics::registerWindowQuitListener(void* ownerPtr, std::function<void()> func)
-{
-	m_windowQuitListeners.insert({ ownerPtr, func });
-}
-
-void Graphics::unregisterWindowQuitListener(void* ownerPtr)
-{
-	m_windowQuitListeners.erase(ownerPtr);
-}
+DECLARE_LISTENER_CPP(Graphics, windowResize, void, uint, uint)
+DECLARE_LISTENER_CPP(Graphics, windowQuit, void)

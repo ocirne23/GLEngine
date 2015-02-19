@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rde/rde_string.h"
-#include "rde/vector.h"
+#include "rde/hash_map.h"
 
 #include <functional>
 
@@ -13,8 +13,8 @@ public:
 	friend class FileModificationListener;
 	
 	static void update();
-	static FileModificationListener* createModificationListener(const rde::string& filePath, std::function<void()> func);
-	static void removeModificationListener(FileModificationListener* listener);
+	static void createModificationListener(void* ownerPtr, const rde::string& filePath, std::function<void()> func);
+	static void removeModificationListener(void* ownerPtr);
 
 private:
 
@@ -29,5 +29,5 @@ private:
 
 private:
 
-	static rde::vector<FileModificationListener*> s_listeners;
+	static rde::hash_map<void*, FileModificationListener*> s_listeners;
 };

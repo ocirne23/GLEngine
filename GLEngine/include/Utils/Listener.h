@@ -21,12 +21,12 @@ END_NAMESPACE(ListenerUtils)
 	private: \
 		rde::hash_map<void*, std::function<RETTYPE(__VA_ARGS__)>> m_##NAME##Listeners;
 
-#define DECLARE_LISTENER_CPP(NAME, RETTYPE, ...) \
-	void Input::##NAME##ListenerRegister(void* a_ownerPtr, std::function<RETTYPE(__VA_ARGS__)> a_func) \
+#define DECLARE_LISTENER_CPP(CLASSNAME, NAME, RETTYPE, ...) \
+	void CLASSNAME::##NAME##ListenerRegister(void* a_ownerPtr, std::function<RETTYPE(__VA_ARGS__)> a_func) \
 	{ \
 		m_##NAME##Listeners.insert({ a_ownerPtr, a_func }); \
 	} \
-	void Input::##NAME##ListenerUnregister(void* a_ownerPtr) \
+	void CLASSNAME::##NAME##ListenerUnregister(void* a_ownerPtr) \
 	{ \
 		m_##NAME##Listeners.erase(a_ownerPtr); \
 	}

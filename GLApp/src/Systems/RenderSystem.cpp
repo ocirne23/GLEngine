@@ -40,13 +40,16 @@ RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSy
 			initializeShaderForCamera(*m_activeCamera);
 	};
 
-	FileModificationManager::createModificationListener(rde::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
-	FileModificationManager::createModificationListener(rde::string(MODEL_FRAG_SHADER_PATH), onShaderEdited);
-	FileModificationManager::createModificationListener(rde::string(CLUSTERED_SHADING_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, rde::string(CLUSTERED_SHADING_PATH), onShaderEdited);
 }
 
 RenderSystem::~RenderSystem()
 {
+	FileModificationManager::removeModificationListener(this);
+	FileModificationManager::removeModificationListener(this);
+	FileModificationManager::removeModificationListener(this);
 }
 
 void RenderSystem::configure(entityx::EventManager& a_eventManager)

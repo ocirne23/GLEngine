@@ -8,16 +8,20 @@
 ScreenManager::ScreenManager()
 {
 	memset(m_screens, 0, sizeof(m_screens));
-
-	GLEngine::graphics->registerWindowQuitListener(this, [&]() { m_hasQuit = true; });
+	REGISTER_LISTENER(GLEngine::graphics, &Graphics::windowQuitListenerRegister, this, &ScreenManager::quit);
 }
 
 ScreenManager::~ScreenManager()
 {
-	GLEngine::graphics->unregisterWindowQuitListener(this);
+	UNREGISTER_LISTENER(GLEngine::graphics, &Graphics::windowQuitListenerUnregister, this);
 
 	for (IScreen* screen : m_screens)
 		SAFE_DELETE(screen);
+}
+
+void ScreenManager::quit()
+{
+	m_hasQuit = true;
 }
 
 void ScreenManager::render(float a_deltaSec)

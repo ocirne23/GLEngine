@@ -40,7 +40,7 @@ void GLEngine::doEngineTick()
 {
 	SDL_Event event;
 
-	while (graphics->getWindow() != NULL && SDL_PollEvent(&event))
+	while (graphics->getWindow() && SDL_PollEvent(&event))
 	{
 		switch (event.type)
 		{
@@ -48,7 +48,7 @@ void GLEngine::doEngineTick()
 			switch (event.window.event)
 			{
 			case SDL_WINDOWEVENT_RESIZED:
-				graphics->resizeScreen(event.window.data1, event.window.data2);
+				graphics->windowResize(event.window.data1, event.window.data2);
 				break;
 			}
 			break;

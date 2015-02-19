@@ -1,11 +1,9 @@
 #pragma once
 
 #include "Core.h"
-
-#include "Utils/VecForward.h"
-
 #include "rde/rde_string.h"
-#include "rde/hash_map.h"
+#include "Utils/VecForward.h"
+#include "Utils/Listener.h"
 
 #include <functional>
 
@@ -23,12 +21,6 @@ public:
 	void clear(const glm::vec4& color, bool clearColor = true, bool clearDepth = true);
 	void swap();
 
-	void registerWindowResizeListener(void* ownerPtr, std::function<void(float, float)> func);
-	void unregisterWindowResizeListener(void* ownerPtr);
-
-	void registerWindowQuitListener(void* ownerPtr, std::function<void()> func);
-	void unregisterWindowQuitListener(void* ownerPtr);
-
 	void destroyWindow();
 
 	void setWindowTitle(const char* title);
@@ -39,8 +31,11 @@ public:
 	bool hasWindow() const			{ return m_window != NULL; }
 
 	uint getScreenWidth() const		{ return m_screenWidth; }
-	uint getScreenHeight() const	{ return m_screenHeight; }
-	bool getVsyncEnabled() const	{ return m_vsyncEnabled; }
+	uint getScreenHeight() const		{ return m_screenHeight; }
+	bool getVsyncEnabled() const		{ return m_vsyncEnabled; }
+
+	DECLARE_LISTENER_H(windowResize, void, uint, uint)
+	DECLARE_LISTENER_H(windowQuit, void)
 
 private:
 	Graphics() {}
@@ -49,7 +44,7 @@ private:
 
 	bool initialize(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, WindowFlags flags);
 	void windowQuit();
-	void resizeScreen(uint screenWidth, uint screenHeight);
+	void windowResize(uint screenWidth, uint screenHeight);
 
 private:
 
@@ -57,7 +52,4 @@ private:
 	uint m_screenWidth		= 0;
 	uint m_screenHeight		= 0;
 	bool m_vsyncEnabled		= false;
-
-	rde::hash_map<void*, std::function<void(uint, uint)>> m_windowResizeListeners;
-	rde::hash_map<void*, std::function<void()>> m_windowQuitListeners;
 };
