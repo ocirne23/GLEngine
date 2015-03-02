@@ -2,7 +2,7 @@
 
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/Core/GLShader.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
 
 #include "Utils/Bounds3D.h"
 #include "Utils/sphereToScreenSpaceBounds.h"

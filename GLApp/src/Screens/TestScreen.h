@@ -14,9 +14,9 @@ public:
 	TestScreen();
 	~TestScreen();
 
-	virtual void render(float deltaSec) OVERRIDE;
-	virtual void show() OVERRIDE;
-	virtual void hide() OVERRIDE;
+	virtual void render(float deltaSec);
+	virtual void show();
+	virtual void hide();
 
 private:
 

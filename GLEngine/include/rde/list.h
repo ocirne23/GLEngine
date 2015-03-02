@@ -1,6 +1,7 @@
 #ifndef RDESTL_LIST_H
 #define RDESTL_LIST_H
 
+#include "algorithm.h"
 #include "allocator.h"
 #include "iterator.h"
 
@@ -12,9 +13,7 @@ namespace internal
 	{
 		list_base_node()
 		{
-#if RDE_DEBUG
 			reset();
-#endif
 		}
 		void reset()
 		{

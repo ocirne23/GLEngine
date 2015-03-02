@@ -1,7 +1,7 @@
-#include "Graphics/GL/Core/GLUniform.h"
+#include "Graphics/GL/Wrappers/GLUniform.h"
 
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/Core/GLShader.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
 
 #include <glm/glm.hpp>
 #include <assert.h>

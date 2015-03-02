@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <direct.h>
 
+const rde::string FileHandle::ASSETS_DIR("assets/");
+
 FileHandle::FileHandle(const rde::string& a_filePath, FileMode a_fileMode) : m_rwops(0), m_size(0), m_fileMode(a_fileMode)
 {
 	initialize(a_filePath.c_str(), a_fileMode);

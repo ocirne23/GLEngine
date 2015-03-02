@@ -5,11 +5,11 @@
 #include "entityx/System.h"
 
 #include "Graphics/LightManager.h"
-#include "Graphics/GL/Core/GLConstantBuffer.h"
-#include "Graphics/GL/Core/GLShader.h"
-#include "Graphics/GL/Core/GLTexture.h"
-#include "Graphics/GL/Core/GLTextureBuffer.h"
-#include "Graphics/GL/Core/GLUniform.h"
+#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
+#include "Graphics/GL/Wrappers/GLTexture.h"
+#include "Graphics/GL/Wrappers/GLTextureBuffer.h"
+#include "Graphics/GL/Wrappers/GLUniform.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
 
 #include <glm/glm.hpp>

@@ -1,4 +1,4 @@
-#include "Graphics/GL/Core/GLTextureArray.h"
+#include "Graphics/GL/Wrappers/GLTextureArray.h"
 
 #include "Graphics/Pixmap.h"
 #include "Graphics/GL/GL.h"

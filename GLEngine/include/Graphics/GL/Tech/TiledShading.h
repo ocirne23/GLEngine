@@ -4,7 +4,7 @@
 #include "rde/vector.h"
 #include "Utils/VecForward.h"
 
-#include "Graphics/GL/Core/GLConstantBuffer.h"
+#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
 
 class PerspectiveCamera;
 class GLShader;

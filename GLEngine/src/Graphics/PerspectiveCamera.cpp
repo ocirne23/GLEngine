@@ -1,7 +1,6 @@
 #include "Graphics/PerspectiveCamera.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/compatibility.hpp>
 

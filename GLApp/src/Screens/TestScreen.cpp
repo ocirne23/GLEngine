@@ -7,6 +7,8 @@
 #include "Components/SkyComponent.h"
 #include "Components/TransformComponent.h"
 
+#include "Editor/Editor.h"
+
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/PerspectiveCamera.h"
@@ -23,7 +25,7 @@
 #include "Systems/RenderSystem.h"
 
 #include "Utils/FileModificationManager.h"
-#include "Utils/Listener.h"
+#include "Utils/ListenerMacros.h"
 
 BEGIN_UNNAMED_NAMESPACE()
 
@@ -44,8 +46,6 @@ TestScreen::TestScreen()
 	m_camera = new PerspectiveCamera();
 	m_camera->initialize((float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 	
-	//m_camera->initialize(600.0f, 600.0f, 90.0f, 0.5f, 1500.0f);
-
 	m_building = new GLMesh();
 	m_building->loadFromFile(MODEL_FILE_PATH, RenderSystem::TextureUnits_MODEL_TEXTURE_ARRAY, RenderSystem::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
 
@@ -88,10 +88,14 @@ bool TestScreen::keyDown(Key a_key)
 
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
+
+	//	rde::string lightStr = rde::format("light %f %f %f", position.x, position.y, position.z);
+		GLEngine::editor->sendTest0Message();
 		return true;
 	}
 	if (a_key == Key_Y)
 	{
+		GLEngine::editor->sendTest1Message();
 		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
 		{
 			e.component<PointLightComponent>().remove();

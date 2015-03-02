@@ -43,6 +43,7 @@ string operator+(const string::value_type* lhs, const string& rhs)
 }
 */
 
+string format(const char* fmt, ...);
 string to_string(int i);
 string to_string(unsigned int u);
 string to_string(float f);

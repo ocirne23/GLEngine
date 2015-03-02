@@ -1,7 +1,7 @@
-#include "Graphics/GL/Core/GLConstantBuffer.h"
+#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
 
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/Core/GLShader.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
 
 #include <assert.h>
 

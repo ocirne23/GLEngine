@@ -37,30 +37,6 @@
     <ClCompile Include="src\Graphics\Frustum.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLVertexBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLTextureBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLTextureArray.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLTexture.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLStateBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLShader.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLFramebuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLConstantBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLMesh.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
@@ -103,15 +79,42 @@
     <ClCompile Include="src\Scene\Systems\StaticScenegraphSystem.cpp">
       <Filter>Source Files\Scene\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
     <ClCompile Include="src\entityx\help\Pool.cc" />
     <ClCompile Include="src\entityx\help\Timer.cc" />
     <ClCompile Include="src\entityx\Entity.cc" />
     <ClCompile Include="src\entityx\Event.cc" />
     <ClCompile Include="src\entityx\System.cc" />
+    <ClCompile Include="src\Utils\WindowsPlatformData.cpp" />
+    <ClCompile Include="src\Editor\EditorPipeline.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLShader.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLStateBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTexture.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureArray.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp">
+      <Filter>Source Files\Graphics\GL\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Editor\Editor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -267,27 +270,6 @@
     <ClInclude Include="include\Graphics\GL\GL.h">
       <Filter>Header Files\Graphics\GL</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLTexture.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLVertexBuffer.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLTextureBuffer.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLTextureArray.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLStateBuffer.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLShader.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLFramebuffer.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
     <ClInclude Include="include\Graphics\GL\GLMesh.h">
       <Filter>Header Files\Graphics\GL</Filter>
     </ClInclude>
@@ -345,9 +327,6 @@
     <ClInclude Include="include\Scene\Systems\StaticScenegraphSystem.h">
       <Filter>Header Files\Scene\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="include\Graphics\GL\Core\GLUniform.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </ClInclude>
     <ClInclude Include="include\Scene\Systems\AnimationSystem.h" />
     <ClInclude Include="include\Utils\EResourceType.h">
       <Filter>Header Files\Utils</Filter>
@@ -366,7 +345,35 @@
     <ClInclude Include="include\entityx\quick.h" />
     <ClInclude Include="include\entityx\System.h" />
     <ClInclude Include="include\entityx\config.h" />
-    <ClInclude Include="include\Utils\Listener.h" />
+    <ClInclude Include="include\Utils\WindowsPlatformData.h" />
+    <ClInclude Include="include\Editor\EditorPipeline.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLFramebuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLShader.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLStateBuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLTexture.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLTextureArray.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLTextureBuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLUniform.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLVertexBuffer.h">
+      <Filter>Header Files\Graphics\GL\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Editor\EditorCommands.h" />
+    <ClInclude Include="include\Editor\Editor.h" />
+    <ClInclude Include="include\Utils\ListenerMacros.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -437,7 +444,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\Graphics\GL\Core\GLConstantBuffer.h">
+    <None Include="include\Graphics\GL\Wrappers\GLConstantBuffer.h">
       <Filter>Header Files\Graphics\GL\Core</Filter>
     </None>
   </ItemGroup>

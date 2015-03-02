@@ -2,7 +2,7 @@
 
 #include "Model/ScreenManager.h"
 
-int main(int a_argc, char* a_argv[])
+int main()
 {
 	GLEngine::initialize();
 	{
@@ -34,5 +34,6 @@ int main(int a_argc, char* a_argv[])
 		}
 	}
 	GLEngine::shutdown();
+	
 	return 0;
 }

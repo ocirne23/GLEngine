@@ -1,4 +1,4 @@
-#include "Graphics/GL/Core/GLShader.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
 
 #include "Core.h"
 

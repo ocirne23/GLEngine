@@ -104,6 +104,26 @@ public:
 	}
     
     inline size_type capacity() const { return m_capacity; }
+
+	void resize(size_type size)
+	{
+		value_type* newData = construct_string(size, m_capacity);
+		size_type newSize = size * sizeof(value_type);
+		Sys::MemSet(newData, ' ', newSize);
+		size_type prevLen = length();
+		if (prevLen > 0)
+		{
+			size_type copyAmount = prevLen * sizeof(value_type);
+			if (copyAmount > newSize)
+				copyAmount = newSize;
+			Sys::MemCpy(newData, m_data, copyAmount);
+			release_string();
+		}
+		m_data = newData;
+		m_length = newSize;
+		m_data[m_length] = 0;
+		RDE_ASSERT(invariant());
+	}
     
     void clear() 
     {

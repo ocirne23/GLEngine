@@ -29,7 +29,7 @@ void FileModificationManager::update()
 void FileModificationManager::createModificationListener(void* a_ownerPtr, const rde::string& a_filePath, std::function<void()> a_func)
 {
 	FileModificationListener* listener = new FileModificationListener(a_filePath, a_func);
-	rde::string key = rde::string(a_filePath).append(":").append(rde::to_string((uint64)a_ownerPtr));
+	rde::string key = rde::to_string((uint64)a_ownerPtr).append(rde::string(a_filePath));
 	s_listeners.insert({ key , listener });
 
 	WIN32_FILE_ATTRIBUTE_DATA data;
@@ -42,7 +42,7 @@ void FileModificationManager::createModificationListener(void* a_ownerPtr, const
 
 void FileModificationManager::removeModificationListener(void* a_ownerPtr, const rde::string& a_filePath)
 {
-	rde::string key = rde::string(a_filePath).append(":").append(rde::to_string((uint64) a_ownerPtr));
+	rde::string key = rde::to_string((uint64)a_ownerPtr).append(rde::string(a_filePath));
 
 	auto it = s_listeners.find(key);
 	assert(it != s_listeners.end());

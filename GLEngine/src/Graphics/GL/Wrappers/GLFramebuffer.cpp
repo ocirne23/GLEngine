@@ -1,4 +1,4 @@
-#include "Graphics/GL/Core/GLFramebuffer.h"
+#include "Graphics/GL/Wrappers/GLFramebuffer.h"
 
 #include "Graphics/GL/GL.h"
 

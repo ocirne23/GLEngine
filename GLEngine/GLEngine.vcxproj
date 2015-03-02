@@ -20,24 +20,26 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core.cpp" />
+    <ClCompile Include="src\Editor\Editor.cpp" />
+    <ClCompile Include="src\Editor\EditorPipeline.cpp" />
     <ClCompile Include="src\entityx\Entity.cc" />
     <ClCompile Include="src\entityx\Event.cc" />
     <ClCompile Include="src\entityx\help\Pool.cc" />
     <ClCompile Include="src\entityx\help\Timer.cc" />
     <ClCompile Include="src\entityx\System.cc" />
     <ClCompile Include="src\GLEngine.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLUniform.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp" />
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
     <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLConstantBuffer.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLFramebuffer.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLShader.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLStateBuffer.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLTexture.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLTextureArray.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLTextureBuffer.cpp" />
-    <ClCompile Include="src\Graphics\GL\Core\GLVertexBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLShader.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLStateBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTexture.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureArray.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\GLMesh.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\TiledShading.cpp" />
@@ -60,9 +62,13 @@
     <ClCompile Include="src\Utils\FPSCameraController.cpp" />
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp" />
     <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp" />
+    <ClCompile Include="src\Utils\WindowsPlatformData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h" />
+    <ClInclude Include="include\Editor\Editor.h" />
+    <ClInclude Include="include\Editor\EditorCommands.h" />
+    <ClInclude Include="include\Editor\EditorPipeline.h" />
     <ClInclude Include="include\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\entityx\3rdparty\deps\Dependencies.h" />
     <ClInclude Include="include\entityx\3rdparty\help\NonCopyable.h" />
@@ -77,18 +83,18 @@
     <ClInclude Include="include\entityx\quick.h" />
     <ClInclude Include="include\entityx\System.h" />
     <ClInclude Include="include\GLEngine.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLUniform.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLUniform.h" />
     <ClInclude Include="include\Graphics\GL\GLVars.h" />
     <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
     <ClInclude Include="include\Graphics\LightManager.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLFramebuffer.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLShader.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLStateBuffer.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLTexture.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLTextureArray.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLTextureBuffer.h" />
-    <ClInclude Include="include\Graphics\GL\Core\GLVertexBuffer.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLFramebuffer.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLShader.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLStateBuffer.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLTexture.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLTextureArray.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLTextureBuffer.h" />
+    <ClInclude Include="include\Graphics\GL\Wrappers\GLVertexBuffer.h" />
     <ClInclude Include="include\Graphics\GL\GL.h" />
     <ClInclude Include="include\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Graphics\GL\GLMesh.h" />
@@ -152,14 +158,15 @@
     <ClInclude Include="include\Utils\FileModificationManager.h" />
     <ClInclude Include="include\Utils\FPSCameraController.h" />
     <ClInclude Include="include\Utils\getGLTextureFormat.h" />
-    <ClInclude Include="include\Utils\Listener.h" />
+    <ClInclude Include="include\Utils\ListenerMacros.h" />
     <ClInclude Include="include\Utils\MatForward.h" />
     <ClInclude Include="include\Utils\EResourceType.h" />
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
+    <ClInclude Include="include\Utils\WindowsPlatformData.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\Graphics\GL\Core\GLConstantBuffer.h" />
+    <None Include="include\Graphics\GL\Wrappers\GLConstantBuffer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CE0F2368-C0DB-4372-A4BB-86FEFD09F1E6}</ProjectGuid>
@@ -269,7 +276,6 @@
       <AdditionalOptions>
       </AdditionalOptions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
-      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -314,7 +320,6 @@
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
-      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -4,6 +4,7 @@
 
 class Input;
 class Graphics;
+class Editor;
 
 class GLEngine
 {
@@ -24,4 +25,5 @@ public:
 
 	static Input* input;
 	static Graphics* graphics;
+	static Editor* editor;
 };

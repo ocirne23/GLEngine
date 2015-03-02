@@ -3,16 +3,32 @@
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLVars.h"
+#include "Graphics/tryEnableARBDebugOutput.h"
 #include "rde/rde_string.h"
 #include "Utils/CheckGLError.h"
-
+#include "Utils/WindowsPlatformData.h"
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
 #include <SDL/SDL_syswm.h>
 
 #include <assert.h>
 
-#include "Graphics/tryEnableARBDebugOutput.h"
+// Step 4: the Window Procedure
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_CLOSE:
+		DestroyWindow(hwnd);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	return 0;
+}
 
 bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
 {
@@ -30,6 +46,9 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 		print("Unable to create window: %s\n", SDL_GetError());
 		return false;
 	}
+#ifdef WINDOWS
+	WindowsPlatformData::setWindowHandle(m_window);
+#endif
 
 	GLVars::init(m_window);
 
@@ -45,7 +64,6 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 	tryEnableARBDebugOutput();
 
 	SDL_GL_SetSwapInterval(m_vsyncEnabled);
-
 	SDL_GetWindowSize(m_window, (int*)&m_screenWidth, (int*)&m_screenHeight);
 	glViewport(0, 0, m_screenWidth, m_screenHeight);
 

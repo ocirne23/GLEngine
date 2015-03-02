@@ -13,12 +13,14 @@
 *.opensdf
 *.ilk
 *.pdb
+modificationdates.txt
 
 ipch/
 GLEngine/gen/
 GLEngine/bin/
 GLEngine/obj/
 GLApp/obj/
-GLApp/assets/modificationdates.txt
+GLEditor/obj/
+GLEditor/bin/
 GLResourceBuilder/x64/
 GLResourceBuilder/Win32/

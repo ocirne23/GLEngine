@@ -2,9 +2,23 @@
 
 #include <stdio.h>
 #include <float.h>
+#include <stdarg.h>
 
 namespace rde
 {
+	rde::string format(const char* fmt, ...)
+	{
+		va_list vl;
+		va_start(vl, fmt);
+		int size = _vscprintf(fmt, vl) + 1;
+		rde::string str;
+		str.resize(size);
+		vsnprintf_s((char*) str.c_str(), size, _TRUNCATE, fmt, vl);
+		va_end(vl);
+
+		return str;
+	}
+
 	rde::string to_string(int i)
 	{
 		char buf[11];

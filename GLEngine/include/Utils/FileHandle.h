@@ -10,6 +10,8 @@ class FileHandle
 {
 public:
 
+	static const rde::string ASSETS_DIR;
+
 	enum FileMode { FileMode_READ, FileMode_WRITE, FileMode_READWRITE };
 
 	FileHandle(const rde::string& filePath, FileMode fileMode = FileMode_READ);
