@@ -374,6 +374,9 @@
     <ClInclude Include="include\Editor\EditorCommands.h" />
     <ClInclude Include="include\Editor\Editor.h" />
     <ClInclude Include="include\Utils\ListenerMacros.h" />
+    <ClInclude Include="include\Utils\ConcurrentQueue.h" />
+    <ClInclude Include="include\Utils\Semaphore.h" />
+    <ClInclude Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

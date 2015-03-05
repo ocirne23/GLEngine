@@ -36,18 +36,21 @@ LightHandle LightManager::createLight(const glm::vec3& a_pos, float a_radius, co
 
 	m_lightPositionRanges[m_numUsedLights] = glm::vec4(a_pos, a_radius);
 	m_lightColorIntensities[m_numUsedLights] = glm::vec4(glm::normalize(a_color), a_intensity);
-
-	return m_numUsedLights++;
+	LightHandle light = m_numUsedLights++;
+	return light;
 }
 
 void LightManager::deleteLight(LightHandle a_handle)
 {
 	assert(m_numUsedLights);
 	--m_numUsedLights;
-	ushort last = m_lightHandles[m_numUsedLights];
-	rde::swap(m_lightPositionRanges[last], m_lightPositionRanges[m_lightHandles[a_handle]]);
-	rde::swap(m_lightColorIntensities[last], m_lightColorIntensities[m_lightHandles[a_handle]]);
-	m_lightHandles[a_handle] = m_maxLights;
+	if (a_handle != m_numUsedLights)
+	{
+		ushort last = m_lightHandles[m_numUsedLights];
+		ushort idx = m_lightHandles[a_handle];
+		rde::swap(m_lightPositionRanges[last], m_lightPositionRanges[idx]);
+		rde::swap(m_lightColorIntensities[last], m_lightColorIntensities[idx]);
+	}
 }
 
 void LightManager::deleteLights()
@@ -57,6 +60,7 @@ void LightManager::deleteLights()
 
 void LightManager::setLight(LightHandle a_light, const glm::vec3& a_pos, float a_radius, const glm::vec3& a_color, float a_intensity)
 {
+	assert(a_light < m_numUsedLights);
 	ushort idx = m_lightHandles[a_light];
 	m_lightPositionRanges[idx] = glm::vec4(a_pos, a_radius);
 	m_lightColorIntensities[idx] = glm::vec4(a_color, a_intensity);
@@ -64,6 +68,7 @@ void LightManager::setLight(LightHandle a_light, const glm::vec3& a_pos, float a
 
 void LightManager::setLightPosition(LightHandle a_light, const glm::vec3& a_position)
 {
+	assert(a_light < m_numUsedLights);
 	glm::vec4& posRange = m_lightPositionRanges[m_lightHandles[a_light]];
 	posRange.x = a_position.x;
 	posRange.y = a_position.y;
@@ -72,11 +77,13 @@ void LightManager::setLightPosition(LightHandle a_light, const glm::vec3& a_posi
 
 void LightManager::setLightRange(LightHandle a_light, float a_range)
 {
+	assert(a_light < m_numUsedLights);
 	m_lightPositionRanges[m_lightHandles[a_light]].w = a_range;
 }
 
 void LightManager::setLightColor(LightHandle a_light, const glm::vec3& a_color)
 {
+	assert(a_light < m_numUsedLights);
 	glm::vec4& col = m_lightColorIntensities[m_lightHandles[a_light]];
 	col.r = a_color.r;
 	col.g = a_color.g;
@@ -85,26 +92,31 @@ void LightManager::setLightColor(LightHandle a_light, const glm::vec3& a_color)
 
 void LightManager::setLightIntensity(LightHandle a_light, float a_intensity)
 {
+	assert(a_light < m_numUsedLights);
 	m_lightColorIntensities[m_lightHandles[a_light]].a = a_intensity;
 }
 
 const glm::vec3& LightManager::getLightPosition(LightHandle a_light) const
 {
+	assert(a_light < m_numUsedLights);
 	return (glm::vec3&) m_lightPositionRanges[m_lightHandles[a_light]];
 }
 
 float LightManager::getLightRange(LightHandle a_light) const
 {
+	assert(a_light < m_numUsedLights);
 	return m_lightPositionRanges[m_lightHandles[a_light]].w;
 }
 
 const glm::vec3& LightManager::getLightColor(LightHandle a_light) const
 {
+	assert(a_light < m_numUsedLights);
 	return (glm::vec3&) m_lightColorIntensities[m_lightHandles[a_light]];
 }
 
 float LightManager::getLightIntensity(LightHandle a_light) const
 {
+	assert(a_light < m_numUsedLights);
 	return m_lightColorIntensities[m_lightHandles[a_light]].a;
 }
 

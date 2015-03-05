@@ -63,6 +63,7 @@
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp" />
     <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp" />
     <ClCompile Include="src\Utils\WindowsPlatformData.cpp" />
+	<ClCompile Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="include\Utils\Bounds2D.h" />
     <ClInclude Include="include\Utils\Bounds3D.h" />
     <ClInclude Include="include\Utils\CheckGLError.h" />
+    <ClInclude Include="include\Utils\ConcurrentQueue.h" />
     <ClInclude Include="include\Utils\FileHandle.h" />
     <ClInclude Include="include\Utils\FileModificationListener.h" />
     <ClInclude Include="include\Utils\FileModificationManager.h" />
@@ -161,6 +163,7 @@
     <ClInclude Include="include\Utils\ListenerMacros.h" />
     <ClInclude Include="include\Utils\MatForward.h" />
     <ClInclude Include="include\Utils\EResourceType.h" />
+    <ClInclude Include="include\Utils\Semaphore.h" />
     <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Utils\VecForward.h" />
     <ClInclude Include="include\Utils\WindowsPlatformData.h" />

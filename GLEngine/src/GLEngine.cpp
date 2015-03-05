@@ -44,42 +44,7 @@ void GLEngine::initialize()
 
 void GLEngine::doEngineTick()
 {
-	SDL_Event event;
-	while (graphics->getWindow() && SDL_PollEvent(&event))
-	{
-		switch (event.type)
-		{
-		case SDL_WINDOWEVENT:
-			switch (event.window.event)
-			{
-			case SDL_WINDOWEVENT_RESIZED:			/**< Window has been resized to data1xdata2 */
-				graphics->windowResize(event.window.data1, event.window.data2);
-				break;
-			}
-			break;
-		case SDL_MOUSEMOTION:
-			input->mouseMoved(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			input->mouseDown((MouseButton) event.button.button, event.button.x, event.button.y);
-			break;
-		case SDL_MOUSEBUTTONUP:
-			input->mouseUp((MouseButton) event.button.button, event.button.x, event.button.y);
-			break;
-		case SDL_MOUSEWHEEL:
-			input->mouseScrolled(event.wheel.y);
-			break;
-		case SDL_KEYDOWN:
-			input->keyDown((Key) event.key.keysym.scancode);
-			break;
-		case SDL_KEYUP:
-			input->keyUp((Key) event.key.keysym.scancode);
-			break;
-		case SDL_QUIT:
-			graphics->windowQuit();
-			break;
-		}
-	}
+	input->processEvents();
 #ifdef EDITOR
 	editor->updateUIPosition();
 #endif

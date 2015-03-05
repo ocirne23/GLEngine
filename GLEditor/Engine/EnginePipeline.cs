@@ -66,7 +66,7 @@ namespace GLEditor.Engine
             m_inboundPipeHandle = CreateFile(
                     PIPE_NAME,
                     GENERIC_READ, // only need read access
-                    FILE_SHARE_READ | FILE_SHARE_WRITE,
+                    FILE_SHARE_READ,
                     IntPtr.Zero,
                     OPEN_EXISTING,
                     FILE_ATTRIBUTE_NORMAL,
