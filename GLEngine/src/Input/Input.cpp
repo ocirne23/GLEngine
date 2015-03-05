@@ -6,8 +6,41 @@
 #include "Input/Key.h"
 #include "Input/MouseButton.h"
 
+#include <SDL/SDL_thread.h>
 #include <SDL/SDL_events.h>
 #include <SDL/SDL_keyboard.h>
+
+Input::Input()
+{
+	m_inputThread = SDL_CreateThread(&Input::inputThread, "InputThread", this);
+}
+
+Input::~Input()
+{
+	m_inputThreadRunning = false;
+	print("Waiting for input thread to exit");
+	while (!m_inputThreadHasExited)
+	{
+		GLEngine::sleep(1);
+	}
+}
+
+int Input::inputThread(void* a_ptr)
+{
+	Input* input = (Input*) a_ptr;
+	while (input->m_inputThreadRunning)
+	{
+		SDL_Event e;
+		while (SDL_PollEvent(&e))
+		{
+			Event& event = *((Event*)&e);
+			print("event: %i \n", e.type);
+			input->m_eventQueue.push_back(event);
+		}
+	}
+	input->m_inputThreadHasExited = true;
+	return 0;
+}
 
 void Input::processEvents()
 {
@@ -15,43 +48,41 @@ void Input::processEvents()
 	for (Event i : m_eventQueue.getBackingQueue())
 	{
 		SDL_Event& event = *(SDL_Event*) &i;
-		while (SDL_PollEvent(&event))
+		switch (event.type)
 		{
-			switch (event.type)
+		case SDL_WINDOWEVENT:
+			switch (event.window.event)
 			{
-			case SDL_WINDOWEVENT:
-				switch (event.window.event)
-				{
-				case SDL_WINDOWEVENT_RESIZED:
-					GLEngine::graphics->windowResize(event.window.data1, event.window.data2);
-					break;
-				}
-				break;
-			case SDL_MOUSEMOTION:
-				mouseMoved(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				mouseDown((MouseButton) event.button.button, event.button.x, event.button.y);
-				break;
-			case SDL_MOUSEBUTTONUP:
-				mouseUp((MouseButton) event.button.button, event.button.x, event.button.y);
-				break;
-			case SDL_MOUSEWHEEL:
-				mouseScrolled(event.wheel.y);
-				break;
-			case SDL_KEYDOWN:
-				keyDown((Key) event.key.keysym.scancode);
-				break;
-			case SDL_KEYUP:
-				keyUp((Key) event.key.keysym.scancode);
-				break;
-			case SDL_QUIT:
-				GLEngine::graphics->windowQuit();
+			case SDL_WINDOWEVENT_RESIZED:
+				GLEngine::graphics->windowResize(event.window.data1, event.window.data2);
 				break;
 			}
+			break;
+		case SDL_MOUSEMOTION:
+			mouseMoved(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			mouseDown((MouseButton) event.button.button, event.button.x, event.button.y);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			mouseUp((MouseButton) event.button.button, event.button.x, event.button.y);
+			break;
+		case SDL_MOUSEWHEEL:
+			mouseScrolled(event.wheel.y);
+			break;
+		case SDL_KEYDOWN:
+			keyDown((Key) event.key.keysym.scancode);
+			break;
+		case SDL_KEYUP:
+			keyUp((Key) event.key.keysym.scancode);
+			break;
+		case SDL_QUIT:
+			GLEngine::graphics->windowQuit();
+			break;
 		}
-
 	}
+	m_eventQueue.getBackingQueue().clear();
+	m_eventQueue.release();
 }
 
 void Input::setMouseCaptured(bool a_captured)

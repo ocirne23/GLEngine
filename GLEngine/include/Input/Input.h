@@ -13,6 +13,9 @@ struct SDL_Thread;
 class Input
 {
 public:
+	Input();
+	~Input();
+
 	void processEvents();
 
 	bool isKeyPressed(Key key);
@@ -48,4 +51,7 @@ private:
 	};
 
 	ConcurrentQueue<Event> m_eventQueue;
+	SDL_Thread* m_inputThread;
+	bool m_inputThreadRunning = true;
+	bool m_inputThreadHasExited = false;
 };

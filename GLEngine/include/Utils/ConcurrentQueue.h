@@ -36,8 +36,8 @@ public:
 	}
 
 	void block() { m_semaphore.acquire(); }
-	void release() { m_semaphore.acquire(); }
-	const rde::list<T>& getBackingQueue() { return m_queue; }
+	void release() { m_semaphore.release(); }
+	rde::list<T>& getBackingQueue() { return m_queue; }
 
 private:
 
