@@ -14,7 +14,20 @@ static std::function<ReturnType(Args...)> bindFunction(ReturnType(Object::*MemPt
 
 END_NAMESPACE(ListenerUtils)
 
-#define DECLARE_LISTENER(NAME, RETTYPE, ...) \
+#define DECLARE_LISTENER(NAME, ...) _DECLARE_LISTENER_IMPL(NAME, void, __VA_ARGS__)
+
+#define DECLARE_LISTENER_CONSUME(NAME, ...) _DECLARE_LISTENER_IMPL(NAME, bool, __VA_ARGS__)
+
+#define CALL_LISTENERS(NAME, ...) \
+	for (auto& listener : m_##NAME##Listeners) \
+		listener.second(__VA_ARGS__);
+
+#define CALL_LISTENERS_CONSUME(NAME, ...) \
+	for (auto& listener : m_##NAME##Listeners) \
+		if (listener.second(__VA_ARGS__)) \
+			break;
+
+#define _DECLARE_LISTENER_IMPL(NAME, RETTYPE, ...) \
 	public:	\
 		void NAME##ListenerRegister(void* ownerPtr, std::function<RETTYPE(__VA_ARGS__)> func) \
 		{ \
@@ -26,13 +39,3 @@ END_NAMESPACE(ListenerUtils)
 		} \
 	private: \
 		rde::hash_map<void*, std::function<RETTYPE(__VA_ARGS__)>> m_##NAME##Listeners;
-
-#define REGISTER_LISTENER(LISTENEE, LISTENEEFUNC, LISTENER, LISTENERFUNC) \
-	{ \
-		ListenerUtils::bindFunction(LISTENEEFUNC, LISTENEE)(LISTENER, ListenerUtils::bindFunction(LISTENERFUNC, LISTENER)); \
-	}
-
-#define UNREGISTER_LISTENER(LISTENEE, LISTENEEFUNC, LISTENER) \
-	{ \
-		ListenerUtils::bindFunction(LISTENEEFUNC, LISTENEE)(LISTENER); \
-	}

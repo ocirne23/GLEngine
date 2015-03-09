@@ -1,54 +1,40 @@
 #include "GLEngine.h"
 
-#include "Model/ScreenManager.h"
-#include "Utils/JobScheduler.h"
+#include "Screens/TestScreen.h"
+#include "AppUtils/DeltaTimeMeasurer.h"
+#include "AppUtils/FPSMeasurer.h"
 
 int main()
 {
 	GLEngine::initialize();
+
+	GLEngine::initializeRenderThread([]()
 	{
-		ScreenManager screenManager;
-
-		GLEngine::initializeRenderThread([&]()
+		FPSMeasurer fpsMeasurer(5.0f, [](const FPSMeasurer& measurer)
 		{
-			JobScheduler jobScheduler;
-
-			const float fpsLogDelay = 5.0f;
-			uint startTime = GLEngine::getTimeMs();
-			uint fpsCounter = 0;
-			float fpsTimeAccumulator = 0.0f;
-
-			jobScheduler.addJob(fpsLogDelay, [&](void* ptr)
-			{
-				print("FPS: %i \t MS: %f\n", (uint) (fpsCounter / fpsLogDelay), fpsTimeAccumulator / fpsCounter);
-				fpsTimeAccumulator = 0.0f;
-				fpsCounter = 0;
-				return EJobRepeat_REPEAT;
-			});
-
-			screenManager.setScreen(EScreenType_TESTSCREEN);
-
-			while (!screenManager.hasQuit())
-			{
-				uint currentTime = GLEngine::getTimeMs();
-				float deltaSec = (currentTime - startTime) / 1000.0f;
-				startTime = currentTime;
-
-				fpsCounter++;
-				fpsTimeAccumulator += deltaSec;
-
-				screenManager.render(deltaSec);
-				jobScheduler.update(deltaSec);
-			}
+			print("FPS: %i \t MS: %f\n", 
+				  (uint) (measurer.getNumFramesPassed() / measurer.getTimeInterval()), 
+				  measurer.getTimePassed() / measurer.getNumFramesPassed());
 		});
 
-		while (!screenManager.hasQuit())
-		{
-			GLEngine::doMainThreadTick();
-		}
+		DeltaTimeMeasurer deltaTimeMeasurer;
+		TestScreen testScreen;
 
+		while (!GLEngine::isShutdown())
+		{
+			GLEngine::doRenderThreadTick();
+
+			float deltaSec = deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs());
+
+			testScreen.render(deltaSec);
+			fpsMeasurer.tickFrame(deltaSec);
+		}
+	});
+
+	while (!GLEngine::isShutdown())
+	{
+		GLEngine::doMainThreadTick();
 	}
-	GLEngine::shutdown();
 	
 	return 0;
 }

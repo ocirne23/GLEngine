@@ -1,5 +1,7 @@
 #include "Editor/Editor.h"
 
+#ifdef EDITOR
+
 #include "Utils/WindowsPlatformData.h"
 
 Editor::Editor()
@@ -27,3 +29,5 @@ void Editor::sendTest1Message()
 	rde::string da("heuhuehue");
 	m_pipeLine.writeCommand(EditorCommands::CommandType_TEST1, da.length(), (byte*) da.c_str());
 }
+
+#endif // EDITOR

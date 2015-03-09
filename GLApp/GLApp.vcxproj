@@ -28,7 +28,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Components\PointLightComponent.cpp" />
-    <ClCompile Include="src\Model\ScreenManager.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Screens\TestScreen.cpp" />
     <ClCompile Include="src\Systems\CameraSystem.cpp" />
@@ -37,15 +36,14 @@
     <ClCompile Include="src\Systems\RenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h" />
+    <ClInclude Include="src\AppUtils\FPSMeasurer.h" />
     <ClInclude Include="src\Components\CameraComponent.h" />
     <ClInclude Include="src\Components\FPSControlledComponent.h" />
     <ClInclude Include="src\Components\ModelComponent.h" />
     <ClInclude Include="src\Components\PointLightComponent.h" />
     <ClInclude Include="src\Components\SkyComponent.h" />
     <ClInclude Include="src\Components\TransformComponent.h" />
-    <ClInclude Include="src\Model\IScreen.h" />
-    <ClInclude Include="src\Model\ScreenManager.h" />
-    <ClInclude Include="src\Screens\EScreenType.h" />
     <ClInclude Include="src\Screens\TestScreen.h" />
     <ClInclude Include="src\Systems\CameraSystem.h" />
     <ClInclude Include="src\Systems\FPSControlSystem.h" />

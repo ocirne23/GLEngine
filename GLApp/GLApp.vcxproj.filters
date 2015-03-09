@@ -15,12 +15,6 @@
     <Filter Include="Header Files\Screens">
       <UniqueIdentifier>{7f6c848b-445f-4e2e-800f-db78127c60f8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Model">
-      <UniqueIdentifier>{018df144-e2a2-433f-bb7d-549a98f9d990}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model">
-      <UniqueIdentifier>{9ded6355-ebdf-4686-b6d2-5f05021e6a53}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Systems">
       <UniqueIdentifier>{79bc8092-f0cf-4a7f-bbd5-279e28349090}</UniqueIdentifier>
     </Filter>
@@ -33,11 +27,11 @@
     <Filter Include="Source Files\Components">
       <UniqueIdentifier>{2a6c6c76-c4f6-4657-a56e-a5490b373762}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\AppUtils">
+      <UniqueIdentifier>{38fb1c23-caae-4e95-a187-27aae3830de2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Model\ScreenManager.cpp">
-      <Filter>Source Files\Model</Filter>
-    </ClCompile>
     <ClCompile Include="src\Systems\RenderSystem.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
@@ -61,15 +55,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Screens\EScreenType.h">
-      <Filter>Header Files\Screens</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Model\ScreenManager.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Model\IScreen.h">
-      <Filter>Header Files\Model</Filter>
-    </ClInclude>
     <ClInclude Include="src\Systems\RenderSystem.h">
       <Filter>Header Files\Systems</Filter>
     </ClInclude>
@@ -102,6 +87,12 @@
     </ClInclude>
     <ClInclude Include="src\Components\SkyComponent.h">
       <Filter>Header Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AppUtils\FPSMeasurer.h">
+      <Filter>Source Files\AppUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h">
+      <Filter>Source Files\AppUtils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

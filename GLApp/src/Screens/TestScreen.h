@@ -1,22 +1,20 @@
 #pragma once
 
 #include "Core.h"
-#include "Model/IScreen.h"
 #include "Input/Key.h"
 #include "entityx/entityx.h"
 
 class GLMesh;
 class PerspectiveCamera;
 
-class TestScreen : public IScreen
+class TestScreen
 {
 public:
+
 	TestScreen();
 	~TestScreen();
 
-	virtual void render(float deltaSec);
-	virtual void show();
-	virtual void hide();
+	void render(float deltaSec);
 
 private:
 

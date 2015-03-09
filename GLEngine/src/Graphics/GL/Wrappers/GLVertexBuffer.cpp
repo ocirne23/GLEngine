@@ -14,6 +14,7 @@ GLVertexBuffer::~GLVertexBuffer()
 void GLVertexBuffer::initialize(GLenum a_bufferType, GLenum a_drawUsage)
 {
 	assert(!m_initialized);
+
 	glGenBuffers(1, &m_id);
 	m_bufferType = a_bufferType;
 	m_drawUsage = a_drawUsage;
@@ -24,8 +25,11 @@ void GLVertexBuffer::upload(uint a_numBytes, const void* a_data)
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);
-	glBindBuffer(m_bufferType, m_id);
-	glBufferData(m_bufferType, a_numBytes, a_data, m_drawUsage);
+	if (a_numBytes)
+	{
+		glBindBuffer(m_bufferType, m_id);
+		glBufferData(m_bufferType, a_numBytes, a_data, m_drawUsage);
+	}
 }
 
 void GLVertexBuffer::bind()
@@ -38,6 +42,7 @@ void GLVertexBuffer::bind()
 void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, VertexAttribute* a_attributes)
 {
 	assert(m_initialized);
+	assert(a_numAttributes);
 
 	uint offset = 0;
 	uint stride = 0;

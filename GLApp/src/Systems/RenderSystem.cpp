@@ -114,7 +114,10 @@ void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& 
 
 void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
 {
-	GLEngine::graphics->clear(glm::vec4(0.4f, 0.7f, 1.0f, 1.0f));
+	FileModificationManager::update();
+
+	//GLEngine::graphics->clear(glm::vec4(0.4f, 0.7f, 1.0f, 1.0f));
+	GLEngine::graphics->clear(glm::vec4(0), false, true);
 	//GLEngine::graphics->clear(glm::vec4(0.1f, 0.0f, 0.0f, 1.0f));
 
 	if (m_activeCamera)

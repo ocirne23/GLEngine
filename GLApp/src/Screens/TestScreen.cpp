@@ -17,14 +17,11 @@
 
 #include "Input/Input.h"
 
-#include "Model/ScreenManager.h"
-
 #include "Systems/CameraSystem.h"
 #include "Systems/FPSControlSystem.h"
 #include "Systems/LightSystem.h"
 #include "Systems/RenderSystem.h"
 
-#include "Utils/FileModificationManager.h"
 #include "Utils/ListenerMacros.h"
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -35,8 +32,9 @@ END_UNNAMED_NAMESPACE()
 
 TestScreen::TestScreen()
 {
-	REGISTER_LISTENER(GLEngine::input, &Input::keyDownListenerRegister, this, &TestScreen::keyDown);
-
+	GLEngine::input->keyDownListenerRegister(this, [&](Key key) { return keyDown(key); });
+	GLEngine::input->windowQuitListenerRegister(this, []() { print("shutting down\n"); GLEngine::shutdown(); });
+	
 	m_entityx.systems.add<FPSControlSystem>();
 	m_entityx.systems.add<CameraSystem>();
 	m_entityx.systems.add<LightSystem>();
@@ -74,7 +72,24 @@ TestScreen::~TestScreen()
 	SAFE_DELETE(m_building);
 	SAFE_DELETE(m_camera);
 
-	UNREGISTER_LISTENER(GLEngine::input, &Input::keyDownListenerUnregister, this);
+	GLEngine::input->keyDownListenerUnregister(this);
+	GLEngine::input->windowQuitListenerUnregister(this);
+}
+
+void TestScreen::render(float a_deltaSec)
+{
+	int lightAnimationOffset = 0;
+	entityx::ComponentHandle<PointLightComponent> light;
+	for (entityx::Entity e : m_entityx.entities.entities_with_components(light))
+	{
+		light->setRadius(2.0f + 20.0f * (((GLEngine::getTimeMs() + lightAnimationOffset * 12345) % 1000) / 1000.0f));
+		light->setIntensity(2.0f + 80.0f * (((GLEngine::getTimeMs() + lightAnimationOffset * 54321) % 10000) / 10000.0f));
+		++lightAnimationOffset;
+	}
+	m_entityx.systems.update<FPSControlSystem>(a_deltaSec);
+	m_entityx.systems.update<CameraSystem>(a_deltaSec);
+	m_entityx.systems.update<LightSystem>(a_deltaSec);
+	m_entityx.systems.update<RenderSystem>(a_deltaSec);
 }
 
 bool TestScreen::keyDown(Key a_key)
@@ -89,42 +104,25 @@ bool TestScreen::keyDown(Key a_key)
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
 
-	//	rde::string lightStr = rde::format("light %f %f %f", position.x, position.y, position.z);
+#ifdef EDITOR
 		GLEngine::editor->sendTest0Message();
+#endif // EDITOR
+
 		return true;
 	}
 	if (a_key == Key_Y)
 	{
-		GLEngine::editor->sendTest1Message();
 		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
 		{
 			e.component<PointLightComponent>().remove();
 			e.destroy();
 		}
+
+#ifdef EDITOR
+		GLEngine::editor->sendTest1Message();
+#endif // EDITOR
+
 		return true;
 	}
 	return false;
 }
-
-void TestScreen::render(float a_deltaSec)
-{
-	entityx::ComponentHandle<PointLightComponent> light;
-	int i = 0;
-	for (entityx::Entity e : m_entityx.entities.entities_with_components(light))
-	{
-		light->setRadius(2.0f + 20.0f * (((GLEngine::getTimeMs() + i * 12345) % 1000) / 1000.0f));
-		light->setIntensity(2.0f + 80.0f * (((GLEngine::getTimeMs() + i * 54321) % 10000) / 10000.0f));
-
-		++i;
-	}
-
-	m_entityx.systems.update<FPSControlSystem>(a_deltaSec);
-	m_entityx.systems.update<CameraSystem>(a_deltaSec);
-	m_entityx.systems.update<LightSystem>(a_deltaSec);
-	m_entityx.systems.update<RenderSystem>(a_deltaSec);
-
-	FileModificationManager::update();
-}
-
-void TestScreen::show() {}
-void TestScreen::hide() {}

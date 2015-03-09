@@ -87,6 +87,7 @@
     <ClInclude Include="include\GLEngine.h" />
     <ClInclude Include="include\Graphics\GL\Wrappers\GLUniform.h" />
     <ClInclude Include="include\Graphics\GL\GLVars.h" />
+    <ClInclude Include="include\Graphics\RenderThread.h" />
     <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Graphics\Frustum.h" />
     <ClInclude Include="include\Graphics\LightManager.h" />

@@ -34,20 +34,14 @@ public:
 	uint getScreenHeight() const		{ return m_screenHeight; }
 	bool getVsyncEnabled() const		{ return m_vsyncEnabled; }
 
-	void windowQuit();
 	void windowResize(uint screenWidth, uint screenHeight);
 
-	DECLARE_LISTENER(windowResize, void, uint, uint)
-	DECLARE_LISTENER(windowQuit, void)
-
 private:
-	Graphics() {}
-	~Graphics() {}
+	Graphics(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, WindowFlags flags);
+	~Graphics();
 	Graphics(const Graphics& copy) = delete;
 
-	bool initializeWindow(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, WindowFlags flags);
 	void initializeGLContext();
-
 
 private:
 

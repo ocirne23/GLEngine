@@ -8,6 +8,8 @@
 void GLTextureBuffer::initialize(const GLShader& a_shader, const char* a_samplerName, GLint a_textureIdx, GLenum a_sizedFormat, GLenum a_drawUsage)
 {
 	assert(a_shader.isBegun());
+	assert(!m_initialized);
+
 	m_drawUsage = a_drawUsage;
 	m_textureIdx = a_textureIdx;
 	m_sizedInternalFormat = a_sizedFormat;
@@ -33,6 +35,8 @@ void GLTextureBuffer::initialize(const GLShader& a_shader, const char* a_sampler
 
 	glBindBuffer(GL_TEXTURE_BUFFER, 0);
 	glBindTexture(GL_TEXTURE_BUFFER, 0);
+
+	m_initialized = true;
 }
 
 GLTextureBuffer::~GLTextureBuffer()
@@ -46,7 +50,8 @@ GLTextureBuffer::~GLTextureBuffer()
 void GLTextureBuffer::upload(uint a_numBytes, const void* a_data)
 {
 	assert(m_shader->isBegun());
-	if (a_numBytes > 0)
+	assert(m_initialized);
+	if (a_numBytes)
 	{
 		glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
 		glBufferData(GL_TEXTURE_BUFFER, a_numBytes, a_data, m_drawUsage);

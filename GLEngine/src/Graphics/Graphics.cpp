@@ -13,7 +13,8 @@
 
 #include <assert.h>
 
-// Step 4: the Window Procedure
+BEGIN_UNNAMED_NAMESPACE()
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -30,7 +31,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-bool Graphics::initializeWindow(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
+END_UNNAMED_NAMESPACE()
+
+Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
 {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -44,13 +47,14 @@ bool Graphics::initializeWindow(const char* a_windowName, uint a_screenWidth, ui
 	if (!m_window)
 	{
 		print("Unable to create window: %s\n", SDL_GetError());
-		return false;
 	}
 #ifdef WINDOWS
 	WindowsPlatformData::setWindowHandle(m_window);
 #endif
+}
 
-	return true;
+Graphics::~Graphics()
+{
 }
 
 void Graphics::initializeGLContext()
@@ -76,8 +80,6 @@ void Graphics::initializeGLContext()
 	glCullFace(GL_BACK);
 	glEnable(GL_MULTISAMPLE);
 	setDepthTest(true);
-
-	windowResize(m_screenWidth, m_screenHeight);
 }
 
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)
@@ -118,15 +120,6 @@ void Graphics::windowResize(uint a_screenWidth, uint a_screenHeight)
 	m_screenHeight = a_screenHeight;
 
 	glViewport(0, 0, a_screenWidth, a_screenHeight);
-
-	for (auto& listener : m_windowResizeListeners)
-		listener.second(a_screenWidth, a_screenHeight);
-}
-
-void Graphics::windowQuit()
-{
-	for (auto& listener : m_windowQuitListeners)
-		listener.second();
 }
 
 void Graphics::destroyWindow()

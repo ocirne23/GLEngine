@@ -10,18 +10,32 @@
 #include <SDL/SDL_events.h>
 #include <SDL/SDL_keyboard.h>
 
-void Input::processEvents()
+void Input::pollEvents()
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
+		m_eventQueue.push_back(*((Event*) &event));
+	}
+}
+
+void Input::processEvents()
+{
+	m_eventQueue.block();
+	for (Event& e : m_eventQueue.getBackingQueue())
+	{
+		SDL_Event& event = (SDL_Event&) e;
+
 		switch (event.type)
 		{
 		case SDL_WINDOWEVENT:
 			switch (event.window.event)
 			{
 			case SDL_WINDOWEVENT_RESIZED:
-				GLEngine::graphics->windowResize(event.window.data1, event.window.data2);
+				windowResized(event.window.data1, event.window.data2);
+				break;
+			case SDL_WINDOWEVENT_CLOSE:
+				windowQuit();
 				break;
 			}
 			break;
@@ -38,63 +52,24 @@ void Input::processEvents()
 			mouseScrolled(event.wheel.y);
 			break;
 		case SDL_KEYDOWN:
-			keyDown((Key) event.key.keysym.scancode);
+			if (!event.key.repeat)
+				keyDown((Key) event.key.keysym.scancode);
 			break;
 		case SDL_KEYUP:
 			keyUp((Key) event.key.keysym.scancode);
 			break;
 		case SDL_QUIT:
-			GLEngine::graphics->windowQuit();
+			windowQuit();
 			break;
 		}
 	}
+	m_eventQueue.getBackingQueue().clear();
+	m_eventQueue.release();
 }
 
 void Input::setMouseCaptured(bool a_captured)
 {
 	SDL_SetRelativeMouseMode((SDL_bool) a_captured);
-}
-
-void Input::keyDown(Key a_key)
-{
-	for (auto& listener : m_keyDownListeners)
-		if (listener.second(a_key))
-			break;
-}
-
-void Input::keyUp(Key a_key)
-{
-	for (auto& listener : m_keyUpListeners)
-		if (listener.second(a_key))
-			break;
-}
-
-void Input::mouseMoved(uint a_xPos, uint a_yPos, int a_deltaX, int a_deltaY)
-{
-	for (auto& listener : m_mouseMovedListeners)
-		if (listener.second(a_xPos, a_yPos, a_deltaX, a_deltaY))
-			break;
-}
-
-void Input::mouseDown(MouseButton a_button, int a_xPos, int a_yPos)
-{
-	for (auto& listener : m_mouseDownListeners)
-		if (listener.second(a_button, a_xPos, a_yPos))
-			break;
-}
-
-void Input::mouseUp(MouseButton a_button, int a_xPos, int a_yPos)
-{
-	for (auto& listener : m_mouseUpListeners)
-		if (listener.second(a_button, a_xPos, a_yPos))
-			break;
-}
-
-void Input::mouseScrolled(int a_amount)
-{
-	for (auto& listener : m_mouseScrolledListeners)
-		if (listener.second(a_amount))
-			break;
 }
 
 bool Input::isKeyPressed(Key a_key)

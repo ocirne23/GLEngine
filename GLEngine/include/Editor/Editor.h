@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Core.h"
-#include "Utils/ListenerMacros.h"
 
 #ifdef EDITOR
+
+#include "Utils/ListenerMacros.h"
 #include "Editor/EditorPipeline.h"
-#endif
 
 class Editor
 {
@@ -23,8 +23,7 @@ public:
 
 private:
 
-#ifdef EDITOR
 	EditorPipeline m_pipeLine;
-#endif
-
 };
+
+#endif // EDITOR

@@ -11,7 +11,6 @@ public:
 	~FPSControlSystem();
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
-	bool mouseMoved(uint xPos, uint yPos, int xMove, int yMove);
 
 private:
 

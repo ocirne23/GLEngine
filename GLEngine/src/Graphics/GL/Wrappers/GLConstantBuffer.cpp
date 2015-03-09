@@ -13,6 +13,8 @@ GLConstantBuffer::~GLConstantBuffer()
 
 void GLConstantBuffer::initialize(const GLShader& a_shader, GLuint a_bindingPoint, const char* a_blockName, GLenum a_drawUsage)
 {
+	assert(!m_initialized);
+
 	m_shader = &a_shader;
 	m_drawUsage = a_drawUsage;
 	m_bindingPoint = a_bindingPoint;
@@ -40,7 +42,8 @@ void GLConstantBuffer::initialize(const GLShader& a_shader, GLuint a_bindingPoin
 void GLConstantBuffer::upload(uint a_numBytes, const void* a_data)
 {
 	assert(m_shader->isBegun());
-	if (m_initialized)
+	assert(m_initialized);
+	if (a_numBytes)
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
 		glBufferData(GL_UNIFORM_BUFFER, a_numBytes, a_data, m_drawUsage);
@@ -50,8 +53,6 @@ void GLConstantBuffer::upload(uint a_numBytes, const void* a_data)
 void GLConstantBuffer::bind()
 {
 	assert(m_shader->isBegun());
-	if (m_initialized)
-	{
-		glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
-	}
+	assert(m_initialized);
+	glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
 }
