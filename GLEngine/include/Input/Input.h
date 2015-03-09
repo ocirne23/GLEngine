@@ -13,9 +13,6 @@ struct SDL_Thread;
 class Input
 {
 public:
-	Input();
-	~Input();
-
 	void processEvents();
 
 	bool isKeyPressed(Key key);
@@ -38,20 +35,4 @@ private:
 	void mouseUp(MouseButton button, int xPos, int yPos);
 	void mouseMoved(uint xPos, uint yPos, int deltaX, int deltaY);
 	void mouseScrolled(int amount);
-
-private:
-
-	static int inputThread(void* ptr);
-
-private:
-
-	struct Event
-	{
-		byte padding[56];
-	};
-
-	ConcurrentQueue<Event> m_eventQueue;
-	SDL_Thread* m_inputThread;
-	bool m_inputThreadRunning = true;
-	bool m_inputThreadHasExited = false;
 };

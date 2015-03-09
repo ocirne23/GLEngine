@@ -144,10 +144,16 @@ GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandl
 	{
 		GLint maxLength = 0;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-
-		rde::vector<GLchar> infoLog(maxLength);
-		glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-		print("link error: %s \n", &infoLog[0]);
+		if (maxLength)
+		{
+			rde::vector<GLchar> infoLog(maxLength);
+			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
+			print("link error: %s \n", &infoLog[0]);
+		}
+		else
+		{
+			print("link error, no info log available \n");
+		}
 	}
 
 	glValidateProgram(program);

@@ -61,9 +61,10 @@
     <ClCompile Include="src\Utils\FileModificationManager.cpp" />
     <ClCompile Include="src\Utils\FPSCameraController.cpp" />
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp" />
+    <ClCompile Include="src\Utils\JobScheduler.cpp" />
     <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp" />
     <ClCompile Include="src\Utils\WindowsPlatformData.cpp" />
-	<ClCompile Include="src\Utils\Semaphore.cpp" />
+    <ClCompile Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="include\Utils\FileModificationListener.h" />
     <ClInclude Include="include\Utils\FileModificationManager.h" />
     <ClInclude Include="include\Utils\FPSCameraController.h" />
+    <ClInclude Include="include\Utils\JobScheduler.h" />
     <ClInclude Include="include\Utils\getGLTextureFormat.h" />
     <ClInclude Include="include\Utils\ListenerMacros.h" />
     <ClInclude Include="include\Utils\MatForward.h" />

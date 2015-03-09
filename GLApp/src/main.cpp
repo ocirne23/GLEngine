@@ -1,37 +1,52 @@
 #include "GLEngine.h"
 
 #include "Model/ScreenManager.h"
+#include "Utils/JobScheduler.h"
 
 int main()
 {
 	GLEngine::initialize();
 	{
 		ScreenManager screenManager;
-		screenManager.setScreen(EScreenType_TESTSCREEN);
 
-		const float fpsLogDelay = 5.0f;
-
-		uint startTime = GLEngine::getTimeMs();
-		uint fpsCounter = 0;
-		float fpsTimeAccumulator = 0.0f;
-		while (!screenManager.hasQuit())
+		GLEngine::initializeRenderThread([&]()
 		{
-			GLEngine::doEngineTick();
+			JobScheduler jobScheduler;
 
-			uint currentTime = GLEngine::getTimeMs();
-			float deltaSec = (currentTime - startTime) / 1000.0f;
-			startTime = currentTime;
+			const float fpsLogDelay = 5.0f;
+			uint startTime = GLEngine::getTimeMs();
+			uint fpsCounter = 0;
+			float fpsTimeAccumulator = 0.0f;
 
-			fpsCounter++;
-			fpsTimeAccumulator += deltaSec;
-			if (fpsTimeAccumulator > fpsLogDelay)
+			jobScheduler.addJob(fpsLogDelay, [&](void* ptr)
 			{
-				print("FPS: %i \t MS: %f\n", (uint)(fpsCounter / fpsLogDelay), fpsTimeAccumulator / fpsCounter);
+				print("FPS: %i \t MS: %f\n", (uint) (fpsCounter / fpsLogDelay), fpsTimeAccumulator / fpsCounter);
 				fpsTimeAccumulator = 0.0f;
 				fpsCounter = 0;
+				return EJobRepeat_REPEAT;
+			});
+
+			screenManager.setScreen(EScreenType_TESTSCREEN);
+
+			while (!screenManager.hasQuit())
+			{
+				uint currentTime = GLEngine::getTimeMs();
+				float deltaSec = (currentTime - startTime) / 1000.0f;
+				startTime = currentTime;
+
+				fpsCounter++;
+				fpsTimeAccumulator += deltaSec;
+
+				screenManager.render(deltaSec);
+				jobScheduler.update(deltaSec);
 			}
-			screenManager.render(deltaSec);
+		});
+
+		while (!screenManager.hasQuit())
+		{
+			GLEngine::doMainThreadTick();
 		}
+
 	}
 	GLEngine::shutdown();
 	

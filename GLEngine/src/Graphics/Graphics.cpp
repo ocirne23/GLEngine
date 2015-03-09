@@ -30,7 +30,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
+bool Graphics::initializeWindow(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
 {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -50,6 +50,11 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 	WindowsPlatformData::setWindowHandle(m_window);
 #endif
 
+	return true;
+}
+
+void Graphics::initializeGLContext()
+{
 	GLVars::init(m_window);
 
 	glewExperimental = GL_TRUE;
@@ -57,14 +62,14 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 	if (res != GLEW_OK)
 	{
 		print("GLEW error: %s\n", glewGetErrorString(res));
-		return false;
+		return;
 	}
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
-	
+
 	tryEnableARBDebugOutput();
 
 	SDL_GL_SetSwapInterval(m_vsyncEnabled);
-	SDL_GetWindowSize(m_window, (int*)&m_screenWidth, (int*)&m_screenHeight);
+	SDL_GetWindowSize(m_window, (int*) &m_screenWidth, (int*) &m_screenHeight);
 	glViewport(0, 0, m_screenWidth, m_screenHeight);
 
 	glEnable(GL_CULL_FACE);
@@ -73,8 +78,6 @@ bool Graphics::initialize(const char* a_windowName, uint a_screenWidth, uint a_s
 	setDepthTest(true);
 
 	windowResize(m_screenWidth, m_screenHeight);
-
-	return true;
 }
 
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)

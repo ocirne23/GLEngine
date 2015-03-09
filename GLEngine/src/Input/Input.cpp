@@ -10,44 +10,11 @@
 #include <SDL/SDL_events.h>
 #include <SDL/SDL_keyboard.h>
 
-Input::Input()
-{
-	m_inputThread = SDL_CreateThread(&Input::inputThread, "InputThread", this);
-}
-
-Input::~Input()
-{
-	m_inputThreadRunning = false;
-	print("Waiting for input thread to exit");
-	while (!m_inputThreadHasExited)
-	{
-		GLEngine::sleep(1);
-	}
-}
-
-int Input::inputThread(void* a_ptr)
-{
-	Input* input = (Input*) a_ptr;
-	while (input->m_inputThreadRunning)
-	{
-		SDL_Event e;
-		while (SDL_PollEvent(&e))
-		{
-			Event& event = *((Event*)&e);
-			print("event: %i \n", e.type);
-			input->m_eventQueue.push_back(event);
-		}
-	}
-	input->m_inputThreadHasExited = true;
-	return 0;
-}
-
 void Input::processEvents()
 {
-	m_eventQueue.block();
-	for (Event i : m_eventQueue.getBackingQueue())
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
 	{
-		SDL_Event& event = *(SDL_Event*) &i;
 		switch (event.type)
 		{
 		case SDL_WINDOWEVENT:
@@ -81,8 +48,6 @@ void Input::processEvents()
 			break;
 		}
 	}
-	m_eventQueue.getBackingQueue().clear();
-	m_eventQueue.release();
 }
 
 void Input::setMouseCaptured(bool a_captured)

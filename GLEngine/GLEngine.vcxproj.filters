@@ -115,6 +115,8 @@
       <Filter>Source Files\Graphics\GL\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Editor\Editor.cpp" />
+    <ClCompile Include="src\Utils\Semaphore.cpp" />
+    <ClCompile Include="src\Utils\JobScheduler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Core.h">
@@ -376,7 +378,7 @@
     <ClInclude Include="include\Utils\ListenerMacros.h" />
     <ClInclude Include="include\Utils\ConcurrentQueue.h" />
     <ClInclude Include="include\Utils\Semaphore.h" />
-    <ClInclude Include="src\Utils\Semaphore.cpp" />
+    <ClInclude Include="include\Utils\JobScheduler.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

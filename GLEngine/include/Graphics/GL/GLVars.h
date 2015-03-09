@@ -19,6 +19,7 @@ public:
 	static const rde::string& getVendorStr()		{ return s_glVendor; }
 	static const rde::string& getRendererStr()		{ return s_glRenderer; }
 	static const rde::string& getDriverVersionStr() { return s_glDriverVersion; }
+	static SDL_GLContext getContext()				{ return s_glContext; }
 
 private:
 

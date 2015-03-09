@@ -45,7 +45,9 @@ private:
 	~Graphics() {}
 	Graphics(const Graphics& copy) = delete;
 
-	bool initialize(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, WindowFlags flags);
+	bool initializeWindow(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, WindowFlags flags);
+	void initializeGLContext();
+
 
 private:
 
