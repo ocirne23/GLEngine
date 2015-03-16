@@ -22,62 +22,62 @@ class RenderSystem : public entityx::System<RenderSystem>, public entityx::Recei
 {
 public:
 
-    enum UBOBindingPoints
-    {
-	UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT = 0,
-	UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT,
-	UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT,
-	UBOBindingPoints_NUM_ENGINE_RESERVED_UBO_BINDING_POINTS
-    };
+	enum UBOBindingPoints
+	{
+		UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT = 0,
+		UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT,
+		UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT,
+		UBOBindingPoints_NUM_ENGINE_RESERVED_UBO_BINDING_POINTS
+	};
 
-    enum TextureUnits
-    {
-	TextureUnits_DFV_TEXTURE = 0,
-	TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE,
-	TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE,
-	TextureUnits_MODEL_TEXTURE_ARRAY,
-	TextureUnits_NUM_ENGINE_RESERVED_TEXTURE_UNITS
-    };
+	enum TextureUnits
+	{
+		TextureUnits_DFV_TEXTURE = 0,
+		TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE,
+		TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE,
+		TextureUnits_MODEL_TEXTURE_ARRAY,
+		TextureUnits_NUM_ENGINE_RESERVED_TEXTURE_UNITS
+	};
 
 public:
 
-    RenderSystem(LightSystem& lightSystem);
-    ~RenderSystem();
+	RenderSystem(LightSystem& lightSystem);
+	~RenderSystem();
 
-    void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
-    void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
-    void configure(entityx::EventManager& eventManager);
+	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
+	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
+	void configure(entityx::EventManager& eventManager);
 
-    const GLShader& getModelShader() { return m_modelShader; }
-
-private:
-
-    void initializeShaderForCamera(const PerspectiveCamera& camera);
+	const GLShader& getModelShader() { return m_modelShader; }
 
 private:
 
-    LightSystem& m_lightSystem;
+	void initializeShaderForCamera(const PerspectiveCamera& camera);
 
-    const PerspectiveCamera* m_activeCamera = NULL;
+private:
 
-    GLTexture m_dfvTexture;
-    GLShader m_modelShader;
+	LightSystem& m_lightSystem;
 
-    GLConstantBuffer m_lightPositionRangeBuffer;
-    GLConstantBuffer m_lightColorBuffer;
+	const PerspectiveCamera* m_activeCamera = NULL;
 
-    ClusteredShading m_clusteredShading;
-    GLTextureBuffer m_lightIndiceTextureBuffer;
-    GLTextureBuffer m_lightGridTextureBuffer;
+	GLTexture m_dfvTexture;
+	GLShader m_modelShader;
 
-    GLUniform<glm::mat3> m_normalMatrixUniform;
-    GLUniform<glm::mat4> m_viewMatrixUniform;
-    GLUniform<glm::mat4> m_mvpMatrixUniform;
-    GLUniform<glm::mat4> m_transformUniform;
+	GLConstantBuffer m_lightPositionRangeBuffer;
+	GLConstantBuffer m_lightColorBuffer;
 
-    GLShader m_skyboxShader;
-    GLUniform<glm::mat3> m_skyboxNormalMatrixUniform;
-    GLUniform<glm::mat4> m_skyboxViewMatrixUniform;
-    GLUniform<glm::mat4> m_skyboxMvpMatrixUniform;
-    GLUniform<glm::mat4> m_skyboxTransformUniform;
+	ClusteredShading m_clusteredShading;
+	GLTextureBuffer m_lightIndiceTextureBuffer;
+	GLTextureBuffer m_lightGridTextureBuffer;
+
+	GLUniform<glm::mat3> m_normalMatrixUniform;
+	GLUniform<glm::mat4> m_viewMatrixUniform;
+	GLUniform<glm::mat4> m_mvpMatrixUniform;
+	GLUniform<glm::mat4> m_transformUniform;
+
+	GLShader m_skyboxShader;
+	GLUniform<glm::mat3> m_skyboxNormalMatrixUniform;
+	GLUniform<glm::mat4> m_skyboxViewMatrixUniform;
+	GLUniform<glm::mat4> m_skyboxMvpMatrixUniform;
+	GLUniform<glm::mat4> m_skyboxTransformUniform;
 };

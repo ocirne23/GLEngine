@@ -87,7 +87,7 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
 	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GL_STREAM_DRAW);
 
-	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid",TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
+	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid", TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
 	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
 	m_lightGridTextureBuffer.bind();
 	m_lightIndiceTextureBuffer.bind();
@@ -97,12 +97,12 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH);
 	m_skyboxShader.begin();
 	m_skyboxShader.setUniform1i("u_textureArray", TextureUnits_MODEL_TEXTURE_ARRAY);
-	
+
 	m_skyboxViewMatrixUniform.initialize(m_skyboxShader, "u_mv");
 	m_skyboxMvpMatrixUniform.initialize(m_skyboxShader, "u_mvp");
 	m_skyboxNormalMatrixUniform.initialize(m_skyboxShader, "u_normalMat");
 	m_skyboxTransformUniform.initialize(m_skyboxShader, "u_transform");
-	
+
 	m_skyboxShader.end();
 }
 

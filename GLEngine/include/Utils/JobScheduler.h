@@ -9,17 +9,17 @@ class JobScheduler
 {
 public:
 
-    void update(float deltaSec);
-    void addJob(float timeIntervalSec, std::function<EJobRepeat(float, void*)> func, void* ptr = NULL);
+	void update(float deltaSec);
+	void addJob(float timeIntervalSec, std::function<EJobRepeat(float, void*)> func, void* ptr = NULL);
 private:
 
-    struct Job
-    {
-	void* dataPtr;
-	float timeIntervalSec;
-	float timeAccumulator;
-	std::function<EJobRepeat(float, void*)> func;
-    };
+	struct Job
+	{
+		void* dataPtr;
+		float timeIntervalSec;
+		float timeAccumulator;
+		std::function<EJobRepeat(float, void*)> func;
+	};
 
-    rde::list<Job> m_jobs;
+	rde::list<Job> m_jobs;
 };

@@ -12,32 +12,32 @@ struct SDL_Thread;
 class EditorPipeline
 {
 public:
-    enum { MAX_COMMAND_SIZE = 1024 };
+	enum { MAX_COMMAND_SIZE = 1024 };
 
-    EditorPipeline();
-    ~EditorPipeline();
+	EditorPipeline();
+	~EditorPipeline();
 
-    void writeCommand(EditorCommands::CommandType commandType, uint numBytes, byte* bytes);
+	void writeCommand(EditorCommands::CommandType commandType, uint numBytes, byte* bytes);
 
-    struct PipelineThread
-    {
-	bool m_running = true;
-	bool m_stopped = false;
-	bool m_connected = false;
+	struct PipelineThread
+	{
+		bool m_running = true;
+		bool m_stopped = false;
+		bool m_connected = false;
 
-	SDL_semaphore* m_commandWrittenNotifier;
+		SDL_semaphore* m_commandWrittenNotifier;
 
-	ConcurrentQueue<byte*> m_concurrentQueue;
-	SDL_Thread* m_thread;
-    };
-
-private:
-
-    static int OutboundThread(void* ptr);
-    static int InboundThread(void* ptr);
+		ConcurrentQueue<byte*> m_concurrentQueue;
+		SDL_Thread* m_thread;
+	};
 
 private:
 
-    PipelineThread m_outboundThread;
-    PipelineThread m_inboundThread;
+	static int OutboundThread(void* ptr);
+	static int InboundThread(void* ptr);
+
+private:
+
+	PipelineThread m_outboundThread;
+	PipelineThread m_inboundThread;
 };

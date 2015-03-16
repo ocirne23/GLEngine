@@ -7,13 +7,13 @@
 class FPSControlSystem : public entityx::System < FPSControlSystem >
 {
 public:
-    FPSControlSystem();
-    ~FPSControlSystem();
+	FPSControlSystem();
+	~FPSControlSystem();
 
-    void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
+	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
 
 private:
 
-    int m_xMoveAmount = 0;
-    int m_yMoveAmount = 0;
+	int m_xMoveAmount = 0;
+	int m_yMoveAmount = 0;
 };

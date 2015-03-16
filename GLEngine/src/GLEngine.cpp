@@ -29,81 +29,81 @@ Editor* GLEngine::editor = NULL;
 
 void GLEngine::createRenderThread(std::function<void()> a_func)
 {
-    s_renderThread = SDL_CreateThread(&GLEngine::renderThread, "RenderThread", &a_func);
+	s_renderThread = SDL_CreateThread(&GLEngine::renderThread, "RenderThread", &a_func);
 }
 
 void GLEngine::doMainThreadTick()
 {
-    input->pollEvents();
+	input->pollEvents();
 
 #ifdef EDITOR
-    editor->updateUIPosition();
+	editor->updateUIPosition();
 #endif // EDITOR
 }
 
 void GLEngine::doRenderThreadTick()
 {
-    input->processEvents();
+	input->processEvents();
 }
 
 int GLEngine::renderThread(void* a_ptr)
 {
-    std::function<void()> func = *((std::function<void()>*) a_ptr);
-    graphics->initializeGLContext();
-    func();
-    dispose();
-    return 0;
+	std::function<void()> func = *((std::function<void()>*) a_ptr);
+	graphics->initializeGLContext();
+	func();
+	dispose();
+	return 0;
 }
 
 void GLEngine::initialize()
 {
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
-    {
-	print("%s: %s\n", "Unable to initialize SDL", SDL_GetError());
-	SDL_Quit();
-	return;
-    }
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+	{
+		print("%s: %s\n", "Unable to initialize SDL", SDL_GetError());
+		SDL_Quit();
+		return;
+	}
 
-    graphics = new Graphics(PROGRAM_NAME,
-			    INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
-			    INIT_WINDOW_XPOS, INIT_WINDOW_YPOS,
-			    (WINDOW_OPENGL | WINDOW_SHOWN | WINDOW_RESIZABLE));
-    input = new Input();
+	graphics = new Graphics(PROGRAM_NAME,
+							INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
+							INIT_WINDOW_XPOS, INIT_WINDOW_YPOS,
+							(WINDOW_OPENGL | WINDOW_SHOWN | WINDOW_RESIZABLE));
+	input = new Input();
 #ifdef EDITOR
-    editor = new Editor();
+	editor = new Editor();
 #endif
 }
 
 void GLEngine::sleep(uint a_timeMs)
 {
-    SDL_Delay(a_timeMs);
+	SDL_Delay(a_timeMs);
 }
 
 uint GLEngine::getTimeMs()
 {
-    return SDL_GetTicks();
+	return SDL_GetTicks();
 }
 
 void GLEngine::dispose()
 {
-    SAFE_DELETE(input);
-    SAFE_DELETE(graphics);
+	SAFE_DELETE(input);
+	SAFE_DELETE(graphics);
 #ifdef EDITOR
-    editor->quit();
-    SAFE_DELETE(editor);
+	editor->quit();
+	SAFE_DELETE(editor);
 #endif // EDITOR
-    SDL_Quit();
+	SDL_Quit();
 }
 
 void GLEngine::shutdown()
 {
-    s_shutdown = true;
+	s_shutdown = true;
 
-    print("da: %i : %i \n", SDL_ThreadID(), SDL_GetThreadID(s_renderThread));
+	print("da: %i : %i \n", SDL_ThreadID(), SDL_GetThreadID(s_renderThread));
 
-    if (SDL_ThreadID() != SDL_GetThreadID(s_renderThread))
-    {
-	print("Waiting for rendering thread to shut down\n");
-	SDL_WaitThread(s_renderThread, NULL);
-    }
+	if (SDL_ThreadID() != SDL_GetThreadID(s_renderThread))
+	{
+		print("Waiting for rendering thread to shut down\n");
+		SDL_WaitThread(s_renderThread, NULL);
+	}
 }

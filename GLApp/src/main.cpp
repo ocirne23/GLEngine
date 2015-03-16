@@ -6,36 +6,36 @@
 
 int main()
 {
-    GLEngine::initialize();
+	GLEngine::initialize();
 
-    DeltaTimeMeasurer deltaTimeMeasurer;
-    const float fpsLogInterval = 5.0f;
-    FPSMeasurer fpsMeasurer(fpsLogInterval, [](const FPSMeasurer& measurer)
-    {
-	uint avgFps = (uint) (measurer.getNumFramesPassed() / measurer.getTimeInterval());
-	float avgMsPerFrame = measurer.getTimePassed() / measurer.getNumFramesPassed();
-	print("FPS: %i \t MS: %f\n", avgFps, avgMsPerFrame);
-    });
+	DeltaTimeMeasurer deltaTimeMeasurer;
+	const float fpsLogInterval = 5.0f;
+	FPSMeasurer fpsMeasurer(fpsLogInterval, [](const FPSMeasurer& measurer)
+	{
+		uint avgFps = (uint) (measurer.getNumFramesPassed() / measurer.getTimeInterval());
+		float avgMsPerFrame = measurer.getTimePassed() / measurer.getNumFramesPassed();
+		print("FPS: %i \t MS: %f\n", avgFps, avgMsPerFrame);
+	});
 
-    GLEngine::createRenderThread([&]()
-    {
-	TestScreen testScreen;
+	GLEngine::createRenderThread([&]()
+	{
+		TestScreen testScreen;
+
+		while (!GLEngine::isShutdown())
+		{
+			GLEngine::doRenderThreadTick();
+
+			float deltaSec = deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs());
+
+			testScreen.render(deltaSec);
+			fpsMeasurer.tickFrame(deltaSec);
+		}
+	});
 
 	while (!GLEngine::isShutdown())
 	{
-	    GLEngine::doRenderThreadTick();
-
-	    float deltaSec = deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs());
-
-	    testScreen.render(deltaSec);
-	    fpsMeasurer.tickFrame(deltaSec);
+		GLEngine::doMainThreadTick();
 	}
-    });
 
-    while (!GLEngine::isShutdown())
-    {
-	GLEngine::doMainThreadTick();
-    }
-
-    return 0;
+	return 0;
 }

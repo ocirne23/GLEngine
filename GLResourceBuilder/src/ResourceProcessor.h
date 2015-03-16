@@ -3,7 +3,7 @@
 class ResourceProcessor
 {
 public:
-    virtual ~ResourceProcessor() {}
+	virtual ~ResourceProcessor() {}
 
-    virtual bool process(const char* inResourcePath, const char* outResourcePath) = 0;
+	virtual bool process(const char* inResourcePath, const char* outResourcePath) = 0;
 };

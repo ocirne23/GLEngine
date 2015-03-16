@@ -8,9 +8,9 @@
 class ResourceBuilder
 {
 public:
-    typedef std::unordered_map<std::string, ResourceProcessor*> ResourceProcessorMap;
-    static void buildResources(const std::unordered_map<std::string, ResourceProcessor*>& processors, const char* inDirectoryPath, const char* outDirectoryPath, bool incremental);
+	typedef std::unordered_map<std::string, ResourceProcessor*> ResourceProcessorMap;
+	static void buildResources(const std::unordered_map<std::string, ResourceProcessor*>& processors, const char* inDirectoryPath, const char* outDirectoryPath, bool incremental);
 
 private:
-    ResourceBuilder() {};
+	ResourceBuilder() {};
 };

@@ -2,7 +2,7 @@
 
 enum EResourceType
 {
-    EResourceType_MODEL,
-    EResourceType_BYTEIMAGE,
-    EResourceType_FLOATIMAGE
+	EResourceType_MODEL,
+	EResourceType_BYTEIMAGE,
+	EResourceType_FLOATIMAGE
 };

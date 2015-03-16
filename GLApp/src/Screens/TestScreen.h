@@ -10,19 +10,19 @@ class PerspectiveCamera;
 class TestScreen
 {
 public:
-    TestScreen();
-    ~TestScreen();
+	TestScreen();
+	~TestScreen();
 
-    void render(float deltaSec);
-
-private:
-
-    bool keyDown(Key key);
+	void render(float deltaSec);
 
 private:
 
-    entityx::EntityX m_entityx;
-    GLMesh* m_building = NULL;
-    GLMesh* m_skybox = NULL;
-    PerspectiveCamera* m_camera = NULL;
+	bool keyDown(Key key);
+
+private:
+
+	entityx::EntityX m_entityx;
+	GLMesh* m_building = NULL;
+	GLMesh* m_skybox = NULL;
+	PerspectiveCamera* m_camera = NULL;
 };

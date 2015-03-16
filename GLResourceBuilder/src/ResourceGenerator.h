@@ -3,7 +3,7 @@
 class ResourceGenerator
 {
 public:
-    virtual ~ResourceGenerator() {}
+	virtual ~ResourceGenerator() {}
 
-    virtual bool generate(const char* outResourcePath) = 0;
+	virtual bool generate(const char* outResourcePath) = 0;
 };

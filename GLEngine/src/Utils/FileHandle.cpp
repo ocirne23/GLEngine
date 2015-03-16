@@ -14,88 +14,88 @@ const rde::string FileHandle::ASSETS_DIR("assets/");
 
 FileHandle::FileHandle(const rde::string& a_filePath, FileMode a_fileMode) : m_rwops(0), m_size(0), m_fileMode(a_fileMode)
 {
-    initialize(a_filePath.c_str(), a_fileMode);
+	initialize(a_filePath.c_str(), a_fileMode);
 }
 
 FileHandle::FileHandle(const char* a_filePath, FileMode a_fileMode) : m_rwops(0), m_size(0), m_fileMode(a_fileMode)
 {
-    initialize(a_filePath, a_fileMode);
+	initialize(a_filePath, a_fileMode);
 }
 
 void FileHandle::initialize(const char* a_filePath, FileMode a_fileMode)
 {
-    rde::string dir(ASSETS_DIR);
-    dir.append(a_filePath);
-    a_filePath = dir.c_str();
+	rde::string dir(ASSETS_DIR);
+	dir.append(a_filePath);
+	a_filePath = dir.c_str();
 
-    char fullPath[_MAX_PATH];
-    if (!_fullpath(fullPath, a_filePath, _MAX_PATH))
-	print("Could not construct full path %s \n", a_filePath);
-    m_filePath = fullPath;
+	char fullPath[_MAX_PATH];
+	if (!_fullpath(fullPath, a_filePath, _MAX_PATH))
+		print("Could not construct full path %s \n", a_filePath);
+	m_filePath = fullPath;
 
-    const char* fileModeStr;
-    switch (a_fileMode)
-    {
-    case FileMode_READ:			fileModeStr = "rb";	break;
-    case FileMode_WRITE:		fileModeStr = "wb";	break;
-    case FileMode_READWRITE:	fileModeStr = "w+b"; break;
-    default:					return;
-    }
+	const char* fileModeStr;
+	switch (a_fileMode)
+	{
+	case FileMode_READ:			fileModeStr = "rb";	break;
+	case FileMode_WRITE:		fileModeStr = "wb";	break;
+	case FileMode_READWRITE:	fileModeStr = "w+b"; break;
+	default:					return;
+	}
 
-    m_rwops = SDL_RWFromFile(a_filePath, fileModeStr);
-    m_isOpen = (m_rwops != NULL);
-    if (!m_rwops)
-    {
-	print("Could not find or open the file %s \n", a_filePath);
-	return;
-    }
+	m_rwops = SDL_RWFromFile(a_filePath, fileModeStr);
+	m_isOpen = (m_rwops != NULL);
+	if (!m_rwops)
+	{
+		print("Could not find or open the file %s \n", a_filePath);
+		return;
+	}
 
-    m_size = (uint) SDL_RWsize(m_rwops);
+	m_size = (uint) SDL_RWsize(m_rwops);
 }
 
 FileHandle::~FileHandle()
 {
-    if (m_isOpen)
-	close();
+	if (m_isOpen)
+		close();
 }
 
 void FileHandle::readBytes(char* a_buffer, uint a_numBytes, uint a_offset) const
 {
-    assert(m_isOpen);
-    assert(a_numBytes + a_offset <= m_size);
-    assert(m_fileMode == FileMode_READ || m_fileMode == FileMode_READWRITE);
+	assert(m_isOpen);
+	assert(a_numBytes + a_offset <= m_size);
+	assert(m_fileMode == FileMode_READ || m_fileMode == FileMode_READWRITE);
 
-    SDL_RWseek(m_rwops, a_offset, RW_SEEK_SET);
-    SDL_RWread(m_rwops, a_buffer, a_numBytes, 1);
+	SDL_RWseek(m_rwops, a_offset, RW_SEEK_SET);
+	SDL_RWread(m_rwops, a_buffer, a_numBytes, 1);
 }
 
 void FileHandle::writeBytes(const char* a_bytes, uint a_numBytes)
 {
-    assert(m_isOpen);
-    assert(m_fileMode == FileMode_WRITE || m_fileMode == FileMode_READWRITE);
+	assert(m_isOpen);
+	assert(m_fileMode == FileMode_WRITE || m_fileMode == FileMode_READWRITE);
 
-    SDL_RWseek(m_rwops, 0, RW_SEEK_END);
-    SDL_RWwrite(m_rwops, a_bytes, a_numBytes, 1);
-    m_size += a_numBytes;
+	SDL_RWseek(m_rwops, 0, RW_SEEK_END);
+	SDL_RWwrite(m_rwops, a_bytes, a_numBytes, 1);
+	m_size += a_numBytes;
 }
 
 rde::string FileHandle::readString(uint a_numChars) const
 {
-    char* chars = new char[a_numChars];
-    readBytes(chars, a_numChars, 0);
-    rde::string str(chars, a_numChars);
-    delete [] chars;
-    return str;
+	char* chars = new char[a_numChars];
+	readBytes(chars, a_numChars, 0);
+	rde::string str(chars, a_numChars);
+	delete [] chars;
+	return str;
 }
 
 rde::string FileHandle::readString() const
 {
-    return readString(m_size);
+	return readString(m_size);
 }
 
 void FileHandle::close()
 {
-    assert(m_isOpen);
-    m_isOpen = false;
-    SDL_RWclose(m_rwops);
+	assert(m_isOpen);
+	m_isOpen = false;
+	SDL_RWclose(m_rwops);
 }

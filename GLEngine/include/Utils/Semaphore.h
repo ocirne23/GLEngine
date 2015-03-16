@@ -9,13 +9,13 @@ class Semaphore
 {
 public:
 
-    Semaphore(uint numPermits);
-    ~Semaphore();
+	Semaphore(uint numPermits);
+	~Semaphore();
 
-    void acquire();
-    void release();
+	void acquire();
+	void release();
 
 private:
 
-    SDL_sem* m_semaphore;
+	SDL_sem* m_semaphore;
 };
