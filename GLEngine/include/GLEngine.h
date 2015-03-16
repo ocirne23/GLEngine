@@ -16,7 +16,7 @@ class GLEngine
 public:
 
 	static void initialize();
-	static void initializeRenderThread(std::function<void()> func);
+	static void createRenderThread(std::function<void()> func);
 
 	static void doMainThreadTick();
 	static void doRenderThreadTick();

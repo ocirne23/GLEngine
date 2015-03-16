@@ -27,7 +27,7 @@ SDL_Thread* GLEngine::s_renderThread	= NULL;
 Editor* GLEngine::editor = NULL;
 #endif // EDITOR
 
-void GLEngine::initializeRenderThread(std::function<void()> a_func)
+void GLEngine::createRenderThread(std::function<void()> a_func)
 {
 	s_renderThread = SDL_CreateThread(&GLEngine::renderThread, "RenderThread", &a_func);
 }

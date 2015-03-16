@@ -29,7 +29,7 @@ vec3 rotateNormal(vec3 tangentSpaceNormal)
 }
 
 // [Burley 2012, "Physically-Based Shading at Disney"]
-vec3 Diffuse_Burley( vec3 DiffuseColor, float Roughness, float NoV, float NoL, float VoH )
+vec3 diffuseBurley( vec3 DiffuseColor, float Roughness, float NoV, float NoL, float VoH )
 {
 	float FD90 = 0.5 + 2 * VoH * VoH * Roughness;
 	float FdV = 1 + (FD90 - 1) * exp2( (-5.55473 * NoV - 6.98316) * NoV );
@@ -38,7 +38,7 @@ vec3 Diffuse_Burley( vec3 DiffuseColor, float Roughness, float NoV, float NoL, f
 }
 
 // [http://www.filmicworlds.com/2014/04/21/optimizing-ggx-shaders-with-dotlh/]
-float Specular_GGX(float roughness, float F0, float NoH, float HoL, float NoL)
+float specularGGX(float roughness, float F0, float NoH, float HoL, float NoL)
 {
 	float D = texture(u_dfvTexture, vec2(NoH * NoH * NoH * NoH, roughness)).x;
 	vec2 FVhelper = texture(u_dfvTexture, vec2(HoL, roughness)).yz;
@@ -46,9 +46,9 @@ float Specular_GGX(float roughness, float F0, float NoH, float HoL, float NoL)
 	return D * FV * NoL;
 }
 
-float inverseSquareFalloff(float dist, float lightRange)
+float inverseSquareFalloff(float lightDistance, float lightRange)
 {
-	return pow(max(1.0 - pow((dist / lightRange), 4), 0), 2) / (pow(dist, 2) + 1);
+	return pow(max(1.0 - pow((lightDistance / lightRange), 4), 0), 2) / (pow(lightDistance, 2) + 1);
 }
 
 void doLight(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse, float roughness, float F0, vec3 P, vec3 N, vec3 V, Light light)
@@ -58,8 +58,8 @@ void doLight(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse, fl
 	vec4 lightColorIntensity = light.colorIntensity;
 
 	vec3 L = lightPos - P;
-	float dist = length(L);
-	L /= dist;
+	float lightDistance = length(L);
+	L /= lightDistance;
 	vec3 H = normalize(L + V);
 	
 	float NdotL = clamp(dot(N, L), 0.0, 1.0);
@@ -67,12 +67,12 @@ void doLight(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse, fl
 	float HdotL = clamp(dot(H, L), 0.0, 1.0);
 	float NdotV = clamp(dot(N, V), 0.0, 1.0);
 	float VdotH = clamp(dot(V, H), 0.0, 1.0);
-	float atten = inverseSquareFalloff(dist, lightRange);
+	float attenuation = inverseSquareFalloff(lightDistance, lightRange);
 
-	vec3 lightContrib = lightColorIntensity.rgb * atten * lightColorIntensity.a;
+	vec3 lightContrib = lightColorIntensity.rgb * attenuation * lightColorIntensity.a;
 	
-	specularContrib = lightContrib * Specular_GGX(roughness, F0, NdotH, HdotL, NdotL);
-	diffuseContrib = lightContrib * Diffuse_Burley(diffuse, roughness, NdotV, NdotL, VdotH);
+	specularContrib = lightContrib * specularGGX(roughness, F0, NdotH, HdotL, NdotL);
+	diffuseContrib = lightContrib * diffuseBurley(diffuse, roughness, NdotV, NdotL, VdotH);
 }
 
 void main()
@@ -96,15 +96,11 @@ void main()
 	{
 		vec3 diffuseContrib, specularContrib;
 		doLight(diffuseContrib, specularContrib, diffuse, 1.0 - roughness, F0, v_position, N, V, light);
-//#define VISUALIZE_LIGHT_CULLING
-#ifdef VISUALIZE_LIGHT_CULLING
-		diffuseAccum += vec3(0.0, 0.1, 0.0);
-#endif //VISUALIZE_LIGHT_CULLING
 		diffuseAccum += diffuseContrib;
 		specularAccum += specularContrib;
 	}
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
-	
-	//out_color = vec4(vec3(length(v_normal)), 1.0) + vec4(diffuseAccum + specularAccum, 1.0) * 0.00000000001; // for testing values without unused errors
+
+	// out_color = vec4(vec3(v_normal), 1.0) + out_color * 0.00000000001; // for testing values without unused variable errors
 }

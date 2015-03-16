@@ -8,16 +8,17 @@ int main()
 {
 	GLEngine::initialize();
 
-	GLEngine::initializeRenderThread([]()
+	DeltaTimeMeasurer deltaTimeMeasurer;
+	const float fpsLogInterval = 5.0f;
+	FPSMeasurer fpsMeasurer(fpsLogInterval, [](const FPSMeasurer& measurer)
 	{
-		FPSMeasurer fpsMeasurer(5.0f, [](const FPSMeasurer& measurer)
-		{
-			print("FPS: %i \t MS: %f\n", 
-				  (uint) (measurer.getNumFramesPassed() / measurer.getTimeInterval()), 
-				  measurer.getTimePassed() / measurer.getNumFramesPassed());
-		});
-
-		DeltaTimeMeasurer deltaTimeMeasurer;
+		uint avgFps = (uint)(measurer.getNumFramesPassed() / measurer.getTimeInterval());
+		float avgMsPerFrame = measurer.getTimePassed() / measurer.getNumFramesPassed();
+		print("FPS: %i \t MS: %f\n", avgFps, avgMsPerFrame);
+	});
+	
+	GLEngine::createRenderThread([&]()
+	{
 		TestScreen testScreen;
 
 		while (!GLEngine::isShutdown())
