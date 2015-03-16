@@ -12,9 +12,7 @@ int main()
 	const float fpsLogInterval = 5.0f;
 	FPSMeasurer fpsMeasurer(fpsLogInterval, [](const FPSMeasurer& measurer)
 	{
-		uint avgFps = (uint) (measurer.getNumFramesPassed() / measurer.getTimeInterval());
-		float avgMsPerFrame = measurer.getTimePassed() / measurer.getNumFramesPassed();
-		print("FPS: %i \t MS: %f\n", avgFps, avgMsPerFrame);
+		print("FPS: %i \t MS: %f\n", measurer.getAvgFps(), measurer.getAvgMsPerFrame());
 	});
 
 	GLEngine::createRenderThread([&]()

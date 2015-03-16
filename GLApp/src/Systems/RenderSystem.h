@@ -18,7 +18,7 @@ struct CameraComponent;
 class PerspectiveCamera;
 class LightSystem;
 
-class RenderSystem : public entityx::System<RenderSystem>, public entityx::Receiver < RenderSystem >
+class RenderSystem : public entityx::System<RenderSystem>, public entityx::Receiver<RenderSystem>
 {
 public:
 
