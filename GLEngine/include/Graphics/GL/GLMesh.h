@@ -17,9 +17,9 @@ struct MaterialProperty
 	glm::vec4 diffuseTexMapping;
 	glm::vec4 normalTexMapping;
 	int diffuseAtlasNr = -1;
-	int bumpAtlasNr = -1;
-	int padding = 0;
-	int padding2 = 0;
+	int bumpAtlasNr    = -1;
+	int padding        = 0;
+	int padding2       = 0;
 };
 
 class GLShader;

@@ -22,10 +22,10 @@ public:
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 
-	bool isLoaded() const { return m_textureID != 0; }
-	GLuint getTextureID() const { return m_textureID; }
-	uint getWidth() const { return m_width; }
-	uint getHeight() const { return m_height; }
+	bool isLoaded() const         { return m_textureID != 0; }
+	GLuint getTextureID() const   { return m_textureID; }
+	uint getWidth() const         { return m_width; }
+	uint getHeight() const        { return m_height; }
 	byte getNumComponents() const { return m_numComponents; }
 
 private:
