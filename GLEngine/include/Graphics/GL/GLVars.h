@@ -9,34 +9,34 @@ typedef void* SDL_GLContext;
 class GLVars
 {
 public:
-	static void init(SDL_Window* window);
-	static void dispose();
+    static void init(SDL_Window* window);
+    static void dispose();
 
-	static uint getGLMajorVersion()					{ return s_glMajorVersion; }
-	static uint getGLMinorVersion()					{ return s_glMinorVersion; }
-	static uint getMaxTextureUnits()				{ return s_maxTextureUnits; }
-	static uint getUBOMaxSize()						{ return s_uboMaxSize; }
-	static const rde::string& getVendorStr()		{ return s_glVendor; }
-	static const rde::string& getRendererStr()		{ return s_glRenderer; }
-	static const rde::string& getDriverVersionStr() { return s_glDriverVersion; }
-	static SDL_GLContext getContext()				{ return s_glContext; }
-
-private:
-
-	GLVars() {}
-	~GLVars() {}
-	GLVars(const GLVars& copy) = delete;
+    static uint getGLMajorVersion() { return s_glMajorVersion; }
+    static uint getGLMinorVersion() { return s_glMinorVersion; }
+    static uint getMaxTextureUnits() { return s_maxTextureUnits; }
+    static uint getUBOMaxSize() { return s_uboMaxSize; }
+    static const rde::string& getVendorStr() { return s_glVendor; }
+    static const rde::string& getRendererStr() { return s_glRenderer; }
+    static const rde::string& getDriverVersionStr() { return s_glDriverVersion; }
+    static SDL_GLContext getContext() { return s_glContext; }
 
 private:
 
-	static SDL_GLContext s_glContext;
+    GLVars() {}
+    ~GLVars() {}
+    GLVars(const GLVars& copy) = delete;
 
-	static uint s_glMajorVersion;
-	static uint s_glMinorVersion;
-	static uint s_maxTextureUnits;
-	static uint s_uboMaxSize;
+private:
 
-	static rde::string s_glVendor;
-	static rde::string s_glRenderer;
-	static rde::string s_glDriverVersion;
+    static SDL_GLContext s_glContext;
+
+    static uint s_glMajorVersion;
+    static uint s_glMinorVersion;
+    static uint s_maxTextureUnits;
+    static uint s_uboMaxSize;
+
+    static rde::string s_glVendor;
+    static rde::string s_glRenderer;
+    static rde::string s_glDriverVersion;
 };

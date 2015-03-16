@@ -10,27 +10,27 @@
 enum { INCREMENTAL_BUILDING = false };
 
 int main()
-{	
-	ByteImageProcessor byteImageProcessor;
-	FloatImageProcessor floatImageProcessor;
-	ModelProcessor modelProcessor;
+{
+    ByteImageProcessor byteImageProcessor;
+    FloatImageProcessor floatImageProcessor;
+    ModelProcessor modelProcessor;
 
-	ResourceBuilder::ResourceProcessorMap imageProcessors = {
-		{ "png", &byteImageProcessor }, { "tga", &byteImageProcessor },
-		{ "bmp", &byteImageProcessor }, { "jpg", &byteImageProcessor }, 
-		{ "hdr", &floatImageProcessor }
-	};
-	ResourceBuilder::ResourceProcessorMap modelProcessors = {
-		{ "obj", &modelProcessor }
-	};
-	
-	ResourceBuilder::buildResources(imageProcessors, "..\\GLApp\\assets-source\\Utils", "..\\GLApp\\assets\\Utils", INCREMENTAL_BUILDING);
-	ResourceBuilder::buildResources(modelProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
+    ResourceBuilder::ResourceProcessorMap imageProcessors = {
+	{"png", &byteImageProcessor}, {"tga", &byteImageProcessor},
+	{"bmp", &byteImageProcessor}, {"jpg", &byteImageProcessor},
+	{"hdr", &floatImageProcessor}
+    };
+    ResourceBuilder::ResourceProcessorMap modelProcessors = {
+	{"obj", &modelProcessor}
+    };
 
-	printf("Press enter to continue.");
-	std::cin.ignore();
+    ResourceBuilder::buildResources(imageProcessors, "..\\GLApp\\assets-source\\Utils", "..\\GLApp\\assets\\Utils", INCREMENTAL_BUILDING);
+    ResourceBuilder::buildResources(modelProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
 
-	return 0;
+    printf("Press enter to continue.");
+    std::cin.ignore();
+
+    return 0;
 }
 
 #else // !_WIN64

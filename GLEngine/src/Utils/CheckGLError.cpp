@@ -27,18 +27,18 @@
 
 bool checkGLError(const char *a_file, int a_line)
 {
-	bool error = false;
+    bool error = false;
 
-	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError())
-	{
-		error = true;
-		const GLubyte* str;
-		str = gluErrorString(glErr);
-		if (!str)
-			str = reinterpret_cast<const GLubyte *>("No Error message available.");
+    for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError())
+    {
+	error = true;
+	const GLubyte* str;
+	str = gluErrorString(glErr);
+	if (!str)
+	    str = reinterpret_cast<const GLubyte *>("No Error message available.");
 
-		printf("GL Error in file: %s at line %i Error %i: %s \n", a_file, a_line, glErr, str);
-	}
+	printf("GL Error in file: %s at line %i Error %i: %s \n", a_file, a_line, glErr, str);
+    }
 
-	return error;
+    return error;
 }

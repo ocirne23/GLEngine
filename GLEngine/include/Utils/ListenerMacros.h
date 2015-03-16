@@ -9,7 +9,7 @@ BEGIN_NAMESPACE(ListenerUtils)
 template <typename Object, typename ReturnType, typename... Args>
 static std::function<ReturnType(Args...)> bindFunction(ReturnType(Object::*MemPtr)(Args...), Object* obj)
 {
-	return [=](Args... args) -> ReturnType { return (obj->*MemPtr)(args...); };
+    return [=](Args... args) -> ReturnType { return (obj->*MemPtr)(args...); };
 }
 
 END_NAMESPACE(ListenerUtils)

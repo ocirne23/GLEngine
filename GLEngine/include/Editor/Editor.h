@@ -10,20 +10,20 @@
 class Editor
 {
 public:
-	Editor();
+    Editor();
 
-	void quit();
-	void updateUIPosition();
+    void quit();
+    void updateUIPosition();
 
-	void sendTest0Message();
-	void sendTest1Message();
+    void sendTest0Message();
+    void sendTest1Message();
 
-	DECLARE_LISTENER(TestButtonClick, void);
-	DECLARE_LISTENER(ResizeButtonClick, void);
+    DECLARE_LISTENER(TestButtonClick, void);
+    DECLARE_LISTENER(ResizeButtonClick, void);
 
 private:
 
-	EditorPipeline m_pipeLine;
+    EditorPipeline m_pipeLine;
 };
 
 #endif // EDITOR

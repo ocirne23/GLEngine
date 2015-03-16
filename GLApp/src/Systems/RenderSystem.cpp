@@ -116,9 +116,7 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 {
 	FileModificationManager::update();
 
-	//GLEngine::graphics->clear(glm::vec4(0.4f, 0.7f, 1.0f, 1.0f));
 	GLEngine::graphics->clear(glm::vec4(0), false, true);
-	//GLEngine::graphics->clear(glm::vec4(0.1f, 0.0f, 0.0f, 1.0f));
 
 	if (m_activeCamera)
 	{
@@ -128,48 +126,49 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		GLEngine::graphics->setDepthTest(false);
 
 		m_skyboxShader.begin();
-
-		m_skyboxMvpMatrixUniform.set(camera.getCombinedMatrix());
-		m_skyboxViewMatrixUniform.set(camera.getViewMatrix());
-		m_skyboxNormalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
-
-		entityx::ComponentHandle<TransformComponent> skyboxTrans;
-		entityx::ComponentHandle<SkyComponent> skybox;
-		for (entityx::Entity entity : a_entities.entities_with_components(skyboxTrans, skybox))
 		{
-			glm::mat4 trans = skyboxTrans->transform;
-			glm::vec3 pos = camera.getPosition();
+			m_skyboxMvpMatrixUniform.set(camera.getCombinedMatrix());
+			m_skyboxViewMatrixUniform.set(camera.getViewMatrix());
+			m_skyboxNormalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
 
-			if (skybox->centerOnCamera)
-				trans[3] = glm::vec4(pos, 1.0f);
+			entityx::ComponentHandle<TransformComponent> transform;
+			entityx::ComponentHandle<SkyComponent> sky;
+			for (entityx::Entity entity : a_entities.entities_with_components(transform, sky))
+			{
+				glm::mat4 trans = transform->transform;
+				glm::vec3 pos = camera.getPosition();
 
-			m_skyboxTransformUniform.set(trans);
-			skybox->mesh->render(m_skyboxShader);
+				if (sky->centerOnCamera)
+					trans[3] = glm::vec4(pos, 1.0f);
+
+				m_skyboxTransformUniform.set(trans);
+				sky->mesh->render(m_skyboxShader);
+			}
 		}
 		m_skyboxShader.end();
 
 		GLEngine::graphics->setDepthTest(true);
 
 		m_modelShader.begin();
-
-		m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
-		m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
-		m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorIntensityList());
-		m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
-		m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
-
-		m_mvpMatrixUniform.set(camera.getCombinedMatrix());
-		m_viewMatrixUniform.set(camera.getViewMatrix());
-		m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
-
-		entityx::ComponentHandle<TransformComponent> transform;
-		entityx::ComponentHandle<ModelComponent> model;
-		for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
 		{
-			m_transformUniform.set(transform->transform);
-			model->mesh->render(m_modelShader);
-		}
+			m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
+			m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
+			m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorIntensityList());
+			m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
+			m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
 
+			m_mvpMatrixUniform.set(camera.getCombinedMatrix());
+			m_viewMatrixUniform.set(camera.getViewMatrix());
+			m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
+
+			entityx::ComponentHandle<TransformComponent> transform;
+			entityx::ComponentHandle<ModelComponent> model;
+			for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
+			{
+				m_transformUniform.set(transform->transform);
+				model->mesh->render(m_modelShader);
+			}
+		}
 		m_modelShader.end();
 	}
 

@@ -11,35 +11,35 @@ static const uint MAX_GL_MINOR_VERSION = 5;
 
 SDL_GLContext createHighestGLContext(SDL_Window* a_window, uint& a_outMaxMajorVersion, uint& a_outMaxMinorVersion)
 {
-	SDL_GLContext context = NULL;
+    SDL_GLContext context = NULL;
 
-	int major = MAX_GL_MAJOR_VERSION;
-	int minor;
-	for (; major >= 0; --major)
+    int major = MAX_GL_MAJOR_VERSION;
+    int minor;
+    for (; major >= 0; --major)
+    {
+	minor = MAX_GL_MINOR_VERSION;
+	for (; minor >= 0; --minor)
 	{
-		minor = MAX_GL_MINOR_VERSION;
-		for (; minor >= 0; --minor)
-		{
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
-			context = SDL_GL_CreateContext(a_window);
-			if (context)
-				goto breakLoop;
-		}
+	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
+	    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
+	    context = SDL_GL_CreateContext(a_window);
+	    if (context)
+		goto breakLoop;
 	}
+    }
 breakLoop:
 
-	if (!context)
-	{
-		print("Failed to create OpenGL context\n");
-		a_outMaxMajorVersion = 0;
-		a_outMaxMinorVersion = 0;
-		return NULL;
-	}
+    if (!context)
+    {
+	print("Failed to create OpenGL context\n");
+	a_outMaxMajorVersion = 0;
+	a_outMaxMinorVersion = 0;
+	return NULL;
+    }
 
-	a_outMaxMajorVersion = major;
-	a_outMaxMinorVersion = minor;
-	return context;
+    a_outMaxMajorVersion = major;
+    a_outMaxMinorVersion = minor;
+    return context;
 }
 
 END_UNNAMED_NAMESPACE()
@@ -57,15 +57,15 @@ rde::string GLVars::s_glDriverVersion;
 
 void GLVars::init(SDL_Window* a_window)
 {
-	s_glContext = createHighestGLContext(a_window, s_glMajorVersion, s_glMinorVersion);
-	s_glVendor = (const char*) glGetString(GL_VENDOR);
-	s_glRenderer = (const char*) glGetString(GL_RENDERER);
-	s_glDriverVersion = (const char*) glGetString(GL_VERSION);
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*) &s_maxTextureUnits);
-	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, (GLint*) &s_uboMaxSize);
+    s_glContext = createHighestGLContext(a_window, s_glMajorVersion, s_glMinorVersion);
+    s_glVendor = (const char*) glGetString(GL_VENDOR);
+    s_glRenderer = (const char*) glGetString(GL_RENDERER);
+    s_glDriverVersion = (const char*) glGetString(GL_VERSION);
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*) &s_maxTextureUnits);
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, (GLint*) &s_uboMaxSize);
 }
 
 void GLVars::dispose()
 {
-	SDL_GL_DeleteContext(s_glContext);
+    SDL_GL_DeleteContext(s_glContext);
 }

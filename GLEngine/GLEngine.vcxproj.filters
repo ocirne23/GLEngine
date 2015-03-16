@@ -379,7 +379,6 @@
     <ClInclude Include="include\Utils\ConcurrentQueue.h" />
     <ClInclude Include="include\Utils\Semaphore.h" />
     <ClInclude Include="include\Utils\JobScheduler.h" />
-    <ClInclude Include="include\Graphics\RenderThread.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
