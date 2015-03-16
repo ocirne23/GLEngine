@@ -27,10 +27,9 @@ public:
 	void setVsync(bool enabled);
 	void setDepthTest(bool enabled);
 
-	SDL_Window* getWindow() { return m_window; }
-	bool hasWindow() const { return m_window != NULL; }
-
-	uint getScreenWidth() const { return m_screenWidth; }
+	SDL_Window* getWindow()      { return m_window; }
+	bool hasWindow() const       { return m_window != NULL; }
+	uint getScreenWidth() const  { return m_screenWidth; }
 	uint getScreenHeight() const { return m_screenHeight; }
 	bool getVsyncEnabled() const { return m_vsyncEnabled; }
 
@@ -46,7 +45,7 @@ private:
 private:
 
 	SDL_Window* m_window = NULL;
-	uint m_screenWidth = 0;
-	uint m_screenHeight = 0;
-	bool m_vsyncEnabled = false;
+	uint m_screenWidth   = 0;
+	uint m_screenHeight  = 0;
+	bool m_vsyncEnabled  = false;
 };

@@ -20,6 +20,6 @@ public:
 private:
 
 	const GLShader* m_shader = NULL;
-	GLint m_uniformLoc = 0;
-	T m_value = (T) 0;
+	GLint m_uniformLoc       = 0;
+	T m_value                = (T) 0;
 };

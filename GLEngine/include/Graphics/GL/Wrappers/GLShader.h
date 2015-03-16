@@ -43,8 +43,8 @@ public:
 private:
 
 	bool m_initialized = false;
-	bool m_begun = false;
-	GLuint m_shaderID = 0;
+	bool m_begun       = false;
+	GLuint m_shaderID  = 0;
 	UniformLocMap m_uniformLocMap;
 
 private:

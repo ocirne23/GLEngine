@@ -8,5 +8,5 @@ struct SkyComponent
 	SkyComponent(GLMesh* mesh) : mesh(mesh) {}
 
 	bool centerOnCamera = true;
-	GLMesh* mesh = NULL;
+	GLMesh* mesh        = NULL;
 };

@@ -23,7 +23,7 @@ static const char* MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
 static const char* MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
 static const char* SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
 
-static const unsigned int TILE_WIDTH_PX = 32;
+static const unsigned int TILE_WIDTH_PX  = 32;
 static const unsigned int TILE_HEIGHT_PX = 32;
 
 END_UNNAMED_NAMESPACE()

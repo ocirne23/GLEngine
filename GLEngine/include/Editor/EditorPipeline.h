@@ -21,8 +21,8 @@ public:
 
 	struct PipelineThread
 	{
-		bool m_running = true;
-		bool m_stopped = false;
+		bool m_running   = true;
+		bool m_stopped   = false;
 		bool m_connected = false;
 
 		SDL_semaphore* m_commandWrittenNotifier;

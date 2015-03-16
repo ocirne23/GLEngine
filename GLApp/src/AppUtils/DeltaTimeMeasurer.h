@@ -22,6 +22,6 @@ public:
 
 private:
 
-	float m_deltaSec;
+	float m_deltaSec = 0.0f;
 	uint m_startTime = 0xFFFFFFFF;
 };

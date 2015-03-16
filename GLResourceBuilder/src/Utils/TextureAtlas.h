@@ -22,11 +22,11 @@ public:
 
 public:
 
-	int m_width = 0;
-	int m_height = 0;
-	int m_numComponents = 0;
-	int m_numMipMaps = 0;
-	int m_padding = 0;
+	int m_width           = 0;
+	int m_height          = 0;
+	int m_numComponents   = 0;
+	int m_numMipMaps      = 0;
+	int m_padding         = 0;
 	unsigned char* m_data = 0;
 
 private:
@@ -35,13 +35,12 @@ private:
 	{
 		~Node();
 
-		Node* left = 0;
+		Node* left  = 0;
 		Node* right = 0;
-
-		int x = 0;
-		int y = 0;
-		int width = 0;
-		int height = 0;
+		int x       = 0;
+		int y       = 0;
+		int width   = 0;
+		int height  = 0;
 	};
 
 	const Node* getRegion(Node *node, int width, int height);

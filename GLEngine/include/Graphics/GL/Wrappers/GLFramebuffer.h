@@ -25,8 +25,8 @@ public:
 
 private:
 
-	bool m_begun = false;
-	GLuint m_fbo = 0;
+	bool m_begun          = false;
+	GLuint m_fbo          = 0;
 	GLuint m_depthTexture = 0;
 
 	rde::vector<GLuint> m_textures;

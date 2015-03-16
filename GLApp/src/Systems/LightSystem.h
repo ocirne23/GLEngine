@@ -34,6 +34,6 @@ private:
 
 	LightManager m_lightManager;
 
-	const PerspectiveCamera* m_activeCamera = NULL;
+	const PerspectiveCamera* m_activeCamera            = NULL;
 	const glm::vec4* m_viewspaceLightPositionRangeList = NULL;
 };

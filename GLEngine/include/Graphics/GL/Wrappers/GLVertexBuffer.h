@@ -19,11 +19,11 @@ struct VertexAttribute
 		m_normalize(normalize)
 	{}
 
-	uint m_attributeIndex = 0;
+	uint m_attributeIndex       = 0;
 	const char* m_attributeName = NULL;
-	EFormat m_format = EFormat_UNSIGNED_BYTE;
-	uint m_numElements = 0;
-	bool m_normalize = false;
+	EFormat m_format            = EFormat_UNSIGNED_BYTE;
+	uint m_numElements          = 0;
+	bool m_normalize            = false;
 };
 
 
@@ -46,8 +46,8 @@ public:
 
 private:
 
-	bool m_initialized = false;
-	GLuint m_id = 0;
+	bool m_initialized  = false;
+	GLuint m_id         = 0;
 	GLenum m_bufferType = 0;
-	GLenum m_drawUsage = 0;
+	GLenum m_drawUsage  = 0;
 };

@@ -40,16 +40,16 @@ private:
 
 	void initializeUBO(const GLShader& shader);
 
-	bool m_initialized = false;
+	bool m_initialized                   = false;
 	GLStateBuffer m_stateBuffer;
-	GLVertexBuffer* m_indiceBuffer = NULL;
-	GLVertexBuffer* m_vertexBuffer = NULL;
-	uint m_matUBOBindingPoint = 0;
+	GLVertexBuffer* m_indiceBuffer       = NULL;
+	GLVertexBuffer* m_vertexBuffer       = NULL;
+	uint m_matUBOBindingPoint            = 0;
 	GLConstantBuffer* m_matUniformBuffer = NULL;
-	uint m_textureUnit = 0;
+	uint m_textureUnit                   = 0;
 	GLTextureArray m_textureArray;
-	uint m_numTransparentMeshes = 0;
-	uint m_numIndices = 0;
+	uint m_numTransparentMeshes          = 0;
+	uint m_numIndices                    = 0;
 
 	rde::vector<MaterialProperty> m_matProperties;
 };

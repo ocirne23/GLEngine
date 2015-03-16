@@ -34,9 +34,9 @@ private:
 
 private:
 
-	bool m_initialized = false;
-	GLuint m_textureID = 0;
-	uint m_width = 0;
-	uint m_height = 0;
+	bool m_initialized   = false;
+	GLuint m_textureID   = 0;
+	uint m_width         = 0;
+	uint m_height        = 0;
 	byte m_numComponents = 0;
 };

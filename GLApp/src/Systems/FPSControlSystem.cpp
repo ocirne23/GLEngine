@@ -14,9 +14,9 @@ BEGIN_UNNAMED_NAMESPACE()
 static const glm::vec3 UP(0, 1, 0);
 static const glm::vec3 FORWARD(0, 0, -1);
 
-static const float BASE_CAMERA_SPEED = 1.0f;
+static const float MOUSE_LOOK_SENSITIVITY     = 0.7f;
+static const float BASE_CAMERA_SPEED          = 1.0f;
 static const float BASE_DIAGONAL_CAMERA_SPEED = glm::sqrt(0.5f);
-static const float MOUSE_LOOK_SENSITIVITY = 0.7f;
 
 END_UNNAMED_NAMESPACE()
 

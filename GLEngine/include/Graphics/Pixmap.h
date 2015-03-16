@@ -19,9 +19,9 @@ public:
 
 public:
 
-	bool m_isFloatData = false;
-	int m_width = 0;
-	int m_height = 0;
+	bool m_isFloatData  = false;
+	int m_width         = 0;
+	int m_height        = 0;
 	int m_numComponents = 0;
 	PixmapData m_data;
 };

@@ -33,12 +33,12 @@ public:
 
 private:
 
-	bool m_initialized = false;
-	uint m_width = 0;
-	uint m_height = 0;
-	uint m_numMipmaps = 0;
-	uint m_numComponents = 0;
-	bool m_isFloatTexture = false;
+	bool m_initialized     = false;
+	uint m_width           = 0;
+	uint m_height          = 0;
+	uint m_numMipmaps      = 0;
+	uint m_numComponents   = 0;
+	bool m_isFloatTexture  = false;
 	bool m_generateMipMaps = false;
-	GLuint m_textureID = 0;
+	GLuint m_textureID     = 0;
 };

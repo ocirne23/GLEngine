@@ -24,8 +24,8 @@ public:
 private:
 
 	bool m_initialized = false;
-	bool m_isBegun = false;
-	GLuint m_vao = 0;
+	bool m_isBegun     = false;
+	GLuint m_vao       = 0;
 
 private:
 

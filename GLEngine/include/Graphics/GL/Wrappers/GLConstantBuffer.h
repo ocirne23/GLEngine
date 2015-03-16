@@ -21,10 +21,10 @@ public:
 
 private:
 
-	bool m_initialized = false;
+	bool m_initialized       = false;
 	const GLShader* m_shader = NULL;
-	GLenum m_drawUsage = 0;
-	GLuint m_ubo = 0;
-	GLuint m_bindingPoint = 0;
-	GLuint m_uboIndex = 0;
+	GLenum m_drawUsage       = 0;
+	GLuint m_ubo             = 0;
+	GLuint m_bindingPoint    = 0;
+	GLuint m_uboIndex        = 0;
 };

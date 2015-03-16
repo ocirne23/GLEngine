@@ -33,21 +33,21 @@ public:
 	const glm::vec3& getLightColor(LightHandle light) const;
 	float getLightIntensity(LightHandle light) const;
 
-	uint getNumLights() const { return m_numUsedLights; }
+	uint getNumLights() const                         { return m_numUsedLights; }
 	const glm::vec4* getLightColorIntensities() const { return m_lightColorIntensities; }
-	const glm::vec4* getLightPositionRanges() const { return m_lightPositionRanges; }
-	glm::vec4* getLightColorIntensities() { return m_lightColorIntensities; }
-	glm::vec4* getLightPositionRanges() { return m_lightPositionRanges; }
+	const glm::vec4* getLightPositionRanges() const   { return m_lightPositionRanges; }
+	const glm::vec4* getLightColorIntensities() const { return m_lightColorIntensities; }
+	const glm::vec4* getLightPositionRanges() const   { return m_lightPositionRanges; }
 
 	const glm::vec4* updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera);
 
 private:
 
-	uint m_maxLights = 0;
-	uint m_numUsedLights = 0;
+	uint m_maxLights       = 0;
+	uint m_numUsedLights   = 0;
 	ushort* m_lightHandles = NULL;
 
 	glm::vec4* m_viewspaceLightPositionRanges = NULL;
-	glm::vec4* m_lightPositionRanges = NULL;
-	glm::vec4* m_lightColorIntensities = NULL;
+	glm::vec4* m_lightPositionRanges          = NULL;
+	glm::vec4* m_lightColorIntensities        = NULL;
 };
