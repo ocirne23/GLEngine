@@ -3,7 +3,11 @@
 #include <functional>
 #include "rde/list.h"
 
-enum EJobRepeat { EJobRepeat_REPEAT, EJobRepeat_NOREPEAT };
+enum class EJobRepeat 
+{ 
+	REPEAT, 
+	NOREPEAT
+};
 
 class JobScheduler
 {

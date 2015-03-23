@@ -10,10 +10,10 @@ class FileHandle
 {
 public:
 
-	enum FileMode { FileMode_READ, FileMode_WRITE, FileMode_READWRITE };
+	enum class EFileMode { READ, WRITE, READWRITE };
 
-	FileHandle(const rde::string& filePath, FileMode fileMode = FileMode_READ);
-	FileHandle(const char* path, FileMode fileMode = FileMode_READ);
+	FileHandle(const rde::string& filePath, EFileMode fileMode = EFileMode::READ);
+	FileHandle(const char* path, EFileMode fileMode = EFileMode::READ);
 	~FileHandle();
 
 	void close();
@@ -33,12 +33,12 @@ public:
 
 private:
 
-	void initialize(const char* path, FileMode fileMode);
+	void initialize(const char* path, EFileMode fileMode);
 
 private:
 
 	rde::string m_filePath;
-	FileMode m_fileMode = FileMode_READ;
+	EFileMode m_fileMode = EFileMode::READ;
 	uint m_size         = 0;
 	bool m_isOpen       = false;
 	SDL_RWops* m_rwops  = NULL;

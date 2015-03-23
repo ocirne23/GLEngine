@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include "Input/Key.h"
+#include "Input/EKey.h"
 #include "entityx/entityx.h"
 
 class GLMesh;
@@ -17,7 +17,7 @@ public:
 
 private:
 
-	bool keyDown(Key key);
+	bool keyDown(EKey key);
 
 private:
 

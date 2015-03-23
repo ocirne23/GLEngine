@@ -16,7 +16,7 @@
 #include "Utils/FileHandle.h"
 
 #include "Input/Input.h"
-#include "Input/Key.h"
+#include "Input/EKey.h"
 
 #include "rde/rde_string.h"
 
@@ -85,7 +85,7 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, GLuint a_m
 
 	int type;
 	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
-	assert(type == EResourceType_MODEL);
+	assert(type == (int) EResourceType::MODEL);
 
 	int numAtlases;
 	file.readBytes(reinterpret_cast<char*>(&numAtlases), sizeof(int), sizeof(int) * 1);
@@ -112,12 +112,12 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, GLuint a_m
 
 	VertexAttribute attributes [] =
 	{
-		VertexAttribute(0, "Position", VertexAttribute::EFormat::EFormat_FLOAT, 3),
-		VertexAttribute(1, "Texcoords", VertexAttribute::EFormat::EFormat_FLOAT, 2),
-		VertexAttribute(2, "Normals", VertexAttribute::EFormat::EFormat_FLOAT, 3),
-		VertexAttribute(3, "Tangents", VertexAttribute::EFormat::EFormat_FLOAT, 3),
-		VertexAttribute(4, "Bitangents", VertexAttribute::EFormat::EFormat_FLOAT, 3),
-		VertexAttribute(5, "MaterialID", VertexAttribute::EFormat::EFormat_UNSIGNED_INT, 1)
+		VertexAttribute(0, "Position", VertexAttribute::EFormat::FLOAT, 3),
+		VertexAttribute(1, "Texcoords", VertexAttribute::EFormat::FLOAT, 2),
+		VertexAttribute(2, "Normals", VertexAttribute::EFormat::FLOAT, 3),
+		VertexAttribute(3, "Tangents", VertexAttribute::EFormat::FLOAT, 3),
+		VertexAttribute(4, "Bitangents", VertexAttribute::EFormat::FLOAT, 3),
+		VertexAttribute(5, "MaterialID", VertexAttribute::EFormat::UNSIGNED_INT, 1)
 	};
 
 	m_vertexBuffer->setVertexAttributes(6, attributes);

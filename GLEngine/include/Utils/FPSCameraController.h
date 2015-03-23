@@ -5,8 +5,8 @@
 #include <glm/glm.hpp>
 
 class PerspectiveCamera;
-enum Key;
-enum MouseButton;
+enum class EKey;
+enum class EMouseButton;
 
 class FPSCameraController
 {
@@ -20,11 +20,11 @@ public:
 
 private:
 
-	bool keyDown(Key key);
-	bool keyUp(Key key);
+	bool keyDown(EKey key);
+	bool keyUp(EKey key);
 
-	bool mouseDown(MouseButton key, int xPos, int yPos);
-	bool mouseUp(MouseButton key, int xPos, int yPos);
+	bool mouseDown(EMouseButton key, int xPos, int yPos);
+	bool mouseUp(EMouseButton key, int xPos, int yPos);
 	bool mouseMoved(int xPos, int yPos, int xMove, int yMove);
 	bool mouseScrolled(int amount);
 

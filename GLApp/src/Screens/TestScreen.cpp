@@ -32,7 +32,7 @@ END_UNNAMED_NAMESPACE()
 
 TestScreen::TestScreen()
 {
-	GLEngine::input->keyDownListenerRegister(this, [&](Key key) { return keyDown(key); });
+	GLEngine::input->keyDownListenerRegister(this, [&](EKey a_key) { return keyDown(a_key); });
 	GLEngine::input->windowQuitListenerRegister(this, []() { print("shutting down\n"); GLEngine::shutdown(); });
 
 	m_entityx.systems.add<FPSControlSystem>();
@@ -45,10 +45,10 @@ TestScreen::TestScreen()
 	m_camera->initialize((float) GLEngine::graphics->getScreenWidth(), (float) GLEngine::graphics->getScreenHeight(), 90.0f, 0.5f, 1500.0f);
 
 	m_building = new GLMesh();
-	m_building->loadFromFile(MODEL_FILE_PATH, RenderSystem::TextureUnits_MODEL_TEXTURE_ARRAY, RenderSystem::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
+	m_building->loadFromFile(MODEL_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	m_skybox = new GLMesh();
-	m_skybox->loadFromFile("Models/Skybox/skysphere.da", RenderSystem::TextureUnits_MODEL_TEXTURE_ARRAY, RenderSystem::UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT);
+	m_skybox->loadFromFile("Models/Skybox/skysphere.da", TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	entityx::Entity cameraEntity = m_entityx.entities.create();
 	cameraEntity.assign<CameraComponent>(m_camera);
@@ -92,9 +92,9 @@ void TestScreen::render(float a_deltaSec)
 	m_entityx.systems.update<RenderSystem>(a_deltaSec);
 }
 
-bool TestScreen::keyDown(Key a_key)
+bool TestScreen::keyDown(EKey a_key)
 {
-	if (a_key == Key_T)
+	if (a_key == EKey::T)
 	{
 		glm::vec3 position = m_camera->getPosition() + m_camera->getDirection();
 		glm::vec3 color = glm::normalize(glm::vec3((rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f));
@@ -110,7 +110,7 @@ bool TestScreen::keyDown(Key a_key)
 
 		return true;
 	}
-	if (a_key == Key_Y)
+	if (a_key == EKey::Y)
 	{
 		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
 		{

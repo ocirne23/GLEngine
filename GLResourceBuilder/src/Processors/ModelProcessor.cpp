@@ -319,7 +319,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		std::ofstream file(atlasFileName.c_str(), std::ios::out | std::ios::binary);
 		assert(file.is_open());
 
-		const int type = EResourceType_BYTEIMAGE;
+		const int type = (int) EResourceType::BYTEIMAGE;
 		const int width = atlas->m_width;
 		const int height = atlas->m_height;
 		const int numComponents = atlas->m_numComponents;
@@ -429,7 +429,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	std::ofstream file(a_outResourcePath, std::ios::out | std::ios::binary);
 	assert(file.is_open());
 
-	const int type = EResourceType_MODEL;
+	const int type = (int) EResourceType::MODEL;
 	const int numTransparent = (int) transparentEntries.size();
 
 	file.write(reinterpret_cast<const char*>(&type), sizeof(int));

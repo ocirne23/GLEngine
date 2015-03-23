@@ -18,17 +18,16 @@ public:
 	void resize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* lightPositionRangeList);
 
-	uint getGridWidth() const { return m_gridWidth; }
+	uint getGridWidth() const  { return m_gridWidth; }
 	uint getGridHeight() const { return m_gridHeight; }
-	uint getGridDepth() const { return m_gridDepth; }
-	uint getGridSize() const { return m_gridSize; }
+	uint getGridDepth() const  { return m_gridDepth; }
+	uint getGridSize() const   { return m_gridSize; }
 
-	uint getNumLightIndices() const { return m_lightIndices.size(); }
-
+	uint getNumLightIndices() const        { return m_lightIndices.size(); }
 	const glm::uvec2* getLightGrid() const { return m_lightGrid; }
-	const ushort* getLightIndices() const { return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
-	float getRecLogSD1() const { return m_recLogSD1; }
-	float getRecNear() const { return m_recNear; }
+	const ushort* getLightIndices() const  { return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
+	float getRecLogSD1() const             { return m_recLogSD1; }
+	float getRecNear() const               { return m_recNear; }
 
 private:
 

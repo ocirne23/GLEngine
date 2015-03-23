@@ -2,7 +2,6 @@
 
 #include "Core.h"
 
-#include "Editor/EditorCommands.h"
 #include "Utils/ConcurrentQueue.h"
 
 struct Command;
@@ -17,7 +16,7 @@ public:
 	EditorPipeline();
 	~EditorPipeline();
 
-	void writeCommand(EditorCommands::CommandType commandType, uint numBytes, byte* bytes);
+	void writeCommand(uint commandID, uint numBytes, byte* bytes);
 
 	struct PipelineThread
 	{

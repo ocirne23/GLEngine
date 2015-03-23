@@ -17,9 +17,9 @@ public:
 
 	void resize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
 	void setupShader(const GLShader& shader);
-	void update(const PerspectiveCamera& camera, const glm::vec4* viewspaceLightPositionRangeList, uint numLights);
+	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* viewspaceLightPositionRangeList);
 
-	uint getGridWidth() { return m_gridWidth; }
+	uint getGridWidth()  { return m_gridWidth; }
 	uint getGridHeight() { return m_gridHeight; }
 
 private:
@@ -32,12 +32,7 @@ private:
 	uint m_pixelsPerTileW = 0;
 	uint m_pixelsPerTileH = 0;
 
-	struct LightListRef
-	{
-		uint begin;
-		uint end;
-	};
-	rde::vector<LightListRef> m_lightGrid;
+	rde::vector<glm::uvec2> m_lightGrid;
 	rde::vector<rde::vector<ushort>> m_tileLightIndices;
 	rde::vector<uint> m_lightIndices;
 

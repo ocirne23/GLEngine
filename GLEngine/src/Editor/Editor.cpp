@@ -2,6 +2,7 @@
 
 #ifdef EDITOR
 
+#include "Editor/CommandType.h"
 #include "Utils/WindowsPlatformData.h"
 
 Editor::Editor()
@@ -21,13 +22,13 @@ void Editor::updateUIPosition()
 
 void Editor::sendTest0Message()
 {
-	m_pipeLine.writeCommand(EditorCommands::CommandType_TEST0, 0, 0);
+	m_pipeLine.writeCommand(CommandType::TEST0, 0, 0);
 }
 
 void Editor::sendTest1Message()
 {
 	rde::string da("heuhuehue");
-	m_pipeLine.writeCommand(EditorCommands::CommandType_TEST1, da.length(), (byte*) da.c_str());
+	m_pipeLine.writeCommand(CommandType::TEST1, da.length(), (byte*) da.c_str());
 }
 
 #endif // EDITOR

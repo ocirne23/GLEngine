@@ -16,20 +16,19 @@ public:
 	GLTextureArray(const GLTextureArray& copyMe) = delete;
 
 	void initialize(const rde::vector<Pixmap*>& pixmaps, uint numMipMaps = 4,
-					GLint minFilter = GL_LINEAR_MIPMAP_LINEAR,
-					GLint magFilter = GL_LINEAR,
-					GLint textureWrapS = GL_CLAMP_TO_EDGE, GLint textureWrapT = GL_CLAMP_TO_EDGE);
+	                GLint minFilter = GL_LINEAR_MIPMAP_LINEAR,
+	                GLint magFilter = GL_LINEAR,
+	                GLint textureWrapS = GL_CLAMP_TO_EDGE, GLint textureWrapT = GL_CLAMP_TO_EDGE);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
-
-	bool isInitialized() { return m_initialized; }
 	void setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture);
+	bool isInitialized() { return m_initialized; }
 
-	uint getWidth() const { return m_width; }
-	uint getHeight() const { return m_height; }
+	uint getWidth() const         { return m_width; }
+	uint getHeight() const        { return m_height; }
 	uint getNumComponents() const { return m_numComponents; }
-	uint getTextureID() const { return m_textureID; }
+	uint getTextureID() const     { return m_textureID; }
 
 private:
 

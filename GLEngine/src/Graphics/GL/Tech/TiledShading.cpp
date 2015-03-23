@@ -32,7 +32,7 @@ void TiledShading::setupShader(const GLShader& a_shader)
 	m_lightIndiceBuffer.initialize(a_shader, 1, "LightIndices", GL_STREAM_DRAW);
 }
 
-void TiledShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_viewspaceLightPositionRangeList, uint a_numLights)
+void TiledShading::update(const PerspectiveCamera& a_camera, uint a_numLights, const glm::vec4* a_viewspaceLightPositionRangeList)
 {
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
 	for (auto& tileIndices : m_tileLightIndices)
@@ -65,8 +65,8 @@ void TiledShading::update(const PerspectiveCamera& a_camera, const glm::vec4* a_
 	for (int i = 0; i < m_tileLightIndices.size(); ++i)
 	{
 		int lightIndicesSize = m_lightIndices.size();
-		m_lightGrid[i].begin = lightIndicesSize;
-		m_lightGrid[i].end = lightIndicesSize + m_tileLightIndices[i].size();
+		m_lightGrid[i].x = lightIndicesSize;
+		m_lightGrid[i].y = lightIndicesSize + m_tileLightIndices[i].size();
 		for (int j = 0; j < m_tileLightIndices[i].size(); ++j)
 		{
 			m_lightIndices.push_back(m_tileLightIndices[i][j]);

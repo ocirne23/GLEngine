@@ -54,7 +54,6 @@
     <ClCompile Include="src\rde\list.cpp" />
     <ClCompile Include="src\rde\rde_string.cpp" />
     <ClCompile Include="src\rde\slist.cpp" />
-    <ClCompile Include="src\Scene\Systems\StaticScenegraphSystem.cpp" />
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
@@ -69,7 +68,7 @@
   <ItemGroup>
     <ClInclude Include="include\Core.h" />
     <ClInclude Include="include\Editor\Editor.h" />
-    <ClInclude Include="include\Editor\EditorCommands.h" />
+    <ClInclude Include="include\Editor\CommandType.h" />
     <ClInclude Include="include\Editor\EditorPipeline.h" />
     <ClInclude Include="include\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\entityx\3rdparty\deps\Dependencies.h" />
@@ -108,8 +107,8 @@
     <ClInclude Include="include\Graphics\Pixmap.h" />
     <ClInclude Include="include\Graphics\WindowFlags.h" />
     <ClInclude Include="include\Input\Input.h" />
-    <ClInclude Include="include\Input\Key.h" />
-    <ClInclude Include="include\Input\MouseButton.h" />
+    <ClInclude Include="include\Input\EKey.h" />
+    <ClInclude Include="include\Input\EMouseButton.h" />
     <ClInclude Include="include\rde\algorithm.h" />
     <ClInclude Include="include\rde\alignment.h" />
     <ClInclude Include="include\rde\allocator.h" />
@@ -149,9 +148,9 @@
     <ClInclude Include="include\rde\type_traits.h" />
     <ClInclude Include="include\rde\utility.h" />
     <ClInclude Include="include\rde\vector.h" />
-    <ClInclude Include="include\Scene\Systems\AnimationSystem.h" />
-    <ClInclude Include="include\Scene\Systems\StaticScenegraphSystem.h" />
     <ClInclude Include="include\Scene\Systems\System.h" />
+    <ClInclude Include="include\UI\Button.h" />
+    <ClInclude Include="include\UI\EWeight.h" />
     <ClInclude Include="include\Utils\Bounds2D.h" />
     <ClInclude Include="include\Utils\Bounds3D.h" />
     <ClInclude Include="include\Utils\CheckGLError.h" />

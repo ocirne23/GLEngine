@@ -1,8 +1,8 @@
 #pragma once
 
-enum EResourceType
+enum class EResourceType
 {
-	EResourceType_MODEL,
-	EResourceType_BYTEIMAGE,
-	EResourceType_FLOATIMAGE
+	MODEL,
+	BYTEIMAGE,
+	FLOATIMAGE
 };

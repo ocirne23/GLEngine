@@ -46,13 +46,13 @@ EditorPipeline::EditorPipeline()
 	m_inboundThread.m_thread = SDL_CreateThread(&EditorPipeline::InboundThread, "OutboundThread", &m_inboundThread);
 }
 
-void EditorPipeline::writeCommand(EditorCommands::CommandType a_commandType, uint a_numBytes, byte* a_bytes)
+void EditorPipeline::writeCommand(uint a_commandID, uint a_numBytes, byte* a_bytes)
 {
 	if (!m_outboundThread.m_connected)
 		return;
 
 	byte* contents = new byte[a_numBytes + 2 * sizeof(uint)];
-	*((uint*) contents) = a_commandType;
+	*((uint*) contents) = a_commandID;
 	*((uint*) (contents + 4)) = a_numBytes;
 	if (a_numBytes)
 		memcpy(contents + 2 * sizeof(uint), a_bytes, a_numBytes);

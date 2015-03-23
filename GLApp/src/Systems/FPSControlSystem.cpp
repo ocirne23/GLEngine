@@ -24,7 +24,7 @@ FPSControlSystem::FPSControlSystem()
 {
 	GLEngine::input->mouseMovedListenerRegister(this, [&](uint xPos, uint yPos, int xMove, int yMove)
 	{
-		if (GLEngine::input->isMousePressed(MouseButton_LEFT))
+		if (GLEngine::input->isMousePressed(EMouseButton::LEFT))
 		{
 			m_xMoveAmount += xMove;
 			m_yMoveAmount += yMove;
@@ -42,18 +42,18 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 {
 	Input& input = *GLEngine::input;
 	glm::vec3 moveAmount(0);
-	if (input.isKeyPressed(Key_W))
-		if (input.isKeyPressed(Key_A))		moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, -BASE_DIAGONAL_CAMERA_SPEED);
-		else if (input.isKeyPressed(Key_D)) moveAmount = glm::vec3(BASE_DIAGONAL_CAMERA_SPEED, 0, -BASE_DIAGONAL_CAMERA_SPEED);
+	if (input.isKeyPressed(EKey::W))
+		if (input.isKeyPressed(EKey::A))		moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, -BASE_DIAGONAL_CAMERA_SPEED);
+		else if (input.isKeyPressed(EKey::D)) moveAmount = glm::vec3(BASE_DIAGONAL_CAMERA_SPEED, 0, -BASE_DIAGONAL_CAMERA_SPEED);
 		else								moveAmount = glm::vec3(0, 0, -BASE_CAMERA_SPEED);
-	else if (input.isKeyPressed(Key_S))
-		if (input.isKeyPressed(Key_A))		moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, BASE_DIAGONAL_CAMERA_SPEED);
-		else if (input.isKeyPressed(Key_D)) moveAmount = glm::vec3(BASE_DIAGONAL_CAMERA_SPEED, 0, BASE_DIAGONAL_CAMERA_SPEED);
+	else if (input.isKeyPressed(EKey::S))
+		if (input.isKeyPressed(EKey::A))		moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, BASE_DIAGONAL_CAMERA_SPEED);
+		else if (input.isKeyPressed(EKey::D)) moveAmount = glm::vec3(BASE_DIAGONAL_CAMERA_SPEED, 0, BASE_DIAGONAL_CAMERA_SPEED);
 		else								moveAmount = glm::vec3(0, 0, BASE_CAMERA_SPEED);
-	else if (input.isKeyPressed(Key_A))		moveAmount = glm::vec3(-BASE_CAMERA_SPEED, 0, 0);
-	else if (input.isKeyPressed(Key_D))		moveAmount = glm::vec3(BASE_CAMERA_SPEED, 0, 0);
-	if (input.isKeyPressed(Key_SPACE))		moveAmount.y += BASE_CAMERA_SPEED;
-	if (input.isKeyPressed(Key_LSHIFT))		moveAmount.y -= BASE_CAMERA_SPEED;
+	else if (input.isKeyPressed(EKey::A))		moveAmount = glm::vec3(-BASE_CAMERA_SPEED, 0, 0);
+	else if (input.isKeyPressed(EKey::D))		moveAmount = glm::vec3(BASE_CAMERA_SPEED, 0, 0);
+	if (input.isKeyPressed(EKey::SPACE))		moveAmount.y += BASE_CAMERA_SPEED;
+	if (input.isKeyPressed(EKey::LSHIFT))		moveAmount.y -= BASE_CAMERA_SPEED;
 	moveAmount *= a_dt;
 
 	entityx::ComponentHandle<FPSControlledComponent> control;

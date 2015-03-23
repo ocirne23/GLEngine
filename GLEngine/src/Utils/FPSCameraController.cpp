@@ -2,8 +2,8 @@
 
 #include "Graphics/PerspectiveCamera.h"
 
-#include "Input/Key.h"
-#include "Input/MouseButton.h"
+#include "Input/EKey.h"
+#include "Input/EMouseButton.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -88,28 +88,28 @@ void FPSCameraController::update(float a_deltaSec)
 	m_camera->lookAtDir(m_lookDir);
 }
 
-bool FPSCameraController::mouseDown(MouseButton a_key, int a_xPos, int a_yPos)
+bool FPSCameraController::mouseDown(EMouseButton a_key, int a_xPos, int a_yPos)
 {
-	if (a_key == 1)
+	if (a_key == EMouseButton::LEFT)
 		m_lmbPressed = true;
-	if (a_key == 3)
+	if (a_key == EMouseButton::RIGHT)
 		m_rmbPressed = true;
 	return false;
 }
 
-bool FPSCameraController::mouseUp(MouseButton key, int xPos, int yPos)
+bool FPSCameraController::mouseUp(EMouseButton a_key, int a_xPos, int a_yPos)
 {
-	if (key == 1)
+	if (a_key == EMouseButton::LEFT)
 		m_lmbPressed = false;
-	if (key == 3)
+	if (a_key == EMouseButton::RIGHT)
 		m_rmbPressed = false;
 	return false;
 }
 
-bool FPSCameraController::mouseMoved(int xPos, int yPos, int xMove, int yMove)
+bool FPSCameraController::mouseMoved(int a_xPos, int a_yPos, int a_xMove, int a_yMove)
 {
 	//rotate horizontally
-	m_lookDir = glm::rotate(m_lookDir, -xMove * MOUSE_LOOK_SENSITIVITY, UP);
+	m_lookDir = glm::rotate(m_lookDir, -a_xMove * MOUSE_LOOK_SENSITIVITY, UP);
 
 	//calculate axis to rotate vertically on
 	float xzAngle = glm::atan2(m_lookDir.x, m_lookDir.z);
@@ -118,7 +118,7 @@ bool FPSCameraController::mouseMoved(int xPos, int yPos, int xMove, int yMove)
 
 	//rotate vertically
 	glm::vec3 tmp = m_lookDir;
-	m_lookDir = glm::rotate(m_lookDir, -yMove * MOUSE_LOOK_SENSITIVITY, yRotAxis);
+	m_lookDir = glm::rotate(m_lookDir, -a_yMove * MOUSE_LOOK_SENSITIVITY, yRotAxis);
 	//limit vertical look movement
 
 	if (m_lookDir.y > 0.99f || m_lookDir.y < -0.99f)
@@ -127,57 +127,57 @@ bool FPSCameraController::mouseMoved(int xPos, int yPos, int xMove, int yMove)
 	return false;
 }
 
-bool FPSCameraController::mouseScrolled(int amount)
+bool FPSCameraController::mouseScrolled(int a_amount)
 {
 	return false;
 }
 
-bool FPSCameraController::keyDown(Key key)
+bool FPSCameraController::keyDown(EKey a_key)
 {
-	switch (key)
+	switch (a_key)
 	{
-	case Key_W:
+	case EKey::W:
 		m_isWPressed = true;
 		break;
-	case Key_A:
+	case EKey::A:
 		m_isAPressed = true;
 		break;
-	case Key_S:
+	case EKey::S:
 		m_isSPressed = true;
 		break;
-	case Key_D:
+	case EKey::D:
 		m_isDPressed = true;
 		break;
-	case Key_SPACE:
+	case EKey::SPACE:
 		m_isSpacePressed = true;
 		break;
-	case Key_LSHIFT:
+	case EKey::LSHIFT:
 		m_isShiftPressed = true;
 		break;
 	}
 	return false;
 }
 
-bool FPSCameraController::keyUp(Key key)
+bool FPSCameraController::keyUp(EKey a_key)
 {
-	switch (key)
+	switch (a_key)
 	{
-	case Key_W:
+	case EKey::W:
 		m_isWPressed = false;
 		break;
-	case Key_A:
+	case EKey::A:
 		m_isAPressed = false;
 		break;
-	case Key_S:
+	case EKey::S:
 		m_isSPressed = false;
 		break;
-	case Key_D:
+	case EKey::D:
 		m_isDPressed = false;
 		break;
-	case Key_SPACE:
+	case EKey::SPACE:
 		m_isSpacePressed = false;
 		break;
-	case Key_LSHIFT:
+	case EKey::LSHIFT:
 		m_isShiftPressed = false;
 		break;
 	}

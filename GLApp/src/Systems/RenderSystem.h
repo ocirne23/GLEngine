@@ -18,27 +18,29 @@ struct CameraComponent;
 class PerspectiveCamera;
 class LightSystem;
 
+BEGIN_NAMESPACE(UBOBindingPoints)
+enum
+{
+	MODEL_MATERIAL_UBO_BINDING_POINT = 0,
+	LIGHT_POSITION_RANGE_UBO_BINDING_POINT,
+	LIGHT_COLOR_UBO_BINDING_POINT,
+	NUM_ENGINE_RESERVED_UBO_BINDING_POINTS
+};
+END_NAMESPACE(UBOBindingPoints)
+
+BEGIN_NAMESPACE(TextureUnits)
+enum
+{
+	DFV_TEXTURE = 0,
+	CLUSTERED_LIGHTING_GRID_TEXTURE,
+	CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE,
+	MODEL_TEXTURE_ARRAY,
+	NUM_ENGINE_RESERVED_TEXTURE_UNITS
+};
+END_NAMESPACE(TextureUnits)
+
 class RenderSystem : public entityx::System<RenderSystem>, public entityx::Receiver<RenderSystem>
 {
-public:
-
-	enum UBOBindingPoints
-	{
-		UBOBindingPoints_MODEL_MATERIAL_UBO_BINDING_POINT = 0,
-		UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT,
-		UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT,
-		UBOBindingPoints_NUM_ENGINE_RESERVED_UBO_BINDING_POINTS
-	};
-
-	enum TextureUnits
-	{
-		TextureUnits_DFV_TEXTURE = 0,
-		TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE,
-		TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE,
-		TextureUnits_MODEL_TEXTURE_ARRAY,
-		TextureUnits_NUM_ENGINE_RESERVED_TEXTURE_UNITS
-	};
-
 public:
 
 	RenderSystem(LightSystem& lightSystem);

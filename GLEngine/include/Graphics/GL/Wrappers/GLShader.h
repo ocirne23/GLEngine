@@ -22,7 +22,7 @@ public:
 	GLShader(const GLShader& copy) = delete;
 
 	void initialize(const FileHandle& vertexShaderFile, const FileHandle& fragmentShaderFile,
-					const rde::vector<rde::string>* defines = NULL, const rde::vector<rde::string>* extensions = NULL);
+	                const rde::vector<rde::string>* defines = NULL, const rde::vector<rde::string>* extensions = NULL);
 
 	void begin();
 	void end();

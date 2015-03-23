@@ -30,7 +30,7 @@ END_UNNAMED_NAMESPACE()
 
 RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
 {
-	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", TextureUnits_DFV_TEXTURE, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", TextureUnits::DFV_TEXTURE, GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 	m_dfvTexture.bind();
 
 	auto onShaderEdited = [&]()
@@ -73,8 +73,8 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &defines);
 
 	m_modelShader.begin();
-	m_modelShader.setUniform1i("u_dfvTexture", TextureUnits_DFV_TEXTURE);
-	m_modelShader.setUniform1i("u_textureArray", TextureUnits_MODEL_TEXTURE_ARRAY);
+	m_modelShader.setUniform1i("u_dfvTexture", TextureUnits::DFV_TEXTURE);
+	m_modelShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
 	//m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
@@ -84,11 +84,11 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_normalMatrixUniform.initialize(m_modelShader, "u_normalMat");
 	m_transformUniform.initialize(m_modelShader, "u_transform");
 
-	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
-	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints_LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GL_STREAM_DRAW);
+	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GL_STREAM_DRAW);
+	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GL_STREAM_DRAW);
 
-	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid", TextureUnits_CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
-	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", TextureUnits_CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
+	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid", TextureUnits::CLUSTERED_LIGHTING_GRID_TEXTURE, GL_RG32UI, GL_STREAM_DRAW);
+	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", TextureUnits::CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GL_R16UI, GL_STREAM_DRAW);
 	m_lightGridTextureBuffer.bind();
 	m_lightIndiceTextureBuffer.bind();
 
@@ -96,7 +96,7 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 
 	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH);
 	m_skyboxShader.begin();
-	m_skyboxShader.setUniform1i("u_textureArray", TextureUnits_MODEL_TEXTURE_ARRAY);
+	m_skyboxShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
 
 	m_skyboxViewMatrixUniform.initialize(m_skyboxShader, "u_mv");
 	m_skyboxMvpMatrixUniform.initialize(m_skyboxShader, "u_mvp");

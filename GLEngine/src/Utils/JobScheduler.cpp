@@ -8,7 +8,7 @@ void JobScheduler::update(float a_deltaSec)
 		job.timeAccumulator += a_deltaSec;
 		if (job.timeAccumulator > job.timeIntervalSec)
 		{
-			if (job.func(job.timeAccumulator, job.dataPtr) == EJobRepeat_NOREPEAT)
+			if (job.func(job.timeAccumulator, job.dataPtr) == EJobRepeat::NOREPEAT)
 				it = m_jobs.erase(it);
 			else
 				++it;

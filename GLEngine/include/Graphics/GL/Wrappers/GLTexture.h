@@ -16,8 +16,8 @@ public:
 	GLTexture(const GLTexture& copy) = delete;
 
 	void initialize(const FileHandle& filePath, GLint textureIdx,
-					GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR,
-					GLint GLTextureWrapS = GL_REPEAT, GLint GLTextureWrapT = GL_REPEAT);
+	                GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR,
+	                GLint GLTextureWrapS = GL_REPEAT, GLint GLTextureWrapT = GL_REPEAT);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);

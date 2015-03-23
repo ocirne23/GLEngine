@@ -6,9 +6,9 @@
 
 struct VertexAttribute
 {
-	enum EFormat
+	enum class EFormat
 	{
-		EFormat_UNSIGNED_BYTE, EFormat_UNSIGNED_INT, EFormat_INT, EFormat_FLOAT
+		UNSIGNED_BYTE, UNSIGNED_INT, INT, FLOAT
 	};
 
 	VertexAttribute(uint idx, const char* name, EFormat format, uint numElements, bool normalize = false) :
@@ -21,7 +21,7 @@ struct VertexAttribute
 
 	uint m_attributeIndex       = 0;
 	const char* m_attributeName = NULL;
-	EFormat m_format            = EFormat_UNSIGNED_BYTE;
+	EFormat m_format            = EFormat::UNSIGNED_BYTE;
 	uint m_numElements          = 0;
 	bool m_normalize            = false;
 };
@@ -41,8 +41,8 @@ public:
 	void bind();
 	void setVertexAttributes(uint numAttributes, VertexAttribute* attributes);
 	void setAttribPointer(GLuint attributeIdx, GLenum type, uint valuesPerVertex,
-						  GLboolean normalized = false, GLboolean isIntegerType = false, GLuint stride = 0,
-						  GLuint offset = 0);
+	                      GLboolean normalized = false, GLboolean isIntegerType = false, GLuint stride = 0,
+	                      GLuint offset = 0);
 
 private:
 

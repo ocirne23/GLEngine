@@ -36,8 +36,8 @@ public:
 	uint getNumLights() const                         { return m_numUsedLights; }
 	const glm::vec4* getLightColorIntensities() const { return m_lightColorIntensities; }
 	const glm::vec4* getLightPositionRanges() const   { return m_lightPositionRanges; }
-	const glm::vec4* getLightColorIntensities() const { return m_lightColorIntensities; }
-	const glm::vec4* getLightPositionRanges() const   { return m_lightPositionRanges; }
+	glm::vec4* getLightColorIntensities()             { return m_lightColorIntensities; }
+	glm::vec4* getLightPositionRanges()               { return m_lightPositionRanges; }
 
 	const glm::vec4* updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera);
 

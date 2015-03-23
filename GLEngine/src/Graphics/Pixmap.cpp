@@ -15,9 +15,9 @@ void Pixmap::read(const FileHandle& a_file)
 	a_file.readBytes(reinterpret_cast<char*>(&m_height), sizeof(uint), sizeof(uint) * 2);
 	a_file.readBytes(reinterpret_cast<char*>(&m_numComponents), sizeof(uint), sizeof(uint) * 3);
 
-	assert(type == EResourceType_BYTEIMAGE || type == EResourceType_FLOATIMAGE);
+	assert(type == (int) EResourceType::BYTEIMAGE || type == (int) EResourceType::FLOATIMAGE);
 
-	if (type == EResourceType_BYTEIMAGE)
+	if (type == (int) EResourceType::BYTEIMAGE)
 	{
 		m_isFloatData = false;
 		m_data.b = new byte[m_width * m_height * m_numComponents];

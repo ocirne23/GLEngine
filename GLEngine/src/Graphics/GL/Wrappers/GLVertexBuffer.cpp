@@ -54,7 +54,7 @@ void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, VertexAttribute* 
 		for (uint i = 0; i < a_numAttributes; ++i)
 		{
 			const VertexAttribute* attribute = a_attributes + i;
-			stride += attribute->m_numElements * (attribute->m_format == VertexAttribute::EFormat_UNSIGNED_BYTE ? 1 : 4);
+			stride += attribute->m_numElements * (attribute->m_format == VertexAttribute::EFormat::UNSIGNED_BYTE ? 1 : 4);
 		}
 	}
 
@@ -67,22 +67,22 @@ void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, VertexAttribute* 
 		bool isIntegerType = false;
 		switch (attribute->m_format)
 		{
-		case VertexAttribute::EFormat_UNSIGNED_BYTE:
+		case VertexAttribute::EFormat::UNSIGNED_BYTE:
 			type = GL_UNSIGNED_BYTE;
 			dataSize = 1;
 			isIntegerType = true;
 			break;
-		case VertexAttribute::EFormat_UNSIGNED_INT:
+		case VertexAttribute::EFormat::UNSIGNED_INT:
 			type = GL_UNSIGNED_INT;
 			isIntegerType = true;
 			dataSize = 4;
 			break;
-		case VertexAttribute::EFormat_INT:
+		case VertexAttribute::EFormat::INT:
 			type = GL_INT;
 			isIntegerType = true;
 			dataSize = 4;
 			break;
-		case VertexAttribute::EFormat_FLOAT:
+		case VertexAttribute::EFormat::FLOAT:
 			type = GL_FLOAT;
 			dataSize = 4;
 			break;
@@ -102,7 +102,7 @@ void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, VertexAttribute* 
 }
 
 void GLVertexBuffer::setAttribPointer(GLuint a_attributeIdx, GLenum a_type, uint a_valuesPerVertex,
-									  GLboolean a_normalized, GLboolean a_isIntegerType, GLuint a_stride, GLuint a_offset)
+	                                  GLboolean a_normalized, GLboolean a_isIntegerType, GLuint a_stride, GLuint a_offset)
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);

@@ -8,7 +8,7 @@
 
 bool ByteImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
 {
-	const int type = EResourceType_BYTEIMAGE;
+	const int type = (int) EResourceType::BYTEIMAGE;
 	int width, height, numComponents;
 
 	const unsigned char* data = stbi_load(a_inResourcePath, &width, &height, &numComponents, 0);

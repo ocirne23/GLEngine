@@ -76,9 +76,6 @@
     <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\Systems\StaticScenegraphSystem.cpp">
-      <Filter>Source Files\Scene\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
     <ClCompile Include="src\entityx\help\Pool.cc" />
     <ClCompile Include="src\entityx\help\Timer.cc" />
@@ -242,12 +239,6 @@
     <ClInclude Include="include\Input\Input.h">
       <Filter>Header Files\Input</Filter>
     </ClInclude>
-    <ClInclude Include="include\Input\Key.h">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Input\MouseButton.h">
-      <Filter>Header Files\Input</Filter>
-    </ClInclude>
     <ClInclude Include="include\Graphics\Graphics.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
@@ -326,10 +317,6 @@
     <ClInclude Include="include\Scene\Systems\System.h">
       <Filter>Header Files\Scene\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="include\Scene\Systems\StaticScenegraphSystem.h">
-      <Filter>Header Files\Scene\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Scene\Systems\AnimationSystem.h" />
     <ClInclude Include="include\Utils\EResourceType.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
@@ -373,12 +360,20 @@
     <ClInclude Include="include\Graphics\GL\Wrappers\GLVertexBuffer.h">
       <Filter>Header Files\Graphics\GL\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Editor\EditorCommands.h" />
     <ClInclude Include="include\Editor\Editor.h" />
     <ClInclude Include="include\Utils\ListenerMacros.h" />
     <ClInclude Include="include\Utils\ConcurrentQueue.h" />
     <ClInclude Include="include\Utils\Semaphore.h" />
     <ClInclude Include="include\Utils\JobScheduler.h" />
+    <ClInclude Include="include\UI\Button.h" />
+    <ClInclude Include="include\UI\EWeight.h" />
+    <ClInclude Include="include\Input\EKey.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Input\EMouseButton.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Editor\CommandType.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

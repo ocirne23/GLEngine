@@ -3,8 +3,8 @@
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 
-#include "Input/Key.h"
-#include "Input/MouseButton.h"
+#include "Input/EKey.h"
+#include "Input/EMouseButton.h"
 
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_events.h>
@@ -43,20 +43,20 @@ void Input::processEvents()
 			mouseMoved(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
 			break;
 		case SDL_MOUSEBUTTONDOWN:
-			mouseDown((MouseButton) event.button.button, event.button.x, event.button.y);
+			mouseDown((EMouseButton) event.button.button, event.button.x, event.button.y);
 			break;
 		case SDL_MOUSEBUTTONUP:
-			mouseUp((MouseButton) event.button.button, event.button.x, event.button.y);
+			mouseUp((EMouseButton) event.button.button, event.button.x, event.button.y);
 			break;
 		case SDL_MOUSEWHEEL:
 			mouseScrolled(event.wheel.y);
 			break;
 		case SDL_KEYDOWN:
 			if (!event.key.repeat)
-				keyDown((Key) event.key.keysym.scancode);
+				keyDown((EKey) event.key.keysym.scancode);
 			break;
 		case SDL_KEYUP:
-			keyUp((Key) event.key.keysym.scancode);
+			keyUp((EKey) event.key.keysym.scancode);
 			break;
 		case SDL_QUIT:
 			windowQuit();
@@ -72,12 +72,12 @@ void Input::setMouseCaptured(bool a_captured)
 	SDL_SetRelativeMouseMode((SDL_bool) a_captured);
 }
 
-bool Input::isKeyPressed(Key a_key)
+bool Input::isKeyPressed(EKey a_key)
 {
-	return SDL_GetKeyboardState(NULL)[a_key] == 1;
+	return SDL_GetKeyboardState(NULL)[(int) a_key] == 1;
 }
 
-bool Input::isMousePressed(MouseButton a_button)
+bool Input::isMousePressed(EMouseButton a_button)
 {
-	return (SDL_BUTTON(a_button) & SDL_GetMouseState(NULL, NULL)) != 0;
+	return (SDL_BUTTON((int) a_button) & SDL_GetMouseState(NULL, NULL)) != 0;
 }
