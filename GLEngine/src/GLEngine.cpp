@@ -2,7 +2,6 @@
 
 #include "Editor/Editor.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/WindowFlags.h"
 #include "Input/Input.h"
 #include "Utils/WindowsPlatformData.h"
 
@@ -66,8 +65,7 @@ void GLEngine::initialize()
 
 	graphics = new Graphics(PROGRAM_NAME,
 							INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
-							INIT_WINDOW_XPOS, INIT_WINDOW_YPOS,
-							(WINDOW_OPENGL | WINDOW_SHOWN | WINDOW_RESIZABLE));
+							INIT_WINDOW_XPOS, INIT_WINDOW_YPOS);
 	input = new Input();
 #ifdef EDITOR
 	editor = new Editor();

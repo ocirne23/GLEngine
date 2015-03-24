@@ -39,10 +39,10 @@ private:
 	void pollEvents();
 	void processEvents();
 
-	void keyDown(EKey key)                                         { CALL_LISTENERS_CONSUME(keyDown, key) }
-	void keyUp(EKey key)                                           { CALL_LISTENERS_CONSUME(keyUp, key) }
-	void mouseDown(EMouseButton button, int xPos, int yPos)        { CALL_LISTENERS_CONSUME(mouseDown, button, xPos, yPos) }
-	void mouseUp(EMouseButton button, int xPos, int yPos)          { CALL_LISTENERS_CONSUME(mouseUp, button, xPos, yPos) }
+	void keyDown(EKey key)                                        { CALL_LISTENERS_CONSUME(keyDown, key) }
+	void keyUp(EKey key)                                          { CALL_LISTENERS_CONSUME(keyUp, key) }
+	void mouseDown(EMouseButton button, int xPos, int yPos)       { CALL_LISTENERS_CONSUME(mouseDown, button, xPos, yPos) }
+	void mouseUp(EMouseButton button, int xPos, int yPos)         { CALL_LISTENERS_CONSUME(mouseUp, button, xPos, yPos) }
 	void mouseMoved(uint xPos, uint yPos, int deltaX, int deltaY) { CALL_LISTENERS_CONSUME(mouseMoved, xPos, yPos, deltaX, deltaY) }
 	void mouseScrolled(int amount)                                { CALL_LISTENERS_CONSUME(mouseScrolled, amount) }
 	void windowResized(uint width, uint height)                   { CALL_LISTENERS(windowResized, width, height) }

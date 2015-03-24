@@ -66,108 +66,106 @@
     <ClCompile Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Core.h" />
-    <ClInclude Include="include\Editor\Editor.h" />
-    <ClInclude Include="include\Editor\CommandType.h" />
-    <ClInclude Include="include\Editor\EditorPipeline.h" />
-    <ClInclude Include="include\entityx\3rdparty\catch.hpp" />
-    <ClInclude Include="include\entityx\3rdparty\deps\Dependencies.h" />
-    <ClInclude Include="include\entityx\3rdparty\help\NonCopyable.h" />
-    <ClInclude Include="include\entityx\3rdparty\help\Pool.h" />
-    <ClInclude Include="include\entityx\3rdparty\help\Timer.h" />
-    <ClInclude Include="include\entityx\3rdparty\simplesignal.h" />
-    <ClInclude Include="include\entityx\3rdparty\tags\TagsComponent.h" />
-    <ClInclude Include="include\entityx\config.h" />
-    <ClInclude Include="include\entityx\Entity.h" />
-    <ClInclude Include="include\entityx\entityx.h" />
-    <ClInclude Include="include\entityx\Event.h" />
-    <ClInclude Include="include\entityx\quick.h" />
-    <ClInclude Include="include\entityx\System.h" />
-    <ClInclude Include="include\GLEngine.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLUniform.h" />
-    <ClInclude Include="include\Graphics\GL\GLVars.h" />
-    <ClInclude Include="include\Graphics\tryEnableARBDebugOutput.h" />
-    <ClInclude Include="include\Graphics\Frustum.h" />
-    <ClInclude Include="include\Graphics\LightManager.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLFramebuffer.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLShader.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLStateBuffer.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLTexture.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLTextureArray.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLTextureBuffer.h" />
-    <ClInclude Include="include\Graphics\GL\Wrappers\GLVertexBuffer.h" />
-    <ClInclude Include="include\Graphics\GL\GL.h" />
-    <ClInclude Include="include\Graphics\GL\GLDefines.h" />
-    <ClInclude Include="include\Graphics\GL\GLMesh.h" />
-    <ClInclude Include="include\Graphics\GL\GLTypes.h" />
-    <ClInclude Include="include\Graphics\GL\Tech\ClusteredShading.h" />
-    <ClInclude Include="include\Graphics\GL\Tech\TiledShading.h" />
-    <ClInclude Include="include\Graphics\Graphics.h" />
-    <ClInclude Include="include\Graphics\PerspectiveCamera.h" />
-    <ClInclude Include="include\Graphics\Pixmap.h" />
-    <ClInclude Include="include\Graphics\WindowFlags.h" />
-    <ClInclude Include="include\Input\Input.h" />
-    <ClInclude Include="include\Input\EKey.h" />
-    <ClInclude Include="include\Input\EMouseButton.h" />
-    <ClInclude Include="include\rde\algorithm.h" />
-    <ClInclude Include="include\rde\alignment.h" />
-    <ClInclude Include="include\rde\allocator.h" />
-    <ClInclude Include="include\rde\basic_string.h" />
-    <ClInclude Include="include\rde\buffer_allocator.h" />
-    <ClInclude Include="include\rde\cow_string_storage.h" />
-    <ClInclude Include="include\rde\fixed_array.h" />
-    <ClInclude Include="include\rde\fixed_list.h" />
-    <ClInclude Include="include\rde\fixed_sorted_vector.h" />
-    <ClInclude Include="include\rde\fixed_substring.h" />
-    <ClInclude Include="include\rde\fixed_vector.h" />
-    <ClInclude Include="include\rde\functional.h" />
-    <ClInclude Include="include\rde\hash.h" />
-    <ClInclude Include="include\rde\hash_map.h" />
-    <ClInclude Include="include\rde\intrusive_list.h" />
-    <ClInclude Include="include\rde\intrusive_slist.h" />
-    <ClInclude Include="include\rde\int_to_type.h" />
-    <ClInclude Include="include\rde\iterator.h" />
-    <ClInclude Include="include\rde\list.h" />
-    <ClInclude Include="include\rde\map.h" />
-    <ClInclude Include="include\rde\pair.h" />
-    <ClInclude Include="include\rde\radix_sorter.h" />
-    <ClInclude Include="include\rde\rb_tree.h" />
-    <ClInclude Include="include\rde\rdestl.h" />
-    <ClInclude Include="include\rde\rdestl_common.h" />
-    <ClInclude Include="include\rde\rde_string.h" />
-    <ClInclude Include="include\rde\set.h" />
-    <ClInclude Include="include\rde\simple_string_storage.h" />
-    <ClInclude Include="include\rde\slist.h" />
-    <ClInclude Include="include\rde\sort.h" />
-    <ClInclude Include="include\rde\sorted_vector.h" />
-    <ClInclude Include="include\rde\sstream.h" />
-    <ClInclude Include="include\rde\stack.h" />
-    <ClInclude Include="include\rde\stack_allocator.h" />
-    <ClInclude Include="include\rde\stringforward.h" />
-    <ClInclude Include="include\rde\string_utils.h" />
-    <ClInclude Include="include\rde\type_traits.h" />
-    <ClInclude Include="include\rde\utility.h" />
-    <ClInclude Include="include\rde\vector.h" />
-    <ClInclude Include="include\Scene\Systems\System.h" />
-    <ClInclude Include="include\UI\Button.h" />
-    <ClInclude Include="include\UI\EWeight.h" />
-    <ClInclude Include="include\Utils\Bounds2D.h" />
-    <ClInclude Include="include\Utils\Bounds3D.h" />
-    <ClInclude Include="include\Utils\CheckGLError.h" />
-    <ClInclude Include="include\Utils\ConcurrentQueue.h" />
-    <ClInclude Include="include\Utils\FileHandle.h" />
-    <ClInclude Include="include\Utils\FileModificationListener.h" />
-    <ClInclude Include="include\Utils\FileModificationManager.h" />
-    <ClInclude Include="include\Utils\FPSCameraController.h" />
-    <ClInclude Include="include\Utils\JobScheduler.h" />
-    <ClInclude Include="include\Utils\getGLTextureFormat.h" />
-    <ClInclude Include="include\Utils\ListenerMacros.h" />
-    <ClInclude Include="include\Utils\MatForward.h" />
-    <ClInclude Include="include\Utils\EResourceType.h" />
-    <ClInclude Include="include\Utils\Semaphore.h" />
-    <ClInclude Include="include\Utils\sphereToScreenSpaceBounds.h" />
-    <ClInclude Include="include\Utils\VecForward.h" />
-    <ClInclude Include="include\Utils\WindowsPlatformData.h" />
+    <ClInclude Include="include\Public\Core.h" />
+    <ClInclude Include="include\Public\Editor\CommandType.h" />
+    <ClInclude Include="include\Public\Editor\Editor.h" />
+    <ClInclude Include="include\Public\Editor\EditorPipeline.h" />
+    <ClInclude Include="include\Public\entityx\3rdparty\catch.hpp" />
+    <ClInclude Include="include\Public\entityx\3rdparty\simplesignal.h" />
+    <ClInclude Include="include\Public\entityx\config.h" />
+    <ClInclude Include="include\Public\entityx\deps\Dependencies.h" />
+    <ClInclude Include="include\Public\entityx\Entity.h" />
+    <ClInclude Include="include\Public\entityx\entityx.h" />
+    <ClInclude Include="include\Public\entityx\Event.h" />
+    <ClInclude Include="include\Public\entityx\help\NonCopyable.h" />
+    <ClInclude Include="include\Public\entityx\help\Pool.h" />
+    <ClInclude Include="include\Public\entityx\help\Timer.h" />
+    <ClInclude Include="include\Public\entityx\quick.h" />
+    <ClInclude Include="include\Public\entityx\System.h" />
+    <ClInclude Include="include\Public\GLEngine.h" />
+    <ClInclude Include="include\Public\Graphics\Frustum.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GL.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLTypes.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLStateBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTexture.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureArray.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Graphics.h" />
+    <ClInclude Include="include\Public\Graphics\LightManager.h" />
+    <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h" />
+    <ClInclude Include="include\Public\Graphics\Pixmap.h" />
+    <ClInclude Include="include\Private\Graphics\tryEnableARBDebugOutput.h" />
+    <ClInclude Include="include\Public\Input\EKey.h" />
+    <ClInclude Include="include\Public\Input\EMouseButton.h" />
+    <ClInclude Include="include\Public\Input\Input.h" />
+    <ClInclude Include="include\Public\rde\algorithm.h" />
+    <ClInclude Include="include\Public\rde\alignment.h" />
+    <ClInclude Include="include\Public\rde\allocator.h" />
+    <ClInclude Include="include\Public\rde\basic_string.h" />
+    <ClInclude Include="include\Public\rde\buffer_allocator.h" />
+    <ClInclude Include="include\Public\rde\cow_string_storage.h" />
+    <ClInclude Include="include\Public\rde\fixed_array.h" />
+    <ClInclude Include="include\Public\rde\fixed_list.h" />
+    <ClInclude Include="include\Public\rde\fixed_sorted_vector.h" />
+    <ClInclude Include="include\Public\rde\fixed_substring.h" />
+    <ClInclude Include="include\Public\rde\fixed_vector.h" />
+    <ClInclude Include="include\Public\rde\functional.h" />
+    <ClInclude Include="include\Public\rde\hash.h" />
+    <ClInclude Include="include\Public\rde\hash_map.h" />
+    <ClInclude Include="include\Public\rde\intrusive_list.h" />
+    <ClInclude Include="include\Public\rde\intrusive_slist.h" />
+    <ClInclude Include="include\Public\rde\int_to_type.h" />
+    <ClInclude Include="include\Public\rde\iterator.h" />
+    <ClInclude Include="include\Public\rde\list.h" />
+    <ClInclude Include="include\Public\rde\map.h" />
+    <ClInclude Include="include\Public\rde\pair.h" />
+    <ClInclude Include="include\Public\rde\radix_sorter.h" />
+    <ClInclude Include="include\Public\rde\rb_tree.h" />
+    <ClInclude Include="include\Public\rde\rdestl.h" />
+    <ClInclude Include="include\Public\rde\rdestl_common.h" />
+    <ClInclude Include="include\Public\rde\rde_string.h" />
+    <ClInclude Include="include\Public\rde\set.h" />
+    <ClInclude Include="include\Public\rde\simple_string_storage.h" />
+    <ClInclude Include="include\Public\rde\slist.h" />
+    <ClInclude Include="include\Public\rde\sort.h" />
+    <ClInclude Include="include\Public\rde\sorted_vector.h" />
+    <ClInclude Include="include\Public\rde\sstream.h" />
+    <ClInclude Include="include\Public\rde\stack.h" />
+    <ClInclude Include="include\Public\rde\stack_allocator.h" />
+    <ClInclude Include="include\Public\rde\stringforward.h" />
+    <ClInclude Include="include\Public\rde\string_utils.h" />
+    <ClInclude Include="include\Public\rde\type_traits.h" />
+    <ClInclude Include="include\Public\rde\utility.h" />
+    <ClInclude Include="include\Public\rde\vector.h" />
+    <ClInclude Include="include\Public\UI\Button.h" />
+    <ClInclude Include="include\Public\UI\EWeight.h" />
+    <ClInclude Include="include\Private\Utils\Bounds2D.h" />
+    <ClInclude Include="include\Private\Utils\Bounds3D.h" />
+    <ClInclude Include="include\Private\Utils\CheckGLError.h" />
+    <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
+    <ClInclude Include="include\Public\Utils\EResourceType.h" />
+    <ClInclude Include="include\Public\Utils\FileHandle.h" />
+    <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
+    <ClInclude Include="include\Public\Utils\FileModificationManager.h" />
+    <ClInclude Include="include\Public\Utils\FPSCameraController.h" />
+    <ClInclude Include="include\Private\Utils\getGLTextureFormat.h" />
+    <ClInclude Include="include\Public\Utils\JobScheduler.h" />
+    <ClInclude Include="include\Public\Utils\ListenerMacros.h" />
+    <ClInclude Include="include\Public\Utils\MatForward.h" />
+    <ClInclude Include="include\Public\Utils\Semaphore.h" />
+    <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h" />
+    <ClInclude Include="include\Public\Utils\VecForward.h" />
+    <ClInclude Include="include\Private\Utils\WindowsPlatformData.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="include\Graphics\GL\Wrappers\GLConstantBuffer.h" />
@@ -253,7 +251,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
@@ -274,7 +272,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <AdditionalOptions>
@@ -297,7 +295,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
@@ -320,10 +318,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -59,7 +59,7 @@ void RenderSystem::configure(entityx::EventManager& a_eventManager)
 
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 {
-	m_clusteredShading.resize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getScreenWidth(), GLEngine::graphics->getScreenHeight(), camera);
+	m_clusteredShading.resize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewportWidth(), GLEngine::graphics->getViewportHeight(), camera);
 
 	rde::vector<rde::string> defines;
 	//defines.push_back(rde::string("VISUALIZE_LIGHT_CULLING"));

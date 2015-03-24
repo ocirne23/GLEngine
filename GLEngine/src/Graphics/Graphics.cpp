@@ -7,33 +7,13 @@
 #include "rde/rde_string.h"
 #include "Utils/CheckGLError.h"
 #include "Utils/WindowsPlatformData.h"
+
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
 #include <SDL/SDL_syswm.h>
-
 #include <assert.h>
 
-BEGIN_UNNAMED_NAMESPACE()
-
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	switch (msg)
-	{
-	case WM_CLOSE:
-		DestroyWindow(hwnd);
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}
-	return 0;
-}
-
-END_UNNAMED_NAMESPACE()
-
-Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, WindowFlags a_flags)
+Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos)
 {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -43,7 +23,8 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, a_flags);
+	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
 	if (!m_window)
 	{
 		print("Unable to create window: %s\n", SDL_GetError());
@@ -54,7 +35,8 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 }
 
 Graphics::~Graphics()
-{}
+{
+}
 
 void Graphics::initializeGLContext()
 {
@@ -71,9 +53,15 @@ void Graphics::initializeGLContext()
 
 	tryEnableARBDebugOutput();
 
-	SDL_GL_SetSwapInterval(m_vsyncEnabled);
-	SDL_GetWindowSize(m_window, (int*) &m_screenWidth, (int*) &m_screenHeight);
-	glViewport(0, 0, m_screenWidth, m_screenHeight);
+	SDL_GL_SetSwapInterval(m_vsync);
+
+	if (!m_viewportWidth || !m_viewportHeight)
+	{
+		int screenWidth, screenHeight;
+		SDL_GetWindowSize(m_window, &screenWidth, &screenHeight);
+		glViewport(0, 0, screenWidth, screenHeight);
+		setViewportSize(screenWidth, screenHeight);
+	}
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -102,7 +90,7 @@ void Graphics::swap()
 void Graphics::setVsync(bool a_enabled)
 {
 	SDL_GL_SetSwapInterval(a_enabled);
-	m_vsyncEnabled = a_enabled;
+	m_vsync = a_enabled;
 }
 
 void Graphics::setDepthTest(bool a_enabled)
@@ -111,14 +99,6 @@ void Graphics::setDepthTest(bool a_enabled)
 		glEnable(GL_DEPTH_TEST);
 	else
 		glDisable(GL_DEPTH_TEST);
-}
-
-void Graphics::windowResize(uint a_screenWidth, uint a_screenHeight)
-{
-	m_screenWidth = a_screenWidth;
-	m_screenHeight = a_screenHeight;
-
-	glViewport(0, 0, a_screenWidth, a_screenHeight);
 }
 
 void Graphics::destroyWindow()
@@ -134,4 +114,18 @@ void Graphics::destroyWindow()
 void Graphics::setWindowTitle(const char* a_title)
 {
 	SDL_SetWindowTitle(m_window, a_title);
+}
+
+void Graphics::setViewportPosition(uint a_viewportXPos, uint a_viewportYPos)
+{
+	m_viewportXPos = a_viewportXPos;
+	m_viewportYPos = a_viewportYPos;
+	glViewport(m_viewportXPos, m_viewportYPos, m_viewportWidth, m_viewportHeight);
+}
+
+void Graphics::setViewportSize(uint a_viewportWidth, uint a_viewportHeight)
+{
+	m_viewportWidth = a_viewportWidth;
+	m_viewportHeight = a_viewportHeight;
+	glViewport(m_viewportXPos, m_viewportYPos, m_viewportWidth, m_viewportHeight);
 }
