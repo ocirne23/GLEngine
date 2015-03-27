@@ -55,7 +55,7 @@ rde::string GLVars::s_glVendor;
 rde::string GLVars::s_glRenderer;
 rde::string GLVars::s_glDriverVersion;
 
-void GLVars::init(SDL_Window* a_window)
+void GLVars::createGLContext(SDL_Window* a_window)
 {
 	s_glContext = createHighestGLContext(a_window, s_glMajorVersion, s_glMinorVersion);
 	s_glVendor = (const char*) glGetString(GL_VENDOR);

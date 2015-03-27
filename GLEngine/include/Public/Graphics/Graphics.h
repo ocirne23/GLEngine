@@ -43,7 +43,7 @@ private:
 	~Graphics();
 	Graphics(const Graphics& copy) = delete;
 
-	void initializeGLContext();
+	void createGLContext();
 
 private:
 

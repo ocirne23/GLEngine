@@ -38,9 +38,9 @@ Graphics::~Graphics()
 {
 }
 
-void Graphics::initializeGLContext()
+void Graphics::createGLContext()
 {
-	GLVars::init(m_window);
+	GLVars::createGLContext(m_window);
 
 	glewExperimental = GL_TRUE;
 	GLenum res = glewInit();
