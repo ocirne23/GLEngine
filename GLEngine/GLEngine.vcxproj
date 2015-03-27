@@ -59,6 +59,7 @@
     <ClCompile Include="src\rde\slist.cpp" />
     <ClCompile Include="src\UI\Frame.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
+    <ClCompile Include="src\UI\SpriteBatch.cpp" />
     <ClCompile Include="src\UI\Widgets\Widget.cpp" />
     <ClCompile Include="src\UI\Widgets\ImageButton.cpp" />
     <ClCompile Include="src\UI\Widgets\TextButton.cpp" />
@@ -113,7 +114,7 @@
     <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Public\Graphics\Pixmap.h" />
     <ClInclude Include="include\Private\Graphics\tryEnableARBDebugOutput.h" />
-    <ClInclude Include="include\Public\Graphics\TextureRegion.h" />
+    <ClInclude Include="include\Public\UI\TextureRegion.h" />
     <ClInclude Include="include\Public\Input\EKey.h" />
     <ClInclude Include="include\Public\Input\EMouseButton.h" />
     <ClInclude Include="include\Public\Input\Input.h" />
@@ -166,6 +167,7 @@
     <ClInclude Include="include\Public\rde\type_traits.h" />
     <ClInclude Include="include\Public\rde\utility.h" />
     <ClInclude Include="include\Public\rde\vector.h" />
+    <ClInclude Include="include\Public\UI\SpriteBatch.h" />
     <ClInclude Include="include\Public\UI\Widgets\ImageButton.h" />
     <ClInclude Include="include\Public\UI\Widgets\TextButton.h" />
     <ClInclude Include="include\Public\UI\Layout.h" />

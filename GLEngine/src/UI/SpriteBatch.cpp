@@ -2,6 +2,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
+static const char* FRAG_SHADER_FILE = "Shaders/UI/"
+
 END_UNNAMED_NAMESPACE()
 
 SpriteBatch::SpriteBatch()
