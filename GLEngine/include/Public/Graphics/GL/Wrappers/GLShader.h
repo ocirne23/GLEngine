@@ -2,8 +2,6 @@
 
 #include "Core.h"
 
-#include "Graphics/GL/GLTypes.h"
-
 #include "Utils/FileHandle.h"
 #include "Utils/MatForward.h"
 #include "Utils/VecForward.h"
@@ -27,7 +25,7 @@ public:
 	void begin();
 	void end();
 	bool isBegun() const { return m_begun; }
-	GLuint getID() const { return m_shaderID; }
+	uint getID() const { return m_shaderID; }
 
 	void setUniform1i(const char* uniformName, int val);
 	void setUniform2i(const char* uniformName, const glm::ivec2& vec);
@@ -38,13 +36,13 @@ public:
 	void setUniformMatrix4f(const char* uniformName, const glm::mat4& mat);
 	void setUniformMatrix3f(const char* uniformName, const glm::mat3& mat);
 
-	typedef rde::hash_map<const char*, GLint> UniformLocMap;
+	typedef rde::hash_map<const char*, int> UniformLocMap;
 
 private:
 
 	bool m_initialized = false;
 	bool m_begun       = false;
-	GLuint m_shaderID  = 0;
+	uint m_shaderID    = 0;
 	UniformLocMap m_uniformLocMap;
 
 private:

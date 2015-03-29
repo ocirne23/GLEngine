@@ -65,7 +65,7 @@ GLMesh::~GLMesh()
 	SAFE_DELETE(m_matUniformBuffer);
 }
 
-void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, GLuint a_matUBOBindingPoint)
+void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_matUBOBindingPoint)
 {
 	assert(!m_initialized);
 
@@ -103,14 +103,14 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, GLuint a_m
 	m_stateBuffer.begin();
 
 	m_indiceBuffer = new GLVertexBuffer();
-	m_indiceBuffer->initialize(GL_ELEMENT_ARRAY_BUFFER, GL_STATIC_DRAW);
+	m_indiceBuffer->initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
 	m_indiceBuffer->upload(sizeof(indices[0]) * indices.size(), &indices[0]);
 
 	m_vertexBuffer = new GLVertexBuffer();
-	m_vertexBuffer->initialize(GL_ARRAY_BUFFER, GL_STATIC_DRAW);
+	m_vertexBuffer->initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
 	m_vertexBuffer->upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
 
-	VertexAttribute attributes [] =
+	VertexAttribute attributes[] =
 	{
 		VertexAttribute(0, "Position", VertexAttribute::EFormat::FLOAT, 3),
 		VertexAttribute(1, "Texcoords", VertexAttribute::EFormat::FLOAT, 2),
@@ -120,7 +120,7 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, GLuint a_m
 		VertexAttribute(5, "MaterialID", VertexAttribute::EFormat::UNSIGNED_INT, 1)
 	};
 
-	m_vertexBuffer->setVertexAttributes(6, attributes);
+	m_vertexBuffer->setVertexAttributes(ARRAY_SIZE(attributes), attributes);
 	m_stateBuffer.end();
 
 	rde::string atlasBasePath(a_filePath);
@@ -147,7 +147,7 @@ void GLMesh::initializeUBO(const GLShader& a_shader)
 {
 	m_stateBuffer.begin();
 	m_matUniformBuffer = new GLConstantBuffer();
-	m_matUniformBuffer->initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GL_STREAM_DRAW);
+	m_matUniformBuffer->initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GLConstantBuffer::EDrawUsage::STREAM);
 	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
 
 	m_stateBuffer.end();
@@ -165,6 +165,7 @@ void GLMesh::render(const GLShader& shader, bool a_renderOpague, bool a_renderTr
 	m_stateBuffer.begin();
 	if (m_textureArray.isInitialized())
 		m_textureArray.bind(m_textureUnit);
+
 	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe rendering
 	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
 

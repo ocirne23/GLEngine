@@ -9,6 +9,7 @@
 #define END_NAMESPACE(X) }
 #define BEGIN_UNNAMED_NAMESPACE() namespace {
 #define END_UNNAMED_NAMESPACE() }
+#define ARRAY_SIZE(A) (sizeof(A)/sizeof(A[0]))
 
 typedef unsigned int uint;
 typedef unsigned short ushort;

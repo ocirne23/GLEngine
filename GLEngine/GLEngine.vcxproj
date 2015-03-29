@@ -30,7 +30,7 @@
     <ClCompile Include="src\GLEngine.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp" />
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
-    <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp" />
+    <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp" />
@@ -59,7 +59,8 @@
     <ClCompile Include="src\rde\slist.cpp" />
     <ClCompile Include="src\UI\Frame.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
-    <ClCompile Include="src\UI\SpriteBatch.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp" />
+    <ClCompile Include="src\UI\Style.cpp" />
     <ClCompile Include="src\UI\Widgets\Widget.cpp" />
     <ClCompile Include="src\UI\Widgets\ImageButton.cpp" />
     <ClCompile Include="src\UI\Widgets\TextButton.cpp" />
@@ -93,10 +94,10 @@
     <ClInclude Include="include\Public\entityx\System.h" />
     <ClInclude Include="include\Public\GLEngine.h" />
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GL.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GL.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLTypes.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h" />
@@ -113,7 +114,7 @@
     <ClInclude Include="include\Public\Graphics\LightManager.h" />
     <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Public\Graphics\Pixmap.h" />
-    <ClInclude Include="include\Private\Graphics\tryEnableARBDebugOutput.h" />
+    <ClInclude Include="include\Private\Graphics\GL\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Public\UI\TextureRegion.h" />
     <ClInclude Include="include\Public\Input\EKey.h" />
     <ClInclude Include="include\Public\Input\EMouseButton.h" />
@@ -167,7 +168,7 @@
     <ClInclude Include="include\Public\rde\type_traits.h" />
     <ClInclude Include="include\Public\rde\utility.h" />
     <ClInclude Include="include\Public\rde\vector.h" />
-    <ClInclude Include="include\Public\UI\SpriteBatch.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLSpriteBatch.h" />
     <ClInclude Include="include\Public\UI\Widgets\ImageButton.h" />
     <ClInclude Include="include\Public\UI\Widgets\TextButton.h" />
     <ClInclude Include="include\Public\UI\Layout.h" />
@@ -195,7 +196,6 @@
     <ClInclude Include="src\json\json_tool.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\Graphics\GL\Wrappers\GLConstantBuffer.h" />
     <None Include="src\json\json_valueiterator.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

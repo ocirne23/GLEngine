@@ -1,5 +1,3 @@
-#version 330
-
 layout(location = 0) out vec4 out_color;
 
 in vec2 v_texcoord;

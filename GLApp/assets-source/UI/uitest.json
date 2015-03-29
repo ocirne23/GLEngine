@@ -1,4 +1,6 @@
-{ "contents" : [
+{ 
+	"style": "UI/uistyle.json",
+	"contents" : [
 	{
 		"type": "textbutton",
 		"name": "test button 1",

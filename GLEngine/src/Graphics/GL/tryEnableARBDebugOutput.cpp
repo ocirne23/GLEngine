@@ -1,15 +1,18 @@
-#include "Graphics/tryEnableARBDebugOutput.h"
+#include "Graphics/GL/tryEnableARBDebugOutput.h"
 
 #include "Core.h"
 
-#include <GLEW/glew.h>
-#include <SDL/SDL_syswm.h>
+#include "Graphics/GL/GL.h"
 
+#include <SDL/SDL_syswm.h>
 #include <string>
 #include <assert.h>
 
 void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_severity, GLsizei a_length, const GLchar* a_message, const void* a_userParam)
 {
+	if (a_id == 131218)	// gl state recompile mismatch 
+		return;
+
 	char debSource[32], debType[32], debSev[32];
 
 	if (a_source == GL_DEBUG_SOURCE_API_ARB)
@@ -25,7 +28,7 @@ void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_
 	else if (a_source == GL_DEBUG_SOURCE_OTHER_ARB)
 		strcpy_s(debSource, "Other");
 	else
-		assert(0);
+		assert(false);
 
 	if (a_type == GL_DEBUG_TYPE_ERROR)
 		strcpy_s(debType, "error");
@@ -46,7 +49,7 @@ void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_
 	else if (a_type == GL_DEBUG_TYPE_POP_GROUP)
 		strcpy_s(debType, "pop group");
 	else
-		assert(0);
+		assert(false);
 
 	if (a_severity == GL_DEBUG_SEVERITY_HIGH_ARB)
 		strcpy_s(debSev, "high");
@@ -57,10 +60,7 @@ void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_
 	else if (a_severity == GL_DEBUG_SEVERITY_NOTIFICATION)
 		strcpy_s(debSev, "notification");
 	else
-		assert(0);
-
-	if (a_id == 131218)	//TODO:? gl state recompile mismatch 
-		return;
+		assert(false);
 
 	print("%s: %s(%s) %d: %s\n", debSource, debType, debSev, a_id, a_message);
 }
@@ -72,10 +72,8 @@ void tryEnableARBDebugOutput()
 	{
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 		glDebugMessageCallbackARB(debugOutput, NULL);
-		glDebugMessageControlARB(GL_DEBUG_SOURCE_APPLICATION_ARB, GL_DONT_CARE,
-								 GL_DONT_CARE, 0, NULL, true);
-		glDebugMessageControlARB(GL_DEBUG_SOURCE_THIRD_PARTY_ARB, GL_DONT_CARE,
-								 GL_DONT_CARE, 0, NULL, true);
+		glDebugMessageControlARB(GL_DEBUG_SOURCE_APPLICATION_ARB, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true);
+		glDebugMessageControlARB(GL_DEBUG_SOURCE_THIRD_PARTY_ARB, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, true);
 	}
 	else
 	{

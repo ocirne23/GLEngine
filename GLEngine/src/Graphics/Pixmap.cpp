@@ -7,6 +7,7 @@
 
 void Pixmap::read(const FileHandle& a_file)
 {
+	assert(a_file.exists());
 	assert(!m_data.b);
 
 	int type;

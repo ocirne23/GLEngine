@@ -11,7 +11,7 @@ GLConstantBuffer::~GLConstantBuffer()
 		glDeleteBuffers(1, &m_ubo);
 }
 
-void GLConstantBuffer::initialize(const GLShader& a_shader, GLuint a_bindingPoint, const char* a_blockName, GLenum a_drawUsage)
+void GLConstantBuffer::initialize(const GLShader& a_shader, uint a_bindingPoint, const char* a_blockName, EDrawUsage a_drawUsage)
 {
 	assert(!m_initialized);
 
@@ -46,7 +46,7 @@ void GLConstantBuffer::upload(uint a_numBytes, const void* a_data)
 	if (a_numBytes)
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
-		glBufferData(GL_UNIFORM_BUFFER, a_numBytes, a_data, m_drawUsage);
+		glBufferData(GL_UNIFORM_BUFFER, a_numBytes, a_data, (GLenum) m_drawUsage);
 	}
 }
 

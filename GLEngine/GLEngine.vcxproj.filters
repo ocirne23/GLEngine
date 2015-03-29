@@ -73,9 +73,6 @@
     <ClCompile Include="src\Graphics\LightManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\tryEnableARBDebugOutput.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
     <ClCompile Include="src\entityx\help\Pool.cc" />
     <ClCompile Include="src\entityx\help\Timer.cc" />
@@ -122,7 +119,11 @@
     <ClCompile Include="src\UI\Widgets\ImageButton.cpp" />
     <ClCompile Include="src\UI\Widgets\Widget.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
-    <ClCompile Include="src\UI\SpriteBatch.cpp" />
+    <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp" />
+    <ClCompile Include="src\UI\Style.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Public\GLEngine.h" />
@@ -152,10 +153,7 @@
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureBuffer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GL.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
     <ClInclude Include="include\Public\Graphics\Graphics.h" />
@@ -216,7 +214,6 @@
     <ClInclude Include="include\Public\Utils\Semaphore.h" />
     <ClInclude Include="include\Public\Utils\VecForward.h" />
     <ClInclude Include="include\Public\Core.h" />
-    <ClInclude Include="include\Private\Graphics\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Private\Utils\Bounds2D.h" />
     <ClInclude Include="include\Private\Utils\Bounds3D.h" />
     <ClInclude Include="include\Private\Utils\CheckGLError.h" />
@@ -241,8 +238,12 @@
     <ClInclude Include="include\Public\UI\Widgets\TextButton.h" />
     <ClInclude Include="include\Public\UI\Widgets\ImageButton.h" />
     <ClInclude Include="include\Public\UI\Widgets\Widget.h" />
-    <ClInclude Include="include\Public\UI\SpriteBatch.h" />
     <ClInclude Include="include\Public\UI\TextureRegion.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GL.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
+    <ClInclude Include="include\Private\Graphics\GL\tryEnableARBDebugOutput.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLSpriteBatch.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -313,9 +314,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="include\Graphics\GL\Wrappers\GLConstantBuffer.h">
-      <Filter>Header Files\Graphics\GL\Core</Filter>
-    </None>
     <None Include="src\json\json_valueiterator.inl" />
   </ItemGroup>
 </Project>

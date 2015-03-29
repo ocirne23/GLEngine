@@ -23,9 +23,12 @@ int main()
 	ResourceBuilder::ResourceProcessorMap modelProcessors = {
 		{"obj", &modelProcessor}
 	};
+	std::vector<std::string> copiedFileExtensions = {"glsl", "vert", "frag", "json"};
 
+	ResourceBuilder::buildResources(imageProcessors, "..\\GLApp\\assets-source\\UI", "..\\GLApp\\assets\\UI", INCREMENTAL_BUILDING);
 	ResourceBuilder::buildResources(imageProcessors, "..\\GLApp\\assets-source\\Utils", "..\\GLApp\\assets\\Utils", INCREMENTAL_BUILDING);
 	ResourceBuilder::buildResources(modelProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
+	ResourceBuilder::copyFiles(copiedFileExtensions, "..\\GLApp\\assets-source", "..\\GLApp\\assets", INCREMENTAL_BUILDING);
 
 	printf("Press enter to continue.");
 	std::cin.ignore();

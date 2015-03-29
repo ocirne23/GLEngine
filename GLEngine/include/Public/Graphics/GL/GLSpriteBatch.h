@@ -8,22 +8,25 @@
 #include "Graphics/GL/Wrappers/GLUniform.h"
 #include "rde/vector.h"
 
+#include "UI/TextureRegion.h"
+
 #include <glm/glm.hpp>
 
 class GLTexture;
 
-class SpriteBatch
+class GLSpriteBatch
 {
 public:
 
-	SpriteBatch();
-	~SpriteBatch();
+	GLSpriteBatch(uint size);
 
-	void setProjectionMatrix(const glm::mat4& matrix);
-	void begin();
+	void begin(const glm::mat4& mvpMatrix);
 	void draw(const TextureRegion& region, float x, float y, float width, float height);
-	void drawRotated(const TextureRegion& region, float x, float y, float width, float height, float rotationDeg);
 	void end();
+
+private:
+
+	void flush();
 
 private:
 
@@ -41,7 +44,7 @@ private:
 	GLTexture* m_currentTexture = NULL;
 
 	GLShader m_shader;
-	GLUniform m_mvpUniform;
+	GLUniform<glm::mat4> m_mvpUniform;
 
 	GLStateBuffer m_stateBuffer;
 	GLVertexBuffer m_vertexBuffer;
