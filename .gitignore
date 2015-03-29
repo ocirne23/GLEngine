@@ -19,6 +19,7 @@ ipch/
 GLEngine/gen/
 GLEngine/bin/
 GLEngine/obj/
+GLApp/assets/
 GLApp/obj/
 GLEditor/obj/
 GLEditor/bin/
