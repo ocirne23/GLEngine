@@ -7,10 +7,6 @@ class Input;
 class Graphics;
 struct SDL_Thread;
 
-#ifdef EDITOR
-class Editor;
-#endif // EDITOR
-
 class GLEngine
 {
 public:
@@ -39,10 +35,6 @@ public:
 
 	static Input* input;
 	static Graphics* graphics;
-
-#ifdef EDITOR
-	static Editor* editor;
-#endif // EDITOR
 
 private:
 

@@ -1,6 +1,5 @@
 #include "GLEngine.h"
 
-#include "Editor/Editor.h"
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include "Utils/WindowsPlatformData.h"
@@ -22,10 +21,6 @@ Graphics* GLEngine::graphics = NULL;
 bool GLEngine::s_shutdown = false;
 SDL_Thread* GLEngine::s_renderThread = NULL;
 
-#ifdef EDITOR
-Editor* GLEngine::editor = NULL;
-#endif // EDITOR
-
 void GLEngine::createRenderThread(std::function<void()> a_func)
 {
 	s_renderThread = SDL_CreateThread(&GLEngine::renderThread, "RenderThread", &a_func);
@@ -34,10 +29,6 @@ void GLEngine::createRenderThread(std::function<void()> a_func)
 void GLEngine::doMainThreadTick()
 {
 	input->pollEvents();
-
-#ifdef EDITOR
-	editor->updateUIPosition();
-#endif // EDITOR
 }
 
 void GLEngine::doRenderThreadTick()
@@ -67,9 +58,6 @@ void GLEngine::initialize()
 							INIT_WINDOW_WIDTH, INIT_WINDOW_HEIGHT,
 							INIT_WINDOW_XPOS, INIT_WINDOW_YPOS);
 	input = new Input();
-#ifdef EDITOR
-	editor = new Editor();
-#endif
 }
 
 void GLEngine::sleep(uint a_timeMs)
@@ -86,19 +74,12 @@ void GLEngine::dispose()
 {
 	SAFE_DELETE(input);
 	SAFE_DELETE(graphics);
-#ifdef EDITOR
-	editor->quit();
-	SAFE_DELETE(editor);
-#endif // EDITOR
 	SDL_Quit();
 }
 
 void GLEngine::shutdown()
 {
 	s_shutdown = true;
-
-	print("da: %i : %i \n", SDL_ThreadID(), SDL_GetThreadID(s_renderThread));
-
 	if (SDL_ThreadID() != SDL_GetThreadID(s_renderThread))
 	{
 		print("Waiting for rendering thread to shut down\n");

@@ -4,7 +4,6 @@
 
 #pragma comment(lib, "user32.lib")
 
-void* WindowsPlatformData::s_editorWindowHandle = NULL;
 void* WindowsPlatformData::s_windowHandle = NULL;
 rde::string WindowsPlatformData::s_className;
 
@@ -74,48 +73,4 @@ HWND isWindowOtherThanAbove(HWND w, HWND exclude)
 		if (from != exclude)
 			return from;
 	}
-}
-
-void WindowsPlatformData::setEditorTop()
-{
-	if (!s_editorWindowHandle)
-	{
-		s_editorWindowHandle = FindWindow(NULL, "MainWindow");
-		if (s_editorWindowHandle)
-			SetForegroundWindow((HWND) s_editorWindowHandle);
-	}
-
-	if (s_editorWindowHandle)
-	{
-		HWND window = (HWND) s_windowHandle;
-		HWND editor = (HWND) s_editorWindowHandle;
-		HWND console = GetConsoleWindow();
-		HWND focus = GetFocus();
-		HWND foreground = GetForegroundWindow();
-
-		RECT rect;
-		GetWindowRect(window, &rect);
-
-		if (foreground == console)
-		{
-			SetWindowPos(console, HWND_TOPMOST, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
-		}
-		if (focus != window && focus != editor && !(foreground == window || foreground == editor))
-		{
-			SetWindowPos(editor, HWND_NOTOPMOST, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
-			SetWindowPos(console, HWND_NOTOPMOST, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
-			SetWindowPos(window, editor, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOACTIVATE);
-		}
-		else if (focus == window || focus == editor)
-		{
-			SetWindowPos(editor, HWND_TOPMOST, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOACTIVATE);
-			SetWindowPos(window, editor, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, SWP_NOSIZE | SWP_NOMOVE);
-		}
-	}
-}
-
-void WindowsPlatformData::quitEditor()
-{
-	if (s_editorWindowHandle)
-		SendMessage((HWND) s_editorWindowHandle, WM_CLOSE, 0, 0);
 }

@@ -7,8 +7,6 @@
 #include "Components/SkyComponent.h"
 #include "Components/TransformComponent.h"
 
-#include "Editor/Editor.h"
-
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/PerspectiveCamera.h"
@@ -33,7 +31,7 @@ END_UNNAMED_NAMESPACE()
 TestScreen::TestScreen()
 {
 	GLEngine::input->keyDownListenerRegister(this, [&](EKey a_key) { return keyDown(a_key); });
-	GLEngine::input->windowQuitListenerRegister(this, []() { print("shutting down\n"); GLEngine::shutdown(); });
+	GLEngine::input->windowQuitListenerRegister(this, &GLEngine::shutdown);
 
 	m_entityx.systems.add<FPSControlSystem>();
 	m_entityx.systems.add<CameraSystem>();
@@ -103,25 +101,15 @@ bool TestScreen::keyDown(EKey a_key)
 
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
-
-#ifdef EDITOR
-		GLEngine::editor->sendTest0Message();
-#endif // EDITOR
-
 		return true;
 	}
-	if (a_key == EKey::Y)
+	else if (a_key == EKey::Y)
 	{
 		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
 		{
 			e.component<PointLightComponent>().remove();
 			e.destroy();
 		}
-
-#ifdef EDITOR
-		GLEngine::editor->sendTest1Message();
-#endif // EDITOR
-
 		return true;
 	}
 	return false;
