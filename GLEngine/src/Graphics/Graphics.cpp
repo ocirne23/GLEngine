@@ -3,7 +3,7 @@
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLVars.h"
-#include "Graphics/tryEnableARBDebugOutput.h"
+#include "Graphics/GL/tryEnableARBDebugOutput.h"
 #include "rde/rde_string.h"
 #include "Utils/CheckGLError.h"
 #include "Utils/WindowsPlatformData.h"
@@ -38,9 +38,9 @@ Graphics::~Graphics()
 {
 }
 
-void Graphics::initializeGLContext()
+void Graphics::createGLContext()
 {
-	GLVars::init(m_window);
+	GLVars::createGLContext(m_window);
 
 	glewExperimental = GL_TRUE;
 	GLenum res = glewInit();

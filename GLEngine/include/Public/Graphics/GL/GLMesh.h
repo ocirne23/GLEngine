@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core.h"
-#include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/Wrappers/GLStateBuffer.h"
 #include "Graphics/GL/Wrappers/GLTextureArray.h"
 
@@ -33,7 +32,7 @@ public:
 	GLMesh(const GLMesh& copy) = delete;
 	~GLMesh();
 
-	void loadFromFile(const char* filePath, uint textureUnit, GLuint matUBOBindingPoint);
+	void loadFromFile(const char* filePath, uint textureUnit, uint matUBOBindingPoint);
 	void render(const GLShader& shader, bool renderOpague = true, bool renderTransparent = true, bool bindMaterials = true);
 
 private:

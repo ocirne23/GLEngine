@@ -10,7 +10,6 @@ bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>&
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA ffd;
 
-	std::string spec;
 	std::stack<std::string> directories;
 	std::string root = a_path;
 
@@ -20,17 +19,16 @@ bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>&
 	while (!directories.empty())
 	{
 		a_path = directories.top();
-		spec = a_path + "\\" + a_mask;
+		std::string spec = a_path + "\\" + a_mask;
 		directories.pop();
-		const char* da = "wa";
-		hFind = FindFirstFile(spec.c_str(), &ffd);
 
+		hFind = FindFirstFile(spec.c_str(), &ffd);
 		if (hFind == INVALID_HANDLE_VALUE)
 			return false;
 
 		do
 		{
-			if (strcmp(ffd.cFileName, ".") != 0 && strcmp(ffd.cFileName, "..") != 0)
+			if (strcmp(ffd.cFileName, ".") && strcmp(ffd.cFileName, ".."))
 			{
 				if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 				{
@@ -57,7 +55,7 @@ bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>&
 				}
 			}
 		}
-		while (FindNextFile(hFind, &ffd) != 0);
+		while (FindNextFile(hFind, &ffd));
 
 		if (GetLastError() != ERROR_NO_MORE_FILES)
 		{

@@ -19,13 +19,13 @@ GLFramebuffer::~GLFramebuffer()
 	glDeleteFramebuffers(1, &m_fbo);
 }
 
-void GLFramebuffer::setDepthbufferTexture(GLenum a_format, uint a_width, uint a_height)
+void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, uint a_height)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
 	glGenTextures(1, &m_depthTexture);
 	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexStorage2D(GL_TEXTURE_2D, 1, a_format, a_width, a_height);
+	glTexStorage2D(GL_TEXTURE_2D, 1, (GLenum) a_format, a_width, a_height);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -34,25 +34,25 @@ void GLFramebuffer::setDepthbufferTexture(GLenum a_format, uint a_width, uint a_
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GLFramebuffer::addFramebufferTexture(GLenum a_format, GLenum a_attachment, uint a_width, uint a_height)
+void GLFramebuffer::addFramebufferTexture(ESizedFormat a_format, EAttachment a_attachment, uint a_width, uint a_height)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 
-	GLuint textureID;
+	uint textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTexStorage2D(GL_TEXTURE_2D, 1, a_format, a_width, a_height);
+	glTexStorage2D(GL_TEXTURE_2D, 1, (GLenum) a_format, a_width, a_height);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, a_attachment, GL_TEXTURE_2D, textureID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum) a_attachment, GL_TEXTURE_2D, textureID, 0);
 
 	m_textures.push_back(textureID);
 	m_drawBuffers.push_back(a_attachment);
 
-	glDrawBuffers(m_drawBuffers.size(), &m_drawBuffers[0]);
+	glDrawBuffers(m_drawBuffers.size(), (GLenum*) &m_drawBuffers[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

@@ -2,7 +2,6 @@
 
 #include "Core.h"
 
-#include "Graphics/GL/GLTypes.h"
 #include "rde/vector.h"
 #include "Utils/VecForward.h"
 

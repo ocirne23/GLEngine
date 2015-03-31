@@ -9,7 +9,7 @@ typedef void* SDL_GLContext;
 class GLVars
 {
 public:
-	static void init(SDL_Window* window);
+	static void createGLContext(SDL_Window* window);
 	static void dispose();
 
 	static uint getGLMajorVersion()                 { return s_glMajorVersion; }

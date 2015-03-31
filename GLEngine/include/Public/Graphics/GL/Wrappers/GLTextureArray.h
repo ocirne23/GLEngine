@@ -2,8 +2,6 @@
 
 #include "Core.h"
 
-#include "Graphics/GL/GLDefines.h"
-#include "Graphics/GL/GLTypes.h"
 #include "rde/vector.h"
 
 class Pixmap;
@@ -11,20 +9,47 @@ class Pixmap;
 class GLTextureArray
 {
 public:
+
+	enum class ETextureMinFilter
+	{
+		NEAREST = 0x2600, // GL_NEAREST
+		LINEAR  = 0x2601, // GL_LINEAR
+		NEAREST_MIPMAP_NEAREST = 0x2700, // GL_NEAREST_MIPMAP_NEAREST
+		LINEAR_MIPMAP_NEAREST  = 0x2701, // GL_LINEAR_MIPMAP_NEAREST
+		NEAREST_MIPMAP_LINEAR  = 0x2702, // GL_NEAREST_MIPMAP_LINEAR
+		LINEAR_MIPMAP_LINEAR   = 0x2703, // GL_LINEAR_MIPMAP_LINEAR
+	};
+
+	enum class ETextureMagFilter
+	{
+		NEAREST = 0x2600, // GL_NEAREST
+		LINEAR  = 0x2601, // GL_LINEAR
+	};
+
+	enum class ETextureWrap
+	{
+		CLAMP_TO_EDGE   = 0x812F, // GL_CLAMP_TO_EDGE
+		MIRRORED_REPEAT = 0x8370, // GL_MIRRORED_REPEAT
+		REPEAT          = 0x2901, // GL_REPEAT
+	};
+
+public:
+
 	GLTextureArray() {}
 	~GLTextureArray();
 	GLTextureArray(const GLTextureArray& copyMe) = delete;
 
 	void initialize(const rde::vector<Pixmap*>& pixmaps, uint numMipMaps = 4,
-	                GLint minFilter = GL_LINEAR_MIPMAP_LINEAR,
-	                GLint magFilter = GL_LINEAR,
-	                GLint textureWrapS = GL_CLAMP_TO_EDGE, GLint textureWrapT = GL_CLAMP_TO_EDGE);
+	                ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
+	                ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
+	                ETextureWrap textureWrapS   = ETextureWrap::CLAMP_TO_EDGE, 
+	                ETextureWrap textureWrapT   = ETextureWrap::CLAMP_TO_EDGE);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 	void setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture);
-	bool isInitialized() { return m_initialized; }
-
+	
+	bool isInitialized() const    { return m_initialized; }
 	uint getWidth() const         { return m_width; }
 	uint getHeight() const        { return m_height; }
 	uint getNumComponents() const { return m_numComponents; }
@@ -39,5 +64,5 @@ private:
 	uint m_numComponents   = 0;
 	bool m_isFloatTexture  = false;
 	bool m_generateMipMaps = false;
-	GLuint m_textureID     = 0;
+	uint m_textureID       = 0;
 };

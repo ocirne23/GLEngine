@@ -17,7 +17,7 @@ GLTextureArray::~GLTextureArray()
 }
 
 void GLTextureArray::initialize(const rde::vector<Pixmap*>& a_pixmaps, uint a_numMipMaps,
-								GLint a_minFilter, GLint a_magFilter, GLint a_textureWrapS, GLint a_textureWrapT)
+								ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	assert(!a_pixmaps.empty());
 
@@ -35,18 +35,18 @@ void GLTextureArray::initialize(const rde::vector<Pixmap*>& a_pixmaps, uint a_nu
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, m_textureID);
 
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, a_minFilter);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, a_magFilter);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, a_textureWrapS);
-	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, a_textureWrapT);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, (GLenum) a_minFilter);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, (GLenum) a_magFilter);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, (GLenum) a_textureWrapS);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, (GLenum) a_textureWrapT);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, a_numMipMaps);
 
 	m_generateMipMaps = (
-		a_minFilter == GL_NEAREST_MIPMAP_LINEAR ||
-		a_minFilter == GL_NEAREST_MIPMAP_NEAREST ||
-		a_minFilter == GL_LINEAR_MIPMAP_LINEAR ||
-		a_minFilter == GL_LINEAR_MIPMAP_NEAREST);
+		a_minFilter == ETextureMinFilter::NEAREST_MIPMAP_LINEAR ||
+		a_minFilter == ETextureMinFilter::NEAREST_MIPMAP_NEAREST ||
+		a_minFilter == ETextureMinFilter::LINEAR_MIPMAP_LINEAR ||
+		a_minFilter == ETextureMinFilter::LINEAR_MIPMAP_NEAREST);
 
 	const GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, m_isFloatTexture);
 	const GLenum format = getFormatForNumComponents(m_numComponents);

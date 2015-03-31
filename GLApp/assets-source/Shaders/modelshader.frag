@@ -1,5 +1,5 @@
-#include "Shaders/clusteredshading.txt"
-#include "Shaders/materiallighting.txt"
+#include "Shaders/clusteredshading.glsl"
+#include "Shaders/materiallighting.glsl"
 
 ////////////////////////// IN / OUT //////////////////////////
 

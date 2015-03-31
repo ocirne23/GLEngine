@@ -1,0 +1,58 @@
+{ 
+	"style": "UI/uistyle.json",
+	"contents" : [
+	{
+		"type": "textbutton",
+		"name": "test button 1",
+		"layout": {
+			"width": 100,
+			"height": 50,
+			"horizontalAlignment": "LEFT",
+			"verticalAlignment": "TOP",
+			"marginLeft": 100,
+			"marginRight": 0,
+			"marginTop": 150,
+			"marginBottom": 0
+		},
+		"properties":
+		{
+			"text":"Hello world"
+		}
+	},
+	{
+		"type": "textbutton",
+		"name": "test button 2",
+		"layout": {
+			"width": 100,
+			"height": 50,
+			"horizontalAlignment": "LEFT",
+			"verticalAlignment": "TOP",
+			"marginLeft": 100,
+			"marginRight": 0,
+			"marginTop": 150,
+			"marginBottom": 0
+		},
+		"properties":
+		{
+			"text":"Haithere world"
+		}
+	},
+	{
+		"type": "imagebutton",
+		"name": "somethingy 1",
+		"layout": {
+			"width": 100,
+			"height": 50,
+			"horizontalAlignment": "LEFT",
+			"verticalAlignment": "TOP",
+			"marginLeft": 100,
+			"marginRight": 0,
+			"marginTop": 150,
+			"marginBottom": 0
+		},
+		"properties":
+		{
+			"stuff":1
+		}
+	}
+]}

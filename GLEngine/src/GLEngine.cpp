@@ -38,9 +38,9 @@ void GLEngine::doRenderThreadTick()
 
 int GLEngine::renderThread(void* a_ptr)
 {
-	std::function<void()> func = *((std::function<void()>*) a_ptr);
-	graphics->initializeGLContext();
-	func();
+	std::function<void()> renderLoopFunc = *((std::function<void()>*) a_ptr);
+	graphics->createGLContext();
+	renderLoopFunc();
 	dispose();
 	return 0;
 }

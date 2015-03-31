@@ -28,8 +28,8 @@ void TiledShading::setupShader(const GLShader& a_shader)
 {
 	assert(a_shader.isBegun());
 
-	m_lightGridBuffer.initialize(a_shader, 0, "LightGrid", GL_STREAM_DRAW);
-	m_lightIndiceBuffer.initialize(a_shader, 1, "LightIndices", GL_STREAM_DRAW);
+	m_lightGridBuffer.initialize(a_shader, 0, "LightGrid", GLConstantBuffer::EDrawUsage::STREAM);
+	m_lightIndiceBuffer.initialize(a_shader, 1, "LightIndices", GLConstantBuffer::EDrawUsage::STREAM);
 }
 
 void TiledShading::update(const PerspectiveCamera& a_camera, uint a_numLights, const glm::vec4* a_viewspaceLightPositionRangeList)

@@ -2,40 +2,61 @@
 
 #include "Core.h"
 
-#include "Graphics/GL/GLDefines.h"
-#include "Graphics/GL/GLTypes.h"
-
 class Pixmap;
 class FileHandle;
 
 class GLTexture
 {
 public:
+
+	enum class ETextureMinFilter
+	{
+		NEAREST = 0x2600, // GL_NEAREST
+		LINEAR  = 0x2601, // GL_LINEAR
+		NEAREST_MIPMAP_NEAREST = 0x2700, // GL_NEAREST_MIPMAP_NEAREST
+		LINEAR_MIPMAP_NEAREST  = 0x2701, // GL_LINEAR_MIPMAP_NEAREST
+		NEAREST_MIPMAP_LINEAR  = 0x2702, // GL_NEAREST_MIPMAP_LINEAR
+		LINEAR_MIPMAP_LINEAR   = 0x2703, // GL_LINEAR_MIPMAP_LINEAR
+	};
+
+	enum class ETextureMagFilter
+	{
+		NEAREST = 0x2600, // GL_NEAREST
+		LINEAR  = 0x2601, // GL_LINEAR
+	};
+
+	enum class ETextureWrap
+	{
+		CLAMP_TO_EDGE   = 0x812F, // GL_CLAMP_TO_EDGE
+		MIRRORED_REPEAT = 0x8370, // GL_MIRRORED_REPEAT
+		REPEAT          = 0x2901, // GL_REPEAT
+	};
+
+public:
+
 	GLTexture() {}
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
-	void initialize(const FileHandle& filePath, GLint textureIdx,
-	                GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR,
-	                GLint GLTextureWrapS = GL_REPEAT, GLint GLTextureWrapT = GL_REPEAT);
+	void initialize(const FileHandle& filePath, int textureIdx,
+					ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
+					ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
+					ETextureWrap textureWrapS = ETextureWrap::REPEAT,
+					ETextureWrap textureWrapT = ETextureWrap::REPEAT);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 
 	bool isLoaded() const         { return m_textureID != 0; }
-	GLuint getTextureID() const   { return m_textureID; }
+	uint getTextureID() const     { return m_textureID; }
 	uint getWidth() const         { return m_width; }
 	uint getHeight() const        { return m_height; }
 	byte getNumComponents() const { return m_numComponents; }
 
 private:
-	void setupGLTexture(const Pixmap& pixmap, GLint minFilter, GLint magFilter,
-						GLint GLTextureWrapS, GLint GLTextureWrapT);
-
-private:
 
 	bool m_initialized   = false;
-	GLuint m_textureID   = 0;
+	uint m_textureID     = 0;
 	uint m_width         = 0;
 	uint m_height        = 0;
 	byte m_numComponents = 0;

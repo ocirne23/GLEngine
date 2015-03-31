@@ -22,9 +22,12 @@
 
 #include "Utils/ListenerMacros.h"
 
+#include "UI/Frame.h"
+
 BEGIN_UNNAMED_NAMESPACE()
 
 static const char* const MODEL_FILE_PATH = "Models/palace/palace.da";
+static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
 
 END_UNNAMED_NAMESPACE()
 
@@ -63,6 +66,8 @@ TestScreen::TestScreen()
 	entityx::Entity skyboxEntity = m_entityx.entities.create();
 	skyboxEntity.assign<SkyComponent>(m_skybox);
 	skyboxEntity.assign<TransformComponent>();
+
+	Frame f(UI_JSON_FILE_PATH);
 }
 
 TestScreen::~TestScreen()

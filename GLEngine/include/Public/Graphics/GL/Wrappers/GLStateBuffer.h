@@ -1,13 +1,9 @@
 #pragma once
 
-#include "Graphics/GL/GLTypes.h"
+#include "Core.h"
+
 #include "rde/vector.h"
 
-class GLConstantBuffer;
-class GLTextureBuffer;
-class GLVertexBuffer;
-
-/** VAO wrapper */
 class GLStateBuffer
 {
 public:
@@ -25,7 +21,7 @@ private:
 
 	bool m_initialized = false;
 	bool m_isBegun     = false;
-	GLuint m_vao       = 0;
+	uint m_vao         = 0;
 
 private:
 
