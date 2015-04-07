@@ -1,7 +1,6 @@
 #pragma once
 
 #define NULL 0
-#define EDITOR
 
 #define SAFE_DELETE(X) if (X) {delete X; X = NULL; }
 #define SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = NULL; }

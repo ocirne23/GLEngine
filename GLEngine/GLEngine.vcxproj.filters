@@ -80,7 +80,6 @@
     <ClCompile Include="src\entityx\Event.cc" />
     <ClCompile Include="src\entityx\System.cc" />
     <ClCompile Include="src\Utils\WindowsPlatformData.cpp" />
-    <ClCompile Include="src\Editor\EditorPipeline.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp">
       <Filter>Source Files\Graphics\GL\Core</Filter>
     </ClCompile>
@@ -108,7 +107,6 @@
     <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp">
       <Filter>Source Files\Graphics\GL\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Editor\Editor.cpp" />
     <ClCompile Include="src\Utils\Semaphore.cpp" />
     <ClCompile Include="src\Utils\JobScheduler.cpp" />
     <ClCompile Include="src\json\json_reader.cpp" />
@@ -127,9 +125,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Public\GLEngine.h" />
-    <ClInclude Include="include\Public\Editor\CommandType.h" />
-    <ClInclude Include="include\Public\Editor\Editor.h" />
-    <ClInclude Include="include\Public\Editor\EditorPipeline.h" />
     <ClInclude Include="include\Public\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\Public\entityx\3rdparty\simplesignal.h" />
     <ClInclude Include="include\Public\entityx\deps\Dependencies.h" />

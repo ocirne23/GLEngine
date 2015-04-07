@@ -20,8 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core.cpp" />
-    <ClCompile Include="src\Editor\Editor.cpp" />
-    <ClCompile Include="src\Editor\EditorPipeline.cpp" />
     <ClCompile Include="src\entityx\Entity.cc" />
     <ClCompile Include="src\entityx\Event.cc" />
     <ClCompile Include="src\entityx\help\Pool.cc" />
@@ -77,9 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Public\Core.h" />
-    <ClInclude Include="include\Public\Editor\CommandType.h" />
-    <ClInclude Include="include\Public\Editor\Editor.h" />
-    <ClInclude Include="include\Public\Editor\EditorPipeline.h" />
     <ClInclude Include="include\Public\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\Public\entityx\3rdparty\simplesignal.h" />
     <ClInclude Include="include\Public\entityx\config.h" />
