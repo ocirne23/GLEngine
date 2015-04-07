@@ -6,7 +6,7 @@
 #include <fstream>
 #include <assert.h>
 
-bool ByteImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
+bool ByteImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildOnFileModificationList)
 {
 	const int type = (int) EResourceType::BYTEIMAGE;
 	int width, height, numComponents;

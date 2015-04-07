@@ -1,4 +1,4 @@
-#include "Shaders/materiallighting.txt"
+#include "Shaders/materiallighting.glsl"
 
 ////////////////////////// IN / OUT //////////////////////////
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ResourceProcessor.h"
+#include "Processors/ResourceProcessor.h"
 
 #include <unordered_map>
 #include <string>

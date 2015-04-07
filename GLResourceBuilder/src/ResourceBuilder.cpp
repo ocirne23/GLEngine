@@ -34,6 +34,19 @@ void createDirectoryForFile(const std::string& a_filePath)
 	}
 }
 
+struct Dependency
+{
+	std::string fileName;
+	std::string writeTimeStr;
+};
+
+struct FileWriteTime
+{
+	std::string fileName;
+	std::string writeTimeStr;
+	std::vector<Dependency> dependencies;
+};
+
 } // namespace
 
 void ResourceBuilder::buildResources(const std::unordered_map<std::string, ResourceProcessor*>& a_processors, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
@@ -44,20 +57,30 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 	const std::string outDirectoryPathStr(a_outDirectoryPath);
 	const std::string modificationFilePath = outDirectoryPathStr + "\\modificationdates.txt";
 
-	std::unordered_map<std::string, std::string> oldWriteTimesMap;
+	std::unordered_map<std::string, FileWriteTime*> oldWriteTimesMap;
 	std::fstream writeTimesFile;
 
 	createDirectoryForFile(modificationFilePath);
 	writeTimesFile.open(modificationFilePath, std::ios::in);
 	if (writeTimesFile.is_open())
 	{	// Read modification file
+		FileWriteTime* prev = NULL;
 		std::string line;
 		while (std::getline(writeTimesFile, line))
 		{
 			const std::string::size_type split = line.find_first_of(":");
-			const std::string fileName = line.substr(0, split);
-			const std::string writeTimeStr = line.substr(split + 1);
-			oldWriteTimesMap.insert(std::make_pair(fileName, writeTimeStr));
+
+			if (line[0] == '>')
+			{
+				prev->dependencies.push_back({line.substr(1, split), line.substr(split + 1)});
+			}
+			else
+			{
+				FileWriteTime* fileWriteTime = new FileWriteTime();
+				fileWriteTime->fileName = line.substr(0, split);
+				fileWriteTime->writeTimeStr = line.substr(split + 1);
+				oldWriteTimesMap.insert({fileWriteTime->fileName, fileWriteTime});
+			}
 		}
 		writeTimesFile.clear();
 		writeTimesFile.close();
@@ -79,8 +102,8 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 			if (a_incremental)
 			{
 				auto writeTimesIt = oldWriteTimesMap.find(str);
-				if (writeTimesIt != oldWriteTimesMap.end() && writeTimesIt->second == writeTime) // check if file was modified
-					continue;
+				//if (writeTimesIt != oldWriteTimesMap.end() && writeTimesIt->second->writeTimeStr == writeTime) // check if file was modified
+				//	continue;
 			}
 
 			const std::string extension = getExtensionForFilePath(str);
@@ -89,12 +112,13 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 			{	// if a processor exists for this extension, process.
 				const std::string inFilePath = inDirectoryPathStr + "\\" + str;
 				const std::string outFilePath = outDirectoryPathStr + "\\" + str.substr(0, str.find_last_of('.')) + BUILT_FILE_EXTENSION;
-				const std::string outDirectoryFilePath = outFilePath.substr(0, outFilePath.find_last_of("\\"));
+				const std::string outDirectoryPath = outFilePath.substr(0, outFilePath.find_last_of("\\"));
 
 				createDirectoryForFile(outFilePath);
 
 				printf("starting %s\n", str.c_str());
-				if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str()))
+				std::vector<std::string> rebuildOnFileModificationList;
+				if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str(), rebuildOnFileModificationList))
 				{
 					printf("finished %s\n", str.c_str());
 
@@ -114,8 +138,9 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 
 	for (const auto& oldWriteTimes : oldWriteTimesMap)
 	{
-		const std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second + "\n";
-		writeTimesFile.write(line.c_str(), line.length());
+		//const std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second + "\n";
+	//	writeTimesFile.write(line.c_str(), line.length());
+		delete oldWriteTimes.second;
 	}
 	writeTimesFile.close();
 

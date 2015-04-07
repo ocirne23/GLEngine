@@ -211,7 +211,7 @@ namespace
 	}
 }
 
-bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath)
+bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildOnFileModificationList)
 {
 	const std::string inResourcePathStr(a_inResourcePath);
 	const std::string outResourcePathstr(a_outResourcePath);
@@ -274,7 +274,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 
 	std::vector<TextureAtlas*> atlases;
 	if (textureAtlasRegions.size() == 1)
-	{
+	{ // If there is only one texture, just create one atlas with the same size
 		TextureAtlasRegion& tar = textureAtlasRegions.back();
 		atlases.push_back(new TextureAtlas(tar.texture.width, tar.texture.height, tar.texture.numComp, ATLAS_NUM_MIPS));
 		tar.atlasIdx = 0;
@@ -295,17 +295,13 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		switch (tar.type)
 		{
 		case aiTextureType_DIFFUSE:
-		{
 			matProperties[tar.materialID].diffuseAtlasNr = tar.atlasIdx;
 			matProperties[tar.materialID].diffuseTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tar.region);
 			break;
-		}
 		case aiTextureType_NORMALS:
-		{
 			matProperties[tar.materialID].normalAtlasNr = tar.atlasIdx;
 			matProperties[tar.materialID].normalTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tar.region);
 			break;
-		}
 		}
 	}
 

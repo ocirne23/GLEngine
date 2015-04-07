@@ -153,6 +153,7 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		m_modelShader.begin();
 		{
 			m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
+
 			m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
 			m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorIntensityList());
 			m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
