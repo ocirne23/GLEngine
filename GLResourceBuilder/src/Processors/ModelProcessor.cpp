@@ -211,7 +211,7 @@ namespace
 	}
 }
 
-bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildOnFileModificationList)
+bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildDependencies)
 {
 	const std::string inResourcePathStr(a_inResourcePath);
 	const std::string outResourcePathstr(a_outResourcePath);
@@ -250,6 +250,8 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		auto addTextureAtlasRegion = [&](const char* a_imageName, int a_materialID, aiTextureType a_type) {
 			std::string filePath(baseTexturePath);
 			filePath.append(a_imageName);
+			printf("added dep: %s \n", a_imageName);
+			a_rebuildDependencies.push_back(filePath);
 
 			TextureAtlasRegion tar;
 			tar.materialID = a_materialID;

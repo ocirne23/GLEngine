@@ -57,7 +57,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 	const std::string outDirectoryPathStr(a_outDirectoryPath);
 	const std::string modificationFilePath = outDirectoryPathStr + "\\modificationdates.txt";
 
-	std::unordered_map<std::string, FileWriteTime*> oldWriteTimesMap;
+	std::unordered_map<std::string, FileWriteTime*> writeTimesMap;
 	std::fstream writeTimesFile;
 
 	createDirectoryForFile(modificationFilePath);
@@ -79,7 +79,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 				FileWriteTime* fileWriteTime = new FileWriteTime();
 				fileWriteTime->fileName = line.substr(0, split);
 				fileWriteTime->writeTimeStr = line.substr(split + 1);
-				oldWriteTimesMap.insert({fileWriteTime->fileName, fileWriteTime});
+				writeTimesMap.insert({fileWriteTime->fileName, fileWriteTime});
 			}
 		}
 		writeTimesFile.clear();
@@ -101,7 +101,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 
 			if (a_incremental)
 			{
-				auto writeTimesIt = oldWriteTimesMap.find(str);
+				auto writeTimesIt = writeTimesMap.find(str);
 				//if (writeTimesIt != oldWriteTimesMap.end() && writeTimesIt->second->writeTimeStr == writeTime) // check if file was modified
 				//	continue;
 			}
@@ -117,16 +117,37 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 				createDirectoryForFile(outFilePath);
 
 				printf("starting %s\n", str.c_str());
-				std::vector<std::string> rebuildOnFileModificationList;
-				if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str(), rebuildOnFileModificationList))
+				std::vector<std::string> rebuildDependencies;
+				if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str(), rebuildDependencies))
 				{
 					printf("finished %s\n", str.c_str());
 
-					const std::string line = str + ":" + writeTime + "\n";
-					writeTimesFile.write(line.c_str(), line.length());
-					auto at = oldWriteTimesMap.find(str);
-					if (at != oldWriteTimesMap.end())
-						oldWriteTimesMap.erase(at);
+					auto at = writeTimesMap.find(str);
+					if (at != writeTimesMap.end())
+					{
+						at->second->writeTimeStr = writeTime;
+					}
+					else
+					{
+						FileWriteTime* fileWriteTime = new FileWriteTime();
+						fileWriteTime->fileName = str;
+						fileWriteTime->writeTimeStr = writeTime;
+						for (const std::string& depStr : rebuildDependencies)
+						{
+							Dependency dependency;
+							dependency.fileName = depStr;
+							for (int i = 0; i < files.size(); ++i)
+							{
+								if (depStr == files[i])
+								{
+									dependency.writeTimeStr = writeTimes[i];
+									break;
+								}
+							}
+							fileWriteTime->dependencies.push_back(dependency);
+						}
+						writeTimesMap.insert({ str, fileWriteTime });
+					}
 				}
 				else
 				{
@@ -136,10 +157,15 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 		}
 	}
 
-	for (const auto& oldWriteTimes : oldWriteTimesMap)
+	for (const auto& oldWriteTimes : writeTimesMap)
 	{
-		//const std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second + "\n";
-	//	writeTimesFile.write(line.c_str(), line.length());
+		const std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second->writeTimeStr + "\n";
+		writeTimesFile.write(line.c_str(), line.length());
+		for (const auto& dependency : oldWriteTimes.second->dependencies)
+		{
+			const std::string dep = std::string(">") + dependency.fileName + ":" + dependency.writeTimeStr + "\n";
+			writeTimesFile.write(dep.c_str(), dep.length());
+		}
 		delete oldWriteTimes.second;
 	}
 	writeTimesFile.close();

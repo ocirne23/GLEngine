@@ -76,5 +76,8 @@
     <ClInclude Include="src\Processors\ResourceProcessor.h">
       <Filter>Header Files\Processors</Filter>
     </ClInclude>
+    <ClInclude Include="src\Utils\getFileTime.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
