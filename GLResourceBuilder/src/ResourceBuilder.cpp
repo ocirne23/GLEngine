@@ -59,6 +59,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 
 	createDirectoryForFile(modificationFilePath);
 
+	std::unordered_map<std::string, FileWriteTime*> writeTimesMap;
 	std::fstream writeTimesFile;
 	writeTimesFile.open(modificationFilePath, std::ios::in | std::ios::out);
 
@@ -115,8 +116,6 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 			std::vector<std::string> rebuildOnFileModificationList;
 			if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str(), rebuildOnFileModificationList))
 			{
-				printf("finished %s\n", str.c_str());
-
 				const std::string line = str + ":" + writeTime + "\n";
 				writeTimesFile.write(line.c_str(), line.length());
 				auto at = oldWriteTimesMap.find(str);
@@ -127,13 +126,67 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 			{
 				printf("failed %s\n", str.c_str());
 			}
+
+			const std::string extension = getExtensionForFilePath(str);
+			const auto processorsIt = a_processors.find(extension);
+			if (processorsIt != a_processors.end())
+			{	// if a processor exists for this extension, process.
+				const std::string inFilePath = inDirectoryPathStr + "\\" + str;
+				const std::string outFilePath = outDirectoryPathStr + "\\" + str.substr(0, str.find_last_of('.')) + BUILT_FILE_EXTENSION;
+				const std::string outDirectoryPath = outFilePath.substr(0, outFilePath.find_last_of("\\"));
+
+				createDirectoryForFile(outFilePath);
+
+				printf("starting %s\n", str.c_str());
+				std::vector<std::string> rebuildDependencies;
+				if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str(), rebuildDependencies))
+				{
+					printf("finished %s\n", str.c_str());
+
+					auto at = writeTimesMap.find(str);
+					if (at != writeTimesMap.end())
+					{
+						at->second->writeTimeStr = writeTime;
+					}
+					else
+					{
+						FileWriteTime* fileWriteTime = new FileWriteTime();
+						fileWriteTime->fileName = str;
+						fileWriteTime->writeTimeStr = writeTime;
+						for (const std::string& depStr : rebuildDependencies)
+						{
+							Dependency dependency;
+							dependency.fileName = depStr;
+							for (int i = 0; i < files.size(); ++i)
+							{
+								if (depStr == files[i])
+								{
+									dependency.writeTimeStr = writeTimes[i];
+									break;
+								}
+							}
+							fileWriteTime->dependencies.push_back(dependency);
+						}
+						writeTimesMap.insert({ str, fileWriteTime });
+					}
+				}
+				else
+				{
+					printf("failed %s\n", str.c_str());
+				}
+			}
 		}
 	}
 
-	for (const auto& oldWriteTimes : oldWriteTimesMap)
+	for (const auto& oldWriteTimes : writeTimesMap)
 	{
-		//const std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second + "\n";
-		//writeTimesFile.write(line.c_str(), line.length());
+		const std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second->writeTimeStr + "\n";
+		writeTimesFile.write(line.c_str(), line.length());
+		for (const auto& dependency : oldWriteTimes.second->dependencies)
+		{
+			const std::string dep = std::string(">") + dependency.fileName + ":" + dependency.writeTimeStr + "\n";
+			writeTimesFile.write(dep.c_str(), dep.length());
+		}
 		delete oldWriteTimes.second;
 	}
 	writeTimesFile.close();

@@ -80,6 +80,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils\writeVector.h">
+    <ClInclude Include="src\Utils\getFileTime.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>

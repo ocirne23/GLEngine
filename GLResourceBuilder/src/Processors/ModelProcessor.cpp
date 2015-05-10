@@ -209,7 +209,6 @@ uint getTextureInfoIndex(std::vector<TextureInfo>& a_textures, const std::string
 END_UNNAMED_NAMESPACE()
 
 
-
 bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildOnFileModificationList)
 {
 	const std::string inResourcePathStr(a_inResourcePath);

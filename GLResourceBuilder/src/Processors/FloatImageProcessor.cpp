@@ -6,7 +6,7 @@
 #include <fstream>
 #include <assert.h>
 
-bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildOnFileModificationList)
+bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildDependencies)
 {
 	const int type = (int) EResourceType::FLOATIMAGE;
 	int width, height, numComponents;

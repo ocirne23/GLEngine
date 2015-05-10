@@ -1,1 +1,0 @@
-C:\Users\Enrico\Documents\GitHub\GLEngine\GLEditor\bin\Release\GLEditor.exe.config

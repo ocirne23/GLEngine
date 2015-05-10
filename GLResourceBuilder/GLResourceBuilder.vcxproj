@@ -171,6 +171,7 @@
     <ClInclude Include="src\Processors\ModelProcessor.h" />
     <ClInclude Include="src\Processors\ResourceProcessor.h" />
     <ClInclude Include="src\ResourceBuilder.h" />
+    <ClInclude Include="src\Utils\getFileTime.h" />
     <ClInclude Include="src\Utils\listFiles.h" />
     <ClInclude Include="src\Utils\stb_image.h" />
     <ClInclude Include="src\Utils\TextureAtlas.h" />
