@@ -34,10 +34,10 @@ layout (std140) uniform MaterialProperties
 	MaterialProperty u_materialProperties[MAX_MATERIALS];
 };
 
-float _getMipMapLevel(vec2 texture_coordinate)
+float _getMipMapLevel(vec2 texCoord)
 {
-    vec2  dx_vtc        = dFdx(texture_coordinate);
-    vec2  dy_vtc        = dFdy(texture_coordinate);
+    vec2 dx_vtc = dFdx(texCoord);
+    vec2 dy_vtc = dFdy(texCoord);
     float delta_max_sqr = max(dot(dx_vtc, dx_vtc), dot(dy_vtc, dy_vtc));
     return 0.5 * log2(delta_max_sqr);
 }

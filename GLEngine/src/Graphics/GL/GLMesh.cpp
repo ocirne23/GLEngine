@@ -14,6 +14,7 @@
 #include "Utils/CheckGLError.h"
 #include "Utils/EResourceType.h"
 #include "Utils/FileHandle.h"
+#include "Utils/readVector.h"
 
 #include "Input/Input.h"
 #include "Input/EKey.h"
@@ -23,8 +24,6 @@
 #include <glm/glm.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
-
-enum { MAX_MATERIALS = 200 };
 
 struct MeshEntry
 {
@@ -44,17 +43,6 @@ struct Vertex
 	glm::vec3 bitangents;
 	uint materialID;
 };
-
-template <typename T>
-uint readVector(const FileHandle& a_handle, rde::vector<T>& a_vector, uint a_offset)
-{
-	int size;
-	a_handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), a_offset);
-	a_vector.resize(size);
-	a_handle.readBytes(reinterpret_cast<char*>(&a_vector[0]), size * sizeof(a_vector[0]), a_offset + sizeof(int));
-
-	return a_offset + sizeof(int) + size * sizeof(a_vector[0]);
-}
 
 END_UNNAMED_NAMESPACE()
 
@@ -89,8 +77,7 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 
 	int numAtlases;
 	file.readBytes(reinterpret_cast<char*>(&numAtlases), sizeof(int), sizeof(int) * 1);
-	file.readBytes(reinterpret_cast<char*>(&m_numTransparentMeshes), sizeof(uint), sizeof(int) * 2);
-	uint offset = sizeof(uint) * 3;
+	uint offset = sizeof(uint) * 2;
 
 	offset = readVector(file, m_matProperties, offset);
 	offset = readVector(file, indices, offset);
@@ -136,7 +123,6 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 		pixmaps[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
 		assert(pixmaps[i]->exists());
 	}
-
 	if (pixmaps.size())
 		m_textureArray.initialize(pixmaps);
 	assert(m_textureArray.isInitialized());
@@ -149,7 +135,6 @@ void GLMesh::initializeUBO(const GLShader& a_shader)
 	m_matUniformBuffer = new GLConstantBuffer();
 	m_matUniformBuffer->initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GLConstantBuffer::EDrawUsage::STREAM);
 	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
-
 	m_stateBuffer.end();
 }
 
@@ -159,15 +144,13 @@ void GLMesh::render(const GLShader& shader, bool a_renderOpague, bool a_renderTr
 
 	if (!m_matUniformBuffer)
 		initializeUBO(shader);
-
 	m_matUniformBuffer->bind();
 
 	m_stateBuffer.begin();
 	if (m_textureArray.isInitialized())
 		m_textureArray.bind(m_textureUnit);
-
-	// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe rendering
 	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
-
 	m_stateBuffer.end();
 }
+
+// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); wireframe rendering

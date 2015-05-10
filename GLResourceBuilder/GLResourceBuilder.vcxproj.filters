@@ -76,5 +76,11 @@
     <ClInclude Include="src\Processors\ResourceProcessor.h">
       <Filter>Header Files\Processors</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\writeVector.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

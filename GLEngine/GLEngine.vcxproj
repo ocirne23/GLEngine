@@ -74,6 +74,7 @@
     <ClCompile Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Private\Utils\readVector.h" />
     <ClInclude Include="include\Public\Core.h" />
     <ClInclude Include="include\Public\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\Public\entityx\3rdparty\simplesignal.h" />

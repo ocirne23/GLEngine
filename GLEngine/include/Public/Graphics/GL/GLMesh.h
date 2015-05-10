@@ -47,7 +47,6 @@ private:
 	GLConstantBuffer* m_matUniformBuffer = NULL;
 	uint m_textureUnit                   = 0;
 	GLTextureArray m_textureArray;
-	uint m_numTransparentMeshes          = 0;
 	uint m_numIndices                    = 0;
 
 	rde::vector<MaterialProperty> m_matProperties;
