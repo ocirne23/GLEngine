@@ -18,13 +18,10 @@ int main()
 	GLEngine::createRenderThread([&]()
 	{
 		TestScreen testScreen;
-
 		while (!GLEngine::isShutdown())
 		{
 			GLEngine::doRenderThreadTick();
-
 			float deltaSec = deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs());
-
 			testScreen.render(deltaSec);
 			fpsMeasurer.tickFrame(deltaSec);
 		}
@@ -34,6 +31,5 @@ int main()
 	{
 		GLEngine::doMainThreadTick();
 	}
-
 	return 0;
 }

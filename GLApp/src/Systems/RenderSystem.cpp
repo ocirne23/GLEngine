@@ -4,7 +4,6 @@
 #include "Components/TransformComponent.h"
 #include "Components/ModelComponent.h"
 #include "Components/SkyComponent.h"
-
 #include "entityx/Entity.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
@@ -117,62 +116,66 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 {
 	FileModificationManager::update();
 
-	GLEngine::graphics->clear(glm::vec4(0), false, true);
-
-	if (m_activeCamera)
+	if (!m_activeCamera)
 	{
-		const PerspectiveCamera& camera = *m_activeCamera;
-		const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
-
-		GLEngine::graphics->setDepthTest(false);
-
-		m_skyboxShader.begin();
-		{
-			m_skyboxMvpMatrixUniform.set(camera.getCombinedMatrix());
-			m_skyboxViewMatrixUniform.set(camera.getViewMatrix());
-			m_skyboxNormalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
-
-			entityx::ComponentHandle<TransformComponent> transform;
-			entityx::ComponentHandle<SkyComponent> sky;
-			for (entityx::Entity entity : a_entities.entities_with_components(transform, sky))
-			{
-				glm::mat4 trans = transform->transform;
-				glm::vec3 pos = camera.getPosition();
-
-				if (sky->centerOnCamera)
-					trans[3] = glm::vec4(pos, 1.0f);
-
-				m_skyboxTransformUniform.set(trans);
-				sky->mesh->render(m_skyboxShader);
-			}
-		}
-		m_skyboxShader.end();
-
-		GLEngine::graphics->setDepthTest(true);
-
-		m_modelShader.begin();
-		{
-			m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
-
-			m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
-			m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorIntensityList());
-			m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
-			m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
-
-			m_mvpMatrixUniform.set(camera.getCombinedMatrix());
-			m_viewMatrixUniform.set(camera.getViewMatrix());
-			m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
-
-			entityx::ComponentHandle<TransformComponent> transform;
-			entityx::ComponentHandle<ModelComponent> model;
-			for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
-			{
-				m_transformUniform.set(transform->transform);
-				model->mesh->render(m_modelShader);
-			}
-		}
-		m_modelShader.end();
+		GLEngine::graphics->clear(glm::vec4(0, 1, 0, 1));
+		GLEngine::graphics->swap();
+		return;
 	}
+
+	const PerspectiveCamera& camera = *m_activeCamera;
+	const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
+	m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
+
+	// No need to clear color because skybox fully covers previous frame
+	GLEngine::graphics->clear(glm::vec4(0), false, true);
+	GLEngine::graphics->setDepthTest(false);
+
+	// Might need to render skybox last with depth test, uses less bandwidth.
+	m_skyboxShader.begin();
+	{
+		m_skyboxMvpMatrixUniform.set(camera.getCombinedMatrix());
+		m_skyboxViewMatrixUniform.set(camera.getViewMatrix());
+		m_skyboxNormalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
+
+		entityx::ComponentHandle<TransformComponent> transform;
+		entityx::ComponentHandle<SkyComponent> sky;
+		for (entityx::Entity entity : a_entities.entities_with_components(transform, sky))
+		{
+			glm::mat4 trans = transform->transform;
+			glm::vec3 pos = camera.getPosition();
+
+			if (sky->centerOnCamera)
+				trans[3] = glm::vec4(pos, 1.0f);
+
+			m_skyboxTransformUniform.set(trans);
+			sky->mesh->render(m_skyboxShader);
+		}
+	}
+	m_skyboxShader.end();
+
+	GLEngine::graphics->setDepthTest(true);
+
+	m_modelShader.begin();
+	{
+		m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
+		m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorIntensityList());
+		m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
+		m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
+
+		m_mvpMatrixUniform.set(camera.getCombinedMatrix());
+		m_viewMatrixUniform.set(camera.getViewMatrix());
+		m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
+
+		entityx::ComponentHandle<TransformComponent> transform;
+		entityx::ComponentHandle<ModelComponent> model;
+		for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
+		{
+			m_transformUniform.set(transform->transform);
+			model->mesh->render(m_modelShader);
+		}
+	}
+	m_modelShader.end();
 
 	GLEngine::graphics->swap();
 }

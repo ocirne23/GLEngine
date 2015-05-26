@@ -3,7 +3,6 @@
 #include "Core.h"
 
 #include "entityx/System.h"
-
 #include "Graphics/LightManager.h"
 #include "Graphics/GL/Wrappers/GLConstantBuffer.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
