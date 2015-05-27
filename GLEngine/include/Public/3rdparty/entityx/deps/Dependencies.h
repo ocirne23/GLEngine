@@ -9,9 +9,9 @@
  */
 #pragma once
 
-#include "entityx/System.h"
-#include "entityx/Event.h"
-#include "entityx/Entity.h"
+#include "3rdparty/entityx/System.h"
+#include "3rdparty/entityx/Event.h"
+#include "3rdparty/entityx/Entity.h"
 
 namespace entityx {
 namespace deps {

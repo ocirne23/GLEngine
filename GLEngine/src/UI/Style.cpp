@@ -1,7 +1,7 @@
 #include "UI/Style.h"
 
 #include "Graphics/GL/Wrappers/GLTexture.h"
-#include "json/json.h"
+#include "3rdparty/json/json.h"
 #include "Utils/FileHandle.h"
 
 Style::~Style()

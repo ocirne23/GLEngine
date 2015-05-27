@@ -19,7 +19,7 @@
 #include "Input/Input.h"
 #include "Input/EKey.h"
 
-#include "rde/rde_string.h"
+#include "3rdparty/rde/rde_string.h"
 
 #include <glm/glm.hpp>
 

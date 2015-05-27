@@ -10,8 +10,8 @@
 
 #pragma once
 
-#include "entityx/config.h"
-#include "entityx/Event.h"
-#include "entityx/Entity.h"
-#include "entityx/System.h"
-#include "entityx/quick.h"
+#include "3rdparty/entityx/config.h"
+#include "3rdparty/entityx/Event.h"
+#include "3rdparty/entityx/Entity.h"
+#include "3rdparty/entityx/System.h"
+#include "3rdparty/entityx/quick.h"

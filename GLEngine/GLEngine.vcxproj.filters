@@ -7,21 +7,6 @@
     <ClCompile Include="src\GLEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\rde\allocator.cpp">
-      <Filter>Source Files\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rde\intrusive_list.cpp">
-      <Filter>Source Files\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rde\intrusive_slist.cpp">
-      <Filter>Source Files\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rde\list.cpp">
-      <Filter>Source Files\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rde\slist.cpp">
-      <Filter>Source Files\rde</Filter>
-    </ClCompile>
     <ClCompile Include="src\Input\Input.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
@@ -42,9 +27,6 @@
     </ClCompile>
     <ClCompile Include="src\Utils\FileHandle.cpp">
       <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rde\rde_string.cpp">
-      <Filter>Source Files\rde</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils\CheckGLError.cpp">
       <Filter>Source Files\Utils</Filter>
@@ -121,15 +103,6 @@
     <ClCompile Include="src\UI\Widgets\Widget.cpp">
       <Filter>Source Files\UI\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\json\json_reader.cpp">
-      <Filter>Source Files\json</Filter>
-    </ClCompile>
-    <ClCompile Include="src\json\json_value.cpp">
-      <Filter>Source Files\json</Filter>
-    </ClCompile>
-    <ClCompile Include="src\json\json_writer.cpp">
-      <Filter>Source Files\json</Filter>
-    </ClCompile>
     <ClCompile Include="src\UI\Widgets\ImageButton.cpp">
       <Filter>Source Files\UI\Widgets</Filter>
     </ClCompile>
@@ -145,49 +118,55 @@
     <ClCompile Include="src\UI\Style.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
-    <ClCompile Include="src\entityx\Entity.cc">
-      <Filter>Source Files\entityx</Filter>
+    <ClCompile Include="src\3rdparty\entityx\help\Pool.cc">
+      <Filter>Source Files\3rdparty\entityx\help</Filter>
     </ClCompile>
-    <ClCompile Include="src\entityx\Event.cc">
-      <Filter>Source Files\entityx</Filter>
+    <ClCompile Include="src\3rdparty\entityx\help\Timer.cc">
+      <Filter>Source Files\3rdparty\entityx\help</Filter>
     </ClCompile>
-    <ClCompile Include="src\entityx\System.cc">
-      <Filter>Source Files\entityx</Filter>
+    <ClCompile Include="src\3rdparty\entityx\Entity.cc">
+      <Filter>Source Files\3rdparty\entityx</Filter>
     </ClCompile>
-    <ClCompile Include="src\entityx\help\Pool.cc">
-      <Filter>Source Files\entityx\help</Filter>
+    <ClCompile Include="src\3rdparty\entityx\Event.cc">
+      <Filter>Source Files\3rdparty\entityx</Filter>
     </ClCompile>
-    <ClCompile Include="src\entityx\help\Timer.cc">
-      <Filter>Source Files\entityx\help</Filter>
+    <ClCompile Include="src\3rdparty\entityx\System.cc">
+      <Filter>Source Files\3rdparty\entityx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\json\json_reader.cpp">
+      <Filter>Source Files\3rdparty\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\json\json_value.cpp">
+      <Filter>Source Files\3rdparty\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\json\json_writer.cpp">
+      <Filter>Source Files\3rdparty\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\rde\allocator.cpp">
+      <Filter>Source Files\3rdparty\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\rde\intrusive_list.cpp">
+      <Filter>Source Files\3rdparty\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\rde\intrusive_slist.cpp">
+      <Filter>Source Files\3rdparty\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\rde\list.cpp">
+      <Filter>Source Files\3rdparty\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\rde\rde_string.cpp">
+      <Filter>Source Files\3rdparty\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\3rdparty\rde\slist.cpp">
+      <Filter>Source Files\3rdparty\rde</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Public\rde\algorithm.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\alignment.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\allocator.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\autolink.h">
-      <Filter>Header Files\Public\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\basic_string.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
       <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Private\Utils\Bounds3D.h">
       <Filter>Header Files\Private\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\buffer_allocator.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\3rdparty\catch.hpp">
-      <Filter>Header Files\Public\entityx\3rdparty</Filter>
     </ClInclude>
     <ClInclude Include="include\Private\Utils\CheckGLError.h">
       <Filter>Header Files\Private\Utils</Filter>
@@ -198,20 +177,8 @@
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\entityx\config.h">
-      <Filter>Header Files\Public\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\config.h">
-      <Filter>Header Files\Public\json</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Core.h">
       <Filter>Header Files\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\cow_string_storage.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\deps\Dependencies.h">
-      <Filter>Header Files\Public\entityx\deps</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Input\EKey.h">
       <Filter>Header Files\Public\Input</Filter>
@@ -219,20 +186,8 @@
     <ClInclude Include="include\Public\Input\EMouseButton.h">
       <Filter>Header Files\Public\Input</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\entityx\Entity.h">
-      <Filter>Header Files\Public\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\entityx.h">
-      <Filter>Header Files\Public\entityx</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\EResourceType.h">
       <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\Event.h">
-      <Filter>Header Files\Public\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\features.h">
-      <Filter>Header Files\Public\json</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\FileHandle.h">
       <Filter>Header Files\Public\Utils</Filter>
@@ -243,26 +198,8 @@
     <ClInclude Include="include\Public\Utils\FileModificationManager.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\fixed_array.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\fixed_list.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\fixed_sorted_vector.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\fixed_substring.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\fixed_vector.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\UI\Font.h">
       <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\forwards.h">
-      <Filter>Header Files\Public\json</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\FPSCameraController.h">
       <Filter>Header Files\Public\Utils</Filter>
@@ -272,9 +209,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\Frustum.h">
       <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\functional.h">
-      <Filter>Header Files\Public\rde</Filter>
     </ClInclude>
     <ClInclude Include="include\Private\Utils\getGLTextureFormat.h">
       <Filter>Header Files\Private\Utils</Filter>
@@ -330,35 +264,14 @@
     <ClInclude Include="include\Public\Graphics\Graphics.h">
       <Filter>Header Files\Public\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\hash.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\hash_map.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\UI\Widgets\ImageButton.h">
       <Filter>Header Files\Public\UI\Widgets</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Input\Input.h">
       <Filter>Header Files\Public\Input</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\int_to_type.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\intrusive_list.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\intrusive_slist.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\iterator.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\JobScheduler.h">
       <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\json.h">
-      <Filter>Header Files\Public\json</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\UI\Layout.h">
       <Filter>Header Files\Public\UI</Filter>
@@ -366,23 +279,11 @@
     <ClInclude Include="include\Public\Graphics\LightManager.h">
       <Filter>Header Files\Public\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\list.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\ListenerMacros.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\map.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\MatForward.h">
       <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\help\NonCopyable.h">
-      <Filter>Header Files\Public\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\pair.h">
-      <Filter>Header Files\Public\rde</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h">
       <Filter>Header Files\Public\Graphics</Filter>
@@ -390,77 +291,17 @@
     <ClInclude Include="include\Public\Graphics\Pixmap.h">
       <Filter>Header Files\Public\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\entityx\help\Pool.h">
-      <Filter>Header Files\Public\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\quick.h">
-      <Filter>Header Files\Public\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\radix_sorter.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\rb_tree.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\rde_string.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\rdestl.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\rdestl_common.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\reader.h">
-      <Filter>Header Files\Public\json</Filter>
-    </ClInclude>
     <ClInclude Include="include\Private\Utils\readVector.h">
       <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\Semaphore.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\set.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\simple_string_storage.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\3rdparty\simplesignal.h">
-      <Filter>Header Files\Public\entityx\3rdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\slist.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\sort.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\sorted_vector.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h">
       <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\sstream.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\stack.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\stack_allocator.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\string_utils.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\stringforward.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\UI\Style.h">
       <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\entityx\System.h">
-      <Filter>Header Files\Public\entityx</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\UI\Widgets\TextButton.h">
       <Filter>Header Files\Public\UI\Widgets</Filter>
@@ -471,29 +312,11 @@
     <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h">
       <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\entityx\help\Timer.h">
-      <Filter>Header Files\Public\entityx\help</Filter>
-    </ClInclude>
     <ClInclude Include="include\Private\Graphics\GL\tryEnableARBDebugOutput.h">
       <Filter>Header Files\Private\Graphics\GL</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\rde\type_traits.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\utility.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\value.h">
-      <Filter>Header Files\Public\json</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\VecForward.h">
       <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\rde\vector.h">
-      <Filter>Header Files\Public\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\json\version.h">
-      <Filter>Header Files\Public\json</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\UI\Widgets\Widget.h">
       <Filter>Header Files\Public\UI\Widgets</Filter>
@@ -501,14 +324,191 @@
     <ClInclude Include="include\Private\Utils\WindowsPlatformData.h">
       <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\json\writer.h">
-      <Filter>Header Files\Public\json</Filter>
-    </ClInclude>
     <ClInclude Include="src\json\json_tool.h">
-      <Filter>Header Files\Public\json</Filter>
+      <Filter>Header Files\Public\3rdparty\json</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\json\assertions.h">
-      <Filter>Header Files\Public\json</Filter>
+    <ClInclude Include="include\Public\3rdparty\entityx\3rdparty\catch.hpp">
+      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\3rdparty\simplesignal.h">
+      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\deps\Dependencies.h">
+      <Filter>Header Files\Public\3rdparty\entityx\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\help\NonCopyable.h">
+      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\help\Pool.h">
+      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\help\Timer.h">
+      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\config.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\Entity.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\entityx.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\Event.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\quick.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\entityx\System.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\algorithm.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\alignment.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\allocator.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\basic_string.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\buffer_allocator.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\cow_string_storage.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\fixed_array.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\fixed_list.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\fixed_sorted_vector.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\fixed_substring.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\fixed_vector.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\functional.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\hash.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\hash_map.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\int_to_type.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\intrusive_list.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\intrusive_slist.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\iterator.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\list.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\map.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\pair.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\radix_sorter.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\rb_tree.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\rde_string.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\rdestl.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\rdestl_common.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\set.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\simple_string_storage.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\slist.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\sort.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\sorted_vector.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\sstream.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\stack.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\stack_allocator.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\string_utils.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\stringforward.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\type_traits.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\utility.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\rde\vector.h">
+      <Filter>Header Files\Public\3rdparty\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\assertions.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\autolink.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\config.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\features.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\forwards.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\json.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\reader.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\value.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\version.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\3rdparty\json\writer.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -517,9 +517,6 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{ce916186-5d2f-42e7-b721-6d332aa7c9da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\rde">
-      <UniqueIdentifier>{fe024b94-f287-4ca6-9bff-003e4fbb4081}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{bec5600e-bf8c-4af0-a279-1dbc737dcfe6}</UniqueIdentifier>
@@ -557,32 +554,14 @@
     <Filter Include="Header Files\Public\Input">
       <UniqueIdentifier>{8a3f4f49-5797-4d5d-b59e-802b5e585ffb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Public\rde">
-      <UniqueIdentifier>{0385059d-b9de-4467-b553-07009e1b8497}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Public\Utils">
       <UniqueIdentifier>{cb1ddaf1-aedf-4453-b457-54817d26e244}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\entityx">
-      <UniqueIdentifier>{7d8de4e9-e654-494b-a180-9020ef09ac05}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Public\UI">
       <UniqueIdentifier>{bbd706cf-5644-4e83-b4e8-2f61b4664b9d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Public\UI\Widgets">
       <UniqueIdentifier>{c97e4a10-a9ff-4675-a7a9-94ce2331486f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\json">
-      <UniqueIdentifier>{91908f5b-0a00-4862-bedc-22e8b49dd449}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\entityx\3rdparty">
-      <UniqueIdentifier>{00805095-f44b-4bca-ba50-3262d9a7e7fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\entityx\deps">
-      <UniqueIdentifier>{3a31d377-cab8-4bf6-b0c8-abbe1d9372c7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\entityx\help">
-      <UniqueIdentifier>{9d040f44-f539-420d-88c7-8826a3a7acc8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Private">
       <UniqueIdentifier>{9b0613f6-8265-4abd-a0cf-c47f2331dc07}</UniqueIdentifier>
@@ -602,19 +581,46 @@
     <Filter Include="Source Files\UI\Widgets">
       <UniqueIdentifier>{80518bdd-6523-4e76-ac16-f3348a235a64}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\json">
+    <Filter Include="Source Files\3rdparty">
+      <UniqueIdentifier>{1bea2067-fdef-422f-aee9-1f099d049ab1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\3rdparty\json">
       <UniqueIdentifier>{9dda1e27-4eaa-453b-9d2b-fdb6b0b48d40}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\entityx">
+    <Filter Include="Source Files\3rdparty\entityx">
       <UniqueIdentifier>{097b4e0e-66ca-4df8-96d6-9bf5e6b0cb58}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\entityx\help">
+    <Filter Include="Source Files\3rdparty\entityx\help">
       <UniqueIdentifier>{8d5453e2-86fd-4d66-a1d8-20d3b08e9467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\3rdparty\rde">
+      <UniqueIdentifier>{fe024b94-f287-4ca6-9bff-003e4fbb4081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\3rdparty">
+      <UniqueIdentifier>{bce36e92-948d-42b1-88ed-b2a6b0b7ea86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\3rdparty\json">
+      <UniqueIdentifier>{91908f5b-0a00-4862-bedc-22e8b49dd449}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\3rdparty\rde">
+      <UniqueIdentifier>{0385059d-b9de-4467-b553-07009e1b8497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\3rdparty\entityx">
+      <UniqueIdentifier>{7d8de4e9-e654-494b-a180-9020ef09ac05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\3rdparty\entityx\3rdparty">
+      <UniqueIdentifier>{00805095-f44b-4bca-ba50-3262d9a7e7fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\3rdparty\entityx\deps">
+      <UniqueIdentifier>{3a31d377-cab8-4bf6-b0c8-abbe1d9372c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\3rdparty\entityx\help">
+      <UniqueIdentifier>{9d040f44-f539-420d-88c7-8826a3a7acc8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\json\json_valueiterator.inl">
-      <Filter>Header Files\Public\json</Filter>
+    <None Include="src\3rdparty\json\json_valueiterator.inl">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
     </None>
   </ItemGroup>
 </Project>

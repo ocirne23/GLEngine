@@ -6,7 +6,7 @@
 #include "Graphics/GL/Wrappers/GLStateBuffer.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Wrappers/GLUniform.h"
-#include "rde/vector.h"
+#include "3rdparty/rde/vector.h"
 
 #include "UI/TextureRegion.h"
 

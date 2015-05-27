@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-#include "entityx/System.h"
+#include "3rdparty/entityx/System.h"
 #include "Graphics/LightManager.h"
 
 #include <glm/glm.hpp>

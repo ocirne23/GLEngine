@@ -1,8 +1,8 @@
 #ifndef RDESTL_RB_TREE_H
 #define RDESTL_RB_TREE_H
 
-#include "rde/rdestl.h"
-#include "rde/allocator.h"
+#include "3rdparty/rde/rdestl.h"
+#include "3rdparty/rde/allocator.h"
 
 namespace rde
 {

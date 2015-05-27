@@ -5,9 +5,9 @@
 #include "Graphics/GL/GLSpriteBatch.h"
 #include "UI/Style.h"
 
-#include "json/json.h"
-#include "rde/rde_string.h"
-#include "rde/vector.h"
+#include "3rdparty/json/json.h"
+#include "3rdparty/rde/rde_string.h"
+#include "3rdparty/rde/vector.h"
 
 class Widget;
 

@@ -4,7 +4,7 @@
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLVars.h"
 #include "Graphics/GL/tryEnableARBDebugOutput.h"
-#include "rde/rde_string.h"
+#include "3rdparty/rde/rde_string.h"
 #include "Utils/CheckGLError.h"
 #include "Utils/WindowsPlatformData.h"
 

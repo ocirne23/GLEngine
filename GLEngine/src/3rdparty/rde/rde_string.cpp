@@ -1,4 +1,4 @@
-#include "rde/rde_string.h"
+#include "3rdparty/rde/rde_string.h"
 
 #include <stdio.h>
 #include <float.h>

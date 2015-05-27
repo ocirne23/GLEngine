@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-#include "rde/vector.h"
+#include "3rdparty/rde/vector.h"
 #include "Utils/VecForward.h"
 
 class PerspectiveCamera;

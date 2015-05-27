@@ -1,7 +1,7 @@
 #pragma once
 
-#include "rde/rde_string.h"
-#include "rde/hash_map.h"
+#include "3rdparty/rde/rde_string.h"
+#include "3rdparty/rde/hash_map.h"
 
 #include <functional>
 

@@ -1,8 +1,8 @@
 #include "Utils/FileHandle.h"
 
 #include "Core.h"
-#include "rde/vector.h"
-#include "rde/rde_string.h"
+#include "3rdparty/rde/vector.h"
+#include "3rdparty/rde/rde_string.h"
 
 #include <SDL/SDL_rwops.h>
 

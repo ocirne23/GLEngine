@@ -4,7 +4,7 @@
 #include "Components/TransformComponent.h"
 #include "Components/ModelComponent.h"
 #include "Components/SkyComponent.h"
-#include "entityx/Entity.h"
+#include "3rdparty/entityx/Entity.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/PerspectiveCamera.h"

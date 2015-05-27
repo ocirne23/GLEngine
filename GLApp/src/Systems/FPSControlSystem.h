@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-#include "entityx/System.h"
+#include "3rdparty/entityx/System.h"
 
 class FPSControlSystem : public entityx::System < FPSControlSystem >
 {

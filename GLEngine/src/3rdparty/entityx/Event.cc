@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012-2014 Alec Thomas <alec@swapoff.org>
+ * Copyright (C) 2012 Alec Thomas <alec@swapoff.org>
  * All rights reserved.
  *
  * This software is licensed as described in the file COPYING, which
@@ -8,14 +8,19 @@
  * Author: Alec Thomas <alec@swapoff.org>
  */
 
-#include "entityx/help/Pool.h"
+#include "3rdparty/entityx/Event.h"
 
 namespace entityx {
 
-BasePool::~BasePool() {
-  for (char *ptr : blocks_) {
-    delete[] ptr;
-  }
+BaseEvent::Family BaseEvent::family_counter_ = 0;
+
+BaseEvent::~BaseEvent() {
+}
+
+EventManager::EventManager() {
+}
+
+EventManager::~EventManager() {
 }
 
 }  // namespace entityx

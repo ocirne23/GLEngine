@@ -7,7 +7,7 @@
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLVars.h"
 
-#include "rde/rde_string.h"
+#include "3rdparty/rde/rde_string.h"
 #include "Utils/FileHandle.h"
 
 #include <glm/glm.hpp>

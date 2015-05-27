@@ -1,6 +1,6 @@
 #include "UI/Layout.h"
 
-#include "rde/rde_string.h"
+#include "3rdparty/rde/rde_string.h"
 
 BEGIN_UNNAMED_NAMESPACE()
 

@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-#include "rde/rde_string.h"
+#include "3rdparty/rde/rde_string.h"
 #include "UI/Layout.h"
 
 enum class EWidgetType

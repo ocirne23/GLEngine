@@ -1,4 +1,4 @@
-#include "rde/intrusive_slist.h"
+#include "3rdparty/rde/intrusive_slist.h"
 
 namespace rde
 {

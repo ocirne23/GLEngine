@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include "rde/rde_string.h"
+#include "3rdparty/rde/rde_string.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #define WINDOWS

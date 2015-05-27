@@ -27,10 +27,10 @@
 #include <utility>
 #include <vector>
 
-#include "entityx/help/Pool.h"
-#include "entityx/config.h"
-#include "entityx/Event.h"
-#include "entityx/help/NonCopyable.h"
+#include "3rdparty/entityx/help/Pool.h"
+#include "3rdparty/entityx/config.h"
+#include "3rdparty/entityx/Event.h"
+#include "3rdparty/entityx/help/NonCopyable.h"
 
 namespace entityx {
 

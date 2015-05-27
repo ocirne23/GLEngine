@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Input/EKey.h"
-#include "entityx/entityx.h"
+#include "3rdparty/entityx/entityx.h"
 
 class GLMesh;
 class PerspectiveCamera;

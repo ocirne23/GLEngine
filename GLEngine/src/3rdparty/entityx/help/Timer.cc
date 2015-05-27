@@ -8,7 +8,7 @@
  * Author: Antony Woods <antony@teamwoods.org>
  */
 
-#include "entityx/help/Timer.h"
+#include "3rdparty/entityx/help/Timer.h"
 
 namespace entityx {
 namespace help {

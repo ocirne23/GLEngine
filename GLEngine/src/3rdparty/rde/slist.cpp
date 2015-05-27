@@ -1,4 +1,4 @@
-#include "rde/slist.h"
+#include "3rdparty/rde/slist.h"
 
 namespace rde
 {

@@ -15,10 +15,10 @@
 #include <unordered_map>
 #include <utility>
 #include <cassert>
-#include "entityx/config.h"
-#include "entityx/Entity.h"
-#include "entityx/Event.h"
-#include "entityx/help/NonCopyable.h"
+#include "3rdparty/entityx/config.h"
+#include "3rdparty/entityx/Entity.h"
+#include "3rdparty/entityx/Event.h"
+#include "3rdparty/entityx/help/NonCopyable.h"
 
 
 namespace entityx {

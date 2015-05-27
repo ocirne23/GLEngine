@@ -2,7 +2,7 @@
 
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GLMesh.h"
-#include "rde/algorithm.h"
+#include "3rdparty/rde/algorithm.h"
 
 #include <glm/glm.hpp>
 

@@ -6,9 +6,9 @@
 #include "Utils/MatForward.h"
 #include "Utils/VecForward.h"
 
-#include "rde/hash_map.h"
-#include "rde/vector.h"
-#include "rde/rde_string.h"
+#include "3rdparty/rde/hash_map.h"
+#include "3rdparty/rde/vector.h"
+#include "3rdparty/rde/rde_string.h"
 
 class FileHandle;
 
