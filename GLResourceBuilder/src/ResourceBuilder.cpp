@@ -197,8 +197,8 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
 {
 	printf("Copying files from %s to %s\n", a_inDirectoryPath, a_outDirectoryPath);
-	std::string inDirectoryPathStr(a_inDirectoryPath);
-	std::string outDirectoryPathStr(a_outDirectoryPath);
+	const std::string inDirectoryPathStr(a_inDirectoryPath);
+	const std::string outDirectoryPathStr(a_outDirectoryPath);
 
 	std::vector<std::string> files;
 	std::vector<std::string> lastWriteTimes;
