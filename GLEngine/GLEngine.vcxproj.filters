@@ -73,173 +73,443 @@
     <ClCompile Include="src\Graphics\LightManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
-    <ClCompile Include="src\entityx\help\Pool.cc" />
-    <ClCompile Include="src\entityx\help\Timer.cc" />
-    <ClCompile Include="src\entityx\Entity.cc" />
-    <ClCompile Include="src\entityx\Event.cc" />
-    <ClCompile Include="src\entityx\System.cc" />
-    <ClCompile Include="src\Utils\WindowsPlatformData.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLVars.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\WindowsPlatformData.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLShader.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLStateBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLTexture.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureArray.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Core</Filter>
+      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\Semaphore.cpp" />
-    <ClCompile Include="src\Utils\JobScheduler.cpp" />
-    <ClCompile Include="src\json\json_reader.cpp" />
-    <ClCompile Include="src\json\json_value.cpp" />
-    <ClCompile Include="src\json\json_writer.cpp" />
-    <ClCompile Include="src\UI\Frame.cpp" />
-    <ClCompile Include="src\UI\Widgets\TextButton.cpp" />
-    <ClCompile Include="src\UI\Widgets\ImageButton.cpp" />
-    <ClCompile Include="src\UI\Widgets\Widget.cpp" />
-    <ClCompile Include="src\UI\Layout.cpp" />
+    <ClCompile Include="src\Utils\Semaphore.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\JobScheduler.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
     <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
-      <Filter>Source Files\Graphics</Filter>
+      <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp" />
-    <ClCompile Include="src\UI\Style.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Widgets\Widget.cpp">
+      <Filter>Source Files\UI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\json\json_reader.cpp">
+      <Filter>Source Files\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\json\json_value.cpp">
+      <Filter>Source Files\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\json\json_writer.cpp">
+      <Filter>Source Files\json</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Widgets\ImageButton.cpp">
+      <Filter>Source Files\UI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Widgets\TextButton.cpp">
+      <Filter>Source Files\UI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Frame.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Layout.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UI\Style.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\entityx\Entity.cc">
+      <Filter>Source Files\entityx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\entityx\Event.cc">
+      <Filter>Source Files\entityx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\entityx\System.cc">
+      <Filter>Source Files\entityx</Filter>
+    </ClCompile>
+    <ClCompile Include="src\entityx\help\Pool.cc">
+      <Filter>Source Files\entityx\help</Filter>
+    </ClCompile>
+    <ClCompile Include="src\entityx\help\Timer.cc">
+      <Filter>Source Files\entityx\help</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Public\GLEngine.h" />
-    <ClInclude Include="include\Public\entityx\3rdparty\catch.hpp" />
-    <ClInclude Include="include\Public\entityx\3rdparty\simplesignal.h" />
-    <ClInclude Include="include\Public\entityx\deps\Dependencies.h" />
-    <ClInclude Include="include\Public\entityx\help\NonCopyable.h" />
-    <ClInclude Include="include\Public\entityx\help\Pool.h" />
-    <ClInclude Include="include\Public\entityx\help\Timer.h" />
-    <ClInclude Include="include\Public\entityx\config.h" />
-    <ClInclude Include="include\Public\entityx\Entity.h" />
-    <ClInclude Include="include\Public\entityx\entityx.h" />
-    <ClInclude Include="include\Public\entityx\Event.h" />
-    <ClInclude Include="include\Public\entityx\quick.h" />
-    <ClInclude Include="include\Public\entityx\System.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLStateBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTexture.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureArray.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
-    <ClInclude Include="include\Public\Graphics\Frustum.h" />
-    <ClInclude Include="include\Public\Graphics\Graphics.h" />
-    <ClInclude Include="include\Public\Graphics\LightManager.h" />
-    <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h" />
-    <ClInclude Include="include\Public\Graphics\Pixmap.h" />
-    <ClInclude Include="include\Public\Input\EKey.h" />
-    <ClInclude Include="include\Public\Input\EMouseButton.h" />
-    <ClInclude Include="include\Public\Input\Input.h" />
-    <ClInclude Include="include\Public\rde\algorithm.h" />
-    <ClInclude Include="include\Public\rde\alignment.h" />
-    <ClInclude Include="include\Public\rde\allocator.h" />
-    <ClInclude Include="include\Public\rde\basic_string.h" />
-    <ClInclude Include="include\Public\rde\buffer_allocator.h" />
-    <ClInclude Include="include\Public\rde\cow_string_storage.h" />
-    <ClInclude Include="include\Public\rde\fixed_array.h" />
-    <ClInclude Include="include\Public\rde\fixed_list.h" />
-    <ClInclude Include="include\Public\rde\fixed_sorted_vector.h" />
-    <ClInclude Include="include\Public\rde\fixed_substring.h" />
-    <ClInclude Include="include\Public\rde\fixed_vector.h" />
-    <ClInclude Include="include\Public\rde\functional.h" />
-    <ClInclude Include="include\Public\rde\hash.h" />
-    <ClInclude Include="include\Public\rde\hash_map.h" />
-    <ClInclude Include="include\Public\rde\int_to_type.h" />
-    <ClInclude Include="include\Public\rde\intrusive_list.h" />
-    <ClInclude Include="include\Public\rde\intrusive_slist.h" />
-    <ClInclude Include="include\Public\rde\iterator.h" />
-    <ClInclude Include="include\Public\rde\list.h" />
-    <ClInclude Include="include\Public\rde\map.h" />
-    <ClInclude Include="include\Public\rde\pair.h" />
-    <ClInclude Include="include\Public\rde\radix_sorter.h" />
-    <ClInclude Include="include\Public\rde\rb_tree.h" />
-    <ClInclude Include="include\Public\rde\rde_string.h" />
-    <ClInclude Include="include\Public\rde\rdestl.h" />
-    <ClInclude Include="include\Public\rde\rdestl_common.h" />
-    <ClInclude Include="include\Public\rde\set.h" />
-    <ClInclude Include="include\Public\rde\simple_string_storage.h" />
-    <ClInclude Include="include\Public\rde\slist.h" />
-    <ClInclude Include="include\Public\rde\sort.h" />
-    <ClInclude Include="include\Public\rde\sorted_vector.h" />
-    <ClInclude Include="include\Public\rde\sstream.h" />
-    <ClInclude Include="include\Public\rde\stack.h" />
-    <ClInclude Include="include\Public\rde\stack_allocator.h" />
-    <ClInclude Include="include\Public\rde\string_utils.h" />
-    <ClInclude Include="include\Public\rde\stringforward.h" />
-    <ClInclude Include="include\Public\rde\type_traits.h" />
-    <ClInclude Include="include\Public\rde\utility.h" />
-    <ClInclude Include="include\Public\rde\vector.h" />
-    <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
-    <ClInclude Include="include\Public\Utils\EResourceType.h" />
-    <ClInclude Include="include\Public\Utils\FileHandle.h" />
-    <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
-    <ClInclude Include="include\Public\Utils\FileModificationManager.h" />
-    <ClInclude Include="include\Public\Utils\FPSCameraController.h" />
-    <ClInclude Include="include\Public\Utils\JobScheduler.h" />
-    <ClInclude Include="include\Public\Utils\ListenerMacros.h" />
-    <ClInclude Include="include\Public\Utils\MatForward.h" />
-    <ClInclude Include="include\Public\Utils\Semaphore.h" />
-    <ClInclude Include="include\Public\Utils\VecForward.h" />
-    <ClInclude Include="include\Public\Core.h" />
-    <ClInclude Include="include\Private\Utils\Bounds2D.h" />
-    <ClInclude Include="include\Private\Utils\Bounds3D.h" />
-    <ClInclude Include="include\Private\Utils\CheckGLError.h" />
-    <ClInclude Include="include\Private\Utils\getGLTextureFormat.h" />
-    <ClInclude Include="include\Private\Utils\WindowsPlatformData.h" />
-    <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h" />
-    <ClInclude Include="include\Public\UI\Frame.h" />
-    <ClInclude Include="include\Public\UI\Font.h" />
-    <ClInclude Include="include\Public\UI\Style.h" />
-    <ClInclude Include="include\Public\json\assertions.h" />
-    <ClInclude Include="include\Public\json\autolink.h" />
-    <ClInclude Include="include\Public\json\config.h" />
-    <ClInclude Include="include\Public\json\features.h" />
-    <ClInclude Include="include\Public\json\forwards.h" />
-    <ClInclude Include="include\Public\json\json.h" />
-    <ClInclude Include="include\Public\json\reader.h" />
-    <ClInclude Include="include\Public\json\value.h" />
-    <ClInclude Include="include\Public\json\version.h" />
-    <ClInclude Include="include\Public\json\writer.h" />
-    <ClInclude Include="src\json\json_tool.h" />
-    <ClInclude Include="include\Public\UI\Layout.h" />
-    <ClInclude Include="include\Public\UI\Widgets\TextButton.h" />
-    <ClInclude Include="include\Public\UI\Widgets\ImageButton.h" />
-    <ClInclude Include="include\Public\UI\Widgets\Widget.h" />
-    <ClInclude Include="include\Public\UI\TextureRegion.h" />
-    <ClInclude Include="include\Private\Graphics\GL\GL.h" />
-    <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
-    <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
-    <ClInclude Include="include\Private\Graphics\GL\tryEnableARBDebugOutput.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLSpriteBatch.h" />
-    <ClInclude Include="include\Private\Utils\readVector.h" />
+    <ClInclude Include="include\Public\rde\algorithm.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\alignment.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\allocator.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\autolink.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\basic_string.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\Bounds2D.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\Bounds3D.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\buffer_allocator.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\3rdparty\catch.hpp">
+      <Filter>Header Files\Public\entityx\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\CheckGLError.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h">
+      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\ConcurrentQueue.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\config.h">
+      <Filter>Header Files\Public\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\config.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Core.h">
+      <Filter>Header Files\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\cow_string_storage.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\deps\Dependencies.h">
+      <Filter>Header Files\Public\entityx\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Input\EKey.h">
+      <Filter>Header Files\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Input\EMouseButton.h">
+      <Filter>Header Files\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\Entity.h">
+      <Filter>Header Files\Public\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\entityx.h">
+      <Filter>Header Files\Public\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\EResourceType.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\Event.h">
+      <Filter>Header Files\Public\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\features.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\FileHandle.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\FileModificationListener.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\FileModificationManager.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\fixed_array.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\fixed_list.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\fixed_sorted_vector.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\fixed_substring.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\fixed_vector.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\Font.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\forwards.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\FPSCameraController.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\Frame.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Frustum.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\functional.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\getGLTextureFormat.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\GL\GL.h">
+      <Filter>Header Files\Private\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\GL\GLDefines.h">
+      <Filter>Header Files\Private\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\GLEngine.h">
+      <Filter>Header Files\Public</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\GLMesh.h">
+      <Filter>Header Files\Public\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\GLSpriteBatch.h">
+      <Filter>Header Files\Public\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLStateBuffer.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTexture.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureArray.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureBuffer.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\GL\GLTypes.h">
+      <Filter>Header Files\Private\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\GLVars.h">
+      <Filter>Header Files\Public\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h">
+      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Graphics.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\hash.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\hash_map.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\Widgets\ImageButton.h">
+      <Filter>Header Files\Public\UI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Input\Input.h">
+      <Filter>Header Files\Public\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\int_to_type.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\intrusive_list.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\intrusive_slist.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\iterator.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\JobScheduler.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\json.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\Layout.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\LightManager.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\list.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\ListenerMacros.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\map.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\MatForward.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\help\NonCopyable.h">
+      <Filter>Header Files\Public\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\pair.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Pixmap.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\help\Pool.h">
+      <Filter>Header Files\Public\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\quick.h">
+      <Filter>Header Files\Public\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\radix_sorter.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\rb_tree.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\rde_string.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\rdestl.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\rdestl_common.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\reader.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\readVector.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\Semaphore.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\set.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\simple_string_storage.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\3rdparty\simplesignal.h">
+      <Filter>Header Files\Public\entityx\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\slist.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\sort.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\sorted_vector.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\sstream.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\stack.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\stack_allocator.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\string_utils.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\stringforward.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\Style.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\System.h">
+      <Filter>Header Files\Public\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\Widgets\TextButton.h">
+      <Filter>Header Files\Public\UI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\TextureRegion.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h">
+      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\entityx\help\Timer.h">
+      <Filter>Header Files\Public\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\GL\tryEnableARBDebugOutput.h">
+      <Filter>Header Files\Private\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\type_traits.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\utility.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\value.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Utils\VecForward.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\rde\vector.h">
+      <Filter>Header Files\Public\rde</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\version.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\Widgets\Widget.h">
+      <Filter>Header Files\Public\UI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\WindowsPlatformData.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\writer.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="src\json\json_tool.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\json\assertions.h">
+      <Filter>Header Files\Public\json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -251,24 +521,6 @@
     <Filter Include="Source Files\rde">
       <UniqueIdentifier>{fe024b94-f287-4ca6-9bff-003e4fbb4081}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\rde">
-      <UniqueIdentifier>{0385059d-b9de-4467-b553-07009e1b8497}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Utils">
-      <UniqueIdentifier>{cb1ddaf1-aedf-4453-b457-54817d26e244}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Core">
-      <UniqueIdentifier>{b27c6e96-c869-40a7-bbe1-ce2928a5e759}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Graphics">
-      <UniqueIdentifier>{b249c0a9-2602-4c93-be42-a4a3886608fe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Input">
-      <UniqueIdentifier>{8a3f4f49-5797-4d5d-b59e-802b5e585ffb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Core">
-      <UniqueIdentifier>{0ae545d4-3401-43fd-a78d-7486196b6c1c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{bec5600e-bf8c-4af0-a279-1dbc737dcfe6}</UniqueIdentifier>
     </Filter>
@@ -278,38 +530,91 @@
     <Filter Include="Source Files\Utils">
       <UniqueIdentifier>{21df264a-d635-4382-aef5-fd92dfe50d29}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Graphics\GL">
-      <UniqueIdentifier>{eda25695-8fbe-4fe4-8c8a-f0dd55c52d66}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Graphics\GL\Core">
-      <UniqueIdentifier>{9ae7c1fb-6b6b-45a0-bd9c-fbf7ac2dcbe9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Graphics\GL">
       <UniqueIdentifier>{dfa02db1-8009-4425-858c-aad50a68dd1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\GL\Core">
-      <UniqueIdentifier>{d4e65135-cafc-4abf-8c55-8cd95328083e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Graphics\GL\Tech">
-      <UniqueIdentifier>{545e9a04-f1ac-451c-9b83-e258e8b003a5}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Graphics\GL\Tech">
       <UniqueIdentifier>{59c56805-b4e3-4e2f-a3b4-26c566273747}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Scene">
+    <Filter Include="Source Files\Graphics\GL\Wrappers">
+      <UniqueIdentifier>{d4e65135-cafc-4abf-8c55-8cd95328083e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public">
+      <UniqueIdentifier>{e68585c1-1392-4c6d-9032-0df905922c4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\Graphics">
+      <UniqueIdentifier>{b249c0a9-2602-4c93-be42-a4a3886608fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\Graphics\GL">
+      <UniqueIdentifier>{eda25695-8fbe-4fe4-8c8a-f0dd55c52d66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\Graphics\GL\Wrappers">
+      <UniqueIdentifier>{9ae7c1fb-6b6b-45a0-bd9c-fbf7ac2dcbe9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\Graphics\GL\Tech">
+      <UniqueIdentifier>{545e9a04-f1ac-451c-9b83-e258e8b003a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\Input">
+      <UniqueIdentifier>{8a3f4f49-5797-4d5d-b59e-802b5e585ffb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\rde">
+      <UniqueIdentifier>{0385059d-b9de-4467-b553-07009e1b8497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\Utils">
+      <UniqueIdentifier>{cb1ddaf1-aedf-4453-b457-54817d26e244}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\entityx">
+      <UniqueIdentifier>{7d8de4e9-e654-494b-a180-9020ef09ac05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\UI">
       <UniqueIdentifier>{bbd706cf-5644-4e83-b4e8-2f61b4664b9d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Scene\Systems">
-      <UniqueIdentifier>{d88afa22-ed94-4905-ace8-9222901341a8}</UniqueIdentifier>
+    <Filter Include="Header Files\Public\UI\Widgets">
+      <UniqueIdentifier>{c97e4a10-a9ff-4675-a7a9-94ce2331486f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Scene">
-      <UniqueIdentifier>{0198196e-5fdb-413f-a45e-e073e19734d1}</UniqueIdentifier>
+    <Filter Include="Header Files\Public\json">
+      <UniqueIdentifier>{91908f5b-0a00-4862-bedc-22e8b49dd449}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Scene\Systems">
-      <UniqueIdentifier>{cf3fa06b-a698-4e4b-86d0-d91a38342286}</UniqueIdentifier>
+    <Filter Include="Header Files\Public\entityx\3rdparty">
+      <UniqueIdentifier>{00805095-f44b-4bca-ba50-3262d9a7e7fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\entityx\deps">
+      <UniqueIdentifier>{3a31d377-cab8-4bf6-b0c8-abbe1d9372c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\entityx\help">
+      <UniqueIdentifier>{9d040f44-f539-420d-88c7-8826a3a7acc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Private">
+      <UniqueIdentifier>{9b0613f6-8265-4abd-a0cf-c47f2331dc07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Private\Graphics">
+      <UniqueIdentifier>{42821d52-d005-4268-9d15-0f6a4971e863}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Private\Utils">
+      <UniqueIdentifier>{c9c2fe74-68e2-4bc9-9655-698197d93aac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Private\Graphics\GL">
+      <UniqueIdentifier>{9b2bacfe-449f-48fa-9fe6-e053e4c57a13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI">
+      <UniqueIdentifier>{378ca07a-f36f-46c4-b700-d0d51e33f8e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\UI\Widgets">
+      <UniqueIdentifier>{80518bdd-6523-4e76-ac16-f3348a235a64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\json">
+      <UniqueIdentifier>{9dda1e27-4eaa-453b-9d2b-fdb6b0b48d40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\entityx">
+      <UniqueIdentifier>{097b4e0e-66ca-4df8-96d6-9bf5e6b0cb58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\entityx\help">
+      <UniqueIdentifier>{8d5453e2-86fd-4d66-a1d8-20d3b08e9467}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\json\json_valueiterator.inl" />
+    <None Include="src\json\json_valueiterator.inl">
+      <Filter>Header Files\Public\json</Filter>
+    </None>
   </ItemGroup>
 </Project>

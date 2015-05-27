@@ -1,87 +1,49 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Processors\ByteImageProcessor.cpp" />
+    <ClCompile Include="src\Processors\FloatImageProcessor.cpp" />
+    <ClCompile Include="src\Processors\ModelProcessor.cpp" />
+    <ClCompile Include="src\ResourceBuilder.cpp" />
+    <ClCompile Include="src\Utils\listFiles.cpp" />
+    <ClCompile Include="src\Utils\stb_image.c" />
+    <ClCompile Include="src\Utils\TextureAtlas.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Core.h" />
+    <ClInclude Include="src\EResourceType.h" />
+    <ClInclude Include="src\Processors\ByteImageProcessor.h" />
+    <ClInclude Include="src\Processors\FloatImageProcessor.h" />
+    <ClInclude Include="src\Processors\ModelProcessor.h" />
+    <ClInclude Include="src\Processors\ResourceProcessor.h" />
+    <ClInclude Include="src\ResourceBuilder.h" />
+    <ClInclude Include="src\Utils\getFileTime.h" />
+    <ClInclude Include="src\Utils\listFiles.h" />
+    <ClInclude Include="src\Utils\stb_image.h" />
+    <ClInclude Include="src\Utils\TextureAtlas.h" />
+    <ClInclude Include="src\Utils\writeVector.h" />
+  </ItemGroup>
+  <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <UniqueIdentifier>{9d2caa92-9c67-45e4-8637-ca45167f14ff}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Header Files\Processors">
-      <UniqueIdentifier>{96649345-f7d4-4e40-a74f-c85e6a43f72d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Utils">
-      <UniqueIdentifier>{70c18863-0dde-4529-83a8-22fa0c80a6f0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Processors">
-      <UniqueIdentifier>{af1a4141-5d84-4c79-86ef-6e6f88002d7b}</UniqueIdentifier>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{6188d9bd-4d1b-4724-a184-0e0b5e6ce1f0}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source Files\Utils">
-      <UniqueIdentifier>{01fdfdca-e711-4b18-b4b5-2b560ca8acca}</UniqueIdentifier>
+      <UniqueIdentifier>{985dddb2-818e-4716-b69f-bbdf23e6e456}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ResourceBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\listFiles.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Processors\ModelProcessor.cpp">
-      <Filter>Source Files\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Processors\ByteImageProcessor.cpp">
-      <Filter>Source Files\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Processors\FloatImageProcessor.cpp">
-      <Filter>Source Files\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\TextureAtlas.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\stb_image.c">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\ResourceBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils\listFiles.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils\stb_image.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Processors\ModelProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Processors\ByteImageProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Processors\FloatImageProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils\TextureAtlas.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EResourceType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Processors\ResourceProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils\writeVector.h">
-    <ClInclude Include="src\Utils\getFileTime.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
+    <Filter Include="Source Files\Processors">
+      <UniqueIdentifier>{bd2d81e6-4fb6-4b7d-9b14-61968ee2a730}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{fb4bda26-3ce1-4dcf-acd9-283eb28989c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Processors">
+      <UniqueIdentifier>{0f61f029-1dd2-4fd1-ba13-b2538fd7ed11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
