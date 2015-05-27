@@ -36,8 +36,7 @@ LightHandle LightManager::createLight(const glm::vec3& a_pos, float a_radius, co
 
 	m_lightPositionRanges[m_numUsedLights] = glm::vec4(a_pos, a_radius);
 	m_lightColorIntensities[m_numUsedLights] = glm::vec4(glm::normalize(a_color), a_intensity);
-	LightHandle light = m_numUsedLights++;
-	return light;
+	return m_numUsedLights++;
 }
 
 void LightManager::deleteLight(LightHandle a_handle)

@@ -6,27 +6,23 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SkyComponent.h"
 #include "Components/TransformComponent.h"
-
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GLMesh.h"
 #include "Graphics/GL/GLVars.h"
-
 #include "Input/Input.h"
-
 #include "Systems/CameraSystem.h"
 #include "Systems/FPSControlSystem.h"
 #include "Systems/LightSystem.h"
 #include "Systems/RenderSystem.h"
-
 #include "Utils/ListenerMacros.h"
-
 #include "UI/Frame.h"
 
 BEGIN_UNNAMED_NAMESPACE()
 
 static const char* const MODEL_FILE_PATH = "Models/palace/palace.da";
+static const char* const SKYBOX_FILE_PATH = "Models/skybox/skysphere.da";
 static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
 
 END_UNNAMED_NAMESPACE()
@@ -49,7 +45,7 @@ TestScreen::TestScreen()
 	m_building->loadFromFile(MODEL_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	m_skybox = new GLMesh();
-	m_skybox->loadFromFile("Models/Skybox/skysphere.da", TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
+	m_skybox->loadFromFile(SKYBOX_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	entityx::Entity cameraEntity = m_entityx.entities.create();
 	cameraEntity.assign<CameraComponent>(m_camera);
@@ -72,6 +68,7 @@ TestScreen::TestScreen()
 
 TestScreen::~TestScreen()
 {
+	SAFE_DELETE(m_skybox);
 	SAFE_DELETE(m_building);
 	SAFE_DELETE(m_camera);
 
@@ -84,7 +81,7 @@ void TestScreen::render(float a_deltaSec)
 	int lightAnimationOffset = 0;
 	entityx::ComponentHandle<PointLightComponent> light;
 	for (entityx::Entity e : m_entityx.entities.entities_with_components(light))
-	{
+	{   // Some semi random light values
 		light->setRadius(2.0f + 20.0f * (((GLEngine::getTimeMs() + lightAnimationOffset * 12345) % 1000) / 1000.0f));
 		light->setIntensity(2.0f + 80.0f * (((GLEngine::getTimeMs() + lightAnimationOffset * 54321) % 10000) / 10000.0f));
 		++lightAnimationOffset;
@@ -97,18 +94,19 @@ void TestScreen::render(float a_deltaSec)
 
 bool TestScreen::keyDown(EKey a_key)
 {
-	if (a_key == EKey::T)
+	switch (a_key)
+	{
+	case EKey::T:
 	{
 		glm::vec3 position = m_camera->getPosition() + m_camera->getDirection();
 		glm::vec3 color = glm::normalize(glm::vec3((rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f));
 		float intensity = 20.0f * ((rand() % 1000) / 1000.0f) + 1.0f;
 		float radius = 20.0f * ((rand() % 1000) / 1000.0f) + 1.0f;
-
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
 		return true;
 	}
-	else if (a_key == EKey::Y)
+	case EKey::Y:
 	{
 		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
 		{
@@ -117,5 +115,12 @@ bool TestScreen::keyDown(EKey a_key)
 		}
 		return true;
 	}
-	return false;
+	case EKey::ESCAPE:
+	{
+		GLEngine::shutdown();
+		return true;
+	}
+	default:
+		return false;
+	}
 }
