@@ -1,28 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Processors\ByteImageProcessor.cpp" />
-    <ClCompile Include="src\Processors\FloatImageProcessor.cpp" />
-    <ClCompile Include="src\Processors\ModelProcessor.cpp" />
-    <ClCompile Include="src\ResourceBuilder.cpp" />
-    <ClCompile Include="src\Utils\listFiles.cpp" />
-    <ClCompile Include="src\Utils\stb_image.c" />
-    <ClCompile Include="src\Utils\TextureAtlas.cpp" />
+    <ClCompile Include="src\Processors\FloatImageProcessor.cpp">
+      <Filter>Source Files\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Processors\ModelProcessor.cpp">
+      <Filter>Source Files\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Processors\ByteImageProcessor.cpp">
+      <Filter>Header Files\Processors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\listFiles.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ResourceBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\stb_image.c">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\TextureAtlas.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Core.h" />
-    <ClInclude Include="src\EResourceType.h" />
-    <ClInclude Include="src\Processors\ByteImageProcessor.h" />
-    <ClInclude Include="src\Processors\FloatImageProcessor.h" />
-    <ClInclude Include="src\Processors\ModelProcessor.h" />
-    <ClInclude Include="src\Processors\ResourceProcessor.h" />
-    <ClInclude Include="src\ResourceBuilder.h" />
-    <ClInclude Include="src\Utils\getFileTime.h" />
-    <ClInclude Include="src\Utils\listFiles.h" />
-    <ClInclude Include="src\Utils\stb_image.h" />
-    <ClInclude Include="src\Utils\TextureAtlas.h" />
-    <ClInclude Include="src\Utils\writeVector.h" />
+    <ClInclude Include="src\Processors\ByteImageProcessor.h">
+      <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EResourceType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Processors\FloatImageProcessor.h">
+      <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\getFileTime.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Processors\ModelProcessor.h">
+      <Filter>Source Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\listFiles.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ResourceBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Processors\ResourceProcessor.h">
+      <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\stb_image.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\TextureAtlas.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\writeVector.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
