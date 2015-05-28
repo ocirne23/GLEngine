@@ -110,7 +110,7 @@
     <ClInclude Include="include\Public\Graphics\LightManager.h" />
     <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Public\Graphics\Pixmap.h" />
-    <ClInclude Include="include\Private\Graphics\GL\tryEnableARBDebugOutput.h" />
+    <ClInclude Include="include\Private\Graphics\GL\Utils\tryEnableARBDebugOutput.h" />
     <ClInclude Include="include\Public\UI\TextureRegion.h" />
     <ClInclude Include="include\Public\Input\EKey.h" />
     <ClInclude Include="include\Public\Input\EMouseButton.h" />

@@ -5,6 +5,7 @@
 #include "3rdparty/entityx/System.h"
 #include "Graphics/LightManager.h"
 #include "Graphics/GL/Wrappers/GLConstantBuffer.h"
+#include "Graphics/GL/Wrappers/GLFramebuffer.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Wrappers/GLTexture.h"
 #include "Graphics/GL/Wrappers/GLTextureBuffer.h"
@@ -81,4 +82,6 @@ private:
 	GLUniform<glm::mat4> m_skyboxViewMatrixUniform;
 	GLUniform<glm::mat4> m_skyboxMvpMatrixUniform;
 	GLUniform<glm::mat4> m_skyboxTransformUniform;
+
+	GLFramebuffer m_ssaoFrameBuffer;
 };

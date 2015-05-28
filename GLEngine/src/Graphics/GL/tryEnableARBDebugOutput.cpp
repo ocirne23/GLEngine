@@ -1,4 +1,4 @@
-#include "Graphics/GL/tryEnableARBDebugOutput.h"
+#include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
 
 #include "Core.h"
 

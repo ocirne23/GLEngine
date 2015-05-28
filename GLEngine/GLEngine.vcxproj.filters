@@ -94,9 +94,6 @@
     <ClCompile Include="src\Utils\JobScheduler.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
@@ -159,6 +156,9 @@
     </ClCompile>
     <ClCompile Include="src\3rdparty\rde\slist.cpp">
       <Filter>Source Files\3rdparty\rde</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -311,9 +311,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h">
       <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\GL\tryEnableARBDebugOutput.h">
-      <Filter>Header Files\Private\Graphics\GL</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\VecForward.h">
       <Filter>Header Files\Public\Utils</Filter>
@@ -510,6 +507,9 @@
     <ClInclude Include="include\Public\3rdparty\json\writer.h">
       <Filter>Header Files\Public\3rdparty\json</Filter>
     </ClInclude>
+    <ClInclude Include="include\Private\Graphics\GL\Utils\tryEnableARBDebugOutput.h">
+      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -616,6 +616,15 @@
     </Filter>
     <Filter Include="Header Files\Public\3rdparty\entityx\help">
       <UniqueIdentifier>{9d040f44-f539-420d-88c7-8826a3a7acc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics\GL\Utils">
+      <UniqueIdentifier>{1e893fa5-0b2e-40d0-a2a1-61f1f58633e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Private\Graphics\GL\Utils">
+      <UniqueIdentifier>{dc43bd5f-225e-48cf-87eb-b5025c9f445d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Public\Graphics\GL\Utils">
+      <UniqueIdentifier>{73dac75e-0b94-4c95-bd09-651aa6c7a93d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

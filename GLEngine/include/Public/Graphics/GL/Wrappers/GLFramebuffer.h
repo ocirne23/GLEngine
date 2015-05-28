@@ -8,6 +8,8 @@ class GLFramebuffer
 {
 public:
 
+	// https://www.opengl.org/sdk/docs/man/html/glTexStorage2D.xhtml
+
 	enum class ESizedFormat
 	{
 		R8       = 0x8229, // GL_R8,
@@ -20,6 +22,7 @@ public:
 		R8UI     = 0x8232, // GL_R8UI,
 		R16UI    = 0x8234, // GL_R16UI,
 		R32UI    = 0x8236, // GL_R32UI,
+
 		RG8      = 0x822B, // GL_RG8,
 		RG16     = 0x822C, // GL_RG16,
 		RG16F    = 0x822F, // GL_RG16F,
@@ -30,6 +33,18 @@ public:
 		RG8UI    = 0x8238, // GL_RG8UI,
 		RG16UI   = 0x823A, // GL_RG16UI,
 		RG32UI   = 0x823C, // GL_RG32UI,
+
+		RGB8     = 0x8051, // GL_RGB8,
+		RGB16    = 0x8054, // GL_RGB16
+		RGB16F   = 0x881B, // GL_RGB16F
+		RGB32F   = 0x8815, // GL_RGB32F
+		RGB8I    = 0x8D8F, // GL_RGB8I
+		RGB16I   = 0x8D89, // GL_RGB16I
+		RGB32I   = 0x8D83, // GL_RGB32I
+		RGB8UI   = 0x8D7D, // GL_RGB8UI
+		RGB16UI  = 0x8D77, // GL_RGB16UI
+		RGB32UI  = 0x8D71, // GL_RGB32UI
+
 		RGBA8    = 0x8058, // GL_RGBA8,
 		RGBA16   = 0x805B, // GL_RGBA16,
 		RGBA16F  = 0x881A, // GL_RGBA16F
@@ -39,7 +54,11 @@ public:
 		RGBA32I  = 0x8D82, // GL_RGBA32I
 		RGBA8UI  = 0x8D7C, // GL_RGBA8UI
 		RGBA16UI = 0x8D76, // GL_RGBA16UI
-		RGBA32UI = 0x8D70  // GL_RGBA32UI
+		RGBA32UI = 0x8D70, // GL_RGBA32UI
+
+		DEPTH16 = 0x81A5, // GL_DEPTH_COMPONENT16
+		DEPTH24 = 0x81A6, // GL_DEPTH_COMPONENT24
+		DEPTH32 = 0x81A7  // GL_DEPTH_COMPONENT32
 	};
 
 	enum class EAttachment

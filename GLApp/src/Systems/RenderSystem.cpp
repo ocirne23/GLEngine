@@ -25,6 +25,8 @@ static const char* SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
 static const unsigned int TILE_WIDTH_PX  = 32;
 static const unsigned int TILE_HEIGHT_PX = 32;
 
+static const glm::vec3 AMBIENT(0.05f);
+
 END_UNNAMED_NAMESPACE()
 
 RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
@@ -61,7 +63,6 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_clusteredShading.resize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewportWidth(), GLEngine::graphics->getViewportHeight(), camera);
 
 	rde::vector<rde::string> defines;
-	//defines.push_back(rde::string("VISUALIZE_LIGHT_CULLING"));
 	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string((int) LightSystem::MAX_LIGHTS)));
 	defines.push_back(rde::string("LIGHT_GRID_WIDTH ").append(rde::to_string(m_clusteredShading.getGridWidth())));
 	defines.push_back(rde::string("LIGHT_GRID_HEIGHT ").append(rde::to_string(m_clusteredShading.getGridHeight())));
@@ -76,7 +77,7 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_modelShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
-	//m_modelShader.setUniform3f("u_ambient", glm::vec3(0.05f));
+	m_modelShader.setUniform3f("u_ambient", AMBIENT);
 
 	m_viewMatrixUniform.initialize(m_modelShader, "u_mv");
 	m_mvpMatrixUniform.initialize(m_modelShader, "u_mvp");
@@ -104,6 +105,16 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_skyboxTransformUniform.initialize(m_skyboxShader, "u_transform");
 
 	m_skyboxShader.end();
+
+	m_ssaoFrameBuffer.addFramebufferTexture(
+		GLFramebuffer::ESizedFormat::RGB8, 
+		GLFramebuffer::EAttachment::COLOR0, 
+		GLEngine::graphics->getViewportWidth(), 
+		GLEngine::graphics->getViewportHeight());
+	m_ssaoFrameBuffer.setDepthbufferTexture(
+		GLFramebuffer::ESizedFormat::DEPTH24,
+		GLEngine::graphics->getViewportWidth(),
+		GLEngine::graphics->getViewportHeight());
 }
 
 void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a_cameraComponentAddedEvent)
@@ -122,6 +133,8 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		GLEngine::graphics->swap();
 		return;
 	}
+
+	m_ssaoFrameBuffer.begin();
 
 	const PerspectiveCamera& camera = *m_activeCamera;
 	const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
@@ -176,6 +189,9 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		}
 	}
 	m_modelShader.end();
+
+	m_ssaoFrameBuffer.end();
+
 
 	GLEngine::graphics->swap();
 }

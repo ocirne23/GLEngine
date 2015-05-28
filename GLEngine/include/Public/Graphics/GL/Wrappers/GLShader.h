@@ -15,6 +15,10 @@ class FileHandle;
 class GLShader
 {
 public:
+
+	typedef rde::hash_map<const char*, int> UniformLocMap;
+public:
+
 	GLShader();
 	~GLShader();
 	GLShader(const GLShader& copy) = delete;
@@ -24,9 +28,7 @@ public:
 
 	void begin();
 	void end();
-	bool isBegun() const { return m_begun; }
-	uint getID() const { return m_shaderID; }
-
+	
 	void setUniform1i(const char* uniformName, int val);
 	void setUniform2i(const char* uniformName, const glm::ivec2& vec);
 	void setUniform1f(const char* uniformName, float val);
@@ -36,7 +38,9 @@ public:
 	void setUniformMatrix4f(const char* uniformName, const glm::mat4& mat);
 	void setUniformMatrix3f(const char* uniformName, const glm::mat3& mat);
 
-	typedef rde::hash_map<const char*, int> UniformLocMap;
+	bool isBegun() const       { return m_begun; }
+	uint getID() const         { return m_shaderID; }
+	bool isInitialized() const { return m_initialized; }
 
 private:
 
