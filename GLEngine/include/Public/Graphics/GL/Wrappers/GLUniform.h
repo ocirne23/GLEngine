@@ -12,7 +12,7 @@ public:
 	~GLUniform() {}
 	GLUniform(const GLUniform& copy) = delete;
 
-	void initialize(const GLShader& shader, const char* uniformName);
+	void initialize(const GLShader& shader, const char* a_uniformName);
 	void set(T value);
 	T get() { return m_value; }
 

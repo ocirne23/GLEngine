@@ -4,8 +4,6 @@
 #include "Graphics/GL/GLDefines.h"
 #include "Graphics/GL/Wrappers/GLTexture.h"
 
-#include "Utils/FileHandle.h"
-
 BEGIN_UNNAMED_NAMESPACE()
 
 static const char* VERT_SHADER_FILE = "Shaders/UI/spritebatch.vert";
@@ -17,7 +15,7 @@ GLSpriteBatch::GLSpriteBatch(uint a_size) : m_size(a_size)
 {
 	m_vertexBuffer.initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STREAM);
 	m_indiceBuffer.initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
-	m_shader.initialize(FileHandle(VERT_SHADER_FILE), FileHandle(FRAG_SHADER_FILE));
+	m_shader.initialize(VERT_SHADER_FILE, FRAG_SHADER_FILE);
 	m_shader.begin();
 	m_mvpUniform.initialize(m_shader, "u_mvp");
 	m_shader.end();

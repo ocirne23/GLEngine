@@ -134,7 +134,7 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		return;
 	}
 
-	m_ssaoFrameBuffer.begin();
+	//m_ssaoFrameBuffer.begin();
 
 	const PerspectiveCamera& camera = *m_activeCamera;
 	const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
@@ -190,7 +190,7 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	}
 	m_modelShader.end();
 
-	m_ssaoFrameBuffer.end();
+	//m_ssaoFrameBuffer.end();
 
 
 	GLEngine::graphics->swap();

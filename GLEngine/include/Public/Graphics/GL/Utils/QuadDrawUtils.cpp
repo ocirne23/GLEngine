@@ -35,5 +35,5 @@ void QuadDrawUtils::drawQuad(GLShader& shader)
 
 void QuadDrawUtils::initShader()
 {
-	m_quadShader.initialize()
+	//m_quadShader.initialize()
 }

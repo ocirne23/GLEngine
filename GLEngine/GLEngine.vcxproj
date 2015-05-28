@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.cpp" />
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
     <ClCompile Include="src\3rdparty\entityx\Event.cc" />
@@ -97,6 +98,7 @@
     <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h" />

@@ -160,6 +160,9 @@
     <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
@@ -509,6 +512,9 @@
     </ClInclude>
     <ClInclude Include="include\Private\Graphics\GL\Utils\tryEnableARBDebugOutput.h">
       <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.h">
+      <Filter>Header Files\Public\Graphics\GL\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

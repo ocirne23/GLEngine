@@ -99,7 +99,7 @@ void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 	glDeleteShader(shader);
 }
 
-GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandle& a_fragmentShaderFile,
+GLuint createShaderProgram(const char* a_vertexShaderFilePath, const char* a_fragmentShaderFilePath,
 						   const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
 {
 	const GLuint program = glCreateProgram();
@@ -112,7 +112,7 @@ GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandl
 		if (a_extensions)
 			for (const rde::string& str : *a_extensions)
 				contents.append("#extension ").append(str).append(" : require\n");
-		contents.append(a_vertexShaderFile.readString());
+		contents.append(FileHandle(a_vertexShaderFilePath).readString());
 		contents = processIncludes(contents);
 		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
 	}
@@ -125,7 +125,7 @@ GLuint createShaderProgram(const FileHandle& a_vertexShaderFile, const FileHandl
 		if (a_extensions)
 			for (const rde::string& str : *a_extensions)
 				contents.append("#extension ").append(str).append(" : require\n");
-		contents.append(a_fragmentShaderFile.readString());
+		contents.append(FileHandle(a_fragmentShaderFilePath).readString());
 		contents = processIncludes(contents);
 		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());
 	}
@@ -185,13 +185,13 @@ GLShader::~GLShader()
 		glDeleteProgram(m_shaderID);
 }
 
-void GLShader::initialize(const FileHandle& vertexShaderFile, const FileHandle& fragmentShaderFile,
-						  const rde::vector<rde::string>* defines, const rde::vector<rde::string>* extensions)
+void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_fragmentShaderFilePath,
+						  const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
 {
 	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
 
-	m_shaderID = createShaderProgram(vertexShaderFile, fragmentShaderFile, defines, extensions);
+	m_shaderID = createShaderProgram(a_vertexShaderFilePath, a_fragmentShaderFilePath, a_defines, a_extensions);
 }
 
 void GLShader::begin()
@@ -213,117 +213,117 @@ void GLShader::end()
 }
 
 //#define SHADER_STRICT_UNIFORM_LOC
-void GLShader::setUniform1i(const char* uniformName, int val)
+void GLShader::setUniform1i(const char* a_uniformName, int a_val)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
-		glUniform1i(loc, val);
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		glUniform1i(loc, a_val);
 	}
 	else
-		glUniform1i(it->second, val);
+		glUniform1i(it->second, a_val);
 }
 
-void GLShader::setUniform1f(const char* uniformName, float val)
+void GLShader::setUniform1f(const char* a_uniformName, float a_val)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
-		glUniform1f(loc, val);
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		glUniform1f(loc, a_val);
 	}
 	else
-		glUniform1f(it->second, val);
+		glUniform1f(it->second, a_val);
 }
 
-void GLShader::setUniform2f(const char* uniformName, const glm::vec2& vec)
+void GLShader::setUniform2f(const char* a_uniformName, const glm::vec2& a_vec)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
-		glUniform2f(loc, vec.x, vec.y);
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		glUniform2f(loc, a_vec.x, a_vec.y);
 	}
 	else
-		glUniform2f(it->second, vec.x, vec.y);
+		glUniform2f(it->second, a_vec.x, a_vec.y);
 }
 
-void GLShader::setUniform2i(const char* uniformName, const glm::ivec2& vec)
+void GLShader::setUniform2i(const char* a_uniformName, const glm::ivec2& a_vec)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
-		glUniform2i(loc, vec.x, vec.y);
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		glUniform2i(loc, a_vec.x, a_vec.y);
 	}
 	else
-		glUniform2i(it->second, vec.x, vec.y);
+		glUniform2i(it->second, a_vec.x, a_vec.y);
 }
-void GLShader::setUniform2fv(const char* uniformName, uint count, const glm::vec2* vecs)
+void GLShader::setUniform2fv(const char* a_uniformName, uint a_count, const glm::vec2* a_vecs)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
-		glUniform2fv(loc, count, &vecs[0][0]);
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		glUniform2fv(loc, a_count, &a_vecs[0][0]);
 	}
 	else
-		glUniform2fv(it->second, count, &vecs[0][0]);
+		glUniform2fv(it->second, a_count, &a_vecs[0][0]);
 }
 
-void GLShader::setUniform3f(const char* uniformName, const glm::vec3& vec)
+void GLShader::setUniform3f(const char* a_uniformName, const glm::vec3& a_vec)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
-		glUniform3f(loc, vec.x, vec.y, vec.z);
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		glUniform3f(loc, a_vec.x, a_vec.y, a_vec.z);
 	}
 	else
-		glUniform3f(it->second, vec.x, vec.y, vec.z);
+		glUniform3f(it->second, a_vec.x, a_vec.y, a_vec.z);
 }
-void GLShader::setUniformMatrix4f(const char* uniformName, const glm::mat4& mat)
+void GLShader::setUniformMatrix4f(const char* a_uniformName, const glm::mat4& a_mat)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
-		glUniformMatrix4fv(loc, 1, GL_FALSE, &mat[0][0]);
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		glUniformMatrix4fv(loc, 1, GL_FALSE, &a_mat[0][0]);
 	}
 	else
-		glUniformMatrix4fv(it->second, 1, GL_FALSE, &mat[0][0]);
+		glUniformMatrix4fv(it->second, 1, GL_FALSE, &a_mat[0][0]);
 }
-void GLShader::setUniformMatrix3f(const char* uniformName, const glm::mat3& mat)
+void GLShader::setUniformMatrix3f(const char* a_uniformName, const glm::mat3& mat)
 {
 	assert(m_begun);
-	auto it = m_uniformLocMap.find(uniformName);
+	auto it = m_uniformLocMap.find(a_uniformName);
 	if (it == m_uniformLocMap.end())
 	{
-		const GLint loc = glGetUniformLocation(m_shaderID, uniformName);
+		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
 		assertStrictUniformLoc(loc);
-		m_uniformLocMap.insert(rde::make_pair(uniformName, loc));
+		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniformMatrix3fv(loc, 1, GL_FALSE, &mat[0][0]);
 	}
 	else
