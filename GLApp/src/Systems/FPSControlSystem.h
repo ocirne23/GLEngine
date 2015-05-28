@@ -4,7 +4,7 @@
 
 #include "3rdparty/entityx/System.h"
 
-class FPSControlSystem : public entityx::System < FPSControlSystem >
+class FPSControlSystem : public entityx::System<FPSControlSystem>
 {
 public:
 	FPSControlSystem();

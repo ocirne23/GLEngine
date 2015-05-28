@@ -12,8 +12,6 @@ class PointLightComponent
 	friend class LightSystem;
 public:
 
-	PointLightComponent() {}
-
 	void set(const glm::vec3& position, float radius, const glm::vec3& color, float intensity);
 	void setPosition(const glm::vec3& position);
 	void setRadius(float radius);

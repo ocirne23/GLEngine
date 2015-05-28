@@ -10,7 +10,7 @@
 struct CameraComponent;
 class PointLightComponent;
 
-class LightSystem : public entityx::System<LightSystem>, public entityx::Receiver < LightSystem >
+class LightSystem : public entityx::System<LightSystem>, public entityx::Receiver<LightSystem>
 {
 public:
 	enum { MAX_LIGHTS = 1024 };

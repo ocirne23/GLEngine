@@ -7,11 +7,9 @@
 class PerspectiveCamera;
 struct CameraComponent;
 
-class CameraSystem : public entityx::System<CameraSystem>, public entityx::Receiver < CameraSystem >
+class CameraSystem : public entityx::System<CameraSystem>, public entityx::Receiver<CameraSystem>
 {
 public:
-	CameraSystem() {}
-	~CameraSystem() {}
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
 	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
