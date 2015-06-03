@@ -61,16 +61,3 @@ void WindowsPlatformData::setWindowHandle(SDL_Window* a_window)
 	SDL_GetWindowWMInfo(a_window, &pInfo);
 	s_windowHandle = pInfo.info.win.window;
 }
-
-HWND isWindowOtherThanAbove(HWND w, HWND exclude)
-{
-	HWND from = w;
-	while (true)
-	{
-		from = GetWindow(from, GW_HWNDPREV);
-		if (!from)
-			return NULL;
-		if (from != exclude)
-			return from;
-	}
-}

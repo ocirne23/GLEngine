@@ -2,7 +2,7 @@
 
 #include "Graphics/Pixmap.h"
 #include "Graphics/GL/GL.h"
-#include "Utils/getGLTextureFormat.h"
+#include "Graphics/GL/Utils/getGLTextureFormat.h"
 
 #include <assert.h>
 
@@ -50,17 +50,12 @@ void GLTextureArray::initialize(const rde::vector<Pixmap*>& a_pixmaps, uint a_nu
 
 	const GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, m_isFloatTexture);
 	const GLenum format = getFormatForNumComponents(m_numComponents);
+	const GLenum type = m_isFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE;
 
 	int width = m_width;
 	int height = m_height;
-	int depth = a_pixmaps.size();
-	for (uint i = 0; i < m_numMipmaps; i++)
-	{
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, i, internalFormat, width, height, depth, 0,
-					 format, m_isFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE, NULL);
-		width = max(1, (int) (width / 2.0f));
-		height = max(1, (int) (height / 2.0f));
-	}
+	const int depth = a_pixmaps.size();
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, a_numMipMaps, internalFormat, m_width, m_height, depth);
 
 	for (int i = 0; i < a_pixmaps.size(); ++i)
 	{
@@ -68,11 +63,11 @@ void GLTextureArray::initialize(const rde::vector<Pixmap*>& a_pixmaps, uint a_nu
 		assert(a_pixmaps[i]->m_height == m_height);
 		assert(a_pixmaps[i]->m_numComponents == m_numComponents);
 		assert(a_pixmaps[i]->m_isFloatData == m_isFloatTexture);
-
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, m_isFloatTexture ? GL_FLOAT : GL_UNSIGNED_BYTE, a_pixmaps[i]->m_data.b);
-		if (m_generateMipMaps)
-			glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+		// GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels 
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, type, a_pixmaps[i]->m_data.b);
 	}
+	if (m_generateMipMaps)
+		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	m_initialized = true;

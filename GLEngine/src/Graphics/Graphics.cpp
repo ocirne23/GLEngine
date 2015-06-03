@@ -5,7 +5,7 @@
 #include "Graphics/GL/GLVars.h"
 #include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
 #include "3rdparty/rde/rde_string.h"
-#include "Utils/CheckGLError.h"
+#include "Graphics/GL/Utils/CheckGLError.h"
 #include "Utils/WindowsPlatformData.h"
 
 #include <glm/glm.hpp>

@@ -20,7 +20,7 @@
 * THE SOFTWARE.
 */
 /****************************************************************************/
-#include "Utils/CheckGLError.h"
+#include "Graphics/GL/Utils/CheckGLError.h"
 
 #include "Graphics/GL/GL.h"
 #include <iostream>

@@ -172,7 +172,7 @@
     <ClInclude Include="include\Public\UI\Layout.h" />
     <ClInclude Include="include\Private\Utils\Bounds2D.h" />
     <ClInclude Include="include\Private\Utils\Bounds3D.h" />
-    <ClInclude Include="include\Private\Utils\CheckGLError.h" />
+    <ClInclude Include="include\Private\Graphics\GL\Utils\CheckGLError.h" />
     <ClInclude Include="include\Public\UI\Font.h" />
     <ClInclude Include="include\Public\UI\Frame.h" />
     <ClInclude Include="include\Public\UI\Style.h" />
@@ -183,7 +183,7 @@
     <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
     <ClInclude Include="include\Public\Utils\FileModificationManager.h" />
     <ClInclude Include="include\Public\Utils\FPSCameraController.h" />
-    <ClInclude Include="include\Private\Utils\getGLTextureFormat.h" />
+    <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h" />
     <ClInclude Include="include\Public\Utils\JobScheduler.h" />
     <ClInclude Include="include\Public\Utils\ListenerMacros.h" />
     <ClInclude Include="include\Public\Utils\MatForward.h" />

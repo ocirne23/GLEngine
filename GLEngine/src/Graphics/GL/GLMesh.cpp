@@ -11,7 +11,6 @@
 #include "Graphics/GL/Wrappers/GLTextureArray.h"
 #include "Graphics/GL/Wrappers/GLVertexBuffer.h"
 
-#include "Utils/CheckGLError.h"
 #include "Utils/EResourceType.h"
 #include "Utils/FileHandle.h"
 #include "Utils/readVector.h"

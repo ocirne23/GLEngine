@@ -2,7 +2,7 @@
 
 #include "Graphics/Pixmap.h"
 #include "Graphics/GL/GL.h"
-#include "Utils/getGLTextureFormat.h"
+#include "Graphics/GL/Utils/getGLTextureFormat.h"
 
 #include <assert.h>
 #include <functional>

@@ -1,4 +1,4 @@
-#include "Utils/getGLTextureFormat.h"
+#include "Graphics/GL/Utils/getGLTextureFormat.h"
 #include "Graphics/GL/GL.h"
 #include <assert.h>
 

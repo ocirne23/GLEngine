@@ -28,9 +28,6 @@
     <ClCompile Include="src\Utils\FileHandle.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\CheckGLError.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\FPSCameraController.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
@@ -41,9 +38,6 @@
       <Filter>Source Files\Graphics\GL\Tech</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\getGLTextureFormat.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils\FileModificationListener.cpp">
@@ -163,15 +157,18 @@
     <ClCompile Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utils\CheckGLError.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\getGLTextureFormat.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
       <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Private\Utils\Bounds3D.h">
-      <Filter>Header Files\Private\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Utils\CheckGLError.h">
       <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h">
@@ -212,9 +209,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\Frustum.h">
       <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Utils\getGLTextureFormat.h">
-      <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Private\Graphics\GL\GL.h">
       <Filter>Header Files\Private\Graphics\GL</Filter>
@@ -515,6 +509,12 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.h">
       <Filter>Header Files\Public\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\GL\Utils\CheckGLError.h">
+      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h">
+      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
