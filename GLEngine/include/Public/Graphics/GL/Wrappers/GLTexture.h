@@ -3,7 +3,6 @@
 #include "Core.h"
 
 class Pixmap;
-class FileHandle;
 
 class GLTexture
 {
@@ -38,7 +37,7 @@ public:
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
-	void initialize(const FileHandle& filePath, int textureIdx,
+	void initialize(const char* filePath,
 					ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
 					ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
 					ETextureWrap textureWrapS = ETextureWrap::REPEAT,

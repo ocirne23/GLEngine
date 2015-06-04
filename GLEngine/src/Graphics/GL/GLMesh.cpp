@@ -113,18 +113,14 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
 	atlasBasePath.append("-atlas-");
 
-	rde::vector<Pixmap*> pixmaps(numAtlases);
+	rde::vector<rde::string> atlasImagePaths;
 	int atlasCounter = 0;
-
 	for (int i = 0; i < numAtlases; ++i, ++atlasCounter)
-	{
-		pixmaps[i] = new Pixmap();
-		pixmaps[i]->read(FileHandle(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da")));
-		assert(pixmaps[i]->exists());
-	}
-	if (pixmaps.size())
-		m_textureArray.initialize(pixmaps);
+		atlasImagePaths.push_back(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da"));
+	
+	m_textureArray.initialize(atlasImagePaths);
 	assert(m_textureArray.isInitialized());
+
 	m_initialized = true;
 }
 

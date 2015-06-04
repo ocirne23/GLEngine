@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\Components\PointLightComponent.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Screens\GLTestScreen.cpp" />
     <ClCompile Include="src\Screens\TestScreen.cpp" />
     <ClCompile Include="src\Systems\CameraSystem.cpp" />
     <ClCompile Include="src\Systems\FPSControlSystem.cpp" />
@@ -36,6 +37,7 @@
     <ClInclude Include="src\Components\PointLightComponent.h" />
     <ClInclude Include="src\Components\SkyComponent.h" />
     <ClInclude Include="src\Components\TransformComponent.h" />
+    <ClInclude Include="src\Screens\GLTestScreen.h" />
     <ClInclude Include="src\Screens\TestScreen.h" />
     <ClInclude Include="src\Systems\CameraSystem.h" />
     <ClInclude Include="src\Systems\FPSControlSystem.h" />

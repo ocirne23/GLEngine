@@ -36,11 +36,11 @@ bool isMipMapFilter(GLenum filter)
 	}
 }
 
-void GLTexture::initialize(const FileHandle& a_file, int a_textureIdx, ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter,
+void GLTexture::initialize(const char* a_filePath, ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter,
 						   ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	Pixmap pixmap;
-	pixmap.read(a_file);
+	pixmap.read(a_filePath);
 
 	if (!pixmap.exists())
 		return;

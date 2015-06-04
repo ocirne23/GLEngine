@@ -38,7 +38,7 @@ GLTexture* Style::getTexture(const rde::string& a_filePath)
 	if (it == m_textures.end())
 	{
 		texture = new GLTexture();
-		texture->initialize(FileHandle(a_filePath.c_str()), 0);
+		texture->initialize(a_filePath.c_str());
 		assert(texture->isLoaded());
 	}
 	else

@@ -163,6 +163,9 @@
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics\GLTestScreenImpl.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
@@ -515,6 +518,9 @@
     </ClInclude>
     <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h">
       <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GLTestScreenImpl.h">
+      <Filter>Header Files\Public\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

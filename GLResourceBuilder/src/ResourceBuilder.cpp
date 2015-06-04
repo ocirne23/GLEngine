@@ -163,7 +163,8 @@ void processFileAndUpdateStoredTimes(const FileName& a_inPath,
 									 ResourceProcessor* a_processor, 
 									 const StoredTimesMap& a_storedTimesMap)
 {
-	a_processor->process(a_inPath, a_outPath, )
+	std::vector<FileName> dependencies;
+	a_processor->process(a_inPath.c_str(), a_outPath.c_str(), dependencies);
 }
 
 } // namespace

@@ -6,7 +6,7 @@
 #include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
 #include "3rdparty/rde/rde_string.h"
 #include "Graphics/GL/Utils/CheckGLError.h"
-#include "Utils/WindowsPlatformData.h"
+//#include "Utils/WindowsPlatformData.h"
 
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
@@ -29,9 +29,11 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	{
 		print("Unable to create window: %s\n", SDL_GetError());
 	}
+	/*
 #ifdef WINDOWS
 	WindowsPlatformData::setWindowHandle(m_window);
 #endif
+	*/
 }
 
 Graphics::~Graphics()
@@ -51,7 +53,7 @@ void Graphics::createGLContext()
 	}
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
 
-	tryEnableARBDebugOutput();
+	// tryEnableARBDebugOutput();
 
 	SDL_GL_SetSwapInterval(m_vsync);
 

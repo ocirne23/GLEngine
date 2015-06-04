@@ -2,15 +2,13 @@
 
 #include "Core.h"
 
-class FileHandle;
-
 class Pixmap
 {
 public:
 	Pixmap() {}
 	~Pixmap() { SAFE_DELETE_ARRAY(m_data.b); }
 
-	void read(const FileHandle& handle);
+	void read(const char* filePath);
 	bool exists() const { return m_data.b != NULL; }
 
 public:

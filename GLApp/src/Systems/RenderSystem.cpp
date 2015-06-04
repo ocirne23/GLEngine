@@ -31,7 +31,7 @@ END_UNNAMED_NAMESPACE()
 
 RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
 {
-	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", TextureUnits::DFV_TEXTURE, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
+	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
 	m_dfvTexture.bind();
 
 	auto onShaderEdited = [&]()
