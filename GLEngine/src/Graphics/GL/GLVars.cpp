@@ -50,6 +50,7 @@ uint GLVars::s_glMajorVersion = 0;
 uint GLVars::s_glMinorVersion = 0;
 uint GLVars::s_maxTextureUnits = 0;
 uint GLVars::s_uboMaxSize = 0;
+uint GLVars::s_maxTextureSize = 0;
 
 rde::string GLVars::s_glVendor;
 rde::string GLVars::s_glRenderer;
@@ -58,12 +59,15 @@ rde::string GLVars::s_glDriverVersion;
 void GLVars::createGLContext(SDL_Window* a_window)
 {
 	s_glContext = createHighestGLContext(a_window, s_glMajorVersion, s_glMinorVersion);
-	print("Created GL Context: %i %i\n", s_glMajorVersion, s_glMinorVersion);
 	s_glVendor = (const char*) glGetString(GL_VENDOR);
 	s_glRenderer = (const char*) glGetString(GL_RENDERER);
 	s_glDriverVersion = (const char*) glGetString(GL_VERSION);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*) &s_maxTextureUnits);
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, (GLint*) &s_uboMaxSize);
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*) &s_maxTextureSize);
+
+	print("Created GL Context: %i %i\n", s_glMajorVersion, s_glMinorVersion);
+	print("Max texture size: %i\n", s_maxTextureSize);
 }
 
 void GLVars::dispose()

@@ -53,7 +53,7 @@ void Graphics::createGLContext()
 	}
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
 
-	// tryEnableARBDebugOutput();
+	tryEnableARBDebugOutput();
 
 	SDL_GL_SetSwapInterval(m_vsync);
 
@@ -69,6 +69,22 @@ void Graphics::createGLContext()
 	glCullFace(GL_BACK);
 	glEnable(GL_MULTISAMPLE);
 	setDepthTest(true);
+
+	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+	glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glPixelStorei(GL_PACK_SWAP_BYTES, GL_FALSE);
+	glPixelStorei(GL_PACK_LSB_FIRST, GL_FALSE);
+	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+	glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	CHECK_GL_ERROR();
 }
 
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)

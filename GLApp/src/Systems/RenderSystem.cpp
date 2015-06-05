@@ -193,6 +193,5 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 
 	//m_ssaoFrameBuffer.end();
 
-
 	GLEngine::graphics->swap();
 }

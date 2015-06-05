@@ -35,6 +35,7 @@ private:
 	static uint s_glMinorVersion;
 	static uint s_maxTextureUnits;
 	static uint s_uboMaxSize;
+	static uint s_maxTextureSize;
 
 	static rde::string s_glVendor;
 	static rde::string s_glRenderer;

@@ -16,7 +16,7 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-enum { ATLAS_MAX_WIDTH = 8192, ATLAS_MAX_HEIGHT = 8192, ATLAS_NUM_MIPS = 4, ATLAS_NUM_COMPONENTS = 3, ATLAS_START_WIDTH = 256, ATLAS_START_HEIGHT = 256, ATLAS_INCREMENT = 256 };
+enum { SUPPORT_NPOT = false, ATLAS_MAX_WIDTH = 4096, ATLAS_MAX_HEIGHT = 4096, ATLAS_NUM_MIPS = 4, ATLAS_NUM_COMPONENTS = 3, ATLAS_START_WIDTH = 256, ATLAS_START_HEIGHT = 256, ATLAS_INCREMENT = 256 };
 
 // GLSL structs
 struct vec4 { float x, y, z, w; };
@@ -123,31 +123,40 @@ void increaseAtlasesSize(std::vector<TextureInfo>& a_textureInfoList, std::vecto
 		}
 		else
 		{
-			int totalWidth = 0;
-			int totalHeight = 0;
-			for (TextureAtlas* atlas : a_atlases)
+			if (SUPPORT_NPOT)
 			{
-				totalWidth += atlas->m_width;
-				totalHeight += atlas->m_height;
+				int totalWidth = 0;
+				int totalHeight = 0;
+				for (TextureAtlas* atlas : a_atlases)
+				{
+					totalWidth += atlas->m_width;
+					totalHeight += atlas->m_height;
+				}
+				int numAtlasses = (int) a_atlases.size();
+				int avgWidth = totalWidth / numAtlasses;
+				int avgHeight = totalHeight / numAtlasses;
+				if (avgWidth < avgHeight)
+					avgWidth += ATLAS_INCREMENT;
+				else
+					avgHeight += ATLAS_INCREMENT;
+
+				// Make even
+				if (avgHeight % 2 != 0)
+					avgHeight++;
+				if (avgWidth % 2 != 0)
+					avgWidth++;
+
+				avgWidth = std::min(avgWidth, (int) ATLAS_MAX_WIDTH);
+				avgHeight = std::min(avgHeight, (int) ATLAS_MAX_HEIGHT);
+
+				for (TextureAtlas* a : a_atlases)
+					a->initialize(avgWidth, avgHeight, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
 			}
-			int numAtlasses = (int) a_atlases.size();
-			int avgWidth = totalWidth / numAtlasses;
-			int avgHeight = totalHeight / numAtlasses;
-			if (avgWidth < avgHeight)
-				avgWidth += ATLAS_INCREMENT;
 			else
-				avgHeight += ATLAS_INCREMENT;
-
-			if (avgHeight % 2 != 0)
-				avgHeight++;
-			if (avgWidth % 2 != 0)
-				avgWidth++;
-
-			avgWidth = std::min(avgWidth, (int) ATLAS_MAX_WIDTH);
-			avgHeight = std::min(avgHeight, (int) ATLAS_MAX_HEIGHT);
-
-			for (TextureAtlas* a : a_atlases)
-				a->initialize(avgWidth, avgHeight, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
+			{
+				for (TextureAtlas* a : a_atlases)
+					a->initialize(a->m_width * 2, a->m_width * 2, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
+			}
 		}
 	}
 }

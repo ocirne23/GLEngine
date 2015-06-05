@@ -29,7 +29,7 @@ void Pixmap::read(const char* a_filePath)
 	{
 		m_isFloatData = true;
 		m_data.f = new float[m_width * m_height * m_numComponents];
-		file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * 4, sizeof(uint) * 4);
+		file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * sizeof(float), sizeof(uint) * 4);
 	}
 	/*
 	for (uint w = 0; w < m_width; ++w)

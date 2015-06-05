@@ -24,7 +24,7 @@ bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_ou
 	file.write(reinterpret_cast<const char*>(&width), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&height), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&numComponents), sizeof(int));
-	file.write(reinterpret_cast<const char*>(data), width * height * numComponents * 4);
+	file.write(reinterpret_cast<const char*>(data), width * height * numComponents * sizeof(float));
 	file.close();
 
 	delete [] data;

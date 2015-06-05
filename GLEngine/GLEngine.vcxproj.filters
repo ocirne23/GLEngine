@@ -163,8 +163,8 @@
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GLTestScreenImpl.cpp">
-      <Filter>Source Files\Graphics</Filter>
+    <ClCompile Include="src\Utils\GLTestScreenImpl.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -519,8 +519,8 @@
     <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h">
       <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GLTestScreenImpl.h">
-      <Filter>Header Files\Public\Graphics</Filter>
+    <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h">
+      <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -56,7 +56,7 @@
     <ClCompile Include="src\3rdparty\rde\list.cpp" />
     <ClCompile Include="src\3rdparty\rde\rde_string.cpp" />
     <ClCompile Include="src\3rdparty\rde\slist.cpp" />
-    <ClCompile Include="src\Graphics\GLTestScreenImpl.cpp" />
+    <ClCompile Include="src\Utils\GLTestScreenImpl.cpp" />
     <ClCompile Include="src\UI\Frame.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
     <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp" />
@@ -94,7 +94,7 @@
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
-    <ClInclude Include="include\Public\Graphics\GLTestScreenImpl.h" />
+    <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
