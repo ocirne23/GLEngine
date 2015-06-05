@@ -22,6 +22,8 @@
 BEGIN_UNNAMED_NAMESPACE()
 
 static const char* const MODEL_FILE_PATH = "Models/palace/palace.obj.da";
+static const char* const MODEL2_FILE_PATH = "Models/meshes/dragon.obj.da";
+
 static const char* const SKYBOX_FILE_PATH = "Models/skybox/skysphere.obj.da";
 static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
 
@@ -44,6 +46,9 @@ TestScreen::TestScreen()
 	m_building = new GLMesh();
 	m_building->loadFromFile(MODEL_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
+	m_dragon = new GLMesh();
+	m_dragon->loadFromFile(MODEL2_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
+
 	m_skybox = new GLMesh();
 	m_skybox->loadFromFile(SKYBOX_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
@@ -55,6 +60,10 @@ TestScreen::TestScreen()
 	entityx::Entity modelEntity = m_entityx.entities.create();
 	modelEntity.assign<ModelComponent>(m_building);
 	modelEntity.assign<TransformComponent>(0.0f, -10.0f, -70.0f);
+
+	entityx::Entity model2Entity = m_entityx.entities.create();
+	model2Entity.assign<ModelComponent>(m_dragon);
+	model2Entity.assign<TransformComponent>(0.0f, -6.9f, -58.0f);
 
 	entityx::Entity lightEntity = m_entityx.entities.create();
 	lightEntity.assign<PointLightComponent>()->set(glm::vec3(0, -10.0f, -20.0f), 5.0f, glm::vec3(1.0f), 20.0f);
@@ -69,6 +78,7 @@ TestScreen::TestScreen()
 TestScreen::~TestScreen()
 {
 	SAFE_DELETE(m_skybox);
+	SAFE_DELETE(m_dragon);
 	SAFE_DELETE(m_building);
 	SAFE_DELETE(m_camera);
 

@@ -234,12 +234,16 @@ void getMaterialTextureInfo(const aiScene& a_scene, const std::string& a_scenePa
 		MaterialData materialData(i);
 		const aiMaterial* material = a_scene.mMaterials[i];
 		aiString path;
-		if (material->GetTextureCount(aiTextureType_DIFFUSE) && material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
-			materialData.diffuseTextureInfoIndex = getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
 
-		auto normalTextureType = getFileExtension(a_scenePath) == "obj" ? aiTextureType_HEIGHT : aiTextureType_NORMALS; // .obj files have normal textures declared as aiTextureType_HEIGHT
-		if (material->GetTextureCount(normalTextureType) && material->GetTexture(normalTextureType, 0, &path) == AI_SUCCESS)
-			materialData.normalTextureInfoIndex = getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
+		auto textureInfoIndex = [&](aiTextureType a_texType)
+		{
+			if (material->GetTextureCount(a_texType) && material->GetTexture(a_texType, 0, &path) == AI_SUCCESS)
+				return (int) getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
+			else
+				return -1;
+		};
+		materialData.diffuseTextureInfoIndex = textureInfoIndex(aiTextureType_DIFFUSE);
+		materialData.normalTextureInfoIndex = textureInfoIndex(getFileExtension(a_scenePath) == "obj" ? aiTextureType_HEIGHT : aiTextureType_NORMALS);
 
 		a_materials.push_back(materialData);
 	}
@@ -265,6 +269,13 @@ std::vector<MaterialProperty> getMaterialProperties(const std::vector<TextureAtl
 			materialProperties[mat.materialID].normalAtlasNr = tex.atlasIdx;
 			materialProperties[mat.materialID].normalTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tex.region);
 		}
+	}
+	if (!a_textures.size()) // If there are no textures, add set the dummy material
+	{
+		materialProperties[0].diffuseTexMapping = {0, 0, 0, 0};
+		materialProperties[0].normalTexMapping = {0, 0, 0, 0};
+		materialProperties[0].diffuseAtlasNr = 0;
+		materialProperties[0].normalAtlasNr = 0;
 	}
 	return materialProperties; // c++11 so can return vector by value
 }
@@ -326,6 +337,8 @@ void getVerticesAndIndices(const aiScene& a_scene, std::vector<Vertex>& a_vertic
 		const aiMesh* mesh = a_scene.mMeshes[entry.meshIndex];
 		const uint numVertices = mesh->mNumVertices;
 		const uint numFaces = mesh->mNumFaces;
+		bool hasTextureCoords = mesh->HasTextureCoords(0);
+		bool hasTangentsAndBitangents = mesh->HasTangentsAndBitangents();
 
 		for (uint j = 0; j < numFaces; ++j)
 		{
@@ -339,10 +352,10 @@ void getVerticesAndIndices(const aiScene& a_scene, std::vector<Vertex>& a_vertic
 		{
 			a_vertices[vertexCounter++] = Vertex(
 					mesh->mVertices[j],
-					mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][j] : aiVector3D(0.0f),
+					hasTextureCoords ? mesh->mTextureCoords[0][j] : aiVector3D(0.0f),
 					mesh->mNormals[j],
-					mesh->mTangents[j],
-					mesh->mBitangents[j],
+					hasTangentsAndBitangents ? mesh->mTangents[j] : aiVector3D(0.0f),
+					hasTangentsAndBitangents ? mesh->mBitangents[j] : aiVector3D(0.0f),
 					entry.materialIndex);
 		}
 	}
@@ -366,6 +379,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		| aiPostProcessSteps::aiProcess_FlipUVs; // Flip uv's because OpenGL
 
 	const aiScene* scene = aiImportFile(a_inResourcePath, flags);
+	
 	if (!scene)
 	{
 		printf("Error parsing scene '%s' : %s\n", a_inResourcePath, aiGetErrorString());
@@ -376,13 +390,16 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	std::vector<MaterialData> materials;
 	std::vector<TextureInfo> textures;
 	getMaterialTextureInfo(*scene, inResourcePathStr, materials, textures);
-
+	
 	// Then we create atlasses out of the textures
 	std::vector<TextureAtlas*> atlases;
-	while (!containTexturesInAtlases(textures, atlases))
-		increaseAtlasesSize(textures, atlases); // Allocates atlases
-	fillAtlasTextures(textures, atlases);
-	writeAtlasesToFiles(atlases, outResourcePathstr);
+	if (textures.size())
+	{
+		while (!containTexturesInAtlases(textures, atlases))
+			increaseAtlasesSize(textures, atlases); // Allocates atlases
+		fillAtlasTextures(textures, atlases);
+		writeAtlasesToFiles(atlases, outResourcePathstr);
+	}
 	const int numAtlases = (int) atlases.size();
 
 	// Then we create the GLSL structs

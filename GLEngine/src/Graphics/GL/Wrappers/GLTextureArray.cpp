@@ -17,24 +17,19 @@ GLTextureArray::~GLTextureArray()
 		glDeleteTextures(1, &m_textureID);
 }
 
-void GLTextureArray::initialize(const rde::vector<rde::string>& a_filePaths, uint a_numMipMaps,
+void GLTextureArray::initialize(const rde::vector<Pixmap>& a_pixmaps, uint a_numMipMaps,
 								ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
-	assert(!a_filePaths.empty());
-	rde::vector<Pixmap> pixmaps;
-	pixmaps.resize(a_filePaths.size());
-	for (int i = 0; i < a_filePaths.size(); ++i)
-		pixmaps[i].read(a_filePaths[i].c_str());
-
+	assert(!a_pixmaps.empty());
 	m_numMipmaps = a_numMipMaps;
 
 	// If setDimensions was not used before, use the dimensions of the first pixmap;
 	if (m_width == 0 || m_height == 0 || m_numComponents == 0)
 	{
-		m_width = pixmaps[0].m_width;
-		m_height = pixmaps[0].m_height;
-		m_numComponents = pixmaps[0].m_numComponents;
-		m_isFloatTexture = pixmaps[0].m_isFloatData;
+		m_width = a_pixmaps[0].m_width;
+		m_height = a_pixmaps[0].m_height;
+		m_numComponents = a_pixmaps[0].m_numComponents;
+		m_isFloatTexture = a_pixmaps[0].m_isFloatData;
 	}
 
 	glGenTextures(1, &m_textureID);
@@ -59,24 +54,33 @@ void GLTextureArray::initialize(const rde::vector<rde::string>& a_filePaths, uin
 
 	int width = m_width;
 	int height = m_height;
-	const int depth = pixmaps.size();
-	glTexStorage3D(GL_TEXTURE_2D_ARRAY, a_numMipMaps, internalFormat, m_width, m_height, depth);
+	const int depth = a_pixmaps.size();
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, a_numMipMaps + 1, internalFormat, m_width, m_height, depth);
 
-	for (int i = 0; i < pixmaps.size(); ++i)
+	for (int i = 0; i < a_pixmaps.size(); ++i)
 	{
-		assert(pixmaps[i].m_width == m_width);
-		assert(pixmaps[i].m_height == m_height);
-		assert(pixmaps[i].m_numComponents == m_numComponents);
-		assert(pixmaps[i].m_isFloatData == m_isFloatTexture);
-		// GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels 
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, type, pixmaps[i].m_data.b);
-		//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internalFormat, m_width, m_height, depth, 0, format, type, pixmaps[i].m_data.b);
+		assert(a_pixmaps[i].m_width == m_width);
+		assert(a_pixmaps[i].m_height == m_height);
+		assert(a_pixmaps[i].m_numComponents == m_numComponents);
+		assert(a_pixmaps[i].m_isFloatData == m_isFloatTexture);
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, type, a_pixmaps[i].m_data.b);
 	}
 	if (m_generateMipMaps)
 		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 	m_initialized = true;
+}
+
+void GLTextureArray::initialize(const rde::vector<rde::string>& a_filePaths, uint a_numMipMaps,
+								ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
+{
+	assert(!a_filePaths.empty());
+	rde::vector<Pixmap> pixmaps;
+	pixmaps.resize(a_filePaths.size());
+	for (int i = 0; i < a_filePaths.size(); ++i)
+		pixmaps[i].read(a_filePaths[i].c_str());
+	initialize(pixmaps, a_numMipMaps, a_minFilter, a_magFilter, a_textureWrapS, a_textureWrapT);
 }
 
 void GLTextureArray::setDimensions(uint a_width, uint a_height, uint a_numComponents, bool a_isFloatTexture)

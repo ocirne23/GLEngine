@@ -2,6 +2,8 @@
 
 #include "Core.h"
 
+#include "Utils/VecForward.h"
+
 class Pixmap
 {
 public:
@@ -10,6 +12,8 @@ public:
 
 	void read(const char* filePath);
 	bool exists() const { return m_data.b != NULL; }
+
+	void set(uint width, uint height, uint numComp, const glm::vec4& col);
 
 public:
 

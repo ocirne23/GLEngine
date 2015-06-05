@@ -6,6 +6,8 @@
 
 #include "3rdparty/rde/rde_string.h"
 
+class Pixmap;
+
 class GLTextureArray
 {
 public:
@@ -38,6 +40,12 @@ public:
 	GLTextureArray() {}
 	~GLTextureArray();
 	GLTextureArray(const GLTextureArray& copyMe) = delete;
+
+	void initialize(const rde::vector<Pixmap>& pixmaps, uint numMipMaps = 4,
+				ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
+				ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
+				ETextureWrap textureWrapS = ETextureWrap::CLAMP_TO_EDGE,
+				ETextureWrap textureWrapT = ETextureWrap::CLAMP_TO_EDGE);
 
 	void initialize(const rde::vector<rde::string>& filePaths, uint numMipMaps = 4,
 	                ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,

@@ -3,7 +3,19 @@
 #include "Utils/EResourceType.h"
 #include "Utils/FileHandle.h"
 
+#include <glm/glm.hpp>
+
 #include <assert.h>
+
+BEGIN_UNNAMED_NAMESPACE()
+
+byte floatToByteCol(float f)
+{
+	float f2 = glm::max(0.0f, glm::min(1.0f, f));
+	return (byte) floor(f2 == 1.0f ? 255 : f2 * 256.0f);
+}
+
+END_UNNAMED_NAMESPACE()
 
 void Pixmap::read(const char* a_filePath)
 {
@@ -31,12 +43,22 @@ void Pixmap::read(const char* a_filePath)
 		m_data.f = new float[m_width * m_height * m_numComponents];
 		file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * sizeof(float), sizeof(uint) * 4);
 	}
-	/*
-	for (uint w = 0; w < m_width; ++w)
-		for (uint h = 0; h < m_height; ++h)
+}
+
+void Pixmap::set(uint a_width, uint a_height, uint a_numComp, const glm::vec4& a_col)
+{
+	assert(!m_data.b);
+	byte byteCol[] = { floatToByteCol(a_col.r), floatToByteCol(a_col.g), floatToByteCol(a_col.b), floatToByteCol(a_col.b)};
+	m_width = a_width;
+	m_height = a_height;
+	m_isFloatData = false;
+	m_numComponents = a_numComp;
+	m_data.b = new byte[m_width * m_height * m_numComponents];
+	for (uint x = 0; x < a_width; ++x)
+	{
+		for (uint y = 0; y < a_height; ++y)
 		{
-			uint idx = ((w * h) + h) * m_numComponents;
-			print("Px: %i %i %i \n", m_data.b[idx], m_data.b[idx + 1], m_data.b[idx + 2]);
+			memcpy(m_data.b + (x * y + y) * a_numComp, byteCol, a_numComp);
 		}
-	*/
+	}
 }

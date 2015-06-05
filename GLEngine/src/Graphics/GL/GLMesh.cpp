@@ -24,6 +24,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
+static const glm::vec4 NO_TEX_COLOR(0.8f, 0.8f, 0.8f, 1.0f);
+
 struct MeshEntry
 {
 	uint meshIndex;
@@ -42,6 +44,11 @@ struct Vertex
 	glm::vec3 bitangents;
 	uint materialID;
 };
+
+byte floatToByteCol(float f)
+{
+	return (byte) floor(f >= 1.0 ? 255 : f * 255.0);
+}
 
 END_UNNAMED_NAMESPACE()
 
@@ -109,17 +116,26 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 	m_vertexBuffer->setVertexAttributes(ARRAY_SIZE(attributes), attributes);
 	m_stateBuffer.end();
 
-	rde::string atlasBasePath(a_filePath);
-	atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
-	atlasBasePath.append("-atlas-");
+	if (numAtlases)
+	{
+		rde::string atlasBasePath(a_filePath);
+		atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
+		atlasBasePath.append("-atlas-");
 
-	rde::vector<rde::string> atlasImagePaths;
-	int atlasCounter = 0;
-	for (int i = 0; i < numAtlases; ++i, ++atlasCounter)
-		atlasImagePaths.push_back(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da"));
-	
-	m_textureArray.initialize(atlasImagePaths);
-	assert(m_textureArray.isInitialized());
+		rde::vector<rde::string> atlasImagePaths;
+		int atlasCounter = 0;
+		for (int i = 0; i < numAtlases; ++i, ++atlasCounter)
+			atlasImagePaths.push_back(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da"));
+		m_textureArray.initialize(atlasImagePaths);
+		assert(m_textureArray.isInitialized());
+	}
+	else
+	{	// If the model doesnt have any textures, just create a 2x2 atlas
+		rde::vector<Pixmap> pixmaps(1);
+		pixmaps[0].set(2, 2, 3, NO_TEX_COLOR);
+		m_textureArray.initialize(pixmaps, 0, GLTextureArray::ETextureMinFilter::NEAREST, GLTextureArray::ETextureMagFilter::NEAREST);
+		assert(m_textureArray.isInitialized());
+	}
 
 	m_initialized = true;
 }
