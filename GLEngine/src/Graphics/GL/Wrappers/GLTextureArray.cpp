@@ -44,8 +44,8 @@ void GLTextureArray::initialize(const rde::vector<rde::string>& a_filePaths, uin
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, (GLenum) a_magFilter);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, (GLenum) a_textureWrapS);
 	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, (GLenum) a_textureWrapT);
-	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
-	//glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, a_numMipMaps);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, a_numMipMaps);
 
 	m_generateMipMaps = (
 		a_minFilter == ETextureMinFilter::NEAREST_MIPMAP_LINEAR ||
@@ -69,8 +69,8 @@ void GLTextureArray::initialize(const rde::vector<rde::string>& a_filePaths, uin
 		assert(pixmaps[i].m_numComponents == m_numComponents);
 		assert(pixmaps[i].m_isFloatData == m_isFloatTexture);
 		// GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels 
-		//glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, type, pixmaps[i].m_data.b);
-		glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internalFormat, m_width, m_height, depth, 0, format, type, pixmaps[i].m_data.b);
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, m_width, m_height, 1, format, type, pixmaps[i].m_data.b);
+		//glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internalFormat, m_width, m_height, depth, 0, format, type, pixmaps[i].m_data.b);
 	}
 	if (m_generateMipMaps)
 		glGenerateMipmap(GL_TEXTURE_2D_ARRAY);

@@ -177,8 +177,8 @@ void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_frag
 	const rde::string fragmentShaderStr = preprocessShaderFile(a_fragmentShaderFilePath, a_defines, a_extensions);
 	const char* vertexShaderSource = vertexShaderStr.c_str();
 	const char* fragmentShaderSource = fragmentShaderStr.c_str();
-	print("Vertex shader:\n%s", vertexShaderSource);
-	print("Fragment shader:\n%s", fragmentShaderSource);
+	//print("Vertex shader:\n%s", vertexShaderSource);
+	//print("Fragment shader:\n%s", fragmentShaderSource);
 
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);

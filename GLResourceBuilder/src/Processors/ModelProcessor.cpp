@@ -228,7 +228,7 @@ void getMaterialTextureInfo(const aiScene& a_scene, const std::string& a_scenePa
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) && material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
 			materialData.diffuseTextureInfoIndex = getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
 
-		auto normalTextureType = getFileExtension(baseTexturePath) == "obj" ? aiTextureType_HEIGHT : aiTextureType_NORMALS; // .obj files have normal textures declared as aiTextureType_HEIGHT
+		auto normalTextureType = getFileExtension(a_scenePath) == "obj" ? aiTextureType_HEIGHT : aiTextureType_NORMALS; // .obj files have normal textures declared as aiTextureType_HEIGHT
 		if (material->GetTextureCount(normalTextureType) && material->GetTexture(normalTextureType, 0, &path) == AI_SUCCESS)
 			materialData.normalTextureInfoIndex = getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
 
