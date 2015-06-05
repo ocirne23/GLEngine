@@ -1,8 +1,11 @@
 #include "GLEngine.h"
 
-//#include "Screens/TestScreen.h"
+#define DA
+#ifdef DA
+#include "Screens/TestScreen.h"
+#else
 #include "Screens/GLTestScreen.h"
-
+#endif
 
 #include "AppUtils/DeltaTimeMeasurer.h"
 #include "AppUtils/FPSMeasurer.h"
@@ -20,14 +23,20 @@ int main()
 
 	GLEngine::createRenderThread([&]()
 	{
+#ifdef DA
+		TestScreen testScreen;
+#else
 		GLTestScreen glTestScreen;
-		//TestScreen testScreen;
+#endif
 		while (!GLEngine::isShutdown())
 		{
 			GLEngine::doRenderThreadTick();
 			float deltaSec = deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs());
-			//testScreen.render(deltaSec);
+#ifdef DA
+			testScreen.render(deltaSec);
+#else
 			glTestScreen.render(deltaSec);
+#endif
 			fpsMeasurer.tickFrame(deltaSec);
 		}
 	});

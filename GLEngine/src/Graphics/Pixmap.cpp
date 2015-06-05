@@ -31,4 +31,12 @@ void Pixmap::read(const char* a_filePath)
 		m_data.f = new float[m_width * m_height * m_numComponents];
 		file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * 4, sizeof(uint) * 4);
 	}
+	/*
+	for (uint w = 0; w < m_width; ++w)
+		for (uint h = 0; h < m_height; ++h)
+		{
+			uint idx = ((w * h) + h) * m_numComponents;
+			print("Px: %i %i %i \n", m_data.b[idx], m_data.b[idx + 1], m_data.b[idx + 2]);
+		}
+	*/
 }

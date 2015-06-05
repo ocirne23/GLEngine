@@ -14,10 +14,6 @@ static const char* BUILT_FILE_EXTENSION = ".da";
 typedef std::string FileName;
 typedef std::string FileTime;
 
-typedef std::unordered_map<FileName, FileWriteTime*> StoredTimesMap;
-typedef std::unordered_map<FileName, FileTime> CurrentTimesMap;
-typedef std::unordered_map<std::string, ResourceProcessor*> ResourceProcessorMap;
-
 struct Dependency
 {
 	FileName fileName;
@@ -30,6 +26,10 @@ struct FileWriteTime
 	FileTime fileTime;
 	std::vector<Dependency> dependencies;
 };
+
+typedef std::unordered_map<FileName, FileWriteTime*> StoredTimesMap;
+typedef std::unordered_map<FileName, FileTime> CurrentTimesMap;
+typedef std::unordered_map<std::string, ResourceProcessor*> ResourceProcessorMap;
 
 std::string getExtensionForFilePath(const std::string& a_path)
 {
@@ -134,15 +134,18 @@ bool isFileModified(const FileName& a_fileName, const FileTime& a_fileTime,
 {
 	const auto storedTimesIt = a_storedTimesMap.find(a_fileName);
 	return (storedTimesIt != a_storedTimesMap.end() &&
-		a_fileTime != storedTimesIt->second->fileTime)
+		a_fileTime != storedTimesIt->second->fileTime);
 }
 
-bool isDependencyModified(const std::vector<Dependency>& a_dependencies, 
-	const StoredTimesMap& a_writeTimesMap)
+bool isDependencyModified(const FileName& a_fileName, const StoredTimesMap& a_storedTimesMap, const CurrentTimesMap& a_currentTimesMap)
 {
-	for (const Dependency& dep : a_dependencies)
+	auto it = a_storedTimesMap.find(a_fileName);
+	if (it != a_storedTimesMap.end())
+		return true;
+	auto dependencies = it->second->dependencies;
+	for (const Dependency& dep : dependencies)
 	{
-		if (isFileModified(dep.fileName, dep.fileTime, a_writeTimesMap))
+		if (isFileModified(dep.fileName, dep.fileTime, a_storedTimesMap))
 			return true;
 	}
 	return false;
@@ -158,20 +161,22 @@ ResourceProcessor* getResourceProcessorForFile(const FileName& a_filePath, const
 		return NULL;
 }
 
-void processFileAndUpdateStoredTimes(const FileName& a_inPath, 
-	                                 const FileName& a_outPath,
+void processFileAndUpdateStoredTimes(const std::string& a_inPath, 
+	                                 const std::string& a_outPath,
 									 ResourceProcessor* a_processor, 
-									 const StoredTimesMap& a_storedTimesMap)
+									 StoredTimesMap& a_storedTimesMap)
 {
+	printf("Processing: %s \n", a_inPath.c_str());
 	std::vector<FileName> dependencies;
 	a_processor->process(a_inPath.c_str(), a_outPath.c_str(), dependencies);
+	printf("done\n");
 }
 
 } // namespace
 
 void ResourceBuilder::buildResources(const std::unordered_map<std::string, ResourceProcessor*>& a_processors, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
 {
-	printf("Starting resource building in folder: \t %s \n", a_inDirectoryPath);
+	printf("Building files in folder: %s\n", a_inDirectoryPath);
 
 	const std::string inDirectoryPathStr(a_inDirectoryPath);
 	const std::string outDirectoryPathStr(a_outDirectoryPath);
@@ -201,145 +206,16 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 		ResourceProcessor* processor = getResourceProcessorForFile(fileName, a_processors);
 		if (processor)
 		{
-			if (a_incremental || isFileModified(fileName, fileTime, storedTimesMap) || isDependencyModified())
+			if (!a_incremental || isFileModified(fileName, fileTime, storedTimesMap) || isDependencyModified(fileName, storedTimesMap, currentTimesMap))
 			{
-				processFile(processor, currentTimesMap, storedTimesMap);
+				const std::string inPath = inDirectoryPathStr + '\\' + fileName;
+				const std::string outPath = outDirectoryPathStr + '\\' + fileName + BUILT_FILE_EXTENSION;
+				createDirectoryForFile(outPath);
+				processFileAndUpdateStoredTimes(inPath, outPath, processor, storedTimesMap);
 			}
 		}
 	}
-
-	processChangedFilesAndUpdateModificationDates(a_processors, currentTimesMap, storedTimesMap, a_incremental);
 	writeModificationMapToFile(modificationFile, storedTimesMap);
-
-	std::unordered_map<std::string, FileWriteTime*> oldWriteTimesMap;
-	FileWriteTime* prev = NULL;
-	std::string line;
-	while (std::getline(modificationFile, line))
-	{
-		const std::string::size_type split = line.find_first_of(":");
-		if (line[0] == '>')
-		{
-			prev->dependencies.push_back({line.substr(1, split), line.substr(split + 1)});
-		}
-		else
-		{
-			FileWriteTime* fileWriteTime = new FileWriteTime();
-			fileWriteTime->fileName = line.substr(0, split);
-			fileWriteTime->writeTimeStr = line.substr(split + 1);
-			oldWriteTimesMap.insert({fileWriteTime->fileName, fileWriteTime});
-			prev = fileWriteTime;
-		}
-	}
-	modificationFile.clear();
-
-	std::vector<std::string> files;
-	std::vector<std::string> writeTimes;
-	listFiles(a_inDirectoryPath, "*", files, writeTimes);
-
-	const int numFiles = (int) files.size();
-#pragma omp parallel for
-	for (int i = 0; i < numFiles; ++i)
-	{
-		const std::string& str = files[i];
-		const std::string& writeTime = writeTimes[i];
-
-		if (a_incremental)
-		{
-			auto writeTimesIt = oldWriteTimesMap.find(str);
-			//if (writeTimesIt != oldWriteTimesMap.end() && writeTimesIt->second->writeTimeStr == writeTime) // check if file was modified
-			//	continue;
-		}
-
-		const std::string extension = getExtensionForFilePath(str);
-		const auto processorsIt = a_processors.find(extension);
-		if (processorsIt != a_processors.end())
-		{	// if a processor exists for this extension, process.
-			const std::string inFilePath = inDirectoryPathStr + "\\" + str;
-			const std::string outFilePath = outDirectoryPathStr + "\\" + str.substr(0, str.find_last_of('.')) + BUILT_FILE_EXTENSION;
-			const std::string outDirectoryPath = outFilePath.substr(0, outFilePath.find_last_of("\\"));
-
-			createDirectoryForFile(outFilePath);
-
-			printf("starting %s\n", str.c_str());
-			std::vector<std::string> rebuildOnFileModificationList;
-			if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str(), rebuildOnFileModificationList))
-			{
-				const std::string line = str + ":" + writeTime + "\n";
-				modificationFile.write(line.c_str(), line.length());
-				auto at = oldWriteTimesMap.find(str);
-				if (at != oldWriteTimesMap.end())
-					oldWriteTimesMap.erase(at);
-			}
-			else
-			{
-				printf("failed %s\n", str.c_str());
-			}
-
-			const std::string extension = getExtensionForFilePath(str);
-			const auto processorsIt = a_processors.find(extension);
-			if (processorsIt != a_processors.end())
-			{	// if a processor exists for this extension, process.
-				const std::string inFilePath = inDirectoryPathStr + "\\" + str;
-				const std::string outFilePath = outDirectoryPathStr + "\\" + str.substr(0, str.find_last_of('.')) + BUILT_FILE_EXTENSION;
-				const std::string outDirectoryPath = outFilePath.substr(0, outFilePath.find_last_of("\\"));
-
-				createDirectoryForFile(outFilePath);
-
-				printf("starting %s\n", str.c_str());
-				std::vector<std::string> rebuildDependencies;
-				if (processorsIt->second->process(inFilePath.c_str(), outFilePath.c_str(), rebuildDependencies))
-				{
-					printf("finished %s\n", str.c_str());
-
-					auto at = storedTimesMap.find(str);
-					if (at != storedTimesMap.end())
-					{
-						at->second->writeTimeStr = writeTime;
-					}
-					else
-					{
-						FileWriteTime* fileWriteTime = new FileWriteTime();
-						fileWriteTime->fileName = str;
-						fileWriteTime->writeTimeStr = writeTime;
-						for (const std::string& depStr : rebuildDependencies)
-						{
-							Dependency dependency;
-							dependency.fileName = depStr;
-							for (int i = 0; i < files.size(); ++i)
-							{
-								if (depStr == files[i])
-								{
-									dependency.writeTimeStr = writeTimes[i];
-									break;
-								}
-							}
-							fileWriteTime->dependencies.push_back(dependency);
-						}
-						storedTimesMap.insert({ str, fileWriteTime });
-					}
-				}
-				else
-				{
-					printf("failed %s\n", str.c_str());
-				}
-			}
-		}
-	}
-
-	for (const auto& oldWriteTimes : storedTimesMap)
-	{
-		const std::string line = oldWriteTimes.first + ":" + oldWriteTimes.second->writeTimeStr + "\n";
-		modificationFile.write(line.c_str(), line.length());
-		for (const auto& dependency : oldWriteTimes.second->dependencies)
-		{
-			const std::string dep = std::string(">") + dependency.fileName + ":" + dependency.writeTimeStr + "\n";
-			modificationFile.write(dep.c_str(), dep.length());
-		}
-		delete oldWriteTimes.second;
-	}
-	modificationFile.close();
-
-	printf("Done building resources in folder: \t %s \n", a_inDirectoryPath);
 }
 
 void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)

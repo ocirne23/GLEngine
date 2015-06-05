@@ -17,6 +17,7 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
+static const char* DFV_TEX_PATH = "Utils/ggx-helper-dfv.hdr.da";
 static const char* CLUSTERED_SHADING_PATH = "Shaders/clusteredshading.glsl";
 static const char* MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
 static const char* MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
@@ -31,7 +32,7 @@ END_UNNAMED_NAMESPACE()
 
 RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
 {
-	m_dfvTexture.initialize("Utils/ggx-helper-dfv.da", GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
+	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
 	m_dfvTexture.bind();
 
 	auto onShaderEdited = [&]()

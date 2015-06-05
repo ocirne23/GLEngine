@@ -12,7 +12,6 @@
 #include <assimp/postprocess.h>
 #include <vector>
 #include <fstream>
-
 #include <iostream>
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -53,14 +52,7 @@ struct MaterialData
 	int diffuseTextureInfoIndex = -1;
 	int normalTextureInfoIndex = -1;
 };
-struct MeshEntry
-{
-	uint meshIndex;
-	uint numIndices;
-	uint baseVertex;
-	uint baseIndex;
-	uint materialIndex;
-};
+
 struct Vertex
 {
 	Vertex() {};
@@ -75,6 +67,24 @@ struct Vertex
 	vec3 bitangents;
 	uint materialID;
 };
+
+std::string getFileExtension(const std::string& a_filePath)
+{
+	auto dotIdx = a_filePath.find_last_of('.');
+	if (dotIdx != std::string::npos)
+		return a_filePath.substr(dotIdx + 1);
+	else
+		return "";
+}
+
+std::string getFolderPathForFile(const std::string& a_filePath)
+{
+	auto dirIdx = std::min(a_filePath.find_last_of('/'), a_filePath.find_last_of('\\'));
+	if (dirIdx != std::string::npos)
+		return a_filePath.substr(0, dirIdx).append("\\");
+	else
+		return "";
+}
 
 vec4 getTextureOffset(uint a_atlasWidth, uint a_atlasHeight, const TextureAtlas::AtlasRegion& a_reg)
 {
@@ -201,13 +211,138 @@ uint getTextureInfoIndex(std::vector<TextureInfo>& a_textures, const std::string
 	newTex.filePath = a_path;
 	newTex.result = stbi_info(a_path.c_str(), &newTex.width, &newTex.height, &newTex.numComp);
 	assert(newTex.result && "Failed to load texture");
-	printf("added tex: %i %i %i %i \n", newTex.width, newTex.height, newTex.numComp, newTex.result);
 	a_textures.push_back(newTex);
 	return (uint) (a_textures.size() - 1);
 }
 
-END_UNNAMED_NAMESPACE()
+void getMaterialTextureInfo(const aiScene& a_scene, const std::string& a_scenePath, 
+							std::vector<MaterialData>& a_materials, std::vector<TextureInfo>& a_textures)
+{
+	const std::string baseTexturePath = getFolderPathForFile(a_scenePath);
 
+	for (uint i = 0; i < a_scene.mNumMaterials; i++)
+	{
+		MaterialData materialData(i);
+		const aiMaterial* material = a_scene.mMaterials[i];
+		aiString path;
+		if (material->GetTextureCount(aiTextureType_DIFFUSE) && material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
+			materialData.diffuseTextureInfoIndex = getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
+
+		auto normalTextureType = getFileExtension(baseTexturePath) == "obj" ? aiTextureType_HEIGHT : aiTextureType_NORMALS; // .obj files have normal textures declared as aiTextureType_HEIGHT
+		if (material->GetTextureCount(normalTextureType) && material->GetTexture(normalTextureType, 0, &path) == AI_SUCCESS)
+			materialData.normalTextureInfoIndex = getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
+
+		a_materials.push_back(materialData);
+	}
+}
+
+std::vector<MaterialProperty> getMaterialProperties(const std::vector<TextureAtlas*>& a_atlases, const std::vector<MaterialData>& a_materials, 
+													const std::vector<TextureInfo>& a_textures)
+{
+	std::vector<MaterialProperty> materialProperties(a_materials.size());
+	for (const MaterialData& mat : a_materials)
+	{
+		if (mat.diffuseTextureInfoIndex != -1)
+		{
+			const TextureInfo& tex = a_textures[mat.diffuseTextureInfoIndex];
+			const TextureAtlas* atlas = a_atlases[tex.atlasIdx];
+			materialProperties[mat.materialID].diffuseAtlasNr = tex.atlasIdx;
+			materialProperties[mat.materialID].diffuseTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tex.region);
+		}
+		if (mat.normalTextureInfoIndex != -1)
+		{
+			const TextureInfo& tex = a_textures[mat.normalTextureInfoIndex];
+			const TextureAtlas* atlas = a_atlases[tex.atlasIdx];
+			materialProperties[mat.materialID].normalAtlasNr = tex.atlasIdx;
+			materialProperties[mat.materialID].normalTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tex.region);
+		}
+	}
+	return materialProperties; // c++11 so can return vector by value
+}
+
+void writeAtlasesToFiles(const std::vector<TextureAtlas*>& a_atlases, const std::string& a_outResourcePath)
+{
+	for (int i = 0; i < a_atlases.size(); ++i)
+	{
+		const TextureAtlas* atlas = a_atlases[i];
+
+		std::string atlasFileName(a_outResourcePath.substr(0, a_outResourcePath.find_last_of('.')));
+		atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");
+
+		std::ofstream file(atlasFileName.c_str(), std::ios::out | std::ios::binary);
+		assert(file.is_open());
+
+		const int type = (int) EResourceType::BYTEIMAGE;
+		const int width = atlas->m_width;
+		const int height = atlas->m_height;
+		const int numComponents = atlas->m_numComponents;
+
+		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&width), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&height), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&numComponents), sizeof(int));
+		file.write(reinterpret_cast<const char*>(atlas->m_data), width * height * numComponents);
+
+		file.close();
+	}
+}
+
+void getVerticesAndIndices(const aiScene& a_scene, std::vector<Vertex>& a_vertices, std::vector<uint>& a_indices)
+{
+	struct MeshEntry
+	{
+		uint meshIndex;
+		uint baseVertex;
+		uint materialIndex;
+	};
+	std::vector<MeshEntry> entries(a_scene.mNumMeshes);
+	uint numVertices = 0;
+	uint numIndices = 0;
+	for (uint i = 0; i < a_scene.mNumMeshes; ++i)
+	{
+		entries[i].meshIndex = i;
+		entries[i].materialIndex = a_scene.mMeshes[i]->mMaterialIndex;
+		entries[i].baseVertex = numVertices;
+		numVertices += a_scene.mMeshes[i]->mNumVertices;
+		numIndices += a_scene.mMeshes[i]->mNumFaces * 3;
+	}
+	a_vertices.resize(numVertices);
+	a_indices.resize(numIndices);
+
+	uint indiceCounter = 0;
+	uint vertexCounter = 0;
+	for (uint i = 0; i < entries.size(); i++)
+	{
+		const MeshEntry& entry = entries[i];
+		const aiMesh* mesh = a_scene.mMeshes[entry.meshIndex];
+		const uint numVertices = mesh->mNumVertices;
+		const uint numFaces = mesh->mNumFaces;
+
+		for (uint j = 0; j < numFaces; ++j)
+		{
+			const aiFace& face = mesh->mFaces[j];
+			a_indices[indiceCounter++] = face.mIndices[0] + entry.baseVertex;
+			a_indices[indiceCounter++] = face.mIndices[1] + entry.baseVertex;
+			a_indices[indiceCounter++] = face.mIndices[2] + entry.baseVertex;
+		}
+
+		for (uint j = 0; j < numVertices; ++j)
+		{
+			a_vertices[vertexCounter++] = Vertex(
+					mesh->mVertices[j],
+					mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][j] : aiVector3D(0.0f),
+					mesh->mNormals[j],
+					mesh->mTangents[j],
+					mesh->mBitangents[j],
+					entry.materialIndex);
+		}
+	}
+
+	assert(a_indices.size() == numIndices);
+	assert(a_vertices.size() == numVertices);
+}
+
+END_UNNAMED_NAMESPACE()
 
 bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildOnFileModificationList)
 {
@@ -228,142 +363,32 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		return false;
 	}
 
-	const std::string extension = inResourcePathStr.substr(inResourcePathStr.find_last_of('.') + 1, inResourcePathStr.length() - 1);
-	const std::string baseTexturePath = inResourcePathStr.substr(0, std::min(inResourcePathStr.find_last_of('/'), inResourcePathStr.find_last_of('\\'))).append("\\");
-
+	// First we get all the materials and textures used in the scene
 	std::vector<MaterialData> materials;
 	std::vector<TextureInfo> textures;
-	for (uint i = 0; i < scene->mNumMaterials; i++)
-	{
-		MaterialData materialData(i);
-		const aiMaterial* material = scene->mMaterials[i];
-		aiString path;
-		if (material->GetTextureCount(aiTextureType_DIFFUSE) && material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
-			materialData.diffuseTextureInfoIndex = getTextureInfoIndex(textures, std::string(baseTexturePath).append(path.C_Str()));
-		
-		auto normalTextureType = extension == "obj" ? aiTextureType_HEIGHT : aiTextureType_NORMALS; // .obj files have normal textures declared as aiTextureType_HEIGHT
-		if (material->GetTextureCount(normalTextureType) && material->GetTexture(normalTextureType, 0, &path) == AI_SUCCESS)
-			materialData.normalTextureInfoIndex = getTextureInfoIndex(textures, std::string(baseTexturePath).append(path.C_Str()));
+	getMaterialTextureInfo(*scene, inResourcePathStr, materials, textures);
 
-		materials.push_back(materialData);
-	}
-
+	// Then we create atlasses out of the textures
 	std::vector<TextureAtlas*> atlases;
 	while (!containTexturesInAtlases(textures, atlases))
-		increaseAtlasesSize(textures, atlases);
+		increaseAtlasesSize(textures, atlases); // Allocates atlases
 	fillAtlasTextures(textures, atlases);
-
-	std::vector<MaterialProperty> matProperties(scene->mNumMaterials);
-	for (const MaterialData& mat : materials)
-	{ // Fill glsl structs
-		if (mat.diffuseTextureInfoIndex != -1)
-		{
-			TextureInfo& tex = textures[mat.diffuseTextureInfoIndex];
-			TextureAtlas* atlas = atlases[tex.atlasIdx];
-			matProperties[mat.materialID].diffuseAtlasNr = tex.atlasIdx;
-			matProperties[mat.materialID].diffuseTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tex.region);
-		}
-		if (mat.normalTextureInfoIndex != -1)
-		{
-			TextureInfo& tex = textures[mat.normalTextureInfoIndex];
-			TextureAtlas* atlas = atlases[tex.atlasIdx];
-			matProperties[mat.materialID].normalAtlasNr = tex.atlasIdx;
-			matProperties[mat.materialID].normalTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tex.region);
-		}
-	}
-
-	for (int i = 0; i < atlases.size(); ++i)
-	{
-		const TextureAtlas* atlas = atlases[i];
-
-		std::string atlasFileName(outResourcePathstr.substr(0, outResourcePathstr.find_last_of('.')));
-		atlasFileName.append("-atlas-").append(std::to_string(i)).append(".da");
-
-		std::ofstream file(atlasFileName.c_str(), std::ios::out | std::ios::binary);
-		assert(file.is_open());
-
-		const int type = (int) EResourceType::BYTEIMAGE;
-		const int width = atlas->m_width;
-		const int height = atlas->m_height;
-		const int numComponents = atlas->m_numComponents;
-
-		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
-		file.write(reinterpret_cast<const char*>(&width), sizeof(int));
-		file.write(reinterpret_cast<const char*>(&height), sizeof(int));
-		file.write(reinterpret_cast<const char*>(&numComponents), sizeof(int));
-		file.write(reinterpret_cast<const char*>(atlas->m_data), width * height * numComponents);
-
-		file.close();
-	}
-
+	writeAtlasesToFiles(atlases, outResourcePathstr);
 	const int numAtlases = (int) atlases.size();
 
+	// Then we create the GLSL structs
+	std::vector<MaterialProperty> matProperties = getMaterialProperties(atlases, materials, textures);
 	for (TextureAtlas* a : atlases)
 		delete a;
 	atlases.clear();
 
-	std::vector<MeshEntry> entries;
-	entries.reserve(scene->mNumMeshes);
-
-	uint numVerticesInScene = 0;
-	uint numIndicesInScene = 0;
-
-	for (uint i = 0; i < scene->mNumMeshes; ++i)
-	{
-		MeshEntry entry;
-		entry.meshIndex = i;
-		entry.materialIndex = scene->mMeshes[i]->mMaterialIndex;
-		entry.numIndices = scene->mMeshes[i]->mNumFaces * 3;
-		entry.baseVertex = numVerticesInScene;
-		entry.baseIndex = numIndicesInScene;
-		numVerticesInScene += scene->mMeshes[i]->mNumVertices;
-		numIndicesInScene += entry.numIndices;
-		entries.push_back(entry);
-	}
-
+	// Get vertices/indices and write everything to a file
 	std::vector<Vertex> vertices;
 	std::vector<uint> indices;
-	std::vector<uint> indiceCounts;
-	std::vector<uint> baseIndices;
-	vertices.reserve(numVerticesInScene);
-	indices.reserve(numIndicesInScene);
-	indiceCounts.reserve(entries.size());
-	baseIndices.reserve(entries.size());
+	getVerticesAndIndices(*scene, vertices, indices);
 
-	for (uint i = 0; i < entries.size(); i++)
-	{
-		const MeshEntry& entry = entries[i];
-		indiceCounts.push_back(entry.numIndices);
-		baseIndices.push_back(entry.baseIndex * sizeof(uint));
-	}
-
-	for (uint i = 0; i < entries.size(); i++)
-	{
-		const MeshEntry& entry = entries[i];
-		const aiMesh* mesh = scene->mMeshes[entry.meshIndex];
-		const uint numVertices = mesh->mNumVertices;
-		const uint numFaces = mesh->mNumFaces;
-
-		for (uint j = 0; j < numFaces; ++j)
-		{
-			const aiFace& face = mesh->mFaces[j];
-			indices.push_back(face.mIndices[0] + entry.baseVertex);
-			indices.push_back(face.mIndices[1] + entry.baseVertex);
-			indices.push_back(face.mIndices[2] + entry.baseVertex);
-		}
-
-		for (uint j = 0; j < numVertices; ++j)
-		{
-			vertices.emplace_back(
-				mesh->mVertices[j],
-				mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][j] : aiVector3D(0.0f),
-				mesh->mNormals[j],
-				mesh->mTangents[j],
-				mesh->mBitangents[j],
-				entry.materialIndex);
-		}
-	}
 	aiReleaseImport(scene);
+	scene = NULL;
 
 	std::ofstream file(a_outResourcePath, std::ios::out | std::ios::binary);
 	assert(file.is_open());

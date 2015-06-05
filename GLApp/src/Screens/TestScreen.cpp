@@ -21,8 +21,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-static const char* const MODEL_FILE_PATH = "Models/palace/palace.da";
-static const char* const SKYBOX_FILE_PATH = "Models/skybox/skysphere.da";
+static const char* const MODEL_FILE_PATH = "Models/palace/palace.obj.da";
+static const char* const SKYBOX_FILE_PATH = "Models/skybox/skysphere.obj.da";
 static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
 
 END_UNNAMED_NAMESPACE()
@@ -63,7 +63,7 @@ TestScreen::TestScreen()
 	skyboxEntity.assign<SkyComponent>(m_skybox);
 	skyboxEntity.assign<TransformComponent>();
 
-	Frame f(UI_JSON_FILE_PATH);
+	// Frame f(UI_JSON_FILE_PATH);
 }
 
 TestScreen::~TestScreen()

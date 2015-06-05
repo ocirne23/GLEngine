@@ -102,5 +102,5 @@ void main()
 	diffuseAccum += diffuse * u_ambient;
 	out_color = vec4(diffuseAccum + specularAccum, 1.0);
 
-	// out_color = vec4(vec3(v_normal), 1.0) + out_color * 0.00000000001; // for testing values without unused variable errors
+	out_color = vec4(vec3(normal), 1.0) + out_color * 0.00000000001; // for testing values without unused variable errors
 }

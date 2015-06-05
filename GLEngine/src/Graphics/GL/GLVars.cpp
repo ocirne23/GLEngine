@@ -58,6 +58,7 @@ rde::string GLVars::s_glDriverVersion;
 void GLVars::createGLContext(SDL_Window* a_window)
 {
 	s_glContext = createHighestGLContext(a_window, s_glMajorVersion, s_glMinorVersion);
+	print("Created GL Context: %i %i\n", s_glMajorVersion, s_glMinorVersion);
 	s_glVendor = (const char*) glGetString(GL_VENDOR);
 	s_glRenderer = (const char*) glGetString(GL_RENDERER);
 	s_glDriverVersion = (const char*) glGetString(GL_VERSION);

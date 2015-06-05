@@ -41,13 +41,14 @@ GLTestScreenImpl::GLTestScreenImpl()
 		{ 1, "TEXCOORDS", VertexAttribute::EFormat::FLOAT, 2 }
 	};
 
-	s_texture.initialize("Models/palace/palace-atlas-0.da");
+	s_texture.initialize("Models/palace/palace.obj-atlas-0.da");
+	//s_texture.initialize("UI/button.9.png.da");
 	s_texture.bind(0);
 
-	rde::vector<rde::string> images;
-	images.push_back(rde::string("Models/palace/palace-atlas-0.da"));
-	s_textureArray.initialize(images);
-	s_textureArray.bind(1);
+	//rde::vector<rde::string> images;
+	//images.push_back(rde::string("Models/palace/palace.obj-atlas-0.da"));
+	//s_textureArray.initialize(images);
+	//s_textureArray.bind(1);
 
 	s_stateBuffer.initialize();
 	s_stateBuffer.begin();
@@ -76,6 +77,7 @@ void GLTestScreenImpl::render(float a_deltaSec)
 
 	s_shader.begin();
 	s_stateBuffer.begin();
+	s_texture.bind(0);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 

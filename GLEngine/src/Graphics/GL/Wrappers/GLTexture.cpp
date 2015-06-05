@@ -52,18 +52,22 @@ void GLTexture::initialize(const char* a_filePath, ETextureMinFilter a_minFilter
 	const GLint internalFormat = getInternalFormatForNumComponents(m_numComponents, pixmap.m_isFloatData);
 	const GLint format         = getFormatForNumComponents(m_numComponents);
 	const bool generateMipMaps = isMipMapFilter((GLenum) a_minFilter);
-
+	glPixelStorei(GL_PACK_ALIGNMENT, 4);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
-
+	/*
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum) a_minFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum) a_magFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, (GLenum) a_textureWrapS);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, (GLenum) a_textureWrapT);
+	*/
 	if (generateMipMaps)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, pixmap.m_isFloatData ? GL_FLOAT : GL_UNSIGNED_BYTE, pixmap.m_data.b);
-		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixmap.m_data.b);
+
+		//glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, pixmap.m_isFloatData ? GL_FLOAT : GL_UNSIGNED_BYTE, pixmap.m_data.b);
+		//glGenerateMipmap(GL_TEXTURE_2D);
 	}
 	else
 	{

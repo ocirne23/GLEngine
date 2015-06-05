@@ -14,14 +14,11 @@
 
 bool GLShader::s_begun = false;
 
-// if an error should be printed when an uniform is set which isn't present in the shader.
-// #define SHADER_STRICT_UNIFORM_LOC
-
 BEGIN_UNNAMED_NAMESPACE()
 
 rde::string getVersionStr()
 {
-	return rde::string("#version 330 core\n");
+	return rde::string("#version 330\n");
 }
 
 rde::string getSystemDefines()
@@ -57,24 +54,51 @@ rde::string processIncludes(const rde::string& a_str)
 	return src;
 }
 
-void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
+void checkProgramForErrors(const GLuint a_program)
 {
-	const GLuint shader = glCreateShader(a_type);
+	int success;
+	glGetProgramiv(a_program, GL_LINK_STATUS, &success);
+	if (success != GL_TRUE)
+	{
+		print("Shader program was not linked.!\n");
+	}
 
-	if (!shader)
-		print("Could not create shader %i \n", a_type);
+	glGetProgramiv(a_program, GL_LINK_STATUS, &success);
+	if (success != GL_TRUE)
+	{
+		GLint maxLength = 0;
+		glGetProgramiv(a_program, GL_INFO_LOG_LENGTH, &maxLength);
+		if (maxLength)
+		{
+			rde::vector<GLchar> infoLog(maxLength);
+			glGetProgramInfoLog(a_program, maxLength, &maxLength, &infoLog[0]);
+			print("link error: %s \n", &infoLog[0]);
+		}
+		else
+		{
+			print("link error, no info log available \n");
+		}
+	}
 
-	glShaderSource(shader, 1, &a_source, NULL);
-	glCompileShader(shader);
+	glValidateProgram(a_program);
+	glGetProgramiv(a_program, GL_VALIDATE_STATUS, &success);
+	if (success != GL_TRUE)
+		print("Shader program was not validated.!\n");
 
+	if (!glIsProgram(a_program))
+		print("failed to create shader \n");
+}
+
+void checkShaderForErrors(const GLuint a_shader, const GLenum a_shaderType, const char* a_source)
+{
 	GLint logLen;
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLen);
+	glGetShaderiv(a_shader, GL_INFO_LOG_LENGTH, &logLen);
 	if (logLen > 1)
 	{
 		char buffer[4096];
-		glGetShaderInfoLog(shader, sizeof(buffer), NULL, buffer);
+		glGetShaderInfoLog(a_shader, sizeof(buffer), NULL, buffer);
 		const char* typeString;
-		switch (a_type)
+		switch (a_shaderType)
 		{
 		case GL_FRAGMENT_SHADER:
 			typeString = "fragment";
@@ -89,95 +113,46 @@ void attachShaderSource(GLuint a_prog, GLenum a_type, const char * a_source)
 		print("Error in %s shader: %s : %s \n", typeString, buffer, a_source);
 	}
 	int compileStatus;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+	glGetShaderiv(a_shader, GL_COMPILE_STATUS, &compileStatus);
 	if (compileStatus != GL_TRUE)
 	{
 		print("shader failed to compile \n");
 	}
+}
+
+rde::string preprocessShaderFile(const char* a_shaderFilePath, const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
+{
+	rde::string contents = getVersionStr();						// #version xxx at top
+	contents.append(getSystemDefines());						// add generic defines
+	if (a_defines)												// add user defines
+		for (const rde::string& str : *a_defines)
+			contents.append("#define ").append(str).append("\n");
+	if (a_extensions)											// add user extensions
+		for (const rde::string& str : *a_extensions)
+			contents.append("#extension ").append(str).append(" : require\n");
+	
+	FileHandle shaderFile(a_shaderFilePath);
+	assert(shaderFile.exists());
+	contents.append(shaderFile.readString());					// add shader data from file
+	contents = processIncludes(contents);						// add all the included files
+	return contents;
+}
+
+void attachShaderSource(GLuint a_prog, GLenum a_type, const char* a_source)
+{
+	const GLuint shader = glCreateShader(a_type);
+	assert(shader);
+
+	glShaderSource(shader, 1, &a_source, NULL);
+	glCompileShader(shader);
+
+	checkShaderForErrors(shader, a_type, a_source);
 
 	glAttachShader(a_prog, shader);
 	glDeleteShader(shader);
 }
 
-GLuint createShaderProgram(const char* a_vertexShaderFilePath, const char* a_fragmentShaderFilePath,
-						   const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
-{
-	const GLuint program = glCreateProgram();
-	{
-		rde::string contents = getVersionStr();
-		contents.append(getSystemDefines());
-		if (a_defines)
-			for (const rde::string& str : *a_defines)
-				contents.append("#define ").append(str).append("\n");
-		if (a_extensions)
-			for (const rde::string& str : *a_extensions)
-				contents.append("#extension ").append(str).append(" : require\n");
-		contents.append(FileHandle(a_vertexShaderFilePath).readString());
-		contents = processIncludes(contents);
-		attachShaderSource(program, GL_VERTEX_SHADER, contents.c_str());
-	}
-	{
-		rde::string contents = getVersionStr();
-		contents.append(getSystemDefines());
-		if (a_defines)
-			for (const rde::string& str : *a_defines)
-				contents.append("#define ").append(str).append("\n");
-		if (a_extensions)
-			for (const rde::string& str : *a_extensions)
-				contents.append("#extension ").append(str).append(" : require\n");
-		contents.append(FileHandle(a_fragmentShaderFilePath).readString());
-		contents = processIncludes(contents);
-		attachShaderSource(program, GL_FRAGMENT_SHADER, contents.c_str());
-	}
-
-	glLinkProgram(program);
-
-	int success;
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
-	if (success != GL_TRUE)
-	{
-		print("Shader program was not linked.!\n");
-	}
-
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
-	if (success != GL_TRUE)
-	{
-		GLint maxLength = 0;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
-		if (maxLength)
-		{
-			rde::vector<GLchar> infoLog(maxLength);
-			glGetProgramInfoLog(program, maxLength, &maxLength, &infoLog[0]);
-			print("link error: %s \n", &infoLog[0]);
-		}
-		else
-		{
-			print("link error, no info log available \n");
-		}
-	}
-
-	glValidateProgram(program);
-	glGetProgramiv(program, GL_VALIDATE_STATUS, &success);
-	if (success != GL_TRUE)
-		print("Shader program was not validated.!\n");
-
-	if (!glIsProgram(program))
-		print("failed to create shader \n");
-
-	return program;
-}
-
-void assertStrictUniformLoc(GLint loc)
-{
-#ifdef SHADER_STRICT_UNIFORM_LOC
-	assert(loc != -1);
-#endif // SHADER_STRICT_UNIFORM_LOC
-}
-
 END_UNNAMED_NAMESPACE()
-
-GLShader::GLShader() : m_shaderID(0), m_begun(false)
-{}
 
 GLShader::~GLShader()
 {
@@ -191,7 +166,36 @@ void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_frag
 	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
 
-	m_shaderID = createShaderProgram(a_vertexShaderFilePath, a_fragmentShaderFilePath, a_defines, a_extensions);
+	const GLuint program = glCreateProgram();
+	assert(program);
+
+	const GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	const GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	assert(vertexShader && fragmentShader);
+
+	const rde::string vertexShaderStr = preprocessShaderFile(a_vertexShaderFilePath, a_defines, a_extensions);
+	const rde::string fragmentShaderStr = preprocessShaderFile(a_fragmentShaderFilePath, a_defines, a_extensions);
+	const char* vertexShaderSource = vertexShaderStr.c_str();
+	const char* fragmentShaderSource = fragmentShaderStr.c_str();
+	print("Vertex shader:\n%s", vertexShaderSource);
+	print("Fragment shader:\n%s", fragmentShaderSource);
+
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	glCompileShader(vertexShader);
+	checkShaderForErrors(vertexShader, GL_VERTEX_SHADER, vertexShaderSource);
+	glAttachShader(program, vertexShader);
+	glDeleteShader(vertexShader);
+
+	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glCompileShader(fragmentShader);
+	checkShaderForErrors(fragmentShader, GL_FRAGMENT_SHADER, fragmentShaderSource);
+	glAttachShader(program, fragmentShader);
+	glDeleteShader(fragmentShader);
+
+	glLinkProgram(program);
+	checkProgramForErrors(program);
+
+	m_shaderID = program;
 }
 
 void GLShader::begin()
@@ -220,7 +224,6 @@ void GLShader::setUniform1i(const char* a_uniformName, int a_val)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniform1i(loc, a_val);
 	}
@@ -235,7 +238,6 @@ void GLShader::setUniform1f(const char* a_uniformName, float a_val)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniform1f(loc, a_val);
 	}
@@ -250,7 +252,6 @@ void GLShader::setUniform2f(const char* a_uniformName, const glm::vec2& a_vec)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniform2f(loc, a_vec.x, a_vec.y);
 	}
@@ -265,7 +266,6 @@ void GLShader::setUniform2i(const char* a_uniformName, const glm::ivec2& a_vec)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniform2i(loc, a_vec.x, a_vec.y);
 	}
@@ -279,7 +279,6 @@ void GLShader::setUniform2fv(const char* a_uniformName, uint a_count, const glm:
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniform2fv(loc, a_count, &a_vecs[0][0]);
 	}
@@ -294,7 +293,6 @@ void GLShader::setUniform3f(const char* a_uniformName, const glm::vec3& a_vec)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniform3f(loc, a_vec.x, a_vec.y, a_vec.z);
 	}
@@ -308,7 +306,6 @@ void GLShader::setUniformMatrix4f(const char* a_uniformName, const glm::mat4& a_
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniformMatrix4fv(loc, 1, GL_FALSE, &a_mat[0][0]);
 	}
@@ -322,7 +319,6 @@ void GLShader::setUniformMatrix3f(const char* a_uniformName, const glm::mat3& ma
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		assertStrictUniformLoc(loc);
 		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
 		glUniformMatrix3fv(loc, 1, GL_FALSE, &mat[0][0]);
 	}

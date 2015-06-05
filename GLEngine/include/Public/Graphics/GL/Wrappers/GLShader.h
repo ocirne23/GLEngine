@@ -19,7 +19,7 @@ public:
 	typedef rde::hash_map<const char*, int> UniformLocMap;
 public:
 
-	GLShader();
+	GLShader() {}
 	~GLShader();
 	GLShader(const GLShader& copy) = delete;
 

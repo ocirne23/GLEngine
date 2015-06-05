@@ -7,9 +7,6 @@
     <ClCompile Include="src\Processors\ModelProcessor.cpp">
       <Filter>Source Files\Processors</Filter>
     </ClCompile>
-    <ClCompile Include="src\Processors\ByteImageProcessor.cpp">
-      <Filter>Header Files\Processors</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\listFiles.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
@@ -24,6 +21,9 @@
     </ClCompile>
     <ClCompile Include="src\Utils\TextureAtlas.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Processors\ByteImageProcessor.cpp">
+      <Filter>Source Files\Processors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -42,9 +42,6 @@
     <ClInclude Include="src\Utils\getFileTime.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="src\Processors\ModelProcessor.h">
-      <Filter>Source Files\Processors</Filter>
-    </ClInclude>
     <ClInclude Include="src\Utils\listFiles.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
@@ -62,6 +59,9 @@
     </ClInclude>
     <ClInclude Include="src\Utils\writeVector.h">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Processors\ModelProcessor.h">
+      <Filter>Header Files\Processors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
