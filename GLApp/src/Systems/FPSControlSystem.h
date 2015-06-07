@@ -17,6 +17,7 @@ public:
 private:
 
 	Input::MouseMovedListener m_mouseMovedListener;
+	Input::WindowQuitListener m_windowQuitListener;
 
 	int m_xMoveAmount = 0;
 	int m_yMoveAmount = 0;

@@ -37,6 +37,12 @@ public:
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
+	void initialize(const Pixmap& pixmap,
+				ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
+				ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
+				ETextureWrap textureWrapS = ETextureWrap::REPEAT,
+				ETextureWrap textureWrapT = ETextureWrap::REPEAT);
+
 	void initialize(const char* filePath,
 					ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
 					ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,

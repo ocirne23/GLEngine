@@ -53,6 +53,9 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Screens\HBAOTestScreen.cpp">
+      <Filter>Source Files\Screens</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Systems\RenderSystem.h">
@@ -93,6 +96,9 @@
     </ClInclude>
     <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h">
       <Filter>Source Files\AppUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Screens\HBAOTestScreen.h">
+      <Filter>Header Files\Screens</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

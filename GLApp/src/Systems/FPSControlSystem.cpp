@@ -19,17 +19,19 @@ static const float BASE_DIAGONAL_CAMERA_SPEED = glm::sqrt(0.5f);
 
 END_UNNAMED_NAMESPACE()
 
-using namespace std::placeholders;
-
 FPSControlSystem::FPSControlSystem()
 {
-	m_mouseMovedListener.setFunc([&](uint xPos, uint yPos, int deltaX, int deltaY)
+	m_mouseMovedListener.setFunc([this](uint xPos, uint yPos, int deltaX, int deltaY)
 	{
 		if (GLEngine::input->isMousePressed(EMouseButton::LEFT))
 		{
 			m_xMoveAmount += deltaX;
 			m_yMoveAmount += deltaY;
 		}
+	});
+
+	m_windowQuitListener.setFunc([this]() {
+		GLEngine::shutdown();
 	});
 }
 
@@ -42,17 +44,17 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 	Input& input = *GLEngine::input;
 	glm::vec3 moveAmount(0);
 	if (input.isKeyPressed(EKey::W))
-		if (input.isKeyPressed(EKey::A))		moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, -BASE_DIAGONAL_CAMERA_SPEED);
+		if (input.isKeyPressed(EKey::A))      moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, -BASE_DIAGONAL_CAMERA_SPEED);
 		else if (input.isKeyPressed(EKey::D)) moveAmount = glm::vec3(BASE_DIAGONAL_CAMERA_SPEED, 0, -BASE_DIAGONAL_CAMERA_SPEED);
-		else								moveAmount = glm::vec3(0, 0, -BASE_CAMERA_SPEED);
+		else                                  moveAmount = glm::vec3(0, 0, -BASE_CAMERA_SPEED);
 	else if (input.isKeyPressed(EKey::S))
-		if (input.isKeyPressed(EKey::A))		moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, BASE_DIAGONAL_CAMERA_SPEED);
+		if (input.isKeyPressed(EKey::A))      moveAmount = glm::vec3(-BASE_DIAGONAL_CAMERA_SPEED, 0, BASE_DIAGONAL_CAMERA_SPEED);
 		else if (input.isKeyPressed(EKey::D)) moveAmount = glm::vec3(BASE_DIAGONAL_CAMERA_SPEED, 0, BASE_DIAGONAL_CAMERA_SPEED);
-		else								moveAmount = glm::vec3(0, 0, BASE_CAMERA_SPEED);
-	else if (input.isKeyPressed(EKey::A))		moveAmount = glm::vec3(-BASE_CAMERA_SPEED, 0, 0);
-	else if (input.isKeyPressed(EKey::D))		moveAmount = glm::vec3(BASE_CAMERA_SPEED, 0, 0);
-	if (input.isKeyPressed(EKey::SPACE))		moveAmount.y += BASE_CAMERA_SPEED;
-	if (input.isKeyPressed(EKey::LSHIFT))		moveAmount.y -= BASE_CAMERA_SPEED;
+		else                                  moveAmount = glm::vec3(0, 0, BASE_CAMERA_SPEED);
+	else if (input.isKeyPressed(EKey::A))     moveAmount = glm::vec3(-BASE_CAMERA_SPEED, 0, 0);
+	else if (input.isKeyPressed(EKey::D))     moveAmount = glm::vec3(BASE_CAMERA_SPEED, 0, 0);
+	if (input.isKeyPressed(EKey::SPACE))      moveAmount.y += BASE_CAMERA_SPEED;
+	if (input.isKeyPressed(EKey::LSHIFT))     moveAmount.y -= BASE_CAMERA_SPEED;
 	moveAmount *= a_dt;
 
 	entityx::ComponentHandle<FPSControlledComponent> control;
@@ -63,13 +65,17 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 		glm::mat3 rotation(transform->transform);
 		glm::vec3 direction(FORWARD * rotation);
 
-		direction = glm::rotate(direction, -m_xMoveAmount * control->lookSensitivity, UP); //rotate horizontally
+		// Rotate horizontally
+		direction = glm::rotate(direction, -m_xMoveAmount * control->lookSensitivity, UP); 
 		float xzAngle = glm::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
 
+		// Rotate vertically
 		glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));
 		glm::vec3 tmp = direction;
-		direction = glm::rotate(direction, -m_yMoveAmount * control->lookSensitivity, yRotAxis); //rotate vertically
-		if (direction.y > 0.99f || direction.y < -0.99f) //limit vertical look movement
+		direction = glm::rotate(direction, -m_yMoveAmount * control->lookSensitivity, yRotAxis); 
+
+		// Limit vertical look movement
+		if (direction.y > 0.99f || direction.y < -0.99f)
 			direction = tmp;
 
 		float xTrans = moveAmount.x * glm::cos(xzAngle) + moveAmount.z * glm::sin(xzAngle);

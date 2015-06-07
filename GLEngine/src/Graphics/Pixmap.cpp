@@ -45,6 +45,17 @@ void Pixmap::read(const char* a_filePath)
 	}
 }
 
+void Pixmap::set(uint a_width, uint a_height, uint a_numComp, bool a_isFloatTexture, void* a_data)
+{
+	assert(!m_data.b);
+	m_width = a_width;
+	m_height = a_height;
+	m_numComponents = a_numComp;
+	m_isFloatData = a_isFloatTexture;
+	m_data.b = (byte*) a_data;
+}
+
+
 void Pixmap::set(uint a_width, uint a_height, uint a_numComp, const glm::vec4& a_col)
 {
 	assert(!m_data.b);

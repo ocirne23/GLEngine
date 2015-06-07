@@ -16,7 +16,6 @@
 #include "Systems/FPSControlSystem.h"
 #include "Systems/LightSystem.h"
 #include "Systems/RenderSystem.h"
-#include "UI/Frame.h"
 
 BEGIN_UNNAMED_NAMESPACE()
 
@@ -68,11 +67,7 @@ TestScreen::TestScreen()
 	skyboxEntity.assign<SkyComponent>(m_skybox);
 	skyboxEntity.assign<TransformComponent>();
 
-	m_keyDownListener.setFunc([&](EKey a_key) {
-		keyDown(a_key);
-	});
-
-	// Frame f(UI_JSON_FILE_PATH);
+	m_keyDownListener.setFunc([this](EKey a_key) { keyDown(a_key); });
 }
 
 TestScreen::~TestScreen()

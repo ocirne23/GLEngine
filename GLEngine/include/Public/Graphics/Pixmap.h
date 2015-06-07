@@ -14,6 +14,7 @@ public:
 	bool exists() const { return m_data.b != NULL; }
 
 	void set(uint width, uint height, uint numComp, const glm::vec4& col);
+	void set(uint width, uint height, uint numComp, bool isFloatTexture, void* data);
 
 public:
 
