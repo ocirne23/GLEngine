@@ -94,6 +94,7 @@
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Public\Input\InputListener.h" />
     <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
@@ -187,7 +188,6 @@
     <ClInclude Include="include\Public\Utils\FPSCameraController.h" />
     <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h" />
     <ClInclude Include="include\Public\Utils\JobScheduler.h" />
-    <ClInclude Include="include\Public\Utils\ListenerMacros.h" />
     <ClInclude Include="include\Public\Utils\MatForward.h" />
     <ClInclude Include="include\Public\Utils\Semaphore.h" />
     <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h" />

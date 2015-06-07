@@ -19,22 +19,22 @@ static const float BASE_DIAGONAL_CAMERA_SPEED = glm::sqrt(0.5f);
 
 END_UNNAMED_NAMESPACE()
 
+using namespace std::placeholders;
+
 FPSControlSystem::FPSControlSystem()
 {
-	GLEngine::input->mouseMovedListenerRegister(this, [&](uint xPos, uint yPos, int xMove, int yMove)
+	m_mouseMovedListener.setFunc([&](uint xPos, uint yPos, int deltaX, int deltaY)
 	{
 		if (GLEngine::input->isMousePressed(EMouseButton::LEFT))
 		{
-			m_xMoveAmount += xMove;
-			m_yMoveAmount += yMove;
+			m_xMoveAmount += deltaX;
+			m_yMoveAmount += deltaY;
 		}
-		return false;
 	});
 }
 
 FPSControlSystem::~FPSControlSystem()
 {
-	GLEngine::input->mouseMovedListenerUnregister(this);
 }
 
 void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include "Input/EKey.h"
+#include "Input/Input.h"
 #include "3rdparty/entityx/entityx.h"
 
 class GLMesh;
@@ -17,7 +17,7 @@ public:
 
 private:
 
-	bool keyDown(EKey key);
+	void keyDown(EKey key);
 
 private:
 
@@ -26,4 +26,6 @@ private:
 	GLMesh* m_building          = NULL;
 	GLMesh* m_skybox            = NULL;
 	PerspectiveCamera* m_camera = NULL;
+
+	Input::KeyDownListener m_keyDownListener;
 };

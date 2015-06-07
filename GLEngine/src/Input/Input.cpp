@@ -81,3 +81,51 @@ bool Input::isMousePressed(EMouseButton a_button)
 {
 	return (SDL_BUTTON((int) a_button) & SDL_GetMouseState(NULL, NULL)) != 0;
 }
+
+void Input::keyDown(EKey a_key)
+{
+	for (KeyDownListener* l : m_keyDownListeners)
+		l->call(a_key);
+}
+
+void Input::keyUp(EKey a_key)
+{
+	for (KeyUpListener* l : m_keyUpListeners)
+		l->call(a_key);
+}
+
+void Input::mouseDown(EMouseButton button, uint xPos, uint yPos)
+{
+	for (MouseDownListener* l : m_mouseDownListeners)
+		l->call(button, xPos, yPos);
+}
+
+void Input::mouseUp(EMouseButton button, uint xPos, uint yPos)
+{
+	for (MouseUpListener* l : m_mouseUpListeners)
+		l->call(button, xPos, yPos);
+}
+
+void Input::mouseMoved(uint xPos, uint yPos, int deltaX, int deltaY)
+{
+	for (MouseMovedListener* l : m_mouseMovedListeners)
+		l->call(xPos, yPos, deltaX, deltaY);
+}
+
+void Input::mouseScrolled(int amount)
+{
+	for (MouseScrolledListener* l : m_mouseScrolledListeners)
+		l->call(amount);
+}
+
+void Input::windowResized(uint width, uint height)
+{
+	for (WindowResizedListener* l : m_windowResizedListeners)
+		l->call(width, height);
+}
+
+void Input::windowQuit()
+{
+	for (WindowQuitListener* l : m_windowQuitListeners)
+		l->call();
+}

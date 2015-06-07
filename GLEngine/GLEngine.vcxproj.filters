@@ -279,9 +279,6 @@
     <ClInclude Include="include\Public\Graphics\LightManager.h">
       <Filter>Header Files\Public\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\Utils\ListenerMacros.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\MatForward.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
@@ -521,6 +518,9 @@
     </ClInclude>
     <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h">
       <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Input\InputListener.h">
+      <Filter>Header Files\Public\Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

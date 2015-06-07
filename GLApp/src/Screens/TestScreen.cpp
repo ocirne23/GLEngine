@@ -16,7 +16,6 @@
 #include "Systems/FPSControlSystem.h"
 #include "Systems/LightSystem.h"
 #include "Systems/RenderSystem.h"
-#include "Utils/ListenerMacros.h"
 #include "UI/Frame.h"
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -31,9 +30,6 @@ END_UNNAMED_NAMESPACE()
 
 TestScreen::TestScreen()
 {
-	GLEngine::input->keyDownListenerRegister(this, [&](EKey a_key) { return keyDown(a_key); });
-	GLEngine::input->windowQuitListenerRegister(this, &GLEngine::shutdown);
-
 	m_entityx.systems.add<FPSControlSystem>();
 	m_entityx.systems.add<CameraSystem>();
 	m_entityx.systems.add<LightSystem>();
@@ -63,7 +59,7 @@ TestScreen::TestScreen()
 
 	entityx::Entity model2Entity = m_entityx.entities.create();
 	model2Entity.assign<ModelComponent>(m_dragon);
-	model2Entity.assign<TransformComponent>(0.0f, -6.9f, -58.0f);
+	model2Entity.assign<TransformComponent>(0.0f, -7.0f, -58.0f);
 
 	entityx::Entity lightEntity = m_entityx.entities.create();
 	lightEntity.assign<PointLightComponent>()->set(glm::vec3(0, -10.0f, -20.0f), 5.0f, glm::vec3(1.0f), 20.0f);
@@ -71,6 +67,10 @@ TestScreen::TestScreen()
 	entityx::Entity skyboxEntity = m_entityx.entities.create();
 	skyboxEntity.assign<SkyComponent>(m_skybox);
 	skyboxEntity.assign<TransformComponent>();
+
+	m_keyDownListener.setFunc([&](EKey a_key) {
+		keyDown(a_key);
+	});
 
 	// Frame f(UI_JSON_FILE_PATH);
 }
@@ -81,9 +81,6 @@ TestScreen::~TestScreen()
 	SAFE_DELETE(m_dragon);
 	SAFE_DELETE(m_building);
 	SAFE_DELETE(m_camera);
-
-	GLEngine::input->keyDownListenerUnregister(this);
-	GLEngine::input->windowQuitListenerUnregister(this);
 }
 
 void TestScreen::render(float a_deltaSec)
@@ -102,7 +99,7 @@ void TestScreen::render(float a_deltaSec)
 	m_entityx.systems.update<RenderSystem>(a_deltaSec);
 }
 
-bool TestScreen::keyDown(EKey a_key)
+void TestScreen::keyDown(EKey a_key)
 {
 	switch (a_key)
 	{
@@ -114,7 +111,7 @@ bool TestScreen::keyDown(EKey a_key)
 		float radius = 20.0f * ((rand() % 1000) / 1000.0f) + 1.0f;
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
-		return true;
+		break;
 	}
 	case EKey::Y:
 	{
@@ -123,14 +120,12 @@ bool TestScreen::keyDown(EKey a_key)
 			e.component<PointLightComponent>().remove();
 			e.destroy();
 		}
-		return true;
+		break;
 	}
 	case EKey::ESCAPE:
 	{
 		GLEngine::shutdown();
-		return true;
+		break;
 	}
-	default:
-		return false;
 	}
 }

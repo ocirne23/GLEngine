@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <assert.h>
 #include <fstream>
-#include <Windows.h>
+#include <windows.h>
+#include <omp.h>
 
 namespace {
 
@@ -102,7 +103,7 @@ void clearModificationFile(std::fstream& a_file)
 	a_file.clear();
 }
 
-void getAllFilesAndModificationTimesInFolder(CurrentTimesMap& a_outFiles, const std::string& a_folder)
+std::vector<std::string> getAllFilesAndModificationTimesInFolder(CurrentTimesMap& a_outFiles, const std::string& a_folder)
 {
 	assert(!a_outFiles.size());
 	std::vector<std::string> files;
@@ -111,6 +112,7 @@ void getAllFilesAndModificationTimesInFolder(CurrentTimesMap& a_outFiles, const 
 	assert(files.size() == writeTimes.size());
 	for (int i = 0; i < files.size(); ++i)
 		a_outFiles.insert({files[i], writeTimes[i]});
+	return files; // Needed to iterate with omp
 }
 
 void writeModificationMapToFile(std::fstream& a_file, const StoredTimesMap& a_writeTimesMap)
@@ -166,18 +168,31 @@ void processFileAndUpdateStoredTimes(const std::string& a_inPath,
 									 ResourceProcessor* a_processor, 
 									 StoredTimesMap& a_storedTimesMap)
 {
-	printf("Processing: %s \n", a_inPath.c_str());
+	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	printf("Processing: %s", a_inPath.c_str());
+	CONSOLE_SCREEN_BUFFER_INFO processingStrPosition;
+	GetConsoleScreenBufferInfo(console, &processingStrPosition);
+	SetConsoleCursorPosition(console, {0, processingStrPosition.dwCursorPosition.Y + 1});
+
 	std::vector<FileName> dependencies;
 	a_processor->process(a_inPath.c_str(), a_outPath.c_str(), dependencies);
-	printf("done\n");
+	
+	CONSOLE_SCREEN_BUFFER_INFO currPos;
+	GetConsoleScreenBufferInfo(console, &currPos);
+	SetConsoleCursorPosition(console, {100, processingStrPosition.dwCursorPosition.Y});
+	char s[] = "\tdone";
+	unsigned long cChars;
+	WriteConsole(console, s, lstrlen(s), &cChars, NULL);
+	SetConsoleCursorPosition(console, currPos.dwCursorPosition);
+
+	//TODO: update stored times map threadsafe
 }
 
 } // namespace
 
 void ResourceBuilder::buildResources(const std::unordered_map<std::string, ResourceProcessor*>& a_processors, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
 {
-	printf("Building files in folder: %s\n", a_inDirectoryPath);
-
 	const std::string inDirectoryPathStr(a_inDirectoryPath);
 	const std::string outDirectoryPathStr(a_outDirectoryPath);
 	const std::string modificationFilePath = outDirectoryPathStr + "\\modificationdates.txt";
@@ -198,11 +213,16 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 		modificationFile.open(modificationFilePath, std::ios::in | std::ios::out);
 	}
 
-	getAllFilesAndModificationTimesInFolder(currentTimesMap, inDirectoryPathStr);
-	for (const auto& currNameTime : currentTimesMap)
+	auto fileNames = getAllFilesAndModificationTimesInFolder(currentTimesMap, inDirectoryPathStr);
+	const int numFiles = (int) fileNames.size();
+omp_set_num_threads(20);
+#pragma omp parallel for
+	for (int i = 0; i < numFiles; ++i)
 	{
-		const FileName& fileName = currNameTime.first;
-		const FileTime& fileTime = currNameTime.second;
+		auto it = currentTimesMap.find(fileNames[i]);
+		assert(it != currentTimesMap.end());
+		const FileName& fileName = it->first;
+		const FileTime& fileTime = it->second;
 		ResourceProcessor* processor = getResourceProcessorForFile(fileName, a_processors);
 		if (processor)
 		{

@@ -19,6 +19,7 @@ BEGIN_UNNAMED_NAMESPACE()
 
 static const char* DFV_TEX_PATH = "Utils/ggx-helper-dfv.hdr.da";
 static const char* CLUSTERED_SHADING_PATH = "Shaders/clusteredshading.glsl";
+static const char* MATERIAL_LIGHTING_PATH = "Shaders/materiallighting.glsl";
 static const char* MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
 static const char* MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
 static const char* SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
@@ -37,7 +38,7 @@ RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSy
 
 	auto onShaderEdited = [&]()
 	{
-		print("shader edited \n");
+		print("shader edited\n");
 		if (m_activeCamera)
 			initializeShaderForCamera(*m_activeCamera);
 	};
@@ -45,6 +46,7 @@ RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSy
 	FileModificationManager::createModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
 	FileModificationManager::createModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH), onShaderEdited);
 	FileModificationManager::createModificationListener(this, rde::string(CLUSTERED_SHADING_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, rde::string(MATERIAL_LIGHTING_PATH), onShaderEdited);
 }
 
 RenderSystem::~RenderSystem()
@@ -52,6 +54,7 @@ RenderSystem::~RenderSystem()
 	FileModificationManager::removeModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH));
 	FileModificationManager::removeModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH));
 	FileModificationManager::removeModificationListener(this, rde::string(CLUSTERED_SHADING_PATH));
+	FileModificationManager::removeModificationListener(this, rde::string(MATERIAL_LIGHTING_PATH));
 }
 
 void RenderSystem::configure(entityx::EventManager& a_eventManager)

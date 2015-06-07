@@ -3,7 +3,6 @@
 #include "Core.h"
 #include "3rdparty/rde/rde_string.h"
 #include "Utils/VecForward.h"
-#include "Utils/ListenerMacros.h"
 
 #include <functional>
 

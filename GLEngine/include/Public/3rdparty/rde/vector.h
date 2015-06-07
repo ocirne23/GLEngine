@@ -256,6 +256,20 @@ public:
 		rde::destruct(m_end);
 	}
 
+	void remove(T t)
+	{
+		auto it = find(t);
+		if (it != end())
+			erase(it);
+	}
+
+	void remove_unordered(T t)
+	{
+		auto it = find(t);
+		if (it != end())
+			erase_unordered(it);
+	}
+
 	void assign(const T* first, const T* last)
 	{
 		// Iterators cant be in range!
