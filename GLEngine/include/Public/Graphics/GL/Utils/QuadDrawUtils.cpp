@@ -9,6 +9,8 @@ static const char* const QUAD_FRAG_SHADER_PATH = "da";
 
 END_UNNAMED_NAMESPACE()
 
+GLShader QuadDrawUtils::m_quadShader;
+
 void QuadDrawUtils::drawQuad()
 {
 	if (!m_quadShader.isInitialized())

@@ -6,15 +6,15 @@ class QuadDrawUtils
 {
 public:
 
-	void drawQuad();
-	void drawQuad(GLShader& shader);
+	static void drawQuad();
+	static void drawQuad(GLShader& shader);
 
 private:
 
 	QuadDrawUtils() {}
-	void initShader();
+	static void initShader();
 
 private:
 
-	GLShader m_quadShader;
+	static GLShader m_quadShader;
 };

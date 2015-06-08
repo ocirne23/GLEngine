@@ -4,9 +4,17 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/Pixmap.h"
+#include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLMesh.h"
 #include "Graphics/GL/GLVars.h"
+#include "Graphics/GL/Wrappers/GLTexture.h"
+#include "Graphics/GL/Wrappers/GLFramebuffer.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
+#include "Graphics/GL/Utils/QuadDrawUtils.h"
 #include "Input/Input.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtx/random.hpp>
 
 //wip 
 //https://github.com/scanberg/hbao
@@ -19,27 +27,28 @@ static const char* const MODEL2_FILE_PATH = "Models/meshes/dragon.obj.da";
 static const char* const SKYBOX_FILE_PATH = "Models/skybox/skysphere.obj.da";
 static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
 
-GLuint generateNoiseTexture(int width, int height)
-{
-
-
-	GLint internalFormat = GL_RGBA16F;
-	GLint format = GL_RGBA;
-	GLint type = GL_FLOAT;
-
-	GLuint tex;
-	glGenTextures(1, &tex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, noise);
-	return tex;
-}
-
 END_UNNAMED_NAMESPACE()
+
+BEGIN_NAMESPACE(UBOBindingPoints)
+enum
+{
+	MODEL_MATERIAL_UBO_BINDING_POINT = 0,
+	LIGHT_POSITION_RANGE_UBO_BINDING_POINT,
+	LIGHT_COLOR_UBO_BINDING_POINT,
+	NUM_ENGINE_RESERVED_UBO_BINDING_POINTS
+};
+END_NAMESPACE(UBOBindingPoints)
+
+BEGIN_NAMESPACE(TextureUnits)
+enum
+{
+	DFV_TEXTURE = 0,
+	CLUSTERED_LIGHTING_GRID_TEXTURE,
+	CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE,
+	MODEL_TEXTURE_ARRAY,
+	NUM_ENGINE_RESERVED_TEXTURE_UNITS
+};
+END_NAMESPACE(TextureUnits)
 
 #define WIDTH 1280
 #define HEIGHT 720
@@ -63,6 +72,9 @@ bool fullres = true;
 
 void HBAOTest::init(PerspectiveCamera* a_camera)
 {
+	const uint screenWidth = GLEngine::graphics->getViewportWidth();
+	const uint screenHeight = GLEngine::graphics->getViewportHeight();
+
 	m_camera = a_camera;
 
 	m_camera = new PerspectiveCamera();
@@ -77,16 +89,27 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	m_skybox = new GLMesh();
 	m_skybox->loadFromFile(SKYBOX_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
+	m_geometryShader = new GLShader();
+	m_geometryShader->initialize("Shaders/HBAO/geometry_vert.glsl", "Shaders/HBAO/geometry_frag.glsl");
+	m_hbaoFullShader = new GLShader();
+	m_hbaoFullShader->initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/hbao_full_frag.glsl");
+
+	m_fboFullRes = new GLFramebuffer();
+	m_fboFullRes->setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
+	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RGBA8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
+	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR1, screenWidth, screenHeight);
+	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR2, screenWidth, screenHeight);
+
 	m_keyDownListener.setFunc([this](EKey a_key) { keyDown(a_key); });
 
 	uint noiseTexWidth = NOISE_RES;
 	uint noiseTexHeight = NOISE_RES;
 	float *noise = new float[noiseTexWidth*noiseTexHeight * 4];
-	for (int y = 0; y < noiseTexHeight; ++y)
+	for (uint y = 0; y < noiseTexHeight; ++y)
 	{
-		for (int x = 0; x < noiseTexWidth; ++x)
+		for (uint x = 0; x < noiseTexWidth; ++x)
 		{
-			vec2 xy = glm::circularRand(1.0f);
+			glm::vec2 xy = glm::circularRand(1.0f);
 			float z = glm::linearRand(0.0f, 1.0f);
 			float w = glm::linearRand(0.0f, 1.0f);
 
@@ -103,202 +126,92 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	m_noiseTexture->initialize(pixmap, 
 							   GLTexture::ETextureMinFilter::NEAREST, GLTexture::ETextureMagFilter::NEAREST,
 							   GLTexture::ETextureWrap::REPEAT, GLTexture::ETextureWrap::REPEAT);
+
+	float fovRad = m_camera->getVFov() * 3.14159265f / 180.0f;
+	glm::vec2 FocalLen, InvFocalLen, UVToViewA, UVToViewB, LinMAD, AORes, InvAORes;
+
+	FocalLen[0] = 1.0f / tanf(fovRad * 0.5f) * ((float)AO_HEIGHT / (float)AO_WIDTH);
+	FocalLen[1] = 1.0f / tanf(fovRad * 0.5f);
+	InvFocalLen[0] = 1.0f / FocalLen[0];
+	InvFocalLen[1] = 1.0f / FocalLen[1];
+
+	UVToViewA[0] = -2.0f * InvFocalLen[0];
+	UVToViewA[1] = -2.0f * InvFocalLen[1];
+	UVToViewB[0] = 1.0f * InvFocalLen[0];
+	UVToViewB[1] = 1.0f * InvFocalLen[1];
+
+	float near = m_camera->getNear(), far = m_camera->getFar();
+	LinMAD[0] = (near - far) / (2.0f*near*far);
+	LinMAD[1] = (near + far) / (2.0f*near*far);
+
+	AORes[0] = WIDTH;
+	AORes[1] = HEIGHT;
+
+	InvAORes[0] = 1.0f / WIDTH;
+	InvAORes[1] = 1.0f / HEIGHT;
+
+	float R = (float) AO_RADIUS;
+	float R2 = R * R;
+	float NegInvR2 = -1.0f / R2;
+	float MaxRadiusPixels = AO_MAX_RADIUS_PIXELS;
+
+	glm::vec2 NoiseScale((float) WIDTH / (float) NOISE_RES, (float) HEIGHT / (float) NOISE_RES);
+	int NumDirections = AO_DIRS;
+	int NumSamples = AO_SAMPLES;
+
+	m_hbaoFullShader->begin();
+	m_hbaoFullShader->setUniform2f("FocalLen", FocalLen);
+	m_hbaoFullShader->setUniform2f("UVToViewA", UVToViewA);
+	m_hbaoFullShader->setUniform2f("UVToViewB", UVToViewB);
+	m_hbaoFullShader->setUniform2f("LinMAD", LinMAD);
+	m_hbaoFullShader->setUniform2f("AORes", AORes);
+	m_hbaoFullShader->setUniform1f("R", R);
+	m_hbaoFullShader->setUniform1f("R2", R2);
+	m_hbaoFullShader->setUniform1f("NegInvR2", NegInvR2);
+	m_hbaoFullShader->setUniform1f("MaxRadiusPixels", MaxRadiusPixels);
+	m_hbaoFullShader->setUniform2f("NoiseScale", NoiseScale);
+	m_hbaoFullShader->setUniform1i("NumDirections", NumDirections);
+	m_hbaoFullShader->setUniform1i("NumSamples", NumSamples);
+	m_hbaoFullShader->end();
 }
 
 void HBAOTest::render(float a_deltaSec)
 {
-	// RENDER GEOMETRY PASS
+	// RENDER GEOMETRY PASS //
 	glEnable(GL_DEPTH_TEST);
+	m_fboFullRes->begin();
 
-	fboFullRes->bind();
-	glClearColor(0.2, 0.3, 0.5, 1.0);
+	glClearColor(0.2f, 0.3f, 0.5f, 1.0f);
 	glClearDepth(1.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	geometryShader->bind();
+	m_geometryShader->begin();
+	m_geometryShader->setUniformMatrix4f("u_viewMatrix", m_camera->getViewMatrix());
+	m_geometryShader->setUniformMatrix4f("u_projMatrix", m_camera->getProjectionMatrix());
 
-	glUniformMatrix4fv(geometryShader->getViewMatrixLocation(), 1, false, glm::value_ptr(cam->getViewMatrix()));
-	glUniformMatrix4fv(geometryShader->getProjMatrixLocation(), 1, false, glm::value_ptr(cam->getProjMatrix()));
+	m_building->render(*m_geometryShader);
+	m_dragon->render(*m_geometryShader);
 
-	mdl->draw();
-	//model->draw();
+	m_geometryShader->end();
+	m_fboFullRes->end();
 
+	m_noiseTexture->bind(1);
+	m_fboFullRes->bindTextures();
+	m_fboFullRes->bindDepthTexture(0);
+
+	// Apply HBAO //
+	m_hbaoFullShader->begin();
 	glDisable(GL_DEPTH_TEST);
+	QuadDrawUtils::drawQuad(*m_hbaoFullShader);
+	m_hbaoFullShader->end();
 
-	//glColorMask(1, 0, 0, 0);
-	//glDepthFunc(GL_ALWAYS);
-
-	if (!fullres)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboFullRes->getBufferHandle(FBO_DEPTH));
-
-		// Downsample depth
-		fboHalfRes->bind();
-
-		buffer[0] = GL_COLOR_ATTACHMENT0;
-		glDrawBuffers(1, buffer);
-
-		downsampleShader->bind();
-		fsquad->draw();
-
-	}
-
-	// AO pass
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, noiseTexture);
-
-	if (!fullres)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboHalfRes->getBufferHandle(FBO_AUX0));
-
-		buffer[0] = GL_COLOR_ATTACHMENT1;
-		glDrawBuffers(1, buffer);
-
-		hbaoHalfShader->bind();
-
-		fsquad->draw();
-	}
-	else
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboFullRes->getBufferHandle(FBO_DEPTH));
-
-		buffer[0] = GL_COLOR_ATTACHMENT1;
-		glDrawBuffers(1, buffer);
-
-		hbaoFullShader->bind();
-		fsquad->draw();
-	}
-
-	// Upsample
-
-	if (!fullres)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboFullRes->getBufferHandle(FBO_DEPTH));
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, fboHalfRes->getBufferHandle(FBO_AUX1));
-
-		fboFullRes->bind();
-
-		buffer[0] = GL_COLOR_ATTACHMENT1;
-		glDrawBuffers(1, buffer);
-
-		upsampleShader->bind();
-
-		fsquad->draw();
-	}
-
-	//timeStamps[4] = glfwGetTime();
-	glQueryCounter(queryID[4], GL_TIMESTAMP);
-
-	if (blur)
-	{
-		// BLUR 
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboFullRes->getBufferHandle(FBO_AUX1));
-
-		// X
-		buffer[0] = GL_COLOR_ATTACHMENT2;
-		glDrawBuffers(1, buffer);
-
-		blurXShader->bind();
-
-		fsquad->draw();
-
-		// Y
-		buffer[0] = GL_COLOR_ATTACHMENT1;
-		glDrawBuffers(1, buffer);
-
-		blurYShader->bind();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, fboFullRes->getBufferHandle(FBO_AUX2));
-
-		fsquad->draw();
-
-	}
-
-	//timeStamps[5] = glfwGetTime();
-	glQueryCounter(queryID[5], GL_TIMESTAMP);
-
-	fboFullRes->unbind();
-
-	// RENDER TO SCREEN PASS
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, fboFullRes->getBufferHandle(FBO_AUX0));
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, fboFullRes->getBufferHandle(FBO_AUX1));
-
-	//glClearColor(1.0, 1.0, 1.0, 0.0);
-	//glClear(GL_COLOR_BUFFER_BIT);
-	glViewport(0, 0, WIDTH, HEIGHT);
-
-	compositShader->bind();
-
-	fsquad->draw();
-
-	glfwSwapBuffers();
-
-	if (!glfwGetWindowParam(GLFW_OPENED))
-		running = false;
-
-	//timeStamps[6] = glfwGetTime();
-	glQueryCounter(queryID[6], GL_TIMESTAMP);
-
-	// wait until the results are available
-	GLint stopTimerAvailable = 0;
-	bool stop = false;
-
-	while (!stop)
-	{
-		stop = true;
-		for (int i = 0; i < 7; ++i)
-		{
-			glGetQueryObjectiv(queryID[1], GL_QUERY_RESULT_AVAILABLE, &stopTimerAvailable);
-			if (!stopTimerAvailable)
-			  stop = false;
-		}
-	}
+	GLEngine::graphics->swap();
 }
-
-
-
-
-
-
-
 
 void HBAOTest::keyDown(EKey a_key)
 {
 	switch (a_key)
 	{
-	case EKey::T:
-	{
-		glm::vec3 position = m_camera->getPosition() + m_camera->getDirection();
-		glm::vec3 color = glm::normalize(glm::vec3((rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f));
-		float intensity = 20.0f * ((rand() % 1000) / 1000.0f) + 1.0f;
-		float radius = 20.0f * ((rand() % 1000) / 1000.0f) + 1.0f;
-		entityx::Entity lightEntity = m_entityx.entities.create();
-		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
-		break;
-	}
-	case EKey::Y:
-	{
-		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
-		{
-			e.component<PointLightComponent>().remove();
-			e.destroy();
-		}
-		break;
-	}
 	case EKey::ESCAPE:
 	{
 		GLEngine::shutdown();
