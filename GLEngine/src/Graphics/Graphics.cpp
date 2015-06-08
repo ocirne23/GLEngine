@@ -64,12 +64,12 @@ void Graphics::createGLContext()
 		glViewport(0, 0, screenWidth, screenHeight);
 		setViewportSize(screenWidth, screenHeight);
 	}
-
+	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glEnable(GL_MULTISAMPLE);
 	setDepthTest(true);
-
+	
 	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
 	glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);

@@ -196,6 +196,7 @@ void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_frag
 	checkProgramForErrors(program);
 
 	m_shaderID = program;
+	m_initialized = true;
 }
 
 void GLShader::begin()

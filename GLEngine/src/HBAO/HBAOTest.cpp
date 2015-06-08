@@ -53,22 +53,16 @@ END_NAMESPACE(TextureUnits)
 #define WIDTH 1280
 #define HEIGHT 720
 
-#define RES_RATIO 2
+#define RES_RATIO 1
 #define AO_WIDTH (WIDTH/RES_RATIO)
 #define AO_HEIGHT (HEIGHT/RES_RATIO)
-#define AO_RADIUS 0.3
+#define AO_RADIUS 1.0
 #define AO_DIRS 6
-#define AO_SAMPLES 3
-#define AO_STRENGTH 2.5;
+#define AO_SAMPLES 6
+#define AO_STRENGTH 1.5;
 #define AO_MAX_RADIUS_PIXELS 50.0
 
-#define NOISE_RES 4
-
-#define MOVE_SPEED 3.5
-#define MOUSE_SPEED 9.5
-
-bool blur = false;
-bool fullres = true;
+#define NOISE_RES 64
 
 void HBAOTest::init(PerspectiveCamera* a_camera)
 {
@@ -76,35 +70,48 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	const uint screenHeight = GLEngine::graphics->getViewportHeight();
 
 	m_camera = a_camera;
-
-	m_camera = new PerspectiveCamera();
-	m_camera->initialize((float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight(), 90.0f, 0.5f, 1500.0f);
-
+	
+	m_keyDownListener.setFunc([this](EKey a_key) { keyDown(a_key); });
+	
 	m_building = new GLMesh();
 	m_building->loadFromFile(MODEL_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	m_dragon = new GLMesh();
 	m_dragon->loadFromFile(MODEL2_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
-	m_skybox = new GLMesh();
-	m_skybox->loadFromFile(SKYBOX_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
+	//m_skybox = new GLMesh();
+	//m_skybox->loadFromFile(SKYBOX_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 
 	m_geometryShader = new GLShader();
-	m_geometryShader->initialize("Shaders/HBAO/geometry_vert.glsl", "Shaders/HBAO/geometry_frag.glsl");
+	m_geometryShader->initialize("Shaders/modelshader.vert", "Shaders/modelshadersimple.frag");
+
+	m_geometryShader->begin();
+	m_geometryShader->setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
+	m_geometryShader->setUniform3f("u_ambient", glm::vec3(0.05f));
+	m_geometryShader->end();
+
 	m_hbaoFullShader = new GLShader();
 	m_hbaoFullShader->initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/hbao_full_frag.glsl");
+
+	m_blurXShader = new GLShader();
+	m_blurXShader->initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/blur_x_frag.glsl");
+
+	m_blurYShader = new GLShader();
+	m_blurYShader->initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/blur_y_frag.glsl");
 
 	m_fboFullRes = new GLFramebuffer();
 	m_fboFullRes->setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
 	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RGBA8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
-	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR1, screenWidth, screenHeight);
-	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR2, screenWidth, screenHeight);
 
-	m_keyDownListener.setFunc([this](EKey a_key) { keyDown(a_key); });
+	m_blurXFbo = new GLFramebuffer();
+	m_blurXFbo->addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
+	
+	m_blurYFbo = new GLFramebuffer();
+	m_blurYFbo->addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 
 	uint noiseTexWidth = NOISE_RES;
 	uint noiseTexHeight = NOISE_RES;
-	float *noise = new float[noiseTexWidth*noiseTexHeight * 4];
+	float *noise = new float[noiseTexWidth * noiseTexHeight * 4];
 	for (uint y = 0; y < noiseTexHeight; ++y)
 	{
 		for (uint x = 0; x < noiseTexWidth; ++x)
@@ -126,9 +133,10 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	m_noiseTexture->initialize(pixmap, 
 							   GLTexture::ETextureMinFilter::NEAREST, GLTexture::ETextureMagFilter::NEAREST,
 							   GLTexture::ETextureWrap::REPEAT, GLTexture::ETextureWrap::REPEAT);
-
+	
+	
 	float fovRad = m_camera->getVFov() * 3.14159265f / 180.0f;
-	glm::vec2 FocalLen, InvFocalLen, UVToViewA, UVToViewB, LinMAD, AORes, InvAORes;
+	glm::vec2 FocalLen, InvFocalLen, UVToViewA, UVToViewB, LinMAD, AORes, InvAORes, FullRes, InvFullRes;
 
 	FocalLen[0] = 1.0f / tanf(fovRad * 0.5f) * ((float)AO_HEIGHT / (float)AO_WIDTH);
 	FocalLen[1] = 1.0f / tanf(fovRad * 0.5f);
@@ -144,35 +152,69 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	LinMAD[0] = (near - far) / (2.0f*near*far);
 	LinMAD[1] = (near + far) / (2.0f*near*far);
 
-	AORes[0] = WIDTH;
-	AORes[1] = HEIGHT;
+	FullRes[0] = WIDTH;
+	FullRes[1] = HEIGHT;
 
-	InvAORes[0] = 1.0f / WIDTH;
-	InvAORes[1] = 1.0f / HEIGHT;
+	InvFullRes[0] = 1.0f / WIDTH;
+	InvFullRes[1] = 1.0f / HEIGHT;
+
+	AORes[0] = AO_WIDTH;
+	AORes[1] = AO_HEIGHT;
+
+	InvAORes[0] = 1.0f / AO_WIDTH;
+	InvAORes[1] = 1.0f / AO_HEIGHT;
 
 	float R = (float) AO_RADIUS;
 	float R2 = R * R;
 	float NegInvR2 = -1.0f / R2;
 	float MaxRadiusPixels = AO_MAX_RADIUS_PIXELS;
 
-	glm::vec2 NoiseScale((float) WIDTH / (float) NOISE_RES, (float) HEIGHT / (float) NOISE_RES);
+	glm::vec2 NoiseScale((float) AO_WIDTH / (float) NOISE_RES, (float) AO_HEIGHT / (float) NOISE_RES);
 	int NumDirections = AO_DIRS;
 	int NumSamples = AO_SAMPLES;
 
 	m_hbaoFullShader->begin();
+	m_hbaoFullShader->setUniform1i("texture0", 0);
+	m_hbaoFullShader->setUniform1i("texture1", 1);
+
 	m_hbaoFullShader->setUniform2f("FocalLen", FocalLen);
 	m_hbaoFullShader->setUniform2f("UVToViewA", UVToViewA);
 	m_hbaoFullShader->setUniform2f("UVToViewB", UVToViewB);
 	m_hbaoFullShader->setUniform2f("LinMAD", LinMAD);
+
 	m_hbaoFullShader->setUniform2f("AORes", AORes);
+	m_hbaoFullShader->setUniform2f("InvAORes", InvAORes);
+
 	m_hbaoFullShader->setUniform1f("R", R);
 	m_hbaoFullShader->setUniform1f("R2", R2);
 	m_hbaoFullShader->setUniform1f("NegInvR2", NegInvR2);
 	m_hbaoFullShader->setUniform1f("MaxRadiusPixels", MaxRadiusPixels);
+
 	m_hbaoFullShader->setUniform2f("NoiseScale", NoiseScale);
 	m_hbaoFullShader->setUniform1i("NumDirections", NumDirections);
 	m_hbaoFullShader->setUniform1i("NumSamples", NumSamples);
 	m_hbaoFullShader->end();
+
+	m_blurXShader->begin();
+	m_blurXShader->setUniform1i("texture0", 0);
+
+	m_blurXShader->setUniform2f("AORes", AORes);
+	m_blurXShader->setUniform2f("InvAORes", InvAORes);
+	m_blurXShader->setUniform2f("FullRes", FullRes);
+	m_blurXShader->setUniform2f("InvFullRes", InvFullRes);
+	m_blurXShader->setUniform2f("LinMAD", LinMAD);
+	m_blurXShader->end();
+
+	m_blurYShader->begin();
+	m_blurYShader->setUniform1i("texture0", 0);
+	m_blurYShader->setUniform1i("texture1", 1);
+
+	m_blurYShader->setUniform2f("AORes", AORes);
+	m_blurYShader->setUniform2f("InvAORes", InvAORes);
+	m_blurYShader->setUniform2f("FullRes", FullRes);
+	m_blurYShader->setUniform2f("InvFullRes", InvFullRes);
+	m_blurYShader->setUniform2f("LinMAD", LinMAD);
+	m_blurYShader->end();
 }
 
 void HBAOTest::render(float a_deltaSec)
@@ -180,31 +222,52 @@ void HBAOTest::render(float a_deltaSec)
 	// RENDER GEOMETRY PASS //
 	glEnable(GL_DEPTH_TEST);
 	m_fboFullRes->begin();
-
-	glClearColor(0.2f, 0.3f, 0.5f, 1.0f);
-	glClearDepth(1.0);
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	GLEngine::graphics->clear(glm::vec4(0.2f, 0.3f, 0.5f, 1.0f));
 
 	m_geometryShader->begin();
 	m_geometryShader->setUniformMatrix4f("u_viewMatrix", m_camera->getViewMatrix());
-	m_geometryShader->setUniformMatrix4f("u_projMatrix", m_camera->getProjectionMatrix());
+	m_geometryShader->setUniformMatrix4f("u_viewProjectionMatrix", m_camera->getCombinedMatrix());
+	m_geometryShader->setUniformMatrix3f("u_normalMatrix", glm::mat3(glm::inverse(glm::transpose(m_camera->getViewMatrix()))));
+	glm::mat4 transform(1);
 
+	transform[3] = glm::vec4(0.0f, -10.0f, -70.0f, 1.0f);
+	m_geometryShader->setUniformMatrix4f("u_modelMatrix", transform);
 	m_building->render(*m_geometryShader);
+
+	transform[3] = glm::vec4(0.0f, -7.0f, -58.0f, 1.0f);
+	m_geometryShader->setUniformMatrix4f("u_modelMatrix", transform);
 	m_dragon->render(*m_geometryShader);
 
 	m_geometryShader->end();
 	m_fboFullRes->end();
 
-	m_noiseTexture->bind(1);
-	m_fboFullRes->bindTextures();
-	m_fboFullRes->bindDepthTexture(0);
+	glDisable(GL_DEPTH_TEST);
 
 	// Apply HBAO //
+	m_fboFullRes->bindDepthTexture(0);
+	m_noiseTexture->bind(1);
+
+	m_blurXFbo->begin();
 	m_hbaoFullShader->begin();
-	glDisable(GL_DEPTH_TEST);
 	QuadDrawUtils::drawQuad(*m_hbaoFullShader);
 	m_hbaoFullShader->end();
+	m_blurXFbo->end();
 
+	// Blur X //
+	m_blurXFbo->bindTexture(0, 0);
+	m_blurYFbo->begin();
+	m_blurXShader->begin();
+	QuadDrawUtils::drawQuad(*m_blurXShader);
+	m_blurXShader->end();
+	m_blurYFbo->end();
+
+	// Blur Y and combine // 
+	m_blurYFbo->bindTexture(0, 0);
+	m_fboFullRes->bindTexture(0, 1);
+	m_blurYShader->begin();
+	QuadDrawUtils::drawQuad(*m_blurYShader);
+	m_blurYShader->end();
+	
 	GLEngine::graphics->swap();
 }
 
@@ -213,9 +276,7 @@ void HBAOTest::keyDown(EKey a_key)
 	switch (a_key)
 	{
 	case EKey::ESCAPE:
-	{
 		GLEngine::shutdown();
 		break;
-	}
 	}
 }

@@ -25,6 +25,9 @@ private:
 private:
 
 	GLFramebuffer* m_fboFullRes    = NULL;
+	GLFramebuffer* m_blurXFbo	   = NULL;
+	GLFramebuffer* m_blurYFbo	   = NULL;
+
 	GLMesh* m_dragon               = NULL;
 	GLMesh* m_building             = NULL;
 	GLMesh* m_skybox               = NULL;

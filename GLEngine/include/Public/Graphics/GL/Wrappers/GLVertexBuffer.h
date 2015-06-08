@@ -55,6 +55,7 @@ public:
 	void upload(uint numBytes, const void* data = 0);
 	void bind();
 	void setVertexAttributes(uint numAttributes, VertexAttribute* attributes);
+	bool isInitialized() const { return m_initialized; }
 
 private:
 

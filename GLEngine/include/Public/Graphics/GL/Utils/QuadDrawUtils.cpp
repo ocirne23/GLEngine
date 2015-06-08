@@ -1,41 +1,86 @@
 #include "Graphics/GL/Utils/QuadDrawUtils.h"
 
 #include "Core.h"
+#include "Graphics/GL/GL.h"
 
-BEGIN_UNNAMED_NAMESPACE()
-
-static const char* const QUAD_VERT_SHADER_PATH = "da";
-static const char* const QUAD_FRAG_SHADER_PATH = "da";
-
-END_UNNAMED_NAMESPACE()
-
-GLShader QuadDrawUtils::m_quadShader;
+GLShader QuadDrawUtils::s_quadShader;
+GLVertexBuffer QuadDrawUtils::s_vertexBuffer;
+GLVertexBuffer QuadDrawUtils::s_indiceBuffer;
+GLStateBuffer QuadDrawUtils::s_stateBuffer;
 
 void QuadDrawUtils::drawQuad()
 {
-	if (!m_quadShader.isInitialized())
-		initShader();
-	m_quadShader.begin();
-	// draw
-	m_quadShader.end();
+	if (!s_vertexBuffer.isInitialized())
+		initBuffers();
+	if (!s_quadShader.isInitialized())
+		initQuadShader();
+
+	s_quadShader.begin();
+	s_stateBuffer.begin();
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL);
+	s_stateBuffer.end();
+	s_quadShader.end();
 }
 
-void QuadDrawUtils::drawQuad(GLShader& shader)
+void QuadDrawUtils::drawQuad(GLShader& a_shader)
 {
-	assert(shader.isInitialized());
-	if (!shader.isBegun())
+	if (!s_vertexBuffer.isInitialized())
+		initBuffers();
+
+	assert(a_shader.isInitialized());
+	s_stateBuffer.begin();
+	if (!a_shader.isBegun())
 	{
-		shader.begin();
-		// draw
-		shader.end();
+		a_shader.begin();
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL);
+		a_shader.end();
 	}
 	else
 	{
-		// draw
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL);
 	}
+	s_stateBuffer.end();
 }
 
-void QuadDrawUtils::initShader()
+void QuadDrawUtils::initBuffers()
 {
-	//m_quadShader.initialize()
+	float quad[] =
+	{ // Position				Texcoords
+		-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,		1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f,		1.0f, 1.0f,
+		-1.0f, 1.0f, 0.0f,		0.0f, 1.0f
+	};
+
+	byte indices[] =
+	{
+		0, 1, 2,
+		0, 2, 3
+	};
+
+	VertexAttribute attributes[] =
+	{
+		{0, "POSITION", VertexAttribute::EFormat::FLOAT, 3},
+		{1, "TEXCOORDS", VertexAttribute::EFormat::FLOAT, 2}
+	};
+
+	s_stateBuffer.initialize();
+	s_stateBuffer.begin();
+
+	s_vertexBuffer.initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
+	s_vertexBuffer.setVertexAttributes(ARRAY_SIZE(attributes), attributes);
+	s_vertexBuffer.upload(sizeof(quad), quad);
+
+	s_indiceBuffer.initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
+	s_indiceBuffer.upload(sizeof(indices), indices);
+
+	s_stateBuffer.end();
+}
+
+void QuadDrawUtils::initQuadShader()
+{
+	s_quadShader.initialize("Shaders/quad.vert", "Shaders/quad.frag");
+	s_quadShader.begin();
+	s_quadShader.setUniform1i("u_tex", 0);
+	s_quadShader.end();
 }

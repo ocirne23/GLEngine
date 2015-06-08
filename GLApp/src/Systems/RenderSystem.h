@@ -82,6 +82,4 @@ private:
 	GLUniform<glm::mat4> m_skyboxViewMatrixUniform;
 	GLUniform<glm::mat4> m_skyboxMvpMatrixUniform;
 	GLUniform<glm::mat4> m_skyboxTransformUniform;
-
-	GLFramebuffer m_ssaoFrameBuffer;
 };

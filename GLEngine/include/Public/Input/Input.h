@@ -70,7 +70,7 @@ private:
 
 #define LISTENERS_GET(TYPE, LISTNAME) \
 	friend class TYPE; \
-	rde::vector<TYPE*>& getListeners(const TYPE& a_listener) { print(#LISTNAME); return LISTNAME;} \
+	rde::vector<TYPE*>& getListeners(const TYPE& a_listener) { return LISTNAME;} \
 	rde::vector<TYPE*> LISTNAME;
 
 	LISTENERS_GET(KeyDownListener, m_keyDownListeners);

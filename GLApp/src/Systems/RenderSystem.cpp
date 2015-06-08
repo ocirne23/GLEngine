@@ -83,10 +83,10 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
 	m_modelShader.setUniform3f("u_ambient", AMBIENT);
 
-	m_viewMatrixUniform.initialize(m_modelShader, "u_mv");
-	m_mvpMatrixUniform.initialize(m_modelShader, "u_mvp");
-	m_normalMatrixUniform.initialize(m_modelShader, "u_normalMat");
-	m_transformUniform.initialize(m_modelShader, "u_transform");
+	m_viewMatrixUniform.initialize(m_modelShader, "u_viewMatrix");
+	m_mvpMatrixUniform.initialize(m_modelShader, "u_viewProjectionMatrix");
+	m_normalMatrixUniform.initialize(m_modelShader, "u_normalMatrix");
+	m_transformUniform.initialize(m_modelShader, "u_modelMatrix");
 
 	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GLConstantBuffer::EDrawUsage::STREAM);
 	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GLConstantBuffer::EDrawUsage::STREAM);
@@ -103,22 +103,12 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_skyboxShader.begin();
 	m_skyboxShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
 
-	m_skyboxViewMatrixUniform.initialize(m_skyboxShader, "u_mv");
-	m_skyboxMvpMatrixUniform.initialize(m_skyboxShader, "u_mvp");
-	m_skyboxNormalMatrixUniform.initialize(m_skyboxShader, "u_normalMat");
-	m_skyboxTransformUniform.initialize(m_skyboxShader, "u_transform");
+	m_skyboxViewMatrixUniform.initialize(m_skyboxShader, "u_viewMatrix");
+	m_skyboxMvpMatrixUniform.initialize(m_skyboxShader, "u_viewProjectionMatrix");
+	m_skyboxNormalMatrixUniform.initialize(m_skyboxShader, "u_normalMatrix");
+	m_skyboxTransformUniform.initialize(m_skyboxShader, "u_modelMatrix");
 
 	m_skyboxShader.end();
-
-	m_ssaoFrameBuffer.addFramebufferTexture(
-		GLFramebuffer::ESizedFormat::RGB8, 
-		GLFramebuffer::EAttachment::COLOR0, 
-		GLEngine::graphics->getViewportWidth(), 
-		GLEngine::graphics->getViewportHeight());
-	m_ssaoFrameBuffer.setDepthbufferTexture(
-		GLFramebuffer::ESizedFormat::DEPTH24,
-		GLEngine::graphics->getViewportWidth(),
-		GLEngine::graphics->getViewportHeight());
 }
 
 void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a_cameraComponentAddedEvent)
@@ -137,8 +127,6 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		GLEngine::graphics->swap();
 		return;
 	}
-
-	//m_ssaoFrameBuffer.begin();
 
 	const PerspectiveCamera& camera = *m_activeCamera;
 	const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
@@ -194,7 +182,6 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	}
 	m_modelShader.end();
 
-	//m_ssaoFrameBuffer.end();
 
 	GLEngine::graphics->swap();
 }

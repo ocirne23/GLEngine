@@ -29,10 +29,6 @@ FPSControlSystem::FPSControlSystem()
 			m_yMoveAmount += deltaY;
 		}
 	});
-
-	m_windowQuitListener.setFunc([this]() {
-		GLEngine::shutdown();
-	});
 }
 
 FPSControlSystem::~FPSControlSystem()

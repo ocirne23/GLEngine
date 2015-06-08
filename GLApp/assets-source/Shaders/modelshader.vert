@@ -5,10 +5,10 @@ layout(location = 3) in vec3 in_tangent;
 layout(location = 4) in vec3 in_bitangent;
 layout(location = 5) in uint in_materialID;
 
-uniform mat4 u_mvp;
-uniform mat4 u_mv;
-uniform mat3 u_normalMat;
-uniform mat4 u_transform;
+uniform mat4 u_viewProjectionMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat3 u_normalMatrix;
+uniform mat4 u_modelMatrix;
 
 out vec3 v_position;
 out vec2 v_texcoord;
@@ -19,13 +19,13 @@ flat out uint v_materialID;
 
 void main()
 {
-	vec4 pos = u_transform * vec4(in_position, 1.0);
-	gl_Position = u_mvp * pos;
+	vec4 pos = u_modelMatrix * vec4(in_position, 1.0);
+	gl_Position = u_viewProjectionMatrix * pos;
 	
-	v_position	= (u_mv * pos).xyz;
+	v_position	= (u_viewMatrix * pos).xyz;
 	v_texcoord	= in_texcoord;
-	v_normal	= normalize(u_normalMat * in_normal);
-	v_tangent	= normalize(u_normalMat * in_tangent);
-	v_bitangent = normalize(u_normalMat * in_bitangent);
+	v_normal	= normalize(u_normalMatrix * in_normal);
+	v_tangent	= normalize(u_normalMatrix * in_tangent);
+	v_bitangent = normalize(u_normalMatrix * in_bitangent);
 	v_materialID = in_materialID;
 }
