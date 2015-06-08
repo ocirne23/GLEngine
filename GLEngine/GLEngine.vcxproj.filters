@@ -528,6 +528,7 @@
     <ClInclude Include="include\Public\HBAO\HBAOTest.h">
       <Filter>Header Files\Public\HBAO</Filter>
     </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Tech\HBAOPlus.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

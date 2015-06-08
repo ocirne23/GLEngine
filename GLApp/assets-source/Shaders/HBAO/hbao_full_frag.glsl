@@ -1,4 +1,6 @@
 const float PI = 3.14159265;
+const float BIAS = 30.0;
+const float TanBias = tan(BIAS * PI / 180.0);
 
 uniform sampler2D texture0;
 uniform sampler2D texture1;
@@ -7,21 +9,20 @@ uniform vec2 FocalLen;
 uniform vec2 UVToViewA;
 uniform vec2 UVToViewB;
 
-uniform vec2 LinMAD;// = vec2(0.1-10.0, 0.1+10.0) / (2.0*0.1*10.0);
+uniform vec2 LinMAD;
 
-uniform vec2 AORes = vec2(1024.0, 768.0);
-uniform vec2 InvAORes = vec2(1.0/1024.0, 1.0/768.0);
-uniform vec2 NoiseScale = vec2(1024.0, 768.0) / 4.0;
+uniform vec2 AORes;
+uniform vec2 InvAORes;
+uniform vec2 NoiseScale;
 
-uniform float AOStrength = 1.9;
-uniform float R = 0.3;
-uniform float R2 = 0.3*0.3;
-uniform float NegInvR2 = - 1.0 / (0.3*0.3);
-uniform float TanBias = tan(30.0 * PI / 180.0);
-uniform float MaxRadiusPixels = 100.0;
+uniform float AOStrength;
+uniform float R;
+uniform float R2;
+uniform float NegInvR2;
+uniform float MaxRadiusPixels;
 
-uniform int NumDirections = 6;
-uniform int NumSamples = 4;
+uniform int NumDirections;
+uniform int NumSamples;
 
 in vec2 TexCoord;
 in vec2 Position;
@@ -239,5 +240,5 @@ void main(void)
 		ao = 1.0 - ao / numDirections * AOStrength;
 	}
 
-	out_frag0 = vec2(ao, 30.0 * P.z);
+	out_frag0 = vec2(ao, BIAS * P.z);
 }

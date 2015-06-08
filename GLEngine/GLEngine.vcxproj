@@ -95,6 +95,7 @@
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\HBAOPlus.h" />
     <ClInclude Include="include\Public\HBAO\HBAOTest.h" />
     <ClInclude Include="include\Public\Input\InputListener.h" />
     <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h" />

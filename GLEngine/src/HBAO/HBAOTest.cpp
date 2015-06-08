@@ -56,11 +56,11 @@ END_NAMESPACE(TextureUnits)
 #define RES_RATIO 1
 #define AO_WIDTH (WIDTH/RES_RATIO)
 #define AO_HEIGHT (HEIGHT/RES_RATIO)
-#define AO_RADIUS 1.0
+#define AO_RADIUS 1.5
 #define AO_DIRS 6
 #define AO_SAMPLES 6
 #define AO_STRENGTH 1.5;
-#define AO_MAX_RADIUS_PIXELS 50.0
+#define AO_MAX_RADIUS_PIXELS 25.0
 
 #define NOISE_RES 64
 
@@ -100,7 +100,7 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	m_blurYShader->initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/blur_y_frag.glsl");
 
 	m_fboFullRes = new GLFramebuffer();
-	m_fboFullRes->setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
+	m_fboFullRes->setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH32, screenWidth, screenHeight);
 	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RGBA8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 
 	m_blurXFbo = new GLFramebuffer();
@@ -164,6 +164,7 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	InvAORes[0] = 1.0f / AO_WIDTH;
 	InvAORes[1] = 1.0f / AO_HEIGHT;
 
+	float AOStrength = AO_STRENGTH;
 	float R = (float) AO_RADIUS;
 	float R2 = R * R;
 	float NegInvR2 = -1.0f / R2;
@@ -185,6 +186,7 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	m_hbaoFullShader->setUniform2f("AORes", AORes);
 	m_hbaoFullShader->setUniform2f("InvAORes", InvAORes);
 
+	m_hbaoFullShader->setUniform1f("AOStrength", AOStrength);
 	m_hbaoFullShader->setUniform1f("R", R);
 	m_hbaoFullShader->setUniform1f("R2", R2);
 	m_hbaoFullShader->setUniform1f("NegInvR2", NegInvR2);
