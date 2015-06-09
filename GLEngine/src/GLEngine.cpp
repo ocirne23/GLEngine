@@ -19,7 +19,7 @@ void GLEngine::initialize()
 		SDL_Quit();
 		return;
 	}
-	graphics = new Graphics("GLEngine", 1280, 720, 25, 40); // TODO: move construction args to app
+	graphics = new Graphics("GLEngine", 1900, 1000, 10, 30); // TODO: move construction args to app
 	input = new Input();
 }
 

@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Screens\HBAOTestScreen.cpp" />
     <ClCompile Include="src\Components\PointLightComponent.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Screens\TestScreen.cpp" />
@@ -29,7 +28,6 @@
     <ClCompile Include="src\Systems\RenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Screens\HBAOTestScreen.h" />
     <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h" />
     <ClInclude Include="src\AppUtils\FPSMeasurer.h" />
     <ClInclude Include="src\Components\CameraComponent.h" />

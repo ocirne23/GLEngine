@@ -166,9 +166,6 @@
     <ClCompile Include="src\Utils\GLTestScreenImpl.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\HBAO\HBAOTest.cpp">
-      <Filter>Source Files\HBAO</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp">
       <Filter>Source Files\Graphics\GL\Tech</Filter>
     </ClCompile>
@@ -528,9 +525,6 @@
     <ClInclude Include="include\Public\Input\InputListener.h">
       <Filter>Header Files\Public\Input</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\HBAO\HBAOTest.h">
-      <Filter>Header Files\Public\HBAO</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h">
       <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
     </ClInclude>
@@ -649,12 +643,6 @@
     </Filter>
     <Filter Include="Header Files\Public\Graphics\GL\Utils">
       <UniqueIdentifier>{73dac75e-0b94-4c95-bd09-651aa6c7a93d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\HBAO">
-      <UniqueIdentifier>{13e0e475-d04a-4789-80e1-535fd2e998d7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\HBAO">
-      <UniqueIdentifier>{008be6ea-6568-4291-b17e-394da1f99110}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -17,6 +17,8 @@
 #include "Systems/LightSystem.h"
 #include "Systems/RenderSystem.h"
 
+#include <glm/gtc/random.hpp>
+
 BEGIN_UNNAMED_NAMESPACE()
 
 static const char* const MODEL_FILE_PATH = "Models/palace/palace.obj.da";
@@ -36,7 +38,7 @@ TestScreen::TestScreen()
 	m_entityx.systems.configure();
 
 	m_camera = new PerspectiveCamera();
-	m_camera->initialize((float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight(), 90.0f, 0.5f, 1500.0f);
+	m_camera->initialize((float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight(), 90.0f, 0.5f, 1000.0f);
 
 	m_building = new GLMesh();
 	m_building->loadFromFile(MODEL_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
@@ -80,16 +82,6 @@ TestScreen::~TestScreen()
 
 void TestScreen::render(float a_deltaSec)
 {
-	/*
-	int lightAnimationOffset = 0;
-	entityx::ComponentHandle<PointLightComponent> light;
-	for (entityx::Entity e : m_entityx.entities.entities_with_components(light))
-	{   // Some semi random light values
-		light->setRadius(2.0f + 20.0f * (((GLEngine::getTimeMs() + lightAnimationOffset * 12345) % 1000) / 1000.0f));
-		light->setIntensity(2.0f + 80.0f * (((GLEngine::getTimeMs() + lightAnimationOffset * 54321) % 10000) / 10000.0f));
-		++lightAnimationOffset;
-	}
-	*/
 	m_entityx.systems.update<FPSControlSystem>(a_deltaSec);
 	m_entityx.systems.update<CameraSystem>(a_deltaSec);
 	m_entityx.systems.update<LightSystem>(a_deltaSec);
@@ -103,9 +95,9 @@ void TestScreen::keyDown(EKey a_key)
 	case EKey::T:
 	{
 		glm::vec3 position = m_camera->getPosition() + m_camera->getDirection();
-		glm::vec3 color = glm::normalize(glm::vec3((rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f, (rand() % 1000) / 1000.0f));
-		float intensity = 20.0f * ((rand() % 1000) / 1000.0f) + 1.0f;
-		float radius = 20.0f * ((rand() % 1000) / 1000.0f) + 1.0f;
+		glm::vec3 color = glm::normalize(glm::linearRand(glm::vec3(0), glm::vec3(1)));
+		float intensity = glm::linearRand(5.0f, 10.0f);
+		float radius = glm::linearRand(10.0f, 20.0f);
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
 		break;

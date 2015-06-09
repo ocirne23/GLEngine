@@ -19,13 +19,13 @@ BEGIN_UNNAMED_NAMESPACE()
 
 static const char* DFV_TEX_PATH = "Utils/ggx-helper-dfv.hdr.da";
 static const char* CLUSTERED_SHADING_PATH = "Shaders/clusteredshading.glsl";
-static const char* MATERIAL_LIGHTING_PATH = "Shaders/materiallighting.glsl";
+static const char* MATERIAL_LIGHTING_PATH = "Shaders/material.glsl";
 static const char* MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
 static const char* MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
 static const char* SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
 
-static const unsigned int TILE_WIDTH_PX  = 32;
-static const unsigned int TILE_HEIGHT_PX = 32;
+static const unsigned int TILE_WIDTH_PX  = 64;
+static const unsigned int TILE_HEIGHT_PX = 64;
 
 static const glm::vec3 AMBIENT(0.05f);
 
@@ -109,7 +109,7 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 
 	m_skyboxShader.end();
 
-	m_hbao.initialize(camera);
+	m_hbao.initialize(camera, UBOBindingPoints::HBAO_GLOBALS_UBO_BINDING_POINT);
 }
 
 void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a_cameraComponentAddedEvent)

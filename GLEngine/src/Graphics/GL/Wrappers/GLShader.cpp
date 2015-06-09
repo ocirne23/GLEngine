@@ -21,18 +21,6 @@ rde::string getVersionStr()
 	return rde::string("#version 330\n");
 }
 
-rde::string getSystemDefines()
-{
-	rde::string str;
-	if (rde::string(GLVars::getVendorStr()).find("NVIDIA") != rde::string::npos
-		&& GLVars::getGLMajorVersion() >= 4
-		&& GLVars::getGLMinorVersion() >= 2)
-	{
-		str.append("#define ").append(rde::string("GLE_DYNAMIC_INDEXING")).append("\n");
-	}
-	return str;
-}
-
 rde::string processIncludes(const rde::string& a_str)
 {
 	rde::string src = a_str;
@@ -60,7 +48,7 @@ void checkProgramForErrors(const GLuint a_program)
 	glGetProgramiv(a_program, GL_LINK_STATUS, &success);
 	if (success != GL_TRUE)
 	{
-		print("Shader program was not linked.!\n");
+		print("Shader program was not linked!\n");
 	}
 
 	glGetProgramiv(a_program, GL_LINK_STATUS, &success);
@@ -76,17 +64,17 @@ void checkProgramForErrors(const GLuint a_program)
 		}
 		else
 		{
-			print("link error, no info log available \n");
+			print("link error, no info log available\n");
 		}
 	}
 
 	glValidateProgram(a_program);
 	glGetProgramiv(a_program, GL_VALIDATE_STATUS, &success);
 	if (success != GL_TRUE)
-		print("Shader program was not validated.!\n");
+		print("Shader program was not validated!\n");
 
 	if (!glIsProgram(a_program))
-		print("failed to create shader \n");
+		print("failed to create shader!\n");
 }
 
 void checkShaderForErrors(const GLuint a_shader, const GLenum a_shaderType, const char* a_source)
@@ -123,7 +111,6 @@ void checkShaderForErrors(const GLuint a_shader, const GLenum a_shaderType, cons
 rde::string preprocessShaderFile(const char* a_shaderFilePath, const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
 {
 	rde::string contents = getVersionStr();						// #version xxx at top
-	contents.append(getSystemDefines());						// add generic defines
 	if (a_defines)												// add user defines
 		for (const rde::string& str : *a_defines)
 			contents.append("#define ").append(str).append("\n");

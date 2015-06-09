@@ -13,12 +13,40 @@
 BEGIN_UNNAMED_NAMESPACE()
 
 static const float RES_RATIO = 1.0f;
-static const float AO_RADIUS = 1.0f;
+static const float AO_RADIUS = 1.5f;
 static const uint AO_DIRS = 6;
 static const uint AO_SAMPLES = 6;
 static const float AO_STRENGTH = 1.5f;
-static const float AO_MAX_RADIUS_PIXELS = 25.0f;
-static const uint NOISE_RES = 64;
+static const float AO_ANGLE_BIAS_DEG = 30.0f;
+static const uint NOISE_RES = 8;
+
+struct HBAOGlobals
+{
+	glm::vec2 fullResolution;
+	glm::vec2 invFullResolution;
+
+	glm::vec2 aoResolution;
+	glm::vec2 invAOResolution;
+
+	glm::vec2 focalLen;
+	glm::vec2 invFocalLen;
+
+	glm::vec2 uvToViewA;
+	glm::vec2 uvToViewB;
+
+	float r;
+	float r2;
+	float negInvR2;
+	float maxRadiusPixels;
+
+	float angleBias;
+	float tanAngleBias;
+	float strength;
+	float dummy;
+
+	glm::vec2 noiseTexScale;
+	glm::vec2 ndcDepthConv;
+};
 
 END_UNNAMED_NAMESPACE()
 
@@ -27,16 +55,16 @@ HBAO::~HBAO()
 
 }
 
-void HBAO::initialize(const PerspectiveCamera& a_camera)
+void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_hbaoGlobalsUBOBindingPoint)
 {
 	const uint screenWidth = GLEngine::graphics->getViewportWidth();
 	const uint screenHeight = GLEngine::graphics->getViewportHeight();
 	const float aoWidth = screenWidth / RES_RATIO;
 	const float aoHeight = screenHeight / RES_RATIO;
 
-	m_hbaoFullShader.initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/hbao_full_frag.glsl");
-	m_blurXShader.initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/blur_x_frag.glsl");
-	m_blurYShader.initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/blur_y_frag.glsl");
+	m_hbaoFullShader.initialize("Shaders/quad.vert", "Shaders/HBAO/HBAO.frag");
+	m_blurXShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blurx.frag");
+	m_blurYShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blury.frag");
 
 	m_fboFullRes.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
 	m_fboFullRes.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
@@ -54,7 +82,7 @@ void HBAO::initialize(const PerspectiveCamera& a_camera)
 			float z = glm::linearRand(0.0f, 1.0f);
 			float w = glm::linearRand(0.0f, 1.0f);
 
-			int offset = 4 * (y*noiseTexWidth + x);
+			int offset = 4 * (y * noiseTexWidth + x);
 			noise[offset + 0] = xy[0];
 			noise[offset + 1] = xy[1];
 			noise[offset + 2] = z;
@@ -68,83 +96,52 @@ void HBAO::initialize(const PerspectiveCamera& a_camera)
 		GLTexture::ETextureMinFilter::NEAREST, GLTexture::ETextureMagFilter::NEAREST,
 		GLTexture::ETextureWrap::REPEAT, GLTexture::ETextureWrap::REPEAT);
 
-	float fovRad = a_camera.getVFov() * 3.14159265f / 180.0f;
-	glm::vec2 FocalLen, InvFocalLen, UVToViewA, UVToViewB, LinMAD, AORes, InvAORes, FullRes, InvFullRes;
+	float fovRad = glm::radians(a_camera.getVFov());
+	float near = a_camera.getNear();
+	float far = a_camera.getFar();
 
-	FocalLen[0] = 1.0f / tanf(fovRad * 0.5f) * ((float) aoHeight / (float) aoWidth);
-	FocalLen[1] = 1.0f / tanf(fovRad * 0.5f);
-	InvFocalLen[0] = 1.0f / FocalLen[0];
-	InvFocalLen[1] = 1.0f / FocalLen[1];
-
-	UVToViewA[0] = -2.0f * InvFocalLen[0];
-	UVToViewA[1] = -2.0f * InvFocalLen[1];
-	UVToViewB[0] = 1.0f * InvFocalLen[0];
-	UVToViewB[1] = 1.0f * InvFocalLen[1];
-
-	float near = a_camera.getNear(), far = a_camera.getFar();
-	LinMAD[0] = (near - far) / (2.0f*near*far);
-	LinMAD[1] = (near + far) / (2.0f*near*far);
-
-	FullRes[0] = (float) screenWidth;
-	FullRes[1] = (float) screenHeight;
-
-	InvFullRes[0] = 1.0f / screenWidth;
-	InvFullRes[1] = 1.0f / screenHeight;
-
-	AORes[0] = aoWidth;
-	AORes[1] = aoHeight;
-
-	InvAORes[0] = 1.0f / aoWidth;
-	InvAORes[1] = 1.0f / aoHeight;
-
-	float AOStrength = AO_STRENGTH;
-	float R = (float)AO_RADIUS;
-	float R2 = R * R;
-	float NegInvR2 = -1.0f / R2;
-	float MaxRadiusPixels = AO_MAX_RADIUS_PIXELS;
-
-	glm::vec2 NoiseScale((float) aoWidth / (float) NOISE_RES, (float)aoHeight / (float) NOISE_RES);
-	int NumDirections = AO_DIRS;
-	int NumSamples = AO_SAMPLES;
+	HBAOGlobals globals;
+	globals.fullResolution    = glm::vec2(screenWidth, screenHeight);
+	globals.invFullResolution = 1.0f / globals.fullResolution;
+	globals.aoResolution      = glm::vec2(aoWidth, aoHeight);
+	globals.invAOResolution   = 1.0f / globals.aoResolution;
+	globals.focalLen.x        = 1.0f / tanf(fovRad * 0.5f) * (aoHeight / aoWidth);
+	globals.focalLen.y        = 1.0f / tanf(fovRad * 0.5f);
+	globals.invFocalLen       = 1.0f / globals.focalLen;
+	globals.uvToViewA = -2.0f * globals.invFocalLen;
+	globals.uvToViewB = 1.0f * globals.invFocalLen;
+	globals.r                 = AO_RADIUS;
+	globals.r2                = globals.r * globals.r;
+	globals.negInvR2          = -1.0f / globals.r2;
+	globals.maxRadiusPixels   = 0.1f * glm::min(globals.fullResolution.x, globals.fullResolution.y);
+	globals.angleBias         = glm::radians(AO_ANGLE_BIAS_DEG);
+	globals.tanAngleBias      = tanf(globals.angleBias);
+	globals.strength          = AO_STRENGTH;
+	globals.dummy             = 0.0f;
+	globals.noiseTexScale     = glm::vec2(screenWidth / (float) noiseTexWidth, screenHeight / (float) noiseTexHeight);
+	globals.ndcDepthConv.x    = (near - far) / (2.0f * near * far);
+	globals.ndcDepthConv.y    = (near + far) / (2.0f * near * far);
 
 	m_hbaoFullShader.begin();
-	m_hbaoFullShader.setUniform1i("texture0", 0);
-	m_hbaoFullShader.setUniform1i("texture1", 1);
-	m_hbaoFullShader.setUniform2f("FocalLen", FocalLen);
-	m_hbaoFullShader.setUniform2f("UVToViewA", UVToViewA);
-	m_hbaoFullShader.setUniform2f("UVToViewB", UVToViewB);
-	m_hbaoFullShader.setUniform2f("LinMAD", LinMAD);
-	m_hbaoFullShader.setUniform2f("AORes", AORes);
-	m_hbaoFullShader.setUniform2f("InvAORes", InvAORes);
-	m_hbaoFullShader.setUniform1f("AOStrength", AOStrength);
-	m_hbaoFullShader.setUniform1f("R", R);
-	m_hbaoFullShader.setUniform1f("R2", R2);
-	m_hbaoFullShader.setUniform1f("NegInvR2", NegInvR2);
-	m_hbaoFullShader.setUniform1f("MaxRadiusPixels", MaxRadiusPixels);
-	m_hbaoFullShader.setUniform2f("NoiseScale", NoiseScale);
-	m_hbaoFullShader.setUniform1i("NumDirections", NumDirections);
-	m_hbaoFullShader.setUniform1i("NumSamples", NumSamples);
+	m_hbaoFullShader.setUniform1i("u_linearDepthTex", 0);
+	m_hbaoFullShader.setUniform1i("u_randomTex", 1);
 	m_hbaoFullShader.end();
 
 	m_blurXShader.begin();
-	m_blurXShader.setUniform1i("texture0", 0);
-	m_blurXShader.setUniform2f("AORes", AORes);
-	m_blurXShader.setUniform2f("InvAORes", InvAORes);
-	m_blurXShader.setUniform2f("FullRes", FullRes);
-	m_blurXShader.setUniform2f("InvFullRes", InvFullRes);
-	m_blurXShader.setUniform2f("LinMAD", LinMAD);
+	m_blurXShader.setUniform1i("u_aoDepthTex", 0);
+	m_blurXShader.setUniform2f("u_invFullRes", globals.invFullResolution);
 	m_blurXShader.end();
 
 	m_blurYShader.begin();
-	m_blurYShader.setUniform1i("texture0", 0);
-	m_blurYShader.setUniform1i("texture1", 1);
-	m_blurYShader.setUniform2f("AORes", AORes);
-	m_blurYShader.setUniform2f("InvAORes", InvAORes);
-	m_blurYShader.setUniform2f("FullRes", FullRes);
-	m_blurYShader.setUniform2f("InvFullRes", InvFullRes);
-	m_blurYShader.setUniform2f("LinMAD", LinMAD);
+	m_blurYShader.setUniform1i("u_aoDepthTex", 0);
+	m_blurYShader.setUniform1i("u_colorTex", 1);
+	m_blurYShader.setUniform2f("u_invFullRes", globals.invFullResolution);
 	m_blurYShader.end();
 
+	m_hbaoFullShader.begin();
+	m_hbaoGlobalsBuffer.initialize(m_hbaoFullShader, a_hbaoGlobalsUBOBindingPoint, "HBAOGlobals", GLConstantBuffer::EDrawUsage::STATIC);
+	m_hbaoGlobalsBuffer.upload(sizeof(HBAOGlobals), &globals);
+	m_hbaoFullShader.end();
 	m_isInitialized = true;
 }
 
@@ -163,10 +160,15 @@ void HBAO::endAndRender()
 	m_fboFullRes.bindDepthTexture(0);
 	m_noiseTexture.bind(1);
 
+#define BLUR
+#ifdef BLUR
 	m_blurXFbo.begin();
+#endif
 	m_hbaoFullShader.begin();
+	m_hbaoGlobalsBuffer.bind();
 	QuadDrawUtils::drawQuad(m_hbaoFullShader);
 	m_hbaoFullShader.end();
+#ifdef BLUR
 	m_blurXFbo.end();
 	
 	// Blur X //
@@ -183,4 +185,5 @@ void HBAO::endAndRender()
 	m_blurYShader.begin();
 	QuadDrawUtils::drawQuad(m_blurYShader);
 	m_blurYShader.end();
+#endif
 }

@@ -47,7 +47,6 @@
     <ClCompile Include="src\Graphics\LightManager.cpp" />
     <ClCompile Include="src\Graphics\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Graphics\Pixmap.cpp" />
-    <ClCompile Include="src\HBAO\HBAOTest.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
@@ -97,7 +96,6 @@
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
-    <ClInclude Include="include\Public\HBAO\HBAOTest.h" />
     <ClInclude Include="include\Public\Input\InputListener.h" />
     <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />

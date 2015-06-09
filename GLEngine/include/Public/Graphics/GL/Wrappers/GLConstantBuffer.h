@@ -22,6 +22,7 @@ public:
 	~GLConstantBuffer();
 	GLConstantBuffer(const GLConstantBuffer& copy) = delete;
 
+	void initialize(const GLShader** shaders, uint numShaders, uint bindingPoint, const char* blockName, EDrawUsage drawUsage);
 	void initialize(const GLShader& shader, uint bindingPoint, const char* blockName, EDrawUsage drawUsage);
 	void upload(uint numBytes, const void* data);
 	void bind();
@@ -29,9 +30,7 @@ public:
 private:
 
 	bool m_initialized       = false;
-	const GLShader* m_shader = NULL;
 	EDrawUsage m_drawUsage   = EDrawUsage::DYNAMIC;
 	uint m_ubo               = 0;
 	uint m_bindingPoint      = 0;
-	uint m_uboIndex          = 0;
 };

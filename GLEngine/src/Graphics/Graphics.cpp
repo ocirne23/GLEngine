@@ -17,22 +17,15 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 #ifdef ENABLE_ARB_DEBUG_OUTPUT
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
 	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
 	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
-	if (!m_window)
-	{
-		print("Unable to create window: %s\n", SDL_GetError());
-	}
-	/*
-#ifdef WINDOWS
-	WindowsPlatformData::setWindowHandle(m_window);
-#endif
-	*/
 }
 
 Graphics::~Graphics()
@@ -67,7 +60,7 @@ void Graphics::createGLContext()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glEnable(GL_MULTISAMPLE);
-	setDepthTest(true);
+	glEnable(GL_DEPTH_TEST);
 
 	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
 	glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
@@ -89,7 +82,6 @@ void Graphics::createGLContext()
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)
 {
 	CHECK_GL_ERROR();
-
 	glClearColor(a_color.r, a_color.g, a_color.b, a_color.a);
 	uint clearFlags = 0;
 	if (a_clearColor)
