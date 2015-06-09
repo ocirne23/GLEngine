@@ -26,9 +26,9 @@ public:
 	void receive(const entityx::ComponentRemovedEvent<PointLightComponent>& pointLightComponentRemovedEvent);
 
 	LightManager& getLightManager();
-	uint getNumLights();
-	const glm::vec4* getViewspaceLightPositionRangeList();
-	const glm::vec4* getLightColorIntensityList();
+	uint getNumLights() const;
+	const glm::vec4* getViewspaceLightPositionRangeList() const;
+	const glm::vec4* getLightColorIntensityList() const;
 
 private:
 

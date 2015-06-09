@@ -80,6 +80,7 @@ TestScreen::~TestScreen()
 
 void TestScreen::render(float a_deltaSec)
 {
+	/*
 	int lightAnimationOffset = 0;
 	entityx::ComponentHandle<PointLightComponent> light;
 	for (entityx::Entity e : m_entityx.entities.entities_with_components(light))
@@ -88,6 +89,7 @@ void TestScreen::render(float a_deltaSec)
 		light->setIntensity(2.0f + 80.0f * (((GLEngine::getTimeMs() + lightAnimationOffset * 54321) % 10000) / 10000.0f));
 		++lightAnimationOffset;
 	}
+	*/
 	m_entityx.systems.update<FPSControlSystem>(a_deltaSec);
 	m_entityx.systems.update<CameraSystem>(a_deltaSec);
 	m_entityx.systems.update<LightSystem>(a_deltaSec);
@@ -115,6 +117,11 @@ void TestScreen::keyDown(EKey a_key)
 			e.component<PointLightComponent>().remove();
 			e.destroy();
 		}
+		break;
+	}
+	case EKey::G:
+	{
+		m_entityx.systems.system<RenderSystem>()->setHBAOEnabled(!m_entityx.systems.system<RenderSystem>()->isHBAOEnabled());
 		break;
 	}
 	case EKey::ESCAPE:

@@ -36,17 +36,17 @@ void LightSystem::update(entityx::EntityManager& a_entities, entityx::EventManag
 	m_viewspaceLightPositionRangeList = m_lightManager.updateViewspaceLightPositionRangeList(*m_activeCamera);
 }
 
-uint LightSystem::getNumLights()
+uint LightSystem::getNumLights() const
 {
 	return m_lightManager.getNumLights();
 }
 
-const glm::vec4* LightSystem::getViewspaceLightPositionRangeList()
+const glm::vec4* LightSystem::getViewspaceLightPositionRangeList() const
 {
 	return m_viewspaceLightPositionRangeList;
 }
 
-const glm::vec4* LightSystem::getLightColorIntensityList()
+const glm::vec4* LightSystem::getLightColorIntensityList() const
 {
 	return m_lightManager.getLightColorIntensities();
 }

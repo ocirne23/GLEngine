@@ -11,6 +11,7 @@
 #include "Graphics/GL/Wrappers/GLTextureBuffer.h"
 #include "Graphics/GL/Wrappers/GLUniform.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
+#include "Graphics/GL/Tech/HBAO.h"
 
 #include <glm/glm.hpp>
 
@@ -43,7 +44,7 @@ class RenderSystem : public entityx::System<RenderSystem>, public entityx::Recei
 {
 public:
 
-	RenderSystem(LightSystem& lightSystem);
+	RenderSystem(const LightSystem& lightSystem);
 	~RenderSystem();
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
@@ -51,6 +52,8 @@ public:
 	void configure(entityx::EventManager& eventManager);
 
 	const GLShader& getModelShader() { return m_modelShader; }
+	bool isHBAOEnabled() const { return m_hbaoEnabled; }
+	void setHBAOEnabled(bool a_enabled) { m_hbaoEnabled = a_enabled; }
 
 private:
 
@@ -58,9 +61,11 @@ private:
 
 private:
 
-	LightSystem& m_lightSystem;
-
+	const LightSystem& m_lightSystem;
 	const PerspectiveCamera* m_activeCamera = NULL;
+
+	bool m_hbaoEnabled = true;
+	HBAO m_hbao;
 
 	GLTexture m_dfvTexture;
 	GLShader m_modelShader;

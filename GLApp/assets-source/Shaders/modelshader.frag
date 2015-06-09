@@ -10,7 +10,7 @@ in vec3 v_tangent;
 in vec3 v_bitangent;
 flat in uint v_materialID;
 
-layout (location = 0) out vec4 out_color;
+layout (location = 0) out vec3 out_color;
 
 ////////////////////////// MAIN //////////////////////////
 
@@ -100,7 +100,8 @@ void main()
 		specularAccum += specularContrib;
 	}
 	diffuseAccum += diffuse * u_ambient;
-	out_color = vec4(diffuseAccum + specularAccum, 1.0);
+	vec3 finalColor = diffuseAccum + specularAccum;
+	out_color = finalColor;
 
-	//out_color = vec4(vec3(normal), 1.0) + out_color * 0.00000000001; // for testing values without unused variable errors
+	//out_color = vec3(normal) + finalColor * 0.00000000001; // for testing values without unused variable errors
 }

@@ -1,6 +1,6 @@
 #include "GLEngine.h"
 
-#include "Screens/HBAOTestScreen.h"
+#include "Screens/TestScreen.h"
 
 #include "AppUtils/DeltaTimeMeasurer.h"
 #include "AppUtils/FPSMeasurer.h"
@@ -18,7 +18,7 @@ int main()
 
 	GLEngine::createRenderThread([&]()
 	{
-		HBAOTestScreen testScreen;
+		TestScreen testScreen;
 		while (!GLEngine::isShutdown())
 		{
 			GLEngine::doRenderThreadTick();

@@ -30,6 +30,7 @@ public:
 	void setViewportPosition(uint viewportXPos, uint viewportYPos);
 	void setVsync(bool enabled);
 	void setDepthTest(bool enabled);
+	void setDepthWrite(bool enabled);
 
 	uint getViewportWidth() const  { return m_viewportWidth; }
 	uint getViewportHeight() const { return m_viewportHeight; }

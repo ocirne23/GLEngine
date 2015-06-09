@@ -31,10 +31,9 @@ static const glm::vec3 AMBIENT(0.05f);
 
 END_UNNAMED_NAMESPACE()
 
-RenderSystem::RenderSystem(LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
+RenderSystem::RenderSystem(const LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
 {
 	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
-	m_dfvTexture.bind();
 
 	auto onShaderEdited = [&]()
 	{
@@ -109,6 +108,8 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_skyboxTransformUniform.initialize(m_skyboxShader, "u_modelMatrix");
 
 	m_skyboxShader.end();
+
+	m_hbao.initialize(camera);
 }
 
 void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a_cameraComponentAddedEvent)
@@ -132,8 +133,11 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
 	m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
 
-	// No need to clear color because skybox fully covers previous frame
-	GLEngine::graphics->clear(glm::vec4(0), false, true);
+	if (m_hbaoEnabled)
+		m_hbao.begin();
+
+	// Skybox doesnt need to look at or modify depth buffer
+	GLEngine::graphics->setDepthWrite(false);
 	GLEngine::graphics->setDepthTest(false);
 
 	// Might need to render skybox last with depth test, uses less bandwidth.
@@ -159,8 +163,13 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	}
 	m_skyboxShader.end();
 
+	GLEngine::graphics->setDepthWrite(true);
 	GLEngine::graphics->setDepthTest(true);
+	
+	// No need to clear color because skybox fully covers previous frame
+	GLEngine::graphics->clear(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), false, true);
 
+	m_dfvTexture.bind(TextureUnits::DFV_TEXTURE);
 	m_modelShader.begin();
 	{
 		m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
@@ -181,7 +190,9 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		}
 	}
 	m_modelShader.end();
-
+	
+	if (m_hbaoEnabled)
+		m_hbao.endAndRender();
 
 	GLEngine::graphics->swap();
 }

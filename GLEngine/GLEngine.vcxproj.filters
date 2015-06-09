@@ -169,6 +169,9 @@
     <ClCompile Include="src\HBAO\HBAOTest.cpp">
       <Filter>Source Files\HBAO</Filter>
     </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp">
+      <Filter>Source Files\Graphics\GL\Tech</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
@@ -528,7 +531,9 @@
     <ClInclude Include="include\Public\HBAO\HBAOTest.h">
       <Filter>Header Files\Public\HBAO</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Tech\HBAOPlus.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h">
+      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

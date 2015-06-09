@@ -118,6 +118,11 @@ void Graphics::setDepthTest(bool a_enabled)
 		glDisable(GL_DEPTH_TEST);
 }
 
+void Graphics::setDepthWrite(bool a_enabled)
+{
+	glDepthMask(a_enabled);
+}
+
 void Graphics::destroyWindow()
 {
 	if (m_window)
