@@ -100,7 +100,7 @@ void HBAOTest::init(PerspectiveCamera* a_camera)
 	m_blurYShader->initialize("Shaders/HBAO/fullscreen_vert.glsl", "Shaders/HBAO/blur_y_frag.glsl");
 
 	m_fboFullRes = new GLFramebuffer();
-	m_fboFullRes->setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH32, screenWidth, screenHeight);
+	m_fboFullRes->setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
 	m_fboFullRes->addFramebufferTexture(GLFramebuffer::ESizedFormat::RGBA8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 
 	m_blurXFbo = new GLFramebuffer();

@@ -6,7 +6,6 @@
 #include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
 #include "3rdparty/rde/rde_string.h"
 #include "Graphics/GL/Utils/CheckGLError.h"
-//#include "Utils/WindowsPlatformData.h"
 
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
@@ -16,11 +15,11 @@
 Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos)
 {
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 #ifdef ENABLE_ARB_DEBUG_OUTPUT
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
 	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
@@ -69,7 +68,7 @@ void Graphics::createGLContext()
 	glCullFace(GL_BACK);
 	glEnable(GL_MULTISAMPLE);
 	setDepthTest(true);
-	
+
 	glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
 	glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
