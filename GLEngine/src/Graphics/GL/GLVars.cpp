@@ -67,6 +67,7 @@ void GLVars::createGLContext(SDL_Window* a_window)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*) &s_maxTextureSize);
 
 	print("Created GL Context: %i %i\n", s_glMajorVersion, s_glMinorVersion);
+	print("Vendor: %s\n", s_glVendor.c_str());
 	print("Max texture size: %i\n", s_maxTextureSize);
 }
 

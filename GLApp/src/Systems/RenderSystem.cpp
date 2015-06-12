@@ -78,6 +78,9 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_modelShader.begin();
 	m_modelShader.setUniform1i("u_dfvTexture", TextureUnits::DFV_TEXTURE);
 	m_modelShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
+	m_modelShader.setUniform1i("u_lightGrid", TextureUnits::CLUSTERED_LIGHTING_GRID_TEXTURE);
+	m_modelShader.setUniform1i("u_lightIndices", TextureUnits::CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
+
 	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
 	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
 	m_modelShader.setUniform3f("u_ambient", AMBIENT);
@@ -90,13 +93,10 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GLConstantBuffer::EDrawUsage::STREAM);
 	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GLConstantBuffer::EDrawUsage::STREAM);
 
-	m_lightGridTextureBuffer.initialize(m_modelShader, "u_lightGrid", TextureUnits::CLUSTERED_LIGHTING_GRID_TEXTURE, GLTextureBuffer::ESizedFormat::RG32UI, GLTextureBuffer::EDrawUsage::STREAM);
-	m_lightIndiceTextureBuffer.initialize(m_modelShader, "u_lightIndices", TextureUnits::CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE, GLTextureBuffer::ESizedFormat::R16UI, GLTextureBuffer::EDrawUsage::STREAM);
-	
-	m_lightGridTextureBuffer.bind();
-	m_lightIndiceTextureBuffer.bind();
-
 	m_modelShader.end();
+
+	m_lightGridTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::RG32UI, GLTextureBuffer::EDrawUsage::STREAM);
+	m_lightIndiceTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::R16UI, GLTextureBuffer::EDrawUsage::STREAM);
 
 	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH);
 	m_skyboxShader.begin();
@@ -170,10 +170,14 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	GLEngine::graphics->clear(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), false, true);
 
 	m_dfvTexture.bind(TextureUnits::DFV_TEXTURE);
+	m_lightGridTextureBuffer.bind(TextureUnits::CLUSTERED_LIGHTING_GRID_TEXTURE);
+	m_lightIndiceTextureBuffer.bind(TextureUnits::CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
+
 	m_modelShader.begin();
 	{
 		m_lightPositionRangeBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), viewspaceLightPositionRanges);
 		m_lightColorBuffer.upload(m_lightSystem.getNumLights() * sizeof(glm::vec4), m_lightSystem.getLightColorIntensityList());
+		
 		m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
 		m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
 

@@ -56,19 +56,15 @@ public:
 	~GLTextureBuffer();
 	GLTextureBuffer(const GLTextureBuffer& copy) = delete;
 
-	void initialize(const GLShader& shader, const char* samplerName, int textureIdx, ESizedFormat sizedFormat, EDrawUsage drawUsage = EDrawUsage::STATIC);
+	void initialize(ESizedFormat sizedFormat, EDrawUsage drawUsage = EDrawUsage::STATIC);
 	void upload(uint numBytes, const void* data);
-	void bind();
+	void bind(uint index);
 
 private:
 
 	bool m_initialized = false;
-	int m_textureLoc   = 0;
-	int m_textureIdx   = 0;
 	uint m_textureID   = 0;
 	uint m_bufferID    = 0;
-
-	const GLShader* m_shader = NULL;
 
 	EDrawUsage m_drawUsage             = EDrawUsage::STATIC;
 	ESizedFormat m_sizedInternalFormat = ESizedFormat::R8UI;

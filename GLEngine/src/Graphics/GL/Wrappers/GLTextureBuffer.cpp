@@ -5,25 +5,12 @@
 
 #include <assert.h>
 
-void GLTextureBuffer::initialize(const GLShader& a_shader, const char* a_samplerName, int a_textureIdx, ESizedFormat a_sizedFormat, EDrawUsage a_drawUsage)
+void GLTextureBuffer::initialize(ESizedFormat a_sizedFormat, EDrawUsage a_drawUsage)
 {
-	assert(a_shader.isBegun());
 	assert(!m_initialized);
 
 	m_drawUsage = a_drawUsage;
-	m_textureIdx = a_textureIdx;
 	m_sizedInternalFormat = a_sizedFormat;
-	m_shader = &a_shader;
-
-	m_textureLoc = glGetUniformLocation(a_shader.getID(), a_samplerName);
-	assert(m_textureLoc != GL_INVALID_INDEX);
-
-	glUniform1i(m_textureLoc, a_textureIdx);
-
-	if (m_bufferID)
-		glDeleteBuffers(1, &m_bufferID);
-	if (m_textureID)
-		glDeleteTextures(1, &m_textureID);
 
 	glGenBuffers(1, &m_bufferID);
 	glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
@@ -49,7 +36,6 @@ GLTextureBuffer::~GLTextureBuffer()
 
 void GLTextureBuffer::upload(uint a_numBytes, const void* a_data)
 {
-	assert(m_shader->isBegun());
 	assert(m_initialized);
 	if (a_numBytes)
 	{
@@ -58,9 +44,10 @@ void GLTextureBuffer::upload(uint a_numBytes, const void* a_data)
 	}
 }
 
-void GLTextureBuffer::bind()
+void GLTextureBuffer::bind(uint a_index)
 {
-	assert(m_shader->isBegun());
-	glActiveTexture(GL_TEXTURE0 + m_textureIdx);
+	assert(m_initialized);	
+	glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
+	glActiveTexture(GL_TEXTURE0 + a_index);
 	glBindTexture(GL_TEXTURE_BUFFER, m_textureID);
 }
