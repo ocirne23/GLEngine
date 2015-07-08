@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Components\PointLightComponent.cpp" />
+    <ClCompile Include="src\Dummy.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Screens\TestScreen.cpp" />
     <ClCompile Include="src\Systems\CameraSystem.cpp" />
