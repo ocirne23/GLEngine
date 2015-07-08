@@ -53,22 +53,22 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 	if (input.isKeyPressed(EKey::LSHIFT))     moveAmount.y -= BASE_CAMERA_SPEED;
 	moveAmount *= a_dt;
 
-	entityx::ComponentHandle<FPSControlledComponent> control;
-	entityx::ComponentHandle<TransformComponent> transform;
-	for (entityx::Entity entity : a_entities.entities_with_components(control, transform))
+	entityx::ComponentHandle<FPSControlledComponent> controlComponent;
+	entityx::ComponentHandle<TransformComponent> transformComponent;
+	for (entityx::Entity entity : a_entities.entities_with_components(controlComponent, transformComponent))
 	{
-		glm::vec3 position(transform->transform[3]);
-		glm::mat3 rotation(transform->transform);
+		glm::vec3 position(transformComponent->transform[3]);
+		glm::mat3 rotation(transformComponent->transform);
 		glm::vec3 direction(FORWARD * rotation);
 
 		// Rotate horizontally
-		direction = glm::rotate(direction, -m_xMoveAmount * control->lookSensitivity, UP); 
+		direction = glm::rotate(direction, -m_xMoveAmount * controlComponent->lookSensitivity, UP); 
 		float xzAngle = glm::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
 
 		// Rotate vertically
 		glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));
 		glm::vec3 tmp = direction;
-		direction = glm::rotate(direction, -m_yMoveAmount * control->lookSensitivity, yRotAxis); 
+		direction = glm::rotate(direction, -m_yMoveAmount * controlComponent->lookSensitivity, yRotAxis); 
 
 		// Limit vertical look movement
 		if (direction.y > 0.99f || direction.y < -0.99f)
@@ -77,12 +77,12 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 		float xTrans = moveAmount.x * glm::cos(xzAngle) + moveAmount.z * glm::sin(xzAngle);
 		float zTrans = moveAmount.z * glm::cos(xzAngle) - moveAmount.x * glm::sin(xzAngle);
 
-		position.x += -xTrans * control->moveSpeed;
-		position.z += -zTrans * control->moveSpeed;
-		position.y += moveAmount.y * control->moveSpeed;
+		position.x += -xTrans * controlComponent->moveSpeed;
+		position.z += -zTrans * controlComponent->moveSpeed;
+		position.y += moveAmount.y * controlComponent->moveSpeed;
 
-		transform->transform = glm::lookAt(position, position + direction, UP);
-		transform->transform[3] = glm::vec4(position, 1.0);
+		transformComponent->transform = glm::lookAt(position, position + direction, UP);
+		transformComponent->transform[3] = glm::vec4(position, 1.0);
 	}
 	m_xMoveAmount = 0;
 	m_yMoveAmount = 0;

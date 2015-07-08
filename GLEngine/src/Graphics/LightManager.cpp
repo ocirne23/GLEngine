@@ -45,8 +45,8 @@ void LightManager::deleteLight(LightHandle a_handle)
 	--m_numUsedLights;
 	if (a_handle != m_numUsedLights)
 	{
-		ushort last = m_lightHandles[m_numUsedLights];
-		ushort idx = m_lightHandles[a_handle];
+		const ushort last = m_lightHandles[m_numUsedLights];
+		const ushort idx = m_lightHandles[a_handle];
 		rde::swap(m_lightPositionRanges[last], m_lightPositionRanges[idx]);
 		rde::swap(m_lightColorIntensities[last], m_lightColorIntensities[idx]);
 	}
@@ -60,7 +60,7 @@ void LightManager::deleteLights()
 void LightManager::setLight(LightHandle a_light, const glm::vec3& a_pos, float a_radius, const glm::vec3& a_color, float a_intensity)
 {
 	assert(a_light < m_numUsedLights);
-	ushort idx = m_lightHandles[a_light];
+	const ushort idx = m_lightHandles[a_light];
 	m_lightPositionRanges[idx] = glm::vec4(a_pos, a_radius);
 	m_lightColorIntensities[idx] = glm::vec4(a_color, a_intensity);
 }

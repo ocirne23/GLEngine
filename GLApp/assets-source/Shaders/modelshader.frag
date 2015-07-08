@@ -29,7 +29,7 @@ vec3 rotateNormal(vec3 tangentSpaceNormal)
 }
 
 // [Burley 2012, "Physically-Based Shading at Disney"]
-vec3 diffuseBurley( vec3 DiffuseColor, float Roughness, float NoV, float NoL, float VoH )
+vec3 diffuseBurley(vec3 DiffuseColor, float Roughness, float NoV, float NoL, float VoH)
 {
 	float FD90 = 0.5 + 2 * VoH * VoH * Roughness;
 	float FdV = 1 + (FD90 - 1) * exp2( (-5.55473 * NoV - 6.98316) * NoV );
@@ -64,8 +64,8 @@ void doLight(out vec3 diffuseContrib, out vec3 specularContrib, vec3 diffuse, fl
 	
 	float NdotL = clamp(dot(N, L), 0.0, 1.0);
 	float NdotH = clamp(dot(N, H), 0.0, 1.0);
-	float HdotL = clamp(dot(H, L), 0.0, 1.0);
 	float NdotV = clamp(dot(N, V), 0.0, 1.0);
+	float HdotL = clamp(dot(H, L), 0.0, 1.0);
 	float VdotH = clamp(dot(V, H), 0.0, 1.0);
 	float attenuation = inverseSquareFalloff(lightDistance, lightRange);
 

@@ -24,7 +24,7 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+	const uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
 	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
 }
 
@@ -37,7 +37,7 @@ void Graphics::createGLContext()
 	GLVars::createGLContext(m_window);
 
 	glewExperimental = GL_TRUE;
-	GLenum res = glewInit();
+	const GLenum res = glewInit();
 	if (res != GLEW_OK)
 	{
 		print("GLEW error: %s\n", glewGetErrorString(res));

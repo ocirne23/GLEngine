@@ -19,17 +19,17 @@ void CameraSystem::update(entityx::EntityManager& entities, entityx::EventManage
 	if (!m_cameraEntity.valid())
 		return;
 
-	entityx::ComponentHandle<TransformComponent> transform = m_cameraEntity.component<TransformComponent>();
-	entityx::ComponentHandle<CameraComponent> camera = m_cameraEntity.component<CameraComponent>();
-	if (transform && camera)
+	auto transformComponent = m_cameraEntity.component<TransformComponent>();
+	auto cameraComponent = m_cameraEntity.component<CameraComponent>();
+	if (transformComponent && cameraComponent)
 	{
 		glm::vec3 direction(0, 0, -1);
-		glm::vec3 position(transform->transform[3]);
-		glm::mat3 rotation(transform->transform);
+		glm::vec3 position(transformComponent->transform[3]);
+		glm::mat3 rotation(transformComponent->transform);
 		direction = direction * rotation;
 
-		camera->camera->setPosition(position);
-		camera->camera->lookAtDir(direction);
-		camera->camera->updateMatrices();
+		cameraComponent->camera->setPosition(position);
+		cameraComponent->camera->lookAtDir(direction);
+		cameraComponent->camera->updateMatrices();
 	}
 }

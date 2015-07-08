@@ -32,9 +32,9 @@ void PerspectiveCamera::translate(const glm::vec3& a_translation)
 
 void PerspectiveCamera::translateRelative(const glm::vec3& a_trans)
 {
-	float angle = getRotationRadXZ();
-	float xTrans = a_trans.x * glm::cos(angle) + a_trans.z * glm::sin(angle);
-	float zTrans = a_trans.z * glm::cos(angle) - a_trans.x * glm::sin(angle);
+	const float angle = getRotationRadXZ();
+	const float xTrans = a_trans.x * glm::cos(angle) + a_trans.z * glm::sin(angle);
+	const float zTrans = a_trans.z * glm::cos(angle) - a_trans.x * glm::sin(angle);
 
 	translate(-xTrans, a_trans.y, -zTrans);
 }
@@ -56,7 +56,7 @@ float PerspectiveCamera::getRotationRadYZ()
 
 void PerspectiveCamera::rotate(float a_angleRad, const glm::vec3& a_axis)
 {
-	glm::vec3 tmp = m_direction;
+	const glm::vec3 tmp = m_direction;
 	m_direction = glm::rotate(m_direction, a_angleRad, a_axis);
 	//limit vertical look movement
 	if (m_direction.y > 0.99f || m_direction.y < -0.99f)
@@ -65,14 +65,14 @@ void PerspectiveCamera::rotate(float a_angleRad, const glm::vec3& a_axis)
 		return;
 	}
 	//recalculate up vector.
-	glm::vec3 side = glm::cross(m_direction, UP);
+	const glm::vec3 side = glm::cross(m_direction, UP);
 	m_up = glm::cross(side, m_direction);
 }
 
 void PerspectiveCamera::rotateRelative(float a_xRot, float a_yRot)
 {
 	rotate(a_xRot, UP); //rotate x component
-	float angle = getRotationRadXZ();
+	const float angle = getRotationRadXZ();
 	rotate(a_yRot, glm::vec3(glm::cos(angle), 0.0f, glm::sin(angle))); //rotate y component
 }
 

@@ -22,10 +22,10 @@ void main()
 	vec4 pos = u_modelMatrix * vec4(in_position, 1.0);
 	gl_Position = u_viewProjectionMatrix * pos;
 	
-	v_position	= (u_viewMatrix * pos).xyz;
-	v_texcoord	= in_texcoord;
-	v_normal	= normalize(u_normalMatrix * in_normal);
-	v_tangent	= normalize(u_normalMatrix * in_tangent);
-	v_bitangent = normalize(u_normalMatrix * in_bitangent);
+	v_position	 = (u_viewMatrix * pos).xyz;
+	v_texcoord	 = in_texcoord;
+	v_normal	 = normalize(u_normalMatrix * in_normal);
+	v_tangent	 = normalize(u_normalMatrix * in_tangent);
+	v_bitangent  = normalize(u_normalMatrix * in_bitangent);
 	v_materialID = in_materialID;
 }

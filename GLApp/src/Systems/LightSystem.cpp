@@ -21,9 +21,9 @@ void LightSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a
 
 void LightSystem::receive(const entityx::ComponentAddedEvent<PointLightComponent>& pointLightComponentAddedEvent)
 {
-	auto light = pointLightComponentAddedEvent.component;
-	light->m_lightManager = &m_lightManager;
-	light->m_lightHandle = m_lightManager.createLight();
+	auto lightComponent = pointLightComponentAddedEvent.component;
+	lightComponent->m_lightManager = &m_lightManager;
+	lightComponent->m_lightHandle = m_lightManager.createLight();
 }
 
 void LightSystem::receive(const entityx::ComponentRemovedEvent<PointLightComponent>& pointLightComponentRemovedEvent)

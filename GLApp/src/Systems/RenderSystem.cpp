@@ -74,25 +74,25 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
 
 	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &defines);
-
 	m_modelShader.begin();
-	m_modelShader.setUniform1i("u_dfvTexture", TextureUnits::DFV_TEXTURE);
-	m_modelShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
-	m_modelShader.setUniform1i("u_lightGrid", TextureUnits::CLUSTERED_LIGHTING_GRID_TEXTURE);
-	m_modelShader.setUniform1i("u_lightIndices", TextureUnits::CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
+	{
+		m_modelShader.setUniform1i("u_dfvTexture", TextureUnits::DFV_TEXTURE);
+		m_modelShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
+		m_modelShader.setUniform1i("u_lightGrid", TextureUnits::CLUSTERED_LIGHTING_GRID_TEXTURE);
+		m_modelShader.setUniform1i("u_lightIndices", TextureUnits::CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
 
-	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
-	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
-	m_modelShader.setUniform3f("u_ambient", AMBIENT);
+		m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
+		m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
+		m_modelShader.setUniform3f("u_ambient", AMBIENT);
 
-	m_viewMatrixUniform.initialize(m_modelShader, "u_viewMatrix");
-	m_mvpMatrixUniform.initialize(m_modelShader, "u_viewProjectionMatrix");
-	m_normalMatrixUniform.initialize(m_modelShader, "u_normalMatrix");
-	m_transformUniform.initialize(m_modelShader, "u_modelMatrix");
+		m_viewMatrixUniform.initialize(m_modelShader, "u_viewMatrix");
+		m_mvpMatrixUniform.initialize(m_modelShader, "u_viewProjectionMatrix");
+		m_normalMatrixUniform.initialize(m_modelShader, "u_normalMatrix");
+		m_transformUniform.initialize(m_modelShader, "u_modelMatrix");
 
-	m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GLConstantBuffer::EDrawUsage::STREAM);
-	m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GLConstantBuffer::EDrawUsage::STREAM);
-
+		m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GLConstantBuffer::EDrawUsage::STREAM);
+		m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GLConstantBuffer::EDrawUsage::STREAM);
+	}
 	m_modelShader.end();
 
 	m_lightGridTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::RG32UI, GLTextureBuffer::EDrawUsage::STREAM);
@@ -100,13 +100,13 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 
 	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH);
 	m_skyboxShader.begin();
-	m_skyboxShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
-
-	m_skyboxViewMatrixUniform.initialize(m_skyboxShader, "u_viewMatrix");
-	m_skyboxMvpMatrixUniform.initialize(m_skyboxShader, "u_viewProjectionMatrix");
-	m_skyboxNormalMatrixUniform.initialize(m_skyboxShader, "u_normalMatrix");
-	m_skyboxTransformUniform.initialize(m_skyboxShader, "u_modelMatrix");
-
+	{
+		m_skyboxShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
+		m_skyboxViewMatrixUniform.initialize(m_skyboxShader, "u_viewMatrix");
+		m_skyboxMvpMatrixUniform.initialize(m_skyboxShader, "u_viewProjectionMatrix");
+		m_skyboxNormalMatrixUniform.initialize(m_skyboxShader, "u_normalMatrix");
+		m_skyboxTransformUniform.initialize(m_skyboxShader, "u_modelMatrix");
+	}
 	m_skyboxShader.end();
 
 	m_hbao.initialize(camera, UBOBindingPoints::HBAO_GLOBALS_UBO_BINDING_POINT);
@@ -136,7 +136,7 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	if (m_hbaoEnabled)
 		m_hbao.begin();
 
-	// Skybox doesnt need to look at or modify depth buffer
+	// Skybox doesn't need to look at or modify depth buffer
 	GLEngine::graphics->setDepthWrite(false);
 	GLEngine::graphics->setDepthTest(false);
 
@@ -185,12 +185,12 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		m_viewMatrixUniform.set(camera.getViewMatrix());
 		m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
 
-		entityx::ComponentHandle<TransformComponent> transform;
-		entityx::ComponentHandle<ModelComponent> model;
-		for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
+		entityx::ComponentHandle<TransformComponent> transformComponent;
+		entityx::ComponentHandle<ModelComponent> modelComponent;
+		for (entityx::Entity entity : a_entities.entities_with_components(transformComponent, modelComponent))
 		{
-			m_transformUniform.set(transform->transform);
-			model->mesh->render(m_modelShader);
+			m_transformUniform.set(transformComponent->transform);
+			modelComponent->mesh->render(m_modelShader);
 		}
 	}
 	m_modelShader.end();

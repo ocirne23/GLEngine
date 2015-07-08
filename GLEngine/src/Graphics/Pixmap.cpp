@@ -59,7 +59,7 @@ void Pixmap::set(uint a_width, uint a_height, uint a_numComp, bool a_isFloatText
 void Pixmap::set(uint a_width, uint a_height, uint a_numComp, const glm::vec4& a_col)
 {
 	assert(!m_data.b);
-	byte byteCol[] = { floatToByteCol(a_col.r), floatToByteCol(a_col.g), floatToByteCol(a_col.b), floatToByteCol(a_col.b)};
+	const byte byteCol[] = { floatToByteCol(a_col.r), floatToByteCol(a_col.g), floatToByteCol(a_col.b), floatToByteCol(a_col.b)};
 	m_width = a_width;
 	m_height = a_height;
 	m_isFloatData = false;

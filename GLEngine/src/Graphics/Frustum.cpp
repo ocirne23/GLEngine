@@ -10,7 +10,7 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 	float m20, m21, m22, m23;
 	float m30, m31, m32, m33;
 
-	glm::mat4 trans = glm::transpose(a_mvp);
+	const glm::mat4 trans = glm::transpose(a_mvp);
 
 	m00 = trans[0][0];
 	m01 = trans[0][1];
@@ -125,7 +125,9 @@ bool Frustum::sphereInFrustum(const glm::vec3& a_point, float a_radius) const
 
 static inline bool extentSignedTest(const glm::vec4& a_p, const glm::vec3& a_center, const glm::vec3& a_extent)
 {
-	return (glm::dot(glm::vec3(a_p), a_center) + glm::dot(glm::abs(glm::vec3(a_p)), a_extent) < -a_p.w);
+	const float pDoTCenter = glm::dot(glm::vec3(a_p), a_center);
+	const float absPdotExtent = glm::dot(glm::abs(glm::vec3(a_p)), a_extent);
+	return (pDoTCenter + absPdotExtent) < -a_p.z;
 }
 
 bool Frustum::aabbInFrustum(const glm::vec3& a_center, const glm::vec3& a_extent, const glm::mat4& a_frustumMatrix)
