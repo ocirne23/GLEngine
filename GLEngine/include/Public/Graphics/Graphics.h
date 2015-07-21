@@ -44,6 +44,7 @@ private:
 	Graphics(const Graphics& copy) = delete;
 
 	void createGLContext();
+	void deleteGLContext();
 
 private:
 

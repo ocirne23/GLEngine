@@ -10,7 +10,7 @@ class GLVars
 {
 public:
 	static void createGLContext(SDL_Window* window);
-	static void dispose();
+	static void deleteGLContext();
 
 	static uint getGLMajorVersion()                 { return s_glMajorVersion; }
 	static uint getGLMinorVersion()                 { return s_glMinorVersion; }

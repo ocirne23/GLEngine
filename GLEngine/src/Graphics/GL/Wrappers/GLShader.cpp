@@ -71,7 +71,21 @@ void checkProgramForErrors(const GLuint a_program)
 	glValidateProgram(a_program);
 	glGetProgramiv(a_program, GL_VALIDATE_STATUS, &success);
 	if (success != GL_TRUE)
+	{
 		print("Shader program was not validated!\n");
+		GLint maxLength = 0;
+		glGetProgramiv(a_program, GL_INFO_LOG_LENGTH, &maxLength);
+		if (maxLength)
+		{
+			rde::vector<GLchar> infoLog(maxLength);
+			glGetProgramInfoLog(a_program, maxLength, &maxLength, &infoLog[0]);
+			print("validated error: %s \n", &infoLog[0]);
+		}
+		else
+		{
+			print("validated error, no info log available\n");
+		}
+	}
 
 	if (!glIsProgram(a_program))
 		print("failed to create shader!\n");

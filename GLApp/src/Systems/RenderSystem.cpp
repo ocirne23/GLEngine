@@ -27,7 +27,7 @@ static const char* SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
 static const unsigned int TILE_WIDTH_PX  = 64;
 static const unsigned int TILE_HEIGHT_PX = 64;
 
-static const glm::vec3 AMBIENT(0.05f);
+static const glm::vec3 AMBIENT(0.15f);
 
 END_UNNAMED_NAMESPACE()
 
@@ -95,8 +95,8 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	}
 	m_modelShader.end();
 
-	m_lightGridTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::RG32UI, GLTextureBuffer::EDrawUsage::STREAM);
-	m_lightIndiceTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::R16UI, GLTextureBuffer::EDrawUsage::STREAM);
+	m_lightGridTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::RG32I, GLTextureBuffer::EDrawUsage::STREAM);
+	m_lightIndiceTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::R16I, GLTextureBuffer::EDrawUsage::STREAM);
 
 	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH);
 	m_skyboxShader.begin();

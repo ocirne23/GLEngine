@@ -108,8 +108,8 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_hbaoGlobalsUBOBi
 	globals.focalLen.x        = 1.0f / tanf(fovRad * 0.5f) * (aoHeight / aoWidth);
 	globals.focalLen.y        = 1.0f / tanf(fovRad * 0.5f);
 	globals.invFocalLen       = 1.0f / globals.focalLen;
-	globals.uvToViewA = -2.0f * globals.invFocalLen;
-	globals.uvToViewB = 1.0f * globals.invFocalLen;
+	globals.uvToViewA         = -2.0f * globals.invFocalLen;
+	globals.uvToViewB         = 1.0f * globals.invFocalLen;
 	globals.r                 = AO_RADIUS;
 	globals.r2                = globals.r * globals.r;
 	globals.negInvR2          = -1.0f / globals.r2;
@@ -147,7 +147,6 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_hbaoGlobalsUBOBi
 
 void HBAO::begin()
 {
-	glEnable(GL_DEPTH_TEST);
 	m_fboFullRes.begin();
 }
 
@@ -160,17 +159,13 @@ void HBAO::endAndRender()
 	m_fboFullRes.bindDepthTexture(0);
 	m_noiseTexture.bind(1);
 
-#define BLUR
-#ifdef BLUR
 	m_blurXFbo.begin();
-#endif
 	m_hbaoFullShader.begin();
 	m_hbaoGlobalsBuffer.bind();
 	QuadDrawUtils::drawQuad(m_hbaoFullShader);
 	m_hbaoFullShader.end();
-#ifdef BLUR
 	m_blurXFbo.end();
-	
+
 	// Blur X //
 	m_blurXFbo.bindTexture(0, 0);
 	m_blurYFbo.begin();
@@ -185,5 +180,5 @@ void HBAO::endAndRender()
 	m_blurYShader.begin();
 	QuadDrawUtils::drawQuad(m_blurYShader);
 	m_blurYShader.end();
-#endif
+	glEnable(GL_DEPTH_TEST);
 }

@@ -21,8 +21,8 @@ void ClusteredShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint
 	m_pixelsPerTileW = a_pixelsPerTileW;
 	m_pixelsPerTileH = a_pixelsPerTileH;
 
-	m_gridWidth = a_screenWidth / a_pixelsPerTileW;
-	m_gridHeight = a_screenHeight / a_pixelsPerTileH;
+	m_gridWidth = a_screenWidth / a_pixelsPerTileW + 1;
+	m_gridHeight = a_screenHeight / a_pixelsPerTileH + 1;
 
 	m_recNear = 1.0f / a_camera.getNear();
 

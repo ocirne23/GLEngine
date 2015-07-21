@@ -282,7 +282,7 @@ std::vector<MaterialProperty> getMaterialProperties(const std::vector<TextureAtl
 
 void writeAtlasesToFiles(const std::vector<TextureAtlas*>& a_atlases, const std::string& a_outResourcePath)
 {
-	for (int i = 0; i < a_atlases.size(); ++i)
+	for (uint i = 0; i < (uint) a_atlases.size(); ++i)
 	{
 		const TextureAtlas* atlas = a_atlases[i];
 

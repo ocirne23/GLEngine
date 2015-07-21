@@ -110,7 +110,7 @@ std::vector<std::string> getAllFilesAndModificationTimesInFolder(CurrentTimesMap
 	std::vector<std::string> writeTimes;
 	listFiles(a_folder, "*", files, writeTimes);
 	assert(files.size() == writeTimes.size());
-	for (int i = 0; i < files.size(); ++i)
+	for (unsigned int i = 0; i < (unsigned int) files.size(); ++i)
 		a_outFiles.insert({files[i], writeTimes[i]});
 	return files; // Needed to iterate with omp
 }

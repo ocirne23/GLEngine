@@ -79,6 +79,11 @@ void Graphics::createGLContext()
 	CHECK_GL_ERROR();
 }
 
+void Graphics::deleteGLContext()
+{
+	GLVars::deleteGLContext();
+}
+
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)
 {
 	CHECK_GL_ERROR();
@@ -119,7 +124,6 @@ void Graphics::destroyWindow()
 {
 	if (m_window)
 	{
-		GLVars::dispose();
 		SDL_DestroyWindow(m_window);
 		m_window = NULL;
 	}

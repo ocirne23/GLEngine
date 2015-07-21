@@ -9,29 +9,41 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Source Files\Screens">
-      <UniqueIdentifier>{3d09557f-1719-4465-865e-2d0a49b6c433}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Screens">
-      <UniqueIdentifier>{7f6c848b-445f-4e2e-800f-db78127c60f8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Systems">
-      <UniqueIdentifier>{79bc8092-f0cf-4a7f-bbd5-279e28349090}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Systems">
-      <UniqueIdentifier>{bbaaf400-f7f1-4294-91d5-f42b02f63b7c}</UniqueIdentifier>
+      <UniqueIdentifier>{dbaac8ca-d828-414d-88df-85a5098b6d23}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Components">
-      <UniqueIdentifier>{da42c49f-0f25-4e99-bad3-ad0433d7064a}</UniqueIdentifier>
+    <Filter Include="Source Files\Screens">
+      <UniqueIdentifier>{a0bcd0ef-1c45-4ac4-a604-6141fa659a91}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Components">
-      <UniqueIdentifier>{2a6c6c76-c4f6-4657-a56e-a5490b373762}</UniqueIdentifier>
+      <UniqueIdentifier>{c09c4def-0232-43fb-99e3-9c90239465a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\AppUtils">
-      <UniqueIdentifier>{38fb1c23-caae-4e95-a187-27aae3830de2}</UniqueIdentifier>
+    <Filter Include="Header Files\Systems">
+      <UniqueIdentifier>{743788b3-e510-460a-9c12-a0b0f24d74c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Screens">
+      <UniqueIdentifier>{3c37abfa-fb99-41a0-b286-2245d6e07c4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Components">
+      <UniqueIdentifier>{b0c7ff9d-2f48-4446-aaf9-ad8661682210}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\AppUtils">
+      <UniqueIdentifier>{35bf71eb-51bc-4dcb-93dc-7cccabd46055}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Components\PointLightComponent.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Systems\FPSControlSystem.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Systems\CameraSystem.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
     <ClCompile Include="src\Systems\RenderSystem.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
@@ -41,40 +53,16 @@
     <ClCompile Include="src\Systems\LightSystem.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="src\Systems\CameraSystem.cpp">
-      <Filter>Source Files\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Systems\FPSControlSystem.cpp">
-      <Filter>Source Files\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Components\PointLightComponent.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Dummy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Systems\RenderSystem.h">
-      <Filter>Header Files\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Components\ModelComponent.h">
-      <Filter>Header Files\Components</Filter>
+    <ClInclude Include="src\AppUtils\FPSMeasurer.h">
+      <Filter>Header Files\AppUtils</Filter>
     </ClInclude>
     <ClInclude Include="src\Components\CameraComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="src\Systems\LightSystem.h">
-      <Filter>Header Files\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Screens\TestScreen.h">
-      <Filter>Header Files\Screens</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Systems\CameraSystem.h">
-      <Filter>Header Files\Systems</Filter>
+    <ClInclude Include="src\Components\FPSControlledComponent.h">
+      <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Components\PointLightComponent.h">
       <Filter>Header Files\Components</Filter>
@@ -82,20 +70,29 @@
     <ClInclude Include="src\Components\TransformComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="src\Systems\FPSControlSystem.h">
-      <Filter>Header Files\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Components\FPSControlledComponent.h">
+    <ClInclude Include="src\Components\ModelComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
     <ClInclude Include="src\Components\SkyComponent.h">
       <Filter>Header Files\Components</Filter>
     </ClInclude>
-    <ClInclude Include="src\AppUtils\FPSMeasurer.h">
-      <Filter>Source Files\AppUtils</Filter>
+    <ClInclude Include="src\Screens\TestScreen.h">
+      <Filter>Header Files\Screens</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Systems\RenderSystem.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Systems\LightSystem.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Systems\FPSControlSystem.h">
+      <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Systems\CameraSystem.h">
+      <Filter>Header Files\Systems</Filter>
     </ClInclude>
     <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h">
-      <Filter>Source Files\AppUtils</Filter>
+      <Filter>Header Files\AppUtils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -71,7 +71,7 @@ void GLVars::createGLContext(SDL_Window* a_window)
 	print("Max texture size: %i\n", s_maxTextureSize);
 }
 
-void GLVars::dispose()
+void GLVars::deleteGLContext()
 {
 	SDL_GL_DeleteContext(s_glContext);
 }
