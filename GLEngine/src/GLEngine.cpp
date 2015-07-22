@@ -6,6 +6,16 @@
 
 #include <SDL/SDL.h>
 
+BEGIN_UNNAMED_NAMESPACE()
+
+struct RenderFuncWrapper
+{
+	RenderFuncWrapper(std::function<void()> a_func) : func(a_func) {}
+	std::function<void()> func;
+};
+
+END_UNNAMED_NAMESPACE()
+
 Input* GLEngine::input = NULL;
 Graphics* GLEngine::graphics = NULL;
 bool GLEngine::s_shutdown = false;
@@ -19,20 +29,20 @@ void GLEngine::initialize()
 		SDL_Quit();
 		return;
 	}
-	graphics = new Graphics("GLEngine", 1900 / 2, 1000 / 2, 1920+ 10, 30); // TODO: move construction args to app
+	graphics = new Graphics("GLEngine", 1900 / 2, 1000 / 2, 1920 + 10, 30); // TODO: move construction args to app
 	input = new Input();
 }
 
 void GLEngine::createRenderThread(std::function<void()> a_func)
 {
-	s_renderThread = SDL_CreateThread(&GLEngine::renderThread, "RenderThread", &a_func);
+	s_renderThread = SDL_CreateThread(&GLEngine::renderThread, "RenderThread", new RenderFuncWrapper(a_func));
 }
 
 int GLEngine::renderThread(void* a_ptr)
 {
-	std::function<void()> renderLoopFunc = *((std::function<void()>*) a_ptr);
 	graphics->createGLContext();
-	renderLoopFunc();
+	((RenderFuncWrapper*) a_ptr)->func();
+	delete a_ptr;
 	return 0;
 }
 

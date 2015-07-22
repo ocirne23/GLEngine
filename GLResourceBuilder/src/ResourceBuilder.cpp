@@ -1,6 +1,6 @@
 #include "ResourceBuilder.h"
 
-#include "Utils/listFiles.h"
+#include "Utils/FileUtils.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -23,48 +23,12 @@ struct Dependency
 
 struct FileWriteTime
 {
-	FileName fileName;
 	FileTime fileTime;
 	std::vector<Dependency> dependencies;
 };
 
-typedef std::unordered_map<FileName, FileWriteTime*> StoredTimesMap;
-typedef std::unordered_map<FileName, FileTime> CurrentTimesMap;
+typedef std::unordered_map<FileName, FileWriteTime*> ModificationFileMap;
 typedef std::unordered_map<std::string, ResourceProcessor*> ResourceProcessorMap;
-
-std::string getExtensionForFilePath(const std::string& a_path)
-{
-	const std::string::size_type extIdx = a_path.find_last_of('.');
-	if (extIdx == std::string::npos)
-		return "";
-	std::string extension = a_path.substr(extIdx + 1, a_path.length() - extIdx - 1);
-	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
-	return extension;
-}
-
-void createDirectoryForFile(const std::string& a_filePath)
-{
-	std::string directory = a_filePath.substr(0, a_filePath.find_last_of("\\"));
-
-	std::string::size_type from = 0;
-	while (from != std::string::npos)
-	{	// create sub directories for file if not exists
-		from = directory.find_first_of("\\", from + 1);
-		const std::string makeDirPath = directory.substr(0, from);
-		CreateDirectory(makeDirPath.c_str(), NULL);
-	}
-}
-
-bool modificationFileExists(const std::string& a_filePath)
-{
-	bool exists = false;
-	std::fstream file;
-	file.open(a_filePath, std::fstream::in); // prolly not the right way to check for exists
-	exists = file.is_open();
-	if (exists)
-		file.close();
-	return exists;
-}
 
 std::fstream createModificationFile(const std::string& a_filePath)
 {
@@ -74,7 +38,7 @@ std::fstream createModificationFile(const std::string& a_filePath)
 	return file;
 }
 
-void writeModificationFileToMap(std::fstream& a_file, StoredTimesMap& a_storedTimesMap)
+void writeModificationFileToMap(std::fstream& a_file, ModificationFileMap& a_storedTimesMap)
 {
 	// TODO: assert that line iterator is at start of file
 	FileWriteTime* prev = NULL;
@@ -84,72 +48,67 @@ void writeModificationFileToMap(std::fstream& a_file, StoredTimesMap& a_storedTi
 		const std::string::size_type split = line.find_first_of(":");
 		if (line[0] == '>')
 		{
-			prev->dependencies.push_back({ line.substr(1, split), line.substr(split + 1) });
+			prev->dependencies.push_back({ line.substr(1, split - 1), line.substr(split + 1) });
 		}
 		else
 		{
+			FileName fileName = line.substr(0, split);
 			FileWriteTime* fileWriteTime = new FileWriteTime();
-			fileWriteTime->fileName = line.substr(0, split);
 			fileWriteTime->fileTime = line.substr(split + 1);
-			a_storedTimesMap.insert({ fileWriteTime->fileName, fileWriteTime });
+			a_storedTimesMap.insert({ fileName, fileWriteTime });
 			prev = fileWriteTime;
 		}
 	}
 }
 
-void clearModificationFile(std::fstream& a_file)
+std::vector<std::string> getAllFilesInFolder(const std::string& a_folder)
 {
-	assert(a_file.is_open());
-	a_file.clear();
-}
-
-std::vector<std::string> getAllFilesAndModificationTimesInFolder(CurrentTimesMap& a_outFiles, const std::string& a_folder)
-{
-	assert(!a_outFiles.size());
 	std::vector<std::string> files;
-	std::vector<std::string> writeTimes;
-	listFiles(a_folder, "*", files, writeTimes);
-	assert(files.size() == writeTimes.size());
-	for (unsigned int i = 0; i < (unsigned int) files.size(); ++i)
-		a_outFiles.insert({files[i], writeTimes[i]});
-	return files; // Needed to iterate with omp
+	listFiles(a_folder, "*", files);
+	return files;
 }
 
-void writeModificationMapToFile(std::fstream& a_file, const StoredTimesMap& a_writeTimesMap)
+void writeModificationMapToFile(const std::string& a_filePath, const ModificationFileMap& a_writeTimesMap)
 {
+	std::ofstream modificationFile(a_filePath);
+	assert(modificationFile.is_open());
 	// TODO: assert that a_file is empty?
 	for (const auto& filePathAndWriteTime : a_writeTimesMap)
 	{
 		const std::string line = filePathAndWriteTime.first + ":" + filePathAndWriteTime.second->fileTime + "\n";
-		a_file.write(line.c_str(), line.length());
+		modificationFile.write(line.c_str(), line.length());
 		for (const auto& dependency : filePathAndWriteTime.second->dependencies)
 		{
 			const std::string dep = std::string(">") + dependency.fileName + ":" + dependency.fileTime + "\n";
-			a_file.write(dep.c_str(), dep.length());
+			modificationFile.write(dep.c_str(), dep.length());
 		}
 		delete filePathAndWriteTime.second;
 	}
+	modificationFile.close();
 }
 
-bool isFileModified(const FileName& a_fileName, const FileTime& a_fileTime,
-	const StoredTimesMap& a_storedTimesMap)
+bool isFileOrDependencyModified(const FileName& a_fileName, const std::string& a_directoryPath,
+	const ModificationFileMap& a_storedTimesMap)
 {
-	const auto storedTimesIt = a_storedTimesMap.find(a_fileName);
-	return (storedTimesIt != a_storedTimesMap.end() &&
-		a_fileTime != storedTimesIt->second->fileTime);
-}
+	std::string fullPath = a_directoryPath + "\\" + a_fileName;
+	FileTime fileTime = getFileTime(fullPath);
 
-bool isDependencyModified(const FileName& a_fileName, const StoredTimesMap& a_storedTimesMap, const CurrentTimesMap& a_currentTimesMap)
-{
 	auto it = a_storedTimesMap.find(a_fileName);
-	if (it != a_storedTimesMap.end())
+	if (it == a_storedTimesMap.end())
 		return true;
-	auto dependencies = it->second->dependencies;
-	for (const Dependency& dep : dependencies)
+	
+	FileWriteTime* fileWriteTime = it->second;
+	if (fileTime != fileWriteTime->fileTime)
+		return true;
+
+	for (const Dependency& dep : fileWriteTime->dependencies)
 	{
-		if (isFileModified(dep.fileName, dep.fileTime, a_storedTimesMap))
+		std::string fullDepPath = a_directoryPath + "\\" + getFolderPathForFile(a_fileName) + dep.fileName;
+		FileTime depFileTime = getFileTime(fullDepPath);
+		if (depFileTime != dep.fileTime)
 			return true;
 	}
+
 	return false;
 }
 
@@ -163,10 +122,9 @@ ResourceProcessor* getResourceProcessorForFile(const FileName& a_filePath, const
 		return NULL;
 }
 
-void processFileAndUpdateStoredTimes(const std::string& a_inPath, 
-	                                 const std::string& a_outPath,
-									 ResourceProcessor* a_processor, 
-									 StoredTimesMap& a_storedTimesMap)
+FileWriteTime* processFile(const std::string& a_inPath, 
+	             const std::string& a_outPath,
+                 ResourceProcessor* a_processor)
 {
 	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -186,7 +144,15 @@ void processFileAndUpdateStoredTimes(const std::string& a_inPath,
 	WriteConsole(console, s, lstrlen(s), &cChars, NULL);
 	SetConsoleCursorPosition(console, currPos.dwCursorPosition);
 
-	//TODO: update stored times map threadsafe
+	FileWriteTime* fileWriteTime = new FileWriteTime();
+	fileWriteTime->fileTime = getFileTime(a_inPath.c_str());
+	for (const FileName& dependency : dependencies)
+	{
+		std::string fullDependencyPath = getFolderPathForFile(a_inPath) + dependency;
+		fileWriteTime->dependencies.push_back({dependency, getFileTime(fullDependencyPath)});
+	}
+
+	return fileWriteTime;
 }
 
 } // namespace
@@ -197,45 +163,46 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 	const std::string outDirectoryPathStr(a_outDirectoryPath);
 	const std::string modificationFilePath = outDirectoryPathStr + "\\modificationdates.txt";
 
-	StoredTimesMap storedTimesMap;
-	CurrentTimesMap currentTimesMap;
-	std::fstream modificationFile;
+	ModificationFileMap storedTimesMap;
 
-	if (modificationFileExists(modificationFilePath))
+	if (fileExists(modificationFilePath))
 	{
-		modificationFile.open(modificationFilePath, std::ios::in | std::ios::out);
+		std::fstream modificationFile(modificationFilePath);
 		writeModificationFileToMap(modificationFile, storedTimesMap);
-		clearModificationFile(modificationFile);
+		modificationFile.clear();
+		modificationFile.close();
 	}
 	else
 	{
 		createDirectoryForFile(modificationFilePath);
-		modificationFile.open(modificationFilePath, std::ios::in | std::ios::out);
+		std::ofstream modificationFile(modificationFilePath);
+		modificationFile.flush();
+		modificationFile.close();
 	}
 
-	auto fileNames = getAllFilesAndModificationTimesInFolder(currentTimesMap, inDirectoryPathStr);
+	auto fileNames = getAllFilesInFolder(inDirectoryPathStr);
 	const int numFiles = (int) fileNames.size();
 omp_set_num_threads(20);
 #pragma omp parallel for
 	for (int i = 0; i < numFiles; ++i)
 	{
-		auto it = currentTimesMap.find(fileNames[i]);
-		assert(it != currentTimesMap.end());
-		const FileName& fileName = it->first;
-		const FileTime& fileTime = it->second;
+		const FileName& fileName = fileNames[i];
+
 		ResourceProcessor* processor = getResourceProcessorForFile(fileName, a_processors);
 		if (processor)
 		{
-			if (!a_incremental || isFileModified(fileName, fileTime, storedTimesMap) || isDependencyModified(fileName, storedTimesMap, currentTimesMap))
+			const std::string inPath = inDirectoryPathStr + '\\' + fileName;
+			const std::string outPath = outDirectoryPathStr + '\\' + fileName + BUILT_FILE_EXTENSION;
+
+			if (!a_incremental || isFileOrDependencyModified(fileName, inDirectoryPathStr, storedTimesMap))
 			{
-				const std::string inPath = inDirectoryPathStr + '\\' + fileName;
-				const std::string outPath = outDirectoryPathStr + '\\' + fileName + BUILT_FILE_EXTENSION;
 				createDirectoryForFile(outPath);
-				processFileAndUpdateStoredTimes(inPath, outPath, processor, storedTimesMap);
+				FileWriteTime* fileWriteTime = processFile(inPath, outPath, processor);
+				storedTimesMap[fileName] = fileWriteTime;
 			}
 		}
 	}
-	writeModificationMapToFile(modificationFile, storedTimesMap);
+	writeModificationMapToFile(modificationFilePath, storedTimesMap);
 }
 
 void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
@@ -245,8 +212,7 @@ void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, co
 	const std::string outDirectoryPathStr(a_outDirectoryPath);
 
 	std::vector<std::string> files;
-	std::vector<std::string> lastWriteTimes;
-	if (listFiles(a_inDirectoryPath, "*", files, lastWriteTimes))
+	if (listFiles(a_inDirectoryPath, "*", files))
 	{
 		for (const auto& filePath : files)
 		{

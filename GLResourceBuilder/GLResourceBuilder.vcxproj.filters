@@ -7,9 +7,6 @@
     <ClCompile Include="src\Processors\ModelProcessor.cpp">
       <Filter>Source Files\Processors</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\listFiles.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -25,6 +22,9 @@
     <ClCompile Include="src\Processors\ByteImageProcessor.cpp">
       <Filter>Source Files\Processors</Filter>
     </ClCompile>
+    <ClCompile Include="src\Utils\FileUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Processors\ByteImageProcessor.h">
@@ -38,12 +38,6 @@
     </ClInclude>
     <ClInclude Include="src\Processors\FloatImageProcessor.h">
       <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils\getFileTime.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils\listFiles.h">
-      <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\ResourceBuilder.h">
       <Filter>Header Files</Filter>
@@ -62,6 +56,9 @@
     </ClInclude>
     <ClInclude Include="src\Processors\ModelProcessor.h">
       <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\FileUtils.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

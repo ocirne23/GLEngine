@@ -3,6 +3,7 @@
 #include "Core.h"
 
 #include "EResourceType.h"
+#include "Utils/FileUtils.h"
 #include "Utils/stb_image.h"
 #include "Utils/TextureAtlas.h"
 #include "Utils/writeVector.h"
@@ -67,24 +68,6 @@ struct Vertex
 	vec3 bitangents;
 	uint materialID;
 };
-
-std::string getFileExtension(const std::string& a_filePath)
-{
-	auto dotIdx = a_filePath.find_last_of('.');
-	if (dotIdx != std::string::npos)
-		return a_filePath.substr(dotIdx + 1);
-	else
-		return "";
-}
-
-std::string getFolderPathForFile(const std::string& a_filePath)
-{
-	auto dirIdx = std::min(a_filePath.find_last_of('/'), a_filePath.find_last_of('\\'));
-	if (dirIdx != std::string::npos)
-		return a_filePath.substr(0, dirIdx).append("\\");
-	else
-		return "";
-}
 
 vec4 getTextureOffset(uint a_atlasWidth, uint a_atlasHeight, const TextureAtlas::AtlasRegion& a_reg)
 {
@@ -190,18 +173,19 @@ bool containTexturesInAtlases(std::vector<TextureInfo>& a_textureInfoList, std::
 	return true;
 }
 
-void fillAtlasTextures(const std::vector<TextureInfo>& a_textureAtlasRegions, std::vector<TextureAtlas*>& a_atlases)
+void fillAtlasTextures(const std::vector<TextureInfo>& a_textureAtlasRegions, const std::string& a_baseFilePath, std::vector<TextureAtlas*>& a_atlases)
 {
 	for (const TextureInfo& tex : a_textureAtlasRegions)
 	{
 		TextureAtlas* atlas = a_atlases[tex.atlasIdx];
 
 		int width, height, numComponents;
-		const unsigned char* data = stbi_load(tex.filePath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
+		const std::string fullTexPath = getFolderPathForFile(a_baseFilePath) + tex.filePath;
+		const unsigned char* data = stbi_load(fullTexPath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
 		if (!data)
 		{
-			printf("FAILED TO LOAD IMAGE: %s \n", tex.filePath.c_str());
-			continue;
+			printf("FAILED TO LOAD IMAGE: %s \n", fullTexPath.c_str());
+			assert(false);
 		}
 		assert(tex.width == tex.region.width);
 		assert(tex.height == tex.region.height);
@@ -210,15 +194,16 @@ void fillAtlasTextures(const std::vector<TextureInfo>& a_textureAtlasRegions, st
 	}
 }
 
-uint getTextureInfoIndex(std::vector<TextureInfo>& a_textures, const std::string& a_path)
+uint getTextureInfoIndex(std::vector<TextureInfo>& a_textures, const std::string& a_baseFilePath, const std::string& a_texturePath)
 {
 	for (uint i = 0; i < a_textures.size(); ++i)
-		if (a_textures[i].filePath == a_path)
+		if (a_textures[i].filePath == a_texturePath)
 			return i;
 
 	TextureInfo newTex;
-	newTex.filePath = a_path;
-	newTex.result = stbi_info(a_path.c_str(), &newTex.width, &newTex.height, &newTex.numComp);
+	newTex.filePath = a_texturePath;
+	const std::string fullPath = getFolderPathForFile(a_baseFilePath) + a_texturePath;
+	newTex.result = stbi_info(fullPath.c_str(), &newTex.width, &newTex.height, &newTex.numComp);
 	assert(newTex.result && "Failed to load texture");
 	a_textures.push_back(newTex);
 	return (uint) (a_textures.size() - 1);
@@ -238,7 +223,7 @@ void getMaterialTextureInfo(const aiScene& a_scene, const std::string& a_scenePa
 		auto textureInfoIndex = [&](aiTextureType a_texType)
 		{
 			if (material->GetTextureCount(a_texType) && material->GetTexture(a_texType, 0, &path) == AI_SUCCESS)
-				return (int) getTextureInfoIndex(a_textures, baseTexturePath + path.C_Str());
+				return (int) getTextureInfoIndex(a_textures, baseTexturePath, path.C_Str());
 			else
 				return -1;
 		};
@@ -366,7 +351,7 @@ void getVerticesAndIndices(const aiScene& a_scene, std::vector<Vertex>& a_vertic
 
 END_UNNAMED_NAMESPACE()
 
-bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildOnFileModificationList)
+bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildDependencies)
 {
 	const std::string inResourcePathStr(a_inResourcePath);
 	const std::string outResourcePathstr(a_outResourcePath);
@@ -379,6 +364,8 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 		| aiPostProcessSteps::aiProcess_FlipUVs; // Flip uv's because OpenGL
 
 	const aiScene* scene = aiImportFile(a_inResourcePath, flags);
+
+	printf("building: %s \n", a_inResourcePath);
 	
 	if (!scene)
 	{
@@ -390,6 +377,9 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	std::vector<MaterialData> materials;
 	std::vector<TextureInfo> textures;
 	getMaterialTextureInfo(*scene, inResourcePathStr, materials, textures);
+
+	for (const TextureInfo& textureInfo : textures)
+		a_rebuildDependencies.push_back(textureInfo.filePath);
 	
 	// Then we create atlasses out of the textures
 	std::vector<TextureAtlas*> atlases;
@@ -397,7 +387,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	{
 		while (!containTexturesInAtlases(textures, atlases))
 			increaseAtlasesSize(textures, atlases); // Allocates atlases
-		fillAtlasTextures(textures, atlases);
+		fillAtlasTextures(textures, getFolderPathForFile(inResourcePathStr), atlases);
 		writeAtlasesToFiles(atlases, outResourcePathstr);
 	}
 	const int numAtlases = (int) atlases.size();

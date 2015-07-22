@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-enum { INCREMENTAL_BUILDING = false };
+enum { INCREMENTAL_BUILDING = true };
 
 int main()
 {
@@ -30,8 +30,8 @@ int main()
 	ResourceBuilder::buildResources(modelProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
 	ResourceBuilder::copyFiles(copiedFileExtensions, "..\\GLApp\\assets-source",         "..\\GLApp\\assets",         INCREMENTAL_BUILDING);
 
-	printf("Press enter to continue.");
-	std::cin.ignore();
+	//printf("Press enter to continue.");
+	//std::cin.ignore();
 
 	return 0;
 }
