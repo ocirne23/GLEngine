@@ -8,6 +8,7 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
+// Needed because you cannot cast a std::function to a void*
 struct RenderFuncWrapper
 {
 	RenderFuncWrapper(std::function<void()> a_func) : func(a_func) {}
