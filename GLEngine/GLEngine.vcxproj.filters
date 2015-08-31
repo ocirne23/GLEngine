@@ -169,6 +169,9 @@
     <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp">
       <Filter>Source Files\Graphics\GL\Tech</Filter>
     </ClCompile>
+    <ClCompile Include="src\Threading\ThreadManager.cpp">
+      <Filter>Source Files\Threading</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
@@ -305,9 +308,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\UI\Widgets\TextButton.h">
       <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\UI\TextureRegion.h">
-      <Filter>Header Files\Public\UI</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h">
       <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
@@ -528,6 +528,12 @@
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h">
       <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
     </ClInclude>
+    <ClInclude Include="include\Private\Threading\ThreadManager.h">
+      <Filter>Header Files\Private\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\TextureRegion.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -643,6 +649,12 @@
     </Filter>
     <Filter Include="Header Files\Public\Graphics\GL\Utils">
       <UniqueIdentifier>{73dac75e-0b94-4c95-bd09-651aa6c7a93d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Threading">
+      <UniqueIdentifier>{f1110ce9-b712-4df5-ba88-5527d44ca774}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Private\Threading">
+      <UniqueIdentifier>{1cde2eba-3e3e-41d0-92dc-847265112bc4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

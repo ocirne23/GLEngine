@@ -21,18 +21,24 @@ END_UNNAMED_NAMESPACE()
 
 FPSControlSystem::FPSControlSystem()
 {
-	m_mouseMovedListener.setFunc([this](uint xPos, uint yPos, int deltaX, int deltaY)
+	m_mouseMovedListener.setFunc([this](uint a_xPos, uint a_yPos, int a_deltaX, int a_deltaY)
 	{
 		if (GLEngine::input->isMousePressed(EMouseButton::LEFT))
 		{
-			m_xMoveAmount += deltaX;
-			m_yMoveAmount += deltaY;
+			m_xMoveAmount += a_deltaX;
+			m_yMoveAmount += a_deltaY;
 		}
 	});
-}
 
-FPSControlSystem::~FPSControlSystem()
-{
+	m_keyDownListener.setFunc([this](EKey a_key)
+	{
+		const float speedMod = 0.1f;
+		switch (a_key)
+		{
+		case EKey::KP_PLUS:  m_speedMultiplier *= 1.0 + speedMod; break;
+		case EKey::KP_MINUS: m_speedMultiplier *= 1.0 - speedMod; break;
+		}
+	});
 }
 
 void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
@@ -51,7 +57,7 @@ void FPSControlSystem::update(entityx::EntityManager& a_entities, entityx::Event
 	else if (input.isKeyPressed(EKey::D))     moveAmount = glm::vec3(BASE_CAMERA_SPEED, 0, 0);
 	if (input.isKeyPressed(EKey::SPACE))      moveAmount.y += BASE_CAMERA_SPEED;
 	if (input.isKeyPressed(EKey::LSHIFT))     moveAmount.y -= BASE_CAMERA_SPEED;
-	moveAmount *= a_dt;
+	moveAmount *= a_dt * m_speedMultiplier;
 
 	entityx::ComponentHandle<FPSControlledComponent> controlComponent;
 	entityx::ComponentHandle<TransformComponent> transformComponent;

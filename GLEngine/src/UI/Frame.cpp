@@ -44,9 +44,9 @@ void Frame::render()
 {
 	glm::mat4 projectionMatrix = glm::ortho(0.0f, (float) m_width, (float) m_height, 0.0f, 0.1f, 100.0f);
 	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, -1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	glm::mat4 mvp = projectionMatrix * viewMatrix;
+	glm::mat4 vp = projectionMatrix * viewMatrix;
 
-	m_spriteBatch.begin(mvp);
+	m_spriteBatch.begin(vp);
 	m_spriteBatch.end();
 }
 

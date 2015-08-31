@@ -79,9 +79,9 @@ void Graphics::createGLContext()
 	CHECK_GL_ERROR();
 }
 
-void Graphics::deleteGLContext()
+void Graphics::destroyGLContext()
 {
-	GLVars::deleteGLContext();
+	GLVars::destroyGLContext();
 }
 
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)

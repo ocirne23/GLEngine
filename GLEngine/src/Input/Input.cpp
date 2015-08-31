@@ -14,9 +14,7 @@ void Input::pollEvents()
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
-	{
 		m_eventQueue.push_back(*((Event*) &event));
-	}
 }
 
 void Input::processEvents()
@@ -25,42 +23,20 @@ void Input::processEvents()
 	for (Event& e : m_eventQueue.getBackingQueue())
 	{
 		SDL_Event& event = (SDL_Event&) e;
-
 		switch (event.type)
 		{
 		case SDL_WINDOWEVENT:
-			switch (event.window.event)
-			{
-			case SDL_WINDOWEVENT_RESIZED:
-				windowResized(event.window.data1, event.window.data2);
-				break;
-			case SDL_WINDOWEVENT_CLOSE:
-				windowQuit();
-				break;
-			}
-			break;
-		case SDL_MOUSEMOTION:
-			mouseMoved(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel);
-			break;
-		case SDL_MOUSEBUTTONDOWN:
-			mouseDown((EMouseButton) event.button.button, event.button.x, event.button.y);
-			break;
-		case SDL_MOUSEBUTTONUP:
-			mouseUp((EMouseButton) event.button.button, event.button.x, event.button.y);
-			break;
-		case SDL_MOUSEWHEEL:
-			mouseScrolled(event.wheel.y);
-			break;
-		case SDL_KEYDOWN:
-			if (!event.key.repeat)
-				keyDown((EKey) event.key.keysym.scancode);
-			break;
-		case SDL_KEYUP:
-			keyUp((EKey) event.key.keysym.scancode);
-			break;
-		case SDL_QUIT:
-			windowQuit();
-			break;
+			switch (event.window.event) {
+			case SDL_WINDOWEVENT_RESIZED: windowResized(event.window.data1, event.window.data2); break;
+			case SDL_WINDOWEVENT_CLOSE:   windowQuit(); break;
+			} break;
+		case SDL_MOUSEMOTION:     mouseMoved(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel); break;
+		case SDL_MOUSEBUTTONDOWN: mouseDown((EMouseButton) event.button.button, event.button.x, event.button.y); break;
+		case SDL_MOUSEBUTTONUP:   mouseUp((EMouseButton) event.button.button, event.button.x, event.button.y); break;
+		case SDL_MOUSEWHEEL:      mouseScrolled(event.wheel.y); break;
+		case SDL_KEYDOWN:         if (!event.key.repeat) keyDown((EKey) event.key.keysym.scancode); break;
+		case SDL_KEYUP:           keyUp((EKey) event.key.keysym.scancode); break;
+		case SDL_QUIT:            windowQuit(); break;
 		}
 	}
 	m_eventQueue.getBackingQueue().clear();

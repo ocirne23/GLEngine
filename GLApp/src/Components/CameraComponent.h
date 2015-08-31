@@ -1,11 +1,13 @@
 #pragma once
 
-class PerspectiveCamera;
+#include "Graphics/PerspectiveCamera.h"
 
 struct CameraComponent
 {
-	CameraComponent() {}
-	CameraComponent(PerspectiveCamera* camera) : camera(camera) {}
+	CameraComponent(float viewportWidth, float viewportHeight, float horizontalFov, float near, float far) 
+	{
+		camera.initialize(viewportWidth, viewportHeight, horizontalFov, near, far);
+	}
 
-	PerspectiveCamera* camera = NULL;
+	PerspectiveCamera camera;
 };

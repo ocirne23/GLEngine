@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 
-struct CameraComponent;
+class CameraSystem;
 class PointLightComponent;
 
 class LightSystem : public entityx::System<LightSystem>, public entityx::Receiver<LightSystem>
@@ -15,15 +15,13 @@ class LightSystem : public entityx::System<LightSystem>, public entityx::Receive
 public:
 	enum { MAX_LIGHTS = 1024 };
 
-	LightSystem() : m_lightManager(MAX_LIGHTS) {};
+	LightSystem(const CameraSystem& cameraSystem) : m_cameraSystem(cameraSystem), m_lightManager(MAX_LIGHTS) {};
 	~LightSystem() {}
 
-	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
-	void configure(entityx::EventManager& eventManager);
+	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt) override;
 
-	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
-	void receive(const entityx::ComponentAddedEvent<PointLightComponent>& pointLightComponentAddedEvent);
-	void receive(const entityx::ComponentRemovedEvent<PointLightComponent>& pointLightComponentRemovedEvent);
+	void configure(entityx::EventManager& eventManager) override;
+	void receive(entityx::ComponentAddedEvent<PointLightComponent>& pointLightComponentAddedEvent);
 
 	LightManager& getLightManager();
 	uint getNumLights() const;
@@ -32,8 +30,7 @@ public:
 
 private:
 
+	const CameraSystem& m_cameraSystem;
 	LightManager m_lightManager;
-
-	const PerspectiveCamera* m_activeCamera            = NULL;
 	const glm::vec4* m_viewspaceLightPositionRangeList = NULL;
 };

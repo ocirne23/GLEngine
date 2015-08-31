@@ -58,6 +58,7 @@ rde::string GLVars::s_glDriverVersion;
 
 void GLVars::createGLContext(SDL_Window* a_window)
 {
+	assert(!s_glContext);
 	s_glContext = createHighestGLContext(a_window, s_glMajorVersion, s_glMinorVersion);
 	s_glVendor = (const char*) glGetString(GL_VENDOR);
 	s_glRenderer = (const char*) glGetString(GL_RENDERER);
@@ -71,7 +72,9 @@ void GLVars::createGLContext(SDL_Window* a_window)
 	print("Max texture size: %i\n", s_maxTextureSize);
 }
 
-void GLVars::deleteGLContext()
+void GLVars::destroyGLContext()
 {
+	assert(s_glContext);
 	SDL_GL_DeleteContext(s_glContext);
+	s_glContext = 0;
 }

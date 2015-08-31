@@ -2,6 +2,11 @@
 
 #include "Graphics/LightManager.h"
 
+PointLightComponent::~PointLightComponent()
+{
+	m_lightManager->deleteLight(m_lightHandle);
+}
+
 void PointLightComponent::set(const glm::vec3& a_position, float a_radius, const glm::vec3& a_color, float a_intensity)
 {
 	m_lightManager->setLight(m_lightHandle, a_position, a_radius, a_color, a_intensity);

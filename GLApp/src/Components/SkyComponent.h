@@ -5,8 +5,7 @@ class GLMesh;
 struct SkyComponent
 {
 	SkyComponent() {}
-	SkyComponent(GLMesh* mesh) : mesh(mesh) {}
 
 	bool centerOnCamera = true;
-	GLMesh* mesh        = NULL;
+	glm::mat4 transform = glm::mat4(1);
 };

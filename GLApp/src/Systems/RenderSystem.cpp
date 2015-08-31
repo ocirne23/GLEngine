@@ -11,6 +11,7 @@
 #include "Graphics/GL/GLMesh.h"
 #include "Graphics/GL/GLVars.h"
 #include "Systems/LightSystem.h"
+#include "Systems/CameraSystem.h"
 #include "Utils/FileModificationManager.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -31,15 +32,16 @@ static const glm::vec3 AMBIENT(0.15f);
 
 END_UNNAMED_NAMESPACE()
 
-RenderSystem::RenderSystem(const LightSystem& a_lightSystem) : m_lightSystem(a_lightSystem)
+RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem& a_lightSystem) : 
+	m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem)
 {
 	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
-
 	auto onShaderEdited = [&]()
 	{
 		print("shader edited\n");
-		if (m_activeCamera)
-			initializeShaderForCamera(*m_activeCamera);
+		const PerspectiveCamera* camera = m_cameraSystem.getActiveCamera();
+		if (camera)
+			initializeShaderForCamera(*camera);
 	};
 
 	FileModificationManager::createModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
@@ -54,11 +56,6 @@ RenderSystem::~RenderSystem()
 	FileModificationManager::removeModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH));
 	FileModificationManager::removeModificationListener(this, rde::string(CLUSTERED_SHADING_PATH));
 	FileModificationManager::removeModificationListener(this, rde::string(MATERIAL_LIGHTING_PATH));
-}
-
-void RenderSystem::configure(entityx::EventManager& a_eventManager)
-{
-	a_eventManager.subscribe<entityx::ComponentAddedEvent<CameraComponent>>(*this);
 }
 
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
@@ -110,28 +107,32 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 	m_skyboxShader.end();
 
 	m_hbao.initialize(camera, UBOBindingPoints::HBAO_GLOBALS_UBO_BINDING_POINT);
-}
 
-void RenderSystem::receive(const entityx::ComponentAddedEvent<CameraComponent>& a_cameraComponentAddedEvent)
-{
-	m_activeCamera = a_cameraComponentAddedEvent.component->camera;
-	initializeShaderForCamera(*m_activeCamera);
+	m_shaderInitialized = true;
 }
 
 void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
 {
 	FileModificationManager::update();
 
-	if (!m_activeCamera)
+	const PerspectiveCamera* activeCamera = m_cameraSystem.getActiveCamera();
+
+	if (!m_shaderInitialized && activeCamera)
+		initializeShaderForCamera(*activeCamera);
+
+	if (!activeCamera)
 	{
 		GLEngine::graphics->clear(glm::vec4(0, 1, 0, 1));
 		GLEngine::graphics->swap();
 		return;
 	}
 
-	const PerspectiveCamera& camera = *m_activeCamera;
+	const glm::mat4& viewMatrix = activeCamera->getViewMatrix();
+	const glm::mat4& combinedMatrix = activeCamera->getCombinedMatrix();
+	const glm::mat3 normalMatrix = glm::mat3(glm::inverse(glm::transpose(viewMatrix)));
+
 	const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
-	m_clusteredShading.update(camera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
+	m_clusteredShading.update(*activeCamera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
 
 	if (m_hbaoEnabled)
 		m_hbao.begin();
@@ -143,22 +144,22 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	// Might need to render skybox last with depth test, uses less bandwidth.
 	m_skyboxShader.begin();
 	{
-		m_skyboxMvpMatrixUniform.set(camera.getCombinedMatrix());
-		m_skyboxViewMatrixUniform.set(camera.getViewMatrix());
-		m_skyboxNormalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
+		m_skyboxMvpMatrixUniform.set(combinedMatrix);
+		m_skyboxViewMatrixUniform.set(viewMatrix);
+		m_skyboxNormalMatrixUniform.set(normalMatrix);
 
-		entityx::ComponentHandle<TransformComponent> transform;
 		entityx::ComponentHandle<SkyComponent> sky;
-		for (entityx::Entity entity : a_entities.entities_with_components(transform, sky))
+		entityx::ComponentHandle<ModelComponent> model;
+		for (entityx::Entity entity : a_entities.entities_with_components(sky, model))
 		{
-			glm::mat4 trans = transform->transform;
-			glm::vec3 pos = camera.getPosition();
+			glm::mat4 trans = sky->transform;
+			glm::vec3 pos = activeCamera->getPosition();
 
 			if (sky->centerOnCamera)
 				trans[3] = glm::vec4(pos, 1.0f);
 
 			m_skyboxTransformUniform.set(trans);
-			sky->mesh->render(m_skyboxShader);
+			model->mesh->render(m_skyboxShader);
 		}
 	}
 	m_skyboxShader.end();
@@ -181,16 +182,16 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 		m_lightGridTextureBuffer.upload(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), m_clusteredShading.getLightGrid());
 		m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
 
-		m_mvpMatrixUniform.set(camera.getCombinedMatrix());
-		m_viewMatrixUniform.set(camera.getViewMatrix());
-		m_normalMatrixUniform.set(glm::mat3(glm::inverse(glm::transpose(camera.getViewMatrix()))));
+		m_mvpMatrixUniform.set(combinedMatrix);
+		m_viewMatrixUniform.set(viewMatrix);
+		m_normalMatrixUniform.set(normalMatrix);
 
-		entityx::ComponentHandle<TransformComponent> transformComponent;
-		entityx::ComponentHandle<ModelComponent> modelComponent;
-		for (entityx::Entity entity : a_entities.entities_with_components(transformComponent, modelComponent))
+		entityx::ComponentHandle<TransformComponent> transform;
+		entityx::ComponentHandle<ModelComponent> model;
+		for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
 		{
-			m_transformUniform.set(transformComponent->transform);
-			modelComponent->mesh->render(m_modelShader);
+			m_transformUniform.set(transform->transform);
+			model->mesh->render(m_modelShader);
 		}
 	}
 	m_modelShader.end();

@@ -1,11 +1,9 @@
 #pragma once
 
+#include "3rdparty/entityx/entityx.h"
+#include "3rdparty/rde/vector.h"
 #include "Core.h"
 #include "Input/Input.h"
-#include "3rdparty/entityx/entityx.h"
-
-class GLMesh;
-class PerspectiveCamera;
 
 class TestScreen
 {
@@ -22,10 +20,8 @@ private:
 private:
 
 	entityx::EntityX m_entityx;
-	GLMesh* m_dragon			= NULL;
-	GLMesh* m_building          = NULL;
-	GLMesh* m_skybox            = NULL;
-	PerspectiveCamera* m_camera = NULL;
-
 	Input::KeyDownListener m_keyDownListener;
+	Input::WindowQuitListener m_windowQuitListener;
+
+	rde::vector<entityx::Entity> m_lightEntities;
 };

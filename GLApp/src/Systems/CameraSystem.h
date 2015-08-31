@@ -11,12 +11,15 @@ class CameraSystem : public entityx::System<CameraSystem>, public entityx::Recei
 {
 public:
 
-	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
-	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
-	void receive(const entityx::ComponentRemovedEvent<CameraComponent>& cameraComponentRemovedEvent);
-	void configure(entityx::EventManager& eventManager);
+	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt) override;
+
+	void configure(entityx::EventManager& eventManager) override;
+	void receive(entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
+
+	const PerspectiveCamera* getActiveCamera() const;
 
 private:
 
 	entityx::Entity m_cameraEntity;
+	const PerspectiveCamera* m_activeCamera;
 };

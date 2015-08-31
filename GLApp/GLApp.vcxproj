@@ -23,12 +23,14 @@
     <RootNamespace>GLApp</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="src\Components\ModelComponent.cpp" />
     <ClCompile Include="src\Components\PointLightComponent.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Screens\TestScreen.cpp" />
     <ClCompile Include="src\Systems\CameraSystem.cpp" />
     <ClCompile Include="src\Systems\FPSControlSystem.cpp" />
     <ClCompile Include="src\Systems\LightSystem.cpp" />
+    <ClCompile Include="src\Systems\ModelManageSystem.cpp" />
     <ClCompile Include="src\Systems\RenderSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +46,7 @@
     <ClInclude Include="src\Systems\CameraSystem.h" />
     <ClInclude Include="src\Systems\FPSControlSystem.h" />
     <ClInclude Include="src\Systems\LightSystem.h" />
+    <ClInclude Include="src\Systems\ModelManageSystem.h" />
     <ClInclude Include="src\Systems\RenderSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -189,8 +192,6 @@
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

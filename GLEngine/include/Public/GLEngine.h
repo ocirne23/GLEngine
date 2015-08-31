@@ -3,19 +3,46 @@
 #include "Core.h"
 #include <functional>
 
+/**********************
+Main class providing basic functions and static access to input and graphics
+
+*** Usage examples ***
+Setup and main loop:
+
+#include "GLEngine.h"
+int main()
+{
+    GLEngine::initialize();
+    GLEngine::createThread("RenderThread", [&]()
+    {
+	    GLEngine::createGLContext();
+        while (!GLEngine::isShutdown())
+        {
+            GLEngine::doRenderThreadTick();
+            // render stuff
+        }
+		GLEngine::destroyGLContext();
+    });
+    while (!GLEngine::isShutdown())
+        GLEngine::doMainThreadTick();
+}
+**********************/
+
 class Input;
 class Graphics;
-struct SDL_Thread;
+class ThreadManager;
 
 class GLEngine
 {
 public:
 
 	static void initialize();
-	static void createRenderThread(std::function<void()> func);
+	static void createThread(const char* threadName, std::function<void()> func);
+	static void createGLContext();
+	static void destroyGLContext();
 
 	static void doMainThreadTick();
-	static void doRenderThreadTick();
+	static void doEngineTick();
 
 	static void sleep(uint timeMs);
 	static uint getTimeMs();
@@ -28,9 +55,6 @@ private:
 	GLEngine() {}
 	~GLEngine() {}
 
-	static int renderThread(void* ptr);
-	static void dispose();
-
 public:
 
 	static Input* input;
@@ -39,5 +63,5 @@ public:
 private:
 
 	static bool s_shutdown;
-	static SDL_Thread* s_renderThread;
+	static ThreadManager* s_threadManager;
 };

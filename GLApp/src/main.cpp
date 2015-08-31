@@ -16,21 +16,24 @@ int main()
 		print("FPS: %i \t MS: %f\n", measurer.getAvgFps(), measurer.getAvgMsPerFrame());
 	});
 
-	GLEngine::createRenderThread([&]()
+	GLEngine::createThread("RenderThread", [&]()
 	{
+		GLEngine::createGLContext();
 		TestScreen testScreen;
 		while (!GLEngine::isShutdown())
 		{
-			GLEngine::doRenderThreadTick();
+			GLEngine::doEngineTick();
 			float deltaSec = deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs());
 			testScreen.render(deltaSec);
 			fpsMeasurer.tickFrame(deltaSec);
 		}
+		GLEngine::destroyGLContext();
 	});
 
 	while (!GLEngine::isShutdown())
 	{
 		GLEngine::doMainThreadTick();
 	}
+	GLEngine::sleep(2000);
 	return 0;
 }

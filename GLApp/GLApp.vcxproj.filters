@@ -53,6 +53,12 @@
     <ClCompile Include="src\Systems\LightSystem.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="src\Systems\ModelManageSystem.cpp">
+      <Filter>Source Files\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Components\ModelComponent.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AppUtils\FPSMeasurer.h">
@@ -93,6 +99,9 @@
     </ClInclude>
     <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h">
       <Filter>Header Files\AppUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Systems\ModelManageSystem.h">
+      <Filter>Header Files\Systems</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

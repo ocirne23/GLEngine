@@ -9,15 +9,20 @@
 #include "Input/InputListener.h"
 #include "3rdparty/rde/vector.h"
 
+/*** Usage examples ***
+Polling input:
+
+if (GLEngine::input->isKeyPressed(EKey::ESCAPE)) {}
+
+Listening to input events:
+
+Input::KeyDownListener keyDownListener;
+keyDownListener.setFunc([this](EKey a_key) { onKeyDown(a_key); });
+
+**********************/
+
 class Input
 {
-public:
-
-	struct Event
-	{
-		byte data[56];
-	};
-
 public:
 	friend class GLEngine;
 
@@ -43,11 +48,12 @@ private:
 	void windowQuit();
 
 private:
+
+	struct Event { byte data[56]; };
 	ConcurrentQueue<Event> m_eventQueue;
 
 public:
 	// Listener stuff from here on //
-
 	struct KeyDownTag {};
 	struct KeyUpTag {};
 	struct MouseDownTag {};
@@ -56,15 +62,15 @@ public:
 	struct MouseScrolledTag {};
 	struct WindowResizedTag {};
 	struct WindowQuitTag {};
-
-	typedef InputListener<KeyDownTag, void, EKey> KeyDownListener;
-	typedef InputListener<KeyUpTag, void, EKey> KeyUpListener;
-	typedef InputListener<MouseDownTag, void, EMouseButton, uint, uint> MouseDownListener;
-	typedef InputListener<MouseUpTag, void, EMouseButton, uint, uint> MouseUpListener;
-	typedef InputListener<MouseMovedTag, void, uint, uint, int, int> MouseMovedListener;
-	typedef InputListener<MouseScrolledTag, void, int> MouseScrolledListener;
-	typedef InputListener<WindowResizedTag, void, uint, uint> WindowResizedListener;
-	typedef InputListener<WindowQuitTag, void> WindowQuitListener;
+	
+	typedef InputListener<KeyDownTag, void,       EKey>                     KeyDownListener;
+	typedef InputListener<KeyUpTag, void,         EKey>                     KeyUpListener;
+	typedef InputListener<MouseDownTag, void,     EMouseButton, uint, uint> MouseDownListener;
+	typedef InputListener<MouseUpTag, void,       EMouseButton, uint, uint> MouseUpListener;
+	typedef InputListener<MouseMovedTag, void,    uint, uint, int, int>     MouseMovedListener;
+	typedef InputListener<MouseScrolledTag, void, int>                      MouseScrolledListener;
+	typedef InputListener<WindowResizedTag, void, uint, uint>               WindowResizedListener;
+	typedef InputListener<WindowQuitTag, void>                              WindowQuitListener;
 
 private:
 

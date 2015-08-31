@@ -15,8 +15,7 @@
 
 #include <glm/glm.hpp>
 
-struct CameraComponent;
-class PerspectiveCamera;
+class CameraSystem;
 class LightSystem;
 
 BEGIN_NAMESPACE(UBOBindingPoints)
@@ -41,19 +40,17 @@ enum
 };
 END_NAMESPACE(TextureUnits)
 
-class RenderSystem : public entityx::System<RenderSystem>, public entityx::Receiver<RenderSystem>
+class RenderSystem : public entityx::System<RenderSystem>
 {
 public:
 
-	RenderSystem(const LightSystem& lightSystem);
+	RenderSystem(const CameraSystem& cameraSystem, const LightSystem& lightSystem);
 	~RenderSystem();
 
-	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt);
-	void receive(const entityx::ComponentAddedEvent<CameraComponent>& cameraComponentAddedEvent);
-	void configure(entityx::EventManager& eventManager);
+	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt) override;
 
-	const GLShader& getModelShader() { return m_modelShader; }
-	bool isHBAOEnabled() const { return m_hbaoEnabled; }
+	const GLShader& getModelShader()    { return m_modelShader; }
+	bool isHBAOEnabled() const          { return m_hbaoEnabled; }
 	void setHBAOEnabled(bool a_enabled) { m_hbaoEnabled = a_enabled; }
 
 private:
@@ -63,9 +60,10 @@ private:
 private:
 
 	const LightSystem& m_lightSystem;
-	const PerspectiveCamera* m_activeCamera = NULL;
+	const CameraSystem& m_cameraSystem;
 
-	bool m_hbaoEnabled = true;
+	bool m_shaderInitialized = false;
+	bool m_hbaoEnabled       = true;
 	HBAO m_hbao;
 
 	GLTexture m_dfvTexture;

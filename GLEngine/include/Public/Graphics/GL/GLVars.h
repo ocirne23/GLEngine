@@ -6,11 +6,12 @@
 struct SDL_Window;
 typedef void* SDL_GLContext;
 
+class Graphics;
+
 class GLVars
 {
 public:
-	static void createGLContext(SDL_Window* window);
-	static void deleteGLContext();
+	friend class Graphics;
 
 	static uint getGLMajorVersion()                 { return s_glMajorVersion; }
 	static uint getGLMinorVersion()                 { return s_glMinorVersion; }
@@ -26,6 +27,9 @@ private:
 	GLVars() {}
 	~GLVars() {}
 	GLVars(const GLVars& copy) = delete;
+
+	static void createGLContext(SDL_Window* window);
+	static void destroyGLContext();
 
 private:
 

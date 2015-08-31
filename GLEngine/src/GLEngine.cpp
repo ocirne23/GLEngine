@@ -2,49 +2,32 @@
 
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
+#include "Threading/ThreadManager.h"
 #include "Utils/WindowsPlatformData.h"
 
 #include <SDL/SDL.h>
 
-BEGIN_UNNAMED_NAMESPACE()
-
-// Needed because you cannot cast a std::function to a void*
-struct RenderFuncWrapper
-{
-	RenderFuncWrapper(std::function<void()> a_func) : func(a_func) {}
-	std::function<void()> func;
-};
-
-END_UNNAMED_NAMESPACE()
-
-Input* GLEngine::input = NULL;
-Graphics* GLEngine::graphics = NULL;
-bool GLEngine::s_shutdown = false;
-SDL_Thread* GLEngine::s_renderThread = NULL;
+Input* GLEngine::input                   = NULL;
+Graphics* GLEngine::graphics             = NULL;
+bool GLEngine::s_shutdown                = false;
+ThreadManager* GLEngine::s_threadManager = NULL;
 
 void GLEngine::initialize()
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
-		print("%s: %s\n", "Unable to initialize SDL", SDL_GetError());
+		print("Unable to initialize SDL: %s\n", SDL_GetError());
 		SDL_Quit();
 		return;
 	}
 	graphics = new Graphics("GLEngine", 1900 / 2, 1000 / 2, 1920 + 10, 30); // TODO: move construction args to app
 	input = new Input();
+	s_threadManager = new ThreadManager();
 }
 
-void GLEngine::createRenderThread(std::function<void()> a_func)
+void GLEngine::createThread(const char* a_threadName, std::function<void()> a_func)
 {
-	s_renderThread = SDL_CreateThread(&GLEngine::renderThread, "RenderThread", new RenderFuncWrapper(a_func));
-}
-
-int GLEngine::renderThread(void* a_ptr)
-{
-	graphics->createGLContext();
-	((RenderFuncWrapper*) a_ptr)->func();
-	delete a_ptr;
-	return 0;
+	s_threadManager->createThread(a_threadName, a_func);
 }
 
 void GLEngine::doMainThreadTick()
@@ -52,7 +35,7 @@ void GLEngine::doMainThreadTick()
 	input->pollEvents();
 }
 
-void GLEngine::doRenderThreadTick()
+void GLEngine::doEngineTick()
 {
 	input->processEvents();
 }
@@ -70,12 +53,19 @@ uint GLEngine::getTimeMs()
 void GLEngine::shutdown()
 {
 	s_shutdown = true;
-	if (SDL_ThreadID() != SDL_GetThreadID(s_renderThread))
-	{
-		print("Waiting for rendering thread to shut down\n");
-		SDL_WaitThread(s_renderThread, NULL);
-	}
+	s_threadManager->waitForAllThreadShutdown();
 	SAFE_DELETE(input);
 	SAFE_DELETE(graphics);
+	SAFE_DELETE(s_threadManager);
 	SDL_Quit();
+}
+
+void GLEngine::createGLContext()
+{
+	graphics->createGLContext();
+}
+
+void GLEngine::destroyGLContext()
+{
+	graphics->destroyGLContext();
 }

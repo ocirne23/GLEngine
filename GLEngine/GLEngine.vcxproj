@@ -57,6 +57,7 @@
     <ClCompile Include="src\3rdparty\rde\list.cpp" />
     <ClCompile Include="src\3rdparty\rde\rde_string.cpp" />
     <ClCompile Include="src\3rdparty\rde\slist.cpp" />
+    <ClCompile Include="src\Threading\ThreadManager.cpp" />
     <ClCompile Include="src\Utils\GLTestScreenImpl.cpp" />
     <ClCompile Include="src\UI\Frame.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
@@ -77,6 +78,7 @@
     <ClCompile Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Private\Threading\ThreadManager.h" />
     <ClInclude Include="include\Private\Utils\readVector.h" />
     <ClInclude Include="include\Public\Core.h" />
     <ClInclude Include="include\Public\3rdparty\entityx\3rdparty\catch.hpp" />
@@ -118,7 +120,7 @@
     <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h" />
     <ClInclude Include="include\Public\Graphics\Pixmap.h" />
     <ClInclude Include="include\Private\Graphics\GL\Utils\tryEnableARBDebugOutput.h" />
-    <ClInclude Include="include\Public\UI\TextureRegion.h" />
+    <ClInclude Include="include\Public\Graphics\TextureRegion.h" />
     <ClInclude Include="include\Public\Input\EKey.h" />
     <ClInclude Include="include\Public\Input\EMouseButton.h" />
     <ClInclude Include="include\Public\Input\Input.h" />

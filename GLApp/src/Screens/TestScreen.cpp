@@ -1,119 +1,118 @@
 #include "Screens/TestScreen.h"
 
+#include "3rdparty/rde/rde_string.h"
+
 #include "Components/CameraComponent.h"
 #include "Components/FPSControlledComponent.h"
 #include "Components/ModelComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SkyComponent.h"
 #include "Components/TransformComponent.h"
+
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/PerspectiveCamera.h"
-#include "Graphics/GL/GLMesh.h"
-#include "Graphics/GL/GLVars.h"
+
 #include "Input/Input.h"
+
 #include "Systems/CameraSystem.h"
 #include "Systems/FPSControlSystem.h"
 #include "Systems/LightSystem.h"
+#include "Systems/ModelManageSystem.h"
 #include "Systems/RenderSystem.h"
 
 #include <glm/gtc/random.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 
-static const char* const MODEL_FILE_PATH = "Models/palace/palace.obj.da";
-static const char* const MODEL2_FILE_PATH = "Models/meshes/dragon.obj.da";
-
-static const char* const SKYBOX_FILE_PATH = "Models/skybox/skysphere.obj.da";
-static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
+static const rde::string MODEL_FILE_PATH("Models/palace/palace.obj.da");
+static const rde::string MODEL2_FILE_PATH("Models/meshes/dragon.obj.da");
+static const rde::string SKYBOX_FILE_PATH("Models/skybox/skysphere.obj.da");
+static const rde::string UI_JSON_FILE_PATH("UI/uitest.json");
 
 END_UNNAMED_NAMESPACE()
 
+using namespace entityx;
+
 TestScreen::TestScreen()
 {
-	m_entityx.systems.add<FPSControlSystem>();
-	m_entityx.systems.add<CameraSystem>();
-	m_entityx.systems.add<LightSystem>();
-	m_entityx.systems.add<RenderSystem>(*m_entityx.systems.system<LightSystem>());
-	m_entityx.systems.configure();
+	m_keyDownListener.setFunc([this](EKey a_key) { keyDown(a_key); });
+	m_windowQuitListener.setFunc([this]() { GLEngine::shutdown(); });
 
-	m_camera = new PerspectiveCamera();
-	m_camera->initialize((float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight(), 90.0f, 0.5f, 1000.0f);
+	SystemManager& systems = m_entityx.systems;
+	systems.add<ModelManageSystem>();
+	systems.add<FPSControlSystem>();
+	systems.add<CameraSystem>();
+	systems.add<LightSystem>(*systems.system<CameraSystem>());
+	systems.add<RenderSystem>(*systems.system<CameraSystem>(), *systems.system<LightSystem>());
+	systems.configure();
 
-	m_building = new GLMesh();
-	m_building->loadFromFile(MODEL_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
-
-	m_dragon = new GLMesh();
-	m_dragon->loadFromFile(MODEL2_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
-
-	m_skybox = new GLMesh();
-	m_skybox->loadFromFile(SKYBOX_FILE_PATH, TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
-
-	entityx::Entity cameraEntity = m_entityx.entities.create();
-	cameraEntity.assign<CameraComponent>(m_camera);
+	Entity cameraEntity = m_entityx.entities.create();
+	cameraEntity.assign<CameraComponent>((float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight(), 90.0f, 0.5f, 1000.0f);
 	cameraEntity.assign<TransformComponent>(0.0f, 0.0f, 0.0f);
 	cameraEntity.assign<FPSControlledComponent>(10.0f, 0.7f);
 
-	entityx::Entity modelEntity = m_entityx.entities.create();
-	modelEntity.assign<ModelComponent>(m_building);
+	Entity skyboxEntity = m_entityx.entities.create();
+	skyboxEntity.assign<SkyComponent>();
+	skyboxEntity.assign<ModelComponent>(SKYBOX_FILE_PATH);
+
+	Entity modelEntity = m_entityx.entities.create();
+	modelEntity.assign<ModelComponent>(MODEL_FILE_PATH);
 	modelEntity.assign<TransformComponent>(0.0f, -10.0f, -70.0f);
 
-	entityx::Entity model2Entity = m_entityx.entities.create();
-	model2Entity.assign<ModelComponent>(m_dragon);
+	Entity model2Entity = m_entityx.entities.create();
+	model2Entity.assign<ModelComponent>(MODEL2_FILE_PATH);
 	model2Entity.assign<TransformComponent>(0.0f, -7.0f, -58.0f);
 
-	entityx::Entity lightEntity = m_entityx.entities.create();
+	Entity lightEntity = m_entityx.entities.create();
 	lightEntity.assign<PointLightComponent>()->set(glm::vec3(0, -10.0f, -20.0f), 5.0f, glm::vec3(1.0f), 20.0f);
-
-	entityx::Entity skyboxEntity = m_entityx.entities.create();
-	skyboxEntity.assign<SkyComponent>(m_skybox);
-	skyboxEntity.assign<TransformComponent>();
-
-	m_keyDownListener.setFunc([this](EKey a_key) { keyDown(a_key); });
 }
 
 TestScreen::~TestScreen()
 {
-	SAFE_DELETE(m_skybox);
-	SAFE_DELETE(m_dragon);
-	SAFE_DELETE(m_building);
-	SAFE_DELETE(m_camera);
 }
 
 void TestScreen::render(float a_deltaSec)
 {
-	m_entityx.systems.update<FPSControlSystem>(a_deltaSec);
-	m_entityx.systems.update<CameraSystem>(a_deltaSec);
-	m_entityx.systems.update<LightSystem>(a_deltaSec);
-	m_entityx.systems.update<RenderSystem>(a_deltaSec);
+	SystemManager& systems = m_entityx.systems;
+	systems.update<FPSControlSystem>(a_deltaSec);
+	systems.update<CameraSystem>(a_deltaSec);
+	systems.update<LightSystem>(a_deltaSec);
+	systems.update<RenderSystem>(a_deltaSec);
 }
 
 void TestScreen::keyDown(EKey a_key)
 {
+	SystemManager& systems = m_entityx.systems;
+
 	switch (a_key)
 	{
 	case EKey::T:
 	{
-		glm::vec3 position = m_camera->getPosition() + m_camera->getDirection();
+		const PerspectiveCamera* camera = systems.system<CameraSystem>()->getActiveCamera();
+		// Place light 1.0f in front of camera position.
+		glm::vec3 position = camera->getPosition() + camera->getDirection();
 		glm::vec3 color = glm::normalize(glm::linearRand(glm::vec3(0), glm::vec3(1)));
-		float intensity = glm::linearRand(5.0f, 10.0f);
+		float intensity = glm::linearRand(7.0f, 25.0f);
 		float radius = glm::linearRand(10.0f, 20.0f);
+
 		entityx::Entity lightEntity = m_entityx.entities.create();
 		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
+		m_lightEntities.push_back(lightEntity);
 		break;
 	}
 	case EKey::Y:
 	{
-		for (entityx::Entity e : m_entityx.entities.entities_with_components<PointLightComponent>())
+		if (m_lightEntities.size())
 		{
-			e.component<PointLightComponent>().remove();
-			e.destroy();
+			m_lightEntities.back().destroy();
+			m_lightEntities.pop_back();
 		}
 		break;
 	}
 	case EKey::G:
 	{
-		m_entityx.systems.system<RenderSystem>()->setHBAOEnabled(!m_entityx.systems.system<RenderSystem>()->isHBAOEnabled());
+		auto renderSystem = systems.system<RenderSystem>();
+		renderSystem->setHBAOEnabled(!renderSystem->isHBAOEnabled());
 		break;
 	}
 	case EKey::ESCAPE:
