@@ -52,10 +52,7 @@ RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem
 
 RenderSystem::~RenderSystem()
 {
-	FileModificationManager::removeModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH));
-	FileModificationManager::removeModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH));
-	FileModificationManager::removeModificationListener(this, rde::string(CLUSTERED_SHADING_PATH));
-	FileModificationManager::removeModificationListener(this, rde::string(MATERIAL_LIGHTING_PATH));
+	FileModificationManager::removeAllModificationListenersForOwner(this);
 }
 
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)

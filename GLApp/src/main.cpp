@@ -31,9 +31,7 @@ int main()
 	});
 
 	while (!GLEngine::isShutdown())
-	{
 		GLEngine::doMainThreadTick();
-	}
-	GLEngine::sleep(2000);
+
 	return 0;
 }

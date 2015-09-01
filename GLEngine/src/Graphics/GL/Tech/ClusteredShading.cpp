@@ -10,6 +10,12 @@
 #include <assert.h>
 #include <glm/glm.hpp>
 
+ClusteredShading::~ClusteredShading()
+{
+	SAFE_DELETE_ARRAY(m_lightGrid);
+	SAFE_DELETE_ARRAY(m_tileLightIndices);
+}
+
 void ClusteredShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight,
 							  const PerspectiveCamera& a_camera)
 {
@@ -40,6 +46,7 @@ void ClusteredShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint
 
 void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLights, const glm::vec4* a_viewSpaceLightPositionRangeList)
 {
+	assert(m_lightGrid && m_tileLightIndices);
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
 
 	for (uint i = 0; i < m_gridSize; ++i)

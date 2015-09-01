@@ -8,7 +8,7 @@
 #include "Graphics/GL/Wrappers/GLUniform.h"
 #include "3rdparty/rde/vector.h"
 
-#include "UI/TextureRegion.h"
+#include "Graphics/TextureRegion.h"
 
 #include <glm/glm.hpp>
 

@@ -2,7 +2,7 @@
 
 #include "UI/Font.h"
 
-#include "UI/TextureRegion.h"
+#include "Graphics/TextureRegion.h"
 #include "3rdparty/rde/rde_string.h"
 #include "3rdparty/rde/hash_map.h"
 

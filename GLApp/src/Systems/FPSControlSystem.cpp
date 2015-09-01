@@ -35,8 +35,8 @@ FPSControlSystem::FPSControlSystem()
 		const float speedMod = 0.1f;
 		switch (a_key)
 		{
-		case EKey::KP_PLUS:  m_speedMultiplier *= 1.0 + speedMod; break;
-		case EKey::KP_MINUS: m_speedMultiplier *= 1.0 - speedMod; break;
+		case EKey::KP_PLUS:  m_speedMultiplier *= 1.0f + speedMod; break;
+		case EKey::KP_MINUS: m_speedMultiplier *= 1.0f - speedMod; break;
 		}
 	});
 }

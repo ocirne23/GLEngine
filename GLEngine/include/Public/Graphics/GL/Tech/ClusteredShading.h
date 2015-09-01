@@ -12,7 +12,7 @@ class ClusteredShading
 {
 public:
 	ClusteredShading() {}
-	~ClusteredShading() {}
+	~ClusteredShading();
 
 	void resize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* lightPositionRangeList);

@@ -12,7 +12,9 @@ public:
 
 private:
 
-	FileModificationListener(const rde::string& filePath, std::function<void()> onFileModification);
+	FileModificationListener(const rde::string& filePath, std::function<void()> onFileModification)
+		: m_filePath(filePath), m_onFileModification(onFileModification)
+	{}
 	~FileModificationListener() {};
 
 private:
