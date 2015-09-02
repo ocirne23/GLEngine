@@ -16,8 +16,9 @@ class Frame
 {
 public:
 
-	Frame(const char* fileName);
 	~Frame();
+
+	void initialize(const char* fileName);
 
 	void resize(uint width, uint height);
 	void render();

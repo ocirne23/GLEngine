@@ -16,16 +16,17 @@ public:
 	void load(const char* filePath);
 	void dispose();
 
+	const TextureRegion& getTextButtonTex() const { return m_textButtonTex; }
+	const TextureRegion& getImageButtonTex() const { return m_imageButtonTex; }
+
 private:
 
 	GLTexture* getTexture(const rde::string& filePath);
 
-public:
-
-	TextureRegion m_textButtonStyle;
-	TextureRegion m_imageButtonStyle;
-
 private:
+
+	TextureRegion m_textButtonTex;
+	TextureRegion m_imageButtonTex;
 
 	bool m_isDisposed = false;
 	rde::hash_map<const char*, GLTexture*> m_textures;

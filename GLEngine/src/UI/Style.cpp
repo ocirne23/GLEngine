@@ -26,9 +26,8 @@ void Style::load(const char* a_filePath)
 		assert(success);
 	}
 	
-	rde::string imagePath = rde::string(json["textbutton"].asCString());
-	GLTexture* textButtonTex = getTexture(imagePath);
-	print("loaded tex: %i %i\n", textButtonTex->getWidth(), textButtonTex->getHeight());
+	m_textButtonTex.texture  = getTexture(rde::string(json["textbutton"]));
+	m_imageButtonTex.texture = getTexture(rde::string(json["imagebutton"]));
 }
 
 GLTexture* Style::getTexture(const rde::string& a_filePath)

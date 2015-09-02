@@ -4,6 +4,7 @@
 #include "3rdparty/rde/vector.h"
 #include "Core.h"
 #include "Input/Input.h"
+#include "UI/Frame.h"
 
 class TestScreen
 {

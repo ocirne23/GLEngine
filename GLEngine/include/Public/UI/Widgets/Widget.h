@@ -24,6 +24,8 @@ public:
 	virtual void fromJson(const Json::Value& json);
 	virtual Json::Value toJson();
 
+	EWidgetType getType() const { return m_type; }
+
 protected:
 
 	EWidgetType m_type;

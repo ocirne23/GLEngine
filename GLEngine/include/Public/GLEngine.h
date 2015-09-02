@@ -25,6 +25,7 @@ int main()
     });
     while (!GLEngine::isShutdown())
         GLEngine::doMainThreadTick();
+	GLEngine::finish();
 }
 **********************/
 
@@ -49,6 +50,7 @@ public:
 
 	static void shutdown();
 	static bool isShutdown() { return s_shutdown; }
+	static void finish();
 
 private:
 

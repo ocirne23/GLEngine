@@ -12,8 +12,10 @@ static const uint SPRITE_BATCH_SIZE = 100;
 
 END_UNNAMED_NAMESPACE()
 
-Frame::Frame(const char* a_fileName) : m_fileName(a_fileName), m_spriteBatch(SPRITE_BATCH_SIZE)
+void Frame::initialize(const char* a_fileName)
 {
+	m_spriteBatch.initialize(SPRITE_BATCH_SIZE);
+
 	Json::Reader reader;
 	{
 		FileHandle handle(a_fileName);
@@ -27,13 +29,21 @@ Frame::Frame(const char* a_fileName) : m_fileName(a_fileName), m_spriteBatch(SPR
 	for (Json::Value item : contents)
 	{
 		Widget* widget = NULL;
-		rde::string type = rde::string(item["type"].asCString());
-
-		if (type == getStringForWidgetType(EWidgetType::TEXTBUTTON))
+		EWidgetType type = getWidgetTypeForString(rde::string(item["type"].asCString()));
+		switch (type)
+		{
+		case EWidgetType::TEXTBUTTON:
 			widget = new TextButton();
-		else if (type == getStringForWidgetType(EWidgetType::IMAGEBUTTON))
+			break;
+		case EWidgetType::IMAGEBUTTON:
 			widget = new ImageButton();
-
+			break;
+		
+		default: // Fall through
+		case EWidgetType::INVALID_TYPE:
+			assert(false);
+			break;
+		}
 		assert(widget);
 		widget->fromJson(item);
 		m_widgets.push_back(widget);
@@ -47,6 +57,18 @@ void Frame::render()
 	glm::mat4 vp = projectionMatrix * viewMatrix;
 
 	m_spriteBatch.begin(vp);
+
+	for (Widget* widget : m_widgets)
+	{
+		switch (widget->getType())
+		{
+		case EWidgetType::TEXTBUTTON: break;
+		case EWidgetType::IMAGEBUTTON; 
+			m_spriteBatch.draw(m_style.getImageButtonTex(), 0.5f, 0.5f, 200.0f, 200.0f);
+			break;
+		}
+	}
+
 	m_spriteBatch.end();
 }
 

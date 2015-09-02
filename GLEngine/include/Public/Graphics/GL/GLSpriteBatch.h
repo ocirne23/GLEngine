@@ -18,7 +18,7 @@ class GLSpriteBatch
 {
 public:
 
-	GLSpriteBatch(uint size);
+	void initialize(uint size);
 
 	void begin(const glm::mat4& mvpMatrix);
 	void draw(const TextureRegion& region, float x, float y, float width, float height);
@@ -37,9 +37,10 @@ private:
 
 private:
 
-	bool m_begun     = false;
-	uint m_size      = 0;
-	uint m_drawCount = 0;
+	bool m_initialzied = false;
+	bool m_begun       = false;
+	uint m_size        = 0;
+	uint m_drawCount   = 0;
 
 	GLTexture* m_currentTexture = NULL;
 

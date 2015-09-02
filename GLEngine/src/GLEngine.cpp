@@ -53,11 +53,6 @@ uint GLEngine::getTimeMs()
 void GLEngine::shutdown()
 {
 	s_shutdown = true;
-	s_threadManager->waitForAllThreadShutdown();
-	SAFE_DELETE(input);
-	SAFE_DELETE(graphics);
-	SAFE_DELETE(s_threadManager);
-	SDL_Quit();
 }
 
 void GLEngine::createGLContext()
@@ -68,4 +63,13 @@ void GLEngine::createGLContext()
 void GLEngine::destroyGLContext()
 {
 	graphics->destroyGLContext();
+}
+
+void GLEngine::finish()
+{
+	s_threadManager->waitForAllThreadShutdown();
+	SAFE_DELETE(input);
+	SAFE_DELETE(graphics);
+	SAFE_DELETE(s_threadManager);
+	SDL_Quit();
 }

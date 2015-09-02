@@ -11,26 +11,15 @@ static const char* FRAG_SHADER_FILE = "Shaders/UI/spritebatch.frag";
 
 END_UNNAMED_NAMESPACE()
 
-GLSpriteBatch::GLSpriteBatch(uint a_size) : m_size(a_size)
+void GLSpriteBatch::initialize(uint a_size)
 {
-	m_vertexBuffer.initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STREAM);
-	m_indiceBuffer.initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
-	m_shader.initialize(VERT_SHADER_FILE, FRAG_SHADER_FILE);
-	m_shader.begin();
-	m_mvpUniform.initialize(m_shader, "u_mvp");
-	m_shader.end();
-
-	m_stateBuffer.initialize();
-
-	m_stateBuffer.begin();
+	m_size = a_size;
 
 	VertexAttribute attributes[] =
 	{
 		VertexAttribute(0, "Position", VertexAttribute::EFormat::FLOAT, 2),
 		VertexAttribute(1, "Texcoords", VertexAttribute::EFormat::FLOAT, 2),
 	};
-	m_vertexBuffer.setVertexAttributes(ARRAY_SIZE(attributes), attributes);
-
 	rde::vector<ushort> indices;
 	indices.reserve(m_size * 6);
 	for (uint i = 0, j = 0; i < m_size * 6; i += 6, j += 4)
@@ -42,14 +31,27 @@ GLSpriteBatch::GLSpriteBatch(uint a_size) : m_size(a_size)
 		indices.push_back(j + 2);
 		indices.push_back(j + 3);
 	}
-	m_indiceBuffer.upload(indices.size() * sizeof(ushort), &indices[0]);
 
+	m_shader.initialize(VERT_SHADER_FILE, FRAG_SHADER_FILE);
+	m_vertexBuffer.initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STREAM);
+	m_indiceBuffer.initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
+	m_stateBuffer.initialize();
+
+	m_shader.begin();
+	m_mvpUniform.initialize(m_shader, "u_mvp");
+	m_shader.end();
+
+	m_stateBuffer.begin();
+	m_vertexBuffer.setVertexAttributes(ARRAY_SIZE(attributes), attributes);
+	m_indiceBuffer.upload(indices.size() * sizeof(ushort), &indices[0]);
 	m_stateBuffer.end();
+
+	m_initialzied = true;
 }
 
 void GLSpriteBatch::begin(const glm::mat4& a_mvpMatrix)
 {
-	assert(!m_begun);
+	assert(!m_begun && m_initialzied);
 	m_begun = true;
 	m_shader.begin();
 	m_mvpUniform.set(a_mvpMatrix);
@@ -58,12 +60,13 @@ void GLSpriteBatch::begin(const glm::mat4& a_mvpMatrix)
 
 void GLSpriteBatch::flush()
 {
-	assert(m_begun);
+	assert(m_begun && m_initialzied);
 
 	if (m_drawCount && m_currentTexture)
 	{
-		m_stateBuffer.begin();
 		m_currentTexture->bind(0);
+
+		m_stateBuffer.begin();
 		m_vertexBuffer.upload(m_vertices.size() * sizeof(Vertex), &m_vertices[0]);
 		glDrawElements(GL_TRIANGLES, m_drawCount * 6, GL_UNSIGNED_SHORT, NULL);
 		m_stateBuffer.end();
@@ -73,7 +76,7 @@ void GLSpriteBatch::flush()
 
 void GLSpriteBatch::draw(const TextureRegion& a_region, float a_x, float a_y, float a_width, float a_height)
 {
-	assert(m_begun);
+	assert(m_begun && m_initialzied);
 	if (m_currentTexture != a_region.texture || m_drawCount > m_size)
 	{
 		flush();
@@ -93,7 +96,7 @@ void GLSpriteBatch::draw(const TextureRegion& a_region, float a_x, float a_y, fl
 
 void GLSpriteBatch::end()
 {
-	assert(m_begun);
+	assert(m_begun && m_initialzied);
 	flush();
 	m_shader.end();
 	m_begun = false;
