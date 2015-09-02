@@ -18,6 +18,7 @@ ModelManageSystem::~ModelManageSystem()
 
 void ModelManageSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
 {
+	// Maybe iterate over models every once in a while and delete unused meshes to free up memory.
 }
 
 void ModelManageSystem::configure(entityx::EventManager& a_eventManager)

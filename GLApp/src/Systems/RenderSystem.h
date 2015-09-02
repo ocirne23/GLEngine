@@ -12,6 +12,7 @@
 #include "Graphics/GL/Wrappers/GLUniform.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
 #include "Graphics/GL/Tech/HBAO.h"
+#include "UI/Frame.h"
 
 #include <glm/glm.hpp>
 
@@ -61,6 +62,8 @@ private:
 
 	const LightSystem& m_lightSystem;
 	const CameraSystem& m_cameraSystem;
+
+	Frame m_frame;
 
 	bool m_shaderInitialized = false;
 	bool m_hbaoEnabled       = true;

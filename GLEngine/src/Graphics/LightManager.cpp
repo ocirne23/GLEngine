@@ -6,9 +6,8 @@
 
 #include <glm/glm.hpp>
 
-LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights), m_numUsedLights(0)
+LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights)
 {
-	m_viewspaceLightPositionRanges = new glm::vec4[m_maxLights];
 	m_lightPositionRanges = new glm::vec4[m_maxLights];
 	m_lightColorIntensities = new glm::vec4[m_maxLights];
 
@@ -17,8 +16,6 @@ LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights), m_numUs
 
 LightManager::~LightManager()
 {
-	SAFE_DELETE_ARRAY(m_viewspaceLightPositionRanges);
-	SAFE_DELETE_ARRAY(m_viewspaceLightPositionRanges);
 	SAFE_DELETE_ARRAY(m_lightPositionRanges);
 	SAFE_DELETE_ARRAY(m_lightColorIntensities);
 	SAFE_DELETE_ARRAY(m_lightHandles);
@@ -41,7 +38,8 @@ LightHandle LightManager::createLight(const glm::vec3& a_pos, float a_radius, co
 
 void LightManager::deleteLight(LightHandle a_handle)
 {
-	assert(m_numUsedLights);
+	assert(m_numUsedLights > 0);
+
 	--m_numUsedLights;
 	if (a_handle != m_numUsedLights)
 	{
@@ -117,14 +115,4 @@ float LightManager::getLightIntensity(LightHandle a_light) const
 {
 	assert(a_light < m_numUsedLights);
 	return m_lightColorIntensities[m_lightHandles[a_light]].a;
-}
-
-const glm::vec4* LightManager::updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera)
-{
-	for (uint i = 0; i < m_numUsedLights; ++i)
-	{
-		m_viewspaceLightPositionRanges[i] = glm::vec4(a_camera.getViewMatrix() * glm::vec4(glm::vec3(m_lightPositionRanges[i]), 1.0));
-		m_viewspaceLightPositionRanges[i].w = m_lightPositionRanges[i].w;
-	}
-	return m_numUsedLights ? &m_viewspaceLightPositionRanges[0] : NULL;
 }

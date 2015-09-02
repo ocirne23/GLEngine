@@ -8,7 +8,6 @@ struct ModelComponent
 {
 	ModelComponent() {}
 	ModelComponent(const rde::string& filePath) : filePath(filePath) {}
-	~ModelComponent();
 
 	rde::string filePath;
 	GLMesh* mesh = NULL;

@@ -26,19 +26,19 @@ void Style::load(const char* a_filePath)
 		assert(success);
 	}
 	
-	m_textButtonTex.texture  = getTexture(rde::string(json["textbutton"]));
-	m_imageButtonTex.texture = getTexture(rde::string(json["imagebutton"]));
+	m_textButtonTex.texture  = getTexture(json["textbutton"].asCString());
+	m_imageButtonTex.texture = getTexture(json["imagebutton"].asCString());
 }
 
-GLTexture* Style::getTexture(const rde::string& a_filePath)
+GLTexture* Style::getTexture(const char* a_filePath)
 {
 	GLTexture* texture = NULL;
-	auto it = m_textures.find(a_filePath.c_str());
+	auto it = m_textures.find(rde::string(a_filePath));
 	if (it == m_textures.end())
 	{
 		texture = new GLTexture();
-		texture->initialize(a_filePath.c_str());
-		assert(texture->isLoaded());
+		texture->initialize(a_filePath, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::NEAREST);
+		m_textures.insert({rde::string(a_filePath), texture});
 	}
 	else
 	{

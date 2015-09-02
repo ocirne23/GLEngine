@@ -27,7 +27,6 @@ BEGIN_UNNAMED_NAMESPACE()
 static const rde::string MODEL_FILE_PATH("Models/palace/palace.obj.da");
 static const rde::string MODEL2_FILE_PATH("Models/meshes/dragon.obj.da");
 static const rde::string SKYBOX_FILE_PATH("Models/skybox/skysphere.obj.da");
-static const rde::string UI_JSON_FILE_PATH("UI/uitest.json");
 
 END_UNNAMED_NAMESPACE()
 
@@ -35,6 +34,9 @@ using namespace entityx;
 
 TestScreen::TestScreen()
 {
+	uint viewportWidth = GLEngine::graphics->getViewportWidth();
+	uint viewportHeight = GLEngine::graphics->getViewportHeight();
+
 	m_keyDownListener.setFunc([this](EKey a_key) { keyDown(a_key); });
 	m_windowQuitListener.setFunc([this]() { GLEngine::shutdown(); });
 
@@ -47,7 +49,7 @@ TestScreen::TestScreen()
 	systems.configure();
 
 	Entity cameraEntity = m_entityx.entities.create();
-	cameraEntity.assign<CameraComponent>((float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight(), 90.0f, 0.5f, 1000.0f);
+	cameraEntity.assign<CameraComponent>((float) viewportWidth, (float) viewportHeight, 90.0f, 0.5f, 1000.0f);
 	cameraEntity.assign<TransformComponent>(0.0f, 0.0f, 0.0f);
 	cameraEntity.assign<FPSControlledComponent>(10.0f, 0.7f);
 

@@ -4,7 +4,6 @@
 #include "3rdparty/rde/vector.h"
 #include "Core.h"
 #include "Input/Input.h"
-#include "UI/Frame.h"
 
 class TestScreen
 {
@@ -20,9 +19,9 @@ private:
 
 private:
 
-	entityx::EntityX m_entityx;
 	Input::KeyDownListener m_keyDownListener;
 	Input::WindowQuitListener m_windowQuitListener;
 
 	rde::vector<entityx::Entity> m_lightEntities;
+	entityx::EntityX m_entityx;
 };

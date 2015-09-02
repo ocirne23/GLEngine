@@ -9,6 +9,8 @@
 #include "3rdparty/rde/rde_string.h"
 #include "3rdparty/rde/vector.h"
 
+#include <glm/glm.hpp>
+
 class Widget;
 
 /** UI Container */
@@ -18,24 +20,22 @@ public:
 
 	~Frame();
 
-	void initialize(const char* fileName);
-
+	void initialize(const char* fileName, float width, float height, float xPos = 0.0f, float yPos = 0.0f);
 	void resize(uint width, uint height);
 	void render();
 
 private:
 
-	uint m_xPos = 0;
-	uint m_yPos = 0;
-	uint m_width = 0;
-	uint m_height = 0;
+	float m_width  = 0.0f;
+	float m_height = 0.0f;
+	float m_xPos   = 0.0f;
+	float m_yPos   = 0.0f;
 
 	Style m_style;
-
 	Json::Value m_root;
 	rde::string m_fileName;
-
 	rde::vector<Widget*> m_widgets;
-
 	GLSpriteBatch m_spriteBatch;
+
+	glm::mat4 m_vpMatrix;
 };

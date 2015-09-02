@@ -56,9 +56,6 @@
     <ClCompile Include="src\Systems\ModelManageSystem.cpp">
       <Filter>Source Files\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="src\Components\ModelComponent.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AppUtils\FPSMeasurer.h">

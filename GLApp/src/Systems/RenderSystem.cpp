@@ -18,12 +18,13 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-static const char* DFV_TEX_PATH = "Utils/ggx-helper-dfv.hdr.da";
-static const char* CLUSTERED_SHADING_PATH = "Shaders/clusteredshading.glsl";
-static const char* MATERIAL_LIGHTING_PATH = "Shaders/material.glsl";
-static const char* MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
-static const char* MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
-static const char* SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
+static const char* const DFV_TEX_PATH = "Utils/ggx-helper-dfv.hdr.da";
+static const char* const CLUSTERED_SHADING_PATH = "Shaders/clusteredshading.glsl";
+static const char* const MATERIAL_LIGHTING_PATH = "Shaders/material.glsl";
+static const char* const MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
+static const char* const MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
+static const char* const SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
+static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
 
 static const unsigned int TILE_WIDTH_PX  = 64;
 static const unsigned int TILE_HEIGHT_PX = 64;
@@ -36,6 +37,8 @@ RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem
 	m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem)
 {
 	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
+	m_frame.initialize(UI_JSON_FILE_PATH, (float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight());
+	
 	auto onShaderEdited = [&]()
 	{
 		print("shader edited\n");
@@ -43,7 +46,6 @@ RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem
 		if (camera)
 			initializeShaderForCamera(*camera);
 	};
-
 	FileModificationManager::createModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
 	FileModificationManager::createModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH), onShaderEdited);
 	FileModificationManager::createModificationListener(this, rde::string(CLUSTERED_SHADING_PATH), onShaderEdited);
@@ -52,10 +54,7 @@ RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem
 
 RenderSystem::~RenderSystem()
 {
-	FileModificationManager::removeModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH));
-	FileModificationManager::removeModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH));
-	FileModificationManager::removeModificationListener(this, rde::string(CLUSTERED_SHADING_PATH));
-	FileModificationManager::removeModificationListener(this, rde::string(MATERIAL_LIGHTING_PATH));
+	FileModificationManager::removeAllModificationListenersForOwner(this);
 }
 
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
@@ -198,6 +197,12 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	
 	if (m_hbaoEnabled)
 		m_hbao.endAndRender();
+
+	GLEngine::graphics->setBlending(true);
+	GLEngine::graphics->setDepthTest(false);
+	m_frame.render();
+	GLEngine::graphics->setDepthTest(true);
+	GLEngine::graphics->setBlending(false);
 
 	GLEngine::graphics->swap();
 }

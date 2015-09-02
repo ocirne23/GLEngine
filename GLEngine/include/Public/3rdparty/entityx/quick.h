@@ -26,8 +26,8 @@ class EntityX {
   EntityX() : entities(events), systems(entities, events) {}
 
   EventManager events;
-  EntityManager entities;
   SystemManager systems;
+  EntityManager entities;
 };
 
 }  // namespace entityx

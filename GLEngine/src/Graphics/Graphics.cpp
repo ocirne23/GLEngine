@@ -120,6 +120,25 @@ void Graphics::setDepthWrite(bool a_enabled)
 	glDepthMask(a_enabled);
 }
 
+void Graphics::setBackFaceCulling(bool a_enabled)
+{
+	if (a_enabled)
+		glEnable(GL_CULL_FACE);
+	else
+		glDisable(GL_CULL_FACE);
+}
+
+void Graphics::setBlending(bool a_enabled)
+{
+	if (a_enabled)
+	{
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+	else
+		glDisable(GL_BLEND);
+}
+
 void Graphics::destroyWindow()
 {
 	if (m_window)

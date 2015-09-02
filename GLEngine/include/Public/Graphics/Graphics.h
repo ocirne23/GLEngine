@@ -31,6 +31,8 @@ public:
 	void setVsync(bool enabled);
 	void setDepthTest(bool enabled);
 	void setDepthWrite(bool enabled);
+	void setBackFaceCulling(bool enabled);
+	void setBlending(bool enabled); //TODO blend func vars
 
 	uint getViewportWidth() const  { return m_viewportWidth; }
 	uint getViewportHeight() const { return m_viewportHeight; }

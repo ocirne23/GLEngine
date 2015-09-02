@@ -23,7 +23,6 @@
     <RootNamespace>GLApp</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="src\Components\ModelComponent.cpp" />
     <ClCompile Include="src\Components\PointLightComponent.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Screens\TestScreen.cpp" />

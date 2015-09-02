@@ -2,7 +2,7 @@
 
 #include "UI/Font.h"
 
-#include "UI/TextureRegion.h"
+#include "Graphics/TextureRegion.h"
 #include "3rdparty/rde/rde_string.h"
 #include "3rdparty/rde/hash_map.h"
 
@@ -21,7 +21,7 @@ public:
 
 private:
 
-	GLTexture* getTexture(const rde::string& filePath);
+	GLTexture* getTexture(const char* filePath);
 
 private:
 
@@ -29,5 +29,5 @@ private:
 	TextureRegion m_imageButtonTex;
 
 	bool m_isDisposed = false;
-	rde::hash_map<const char*, GLTexture*> m_textures;
+	rde::hash_map<rde::string, GLTexture*> m_textures;
 };

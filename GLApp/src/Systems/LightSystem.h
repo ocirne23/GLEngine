@@ -15,8 +15,8 @@ class LightSystem : public entityx::System<LightSystem>, public entityx::Receive
 public:
 	enum { MAX_LIGHTS = 1024 };
 
-	LightSystem(const CameraSystem& cameraSystem) : m_cameraSystem(cameraSystem), m_lightManager(MAX_LIGHTS) {};
-	~LightSystem() {}
+	LightSystem(const CameraSystem& cameraSystem);
+	~LightSystem();
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt) override;
 
@@ -30,7 +30,11 @@ public:
 
 private:
 
+	void updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera);
+
+private:
+
 	const CameraSystem& m_cameraSystem;
 	LightManager m_lightManager;
-	const glm::vec4* m_viewspaceLightPositionRangeList = NULL;
+	glm::vec4* m_viewspaceLightPositionRangeList = NULL;
 };

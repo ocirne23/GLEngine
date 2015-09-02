@@ -68,7 +68,6 @@
     <ClCompile Include="src\UI\Widgets\TextButton.cpp" />
     <ClCompile Include="src\Utils\CheckGLError.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
-    <ClCompile Include="src\Utils\FileModificationListener.cpp" />
     <ClCompile Include="src\Utils\FileModificationManager.cpp" />
     <ClCompile Include="src\Utils\FPSCameraController.cpp" />
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp" />
