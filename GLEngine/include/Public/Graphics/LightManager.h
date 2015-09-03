@@ -4,7 +4,7 @@
 
 #include "Utils/VecForward.h"
 
-typedef uint LightHandle;
+typedef ushort LightHandle;
 
 class GLShader;
 class PerspectiveCamera;

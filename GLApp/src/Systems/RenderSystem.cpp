@@ -133,9 +133,6 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	const glm::vec4* viewspaceLightPositionRanges = m_lightSystem.getViewspaceLightPositionRangeList();
 	m_clusteredShading.update(*activeCamera, m_lightSystem.getNumLights(), viewspaceLightPositionRanges);
 
-	if (m_hbaoEnabled)
-		m_hbao.begin();
-
 	// Skybox doesn't need to look at or modify depth buffer
 	GLEngine::graphics->setDepthWrite(false);
 	GLEngine::graphics->setDepthTest(false);
@@ -165,6 +162,9 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 
 	GLEngine::graphics->setDepthWrite(true);
 	GLEngine::graphics->setDepthTest(true);
+
+	if (m_hbaoEnabled)
+		m_hbao.begin();
 	
 	// No need to clear color because skybox fully covers previous frame
 	GLEngine::graphics->clear(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), false, true);
