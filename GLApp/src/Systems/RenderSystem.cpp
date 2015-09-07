@@ -37,7 +37,7 @@ RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem
 	m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem)
 {
 	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
-	m_frame.initialize(UI_JSON_FILE_PATH, (float) GLEngine::graphics->getViewportWidth(), (float) GLEngine::graphics->getViewportHeight());
+	m_frame.initialize(UI_JSON_FILE_PATH);
 	
 	auto onShaderEdited = [&]()
 	{

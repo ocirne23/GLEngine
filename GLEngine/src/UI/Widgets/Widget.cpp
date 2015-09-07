@@ -1,5 +1,7 @@
 #include "UI/Widgets/Widget.h"
 
+#include <glm/glm.hpp>
+
 BEGIN_UNNAMED_NAMESPACE()
 
 static const rde::string WIDGET_TYPE_STRINGS[] =
@@ -39,4 +41,9 @@ Json::Value Widget::toJson()
 	v["name"] = m_name.c_str();
 	v["type"] = getStringForWidgetType(m_type).c_str();
 	return v;
+}
+
+glm::vec4 Widget::getAbsoluteBounds(Frame& frame) const
+{
+	return glm::vec4(0);
 }

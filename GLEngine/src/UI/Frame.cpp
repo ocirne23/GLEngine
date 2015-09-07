@@ -3,6 +3,8 @@
 #include "UI/Widgets/ImageButton.h"
 #include "UI/Widgets/TextButton.h"
 #include "Utils/FileHandle.h"
+#include "GLEngine.h"
+#include "Graphics/Graphics.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -12,13 +14,8 @@ static const uint SPRITE_BATCH_SIZE = 100;
 
 END_UNNAMED_NAMESPACE()
 
-void Frame::initialize(const char* a_fileName, float a_width, float a_height, float a_xPos, float a_yPos)
+void Frame::initialize(const char* a_fileName)
 {
-	m_width = a_width;
-	m_height = a_height;
-	m_xPos = a_xPos;
-	m_yPos = a_yPos;
-
 	m_spriteBatch.initialize(SPRITE_BATCH_SIZE);
 
 	Json::Reader reader;
@@ -53,7 +50,9 @@ void Frame::initialize(const char* a_fileName, float a_width, float a_height, fl
 		m_widgets.push_back(widget);
 	}
 
-	glm::mat4 projectionMatrix = glm::ortho(0.0f, (float) m_width, (float) m_height, 0.0f, 0.1f, 100.0f);
+	float screenWidth = (float) GLEngine::graphics->getViewportWidth();
+	float screenHeight = (float) GLEngine::graphics->getViewportHeight();
+	glm::mat4 projectionMatrix = glm::ortho(0.0f, screenWidth, screenHeight, 0.0f, 0.1f, 100.0f);
 	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 	m_vpMatrix = projectionMatrix * viewMatrix;
 }

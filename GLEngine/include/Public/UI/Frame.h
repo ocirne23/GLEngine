@@ -20,16 +20,11 @@ public:
 
 	~Frame();
 
-	void initialize(const char* fileName, float width, float height, float xPos = 0.0f, float yPos = 0.0f);
+	void initialize(const char* fileName);
 	void resize(uint width, uint height);
 	void render();
 
 private:
-
-	float m_width  = 0.0f;
-	float m_height = 0.0f;
-	float m_xPos   = 0.0f;
-	float m_yPos   = 0.0f;
 
 	Style m_style;
 	Json::Value m_root;
