@@ -49,9 +49,6 @@
     <ClCompile Include="src\Graphics\GL\GLVars.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\WindowsPlatformData.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp">
       <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
@@ -159,9 +156,6 @@
     </ClCompile>
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\GLTestScreenImpl.cpp">
-      <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp">
       <Filter>Source Files\Graphics\GL\Tech</Filter>
@@ -314,9 +308,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\UI\Widgets\Widget.h">
       <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Utils\WindowsPlatformData.h">
-      <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\json\json_tool.h">
       <Filter>Header Files\Public\3rdparty\json</Filter>
@@ -515,9 +506,6 @@
     </ClInclude>
     <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h">
       <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h">
-      <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Input\InputListener.h">
       <Filter>Header Files\Public\Input</Filter>

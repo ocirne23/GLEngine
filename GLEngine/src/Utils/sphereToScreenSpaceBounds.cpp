@@ -22,89 +22,78 @@
 /****************************************************************************/
 #include "Utils/sphereToScreenSpaceBounds.h"
 
+#include "Core.h"
 #include "Graphics/PerspectiveCamera.h"
 
-namespace
+BEGIN_UNNAMED_NAMESPACE()
+
+void updateClipRegionRoot(float a_nc, float lc, float lz, float lightRadius, float cameraScale, float &clipMin, float &clipMax)
 {
+	float nz = (lightRadius - a_nc * lc) / lz;
+	float pz = (lc * lc + lz * lz - lightRadius * lightRadius) / (lz - (nz / a_nc) * lc);
 
-	void updateClipRegionRoot(float a_nc,
-							  float lc,
-							  float lz,
-							  float lightRadius,
-							  float cameraScale,
-							  float &clipMin,
-							  float &clipMax)
+	if (pz < 0.0f)
 	{
-		float nz = (lightRadius - a_nc * lc) / lz;
-		float pz = (lc * lc + lz * lz - lightRadius * lightRadius) / (lz - (nz / a_nc) * lc);
-
-		if (pz < 0.0f)
+		float c = -nz * cameraScale / a_nc;
+		if (a_nc < 0.0f)
 		{
-			float c = -nz * cameraScale / a_nc;
-			if (a_nc < 0.0f)
-			{
-				clipMin = glm::max(clipMin, c);
-			}
-			else
-			{
-				clipMax = glm::min(clipMax, c);
-			}
+			clipMin = glm::max(clipMin, c);
+		}
+		else
+		{
+			clipMax = glm::min(clipMax, c);
 		}
 	}
-
-	void updateClipRegion(float a_lc,
-						  float a_lz,
-						  float a_lightRadius,
-						  float a_cameraScale,
-						  float &a_clipMin,
-						  float &a_clipMax)
-	{
-		float rSq = a_lightRadius * a_lightRadius;
-		float lcSqPluslzSq = a_lc * a_lc + a_lz * a_lz;
-		float d = rSq * a_lc * a_lc - lcSqPluslzSq * (rSq - a_lz * a_lz);
-
-		if (d >= 0.0f)
-		{
-			float a = a_lightRadius * a_lc;
-			float b = sqrt(d);
-			float nx0 = (a + b) / lcSqPluslzSq;
-			float nx1 = (a - b) / lcSqPluslzSq;
-
-			updateClipRegionRoot(nx0, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
-			updateClipRegionRoot(nx1, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
-		}
-	}
-
-	glm::vec4 computeClipRegion(const glm::vec3& a_lightPosView, float a_lightRadius, float a_cameraNear, const glm::mat4 &a_projection)
-	{
-		glm::vec4 clipRegion(1.0f, 1.0f, -1.0f, -1.0f);
-		if (a_lightPosView.z - a_lightRadius <= -a_cameraNear)
-		{
-			glm::vec2 clipMin(-1.0f, -1.0f);
-			glm::vec2 clipMax(1.0f, 1.0f);
-
-			updateClipRegion(a_lightPosView.x, a_lightPosView.z, a_lightRadius, a_projection[0][0], clipMin.x, clipMax.x);
-			updateClipRegion(a_lightPosView.y, a_lightPosView.z, a_lightRadius, a_projection[1][1], clipMin.y, clipMax.y);
-
-			clipRegion = glm::vec4(clipMin, clipMax);
-		}
-
-		return clipRegion;
-	}
-
-	inline void swap(float& a_a, float& a_b)
-	{
-		float tmp = a_a;
-		a_a = a_b;
-		a_b = tmp;
-	}
-
-	inline float calcClusterZ(float a_viewSpaceZ, float a_recNear, float a_recLogSD1)
-	{
-		return logf(-a_viewSpaceZ * a_recNear) * a_recLogSD1;
-	}
-
 }
+
+void updateClipRegion(float a_lc, float a_lz, float a_lightRadius, float a_cameraScale, float &a_clipMin, float &a_clipMax)
+{
+	float rSq = a_lightRadius * a_lightRadius;
+	float lcSqPluslzSq = a_lc * a_lc + a_lz * a_lz;
+	float d = rSq * a_lc * a_lc - lcSqPluslzSq * (rSq - a_lz * a_lz);
+
+	if (d >= 0.0f)
+	{
+		float a = a_lightRadius * a_lc;
+		float b = sqrt(d);
+		float nx0 = (a + b) / lcSqPluslzSq;
+		float nx1 = (a - b) / lcSqPluslzSq;
+
+		updateClipRegionRoot(nx0, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
+		updateClipRegionRoot(nx1, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
+	}
+}
+
+glm::vec4 computeClipRegion(const glm::vec3& a_lightPosView, float a_lightRadius, float a_cameraNear, const glm::mat4 &a_projection)
+{
+	glm::vec4 clipRegion(1.0f, 1.0f, -1.0f, -1.0f);
+	if (a_lightPosView.z - a_lightRadius <= -a_cameraNear)
+	{
+		glm::vec2 clipMin(-1.0f, -1.0f);
+		glm::vec2 clipMax(1.0f, 1.0f);
+
+		updateClipRegion(a_lightPosView.x, a_lightPosView.z, a_lightRadius, a_projection[0][0], clipMin.x, clipMax.x);
+		updateClipRegion(a_lightPosView.y, a_lightPosView.z, a_lightRadius, a_projection[1][1], clipMin.y, clipMax.y);
+
+		clipRegion = glm::vec4(clipMin, clipMax);
+	}
+
+	return clipRegion;
+}
+
+inline void swap(float& a_a, float& a_b)
+{
+	float tmp = a_a;
+	a_a = a_b;
+	a_b = tmp;
+}
+
+inline float calcClusterZ(float a_viewSpaceZ, float a_recNear, float a_recLogSD1)
+{
+	return logf(-a_viewSpaceZ * a_recNear) * a_recLogSD1;
+}
+
+END_UNNAMED_NAMESPACE()
 
 IBounds2D sphereToScreenSpaceBounds2D(const PerspectiveCamera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius, uint a_screenWidth, uint a_screenHeight)
 {
@@ -129,7 +118,7 @@ IBounds2D sphereToScreenSpaceBounds2D(const PerspectiveCamera& a_camera, glm::ve
 }
 
 IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& a_camera, glm::vec3 a_lightPosViewSpace, float a_lightRadius,
-									  uint a_screenWidth, uint a_screenHeight, uint a_pixelsPerTileW, uint a_pixelsPerTileH, float a_recLogSD1)
+                                      uint a_screenWidth, uint a_screenHeight, uint a_pixelsPerTileW, uint a_pixelsPerTileH, float a_recLogSD1)
 {
 	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, a_lightPosViewSpace, a_lightRadius, a_screenWidth, a_screenHeight);
 	float recNear = 1.0f / a_camera.getNear();

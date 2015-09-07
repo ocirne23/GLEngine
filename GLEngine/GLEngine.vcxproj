@@ -58,7 +58,6 @@
     <ClCompile Include="src\3rdparty\rde\rde_string.cpp" />
     <ClCompile Include="src\3rdparty\rde\slist.cpp" />
     <ClCompile Include="src\Threading\ThreadManager.cpp" />
-    <ClCompile Include="src\Utils\GLTestScreenImpl.cpp" />
     <ClCompile Include="src\UI\Frame.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
     <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp" />
@@ -73,7 +72,6 @@
     <ClCompile Include="src\Utils\getGLTextureFormat.cpp" />
     <ClCompile Include="src\Utils\JobScheduler.cpp" />
     <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp" />
-    <ClCompile Include="src\Utils\WindowsPlatformData.cpp" />
     <ClCompile Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,7 +96,6 @@
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
     <ClInclude Include="include\Public\Input\InputListener.h" />
-    <ClInclude Include="include\Public\Utils\GLTestScreenImpl.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
@@ -195,7 +192,6 @@
     <ClInclude Include="include\Public\Utils\Semaphore.h" />
     <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h" />
     <ClInclude Include="include\Public\Utils\VecForward.h" />
-    <ClInclude Include="include\Private\Utils\WindowsPlatformData.h" />
     <ClInclude Include="src\json\json_tool.h" />
   </ItemGroup>
   <ItemGroup>

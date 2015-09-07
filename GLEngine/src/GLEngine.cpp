@@ -3,7 +3,6 @@
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include "Threading/ThreadManager.h"
-#include "Utils/WindowsPlatformData.h"
 
 #include <SDL/SDL.h>
 
