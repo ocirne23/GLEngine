@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.cpp" />
+    <ClCompile Include="src\Graphics\GL\Utils\QuadDrawUtils.cpp" />
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
     <ClCompile Include="src\3rdparty\entityx\Event.cc" />
@@ -29,7 +29,7 @@
     <ClCompile Include="src\GLEngine.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp" />
-    <ClCompile Include="src\Graphics\GL\GLVars.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLContext.cpp" />
     <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Frustum.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp" />
@@ -98,7 +98,7 @@
     <ClInclude Include="include\Public\Input\InputListener.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLVars.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLContext.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h" />
     <ClInclude Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.h" />

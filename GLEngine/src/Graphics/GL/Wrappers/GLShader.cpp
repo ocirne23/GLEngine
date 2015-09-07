@@ -3,12 +3,9 @@
 #include "Core.h"
 
 #include "GLEngine.h"
-
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/GLVars.h"
-
-#include "3rdparty/rde/rde_string.h"
 #include "Utils/FileHandle.h"
+#include "3rdparty/rde/rde_string.h"
 
 #include <glm/glm.hpp>
 

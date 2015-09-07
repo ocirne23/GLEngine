@@ -66,10 +66,6 @@ void Pixmap::set(uint a_width, uint a_height, uint a_numComp, const glm::vec4& a
 	m_numComponents = a_numComp;
 	m_data.b = new byte[m_width * m_height * m_numComponents];
 	for (uint x = 0; x < a_width; ++x)
-	{
 		for (uint y = 0; y < a_height; ++y)
-		{
 			memcpy(m_data.b + (x * y + y) * a_numComp, byteCol, a_numComp);
-		}
-	}
 }

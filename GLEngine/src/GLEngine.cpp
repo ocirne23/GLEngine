@@ -49,11 +49,6 @@ uint GLEngine::getTimeMs()
 	return SDL_GetTicks();
 }
 
-void GLEngine::shutdown()
-{
-	s_shutdown = true;
-}
-
 void GLEngine::createGLContext()
 {
 	graphics->createGLContext();

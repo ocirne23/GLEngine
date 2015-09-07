@@ -9,7 +9,6 @@ int main()
 {
 	GLEngine::initialize();
 
-	DeltaTimeMeasurer deltaTimeMeasurer;
 	const float fpsLogInterval = 5.0f;
 	FPSMeasurer fpsMeasurer(fpsLogInterval, [](const FPSMeasurer& measurer)
 	{
@@ -19,6 +18,7 @@ int main()
 	GLEngine::createThread("RenderThread", [&]()
 	{
 		GLEngine::createGLContext();
+		DeltaTimeMeasurer deltaTimeMeasurer;
 		TestScreen testScreen;
 		while (!GLEngine::isShutdown())
 		{

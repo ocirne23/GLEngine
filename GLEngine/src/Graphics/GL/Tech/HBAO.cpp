@@ -142,7 +142,8 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_hbaoGlobalsUBOBi
 	m_hbaoGlobalsBuffer.initialize(m_hbaoFullShader, a_hbaoGlobalsUBOBindingPoint, "HBAOGlobals", GLConstantBuffer::EDrawUsage::STATIC);
 	m_hbaoGlobalsBuffer.upload(sizeof(HBAOGlobals), &globals);
 	m_hbaoFullShader.end();
-	m_isInitialized = true;
+
+	m_initialized = true;
 }
 
 void HBAO::begin()

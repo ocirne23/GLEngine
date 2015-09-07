@@ -14,6 +14,9 @@ public:
 	void initialize();
 	void begin();
 	void end();
+	bool isInitialized() const { return m_initialized; }
+
+public:
 
 	static bool isBegun() { return s_isBegun; }
 

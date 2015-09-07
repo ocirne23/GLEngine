@@ -20,7 +20,7 @@ public:
 
 private:
 
-	bool m_isInitialized;
+	bool m_initialized;
 
 	GLFramebuffer m_fboFullRes;
 	GLFramebuffer m_blurXFbo;

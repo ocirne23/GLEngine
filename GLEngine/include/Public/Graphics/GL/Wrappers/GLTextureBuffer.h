@@ -59,6 +59,7 @@ public:
 	void initialize(ESizedFormat sizedFormat, EDrawUsage drawUsage = EDrawUsage::STATIC);
 	void upload(uint numBytes, const void* data);
 	void bind(uint index);
+	bool isInitialized() const { return m_initialized; }
 
 private:
 

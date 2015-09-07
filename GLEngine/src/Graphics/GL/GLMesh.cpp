@@ -5,11 +5,6 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/Pixmap.h"
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
-#include "Graphics/GL/Wrappers/GLShader.h"
-#include "Graphics/GL/Wrappers/GLStateBuffer.h"
-#include "Graphics/GL/Wrappers/GLTextureArray.h"
-#include "Graphics/GL/Wrappers/GLVertexBuffer.h"
 
 #include "Utils/EResourceType.h"
 #include "Utils/FileHandle.h"
@@ -52,13 +47,6 @@ byte floatToByteCol(float f)
 
 END_UNNAMED_NAMESPACE()
 
-GLMesh::~GLMesh()
-{
-	SAFE_DELETE(m_indiceBuffer);
-	SAFE_DELETE(m_vertexBuffer);
-	SAFE_DELETE(m_matUniformBuffer);
-}
-
 void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_matUBOBindingPoint)
 {
 	assert(!m_initialized);
@@ -95,13 +83,11 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 	m_stateBuffer.initialize();
 	m_stateBuffer.begin();
 
-	m_indiceBuffer = new GLVertexBuffer();
-	m_indiceBuffer->initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
-	m_indiceBuffer->upload(sizeof(indices[0]) * indices.size(), &indices[0]);
+	m_indiceBuffer.initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
+	m_indiceBuffer.upload(sizeof(indices[0]) * indices.size(), &indices[0]);
 
-	m_vertexBuffer = new GLVertexBuffer();
-	m_vertexBuffer->initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
-	m_vertexBuffer->upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
+	m_vertexBuffer.initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
+	m_vertexBuffer.upload(sizeof(vertices[0]) * vertices.size(), &vertices[0]);
 
 	VertexAttribute attributes[] =
 	{
@@ -113,7 +99,7 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 		VertexAttribute(5, "MaterialID", VertexAttribute::EFormat::UNSIGNED_INT, 1)
 	};
 
-	m_vertexBuffer->setVertexAttributes(ARRAY_SIZE(attributes), attributes);
+	m_vertexBuffer.setVertexAttributes(ARRAY_SIZE(attributes), attributes);
 	m_stateBuffer.end();
 
 	if (numAtlases)
@@ -143,25 +129,25 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 void GLMesh::initializeUBO(const GLShader& a_shader)
 {
 	m_stateBuffer.begin();
-	m_matUniformBuffer = new GLConstantBuffer();
-	m_matUniformBuffer->initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GLConstantBuffer::EDrawUsage::STREAM);
-	m_matUniformBuffer->upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
+	m_matUniformBuffer.initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GLConstantBuffer::EDrawUsage::STREAM);
+	m_matUniformBuffer.upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
 	m_stateBuffer.end();
+	m_matProperties.clear();
 }
 
 void GLMesh::render(const GLShader& shader, bool a_renderOpague, bool a_renderTransparent, bool a_bindMaterials)
 {
 	assert(shader.isBegun());
 
-	if (!m_matUniformBuffer)
+	if (!m_matUniformBuffer.isInitialized())
 		initializeUBO(shader);
-	m_matUniformBuffer->bind();
+	m_matUniformBuffer.bind();
 
 	m_stateBuffer.begin();
 	if (m_textureArray.isInitialized())
 		m_textureArray.bind(m_textureUnit);
 	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); wireframe rendering
 	m_stateBuffer.end();
 }
 
-// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); wireframe rendering

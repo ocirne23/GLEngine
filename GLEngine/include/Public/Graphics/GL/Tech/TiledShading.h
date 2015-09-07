@@ -4,26 +4,28 @@
 #include "3rdparty/rde/vector.h"
 #include "Utils/VecForward.h"
 
-#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
-
 class PerspectiveCamera;
-class GLShader;
 
 class TiledShading
 {
 public:
 	TiledShading() {}
-	~TiledShading() {}
+	~TiledShading();
 
-	void resize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
-	void setupShader(const GLShader& shader);
+	void initialize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* viewspaceLightPositionRangeList);
 
-	uint getGridWidth()  { return m_gridWidth; }
-	uint getGridHeight() { return m_gridHeight; }
+	uint getGridWidth() const  { return m_gridWidth; }
+	uint getGridHeight() const { return m_gridHeight; }
+	uint getGridSize() const   { return m_gridSize; }
+
+	uint getNumLightIndices() const        { return m_lightIndices.size(); }
+	const glm::uvec2* getLightGrid() const { return m_lightGrid; }
+	const ushort* getLightIndices() const  { return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
 
 private:
 
+	bool m_initialized    = false;
 	uint m_screenWidth    = 0;
 	uint m_screenHeight   = 0;
 	uint m_gridWidth      = 0;
@@ -32,10 +34,7 @@ private:
 	uint m_pixelsPerTileW = 0;
 	uint m_pixelsPerTileH = 0;
 
-	rde::vector<glm::uvec2> m_lightGrid;
-	rde::vector<rde::vector<ushort>> m_tileLightIndices;
-	rde::vector<uint> m_lightIndices;
-
-	GLConstantBuffer m_lightIndiceBuffer;
-	GLConstantBuffer m_lightGridBuffer;
+	glm::uvec2* m_lightGrid                 = NULL;
+	rde::vector<ushort>* m_tileLightIndices = NULL;
+	rde::vector<ushort> m_lightIndices;
 };

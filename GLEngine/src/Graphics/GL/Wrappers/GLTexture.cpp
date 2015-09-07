@@ -38,7 +38,7 @@ bool isMipMapFilter(GLenum filter)
 }
 
 void GLTexture::initialize(const char* a_filePath, ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter,
-						   ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
+                           ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	assert(!m_initialized);
 	Pixmap pixmap;
@@ -49,7 +49,7 @@ void GLTexture::initialize(const char* a_filePath, ETextureMinFilter a_minFilter
 }
 
 void GLTexture::initialize(const Pixmap& a_pixmap, ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter,
-							   ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
+                           ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	assert(!m_initialized);
 	m_width          = a_pixmap.m_width;
@@ -72,7 +72,6 @@ void GLTexture::initialize(const Pixmap& a_pixmap, ETextureMinFilter a_minFilter
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, a_pixmap.m_isFloatData ? GL_FLOAT : GL_UNSIGNED_BYTE, (GLvoid*) data);
-	
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	bool m_initialized = true;

@@ -26,6 +26,7 @@ public:
 	void initialize(const GLShader& shader, uint bindingPoint, const char* blockName, EDrawUsage drawUsage);
 	void upload(uint numBytes, const void* data);
 	void bind();
+	bool isInitialized() const { return m_initialized; }
 
 private:
 

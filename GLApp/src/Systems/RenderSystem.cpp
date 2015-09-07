@@ -59,7 +59,7 @@ RenderSystem::~RenderSystem()
 
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 {
-	m_clusteredShading.resize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewportWidth(), GLEngine::graphics->getViewportHeight(), camera);
+	m_clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewportWidth(), GLEngine::graphics->getViewportHeight(), camera);
 
 	rde::vector<rde::string> defines;
 	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string((int) LightSystem::MAX_LIGHTS)));

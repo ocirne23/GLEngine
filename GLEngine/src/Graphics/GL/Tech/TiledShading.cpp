@@ -8,8 +8,17 @@
 #include <assert.h>
 #include <glm/glm.hpp>
 
-void TiledShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight, const PerspectiveCamera& a_camera)
+TiledShading::~TiledShading()
 {
+	SAFE_DELETE_ARRAY(m_lightGrid);
+	SAFE_DELETE_ARRAY(m_tileLightIndices);
+}
+
+void TiledShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight, const PerspectiveCamera& a_camera)
+{
+	SAFE_DELETE_ARRAY(m_lightGrid);
+	SAFE_DELETE_ARRAY(m_tileLightIndices);
+
 	m_screenWidth = a_screenWidth;
 	m_screenHeight = a_screenHeight;
 	m_pixelsPerTileW = a_pixelsPerTileW;
@@ -20,23 +29,19 @@ void TiledShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_s
 
 	m_gridSize = m_gridWidth * m_gridHeight;
 
-	m_lightGrid.resize(m_gridSize);
-	m_tileLightIndices.resize(m_gridSize);
-}
+	m_lightGrid = new glm::uvec2[m_gridSize];
+	m_tileLightIndices = new rde::vector<ushort>[m_gridSize];
 
-void TiledShading::setupShader(const GLShader& a_shader)
-{
-	assert(a_shader.isBegun());
-
-	m_lightGridBuffer.initialize(a_shader, 0, "LightGrid", GLConstantBuffer::EDrawUsage::STREAM);
-	m_lightIndiceBuffer.initialize(a_shader, 1, "LightIndices", GLConstantBuffer::EDrawUsage::STREAM);
+	m_initialized = true;
 }
 
 void TiledShading::update(const PerspectiveCamera& a_camera, uint a_numLights, const glm::vec4* a_viewspaceLightPositionRangeList)
 {
+	assert(m_initialized);
+
 	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
-	for (auto& tileIndices : m_tileLightIndices)
-		tileIndices.clear();
+	for (uint i = 0; i < m_gridSize; ++i)
+		m_tileLightIndices[i].clear();
 	m_lightIndices.clear();
 
 	for (ushort i = 0; i < a_numLights; ++i)
@@ -62,21 +67,12 @@ void TiledShading::update(const PerspectiveCamera& a_camera, uint a_numLights, c
 		}
 	}
 
-	for (int i = 0; i < m_tileLightIndices.size(); ++i)
+	for (uint i = 0; i < m_gridSize; ++i)
 	{
 		int lightIndicesSize = m_lightIndices.size();
 		m_lightGrid[i].x = lightIndicesSize;
 		m_lightGrid[i].y = lightIndicesSize + m_tileLightIndices[i].size();
 		for (int j = 0; j < m_tileLightIndices[i].size(); ++j)
-		{
 			m_lightIndices.push_back(m_tileLightIndices[i][j]);
-		}
 	}
-	if (m_lightIndices.size() > 0)
-	{
-		m_lightIndiceBuffer.upload(m_lightIndices.size() * sizeof(m_lightIndices[0]), &m_lightIndices[0]);
-		m_lightIndiceBuffer.bind();
-	}
-	m_lightGridBuffer.upload(m_lightGrid.size() * sizeof(m_lightGrid[0]), &m_lightGrid[0]);
-	m_lightGridBuffer.bind();
 }

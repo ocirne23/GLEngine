@@ -2,7 +2,7 @@
 
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
-#include "Graphics/GL/GLVars.h"
+#include "Graphics/GL/GLContext.h"
 #include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
 #include "3rdparty/rde/rde_string.h"
 #include "Graphics/GL/Utils/CheckGLError.h"
@@ -34,7 +34,7 @@ Graphics::~Graphics()
 
 void Graphics::createGLContext()
 {
-	GLVars::createGLContext(m_window);
+	GLContext::createGLContext(m_window);
 
 	glewExperimental = GL_TRUE;
 	const GLenum res = glewInit();
@@ -81,7 +81,7 @@ void Graphics::createGLContext()
 
 void Graphics::destroyGLContext()
 {
-	GLVars::destroyGLContext();
+	GLContext::destroyGLContext();
 }
 
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)

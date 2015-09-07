@@ -57,6 +57,7 @@ public:
 	uint getWidth() const         { return m_width; }
 	uint getHeight() const        { return m_height; }
 	byte getNumComponents() const { return m_numComponents; }
+	bool isInitialized() const    { return m_initialized; }
 
 private:
 

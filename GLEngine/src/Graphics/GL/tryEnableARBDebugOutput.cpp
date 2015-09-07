@@ -1,7 +1,6 @@
 #include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
 
 #include "Core.h"
-
 #include "Graphics/GL/GL.h"
 
 #include <SDL/SDL_syswm.h>
@@ -15,52 +14,39 @@ void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_
 
 	char debSource[32], debType[32], debSev[32];
 
-	if (a_source == GL_DEBUG_SOURCE_API_ARB)
-		strcpy_s(debSource, "OpenGL");
-	else if (a_source == GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB)
-		strcpy_s(debSource, "Windows");
-	else if (a_source == GL_DEBUG_SOURCE_SHADER_COMPILER_ARB)
-		strcpy_s(debSource, "Shader Compiler");
-	else if (a_source == GL_DEBUG_SOURCE_THIRD_PARTY_ARB)
-		strcpy_s(debSource, "Third Party");
-	else if (a_source == GL_DEBUG_SOURCE_APPLICATION_ARB)
-		strcpy_s(debSource, "Application");
-	else if (a_source == GL_DEBUG_SOURCE_OTHER_ARB)
-		strcpy_s(debSource, "Other");
-	else
-		assert(false);
+	switch (a_source)
+	{
+	case GL_DEBUG_SOURCE_API_ARB:             strcpy_s(debSource, "OpenGL"); break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB:   strcpy_s(debSource, "Windows"); break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB: strcpy_s(debSource, "Shader Compiler"); break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY_ARB:     strcpy_s(debSource, "Third Party"); break;
+	case GL_DEBUG_SOURCE_APPLICATION_ARB:     strcpy_s(debSource, "Application"); break;
+	case GL_DEBUG_SOURCE_OTHER_ARB:           strcpy_s(debSource, "Other"); break;
+	default: assert(false);
+	}
 
-	if (a_type == GL_DEBUG_TYPE_ERROR)
-		strcpy_s(debType, "error");
-	else if (a_type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR)
-		strcpy_s(debType, "deprecated behavior");
-	else if (a_type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
-		strcpy_s(debType, "undefined behavior");
-	else if (a_type == GL_DEBUG_TYPE_PORTABILITY)
-		strcpy_s(debType, "portability");
-	else if (a_type == GL_DEBUG_TYPE_PERFORMANCE)
-		strcpy_s(debType, "performance");
-	else if (a_type == GL_DEBUG_TYPE_OTHER)
-		strcpy_s(debType, "message");
-	else if (a_type == GL_DEBUG_TYPE_MARKER)
-		strcpy_s(debType, "marker");
-	else if (a_type == GL_DEBUG_TYPE_PUSH_GROUP)
-		strcpy_s(debType, "push group");
-	else if (a_type == GL_DEBUG_TYPE_POP_GROUP)
-		strcpy_s(debType, "pop group");
-	else
-		assert(false);
+	switch (a_type)
+	{
+	case GL_DEBUG_TYPE_ERROR:               strcpy_s(debType, "error"); break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: strcpy_s(debType, "deprecated behavior"); break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  strcpy_s(debType, "undefined behavior"); break;
+	case GL_DEBUG_TYPE_PORTABILITY:         strcpy_s(debType, "portability"); break;
+	case GL_DEBUG_TYPE_PERFORMANCE:         strcpy_s(debType, "performance"); break;
+	case GL_DEBUG_TYPE_OTHER:               strcpy_s(debType, "message"); break;
+	case GL_DEBUG_TYPE_MARKER:              strcpy_s(debType, "marker"); break;
+	case GL_DEBUG_TYPE_PUSH_GROUP:          strcpy_s(debType, "push group"); break;
+	case GL_DEBUG_TYPE_POP_GROUP:           strcpy_s(debType, "pop group"); break;
+	default: assert(false);
+	}
 
-	if (a_severity == GL_DEBUG_SEVERITY_HIGH_ARB)
-		strcpy_s(debSev, "high");
-	else if (a_severity == GL_DEBUG_SEVERITY_MEDIUM_ARB)
-		strcpy_s(debSev, "medium");
-	else if (a_severity == GL_DEBUG_SEVERITY_LOW_ARB)
-		strcpy_s(debSev, "low");
-	else if (a_severity == GL_DEBUG_SEVERITY_NOTIFICATION)
-		strcpy_s(debSev, "notification");
-	else
-		assert(false);
+	switch (a_severity)
+	{
+	case GL_DEBUG_SEVERITY_HIGH_ARB:     strcpy_s(debSev, "high"); break;
+	case GL_DEBUG_SEVERITY_MEDIUM_ARB:   strcpy_s(debSev, "medium"); break;
+	case GL_DEBUG_SEVERITY_LOW_ARB:      strcpy_s(debSev, "low"); break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION: strcpy_s(debSev, "notification"); break;
+	default: assert(false);
+	}
 
 	print("%s: %s(%s) %d: %s\n", debSource, debType, debSev, a_id, a_message);
 }

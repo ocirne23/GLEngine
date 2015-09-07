@@ -41,6 +41,7 @@ public:
 	void destroyWindow();
 
 private:
+
 	Graphics(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos);
 	~Graphics();
 	Graphics(const Graphics& copy) = delete;

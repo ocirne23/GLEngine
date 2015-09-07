@@ -15,9 +15,9 @@ public:
 
 public:
 
-	glm::vec4 m_planes[6];
+	static bool aabbInFrustum(const glm::vec3& point, const glm::vec3& extents, const glm::mat4& frustumMatrix);
 
 public:
 
-	static bool aabbInFrustum(const glm::vec3& point, const glm::vec3& extents, const glm::mat4& frustumMatrix);
+	glm::vec4 m_planes[6];
 };

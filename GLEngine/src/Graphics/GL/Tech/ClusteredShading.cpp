@@ -3,8 +3,6 @@
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
-
-#include "Utils/Bounds3D.h"
 #include "Utils/sphereToScreenSpaceBounds.h"
 
 #include <assert.h>
@@ -16,7 +14,7 @@ ClusteredShading::~ClusteredShading()
 	SAFE_DELETE_ARRAY(m_tileLightIndices);
 }
 
-void ClusteredShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight,
+void ClusteredShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight,
 							  const PerspectiveCamera& a_camera)
 {
 	SAFE_DELETE_ARRAY(m_lightGrid);
@@ -42,13 +40,15 @@ void ClusteredShading::resize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint
 
 	m_lightGrid = new glm::uvec2[m_gridSize];
 	m_tileLightIndices = new rde::vector<ushort>[m_gridSize];
+
+	m_initialized = true;
 }
 
 void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLights, const glm::vec4* a_viewSpaceLightPositionRangeList)
 {
-	assert(m_lightGrid && m_tileLightIndices);
-	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
+	assert(m_initialized);
 
+	memset(&m_lightGrid[0], 0, m_gridSize * sizeof(m_lightGrid[0]));
 	for (uint i = 0; i < m_gridSize; ++i)
 		m_tileLightIndices[i].clear();
 	m_lightIndices.clear();

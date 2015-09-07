@@ -20,6 +20,7 @@ void GLSpriteBatch::initialize(uint a_size)
 		VertexAttribute(0, "Position", VertexAttribute::EFormat::FLOAT, 2),
 		VertexAttribute(1, "Texcoords", VertexAttribute::EFormat::FLOAT, 2),
 	};
+	
 	rde::vector<ushort> indices;
 	indices.reserve(m_size * 6);
 	for (uint i = 0, j = 0; i < m_size * 6; i += 6, j += 4)

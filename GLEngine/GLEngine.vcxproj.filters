@@ -46,9 +46,6 @@
     <ClCompile Include="src\Graphics\LightManager.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\GLVars.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp">
       <Filter>Source Files\Graphics\GL\Wrappers</Filter>
     </ClCompile>
@@ -148,9 +145,6 @@
     <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\CheckGLError.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
@@ -162,6 +156,12 @@
     </ClCompile>
     <ClCompile Include="src\Threading\ThreadManager.cpp">
       <Filter>Source Files\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Utils\QuadDrawUtils.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\GLContext.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -251,9 +251,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h">
       <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\GLVars.h">
-      <Filter>Header Files\Public\Graphics\GL</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h">
       <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
@@ -518,6 +515,9 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\TextureRegion.h">
       <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\GLContext.h">
+      <Filter>Header Files\Public\Graphics\GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
