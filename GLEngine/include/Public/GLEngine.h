@@ -12,19 +12,19 @@ Setup and main loop:
 #include "GLEngine.h"
 int main()
 {
-    GLEngine::initialize();
-    GLEngine::createThread("RenderThread", [&]()
-    {
-	    GLEngine::createGLContext();
-        while (!GLEngine::isShutdown())
-        {
-            GLEngine::doRenderThreadTick();
-            // render stuff
-        }
+	GLEngine::initialize();
+	GLEngine::createThread("RenderThread", [&]()
+	{
+		GLEngine::createGLContext();
+		while (!GLEngine::isShutdown())
+		{
+			GLEngine::doRenderThreadTick();
+			// render stuff
+		}
 		GLEngine::destroyGLContext();
-    });
-    while (!GLEngine::isShutdown())
-        GLEngine::doMainThreadTick();
+	});
+	while (!GLEngine::isShutdown())
+		GLEngine::doMainThreadTick()
 	GLEngine::finish();
 }
 **********************/
