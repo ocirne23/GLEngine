@@ -7,7 +7,7 @@
 
 #include "3rdparty/json/json.h"
 #include "3rdparty/rde/rde_string.h"
-#include "3rdparty/rde/vector.h"
+#include "3rdparty/rde/hash_map.h"
 
 #include <glm/glm.hpp>
 
@@ -29,7 +29,7 @@ private:
 	Style m_style;
 	Json::Value m_root;
 	rde::string m_fileName;
-	rde::vector<Widget*> m_widgets;
+	rde::hash_map<rde::string, Widget*> m_widgets;
 	GLSpriteBatch m_spriteBatch;
 
 	glm::mat4 m_vpMatrix;

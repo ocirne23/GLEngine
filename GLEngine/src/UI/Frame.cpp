@@ -18,6 +18,12 @@ void Frame::initialize(const char* a_fileName)
 {
 	m_spriteBatch.initialize(SPRITE_BATCH_SIZE);
 
+	float screenWidth = (float) GLEngine::graphics->getViewportWidth();
+	float screenHeight = (float) GLEngine::graphics->getViewportHeight();
+	glm::mat4 projectionMatrix = glm::ortho(0.0f, screenWidth, screenHeight, 0.0f, 0.1f, 100.0f);
+	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	m_vpMatrix = projectionMatrix * viewMatrix;
+
 	Json::Reader reader;
 	{
 		FileHandle handle(a_fileName);
@@ -47,29 +53,25 @@ void Frame::initialize(const char* a_fileName)
 		}
 		assert(widget);
 		widget->fromJson(item);
-		m_widgets.push_back(widget);
+		m_widgets.insert({widget->getName(), widget});
 	}
-
-	float screenWidth = (float) GLEngine::graphics->getViewportWidth();
-	float screenHeight = (float) GLEngine::graphics->getViewportHeight();
-	glm::mat4 projectionMatrix = glm::ortho(0.0f, screenWidth, screenHeight, 0.0f, 0.1f, 100.0f);
-	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	m_vpMatrix = projectionMatrix * viewMatrix;
 }
 
 void Frame::render()
 {
 	m_spriteBatch.begin(m_vpMatrix);
 
-	for (Widget* widget : m_widgets)
+	for (const auto& it : m_widgets)
 	{
+		Widget* widget = it.second;
 		switch (widget->getType())
 		{
 		case EWidgetType::TEXTBUTTON: break;
 		case EWidgetType::IMAGEBUTTON:
 		{
-			ImageButton* imageButton = (ImageButton*) widget;
-			m_spriteBatch.draw(m_style.getImageButtonTex(), 50.0f, 150.0f, 400.0f, 300.0f);
+			ImageButton* button = (ImageButton*) widget;
+			const Layout& layout = button->getLayout();
+			m_spriteBatch.draw(m_style.getImageButtonTex(), layout.width, layout.height, layout.marginLeft, layout.marginTop);
 			break;
 		}
 		}
@@ -80,8 +82,8 @@ void Frame::render()
 
 Frame::~Frame()
 {
-	for (Widget* widget : m_widgets)
-		delete widget;
+	for (auto& it: m_widgets)
+		delete it.second;
 	m_widgets.clear();
 }
 
