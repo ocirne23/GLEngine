@@ -13,7 +13,8 @@ GLVertexBuffer::~GLVertexBuffer()
 
 void GLVertexBuffer::initialize(EBufferType a_bufferType, EDrawUsage a_drawUsage)
 {
-	assert(!m_initialized);
+	if (m_initialized)
+		glDeleteBuffers(1, &m_id);
 
 	glGenBuffers(1, &m_id);
 	m_bufferType = a_bufferType;

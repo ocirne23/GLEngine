@@ -21,16 +21,17 @@ void GLTextureArray::initialize(const rde::vector<Pixmap>& a_pixmaps, uint a_num
 								ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	assert(!a_pixmaps.empty());
+
+	if (m_initialized)
+		glDeleteTextures(1, &m_textureID);
+
 	m_numMipmaps = a_numMipMaps;
 
-	// If setDimensions was not used before, use the dimensions of the first pixmap;
-	if (m_width == 0 || m_height == 0 || m_numComponents == 0)
-	{
-		m_width = a_pixmaps[0].m_width;
-		m_height = a_pixmaps[0].m_height;
-		m_numComponents = a_pixmaps[0].m_numComponents;
-		m_isFloatTexture = a_pixmaps[0].m_isFloatData;
-	}
+	// use the dimensions of the first pixmap;
+	m_width = a_pixmaps[0].m_width;
+	m_height = a_pixmaps[0].m_height;
+	m_numComponents = a_pixmaps[0].m_numComponents;
+	m_isFloatTexture = a_pixmaps[0].m_isFloatData;
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, m_textureID);
@@ -81,15 +82,6 @@ void GLTextureArray::initialize(const rde::vector<rde::string>& a_filePaths, uin
 	for (int i = 0; i < a_filePaths.size(); ++i)
 		pixmaps[i].read(a_filePaths[i].c_str());
 	initialize(pixmaps, a_numMipMaps, a_minFilter, a_magFilter, a_textureWrapS, a_textureWrapT);
-}
-
-void GLTextureArray::setDimensions(uint a_width, uint a_height, uint a_numComponents, bool a_isFloatTexture)
-{
-	assert(!m_initialized);
-	m_width = a_width;
-	m_height = a_height;
-	m_numComponents = a_numComponents;
-	m_isFloatTexture = a_isFloatTexture;
 }
 
 void GLTextureArray::bind(uint a_index)

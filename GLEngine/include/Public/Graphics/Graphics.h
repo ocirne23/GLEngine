@@ -6,11 +6,11 @@
 
 #include <functional>
 
+typedef uint WindowFlags;
+
 struct SDL_Window;
 class WindowEventListener;
-
-typedef void* SDL_GLContext;
-typedef uint WindowFlags;
+class GLContext;
 
 class Graphics
 {
@@ -59,4 +59,5 @@ private:
 	uint m_viewportYPos   = 0;
 	uint m_viewportWidth  = 0;
 	uint m_viewportHeight = 0;
+	GLContext* m_context  = NULL;
 };

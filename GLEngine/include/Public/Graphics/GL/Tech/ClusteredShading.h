@@ -12,7 +12,8 @@ public:
 	ClusteredShading() {}
 	~ClusteredShading();
 
-	void initialize(uint pixelsPerTileW, uint pixelsPerTileH, uint screenWidth, uint screenHeight, const PerspectiveCamera& camera);
+	void initialize(const PerspectiveCamera& camera, uint screenWidth, uint screenHeight,
+	                uint pixelsPerTileW, uint pixelsPerTileH);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* viewSpaceLightPositionRangeList);
 
 	uint getGridWidth() const  { return m_gridWidth; }

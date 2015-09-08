@@ -30,11 +30,12 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 
 Graphics::~Graphics()
 {
+	assert(!m_context && "destroyGLContext() was not called");
 }
 
 void Graphics::createGLContext()
 {
-	GLContext::createGLContext(m_window);
+	m_context = new GLContext(m_window);
 
 	glewExperimental = GL_TRUE;
 	const GLenum res = glewInit();
@@ -81,7 +82,7 @@ void Graphics::createGLContext()
 
 void Graphics::destroyGLContext()
 {
-	GLContext::destroyGLContext();
+	SAFE_DELETE(m_context);
 }
 
 void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDepth)

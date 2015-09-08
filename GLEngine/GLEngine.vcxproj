@@ -58,7 +58,7 @@
     <ClCompile Include="src\3rdparty\rde\rde_string.cpp" />
     <ClCompile Include="src\3rdparty\rde\slist.cpp" />
     <ClCompile Include="src\Threading\ThreadManager.cpp" />
-    <ClCompile Include="src\UI\Frame.cpp" />
+    <ClCompile Include="src\UI\UIFrame.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
     <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp" />
     <ClCompile Include="src\UI\Style.cpp" />
@@ -177,7 +177,7 @@
     <ClInclude Include="include\Private\Utils\Bounds3D.h" />
     <ClInclude Include="include\Private\Graphics\GL\Utils\CheckGLError.h" />
     <ClInclude Include="include\Public\UI\Font.h" />
-    <ClInclude Include="include\Public\UI\Frame.h" />
+    <ClInclude Include="include\Public\UI\UIFrame.h" />
     <ClInclude Include="include\Public\UI\Style.h" />
     <ClInclude Include="include\Public\UI\Widgets\Widget.h" />
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />

@@ -7,7 +7,10 @@
 
 void GLTextureBuffer::initialize(ESizedFormat a_sizedFormat, EDrawUsage a_drawUsage)
 {
-	assert(!m_initialized);
+	if (m_bufferID)
+		glDeleteBuffers(1, &m_bufferID);
+	if (m_textureID)
+		glDeleteTextures(1, &m_textureID);
 
 	m_drawUsage = a_drawUsage;
 	m_sizedInternalFormat = a_sizedFormat;

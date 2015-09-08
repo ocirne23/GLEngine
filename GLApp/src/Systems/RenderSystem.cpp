@@ -4,15 +4,17 @@
 #include "Components/TransformComponent.h"
 #include "Components/ModelComponent.h"
 #include "Components/SkyComponent.h"
-#include "3rdparty/entityx/Entity.h"
+#include "Components/UIComponent.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GLMesh.h"
-#include "Graphics/GL/GLVars.h"
 #include "Systems/LightSystem.h"
 #include "Systems/CameraSystem.h"
+#include "Systems/UISystem.h"
+#include "UI/UIFrame.h"
 #include "Utils/FileModificationManager.h"
+#include "3rdparty/entityx/Entity.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -26,19 +28,23 @@ static const char* const MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
 static const char* const SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
 static const char* const UI_JSON_FILE_PATH = "UI/uitest.json";
 
-static const unsigned int TILE_WIDTH_PX  = 64;
-static const unsigned int TILE_HEIGHT_PX = 64;
+static const uint UI_SPRITE_BATCH_SIZE = 100;
+static const uint TILE_WIDTH_PX  = 64;
+static const uint TILE_HEIGHT_PX = 64;
 
 static const glm::vec3 AMBIENT(0.15f);
 
 END_UNNAMED_NAMESPACE()
 
-RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem& a_lightSystem) : 
-	m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem)
+RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem& a_lightSystem, const UISystem& a_uiSystem) :
+m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem), m_uiSystem(a_uiSystem)
 {
+	m_xRes = GLEngine::graphics->getViewportWidth();
+	m_yRes = GLEngine::graphics->getViewportHeight();
+
 	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
-	m_frame.initialize(UI_JSON_FILE_PATH);
-	
+	m_uiSpriteBatch.initialize(UI_SPRITE_BATCH_SIZE);
+
 	auto onShaderEdited = [&]()
 	{
 		print("shader edited\n");
@@ -57,9 +63,20 @@ RenderSystem::~RenderSystem()
 	FileModificationManager::removeAllModificationListenersForOwner(this);
 }
 
-void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
+void RenderSystem::onResize(uint a_width, uint a_height)
 {
-	m_clusteredShading.initialize(TILE_WIDTH_PX, TILE_HEIGHT_PX, GLEngine::graphics->getViewportWidth(), GLEngine::graphics->getViewportHeight(), camera);
+	m_xRes = a_width;
+	m_yRes = a_height;
+
+	const PerspectiveCamera* camera = m_cameraSystem.getActiveCamera();
+	if (camera)
+		initializeShaderForCamera(*camera);
+}
+
+void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& a_camera)
+{
+	m_clusteredShading.initialize(a_camera, m_xRes, m_yRes, TILE_WIDTH_PX, TILE_HEIGHT_PX);
+	m_hbao.initialize(a_camera, m_xRes, m_yRes, UBOBindingPoints::HBAO_GLOBALS_UBO_BINDING_POINT);
 
 	rde::vector<rde::string> defines;
 	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string((int) LightSystem::MAX_LIGHTS)));
@@ -104,8 +121,6 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& camera)
 		m_skyboxTransformUniform.initialize(m_skyboxShader, "u_modelMatrix");
 	}
 	m_skyboxShader.end();
-
-	m_hbao.initialize(camera, UBOBindingPoints::HBAO_GLOBALS_UBO_BINDING_POINT);
 
 	m_shaderInitialized = true;
 }
@@ -200,7 +215,11 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 
 	GLEngine::graphics->setBlending(true);
 	GLEngine::graphics->setDepthTest(false);
-	m_frame.render();
+
+	for (const UIComponent* uiComponent : m_uiSystem.getSortedUIComponents())
+	{
+		uiComponent->getUIFrame().render(m_uiSpriteBatch);
+	}
 	GLEngine::graphics->setDepthTest(true);
 	GLEngine::graphics->setBlending(false);
 

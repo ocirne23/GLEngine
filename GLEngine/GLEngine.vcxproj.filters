@@ -91,9 +91,6 @@
     <ClCompile Include="src\UI\Widgets\TextButton.cpp">
       <Filter>Source Files\UI\Widgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\UI\Frame.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
     <ClCompile Include="src\UI\Layout.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
@@ -163,6 +160,9 @@
     <ClCompile Include="src\Graphics\GL\GLContext.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
     </ClCompile>
+    <ClCompile Include="src\UI\UIFrame.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
@@ -203,9 +203,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\Utils\FPSCameraController.h">
       <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\UI\Frame.h">
-      <Filter>Header Files\Public\UI</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\Frustum.h">
       <Filter>Header Files\Public\Graphics</Filter>
@@ -518,6 +515,9 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\GLContext.h">
       <Filter>Header Files\Public\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\UI\UIFrame.h">
+      <Filter>Header Files\Public\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

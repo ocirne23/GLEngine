@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Core.h"
-
-#include "3rdparty/entityx/System.h"
 #include "Graphics/LightManager.h"
+#include "Graphics/GL/GLSpriteBatch.h"
 #include "Graphics/GL/Wrappers/GLConstantBuffer.h"
 #include "Graphics/GL/Wrappers/GLFramebuffer.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
@@ -12,12 +11,13 @@
 #include "Graphics/GL/Wrappers/GLUniform.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
 #include "Graphics/GL/Tech/HBAO.h"
-#include "UI/Frame.h"
+#include "3rdparty/entityx/System.h"
 
 #include <glm/glm.hpp>
 
 class CameraSystem;
 class LightSystem;
+class UISystem;
 
 BEGIN_NAMESPACE(UBOBindingPoints)
 enum
@@ -45,10 +45,11 @@ class RenderSystem : public entityx::System<RenderSystem>
 {
 public:
 
-	RenderSystem(const CameraSystem& cameraSystem, const LightSystem& lightSystem);
+	RenderSystem(const CameraSystem& cameraSystem, const LightSystem& lightSystem, const UISystem& uiSystem);
 	~RenderSystem();
 
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt) override;
+	void onResize(uint width, uint height);
 
 	const GLShader& getModelShader()    { return m_modelShader; }
 	bool isHBAOEnabled() const          { return m_hbaoEnabled; }
@@ -62,13 +63,16 @@ private:
 
 	const LightSystem& m_lightSystem;
 	const CameraSystem& m_cameraSystem;
-
-	Frame m_frame;
+	const UISystem& m_uiSystem;
 
 	bool m_shaderInitialized = false;
-	bool m_hbaoEnabled       = true;
+	uint m_xRes = 0;
+	uint m_yRes = 0;
+
+	bool m_hbaoEnabled = true;
 	HBAO m_hbao;
 
+	GLSpriteBatch m_uiSpriteBatch;
 	GLTexture m_dfvTexture;
 	GLShader m_modelShader;
 

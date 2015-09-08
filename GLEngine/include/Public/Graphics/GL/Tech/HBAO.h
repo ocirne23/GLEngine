@@ -13,7 +13,7 @@ public:
 	HBAO() {}
 	~HBAO();
 
-	void initialize(const PerspectiveCamera& camera, uint hbaoGlobalsUBOBindingPoint);
+	void initialize(const PerspectiveCamera& camera, uint xRes, uint yRes, uint hbaoGlobalsUBOBindingPoint);
 
 	void begin();
 	void endAndRender();

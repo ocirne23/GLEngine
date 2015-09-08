@@ -1,5 +1,7 @@
 #include "UI/Widgets/Widget.h"
 
+#include "UI/UIFrame.h"
+
 #include <glm/glm.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -43,7 +45,21 @@ Json::Value Widget::toJson()
 	return v;
 }
 
-glm::vec4 Widget::getAbsoluteBounds(Frame& frame) const
+void Widget::updateLayout(const UIFrame& a_frame)
 {
-	return glm::vec4(0);
+	float frameWidth = a_frame.getWidth();
+	float frameHeight = a_frame.getHeight();
+
+	if (m_layout.horzontalAlignment == Layout::EHorizontalAlignment::RIGHT)
+		m_absBounds.x = frameWidth - m_layout.marginRight - m_layout.width;
+	else
+		m_absBounds.x = m_layout.marginLeft;
+
+	if (m_layout.verticalAlignment == Layout::EVerticalAlignment::BOTTOM)
+		m_absBounds.y = frameHeight - m_layout.marginBottom - m_layout.height;
+	else
+		m_absBounds.y = m_layout.marginTop;
+
+	m_absBounds.z = m_layout.width;
+	m_absBounds.w = m_layout.height;
 }

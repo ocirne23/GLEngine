@@ -4,9 +4,10 @@
 
 #include "3rdparty/rde/rde_string.h"
 #include "UI/Layout.h"
-#include "Utils/VecForward.h"
 
-class Frame;
+#include <glm/glm.hpp>
+
+class UIFrame;
 
 enum class EWidgetType
 {
@@ -27,20 +28,21 @@ public:
 	virtual void fromJson(const Json::Value& json);
 	virtual Json::Value toJson();
 
-	EWidgetType getType() const        { return m_type; }
-	const rde::string& getName() const { return m_name; }
-	const Layout& getLayout() const    { return m_layout; }
-	const Widget* getParent() const    { return m_parent; }
+	void updateLayout(const UIFrame& frame);
 
-	glm::vec4 getAbsoluteBounds(Frame& frame) const;
+	EWidgetType getType() const                { return m_type; }
+	const rde::string& getName() const         { return m_name; }
+	const Layout& getLayout() const            { return m_layout; }
+	const Widget* getParent() const            { return m_parent; }
+	const glm::vec4& getAbsoluteBounds() const { return m_absBounds; }
 
 protected:
 
 	EWidgetType m_type;
 	rde::string m_name;
 	Layout m_layout;
-
 	Widget* m_parent = NULL;
+	glm::vec4 m_absBounds = glm::vec4(0);
 };
 
 

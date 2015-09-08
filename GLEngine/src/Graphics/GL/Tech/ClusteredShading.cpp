@@ -14,8 +14,8 @@ ClusteredShading::~ClusteredShading()
 	SAFE_DELETE_ARRAY(m_tileLightIndices);
 }
 
-void ClusteredShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint a_screenWidth, uint a_screenHeight,
-							  const PerspectiveCamera& a_camera)
+void ClusteredShading::initialize(const PerspectiveCamera& a_camera, uint a_screenWidth, uint a_screenHeight, 
+	                              uint a_pixelsPerTileW, uint a_pixelsPerTileH)
 {
 	SAFE_DELETE_ARRAY(m_lightGrid);
 	SAFE_DELETE_ARRAY(m_tileLightIndices);

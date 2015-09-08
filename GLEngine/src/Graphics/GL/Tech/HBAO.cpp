@@ -55,10 +55,10 @@ HBAO::~HBAO()
 
 }
 
-void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_hbaoGlobalsUBOBindingPoint)
+void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRes, uint a_hbaoGlobalsUBOBindingPoint)
 {
-	const uint screenWidth = GLEngine::graphics->getViewportWidth();
-	const uint screenHeight = GLEngine::graphics->getViewportHeight();
+	const uint screenWidth = a_xRes;
+	const uint screenHeight = a_yRes;
 	const float aoWidth = screenWidth / RES_RATIO;
 	const float aoHeight = screenHeight / RES_RATIO;
 

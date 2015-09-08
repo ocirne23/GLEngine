@@ -19,6 +19,7 @@
 #include "Systems/LightSystem.h"
 #include "Systems/ModelManageSystem.h"
 #include "Systems/RenderSystem.h"
+#include "Systems/UISystem.h"
 
 #include <glm/gtc/random.hpp>
 
@@ -44,8 +45,9 @@ TestScreen::TestScreen()
 	systems.add<ModelManageSystem>();
 	systems.add<FPSControlSystem>();
 	systems.add<CameraSystem>();
+	systems.add<UISystem>();
 	systems.add<LightSystem>(*systems.system<CameraSystem>());
-	systems.add<RenderSystem>(*systems.system<CameraSystem>(), *systems.system<LightSystem>());
+	systems.add<RenderSystem>(*systems.system<CameraSystem>(), *systems.system<LightSystem>(), *systems.system<UISystem>());
 	systems.configure();
 
 	Entity cameraEntity = m_entityx.entities.create();
@@ -115,6 +117,10 @@ void TestScreen::keyDown(EKey a_key)
 	{
 		auto renderSystem = systems.system<RenderSystem>();
 		renderSystem->setHBAOEnabled(!renderSystem->isHBAOEnabled());
+		break;
+	}
+	case EKey::H:
+	{
 		break;
 	}
 	case EKey::ESCAPE:

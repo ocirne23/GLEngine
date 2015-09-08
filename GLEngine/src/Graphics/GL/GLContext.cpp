@@ -55,9 +55,8 @@ GLContext::GLContext(SDL_Window* a_window)
 	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, (GLint*) &m_uboMaxSize);
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*) &m_maxTextureSize);
 
-	print("Created GL Context: %i %i\n", m_glMajorVersion, m_glMinorVersion);
+	print("Created GL Context: %i.%i\n", m_glMajorVersion, m_glMinorVersion);
 	print("Vendor: %s\n", m_glVendor.c_str());
-	print("Max texture size: %i\n", m_maxTextureSize);
 }
 
 GLContext::~GLContext()

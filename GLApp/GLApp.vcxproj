@@ -24,6 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="src\Components\PointLightComponent.cpp" />
+    <ClCompile Include="src\Components\UIComponent.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Screens\TestScreen.cpp" />
     <ClCompile Include="src\Systems\CameraSystem.cpp" />
@@ -31,6 +32,7 @@
     <ClCompile Include="src\Systems\LightSystem.cpp" />
     <ClCompile Include="src\Systems\ModelManageSystem.cpp" />
     <ClCompile Include="src\Systems\RenderSystem.cpp" />
+    <ClCompile Include="src\Systems\UISystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h" />
@@ -41,12 +43,14 @@
     <ClInclude Include="src\Components\PointLightComponent.h" />
     <ClInclude Include="src\Components\SkyComponent.h" />
     <ClInclude Include="src\Components\TransformComponent.h" />
+    <ClInclude Include="src\Components\UIComponent.h" />
     <ClInclude Include="src\Screens\TestScreen.h" />
     <ClInclude Include="src\Systems\CameraSystem.h" />
     <ClInclude Include="src\Systems\FPSControlSystem.h" />
     <ClInclude Include="src\Systems\LightSystem.h" />
     <ClInclude Include="src\Systems\ModelManageSystem.h" />
     <ClInclude Include="src\Systems\RenderSystem.h" />
+    <ClInclude Include="src\Systems\UISystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

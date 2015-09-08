@@ -13,7 +13,8 @@ GLConstantBuffer::~GLConstantBuffer()
 
 void GLConstantBuffer::initialize(const GLShader** a_shaders, uint a_numShaders, uint a_bindingPoint, const char* a_blockName, EDrawUsage a_drawUsage)
 {
-	assert(!m_initialized);
+	if (m_initialized)
+		glDeleteBuffers(1, &m_ubo);
 
 	m_drawUsage = a_drawUsage;
 	m_bindingPoint = a_bindingPoint;
@@ -41,7 +42,8 @@ void GLConstantBuffer::initialize(const GLShader** a_shaders, uint a_numShaders,
 
 void GLConstantBuffer::initialize(const GLShader& a_shader, uint a_bindingPoint, const char* a_blockName, EDrawUsage a_drawUsage)
 {
-	assert(!m_initialized);
+	if (m_initialized)
+		glDeleteBuffers(1, &m_ubo);
 
 	m_drawUsage = a_drawUsage;
 	m_bindingPoint = a_bindingPoint;

@@ -40,7 +40,9 @@ bool isMipMapFilter(GLenum filter)
 void GLTexture::initialize(const char* a_filePath, ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter,
                            ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
-	assert(!m_initialized);
+	if (m_initialized)
+		glDeleteTextures(1, &m_textureID);
+
 	Pixmap pixmap;
 	pixmap.read(a_filePath);
 	if (!pixmap.exists())
@@ -51,7 +53,9 @@ void GLTexture::initialize(const char* a_filePath, ETextureMinFilter a_minFilter
 void GLTexture::initialize(const Pixmap& a_pixmap, ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter,
                            ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
-	assert(!m_initialized);
+	if (m_initialized)
+		glDeleteTextures(1, &m_textureID);
+
 	m_width          = a_pixmap.m_width;
 	m_height         = a_pixmap.m_height;
 	m_numComponents  = a_pixmap.m_numComponents;

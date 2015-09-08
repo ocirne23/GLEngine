@@ -18,7 +18,9 @@ GLStateBuffer::~GLStateBuffer()
 void GLStateBuffer::initialize()
 {
 	assert(!s_isBegun);
-	assert(!m_initialized);
+	if (m_initialized)
+		glDeleteVertexArrays(1, &m_vao);
+
 	glGenVertexArrays(1, &m_vao);
 	m_initialized = true;
 }

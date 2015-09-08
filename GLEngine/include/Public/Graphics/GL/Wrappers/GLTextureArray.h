@@ -55,7 +55,6 @@ public:
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
-	void setDimensions(uint width, uint height, uint numComponents, bool isFloatTexture);
 	
 	bool isInitialized() const    { return m_initialized; }
 	uint getWidth() const         { return m_width; }

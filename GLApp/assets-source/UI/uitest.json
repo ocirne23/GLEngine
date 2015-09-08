@@ -41,13 +41,13 @@
 		"type": "imagebutton",
 		"name": "somethingy 1",
 		"layout": {
-			"width": 100,
-			"height": 50,
+			"width": 300,
+			"height": 100,
 			"horizontalAlignment": "LEFT",
 			"verticalAlignment": "TOP",
-			"marginLeft": 100,
+			"marginLeft": 20,
 			"marginRight": 0,
-			"marginTop": 150,
+			"marginTop": 60,
 			"marginBottom": 0
 		},
 		"properties":
