@@ -8,6 +8,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SkyComponent.h"
 #include "Components/TransformComponent.h"
+#include "Components/UIComponent.h"
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
@@ -28,6 +29,7 @@ BEGIN_UNNAMED_NAMESPACE()
 static const rde::string MODEL_FILE_PATH("Models/palace/palace.obj.da");
 static const rde::string MODEL2_FILE_PATH("Models/meshes/dragon.obj.da");
 static const rde::string SKYBOX_FILE_PATH("Models/skybox/skysphere.obj.da");
+static const rde::string UI_JSON_FILE_PATH("UI/uitest.json");
 
 END_UNNAMED_NAMESPACE()
 
@@ -69,6 +71,9 @@ TestScreen::TestScreen()
 
 	Entity lightEntity = m_entityx.entities.create();
 	lightEntity.assign<PointLightComponent>()->set(glm::vec3(0, -10.0f, -20.0f), 5.0f, glm::vec3(1.0f), 20.0f);
+
+	Entity uiEntity = m_entityx.entities.create();
+	uiEntity.assign<UIComponent>(UI_JSON_FILE_PATH, UIComponent::ELayer::Layer0);
 }
 
 TestScreen::~TestScreen()

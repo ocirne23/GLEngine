@@ -29,6 +29,8 @@ void UISystem::receive(entityx::ComponentAddedEvent<UIComponent>& a_uiComponentA
 	rde::quick_sort(m_uiComponents.begin(), m_uiComponents.end(), [](UIComponent* l, UIComponent* r) {
 		return l->getLayer() < r->getLayer();
 	});
+	component->m_uiFrame->updateLayout();
+	component->m_uiSystem = this;
 }
 
 void UISystem::reloadJsonFiles()

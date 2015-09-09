@@ -1,3 +1,5 @@
+#include "Shaders/cameravars.glsl"
+
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec2 in_texcoord;
 layout(location = 2) in vec3 in_normal;
@@ -5,9 +7,6 @@ layout(location = 3) in vec3 in_tangent;
 layout(location = 4) in vec3 in_bitangent;
 layout(location = 5) in uint in_materialID;
 
-uniform mat4 u_viewProjectionMatrix;
-uniform mat4 u_viewMatrix;
-uniform mat3 u_normalMatrix;
 uniform mat4 u_modelMatrix;
 
 out vec3 v_position;
@@ -20,7 +19,7 @@ flat out uint v_materialID;
 void main()
 {
 	vec4 pos = u_modelMatrix * vec4(in_position, 1.0);
-	gl_Position = u_viewProjectionMatrix * pos;
+	gl_Position = u_vpMatrix * pos;
 	
 	v_position	 = (u_viewMatrix * pos).xyz;
 	v_texcoord	 = in_texcoord;

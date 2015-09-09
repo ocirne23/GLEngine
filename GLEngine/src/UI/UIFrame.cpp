@@ -6,8 +6,6 @@
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 void UIFrame::initialize(const char* a_filePath)
 {
 	m_filePath = a_filePath;
@@ -91,11 +89,6 @@ void UIFrame::resize(float a_width, float a_height)
 {
 	m_width = a_width;
 	m_height = a_height;
-	/*
-	glm::mat4 projectionMatrix = glm::ortho(0.0f, m_width, m_height, 0.0f, 0.1f, 100.0f);
-	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	m_vpMatrix = projectionMatrix * viewMatrix;
-	*/
 	m_layoutValid = false;
 }
 
@@ -106,7 +99,21 @@ void UIFrame::updateLayout()
 	m_layoutValid = true;
 }
 
-void UIFrame::render(GLSpriteBatch& spriteBatch) const
+void UIFrame::render(GLSpriteBatch& a_spriteBatch) const
 {
+	for (const auto& it : m_widgets)
+	{
+		Widget* widget = it.second;
+		glm::vec4 bounds = widget->getAbsoluteBounds();
 
+		switch (widget->getType())
+		{
+		case EWidgetType::TEXTBUTTON:
+			a_spriteBatch.draw(m_style.getTextButtonTex(), bounds.x, bounds.y, bounds.z, bounds.w);
+			break;
+		case EWidgetType::IMAGEBUTTON:
+			a_spriteBatch.draw(m_style.getImageButtonTex(), bounds.x, bounds.y, bounds.z, bounds.w);
+			break;
+		}
+	}
 }

@@ -26,6 +26,7 @@ enum
 	LIGHT_POSITION_RANGE_UBO_BINDING_POINT,
 	LIGHT_COLOR_UBO_BINDING_POINT,
 	HBAO_GLOBALS_UBO_BINDING_POINT,
+	CAMERA_VARS_UBO_BINDING_POINT,
 	NUM_ENGINE_RESERVED_UBO_BINDING_POINTS
 };
 END_NAMESPACE(UBOBindingPoints)
@@ -58,6 +59,9 @@ public:
 private:
 
 	void initializeShaderForCamera(const PerspectiveCamera& camera);
+	void renderSkybox(entityx::EntityManager& entities);
+	void renderModels(entityx::EntityManager& entities);
+	void renderUI();
 
 private:
 
@@ -72,25 +76,22 @@ private:
 	bool m_hbaoEnabled = true;
 	HBAO m_hbao;
 
+	glm::mat4 m_uiMatrix;
+
 	GLSpriteBatch m_uiSpriteBatch;
 	GLTexture m_dfvTexture;
-	GLShader m_modelShader;
 
-	GLConstantBuffer m_lightPositionRangeBuffer;
-	GLConstantBuffer m_lightColorBuffer;
+	GLConstantBuffer m_cameraBuffer;
 
 	ClusteredShading m_clusteredShading;
 	GLTextureBuffer m_lightIndiceTextureBuffer;
 	GLTextureBuffer m_lightGridTextureBuffer;
+	GLConstantBuffer m_lightPositionRangeBuffer;
+	GLConstantBuffer m_lightColorBuffer;
 
-	GLUniform<glm::mat3> m_normalMatrixUniform;
-	GLUniform<glm::mat4> m_viewMatrixUniform;
-	GLUniform<glm::mat4> m_mvpMatrixUniform;
-	GLUniform<glm::mat4> m_transformUniform;
+	GLShader m_modelShader;
+	GLUniform<glm::mat4> m_modelMatrixUniform;
 
 	GLShader m_skyboxShader;
-	GLUniform<glm::mat3> m_skyboxNormalMatrixUniform;
-	GLUniform<glm::mat4> m_skyboxViewMatrixUniform;
-	GLUniform<glm::mat4> m_skyboxMvpMatrixUniform;
-	GLUniform<glm::mat4> m_skyboxTransformUniform;
+	GLUniform<glm::mat4> m_skyboxModelMatrixUniform;
 };
