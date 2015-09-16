@@ -31,6 +31,7 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 Graphics::~Graphics()
 {
 	assert(!m_context && "destroyGLContext() was not called");
+	SDL_DestroyWindow(m_window);
 }
 
 void Graphics::createGLContext()
@@ -138,15 +139,6 @@ void Graphics::setBlending(bool a_enabled)
 	}
 	else
 		glDisable(GL_BLEND);
-}
-
-void Graphics::destroyWindow()
-{
-	if (m_window)
-	{
-		SDL_DestroyWindow(m_window);
-		m_window = NULL;
-	}
 }
 
 void Graphics::setWindowTitle(const char* a_title)

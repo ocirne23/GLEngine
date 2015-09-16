@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Core.h"
-#include "3rdparty/rde/rde_string.h"
 #include "Utils/VecForward.h"
 
 #include <functional>
@@ -37,8 +36,6 @@ public:
 	uint getViewportWidth() const  { return m_viewportWidth; }
 	uint getViewportHeight() const { return m_viewportHeight; }
 	bool getVsyncEnabled() const   { return m_vsync; }
-
-	void destroyWindow();
 
 private:
 
