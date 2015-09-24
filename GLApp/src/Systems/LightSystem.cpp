@@ -33,7 +33,16 @@ void LightSystem::update(entityx::EntityManager& a_entities, entityx::EventManag
 {
 	const auto activeCamera = m_cameraSystem.getActiveCamera();
 	if (activeCamera)
-		updateViewspaceLightPositionRangeList(*activeCamera);
+	{
+		const glm::mat4 viewMatrix = glm::mat4(activeCamera->getViewMatrix());
+		// Transform positions to viewspace
+		const glm::vec4* lightPositionRanges = m_lightManager.getLightPositionRanges();
+		for (uint i = 0; i < m_lightManager.getNumLights(); ++i)
+		{
+			m_viewspaceLightPositionRangeList[i] = viewMatrix * glm::vec4(glm::vec3(lightPositionRanges[i]), 1.0);
+			m_viewspaceLightPositionRangeList[i].w = lightPositionRanges[i].w;
+		}
+	}
 }
 
 uint LightSystem::getNumLights() const
@@ -50,15 +59,3 @@ const glm::vec4* LightSystem::getLightColorIntensityList() const
 {
 	return m_lightManager.getLightColorIntensities();
 }
-
-void LightSystem::updateViewspaceLightPositionRangeList(const PerspectiveCamera& a_camera)
-{
-	const glm::vec4* lightPositionRanges = m_lightManager.getLightPositionRanges();
-	uint numUsedLights = m_lightManager.getNumLights();
-	for (uint i = 0; i < m_lightManager.getNumLights(); ++i)
-	{
-		m_viewspaceLightPositionRangeList[i] = glm::vec4(a_camera.getViewMatrix() * glm::vec4(glm::vec3(lightPositionRanges[i]), 1.0));
-		m_viewspaceLightPositionRangeList[i].w = lightPositionRanges[i].w;
-	}
-}
-

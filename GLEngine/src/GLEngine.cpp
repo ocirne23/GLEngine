@@ -3,6 +3,7 @@
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include "Threading/ThreadManager.h"
+#include "Utils/FileModificationManager.h"
 
 #include <SDL/SDL.h>
 
@@ -37,6 +38,7 @@ void GLEngine::doMainThreadTick()
 void GLEngine::doEngineTick()
 {
 	input->processEvents();
+	FileModificationManager::update();
 }
 
 void GLEngine::sleep(uint a_timeMs)

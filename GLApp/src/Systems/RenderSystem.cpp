@@ -137,8 +137,6 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& a_camera)
 
 void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventManager& a_events, entityx::TimeDelta a_dt)
 {
-	FileModificationManager::update();
-
 	const PerspectiveCamera* activeCamera = m_cameraSystem.getActiveCamera();
 
 	if (!m_shaderInitialized && activeCamera)

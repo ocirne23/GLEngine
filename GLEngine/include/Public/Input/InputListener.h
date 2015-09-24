@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GLEngine.h"
-#include "3rdparty/rde/vector.h"
+#include "Input/Input.h"
 
 #include <functional>
 
@@ -33,10 +33,14 @@ public:
 
 	RetType call(Args... args)
 	{
-		return m_func(args...);
+		if (m_func)
+			return m_func(args...);
+		else
+			return RetType(0);
 	}
 
 private:
+
 	typedef Tag TagType;
 	std::function<RetType(Args...)> m_func;
 };
