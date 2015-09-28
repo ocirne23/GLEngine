@@ -128,8 +128,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>Core.h;</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include\Public;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -137,22 +138,31 @@
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
+      <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>Core.h;</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include\Public;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>
+      <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -161,8 +171,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>Core.h;</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include\Public;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -170,11 +181,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>
+      <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>
       </Command>
     </PreBuildEvent>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -183,8 +198,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
-      <ForcedIncludeFiles>Core.h;</ForcedIncludeFiles>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\GLEngine\include\Public;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
@@ -193,7 +209,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>
+      <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

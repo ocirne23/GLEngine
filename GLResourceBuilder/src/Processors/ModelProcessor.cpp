@@ -1,6 +1,6 @@
 #include "ModelProcessor.h"
 
-#include "Core.h"
+#include "BuilderCore.h"
 
 #include "EResourceType.h"
 #include "Utils/FileUtils.h"
