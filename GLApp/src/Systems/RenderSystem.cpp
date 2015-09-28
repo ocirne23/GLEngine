@@ -46,6 +46,11 @@ END_UNNAMED_NAMESPACE()
 RenderSystem::RenderSystem(const CameraSystem& a_cameraSystem, const LightSystem& a_lightSystem, const UISystem& a_uiSystem) :
 m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem), m_uiSystem(a_uiSystem)
 {
+	m_fpsMeasurer.setLogFunction(5.0f, [](const FPSMeasurer& a_measurer)
+	{
+		print("FPS: %i \t MS: %f\n", a_measurer.getAvgFps(), a_measurer.getAvgMsPerFrame());
+	});
+
 	m_xRes = GLEngine::graphics->getViewportWidth();
 	m_yRes = GLEngine::graphics->getViewportHeight();
 
@@ -172,6 +177,8 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	renderUI();
 
 	GLEngine::graphics->swap();
+
+	m_fpsMeasurer.tickFrame(a_dt);
 }
 
 void RenderSystem::renderSkybox(entityx::EntityManager& a_entities)

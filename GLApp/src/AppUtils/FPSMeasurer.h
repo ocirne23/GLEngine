@@ -8,9 +8,11 @@ class FPSMeasurer
 {
 public:
 
-	FPSMeasurer(float timeInterval, std::function<void(const FPSMeasurer&)> timeIntervalReachedFunc)
-		: m_timeInterval(timeInterval), m_timeIntervalReachedFunc(timeIntervalReachedFunc)
-	{}
+	void setLogFunction(float a_timeInterval, std::function<void(const FPSMeasurer&)> a_logFunc)
+	{
+		m_timeInterval = a_timeInterval;
+		m_logFunc = a_logFunc;
+	}
 
 	void tickFrame(float deltaSec)
 	{
@@ -18,7 +20,7 @@ public:
 		m_timeAccumulator += deltaSec;
 		if (m_timeAccumulator >= m_timeInterval)
 		{
-			m_timeIntervalReachedFunc(*this);
+			m_logFunc(*this);
 			m_timeAccumulator -= m_timeInterval;
 			m_frameCounter = 0;
 		}
@@ -32,7 +34,7 @@ public:
 
 private:
 
-	std::function<void(const FPSMeasurer&)> m_timeIntervalReachedFunc;
+	std::function<void(const FPSMeasurer&)> m_logFunc;
 	uint m_frameCounter     = 0;
 	float m_timeAccumulator = 0;
 	float m_timeInterval    = 0;

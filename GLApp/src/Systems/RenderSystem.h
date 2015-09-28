@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Core.h"
+
+#include "AppUtils/FPSMeasurer.h"
 #include "Graphics/LightManager.h"
 #include "Graphics/GL/GLSpriteBatch.h"
 #include "Graphics/GL/Wrappers/GLConstantBuffer.h"
@@ -94,4 +96,6 @@ private:
 
 	GLShader m_skyboxShader;
 	GLUniform<glm::mat4> m_skyboxModelMatrixUniform;
+
+	FPSMeasurer m_fpsMeasurer;
 };
