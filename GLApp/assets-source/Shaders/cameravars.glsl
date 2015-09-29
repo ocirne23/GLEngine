@@ -8,4 +8,4 @@ layout (std140) uniform CameraVars
 	uniform mat3 u_normalMatrix; // Should be uploaded as a mat4 because std140 allignment
 };
 
-#endif CAMERA_VARS
+#endif // CAMERA_VARS
