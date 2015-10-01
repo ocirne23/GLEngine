@@ -73,11 +73,22 @@ public:
 		COLOR5  = 0x8CE5  // GL_COLOR_ATTACHMENT5
 	};
 
+	enum class EMultiSampleType
+	{
+		NONE = 0,
+		MSAA_2X = 2,
+		MSAA_4X = 4,
+		MSAA_8X = 8,
+		MSAA_16X = 16
+	};
+
 public:
 
-	GLFramebuffer();
+	GLFramebuffer() {};
 	~GLFramebuffer();
 	GLFramebuffer(const GLFramebuffer& copy) = delete;
+
+	void initialize(EMultiSampleType multiSampleType = EMultiSampleType::NONE);
 
 	void addFramebufferTexture(ESizedFormat format, EAttachment attachment, uint width, uint height);
 	void setDepthbufferTexture(ESizedFormat format, uint width, uint height);
@@ -92,9 +103,14 @@ public:
 
 private:
 
+private:
+
+	bool m_initialized  = false;
 	bool m_begun        = false;
 	uint m_fbo          = 0;
 	uint m_depthTexture = 0;
+
+	EMultiSampleType m_multiSampleType = EMultiSampleType::NONE;
 
 	rde::vector<uint> m_textures;
 	rde::vector<EAttachment> m_drawBuffers;

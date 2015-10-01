@@ -6,58 +6,94 @@
 
 bool GLFramebuffer::s_begun = false;
 
-GLFramebuffer::GLFramebuffer()
-{
-	glGenFramebuffers(1, &m_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 GLFramebuffer::~GLFramebuffer()
 {
-	deleteTextures();
-	glDeleteFramebuffers(1, &m_fbo);
+	if (m_initialized)
+	{
+		deleteTextures();
+		glDeleteFramebuffers(1, &m_fbo);
+	}
+}
+
+void GLFramebuffer::initialize(EMultiSampleType a_multiSampleType)
+{
+	assert(!m_initialized);
+	m_multiSampleType = a_multiSampleType;
+	glGenFramebuffers(1, &m_fbo);
+	m_initialized = true;
 }
 
 void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, uint a_height)
 {
+	assert(m_initialized);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-
+	GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
 	glGenTextures(1, &m_depthTexture);
-	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-	glTexStorage2D(GL_TEXTURE_2D, 1, (GLenum) a_format, a_width, a_height);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTexture, 0);
+	glBindTexture(textureType, m_depthTexture);
+	if (m_multiSampleType == EMultiSampleType::NONE)
+	{
+		glTexStorage2D(textureType, 1, (GLenum) a_format, a_width, a_height);
+		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
+	else
+	{
+		glTexStorage2DMultisample(textureType, (GLsizei) m_multiSampleType, (GLenum) a_format, a_width, a_height, GL_TRUE);
+	}
+	
+	begin();
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureType, m_depthTexture, 0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	end();
+
+	glBindTexture(textureType, 0);
 }
 
 void GLFramebuffer::addFramebufferTexture(ESizedFormat a_format, EAttachment a_attachment, uint a_width, uint a_height)
 {
+	assert(m_initialized);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-
+	GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
 	uint textureID;
 	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
+	glBindTexture(textureType, textureID);
+	if (m_multiSampleType == EMultiSampleType::NONE)
+	{
+		glTexStorage2D(textureType, 1, (GLenum) a_format, a_width, a_height);
+		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
+	else
+	{
+		glTexStorage2DMultisample(textureType, (GLsizei) m_multiSampleType, (GLenum) a_format, a_width, a_height, GL_FALSE);
+	}
 
-	glTexStorage2D(GL_TEXTURE_2D, 1, (GLenum) a_format, a_width, a_height);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum) a_attachment, GL_TEXTURE_2D, textureID, 0);
+	begin();
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum) a_attachment, textureType, textureID, 0);
 
 	m_textures.push_back(textureID);
 	m_drawBuffers.push_back(a_attachment);
 
 	glDrawBuffers(m_drawBuffers.size(), (GLenum*) &m_drawBuffers[0]);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	assert(status == GL_FRAMEBUFFER_COMPLETE);
+	
+	end();
+
+	glBindTexture(textureType, 0);
 }
 
 void GLFramebuffer::end()
 {
+	assert(m_initialized);
 	assert(m_begun);
 	assert(s_begun);
 	m_begun = false;
@@ -67,6 +103,7 @@ void GLFramebuffer::end()
 
 void GLFramebuffer::begin()
 {
+	assert(m_initialized);
 	assert(!s_begun);
 	assert(!m_begun);
 	m_begun = true;
@@ -76,35 +113,41 @@ void GLFramebuffer::begin()
 
 void GLFramebuffer::bindTextures(uint a_fromTextureUnit)
 {
+	assert(m_initialized);
 	for (int i = 0; i < m_textures.size(); ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + i + a_fromTextureUnit);
-		glBindTexture(GL_TEXTURE_2D, m_textures[i]);
+		GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
+		glBindTexture(textureType, m_textures[i]);
 	}
 }
 
 void GLFramebuffer::bindTexture(uint a_textureIndex, uint a_textureUnit)
 {
+	assert(m_initialized);
 	assert(a_textureIndex < (uint) m_textures.size());
 	assert(a_textureIndex >= 0);
 	assert(a_textureUnit >= 0);
 
 	glActiveTexture(GL_TEXTURE0 + a_textureUnit);
-	glBindTexture(GL_TEXTURE_2D, m_textures[a_textureIndex]);
+	GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
+	glBindTexture(textureType, m_textures[a_textureIndex]);
 }
 
 void GLFramebuffer::bindDepthTexture(uint a_textureUnit)
 {
+	assert(m_initialized);
 	glActiveTexture(GL_TEXTURE0 + a_textureUnit);
-	glBindTexture(GL_TEXTURE_2D, m_depthTexture);
+	GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
+	glBindTexture(textureType, m_depthTexture);
 }
 
 void GLFramebuffer::deleteTextures()
 {
-	if (m_textures.size() > 0)
-		glDeleteTextures(m_textures.size(), &m_textures[0]);
+	assert(m_initialized);
+	glDeleteTextures(m_textures.size(), &m_textures[0]);
 	m_textures.clear();
-
+	
 	if (m_depthTexture)
 	{
 		glDeleteTextures(1, &m_depthTexture);

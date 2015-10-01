@@ -69,8 +69,15 @@ TestScreen::TestScreen()
 	model2Entity.assign<ModelComponent>(MODEL2_FILE_PATH);
 	model2Entity.assign<TransformComponent>(0.0f, -7.0f, -58.0f);
 
-	Entity lightEntity = m_entityx.entities.create();
-	lightEntity.assign<PointLightComponent>()->set(glm::vec3(0, -10.0f, -20.0f), 5.0f, glm::vec3(1.0f), 20.0f);
+	for (uint i = 0; i < 30; ++i)
+	{
+		Entity lightEntity = m_entityx.entities.create();
+		glm::vec3 color = glm::normalize(glm::linearRand(glm::vec3(0), glm::vec3(1)));
+		float intensity = glm::linearRand(7.0f, 25.0f);
+		float radius = glm::linearRand(10.0f, 20.0f);
+		glm::vec3 position = glm::linearRand(glm::vec3(-22.0f, -6.0f, -17.0f), glm::vec3(20.0f, 8.0f, -92.0f));
+		lightEntity.assign<PointLightComponent>()->set(position, radius, color, intensity);
+	}
 
 	Entity uiEntity = m_entityx.entities.create();
 	uiEntity.assign<UIComponent>(UI_JSON_FILE_PATH, UIComponent::ELayer::Layer0);
@@ -126,6 +133,8 @@ void TestScreen::keyDown(EKey a_key)
 	}
 	case EKey::H:
 	{
+		glm::vec3 pos = systems.system<CameraSystem>()->getActiveCamera()->getPosition();
+		print("CameraPos: %f %f %f\n", pos.x, pos.y, pos.z);
 		break;
 	}
 	case EKey::ESCAPE:

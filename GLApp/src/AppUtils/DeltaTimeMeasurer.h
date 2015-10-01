@@ -8,7 +8,7 @@ public:
 
 	float calcDeltaSec(uint currTimeMs)
 	{
-		if (m_startTime == 0xFFFFFFFF)
+		if (m_startTime == UNINITIALIZED_TIME)
 			m_startTime = currTimeMs;
 
 		uint currentTime = currTimeMs;
@@ -22,6 +22,8 @@ public:
 
 private:
 
+	const int UNINITIALIZED_TIME = 0xFFFFFFFF;
+
 	float m_deltaSec = 0.0f;
-	uint m_startTime = 0xFFFFFFFF;
+	uint m_startTime = UNINITIALIZED_TIME;
 };

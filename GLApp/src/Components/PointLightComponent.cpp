@@ -31,3 +31,23 @@ void PointLightComponent::setIntensity(float a_intensity)
 {
 	m_lightManager->setLightIntensity(m_lightHandle, a_intensity);
 }
+
+const glm::vec3& PointLightComponent::getPosition() const
+{
+	return m_lightManager->getLightPosition(m_lightHandle);
+}
+
+float PointLightComponent::getRadius() const
+{
+	return m_lightManager->getLightRange(m_lightHandle);
+}
+
+const glm::vec3& PointLightComponent::getColor() const
+{
+	return m_lightManager->getLightColor(m_lightHandle);
+}
+
+float PointLightComponent::getIntensity() const
+{
+	return m_lightManager->getLightIntensity(m_lightHandle);
+}
