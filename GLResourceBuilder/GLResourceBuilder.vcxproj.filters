@@ -25,13 +25,34 @@
     <ClCompile Include="src\Utils\FileUtils.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="src\Processors\SceneProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BuilderCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\AssetDatabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Assets\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Assets\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\CRC64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Assets\Scene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\AtlasBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Processors\ByteImageProcessor.h">
       <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EResourceType.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Processors\FloatImageProcessor.h">
       <Filter>Header Files\Processors</Filter>
@@ -60,6 +81,36 @@
     <ClInclude Include="src\BuilderCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Processors\SceneProcessor.h">
+      <Filter>Header Files\Processors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\AssetDatabase.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\Assets\Material.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\Assets\Mesh.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\Assets\Scene.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\Assets\Texture.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\EAssetType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\IAsset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\CRC64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\AtlasBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -78,6 +129,12 @@
     </Filter>
     <Filter Include="Header Files\Utils">
       <UniqueIdentifier>{fb4bda26-3ce1-4dcf-acd9-283eb28989c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Database">
+      <UniqueIdentifier>{de78dadb-fe58-40b6-96b8-a6c5dadf48cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Database">
+      <UniqueIdentifier>{60476da6-3282-47b1-b3d1-52925830d0d4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Processors">
       <UniqueIdentifier>{0f61f029-1dd2-4fd1-ba13-b2538fd7ed11}</UniqueIdentifier>

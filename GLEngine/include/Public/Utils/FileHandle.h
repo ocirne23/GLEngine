@@ -20,11 +20,11 @@ public:
 	void readBytes(char* buffer, uint numBytes, uint offset) const;
 	void writeBytes(const char* bytes, uint numBytes);
 
-	rde::string readString(uint numChars) const;
+	rde::string readString(uint64 numChars) const;
 	rde::string readString() const;
 
 	const rde::string& getFilePath() const { return m_filePath; }
-	uint getFileSize() const               { return m_size; }
+	uint64 getFileSize() const             { return m_size; }
 	bool exists() const                    { return m_rwops != NULL; }
 
 public:
@@ -39,7 +39,7 @@ private:
 
 	rde::string m_filePath;
 	EFileMode m_fileMode = EFileMode::READ;
-	uint m_size         = 0;
+	uint64 m_size       = 0;
 	bool m_isOpen       = false;
 	SDL_RWops* m_rwops  = NULL;
 };

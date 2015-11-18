@@ -8,7 +8,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
-std::string getFileExtension(const std::string& a_filePath)
+std::string FileUtils::getFileExtension(const std::string& a_filePath)
 {
 	auto dotIdx = a_filePath.find_last_of('.');
 	if (dotIdx != std::string::npos)
@@ -17,7 +17,7 @@ std::string getFileExtension(const std::string& a_filePath)
 		return "";
 }
 
-std::string getFolderPathForFile(const std::string& a_filePath)
+std::string FileUtils::getFolderPathForFile(const std::string& a_filePath)
 {
 	auto dirIdx = std::min(a_filePath.find_last_of('/'), a_filePath.find_last_of('\\'));
 	if (dirIdx != std::string::npos)
@@ -26,7 +26,7 @@ std::string getFolderPathForFile(const std::string& a_filePath)
 		return "";
 }
 
-std::string getFileTime(const std::string& a_filePath)
+std::string FileUtils::getFileTime(const std::string& a_filePath)
 {
 	std::wstring stemp = std::wstring(a_filePath.begin(), a_filePath.end());
 	LPCWSTR filePath = stemp.c_str();
@@ -51,7 +51,7 @@ std::string getFileTime(const std::string& a_filePath)
 	return time;
 }
 
-bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>& a_files)
+bool FileUtils::listFiles(std::string a_path, std::string a_mask, std::vector<std::string>& a_files)
 {
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA ffd;
@@ -102,7 +102,7 @@ bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>&
 	return true;
 }
 
-std::string getExtensionForFilePath(const std::string& a_path)
+std::string FileUtils::getExtensionForFilePath(const std::string& a_path)
 {
 	const std::string::size_type extIdx = a_path.find_last_of('.');
 	if (extIdx == std::string::npos)
@@ -112,7 +112,7 @@ std::string getExtensionForFilePath(const std::string& a_path)
 	return extension;
 }
 
-void createDirectoryForFile(const std::string& a_filePath)
+void FileUtils::createDirectoryForFile(const std::string& a_filePath)
 {
 	std::string directory = a_filePath.substr(0, a_filePath.find_last_of("\\"));
 
@@ -125,7 +125,7 @@ void createDirectoryForFile(const std::string& a_filePath)
 	}
 }
 
-bool fileExists(const std::string& a_filePath)
+bool FileUtils::fileExists(const std::string& a_filePath)
 {
 	bool exists = false;
 	std::fstream file;
@@ -134,5 +134,14 @@ bool fileExists(const std::string& a_filePath)
 	if (exists)
 		file.close();
 	return exists;
+}
+
+FileTime FileUtils::getCurrentFileTime()
+{
+	SYSTEMTIME st;
+	GetSystemTime(&st);
+	FileTime ft;
+	SystemTimeToFileTime(&st, (_FILETIME*)(&ft));
+	return ft;
 }
 

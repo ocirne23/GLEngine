@@ -1,7 +1,7 @@
 #pragma once
 
 template <typename T>
-uint readVector(const FileHandle& a_handle, rde::vector<T>& a_vector, uint a_offset)
+uint readVector(FileHandle& a_handle, rde::vector<T>& a_vector, uint a_offset)
 {
 	int size;
 	a_handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), a_offset);

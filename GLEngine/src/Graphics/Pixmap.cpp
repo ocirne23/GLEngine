@@ -1,6 +1,6 @@
 #include "Graphics/Pixmap.h"
 
-#include "Utils/EResourceType.h"
+#include "Utils/EAssetType.h"
 #include "Utils/FileHandle.h"
 
 #include <glm/glm.hpp>
@@ -25,23 +25,22 @@ void Pixmap::read(const char* a_filePath)
 
 	int type;
 	file.readBytes(reinterpret_cast<char*>(&type), sizeof(uint), 0);
+	file.readBytes(reinterpret_cast<char*>(&m_isFloatData), sizeof(bool), sizeof(uint));
 	file.readBytes(reinterpret_cast<char*>(&m_width), sizeof(uint), sizeof(uint));
 	file.readBytes(reinterpret_cast<char*>(&m_height), sizeof(uint), sizeof(uint) * 2);
 	file.readBytes(reinterpret_cast<char*>(&m_numComponents), sizeof(uint), sizeof(uint) * 3);
 
-	assert(type == (int) EResourceType::BYTEIMAGE || type == (int) EResourceType::FLOATIMAGE);
+	assert(type == (int) EAssetType::TEXTURE);
 
-	if (type == (int) EResourceType::BYTEIMAGE)
+	if (m_isFloatData)
 	{
-		m_isFloatData = false;
-		m_data.b = new byte[m_width * m_height * m_numComponents];
-		file.readBytes(reinterpret_cast<char*>(m_data.b), m_width * m_height * m_numComponents, sizeof(uint) * 4);
+		m_data.f = new float[m_width * m_height * m_numComponents];
+		file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * sizeof(float), sizeof(uint) * 4);
 	}
 	else
 	{
-		m_isFloatData = true;
-		m_data.f = new float[m_width * m_height * m_numComponents];
-		file.readBytes(reinterpret_cast<char*>(m_data.f), m_width * m_height * m_numComponents * sizeof(float), sizeof(uint) * 4);
+		m_data.b = new byte[m_width * m_height * m_numComponents];
+		file.readBytes(reinterpret_cast<char*>(m_data.b), m_width * m_height * m_numComponents, sizeof(uint) * 4);
 	}
 }
 

@@ -3,20 +3,21 @@
 #include <assert.h>
 #include <memory>
 
-namespace
-{
-	inline void setPixel(unsigned char* data, int width, int height, int x, int y, int numComponents, const unsigned char* pixelData)
-	{
-		memcpy(data + ((width * y) + x) * numComponents, pixelData, numComponents);
-	}
+BEGIN_UNNAMED_NAMESPACE()
 
-	inline void getPixel(const unsigned char* data, int width, int height, int x, int y, int numComponents, unsigned char* outPixelData)
-	{
-		memcpy(outPixelData, data + ((width * y) + x) * numComponents, numComponents);
-	}
+inline void setPixel(unsigned char* data, uint width, uint height, uint x, uint y, uint numComponents, const unsigned char* pixelData)
+{
+	memcpy(data + ((width * y) + x) * numComponents, pixelData, numComponents);
 }
 
-TextureAtlas::TextureAtlas(int width, int height, int numComponents, int numMipMaps)
+inline void getPixel(const unsigned char* data, uint width, uint height, uint x, uint y, uint numComponents, unsigned char* outPixelData)
+{
+	memcpy(outPixelData, data + ((width * y) + x) * numComponents, numComponents);
+}
+
+END_UNNAMED_NAMESPACE()
+
+TextureAtlas::TextureAtlas(uint width, uint height, uint numComponents)
 {
 	initialize(width, height, numComponents, numMipMaps);
 }
@@ -34,7 +35,7 @@ TextureAtlas::Node::~Node()
 		delete right;
 }
 
-TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
+TextureAtlas::AtlasRegion TextureAtlas::getRegion(uint width, uint height)
 {
 	if (width > m_width || height > m_height)
 		return {0, 0, 0, 0};
@@ -54,7 +55,7 @@ TextureAtlas::AtlasRegion TextureAtlas::getRegion(int width, int height)
 		return {0, 0, 0, 0};
 }
 
-const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int width, int height)
+const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, uint width, uint height)
 {
 	if (node->left || node->right)
 	{
@@ -76,8 +77,8 @@ const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int 
 	if (width > node->width || height > node->height)
 		return 0;
 
-	const int w = node->width - width;
-	const int h = node->height - height;
+	const uint w = node->width - width;
+	const uint h = node->height - height;
 	node->left = new Node();
 	node->right = new Node();
 	if (w <= h)
@@ -110,10 +111,8 @@ const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, int 
 	return node;
 }
 
-void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned char* data, int stride)
+void TextureAtlas::setRegion(uint x, uint y, uint width, uint height, const unsigned char* data, uint stride)
 {
-	assert(x >= 0);
-	assert(y >= 0);
 	assert(x < m_width);
 	assert((x + width) <= m_width);
 	assert(y < m_height);
@@ -126,8 +125,8 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 
 		unsigned char red [] = {255, 0, 0, 255};
 		// Initialize atlas color to red
-		for (int xa = 0; xa < m_width; ++xa)
-			for (int ya = 0; ya < m_height; ++ya)
+		for (uint xa = 0; xa < m_width; ++xa)
+			for (uint ya = 0; ya < m_height; ++ya)
 				setPixel(m_data, m_width, m_height, xa, ya, m_numComponents, red);
 	}
 
@@ -139,45 +138,45 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 	{	// NOTE: can optimize a whole lot
 		unsigned char pixel [] = {0, 0, 0, 0};
 		// center
-		for (int xPix = 0; xPix < width; ++xPix)
+		for (uint xPix = 0; xPix < width; ++xPix)
 		{
-			for (int yPix = 0; yPix < height; ++yPix)
+			for (uint yPix = 0; yPix < height; ++yPix)
 			{
 				getPixel(data, width, height, xPix, yPix, m_numComponents, pixel);
 				setPixel(m_data, m_width, m_height, x + xPix, y + yPix, m_numComponents, pixel);
 			}
 		}
 		// top
-		for (int xPix = 0; xPix < width; ++xPix)
+		for (uint xPix = 0; xPix < width; ++xPix)
 		{
 			getPixel(data, width, height, xPix, 0, m_numComponents, pixel);
-			for (int yPix = 0; yPix < m_padding; ++yPix)
+			for (uint yPix = 0; yPix < m_padding; ++yPix)
 			{
 				setPixel(m_data, m_width, m_height, x + xPix, y - yPix - 1, m_numComponents, pixel);
 			}
 		}
 		//bottom
-		for (int xPix = 0; xPix < width; ++xPix)
+		for (uint xPix = 0; xPix < width; ++xPix)
 		{
 			getPixel(data, width, height, xPix, height - 1, m_numComponents, pixel);
-			for (int yPix = 0; yPix < m_padding; ++yPix)
+			for (uint yPix = 0; yPix < m_padding; ++yPix)
 			{
 				setPixel(m_data, m_width, m_height, x + xPix, y + yPix + height, m_numComponents, pixel);
 			}
 		}
 		//left
-		for (int xPix = 0; xPix < m_padding; ++xPix)
+		for (uint xPix = 0; xPix < m_padding; ++xPix)
 		{
-			for (int yPix = 0; yPix < height; ++yPix)
+			for (uint yPix = 0; yPix < height; ++yPix)
 			{
 				getPixel(data, width, height, 0, yPix, m_numComponents, pixel);
 				setPixel(m_data, m_width, m_height, x - xPix - 1, y + yPix, m_numComponents, pixel);
 			}
 		}
 		//right
-		for (int xPix = 0; xPix < m_padding; ++xPix)
+		for (uint xPix = 0; xPix < m_padding; ++xPix)
 		{
-			for (int yPix = 0; yPix < height; ++yPix)
+			for (uint yPix = 0; yPix < height; ++yPix)
 			{
 				getPixel(data, width, height, width - 1, yPix, m_numComponents, pixel);
 				setPixel(m_data, m_width, m_height, x + xPix + width, y + yPix, m_numComponents, pixel);
@@ -185,36 +184,36 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 		}
 		// topLeft
 		getPixel(data, width, height, 0, 0, m_numComponents, pixel);
-		for (int xPix = 0; xPix < m_padding; ++xPix)
+		for (uint xPix = 0; xPix < m_padding; ++xPix)
 		{
-			for (int yPix = 0; yPix < m_padding; ++yPix)
+			for (uint yPix = 0; yPix < m_padding; ++yPix)
 			{
 				setPixel(m_data, m_width, m_height, x - xPix - 1, y - yPix - 1, m_numComponents, pixel);
 			}
 		}
 		// topRight
 		getPixel(data, width, height, width - 1, 0, m_numComponents, pixel);
-		for (int xPix = 0; xPix < m_padding; ++xPix)
+		for (uint xPix = 0; xPix < m_padding; ++xPix)
 		{
-			for (int yPix = 0; yPix < m_padding; ++yPix)
+			for (uint yPix = 0; yPix < m_padding; ++yPix)
 			{
 				setPixel(m_data, m_width, m_height, x + xPix + width, y - yPix - 1, m_numComponents, pixel);
 			}
 		}
 		// bottomLeft
 		getPixel(data, width, height, 0, height - 1, m_numComponents, pixel);
-		for (int xPix = 0; xPix < m_padding; ++xPix)
+		for (uint xPix = 0; xPix < m_padding; ++xPix)
 		{
-			for (int yPix = 0; yPix < m_padding; ++yPix)
+			for (uint yPix = 0; yPix < m_padding; ++yPix)
 			{
 				setPixel(m_data, m_width, m_height, x - xPix - 1, y + yPix + height, m_numComponents, pixel);
 			}
 		}
 		// bottomRight
 		getPixel(data, width, height, width - 1, height - 1, m_numComponents, pixel);
-		for (int xPix = 0; xPix < m_padding; ++xPix)
+		for (uint xPix = 0; xPix < m_padding; ++xPix)
 		{
-			for (int yPix = 0; yPix < m_padding; ++yPix)
+			for (uint yPix = 0; yPix < m_padding; ++yPix)
 			{
 				setPixel(m_data, m_width, m_height, x + xPix + width, y + yPix + height, m_numComponents, pixel);
 			}
@@ -224,15 +223,17 @@ void TextureAtlas::setRegion(int x, int y, int width, int height, const unsigned
 
 void TextureAtlas::clear()
 {
-	initialize(m_width, m_height, m_numComponents, m_numMipMaps);
+	initialize(m_width, m_height, m_numComponents);
 }
 
-void TextureAtlas::initialize(int width, int height, int numComponents, int numMipMaps)
+void TextureAtlas::initialize(uint width, uint height, uint numComponents, uint numMipMaps)
 {
 	assert(width % 2 == 0 && height % 2 == 0 && "Atlas width and height must be divideable by 2");
 
-	if (m_width != width || m_height != height || m_numComponents != numComponents || numMipMaps != m_numMipMaps)
+	if (m_width != width || m_height != height || m_numComponents != numComponents)
 	{
+		// Lazy initialisation for m_data inside setRegion since algorithms may create atlases to see if textures fit
+		// with the current size and resize the atlases if they don't.
 		if (m_data)
 		{
 			delete [] m_data;
@@ -242,7 +243,6 @@ void TextureAtlas::initialize(int width, int height, int numComponents, int numM
 		m_width = width;
 		m_height = height;
 		m_numComponents = numComponents;
-		m_numMipMaps = numMipMaps;
 		m_padding = numMipMaps * numMipMaps;
 	}
 

@@ -128,21 +128,10 @@ FileWriteTime* processFile(const std::string& a_inPath,
 {
 	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	printf("Processing: %s", a_inPath.c_str());
-	CONSOLE_SCREEN_BUFFER_INFO processingStrPosition;
-	GetConsoleScreenBufferInfo(console, &processingStrPosition);
-	SetConsoleCursorPosition(console, {0, processingStrPosition.dwCursorPosition.Y + 1});
-
+	printf("Processing: %s\n", a_inPath.c_str());
 	std::vector<FileName> dependencies;
 	a_processor->process(a_inPath.c_str(), a_outPath.c_str(), dependencies);
-	
-	CONSOLE_SCREEN_BUFFER_INFO currPos;
-	GetConsoleScreenBufferInfo(console, &currPos);
-	SetConsoleCursorPosition(console, {100, processingStrPosition.dwCursorPosition.Y});
-	char s[] = "\tdone";
-	unsigned long cChars;
-	WriteConsole(console, s, lstrlen(s), &cChars, NULL);
-	SetConsoleCursorPosition(console, currPos.dwCursorPosition);
+	printf("Finished: %s\n", a_inPath.c_str());
 
 	FileWriteTime* fileWriteTime = new FileWriteTime();
 	fileWriteTime->fileTime = getFileTime(a_inPath.c_str());

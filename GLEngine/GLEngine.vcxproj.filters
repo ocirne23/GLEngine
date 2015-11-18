@@ -186,9 +186,6 @@
     <ClInclude Include="include\Public\Input\EMouseButton.h">
       <Filter>Header Files\Public\Input</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\Utils\EResourceType.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\FileHandle.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
@@ -518,6 +515,10 @@
     </ClInclude>
     <ClInclude Include="include\Public\UI\UIFrame.h">
       <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\GLMaterial.h" />
+    <ClInclude Include="include\Public\Utils\EAssetType.h">
+      <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

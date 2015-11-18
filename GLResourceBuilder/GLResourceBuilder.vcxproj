@@ -66,28 +66,28 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>$(ProjectDir)\libs\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(ProjectDir)/libs;$(ProjectDir)\libs\$(Platform);</LibraryPath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(ProjectDir)\libs\$(Platform);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
+    <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(ProjectDir)\libs\$(Platform);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
+    <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,23 +156,40 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BuilderCore.cpp" />
+    <ClCompile Include="src\Database\AssetDatabase.cpp" />
+    <ClCompile Include="src\Database\Assets\Material.cpp" />
+    <ClCompile Include="src\Database\Assets\Scene.cpp" />
+    <ClCompile Include="src\Database\Assets\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Processors\FloatImageProcessor.cpp" />
+    <ClCompile Include="src\Processors\SceneProcessor.cpp" />
     <ClCompile Include="src\Processors\ModelProcessor.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
+    <ClCompile Include="src\Utils\AtlasBuilder.cpp" />
+    <ClCompile Include="src\Utils\CRC64.cpp" />
     <ClCompile Include="src\Utils\FileUtils.cpp" />
     <ClCompile Include="src\Utils\stb_image.c" />
     <ClCompile Include="src\Utils\TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Database\IAsset.h" />
+    <ClInclude Include="src\Database\AssetDatabase.h" />
     <ClInclude Include="src\BuilderCore.h" />
-    <ClInclude Include="src\EResourceType.h" />
+    <ClInclude Include="src\Database\Assets\Mesh.h" />
+    <ClInclude Include="src\Database\Assets\Scene.h" />
+    <ClInclude Include="src\Database\Assets\Texture.h" />
+    <ClInclude Include="src\Database\EAssetType.h" />
+    <ClInclude Include="src\Database\Assets\Material.h" />
     <ClInclude Include="src\Processors\ByteImageProcessor.h" />
     <ClInclude Include="src\Processors\FloatImageProcessor.h" />
     <ClInclude Include="src\Processors\ModelProcessor.h" />
     <ClInclude Include="src\Processors\ResourceProcessor.h" />
+    <ClInclude Include="src\Processors\SceneProcessor.h" />
     <ClInclude Include="src\ResourceBuilder.h" />
+    <ClInclude Include="src\Utils\AtlasBuilder.h" />
+    <ClInclude Include="src\Utils\CRC64.h" />
     <ClInclude Include="src\Utils\FileUtils.h" />
     <ClInclude Include="src\Utils\stb_image.h" />
     <ClInclude Include="src\Utils\TextureAtlas.h" />

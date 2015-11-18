@@ -6,7 +6,7 @@
 #include "Graphics/Pixmap.h"
 #include "Graphics/GL/GL.h"
 
-#include "Utils/EResourceType.h"
+#include "Utils/EAssetType.h"
 #include "Utils/FileHandle.h"
 #include "Utils/readVector.h"
 
@@ -67,7 +67,7 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 
 	int type;
 	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
-	assert(type == (int) EResourceType::MODEL);
+	assert(type == (int) EAssetType::MESH);
 
 	int numAtlases;
 	file.readBytes(reinterpret_cast<char*>(&numAtlases), sizeof(int), sizeof(int) * 1);

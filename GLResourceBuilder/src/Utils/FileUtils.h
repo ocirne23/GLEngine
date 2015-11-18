@@ -1,18 +1,37 @@
 #pragma once
 
+#include "BuilderCore.h"
+
 #include <string>
 #include <vector>
 
-std::string getFileExtension(const std::string& a_filePath);
+struct FileTime
+{
+	uint dwLowDateTime  = 0;
+	uint dwHighDateTime = 0;
+};
 
-std::string getFolderPathForFile(const std::string& a_filePath);
+class FileUtils
+{
+public:
+	static FileTime getCurrentFileTime();
 
-std::string getFileTime(const std::string& filePath);
+	static std::string getFileExtension(const std::string& a_filePath);
 
-bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>& a_files);
+	static std::string getFolderPathForFile(const std::string& a_filePath);
 
-std::string getExtensionForFilePath(const std::string& a_path);
+	static std::string getFileTime(const std::string& filePath);
 
-void createDirectoryForFile(const std::string& a_filePath);
+	static bool listFiles(std::string a_path, std::string a_mask, std::vector<std::string>& a_files);
 
-bool fileExists(const std::string& a_filePath);
+	static std::string getExtensionForFilePath(const std::string& a_path);
+
+	static void createDirectoryForFile(const std::string& a_filePath);
+
+	static bool fileExists(const std::string& a_filePath);
+
+private:
+	FileUtils() {}
+	~FileUtils() {}
+};
+

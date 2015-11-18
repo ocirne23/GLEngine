@@ -51,7 +51,7 @@ void FileHandle::initialize(const char* a_filePath, EFileMode a_fileMode)
 		return;
 	}
 
-	m_size = (uint) SDL_RWsize(m_rwops);
+	m_size = (uint64) SDL_RWsize(m_rwops);
 }
 
 FileHandle::~FileHandle()
@@ -67,7 +67,7 @@ void FileHandle::readBytes(char* a_buffer, uint a_numBytes, uint a_offset) const
 	assert(m_fileMode == EFileMode::READ || m_fileMode == EFileMode::READWRITE);
 
 	SDL_RWseek(m_rwops, a_offset, RW_SEEK_SET);
-	SDL_RWread(m_rwops, a_buffer, a_numBytes, 1);
+	uint64 read = SDL_RWread(m_rwops, a_buffer, a_numBytes, 1);
 }
 
 void FileHandle::writeBytes(const char* a_bytes, uint a_numBytes)
@@ -80,7 +80,7 @@ void FileHandle::writeBytes(const char* a_bytes, uint a_numBytes)
 	m_size += a_numBytes;
 }
 
-rde::string FileHandle::readString(uint a_numChars) const
+rde::string FileHandle::readString(uint64 a_numChars) const
 {
 	char* chars = new char[a_numChars];
 	readBytes(chars, a_numChars, 0);

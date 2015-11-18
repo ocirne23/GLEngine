@@ -2,7 +2,7 @@
 
 #include "BuilderCore.h"
 
-#include "EResourceType.h"
+#include "Database/EAssetType.h"
 #include "Utils/FileUtils.h"
 #include "Utils/stb_image.h"
 #include "Utils/TextureAtlas.h"
@@ -34,7 +34,7 @@ struct MaterialProperty
 };
 // !GLSL structs
 	
-struct TextureInfo
+struct AtlasTexture
 {
 	std::string filePath;
 	int result = 0;
@@ -42,16 +42,16 @@ struct TextureInfo
 	int height = 0;
 	int numComp = 0;
 
-	TextureAtlas::AtlasRegion region;
-	uint atlasIdx;
+	uint atlasIdx = 0; // Which atlas
+	TextureAtlas::AtlasRegion region; // Where in the atlas
 };
 
-struct MaterialData
+struct Material
 {
-	MaterialData(uint a_materialID) : materialID(a_materialID) {}
+	Material(uint a_materialID) : materialID(a_materialID) {}
 	uint materialID = 0;
-	int diffuseTextureInfoIndex = -1;
-	int normalTextureInfoIndex = -1;
+	int diffuseAtlasTextureIndex = -1;
+	int normalAtlasTextureIndex = -1;
 };
 
 struct Vertex
@@ -86,7 +86,7 @@ vec4 getTextureOffset(uint a_atlasWidth, uint a_atlasHeight, const TextureAtlas:
 	return {xOffset, yOffset, wScale, hScale};
 }
 
-void increaseAtlasesSize(std::vector<TextureInfo>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
+void increaseAtlasesSize(std::vector<AtlasTexture>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
 {
 	if (!a_atlases.size())
 	{
@@ -210,13 +210,13 @@ uint getTextureInfoIndex(std::vector<TextureInfo>& a_textures, const std::string
 }
 
 void getMaterialTextureInfo(const aiScene& a_scene, const std::string& a_scenePath, 
-							std::vector<MaterialData>& a_materials, std::vector<TextureInfo>& a_textures)
+							std::vector<Material>& a_materials, std::vector<TextureInfo>& a_textures)
 {
 	const std::string baseTexturePath = getFolderPathForFile(a_scenePath);
 
 	for (uint i = 0; i < a_scene.mNumMaterials; i++)
 	{
-		MaterialData materialData(i);
+		Material materialData(i);
 		const aiMaterial* material = a_scene.mMaterials[i];
 		aiString path;
 
@@ -234,11 +234,11 @@ void getMaterialTextureInfo(const aiScene& a_scene, const std::string& a_scenePa
 	}
 }
 
-std::vector<MaterialProperty> getMaterialProperties(const std::vector<TextureAtlas*>& a_atlases, const std::vector<MaterialData>& a_materials, 
+std::vector<MaterialProperty> getMaterialProperties(const std::vector<TextureAtlas*>& a_atlases, const std::vector<Material>& a_materials, 
 													const std::vector<TextureInfo>& a_textures)
 {
 	std::vector<MaterialProperty> materialProperties(a_materials.size());
-	for (const MaterialData& mat : a_materials)
+	for (const Material& mat : a_materials)
 	{
 		if (mat.diffuseTextureInfoIndex != -1)
 		{
@@ -277,12 +277,14 @@ void writeAtlasesToFiles(const std::vector<TextureAtlas*>& a_atlases, const std:
 		std::ofstream file(atlasFileName.c_str(), std::ios::out | std::ios::binary);
 		assert(file.is_open());
 
-		const int type = (int) EResourceType::BYTEIMAGE;
+		const int type = (int) EAssetType::TEXTURE;
+		const bool isFloatImage = false;
 		const int width = atlas->m_width;
 		const int height = atlas->m_height;
 		const int numComponents = atlas->m_numComponents;
 
 		file.write(reinterpret_cast<const char*>(&type), sizeof(int));
+		file.write(reinterpret_cast<const char*>(&isFloatImage), sizeof(bool));
 		file.write(reinterpret_cast<const char*>(&width), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&height), sizeof(int));
 		file.write(reinterpret_cast<const char*>(&numComponents), sizeof(int));
@@ -374,7 +376,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	}
 
 	// First we get all the materials and textures used in the scene
-	std::vector<MaterialData> materials;
+	std::vector<Material> materials;
 	std::vector<TextureInfo> textures;
 	getMaterialTextureInfo(*scene, inResourcePathStr, materials, textures);
 
@@ -409,7 +411,7 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 	std::ofstream file(a_outResourcePath, std::ios::out | std::ios::binary);
 	assert(file.is_open());
 
-	const int type = (int) EResourceType::MODEL;
+	const int type = (int) EAssetType::MESH;
 	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&numAtlases), sizeof(int));
 	writeVector(file, matProperties);

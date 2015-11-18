@@ -94,6 +94,7 @@
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLMaterial.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
     <ClInclude Include="include\Public\Input\InputListener.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
@@ -181,7 +182,7 @@
     <ClInclude Include="include\Public\UI\Style.h" />
     <ClInclude Include="include\Public\UI\Widgets\Widget.h" />
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
-    <ClInclude Include="include\Public\Utils\EResourceType.h" />
+    <ClInclude Include="include\Public\Utils\EAssetType.h" />
     <ClInclude Include="include\Public\Utils\FileHandle.h" />
     <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
     <ClInclude Include="include\Public\Utils\FileModificationManager.h" />

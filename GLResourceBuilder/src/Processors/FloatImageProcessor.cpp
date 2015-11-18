@@ -1,6 +1,6 @@
 #include "FloatImageProcessor.h"
 
-#include "EResourceType.h"
+#include "Database/EAssetType.h"
 #include "Utils/stb_image.h"
 
 #include <fstream>
@@ -8,7 +8,8 @@
 
 bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildDependencies)
 {
-	const int type = (int) EResourceType::FLOATIMAGE;
+	const int type = (int) EAssetType::TEXTURE;
+	const bool isFloatImage = true;
 	int width, height, numComponents;
 
 	const float* data = stbi_loadf(a_inResourcePath, &width, &height, &numComponents, 0);
@@ -21,6 +22,7 @@ bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_ou
 
 	assert(file.is_open());
 	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
+	file.write(reinterpret_cast<const char*>(&isFloatImage), sizeof(bool));
 	file.write(reinterpret_cast<const char*>(&width), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&height), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&numComponents), sizeof(int));

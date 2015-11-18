@@ -66,7 +66,7 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	m_hbaoFullShader.initialize("Shaders/quad.vert", "Shaders/HBAO/HBAO.frag");
 	m_blurXShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blurx.frag");
 	m_blurYShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blury.frag");
-	m_fboFullRes.initialize(GLFramebuffer::EMultiSampleType::MSAA_4X);
+	m_fboFullRes.initialize(GLFramebuffer::EMultiSampleType::NONE);
 	m_blurXFbo.initialize();
 	m_blurYFbo.initialize();
 
@@ -168,13 +168,13 @@ void HBAO::endAndRender()
 	m_fboFullRes.bindDepthTexture(0);
 	m_noiseTexture.bind(1);
 
-	//m_blurXFbo.begin();
+	m_blurXFbo.begin();
 	m_hbaoFullShader.begin();
 	m_hbaoGlobalsBuffer.bind();
 	QuadDrawUtils::drawQuad(m_hbaoFullShader);
 	m_hbaoFullShader.end();
-	//m_blurXFbo.end();
-	/*
+	m_blurXFbo.end();
+	
 	// Blur X //
 	m_blurXFbo.bindTexture(0, 0);
 	m_blurYFbo.begin();
@@ -188,7 +188,7 @@ void HBAO::endAndRender()
 	m_fboFullRes.bindTexture(0, 1);
 	m_blurYShader.begin();
 	QuadDrawUtils::drawQuad(m_blurYShader);
-	m_blurYShader.end();*/
+	m_blurYShader.end();
 	glEnable(GL_DEPTH_TEST);	
 	CHECK_GL_ERROR();
 }
