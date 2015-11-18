@@ -1,30 +1,19 @@
 #include "Utils/AtlasBuilder.h"
 
-#include "Utils/TextureAtlas.h"
-#include "BuilderCore.h"
+#include "Utils/stb_image.h"
 #include <numeric>
 
 BEGIN_UNNAMED_NAMESPACE()
 
-enum { SUPPORT_NPOT = false, ATLAS_MAX_WIDTH = 4096, ATLAS_MAX_HEIGHT = 4096, ATLAS_NUM_COMPONENTS = 3, ATLAS_START_WIDTH = 256, ATLAS_START_HEIGHT = 256, ATLAS_INCREMENT = 256 };
-
-struct AtlasTextureInfo
-{
-	struct TextureInfo
-	{
-		std::string filePath;
-		int width   = 0;
-		int height  = 0;
-		int numComp = 0;
-		int result  = 0;
-		int index   = -1;
-	} textureInfo;
-
-	struct AtlasInfo
-	{
-		uint atlasIdx = 0;
-		TextureAtlas::AtlasRegion region;
-	} atlasInfo;
+enum { 
+	SUPPORT_NPOT         = false, 
+	ATLAS_MAX_WIDTH      = 4096, 
+	ATLAS_MAX_HEIGHT     = 4096, 
+	ATLAS_NUM_COMPONENTS = 3, 
+	ATLAS_START_WIDTH    = 256, 
+	ATLAS_START_HEIGHT   = 256, 
+	ATLAS_INCREMENT      = 256, 
+	ATLAS_NUM_MIPMAPS    = 4 
 };
 
 uint getNextPOT(uint i)
@@ -39,18 +28,21 @@ uint getNextPOT(uint i)
 	return i;
 }
 
-AtlasTextureInfo addTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, aiTextureType a_textureType, const aiMaterial* a_material, const std::string& a_basePath)
+AtlasTextureInfo addTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, 
+                                aiTextureType a_textureType, 
+                                const aiMaterial* a_material, 
+                                const std::string& a_baseScenePath)
 {
 	std::string texturePath;
 	if (a_material->GetTextureCount(a_textureType))
 	{
 		aiString path;
 		a_material->GetTexture(a_textureType, 0, &path);
-		if (path[0] == '*')
+		if (path.data[0] == '*')
 		{
 			print("EMBEDDED TEXTURE: %s\n", path.C_Str());
 		}
-		texturePath = a_basePath + path.C_Str();
+		texturePath = path.C_Str();
 	} 
 	else
 	{
@@ -65,27 +57,27 @@ AtlasTextureInfo addTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList
 
 	// If texture doesnt exist, get the info and add to end
 	AtlasTextureInfo info;
-	info.textureInfo.result = stbi_info(info.textureInfo.filePath, &info.textureInfo.width, &info.textureInfo.height, &info.textureInfo.numComp);
+	info.textureInfo.result = stbi_info(info.textureInfo.filePath.c_str(), &info.textureInfo.width, &info.textureInfo.height, &info.textureInfo.numComp);
 	if (info.textureInfo.result)
 	{
-		info.textureInfo.index = a_textureInfoList.size();
+		info.textureInfo.index = (int) a_textureInfoList.size();
 		a_textureInfoList.push_back(info);
 	}
 	assert(info.textureInfo.result && "Failed to load texture");
 	return info;
 }
 
-void addDiffuseTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, const aiMaterial* a_material, const std::string& a_basePath)
+void addDiffuseTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, const aiMaterial* a_material)
 {
-	addTextureInfo(a_textureInfoList, aiTextureType_DIFFUSE, a_material, a_basePath);
+	addTextureInfo(a_textureInfoList, aiTextureType_DIFFUSE, a_material);
 }
 
-void addNormalTextureInfo(const aiMaterial* a_material, const std::string& a_basePath)
+void addNormalTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, const aiMaterial* a_material)
 {
 	if (a_material->GetTextureCount(aiTextureType_NORMALS))
-		addTextureInfo(aiTextureType_NORMALS, a_material, a_basePath);
+		addTextureInfo(a_textureInfoList, aiTextureType_NORMALS, a_material);
 	else if (a_material->GetTextureCount(aiTextureType_HEIGHT))
-		addTextureInfo(aiTextureType_HEIGHT, a_material, a_basePath);  // .obj files have their normals map under aiTextureType_HEIGHT
+		addTextureInfo(a_textureInfoList, aiTextureType_HEIGHT, a_material);  // .obj files have their normals map under aiTextureType_HEIGHT
 }
 
 /* Increment the width/height, returns if incrementing was possible (not at max size) */
@@ -115,8 +107,8 @@ bool getNextAtlasSize(uint& width, uint& height)
 			height = getNextPOT(height);
 	}
 
-	width = std::min(width, (int) ATLAS_MAX_WIDTH);
-	height = std::min(height, (int) ATLAS_MAX_HEIGHT);
+	width = std::min((int) width, (int) ATLAS_MAX_WIDTH);
+	height = std::min((int) height, (int) ATLAS_MAX_HEIGHT);
 	
 	return true;
 }
@@ -125,22 +117,22 @@ void increaseAtlasesSize(std::vector<AtlasTextureInfo>& a_textureInfoList, std::
 {
 	if (!a_atlases.size())
 	{
-		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS));
+		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS));
 		return;
 	}
-	uint width = a_atlases[0].m_width;
-	uint height = a_atlases[0].m_height;
+	uint width = a_atlases[0]->m_width;
+	uint height = a_atlases[0]->m_height;
 	bool canIncrement = getNextAtlasSize(width, height);
 	if (canIncrement)
 	{	// resize all atlases to the new size
 		for (TextureAtlas* a : a_atlases)
-			a->initialize(width, height, ATLAS_NUM_COMPONENTS);
+			a->initialize(width, height, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS);
 	}
 	else
 	{	// Add one new atlas and reset all atlas sizes back to smallest (not efficient)
-		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS));
+		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS));
 		for (TextureAtlas* a : a_atlases)
-			a->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS);
+			a->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS);
 	}
 }
 
@@ -177,7 +169,7 @@ END_UNNAMED_NAMESPACE()
 
 std::vector<AtlasTextureInfo> AtlasBuilder::getTextures(const aiScene* a_scene)
 {
-	print("NUM EMBEDDED TEXTURES: %i\n", a_scene->mNumTextures());
+	print("NUM EMBEDDED TEXTURES: %i\n", a_scene->mNumTextures);
 	std::vector<AtlasTextureInfo> textureInfoList;
 	for (uint i = 0; i < a_scene->mNumMaterials; ++i)
 	{
@@ -189,7 +181,7 @@ std::vector<AtlasTextureInfo> AtlasBuilder::getTextures(const aiScene* a_scene)
 	return textureInfoList;
 }
 
-std::vector<TextureAtlas*> AtlasBuilder::fitMaterials(std::vector<AtlasTextureInfo> a_textures)
+std::vector<TextureAtlas*> AtlasBuilder::fitMaterials(std::vector<AtlasTextureInfo>& a_textures)
 {
 	std::vector<TextureAtlas*> atlases;
 	if (a_textures.size())
@@ -198,16 +190,16 @@ std::vector<TextureAtlas*> AtlasBuilder::fitMaterials(std::vector<AtlasTextureIn
 	return atlases;
 }
 
-void AtlasBuilder::fillAtlases(std::vector<TextureAtlas*>& a_atlases, std::vector<AtlasTextureInfo>& a_textures, const char* a_baseScenePath)
+void AtlasBuilder::fillAtlases(std::vector<TextureAtlas*>& a_atlases, std::vector<AtlasTextureInfo>& a_textures, const std::string& a_baseScenePath)
 {
-	const std::string baseScenePath(a_baseScenePath);
 	for (const AtlasTextureInfo& tex : a_textures)
 	{
 		TextureAtlas* atlas = a_atlases[tex.atlasInfo.atlasIdx];
 		tex.atlasInfo.region;
 
+		const std::string filePath = a_baseScenePath + tex.textureInfo.filePath;
 		int width, height, numComponents;
-		const unsigned char* data = stbi_load(baseScenePath + tex.textureInfo.filePath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
+		const unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
 		if (!data)
 		{
 			printf("FAILED TO LOAD IMAGE: %s \n", tex.textureInfo.filePath.c_str());

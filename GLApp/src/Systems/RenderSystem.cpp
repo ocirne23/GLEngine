@@ -55,7 +55,7 @@ m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem), m_uiSystem(a_uiSys
 	m_yRes = GLEngine::graphics->getViewportHeight();
 
 	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
-	m_uiSpriteBatch.initialize(UI_SPRITE_BATCH_SIZE);
+	//m_uiSpriteBatch.initialize(UI_SPRITE_BATCH_SIZE);
 
 	auto onShaderEdited = [&]()
 	{
@@ -174,7 +174,7 @@ void RenderSystem::update(entityx::EntityManager& a_entities, entityx::EventMana
 	if (m_hbaoEnabled)
 		m_hbao.endAndRender();
 	
-	renderUI();
+	//renderUI();
 
 	GLEngine::graphics->swap();
 

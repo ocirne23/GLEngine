@@ -1,5 +1,5 @@
 #include "ModelProcessor.h"
-
+/*
 #include "BuilderCore.h"
 
 #include "Database/EAssetType.h"
@@ -91,9 +91,9 @@ void increaseAtlasesSize(std::vector<AtlasTexture>& a_textureInfoList, std::vect
 	if (!a_atlases.size())
 	{
 		if (a_textureInfoList.size() == 1)
-			a_atlases.push_back(new TextureAtlas(a_textureInfoList[0].width, a_textureInfoList[0].height, 4, ATLAS_NUM_MIPS));
+			a_atlases.push_back(new TextureAtlas(a_textureInfoList[0].width, a_textureInfoList[0].height, 4));
 		else
-			a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, 4, ATLAS_NUM_MIPS));
+			a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, 4));
 	}
 	else
 	{
@@ -101,8 +101,8 @@ void increaseAtlasesSize(std::vector<AtlasTexture>& a_textureInfoList, std::vect
 		if (last->m_width >= ATLAS_MAX_WIDTH && last->m_height >= ATLAS_MAX_HEIGHT)
 		{
 			for (TextureAtlas* atlas : a_atlases)
-				atlas->initialize(ATLAS_MAX_WIDTH / 2, ATLAS_MAX_HEIGHT / 2, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
-			a_atlases.push_back(new TextureAtlas(ATLAS_MAX_WIDTH / 2, ATLAS_MAX_HEIGHT / 2, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS));
+				atlas->initialize(ATLAS_MAX_WIDTH / 2, ATLAS_MAX_HEIGHT / 2, ATLAS_NUM_COMPONENTS);
+			a_atlases.push_back(new TextureAtlas(ATLAS_MAX_WIDTH / 2, ATLAS_MAX_HEIGHT / 2, ATLAS_NUM_COMPONENTS));
 		}
 		else
 		{
@@ -133,12 +133,12 @@ void increaseAtlasesSize(std::vector<AtlasTexture>& a_textureInfoList, std::vect
 				avgHeight = std::min(avgHeight, (int) ATLAS_MAX_HEIGHT);
 
 				for (TextureAtlas* a : a_atlases)
-					a->initialize(avgWidth, avgHeight, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
+					a->initialize(avgWidth, avgHeight, ATLAS_NUM_COMPONENTS);
 			}
 			else
 			{
 				for (TextureAtlas* a : a_atlases)
-					a->initialize(a->m_width * 2, a->m_width * 2, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPS);
+					a->initialize(a->m_width * 2, a->m_width * 2, ATLAS_NUM_COMPONENTS);
 			}
 		}
 	}
@@ -180,7 +180,7 @@ void fillAtlasTextures(const std::vector<TextureInfo>& a_textureAtlasRegions, co
 		TextureAtlas* atlas = a_atlases[tex.atlasIdx];
 
 		int width, height, numComponents;
-		const std::string fullTexPath = getFolderPathForFile(a_baseFilePath) + tex.filePath;
+		const std::string fullTexPath = FileUtils::getFolderPathForFile(a_baseFilePath) + tex.filePath;
 		const unsigned char* data = stbi_load(fullTexPath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
 		if (!data)
 		{
@@ -422,3 +422,4 @@ bool ModelProcessor::process(const char* a_inResourcePath, const char* a_outReso
 
 	return true;
 }
+*/

@@ -5,21 +5,21 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-inline void setPixel(unsigned char* data, uint width, uint height, uint x, uint y, uint numComponents, const unsigned char* pixelData)
+inline void setPixel(byte* a_data, uint a_width, uint a_height, uint a_x, uint a_y, uint a_numComponents, const byte* a_pixelData)
 {
-	memcpy(data + ((width * y) + x) * numComponents, pixelData, numComponents);
+	memcpy(a_data + ((a_width * a_y) + a_x) * a_numComponents, a_pixelData, a_numComponents);
 }
 
-inline void getPixel(const unsigned char* data, uint width, uint height, uint x, uint y, uint numComponents, unsigned char* outPixelData)
+inline void getPixel(const byte* a_data, uint a_width, uint a_height, uint a_x, uint a_y, uint a_numComponents, byte* a_outPixelData)
 {
-	memcpy(outPixelData, data + ((width * y) + x) * numComponents, numComponents);
+	memcpy(a_outPixelData, a_data + ((a_width * a_y) + a_x) * a_numComponents, a_numComponents);
 }
 
 END_UNNAMED_NAMESPACE()
 
-TextureAtlas::TextureAtlas(uint width, uint height, uint numComponents)
+TextureAtlas::TextureAtlas(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps)
 {
-	initialize(width, height, numComponents, numMipMaps);
+	initialize(a_width, a_height, a_numComponents, a_numMipMaps);
 }
 
 TextureAtlas::~TextureAtlas()
@@ -223,14 +223,14 @@ void TextureAtlas::setRegion(uint x, uint y, uint width, uint height, const unsi
 
 void TextureAtlas::clear()
 {
-	initialize(m_width, m_height, m_numComponents);
+	initialize(m_width, m_height, m_numComponents, m_numMipMaps);
 }
 
-void TextureAtlas::initialize(uint width, uint height, uint numComponents, uint numMipMaps)
+void TextureAtlas::initialize(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps)
 {
-	assert(width % 2 == 0 && height % 2 == 0 && "Atlas width and height must be divideable by 2");
+	assert(a_width % 2 == 0 && a_height % 2 == 0 && "Atlas width and height must be divideable by 2");
 
-	if (m_width != width || m_height != height || m_numComponents != numComponents)
+	if (m_width != a_width || m_height != a_height || m_numComponents != a_numComponents)
 	{
 		// Lazy initialisation for m_data inside setRegion since algorithms may create atlases to see if textures fit
 		// with the current size and resize the atlases if they don't.
@@ -240,10 +240,10 @@ void TextureAtlas::initialize(uint width, uint height, uint numComponents, uint 
 			m_data = NULL;
 		}
 
-		m_width = width;
-		m_height = height;
-		m_numComponents = numComponents;
-		m_padding = numMipMaps * numMipMaps;
+		m_width = a_width;
+		m_height = a_height;
+		m_numComponents = a_numComponents;
+		m_padding = a_numMipMaps * a_numMipMaps;
 	}
 
 	if (m_root.left)
@@ -253,6 +253,6 @@ void TextureAtlas::initialize(uint width, uint height, uint numComponents, uint 
 	m_root.left = m_root.right = NULL;
 
 	m_root.x = m_root.y = 0;
-	m_root.width = width;
-	m_root.height = height;
+	m_root.width = a_width;
+	m_root.height = a_height;
 }

@@ -19,7 +19,7 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-struct vec4 { float x, y, z, w };
+struct vec4 { float x, y, z, w; };
 struct vec3 { float x, y, z; };
 struct vec2 { float x, y; };
 
@@ -46,11 +46,6 @@ struct GLSLMaterial
 	int normalAtlasNr = -1;
 	int padding = -1;
 	int padding2 = -1;
-};
-
-struct Material
-{
-
 };
 
 struct MeshData
@@ -199,49 +194,77 @@ std::vector<MeshData> getMultiOccurenceMeshes(const aiScene* a_scene, const std:
 	std::vector<MeshData> seperateMeshes;
 	for (uint i = 0; i < a_meshCountList.size(); ++i)
 	{
-		seperateMeshes.push_back({});
-		appendMesh(a_scene, seperateMeshes.back(), i, false);
+		if (a_meshCountList[i] > 1)
+		{
+			MeshData mesh;
+			mesh.indices.resize(a_scene->mMeshes[i]->mNumVertices);
+			mesh.vertices.resize(a_scene->mMeshes[i]->mNumFaces * 3);
+			appendMesh(a_scene, mesh, i, false);
+			seperateMeshes.push_back(mesh);
+		}
 	}
+	return seperateMeshes;
 }
 
-std::vector<Material> getMaterials(const aiScene* a_scene)
+vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const TextureAtlas::AtlasRegion& a_reg)
 {
+	const float wScale = a_reg.width / (float) a_atlasWidth;
+	const float hScale = a_reg.height / (float) a_atlasHeight;
+	const float xOffset = a_reg.x / (float) a_atlasWidth;
+	const float yOffset = a_reg.y / (float) a_atlasHeight;
+	return {xOffset, yOffset, wScale, hScale};
+}
+
+// int: atlasIdx, vec4: mapping
+std::pair<int, vec4> getGLSLTexLocation(const std::vector<AtlasTextureInfo>& a_textures, const std::string& a_path, const std::vector<TextureAtlas*>& a_atlases)
+{
+	for (const AtlasTextureInfo& tex : a_textures)
+	{
+		if (tex.textureInfo.filePath == a_path)
+		{
+			const TextureAtlas* atlas = a_atlases[tex.atlasInfo.atlasIdx];
+			vec4 mapping = getTextureMapping(atlas->m_width, atlas->m_height, tex.atlasInfo.region);
+			return {tex.atlasInfo.atlasIdx, mapping};
+		}
+	}
+	return {-1, {0.0f, 0.0f, 0.0f, 0.0f}};
+}
+AtlasTextureInfo::AtlasInfo getAtlasInfo(const std::vector<AtlasTextureInfo>& a_textures, const std::string& a_path)
+{
+	for (const AtlasTextureInfo& tex : a_textures)
+	{
+		if (tex.textureInfo.filePath == a_path)
+			return tex.atlasInfo;
+	}
+	assert(false);
+	return AtlasTextureInfo::AtlasInfo();
+}
+
+std::vector<GLSLMaterial> getMaterials(const aiScene* a_scene, const std::vector<AtlasTextureInfo>& a_textures, const std::vector<TextureAtlas*>& a_atlases)
+{
+	std::vector<GLSLMaterial> materials;
 	for (uint i = 0; i < a_scene->mNumMaterials; i++)
 	{
-		const aiMaterial* material = a_scene->mMaterials[i];
-		material->
-	}
-}
-
-std::vector<MaterialProperty> getMaterialProperties(const std::vector<TextureAtlas*>& a_atlases, const std::vector<Material>& a_materials,
-													const std::vector<TextureInfo>& a_textures)
-{
-	std::vector<MaterialProperty> materialProperties(a_materials.size());
-	for (const Material& mat : a_materials)
-	{
-		if (mat.diffuseTextureInfoIndex != -1)
+		GLSLMaterial material;
+		aiString path;
+		const aiMaterial* assimpMat = a_scene->mMaterials[i];
+		if (assimpMat->GetTextureCount(aiTextureType_DIFFUSE))
 		{
-			const TextureInfo& tex = a_textures[mat.diffuseTextureInfoIndex];
-			const TextureAtlas* atlas = a_atlases[tex.atlasIdx];
-			materialProperties[mat.materialID].diffuseAtlasNr = tex.atlasIdx;
-			materialProperties[mat.materialID].diffuseTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tex.region);
+			assimpMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
+			std::pair<int, vec4> loc = getGLSLTexLocation(a_textures, path.C_Str(), a_atlases);
+			material.diffuseAtlasNr = loc.first;
+			material.diffuseTexMapping = loc.second;
 		}
-		if (mat.normalTextureInfoIndex != -1)
+		if (assimpMat->GetTextureCount(aiTextureType_NORMALS))
 		{
-			const TextureInfo& tex = a_textures[mat.normalTextureInfoIndex];
-			const TextureAtlas* atlas = a_atlases[tex.atlasIdx];
-			materialProperties[mat.materialID].normalAtlasNr = tex.atlasIdx;
-			materialProperties[mat.materialID].normalTexMapping = getTextureOffset(atlas->m_width, atlas->m_height, tex.region);
+			assimpMat->GetTexture(aiTextureType_NORMALS, 0, &path);
+			std::pair<int, vec4> loc = getGLSLTexLocation(a_textures, path.C_Str(), a_atlases);
+			material.normalAtlasNr = loc.first;
+			material.normalTexMapping = loc.second;
 		}
+		materials.push_back(material);
 	}
-	if (!a_textures.size()) // If there are no textures, add set the dummy material
-	{
-		materialProperties[0].diffuseTexMapping = {0, 0, 0, 0};
-		materialProperties[0].normalTexMapping = {0, 0, 0, 0};
-		materialProperties[0].diffuseAtlasNr = 0;
-		materialProperties[0].normalAtlasNr = 0;
-	}
-	return materialProperties; // c++11 so can return vector by value
+	return materials;
 }
 
 END_UNNAMED_NAMESPACE()
@@ -264,18 +287,19 @@ void SceneProcessor::process(const char* a_inResourcePath, AssetDatabase& a_asse
 	std::vector<MeshData> seperateMeshes = getMultiOccurenceMeshes(assimpScene, meshCountList);
 
 	std::vector<AtlasTextureInfo> textureInfoList = AtlasBuilder::getTextures(assimpScene);
-	std::vector<TextureAtlas*> atlases = AtlasBuilder::fitMaterials(textureInfoList, a_inResourcePath);
-
-	std::vector<Material> materials = getMaterials(assimpScene);
-
-	// Then we create the GLSL structs
-	std::vector<MaterialProperty> matProperties = getMaterialProperties(atlases, materials, textures);
-	for (TextureAtlas* a : atlases)
-		delete a;
-	atlases.clear();
+	std::vector<TextureAtlas*> atlases = AtlasBuilder::fitMaterials(textureInfoList);
+	std::vector<GLSLMaterial> glslMaterials = getMaterials(assimpScene, textureInfoList, atlases);
+	AtlasBuilder::fillAtlases(atlases, textureInfoList, FileUtils::getFolderPathForFile(a_inResourcePath));
 	
+	print("Built scene: %s\n", a_inResourcePath);
+	print("NumTextures: %i\n", textureInfoList.size());
+	print("NumAtlases: %i\n", atlases.size());
+	print("NumMaterials: %i\n", glslMaterials.size());
 	// TODO: write stuff
 
+	for (TextureAtlas* atlas : atlases)
+		delete atlas;
+	atlases.clear();
 	aiReleaseImport(assimpScene);
 }
 

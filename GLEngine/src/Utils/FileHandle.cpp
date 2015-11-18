@@ -60,7 +60,7 @@ FileHandle::~FileHandle()
 		close();
 }
 
-void FileHandle::readBytes(char* a_buffer, uint a_numBytes, uint a_offset) const
+void FileHandle::readBytes(char* a_buffer, uint64 a_numBytes, uint a_offset) const
 {
 	assert(m_isOpen);
 	assert(a_numBytes + a_offset <= m_size);
@@ -70,7 +70,7 @@ void FileHandle::readBytes(char* a_buffer, uint a_numBytes, uint a_offset) const
 	uint64 read = SDL_RWread(m_rwops, a_buffer, a_numBytes, 1);
 }
 
-void FileHandle::writeBytes(const char* a_bytes, uint a_numBytes)
+void FileHandle::writeBytes(const char* a_bytes, uint64 a_numBytes)
 {
 	assert(m_isOpen);
 	assert(m_fileMode == EFileMode::WRITE || m_fileMode == EFileMode::READWRITE);
@@ -84,7 +84,7 @@ rde::string FileHandle::readString(uint64 a_numChars) const
 {
 	char* chars = new char[a_numChars];
 	readBytes(chars, a_numChars, 0);
-	rde::string str(chars, a_numChars);
+	rde::string str(chars, (int) a_numChars);
 	delete [] chars;
 	return str;
 }

@@ -60,7 +60,7 @@ void Graphics::createGLContext()
 	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	glEnable(GL_MULTISAMPLE);
+	// glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
 
 	CHECK_GL_ERROR();

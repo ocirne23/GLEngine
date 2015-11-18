@@ -17,8 +17,8 @@ public:
 	~FileHandle();
 
 	void close();
-	void readBytes(char* buffer, uint numBytes, uint offset) const;
-	void writeBytes(const char* bytes, uint numBytes);
+	void readBytes(char* buffer, uint64 numBytes, uint offset) const;
+	void writeBytes(const char* bytes, uint64 numBytes);
 
 	rde::string readString(uint64 numChars) const;
 	rde::string readString() const;

@@ -64,7 +64,7 @@ void writeModificationFileToMap(std::fstream& a_file, ModificationFileMap& a_sto
 std::vector<std::string> getAllFilesInFolder(const std::string& a_folder)
 {
 	std::vector<std::string> files;
-	listFiles(a_folder, "*", files);
+	FileUtils::listFiles(a_folder, "*", files);
 	return files;
 }
 
@@ -91,7 +91,7 @@ bool isFileOrDependencyModified(const FileName& a_fileName, const std::string& a
 	const ModificationFileMap& a_storedTimesMap)
 {
 	std::string fullPath = a_directoryPath + "\\" + a_fileName;
-	FileTime fileTime = getFileTime(fullPath);
+	FileTime fileTime = FileUtils::getFileTime(fullPath);
 
 	auto it = a_storedTimesMap.find(a_fileName);
 	if (it == a_storedTimesMap.end())
@@ -103,8 +103,8 @@ bool isFileOrDependencyModified(const FileName& a_fileName, const std::string& a
 
 	for (const Dependency& dep : fileWriteTime->dependencies)
 	{
-		std::string fullDepPath = a_directoryPath + "\\" + getFolderPathForFile(a_fileName) + dep.fileName;
-		FileTime depFileTime = getFileTime(fullDepPath);
+		std::string fullDepPath = a_directoryPath + "\\" + FileUtils::getFolderPathForFile(a_fileName) + dep.fileName;
+		FileTime depFileTime = FileUtils::getFileTime(fullDepPath);
 		if (depFileTime != dep.fileTime)
 			return true;
 	}
@@ -114,7 +114,7 @@ bool isFileOrDependencyModified(const FileName& a_fileName, const std::string& a
 
 ResourceProcessor* getResourceProcessorForFile(const FileName& a_filePath, const ResourceProcessorMap& a_processors)
 {
-	const std::string extension = getExtensionForFilePath(a_filePath);
+	const std::string extension = FileUtils::getExtensionForFilePath(a_filePath);
 	const auto processorsIt = a_processors.find(extension);
 	if (processorsIt != a_processors.end())
 		return processorsIt->second;
@@ -134,11 +134,11 @@ FileWriteTime* processFile(const std::string& a_inPath,
 	printf("Finished: %s\n", a_inPath.c_str());
 
 	FileWriteTime* fileWriteTime = new FileWriteTime();
-	fileWriteTime->fileTime = getFileTime(a_inPath.c_str());
+	fileWriteTime->fileTime = FileUtils::getFileTime(a_inPath.c_str());
 	for (const FileName& dependency : dependencies)
 	{
-		std::string fullDependencyPath = getFolderPathForFile(a_inPath) + dependency;
-		fileWriteTime->dependencies.push_back({dependency, getFileTime(fullDependencyPath)});
+		std::string fullDependencyPath = FileUtils::getFolderPathForFile(a_inPath) + dependency;
+		fileWriteTime->dependencies.push_back({ dependency, FileUtils::getFileTime(fullDependencyPath) });
 	}
 
 	return fileWriteTime;
@@ -154,7 +154,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 
 	ModificationFileMap storedTimesMap;
 
-	if (fileExists(modificationFilePath))
+	if (FileUtils::fileExists(modificationFilePath))
 	{
 		std::fstream modificationFile(modificationFilePath);
 		writeModificationFileToMap(modificationFile, storedTimesMap);
@@ -163,7 +163,7 @@ void ResourceBuilder::buildResources(const std::unordered_map<std::string, Resou
 	}
 	else
 	{
-		createDirectoryForFile(modificationFilePath);
+		FileUtils::createDirectoryForFile(modificationFilePath);
 		std::ofstream modificationFile(modificationFilePath);
 		modificationFile.flush();
 		modificationFile.close();
@@ -185,7 +185,7 @@ omp_set_num_threads(20);
 
 			if (!a_incremental || isFileOrDependencyModified(fileName, inDirectoryPathStr, storedTimesMap))
 			{
-				createDirectoryForFile(outPath);
+				FileUtils::createDirectoryForFile(outPath);
 				FileWriteTime* fileWriteTime = processFile(inPath, outPath, processor);
 				storedTimesMap[fileName] = fileWriteTime;
 			}
@@ -201,16 +201,16 @@ void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, co
 	const std::string outDirectoryPathStr(a_outDirectoryPath);
 
 	std::vector<std::string> files;
-	if (listFiles(a_inDirectoryPath, "*", files))
+	if (FileUtils::listFiles(a_inDirectoryPath, "*", files))
 	{
 		for (const auto& filePath : files)
 		{
-			const std::string extension = getExtensionForFilePath(filePath);
+			const std::string extension = FileUtils::getExtensionForFilePath(filePath);
 			if (std::find(a_extensions.begin(), a_extensions.end(), extension) != a_extensions.end())
 			{
 				const std::string from = inDirectoryPathStr + "\\" + filePath;
 				const std::string to = outDirectoryPathStr + "\\" + filePath;
-				createDirectoryForFile(to);
+				FileUtils::createDirectoryForFile(to);
 				CopyFile(from.c_str(), to.c_str(), false);
 			}
 		}

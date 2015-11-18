@@ -16,7 +16,6 @@ int main()
 {
 	ByteImageProcessor byteImageProcessor;
 	FloatImageProcessor floatImageProcessor;
-	ModelProcessor modelProcessor;
 	SceneProcessor sceneProcessor;
 
 	ResourceBuilder::ResourceProcessorMap imageProcessors = {
@@ -25,16 +24,16 @@ int main()
 		{"hdr", &floatImageProcessor}
 	};
 	ResourceBuilder::ResourceProcessorMap modelProcessors = {
-		{"obj", &modelProcessor},
-		//{"ifc", &modelProcessor}
-		//{"rvt", &modelProcessor}
+		{ "obj", &sceneProcessor },
+		//{"ifc", &sceneProcessor}
+		//{"rvt", &sceneProcessor}
 	};
 	ResourceBuilder::ResourceProcessorMap sceneProcessors = {
-		//{"obj", &sceneProcessor},
 		{"ifc", &sceneProcessor}
 	};
 	std::vector<std::string> copiedFileExtensions = {"glsl", "vert", "frag", "json"};
 	
+	ResourceBuilder::buildResources(modelProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
 	ResourceBuilder::buildResources(sceneProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
 
 	/*

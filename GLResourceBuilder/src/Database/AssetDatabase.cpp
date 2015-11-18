@@ -2,6 +2,7 @@
 
 #include "Database/IAsset.h"
 #include "Utils/CRC64.h"
+#include "Utils/FileUtils.h"
 #include "Utils/writeVector.h"
 
 #include <assert.h>
@@ -29,7 +30,7 @@ void AssetDatabase::create(const char* a_filePath)
 
 	const uint m_header = (uint) EAssetType::ASSETDB;
 	const uint64 lookupTablePos = 0xFFFFFFFFFFFFFFFFull; // Placeholder
-	const FileTime writeTime = getCurrentFileTime();
+	const FileTime writeTime = FileUtils::getCurrentFileTime();
 	
 	m_file.write(reinterpret_cast<const char*>(&m_header), sizeof(uint));
 	m_file.write(reinterpret_cast<const char*>(&writeTime), sizeof(FileTime));

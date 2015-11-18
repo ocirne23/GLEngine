@@ -6,8 +6,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-static const uint MAX_GL_MAJOR_VERSION = 4;
-static const uint MAX_GL_MINOR_VERSION = 5;
+static const uint MAX_GL_MAJOR_VERSION = 3;
+static const uint MAX_GL_MINOR_VERSION = 3;
 
 SDL_GLContext createHighestGLContext(SDL_Window* a_window, uint& a_outMaxMajorVersion, uint& a_outMaxMinorVersion)
 {
@@ -57,6 +57,8 @@ GLContext::GLContext(SDL_Window* a_window)
 
 	print("Created GL Context: %i.%i\n", m_glMajorVersion, m_glMinorVersion);
 	print("Vendor: %s\n", m_glVendor.c_str());
+	print("Renderer: %s\n", m_glRenderer.c_str());
+	print("DriverVersion: %s\n", m_glDriverVersion.c_str());
 }
 
 GLContext::~GLContext()
