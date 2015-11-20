@@ -159,6 +159,7 @@
     <ClCompile Include="src\BuilderCore.cpp" />
     <ClCompile Include="src\Database\AssetDatabase.cpp" />
     <ClCompile Include="src\Database\Assets\Material.cpp" />
+    <ClCompile Include="src\Database\Assets\Mesh.cpp" />
     <ClCompile Include="src\Database\Assets\Scene.cpp" />
     <ClCompile Include="src\Database\Assets\AtlasTexture.cpp" />
     <ClCompile Include="src\Database\Assets\Shader.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="src\Utils\AtlasPosition.h" />
     <ClInclude Include="src\Utils\CRC64.h" />
     <ClInclude Include="src\Utils\FileUtils.h" />
+    <ClInclude Include="src\Utils\MeshMerger.h" />
     <ClInclude Include="src\Utils\stb_image.h" />
     <ClInclude Include="src\Database\Assets\TextureAtlas.h" />
     <ClInclude Include="src\Utils\TextureLoader.h" />

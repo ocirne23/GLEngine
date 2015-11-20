@@ -1,10 +1,11 @@
 #pragma once
 
 #include "BuilderCore.h"
-
+#include "Database/IAsset.h"
+#include <assimp/scene.h>
 #include <vector>
 
-class Mesh
+class Mesh : public IAsset
 {
 public:
 
@@ -26,6 +27,20 @@ public:
 		uint materialID;
 	};
 
+public:
+
+	Mesh(const std::string& name);
+	~Mesh() {}
+	void addVerticesIndices(const aiMesh* mesh, const aiMatrix3x3* vertexTransform);
+	const std::string& getName() { return m_name; }
+
+	virtual uint getByteSize();
+	virtual EAssetType getAssetType() { return EAssetType::MESH; }
+	virtual void write(std::ostream& file);
+
+private:
+
+	std::string m_name;
 	std::vector<Vertex> m_vertices;
 	std::vector<uint> m_indices;
 };

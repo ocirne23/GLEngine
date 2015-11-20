@@ -2,6 +2,7 @@
 
 #include "BuilderCore.h"
 #include "Database/IAsset.h"
+#include <vector>
 #include <string>
 
 class Scene : public IAsset
@@ -10,14 +11,18 @@ public:
 
 	struct Node
 	{
-		std::string m_names;
-		uint parentIdx = 0;
-		uint numChildren = 0;
-		uint* childIndices = NULL;
+		std::string m_name;
 		float transform[4 * 4];
+		uint parentIdx = 0;
+		std::vector<uint> childIndices;
+		std::vector<uint> meshIndices;
 	};
 
 public:
+
+	uint addNode(std::string name, uint parentIdx);
+	void addMesh(uint nodeIdx, uint meshIdx);
+
 
 	virtual uint getByteSize() override;
 	virtual EAssetType getAssetType() override;
@@ -25,7 +30,5 @@ public:
 
 private:
 
-	uint m_numNodes = 0;
-	Node* m_nodes   = NULL;
-	
+	std::vector<Node> m_nodes;
 };

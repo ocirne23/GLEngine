@@ -55,6 +55,9 @@
     <ClCompile Include="src\Database\Assets\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Database\Assets\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Processors\ByteImageProcessor.h">
@@ -127,6 +130,9 @@
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Database\Assets\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\MeshMerger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
