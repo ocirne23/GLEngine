@@ -194,6 +194,23 @@ omp_set_num_threads(20);
 	writeModificationMapToFile(modificationFilePath, storedTimesMap);
 }
 
+void ResourceBuilder::buildResourcesDB(const std::unordered_map<std::string, ResourceProcessor*>& a_processors, const char* a_inDirectoryPath, AssetDatabase& a_assetDatabase, bool a_incremental)
+{
+	const std::string inDirectoryPathStr(a_inDirectoryPath);
+	std::vector<std::string> fileList = getAllFilesInFolder(inDirectoryPathStr);
+	for (auto filePath : fileList)
+	{
+		ResourceProcessor* processor = getResourceProcessorForFile(filePath, a_processors);
+		if (processor)
+		{
+			std::vector<std::string> temp;
+			print("Processing: %s\n", filePath.c_str());
+			processor->process(filePath, a_assetDatabase, temp);
+			print("Finished processing %s\n", filePath.c_str());
+		}
+	}
+}
+
 void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
 {
 	printf("Copying files from %s to %s\n", a_inDirectoryPath, a_outDirectoryPath);

@@ -4,11 +4,13 @@
 #include "Database/EAssetType.h"
 #include "Database/AssetDatabase.h"
 #include "Database/Assets/Scene.h"
+#include "Database/Assets/Material.h"
 #include "Utils/FileUtils.h"
 #include "Utils/stb_image.h"
 #include "Utils/TextureAtlas.h"
 #include "Utils/writeVector.h"
 #include "Utils/AtlasBuilder.h"
+#include "Utils/TextureLoader.h"
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -25,27 +27,16 @@ struct vec2 { float x, y; };
 
 struct Vertex
 {
-	Vertex() {};
+	Vertex() {}
 	Vertex(aiVector3D& a_position, aiVector3D& a_texcoords, aiVector3D& a_normal, aiVector3D& a_tangents, aiVector3D& a_bitangents, uint a_materialID)
-		: position((vec3&) a_position), texcoords((vec2&) a_texcoords), normal((vec3&) a_normal)
-		, tangents((vec3&) a_tangents), bitangents((vec3&) a_bitangents), materialID(a_materialID)
-	{}
+		: position((vec3&) a_position), texcoords((vec2&) a_texcoords), normal((vec3&) a_normal), 
+		  tangents((vec3&) a_tangents), bitangents((vec3&) a_bitangents), materialID(a_materialID) {}
 	vec3 position;
 	vec2 texcoords;
 	vec3 normal;
 	vec3 tangents;
 	vec3 bitangents;
 	uint materialID;
-};
-
-struct GLSLMaterial
-{
-	vec4 diffuseTexMapping;
-	vec4 normalTexMapping;
-	int diffuseAtlasNr = -1;
-	int normalAtlasNr = -1;
-	int padding = -1;
-	int padding2 = -1;
 };
 
 struct MeshData
@@ -56,12 +47,6 @@ struct MeshData
 	uint vertexCounter = 0;
 	std::vector<uint> indices;
 	std::vector<Vertex> vertices;
-};
-
-struct MeshEntry
-{
-	uint numOccurences = 0;
-	aiMatrix3x3 transform;
 };
 
 void countMeshes(std::vector<uint>& a_meshCountList, const aiNode* a_node)
@@ -80,26 +65,6 @@ std::vector<uint> countMeshes(const aiScene* a_assimpScene)
 	std::vector<uint> meshCountList(a_assimpScene->mNumMeshes);
 	countMeshes(meshCountList, a_assimpScene->mRootNode);
 	return meshCountList;
-}
-
-void countMeshes(std::vector<MeshEntry>& a_meshEntryList, aiNode* a_node, aiMatrix3x3 a_parentTransform)
-{
-	const aiMatrix4x4& trans4d = a_node->mTransformation;
-	aiMatrix3x3 transform = a_parentTransform * aiMatrix3x3(trans4d.a1, trans4d.a2, trans4d.a3,
-															trans4d.b1, trans4d.b2, trans4d.b3,
-															trans4d.c1, trans4d.c2, trans4d.c3);
-
-	uint numMeshes = a_node->mNumMeshes;
-	for (uint i = 0; i < numMeshes; ++i)
-	{
-		uint meshIdx = a_node->mMeshes[i];
-		a_meshEntryList[meshIdx].numOccurences++;
-		if (a_meshEntryList[meshIdx].numOccurences == 1)
-			a_meshEntryList[meshIdx].transform = transform;
-	}
-	uint numChildren = a_node->mNumChildren;
-	for (uint i = 0; i < numChildren; ++i)
-		countMeshes(a_meshEntryList, a_node->mChildren[i], transform);
 }
 
 /* Get the transform of the first node using a mesh with the given ID, returns if a transform was found */
@@ -206,52 +171,101 @@ std::vector<MeshData> getMultiOccurenceMeshes(const aiScene* a_scene, const std:
 	return seperateMeshes;
 }
 
-vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const TextureAtlas::AtlasRegion& a_reg)
+// !Meshes stuff
+/*
+vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const AtlasPosition& a_atlasPos)
 {
-	const float wScale = a_reg.width / (float) a_atlasWidth;
-	const float hScale = a_reg.height / (float) a_atlasHeight;
-	const float xOffset = a_reg.x / (float) a_atlasWidth;
-	const float yOffset = a_reg.y / (float) a_atlasHeight;
-	return {xOffset, yOffset, wScale, hScale};
+	const float xOffset = a_atlasPos.xPos / (float) a_atlasWidth;
+	const float yOffset = a_atlasPos.yPos / (float) a_atlasHeight;
+	const float width = a_atlasPos.width / (float) a_atlasWidth;
+	const float height = a_atlasPos.height / (float) a_atlasHeight;
+	return {xOffset, yOffset, width, height};
 }
+*/
 
-// int: atlasIdx, vec4: mapping
-std::pair<int, vec4> getGLSLTexLocation(const std::vector<AtlasTextureInfo>& a_textures, const std::string& a_path, const std::vector<TextureAtlas*>& a_atlases)
+void addTextureInfo(AssetDatabase& a_assetDatabase, aiTextureType a_textureType, const aiMaterial* a_material, const std::string& a_baseScenePath)
 {
-	for (const AtlasTextureInfo& tex : a_textures)
+	std::string texturePath(a_baseScenePath);
+	if (a_material->GetTextureCount(a_textureType))
 	{
-		if (tex.textureInfo.filePath == a_path)
+		aiString path;
+		a_material->GetTexture(a_textureType, 0, &path);
+		if (path.data[0] == '*') //TODO
 		{
-			const TextureAtlas* atlas = a_atlases[tex.atlasInfo.atlasIdx];
-			vec4 mapping = getTextureMapping(atlas->m_width, atlas->m_height, tex.atlasInfo.region);
-			return {tex.atlasInfo.atlasIdx, mapping};
+			print("EMBEDDED TEXTURE: %s\n", path.C_Str());
+			assert(false);
+			return;
 		}
+		texturePath.append(path.C_Str());
 	}
-	return {-1, {0.0f, 0.0f, 0.0f, 0.0f}};
-}
-AtlasTextureInfo::AtlasInfo getAtlasInfo(const std::vector<AtlasTextureInfo>& a_textures, const std::string& a_path)
-{
-	for (const AtlasTextureInfo& tex : a_textures)
+	else
 	{
-		if (tex.textureInfo.filePath == a_path)
-			return tex.atlasInfo;
+		assert(false && "Material doesnt have a texture of the type");
+		return;
 	}
-	assert(false);
-	return AtlasTextureInfo::AtlasInfo();
+
+	if (a_assetDatabase.getAsset(texturePath.c_str()) != NULL)
+		return;
+
+	// If texture doesnt exist, get the info and add to list
+	int width, height, numComp;
+	int result = stbi_info(texturePath.c_str(), &width, &height, &numComp);
+	if (result)
+	{
+		AtlasTexture* tex = new AtlasTexture();
+		tex->filePath = texturePath;
+		tex->width = width;
+		tex->height = height;
+		tex->numComp = numComp;
+		a_assetDatabase.addAsset(texturePath.c_str(), tex);
+	}
+	else
+	{
+		assert(false && "Failed to load texture");
+		return;
+	}
 }
 
-std::vector<GLSLMaterial> getMaterials(const aiScene* a_scene, const std::vector<AtlasTextureInfo>& a_textures, const std::vector<TextureAtlas*>& a_atlases)
+void addDiffuseTextureInfo(AssetDatabase& a_assetDatabase, const aiMaterial* a_material, const std::string& a_baseScenePath)
 {
-	std::vector<GLSLMaterial> materials;
+	if (a_material->GetTextureCount(aiTextureType_DIFFUSE))
+		addTextureInfo(aiTextureType_DIFFUSE, a_material, a_baseScenePath);
+	else
+		print("No diffuse texture for material found\n");
+}
+
+void addNormalTextureInfo(AssetDatabase& a_assetDatabase, const aiMaterial* a_material, const std::string& a_baseScenePath)
+{
+	if (a_material->GetTextureCount(aiTextureType_NORMALS))
+		addTextureInfo(a_textureInfoList, aiTextureType_NORMALS, a_material, a_baseScenePath);
+	else if (a_material->GetTextureCount(aiTextureType_HEIGHT))
+		addTextureInfo(a_textureInfoList, aiTextureType_HEIGHT, a_material, a_baseScenePath);  // .obj files have their normals map under aiTextureType_HEIGHT
+}
+
+void addTexturesToDatabase(const aiScene* a_scene, const std::string& a_baseScenePath, AssetDatabase& a_assetDatabase)
+{
+	print("NUM EMBEDDED TEXTURES: %i\n", a_scene->mNumTextures);
+	for (uint i = 0; i < a_scene->mNumMaterials; ++i)
+	{
+		const aiMaterial* material = a_scene->mMaterials[i];
+		addDiffuseTextureInfo(a_assetDatabase, material, a_baseScenePath);
+		addNormalTextureInfo(a_assetDatabase, material, a_baseScenePath);
+	}
+}
+
+std::vector<Material> getMaterials(const aiScene* a_scene, const std::vector<AtlasTextureInfo>& a_textures, const std::vector<TextureAtlas*>& a_atlases)
+{
+	std::vector<Material> materials;
 	for (uint i = 0; i < a_scene->mNumMaterials; i++)
 	{
-		GLSLMaterial material;
+		Material material;
 		aiString path;
 		const aiMaterial* assimpMat = a_scene->mMaterials[i];
 		if (assimpMat->GetTextureCount(aiTextureType_DIFFUSE))
 		{
 			assimpMat->GetTexture(aiTextureType_DIFFUSE, 0, &path);
 			std::pair<int, vec4> loc = getGLSLTexLocation(a_textures, path.C_Str(), a_atlases);
+			material.
 			material.diffuseAtlasNr = loc.first;
 			material.diffuseTexMapping = loc.second;
 		}
@@ -278,6 +292,7 @@ void SceneProcessor::process(const char* a_inResourcePath, AssetDatabase& a_asse
 		| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
 		| aiPostProcessSteps::aiProcess_FlipUVs; // Flip uv's because OpenGL
 
+	const std::string baseScenePath = FileUtils::getFolderPathForFile(a_inResourcePath);
 	const aiScene* assimpScene = aiImportFile(a_inResourcePath, flags);
 	printf("building: %s\n", a_inResourcePath);
 
@@ -286,10 +301,13 @@ void SceneProcessor::process(const char* a_inResourcePath, AssetDatabase& a_asse
 	MeshData mergedMeshData = getSingleOccurrenceMergedMesh(assimpScene, meshCountList);
 	std::vector<MeshData> seperateMeshes = getMultiOccurenceMeshes(assimpScene, meshCountList);
 
-	std::vector<AtlasTextureInfo> textureInfoList = AtlasBuilder::getTextures(assimpScene);
-	std::vector<TextureAtlas*> atlases = AtlasBuilder::fitMaterials(textureInfoList);
+
+	std::vector<AtlasTexture*> textures = a_assetDatabase.getAllAssetsOfType(EAssetType::ATLAS_TEXTURE);
+
+	std::vector<AtlasTexture> textureInfoList = getTextures(assimpScene, baseScenePath);
+	std::vector<TextureAtlas*> atlases = AtlasBuilder::fitTextures(textureInfoList);
 	std::vector<GLSLMaterial> glslMaterials = getMaterials(assimpScene, textureInfoList, atlases);
-	AtlasBuilder::fillAtlases(atlases, textureInfoList, FileUtils::getFolderPathForFile(a_inResourcePath));
+	AtlasBuilder::fillAtlases(atlases, textureInfoList);
 	
 	print("Built scene: %s\n", a_inResourcePath);
 	print("NumTextures: %i\n", textureInfoList.size());
@@ -323,11 +341,11 @@ bool SceneProcessor::process(const char* a_inResourcePath, const char* a_outReso
 
 	const aiScene* scene = aiImportFile(a_inResourcePath, flags);
 
-	printf("building: %s \n", a_inResourcePath);
+	print("building: %s \n", a_inResourcePath);
 
 	if (!scene)
 	{
-		printf("Error parsing scene '%s' : %s\n", a_inResourcePath, aiGetErrorString());
+		print("Error parsing scene '%s' : %s\n", a_inResourcePath, aiGetErrorString());
 		return false;
 	}
 

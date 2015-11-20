@@ -16,8 +16,17 @@ enum {
 	ATLAS_NUM_MIPMAPS    = 4 
 };
 
+bool isPowerOfTwo(uint x)
+{
+	return ((x != 0) && !(x & (x - 1)));
+}
+
+// if i is already PoT, return the next higher PoT.
 uint getNextPOT(uint i)
 {
+	if (isPowerOfTwo(i))
+		i++;
+
 	i--;
 	i |= i >> 1;
 	i |= i >> 2;
@@ -28,57 +37,6 @@ uint getNextPOT(uint i)
 	return i;
 }
 
-AtlasTextureInfo addTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, 
-                                aiTextureType a_textureType, 
-                                const aiMaterial* a_material, 
-                                const std::string& a_baseScenePath)
-{
-	std::string texturePath;
-	if (a_material->GetTextureCount(a_textureType))
-	{
-		aiString path;
-		a_material->GetTexture(a_textureType, 0, &path);
-		if (path.data[0] == '*')
-		{
-			print("EMBEDDED TEXTURE: %s\n", path.C_Str());
-		}
-		texturePath = path.C_Str();
-	} 
-	else
-	{
-		assert(false);
-		return AtlasTextureInfo(); // Material doesn't have texture of type
-	}
-	
-	// If texture already exists, return existing.
-	for (uint i = 0; i < a_textureInfoList.size(); ++i)
-		if (a_textureInfoList[i].textureInfo.filePath == texturePath)
-			return a_textureInfoList[i];
-
-	// If texture doesnt exist, get the info and add to end
-	AtlasTextureInfo info;
-	info.textureInfo.result = stbi_info(info.textureInfo.filePath.c_str(), &info.textureInfo.width, &info.textureInfo.height, &info.textureInfo.numComp);
-	if (info.textureInfo.result)
-	{
-		info.textureInfo.index = (int) a_textureInfoList.size();
-		a_textureInfoList.push_back(info);
-	}
-	assert(info.textureInfo.result && "Failed to load texture");
-	return info;
-}
-
-void addDiffuseTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, const aiMaterial* a_material)
-{
-	addTextureInfo(a_textureInfoList, aiTextureType_DIFFUSE, a_material);
-}
-
-void addNormalTextureInfo(std::vector<AtlasTextureInfo>& a_textureInfoList, const aiMaterial* a_material)
-{
-	if (a_material->GetTextureCount(aiTextureType_NORMALS))
-		addTextureInfo(a_textureInfoList, aiTextureType_NORMALS, a_material);
-	else if (a_material->GetTextureCount(aiTextureType_HEIGHT))
-		addTextureInfo(a_textureInfoList, aiTextureType_HEIGHT, a_material);  // .obj files have their normals map under aiTextureType_HEIGHT
-}
 
 /* Increment the width/height, returns if incrementing was possible (not at max size) */
 bool getNextAtlasSize(uint& width, uint& height)
@@ -113,7 +71,7 @@ bool getNextAtlasSize(uint& width, uint& height)
 	return true;
 }
 
-void increaseAtlasesSize(std::vector<AtlasTextureInfo>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
+void increaseAtlasesSize(std::vector<AtlasTexture>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
 {
 	if (!a_atlases.size())
 	{
@@ -136,7 +94,7 @@ void increaseAtlasesSize(std::vector<AtlasTextureInfo>& a_textureInfoList, std::
 	}
 }
 
-bool containTexturesInAtlases(std::vector<AtlasTextureInfo>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
+bool containTexturesInAtlases(std::vector<AtlasTexture*>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
 {
 	if (!a_atlases.size())
 		return false;
@@ -145,16 +103,15 @@ bool containTexturesInAtlases(std::vector<AtlasTextureInfo>& a_textureInfoList, 
 
 	for (uint i = 0; i < a_textureInfoList.size(); ++i)
 	{
-		AtlasTextureInfo& tex = a_textureInfoList[i];
+		AtlasTexture* tex = a_textureInfoList[i];
 		bool contained = false;
 		for (uint j = 0; j < a_atlases.size(); ++j)
 		{
 			TextureAtlas* atlas = a_atlases[j];
-			TextureAtlas::AtlasRegion region = atlas->getRegion(tex.textureInfo.width, tex.textureInfo.height);
-			if (region.width && region.height)
+			AtlasPosition pos = atlas->getRegion(tex->width, tex->height);
+			if (pos.atlasIdx != -1)
 			{
-				tex.atlasInfo.atlasIdx = j;
-				tex.atlasInfo.region = region;
+				tex->atlasPosition = pos;
 				contained = true;
 				break;
 			}
@@ -167,21 +124,7 @@ bool containTexturesInAtlases(std::vector<AtlasTextureInfo>& a_textureInfoList, 
 
 END_UNNAMED_NAMESPACE()
 
-std::vector<AtlasTextureInfo> AtlasBuilder::getTextures(const aiScene* a_scene)
-{
-	print("NUM EMBEDDED TEXTURES: %i\n", a_scene->mNumTextures);
-	std::vector<AtlasTextureInfo> textureInfoList;
-	for (uint i = 0; i < a_scene->mNumMaterials; ++i)
-	{
-		const aiMaterial* material = a_scene->mMaterials[i];
-		addDiffuseTextureInfo(textureInfoList, material);
-		addNormalTextureInfo(textureInfoList, material);
-	}
-
-	return textureInfoList;
-}
-
-std::vector<TextureAtlas*> AtlasBuilder::fitMaterials(std::vector<AtlasTextureInfo>& a_textures)
+std::vector<TextureAtlas*> AtlasBuilder::fitTextures(std::vector<AtlasTexture*>& a_textures)
 {
 	std::vector<TextureAtlas*> atlases;
 	if (a_textures.size())
@@ -190,26 +133,24 @@ std::vector<TextureAtlas*> AtlasBuilder::fitMaterials(std::vector<AtlasTextureIn
 	return atlases;
 }
 
-void AtlasBuilder::fillAtlases(std::vector<TextureAtlas*>& a_atlases, std::vector<AtlasTextureInfo>& a_textures, const std::string& a_baseScenePath)
+void AtlasBuilder::fillAtlases(std::vector<TextureAtlas*>& a_atlases, std::vector<AtlasTexture*>& a_textures)
 {
-	for (const AtlasTextureInfo& tex : a_textures)
+	for (const AtlasTexture& tex : a_textures)
 	{
-		TextureAtlas* atlas = a_atlases[tex.atlasInfo.atlasIdx];
-		tex.atlasInfo.region;
+		TextureAtlas* atlas = a_atlases[tex.atlasPosition.atlasIdx];
 
-		const std::string filePath = a_baseScenePath + tex.textureInfo.filePath;
 		int width, height, numComponents;
-		const unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
+		const unsigned char* data = stbi_load(tex.filePath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
 		if (!data)
 		{
-			printf("FAILED TO LOAD IMAGE: %s \n", tex.textureInfo.filePath.c_str());
+			printf("FAILED TO LOAD IMAGE: %s \n", tex.filePath.c_str());
 			assert(false);
 			return;
 		}
-		atlas->setRegion(tex.atlasInfo.region.x,
-						 tex.atlasInfo.region.y,
-						 tex.atlasInfo.region.width,
-						 tex.atlasInfo.region.height,
+		atlas->setRegion(tex.atlasPosition.xPos,
+						 tex.atlasPosition.yPos,
+						 tex.atlasPosition.width,
+						 tex.atlasPosition.height,
 						 data,
 						 atlas->m_numComponents);
 		delete data;

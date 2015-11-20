@@ -16,9 +16,6 @@
     <ClCompile Include="src\Utils\stb_image.c">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils\TextureAtlas.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Processors\ByteImageProcessor.cpp">
       <Filter>Source Files\Processors</Filter>
     </ClCompile>
@@ -37,9 +34,6 @@
     <ClCompile Include="src\Database\Assets\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Database\Assets\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\CRC64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -47,6 +41,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils\AtlasBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Assets\TextureAtlas.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\TextureLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Assets\AtlasTexture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Assets\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -64,9 +70,6 @@
       <Filter>Header Files\Processors</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils\stb_image.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils\TextureAtlas.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="src\Utils\writeVector.h">
@@ -96,19 +99,34 @@
     <ClInclude Include="src\Database\Assets\Scene.h">
       <Filter>Header Files\Database</Filter>
     </ClInclude>
-    <ClInclude Include="src\Database\Assets\Texture.h">
-      <Filter>Header Files\Database</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Database\EAssetType.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Database\IAsset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Utils\CRC64.h">
+    <ClInclude Include="src\Utils\Vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Utils\AtlasPosition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\Assets\TextureAtlas.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\TextureLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\Assets\AtlasTexture.h">
+      <Filter>Header Files\Database</Filter>
+    </ClInclude>
     <ClInclude Include="src\Utils\AtlasBuilder.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils\CRC64.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\EAssetType.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Database\Assets\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

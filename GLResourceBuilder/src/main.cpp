@@ -3,6 +3,7 @@
 #endif // !_WIN64
 
 #include "ResourceBuilder.h"
+#include "Database\AssetDatabase.h"
 #include "Processors\ByteImageProcessor.h"
 #include "Processors\FloatImageProcessor.h"
 #include "Processors\ModelProcessor.h"
@@ -35,6 +36,12 @@ int main()
 	
 	ResourceBuilder::buildResources(modelProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
 	ResourceBuilder::buildResources(sceneProcessors, "..\\GLApp\\assets-source\\Models", "..\\GLApp\\assets\\Models", INCREMENTAL_BUILDING);
+
+	AssetDatabase assetDatabase;
+	assetDatabase.create("..\\GLApp\\assets\\db.da");
+	ResourceBuilder::buildResourcesDB(modelProcessors, "..\\GLApp\\assets-source\\Models", assetDatabase, INCREMENTAL_BUILDING);
+	assetDatabase.flush();
+	assetDatabase.saveAndClose();
 
 	/*
 	ResourceBuilder::buildResources(imageProcessors, "..\\GLApp\\assets-source\\UI",     "..\\GLApp\\assets\\UI",     INCREMENTAL_BUILDING);

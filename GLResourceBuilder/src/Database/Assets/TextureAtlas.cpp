@@ -15,44 +15,65 @@ inline void getPixel(const byte* a_data, uint a_width, uint a_height, uint a_x, 
 	memcpy(a_outPixelData, a_data + ((a_width * a_y) + a_x) * a_numComponents, a_numComponents);
 }
 
+Vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const TextureAtlas::AtlasRegion& a_reg)
+{
+	const float xOffset = a_reg.x / (float) a_atlasWidth;
+	const float yOffset = a_reg.y / (float) a_atlasHeight;
+	const float wScale = a_reg.width / (float) a_atlasWidth;
+	const float hScale = a_reg.height / (float) a_atlasHeight;
+	return {xOffset, yOffset, wScale, hScale};
+}
+
 END_UNNAMED_NAMESPACE()
 
-TextureAtlas::TextureAtlas(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps)
+TextureAtlas::TextureAtlas(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps, uint a_atlasIndex)
 {
-	initialize(a_width, a_height, a_numComponents, a_numMipMaps);
+	initialize(a_width, a_height, a_numComponents, a_numMipMaps, a_atlasIndex);
 }
 
-TextureAtlas::~TextureAtlas()
+void TextureAtlas::initialize(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps, uint a_atlasIndex)
 {
-	delete [] m_data;
+	assert(a_width % 2 == 0 && a_height % 2 == 0 && "Atlas width and height must be divideable by 2");
+	if (m_width != a_width || m_height != a_height || m_numComponents != a_numComponents || m_numMipMaps != a_numMipMaps)
+	{
+		// Lazy initialisation for m_data inside setRegion since algorithms may create atlases to see if textures fit
+		// with the current size and resize the atlases if they don't.
+		SAFE_DELETE_ARRAY(m_data);
+		m_width = a_width;
+		m_height = a_height;
+		m_numComponents = a_numComponents;
+		m_padding = a_numMipMaps * a_numMipMaps;
+		m_numMipMaps = a_numMipMaps;
+		m_atlasIndex = a_atlasIndex;
+	}
+
+	SAFE_DELETE(m_root.left);
+	SAFE_DELETE(m_root.right);
+	m_root.x = m_root.y = 0;
+	m_root.width = a_width;
+	m_root.height = a_height;
 }
 
-TextureAtlas::Node::~Node()
+void TextureAtlas::clear()
 {
-	if (left)
-		delete left;
-	if (right)
-		delete right;
+	initialize(m_width, m_height, m_numComponents, m_numMipMaps, m_atlasIndex);
 }
 
-TextureAtlas::AtlasRegion TextureAtlas::getRegion(uint width, uint height)
+AtlasPosition TextureAtlas::getRegion(uint width, uint height)
 {
 	if (width > m_width || height > m_height)
-		return {0, 0, 0, 0};
-
+		return {0, 0, 0, 0, -1};
 	if (!m_root.left && !m_root.right && (width == m_root.width && height == m_root.height))
 	{	// if no region has been used yet and region size is equal to atlas size, use entire atlas
 		m_root.left = new Node();
 		m_root.right = new Node();
-		return {0, 0, width, height};
+		return {0, 0, width, height, (int) m_atlasIndex}
 	}
-
 	const Node* node = getRegion(&m_root, width + m_padding * 2, height + m_padding * 2);
-
 	if (node)
-		return {node->x + m_padding, node->y + m_padding, width, height};
+		return {node->x + m_padding, node->y + m_padding, width, height, (int) m_atlasIndex};
 	else
-		return {0, 0, 0, 0};
+		return {0, 0, 0, 0, -1};
 }
 
 const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, uint width, uint height)
@@ -71,11 +92,10 @@ const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, uint
 			if (newNode)
 				return newNode;
 		}
-		return 0;
+		return NULL;
 	}
-
 	if (width > node->width || height > node->height)
-		return 0;
+		return NULL;
 
 	const uint w = node->width - width;
 	const uint h = node->height - height;
@@ -105,7 +125,6 @@ const TextureAtlas::Node* TextureAtlas::getRegion(TextureAtlas::Node *node, uint
 		node->right->width = w;
 		node->right->height = node->height;
 	}
-
 	node->width = width;
 	node->height = height;
 	return node;
@@ -122,8 +141,7 @@ void TextureAtlas::setRegion(uint x, uint y, uint width, uint height, const unsi
 	if (m_data == NULL)
 	{
 		m_data = new unsigned char[m_width * m_height * m_numComponents];
-
-		unsigned char red [] = {255, 0, 0, 255};
+		unsigned char red[] = {255, 0, 0, 255};
 		// Initialize atlas color to red
 		for (uint xa = 0; xa < m_width; ++xa)
 			for (uint ya = 0; ya < m_height; ++ya)
@@ -136,7 +154,7 @@ void TextureAtlas::setRegion(uint x, uint y, uint width, uint height, const unsi
 	}
 	else
 	{	// NOTE: can optimize a whole lot
-		unsigned char pixel [] = {0, 0, 0, 0};
+		unsigned char pixel[] = {0, 0, 0, 0};
 		// center
 		for (uint xPix = 0; xPix < width; ++xPix)
 		{
@@ -219,40 +237,4 @@ void TextureAtlas::setRegion(uint x, uint y, uint width, uint height, const unsi
 			}
 		}
 	}
-}
-
-void TextureAtlas::clear()
-{
-	initialize(m_width, m_height, m_numComponents, m_numMipMaps);
-}
-
-void TextureAtlas::initialize(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps)
-{
-	assert(a_width % 2 == 0 && a_height % 2 == 0 && "Atlas width and height must be divideable by 2");
-
-	if (m_width != a_width || m_height != a_height || m_numComponents != a_numComponents)
-	{
-		// Lazy initialisation for m_data inside setRegion since algorithms may create atlases to see if textures fit
-		// with the current size and resize the atlases if they don't.
-		if (m_data)
-		{
-			delete [] m_data;
-			m_data = NULL;
-		}
-
-		m_width = a_width;
-		m_height = a_height;
-		m_numComponents = a_numComponents;
-		m_padding = a_numMipMaps * a_numMipMaps;
-	}
-
-	if (m_root.left)
-		delete m_root.left;
-	if (m_root.right)
-		delete m_root.right;
-	m_root.left = m_root.right = NULL;
-
-	m_root.x = m_root.y = 0;
-	m_root.width = a_width;
-	m_root.height = a_height;
 }

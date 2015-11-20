@@ -160,7 +160,8 @@
     <ClCompile Include="src\Database\AssetDatabase.cpp" />
     <ClCompile Include="src\Database\Assets\Material.cpp" />
     <ClCompile Include="src\Database\Assets\Scene.cpp" />
-    <ClCompile Include="src\Database\Assets\Texture.cpp" />
+    <ClCompile Include="src\Database\Assets\AtlasTexture.cpp" />
+    <ClCompile Include="src\Database\Assets\Shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Processors\FloatImageProcessor.cpp" />
@@ -171,15 +172,17 @@
     <ClCompile Include="src\Utils\CRC64.cpp" />
     <ClCompile Include="src\Utils\FileUtils.cpp" />
     <ClCompile Include="src\Utils\stb_image.c" />
-    <ClCompile Include="src\Utils\TextureAtlas.cpp" />
+    <ClCompile Include="src\Database\Assets\TextureAtlas.cpp" />
+    <ClCompile Include="src\Utils\TextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Database\Assets\Shader.h" />
     <ClInclude Include="src\Database\IAsset.h" />
     <ClInclude Include="src\Database\AssetDatabase.h" />
     <ClInclude Include="src\BuilderCore.h" />
     <ClInclude Include="src\Database\Assets\Mesh.h" />
     <ClInclude Include="src\Database\Assets\Scene.h" />
-    <ClInclude Include="src\Database\Assets\Texture.h" />
+    <ClInclude Include="src\Database\Assets\AtlasTexture.h" />
     <ClInclude Include="src\Database\EAssetType.h" />
     <ClInclude Include="src\Database\Assets\Material.h" />
     <ClInclude Include="src\Processors\ByteImageProcessor.h" />
@@ -189,10 +192,13 @@
     <ClInclude Include="src\Processors\SceneProcessor.h" />
     <ClInclude Include="src\ResourceBuilder.h" />
     <ClInclude Include="src\Utils\AtlasBuilder.h" />
+    <ClInclude Include="src\Utils\AtlasPosition.h" />
     <ClInclude Include="src\Utils\CRC64.h" />
     <ClInclude Include="src\Utils\FileUtils.h" />
     <ClInclude Include="src\Utils\stb_image.h" />
-    <ClInclude Include="src\Utils\TextureAtlas.h" />
+    <ClInclude Include="src\Database\Assets\TextureAtlas.h" />
+    <ClInclude Include="src\Utils\TextureLoader.h" />
+    <ClInclude Include="src\Utils\Vec.h" />
     <ClInclude Include="src\Utils\writeVector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

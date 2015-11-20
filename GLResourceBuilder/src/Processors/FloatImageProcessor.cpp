@@ -8,7 +8,7 @@
 
 bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildDependencies)
 {
-	const int type = (int) EAssetType::TEXTURE;
+	const int type = (int) EAssetType::ATLAS_TEXTURE;
 	const bool isFloatImage = true;
 	int width, height, numComponents;
 
@@ -31,4 +31,9 @@ bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_ou
 
 	delete [] data;
 	return true;
+}
+
+void FloatImageProcessor::process(const char* inResourcePath, AssetDatabase& assetDatabase, std::vector<std::string>& rebuildOnFileModificationList)
+{
+	throw std::logic_error("The method or operation is not implemented.");
 }

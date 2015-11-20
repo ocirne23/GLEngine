@@ -8,7 +8,6 @@ class Scene : public IAsset
 {
 public:
 
-
 	struct Node
 	{
 		std::string m_names;

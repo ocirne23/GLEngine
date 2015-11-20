@@ -3,8 +3,9 @@
 enum class EAssetType
 {
 	MESH = 1,
-	TEXTURE,
+	ATLAS_TEXTURE,
 	SCENE,
 	MATERIAL,
+	SHADER,
 	ASSETDB = 255,
 };

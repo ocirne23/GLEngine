@@ -1,11 +1,11 @@
-#include "Database/Assets/Texture.h"
+#include "Database/Assets/AtlasTexture.h"
 
-uint Texture::getByteSize()
+uint AtlasTexture::getByteSize()
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
-void Texture::write(std::ostream& file)
+void AtlasTexture::write(std::ostream& file)
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }
