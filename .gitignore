@@ -13,7 +13,6 @@
 *.opensdf
 *.ilk
 *.pdb
-thumbs.db
 
 ipch/
 GLEngine/gen/
