@@ -516,7 +516,6 @@
     <ClInclude Include="include\Public\UI\UIFrame.h">
       <Filter>Header Files\Public\UI</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\GLMaterial.h" />
     <ClInclude Include="include\Public\Utils\EAssetType.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>

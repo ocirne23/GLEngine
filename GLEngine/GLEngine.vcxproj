@@ -94,7 +94,6 @@
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLMaterial.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
     <ClInclude Include="include\Public\Input\InputListener.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
