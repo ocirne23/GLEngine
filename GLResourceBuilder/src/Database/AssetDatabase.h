@@ -14,20 +14,7 @@ enum { MAX_FILEPATH_LENGTH = 255 };
 class AssetDatabase
 {
 public:
-	class AssetDatabaseEntry
-	{
-	public:
-		AssetDatabaseEntry(std::fstream& file);
-
-		template <typename T>
-		void write(T t);
-
-		template <typename T>
-		void read(T t);
 	
-	private:
-		std::fstream& m_file;
-	};
 
 public:
 	AssetDatabase();
