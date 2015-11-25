@@ -6,20 +6,19 @@
 #include <fstream>
 #include <assert.h>
 
-bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildDependencies)
+bool FloatImageProcessor::process(const std::string& a_resourcePath, AssetDatabase& a_assetDatabase)
 {
-	const int type = (int) EAssetType::ATLAS_TEXTURE;
+	const int type = (int) EAssetType::TEXTURE;
 	const bool isFloatImage = true;
 	int width, height, numComponents;
 
-	const float* data = stbi_loadf(a_inResourcePath, &width, &height, &numComponents, 0);
+	const float* data = stbi_loadf(a_resourcePath.c_str(), &width, &height, &numComponents, 0);
 	if (!data)
 	{
-		printf("FAILED TO LOAD IMAGE: %s \n", a_inResourcePath);
+		printf("FAILED TO LOAD IMAGE: %s \n", a_resourcePath.c_str());
 		return false;
 	}
-	std::fstream file(a_outResourcePath, std::ios::out | std::ios::binary);
-
+	std::fstream file(a_resourcePath.c_str(), std::ios::out | std::ios::binary);
 	assert(file.is_open());
 	file.write(reinterpret_cast<const char*>(&type), sizeof(int));
 	file.write(reinterpret_cast<const char*>(&isFloatImage), sizeof(bool));
@@ -29,11 +28,6 @@ bool FloatImageProcessor::process(const char* a_inResourcePath, const char* a_ou
 	file.write(reinterpret_cast<const char*>(data), width * height * numComponents * sizeof(float));
 	file.close();
 
-	delete [] data;
+	delete[] data;
 	return true;
-}
-
-void FloatImageProcessor::process(const char* inResourcePath, AssetDatabase& assetDatabase, std::vector<std::string>& rebuildOnFileModificationList)
-{
-	throw std::logic_error("The method or operation is not implemented.");
 }

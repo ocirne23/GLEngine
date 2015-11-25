@@ -7,15 +7,18 @@ class AtlasTexture : public IAsset
 {
 public:
 
-	std::string filePath;
-	int width   = 0;
-	int height  = 0;
-	int numComp = 0;
-	AtlasPosition atlasPosition;
+	AtlasTexture(const std::string& databaseEntryName);
 
-public:
-
-	virtual uint getByteSize() override;
+	virtual uint getByteSize() const override;
+	virtual EAssetType getAssetType() const override { return EAssetType::ATLAS_TEXTURE; }
 	virtual void write(std::ostream& file) override;
-	virtual EAssetType getAssetType() override { return EAssetType::ATLAS_TEXTURE; }
+	virtual void read(std::istream& file) override;
+
+private:
+
+	std::string m_filePath;
+	int m_width = 0;
+	int m_height = 0;
+	int m_numComp = 0;
+	AtlasPosition m_atlasPosition;
 };

@@ -30,7 +30,7 @@ void Pixmap::read(const char* a_filePath)
 	file.readBytes(reinterpret_cast<char*>(&m_height), sizeof(uint), sizeof(uint) * 2);
 	file.readBytes(reinterpret_cast<char*>(&m_numComponents), sizeof(uint), sizeof(uint) * 3);
 
-	assert(type == (int) EAssetType::TEXTURE);
+	assert(type == (int) EAssetType::ATLAS_TEXTURE);
 
 	if (m_isFloatData)
 	{

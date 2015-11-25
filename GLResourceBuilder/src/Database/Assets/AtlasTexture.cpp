@@ -1,11 +1,21 @@
 #include "Database/Assets/AtlasTexture.h"
 
-uint AtlasTexture::getByteSize()
+AtlasTexture::AtlasTexture(const std::string& a_databaseEntryName) : IAsset(a_databaseEntryName)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
+}
+
+uint AtlasTexture::getByteSize() const
+{
+
 }
 
 void AtlasTexture::write(std::ostream& file)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	
+}
+
+void AtlasTexture::read(std::istream& file)
+{
+	
 }

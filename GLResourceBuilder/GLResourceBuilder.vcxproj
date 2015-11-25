@@ -163,6 +163,7 @@
     <ClCompile Include="src\Database\Assets\Scene.cpp" />
     <ClCompile Include="src\Database\Assets\AtlasTexture.cpp" />
     <ClCompile Include="src\Database\Assets\Shader.cpp" />
+    <ClCompile Include="src\Database\Assets\Texture.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Processors\FloatImageProcessor.cpp" />
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Database\Assets\Shader.h" />
+    <ClInclude Include="src\Database\Assets\Texture.h" />
     <ClInclude Include="src\Database\IAsset.h" />
     <ClInclude Include="src\Database\AssetDatabase.h" />
     <ClInclude Include="src\BuilderCore.h" />
