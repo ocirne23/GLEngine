@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include "eastl/ustring.h"
+#include "EASTL/string.h"
 
 struct SDL_Window;
 typedef void* SDL_GLContext;

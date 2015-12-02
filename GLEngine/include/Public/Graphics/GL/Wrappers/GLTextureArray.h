@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core.h"
-#include "eastl/uvector.h"
-#include "eastl/ustring.h"
+#include "EASTL/vector.h"
+#include "EASTL/string.h"
 
 class Pixmap;
 

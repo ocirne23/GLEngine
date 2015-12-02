@@ -1,8 +1,9 @@
 #include "UI/Style.h"
 
 #include "Graphics/GL/Wrappers/GLTexture.h"
-#include "3rdparty/json/json.h"
+#include "json/json.h"
 #include "Utils/FileHandle.h"
+#include <assert.h>
 
 Style::~Style()
 {
@@ -21,7 +22,7 @@ void Style::load(const char* a_filePath)
 	Json::Reader reader;
 	{
 		FileHandle handle(a_filePath);
-		rde::string contents = handle.readString();
+		eastl::string contents = handle.readString();
 		bool success = reader.parse(contents.begin(), contents.end(), json);
 		assert(success);
 	}
@@ -33,12 +34,12 @@ void Style::load(const char* a_filePath)
 GLTexture* Style::getTexture(const char* a_filePath)
 {
 	GLTexture* texture = NULL;
-	auto it = m_textures.find(rde::string(a_filePath));
+	auto it = m_textures.find(eastl::string(a_filePath));
 	if (it == m_textures.end())
 	{
 		texture = new GLTexture();
 		texture->initialize(a_filePath, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::NEAREST);
-		m_textures.insert({rde::string(a_filePath), texture});
+		m_textures.insert({eastl::string(a_filePath), texture});
 	}
 	else
 	{

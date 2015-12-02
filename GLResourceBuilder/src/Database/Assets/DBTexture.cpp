@@ -1,10 +1,5 @@
 #include "Database/Assets/DBTexture.h"
 
-DBTexture::DBTexture(const std::string& a_sourceFilePath) : m_filePath(a_sourceFilePath)
-{
-
-}
-
 uint64 DBTexture::getByteSize() const
 {
 	return 0;

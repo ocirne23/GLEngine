@@ -13,7 +13,7 @@
 #include "Graphics/GL/Wrappers/GLUniform.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
 #include "Graphics/GL/Tech/HBAO.h"
-#include "3rdparty/entityx/System.h"
+#include "entityx/System.h"
 
 #include <glm/glm.hpp>
 

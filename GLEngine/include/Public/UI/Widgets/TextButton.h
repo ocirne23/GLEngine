@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/Widgets/Widget.h"
+#include "EASTL/string.h"
 #include <functional>
 
 class Style;
@@ -12,5 +13,5 @@ public:
 	virtual void fromJson(const Json::Value& json) override;
 	virtual Json::Value toJson() override;
 private:
-	rde::string m_text;
+	eastl::string m_text;
 };

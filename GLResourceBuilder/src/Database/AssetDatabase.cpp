@@ -4,11 +4,10 @@
 #include "Database/AssetDatabaseEntry.h"
 #include "Utils/CRC64.h"
 #include "Utils/FileUtils.h"
-#include "Utils/writeVector.h"
 
 #include <assert.h>
 
-void AssetDatabase::createNew(const std::string& a_filePath)
+void AssetDatabase::createNew(const eastl::string& a_filePath)
 {
 	assert(m_openMode == EOpenMode::UNOPENED);
 	
@@ -25,7 +24,7 @@ void AssetDatabase::createNew(const std::string& a_filePath)
 	m_assetWritePos = sizeof(uint64) * 2;
 }
 
-void AssetDatabase::openExisting(const std::string& a_filePath)
+void AssetDatabase::openExisting(const eastl::string& a_filePath)
 {
 	assert(m_openMode == EOpenMode::UNOPENED);
 	
@@ -64,7 +63,7 @@ void AssetDatabase::openExisting(const std::string& a_filePath)
 	print("Num assets in database: %i\n", m_writtenAssets.size());
 }
 
-void AssetDatabase::addAsset(const std::string& a_databaseEntryName, IAsset* a_asset)
+void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, IAsset* a_asset)
 {
 	uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	const auto unwrittenIt = m_unwrittenAssets.find(hash);
@@ -80,7 +79,7 @@ void AssetDatabase::addAsset(const std::string& a_databaseEntryName, IAsset* a_a
 	}
 }
 
-IAsset* AssetDatabase::loadAsset(const std::string& a_databaseEntryName, EAssetType a_type)
+IAsset* AssetDatabase::loadAsset(const eastl::string& a_databaseEntryName, EAssetType a_type)
 {
 	assert(m_openMode == EOpenMode::READ);
 	uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());

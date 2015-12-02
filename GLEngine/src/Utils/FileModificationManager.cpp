@@ -1,25 +1,25 @@
 #include "Utils/FileModificationManager.h"
 
 #include "Core.h"
-#include "3rdparty/rde/rde_string.h"
 #include "Utils/FileModificationListener.h"
 #include "Utils/FileHandle.h"
 
+#include <assert.h>
 #include <Windows.h>
 
-rde::hash_map<rde::string, rde::hash_map<void*, FileModificationListener*>*>FileModificationManager::s_listeners;
+eastl::hash_map<eastl::string, eastl::hash_map<void*, FileModificationListener*>*>FileModificationManager::s_listeners;
 
 void FileModificationManager::update()
 {
 	for (auto& files : s_listeners)
 	{
-		rde::string fullFilePath = rde::string(FileHandle::ASSETS_DIR).append(files.first);
+		eastl::string fullFilePath = eastl::string(FileHandle::ASSETS_DIR).append(files.first);
 		WIN32_FILE_ATTRIBUTE_DATA data;
 		const BOOL result = GetFileAttributesEx(fullFilePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
 		assert(result);
 		
 		// This can be optimized
-		rde::hash_map<void*, FileModificationListener*>* ownerListenerMap = files.second;
+		eastl::hash_map<void*, FileModificationListener*>* ownerListenerMap = files.second;
 		assert(ownerListenerMap);
 		for (auto& listeners : *ownerListenerMap) 
 		{
@@ -35,16 +35,16 @@ void FileModificationManager::update()
 	}
 }
 
-void FileModificationManager::createModificationListener(void* a_ownerPtr, const rde::string& a_filePath, std::function<void()> a_func)
+void FileModificationManager::createModificationListener(void* a_ownerPtr, const eastl::string& a_filePath, std::function<void()> a_func)
 {
 	FileModificationListener* listener = new FileModificationListener(a_filePath, a_func);
-	rde::hash_map<void*, FileModificationListener*>* ownerListenerMap = NULL;
+	eastl::hash_map<void*, FileModificationListener*>* ownerListenerMap = NULL;
 
 	// find ownerPtr to listener map based on filePath.
 	auto it = s_listeners.find(a_filePath);
 	if (it == s_listeners.end())
 	{
-		ownerListenerMap = new rde::hash_map<void*, FileModificationListener*>();
+		ownerListenerMap = new eastl::hash_map<void*, FileModificationListener*>();
 		s_listeners.insert({a_filePath, ownerListenerMap});
 	}
 	else
@@ -54,7 +54,7 @@ void FileModificationManager::createModificationListener(void* a_ownerPtr, const
 
 	// set the current file time in the listener.
 	WIN32_FILE_ATTRIBUTE_DATA data;
-	rde::string fullFilePath = rde::string(FileHandle::ASSETS_DIR).append(listener->m_filePath);
+	eastl::string fullFilePath = eastl::string(FileHandle::ASSETS_DIR).append(listener->m_filePath);
 	const BOOL result = GetFileAttributesEx(fullFilePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
 	assert(result);
 
@@ -62,12 +62,12 @@ void FileModificationManager::createModificationListener(void* a_ownerPtr, const
 	listener->m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
 }
 
-void FileModificationManager::removeModificationListener(void* a_ownerPtr, const rde::string& a_filePath)
+void FileModificationManager::removeModificationListener(void* a_ownerPtr, const eastl::string& a_filePath)
 {
 	auto ownerMapIt = s_listeners.find(a_filePath);
 	assert(ownerMapIt != s_listeners.end());
 
-	rde::hash_map<void*, FileModificationListener*>* ownerListenerMap = (*ownerMapIt).second;
+	eastl::hash_map<void*, FileModificationListener*>* ownerListenerMap = (*ownerMapIt).second;
 	auto listenerIt = ownerListenerMap->find(a_ownerPtr);
 	assert(listenerIt != ownerListenerMap->end());
 
@@ -82,7 +82,7 @@ void FileModificationManager::removeAllModificationListenersForOwner(void* a_own
 	auto filesIt = s_listeners.begin();
 	while (filesIt != s_listeners.end())
 	{
-		rde::hash_map<void*, FileModificationListener*>* ownerListenerMap = filesIt->second;
+		eastl::hash_map<void*, FileModificationListener*>* ownerListenerMap = filesIt->second;
 		assert(ownerListenerMap);
 		auto listenerIt = ownerListenerMap->find(a_ownerPtr);
 		if (listenerIt != ownerListenerMap->end())

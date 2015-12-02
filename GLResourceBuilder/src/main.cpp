@@ -13,7 +13,7 @@ int main()
 {
 	SceneProcessor sceneProcessor;
 	ResourceBuilder::ResourceProcessorMap modelProcessors;
-	modelProcessors.insert({"obj", &sceneProcessor})
+	modelProcessors.insert({ "obj", &sceneProcessor });
 	
 	AssetDatabase assetDatabase;
 	assetDatabase.createNew("..\\GLApp\\assets\\db.da");

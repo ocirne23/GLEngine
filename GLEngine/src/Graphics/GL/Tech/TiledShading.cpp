@@ -30,7 +30,7 @@ void TiledShading::initialize(uint a_pixelsPerTileW, uint a_pixelsPerTileH, uint
 	m_gridSize = m_gridWidth * m_gridHeight;
 
 	m_lightGrid = new glm::uvec2[m_gridSize];
-	m_tileLightIndices = new rde::vector<ushort>[m_gridSize];
+	m_tileLightIndices = new eastl::vector<ushort>[m_gridSize];
 
 	m_initialized = true;
 }
@@ -72,7 +72,7 @@ void TiledShading::update(const PerspectiveCamera& a_camera, uint a_numLights, c
 		int lightIndicesSize = m_lightIndices.size();
 		m_lightGrid[i].x = lightIndicesSize;
 		m_lightGrid[i].y = lightIndicesSize + m_tileLightIndices[i].size();
-		for (int j = 0; j < m_tileLightIndices[i].size(); ++j)
+		for (uint j = 0; j < m_tileLightIndices[i].size(); ++j)
 			m_lightIndices.push_back(m_tileLightIndices[i][j]);
 	}
 }

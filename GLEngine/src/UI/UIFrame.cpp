@@ -20,7 +20,7 @@ void UIFrame::initialize(const char* a_filePath)
 	Json::Reader reader;
 	{
 		FileHandle handle(a_filePath);
-		rde::string contents = handle.readString();
+		eastl::string contents = handle.readString();
 		bool success = reader.parse(contents.begin(), contents.end(), root);
 		assert(success);
 	}
@@ -30,7 +30,7 @@ void UIFrame::initialize(const char* a_filePath)
 	for (Json::Value item : contents)
 	{
 		Widget* widget = NULL;
-		EWidgetType type = getWidgetTypeForString(rde::string(item["type"].asCString()));
+		EWidgetType type = getWidgetTypeForString(eastl::string(item["type"].asCString()));
 		switch (type)
 		{
 		case EWidgetType::TEXTBUTTON:

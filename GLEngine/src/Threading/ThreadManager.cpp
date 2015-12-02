@@ -2,6 +2,7 @@
 
 #include "Core.h"
 
+#include <assert.h>
 #include <SDL/SDL.h>
 
 BEGIN_UNNAMED_NAMESPACE()

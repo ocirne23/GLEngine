@@ -8,7 +8,7 @@
  * Author: Alec Thomas <alec@swapoff.org>
  */
 
-#include "3rdparty/entityx/Event.h"
+#include "entityx/Event.h"
 
 namespace entityx {
 

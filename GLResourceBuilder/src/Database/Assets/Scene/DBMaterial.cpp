@@ -21,12 +21,12 @@ DBMaterial::DBMaterial(const aiMaterial& a_assimpMaterial)
 	}
 }
 
-const std::string& DBMaterial::getDiffuseTexturePath() const
+const eastl::string& DBMaterial::getDiffuseTexturePath() const
 {
 	return m_diffuseRegion.m_filePath;
 }
 
-const std::string& DBMaterial::getNormalTexturePath() const
+const eastl::string& DBMaterial::getNormalTexturePath() const
 {
 	return m_normalRegion.m_filePath;
 }
@@ -41,12 +41,12 @@ void DBMaterial::setNormalTextureRegion(const DBAtlasRegion& a_region)
 	m_normalRegion = a_region;
 }
 
-void DBMaterial::setDiffuseTexturePath(const std::string& a_filePath)
+void DBMaterial::setDiffuseTexturePath(const eastl::string& a_filePath)
 {
 	m_diffuseRegion.m_filePath = a_filePath;
 }
 
-void DBMaterial::setNormalTexturePath(const std::string& a_filePath)
+void DBMaterial::setNormalTexturePath(const eastl::string& a_filePath)
 {
 	m_normalRegion.m_filePath = a_filePath;
 }

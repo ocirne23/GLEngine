@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-#include "3rdparty/rde/rde_string.h"
+#include "EASTL/string.h"
 
 struct SDL_RWops;
 
@@ -12,7 +12,7 @@ public:
 
 	enum class EFileMode { READ, WRITE, READWRITE };
 
-	FileHandle(const rde::string& filePath, EFileMode fileMode = EFileMode::READ);
+	FileHandle(const eastl::string& filePath, EFileMode fileMode = EFileMode::READ);
 	FileHandle(const char* path, EFileMode fileMode = EFileMode::READ);
 	~FileHandle();
 
@@ -20,16 +20,16 @@ public:
 	void readBytes(char* buffer, uint64 numBytes, uint offset) const;
 	void writeBytes(const char* bytes, uint64 numBytes);
 
-	rde::string readString(uint64 numChars) const;
-	rde::string readString() const;
+	eastl::string readString(uint64 numChars) const;
+	eastl::string readString() const;
 
-	const rde::string& getFilePath() const { return m_filePath; }
-	uint64 getFileSize() const             { return m_size; }
-	bool exists() const                    { return m_rwops != NULL; }
+	const eastl::string& getFilePath() const { return m_filePath; }
+	uint64 getFileSize() const               { return m_size; }
+	bool exists() const                      { return m_rwops != NULL; }
 
 public:
 
-	static const rde::string ASSETS_DIR;
+	static const eastl::string ASSETS_DIR;
 
 private:
 
@@ -37,9 +37,9 @@ private:
 
 private:
 
-	rde::string m_filePath;
+	eastl::string m_filePath;
 	EFileMode m_fileMode = EFileMode::READ;
-	uint64 m_size       = 0;
-	bool m_isOpen       = false;
-	SDL_RWops* m_rwops  = NULL;
+	uint64 m_size        = 0;
+	bool m_isOpen        = false;
+	SDL_RWops* m_rwops   = NULL;
 };

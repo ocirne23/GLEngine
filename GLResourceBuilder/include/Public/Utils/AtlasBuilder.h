@@ -1,6 +1,7 @@
 #pragma once
 
-#include <vector>
+#include "EASTL/vector.h"
+#include "EASTL/string.h"
 
 class DBAtlasTexture;
 class DBMaterial;
@@ -8,5 +9,5 @@ class DBMaterial;
 class AtlasBuilder
 {
 public:
-	static std::vector<DBAtlasTexture> createAtlases(std::vector<DBMaterial>& materials, const std::string& baseAssetPath);
+	static eastl::vector<DBAtlasTexture> createAtlases(eastl::vector<DBMaterial>& materials, const eastl::string& baseAssetPath);
 };

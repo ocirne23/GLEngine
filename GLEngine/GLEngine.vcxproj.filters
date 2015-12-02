@@ -145,6 +145,12 @@
     <ClCompile Include="src\UI\UIFrame.cpp">
       <Filter>Source Files\UI</Filter>
     </ClCompile>
+    <ClCompile Include="src\3rdparty\EASTL\allocator.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\assert.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\fixed_pool.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\hashtable.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\red_black_tree.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\string.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
@@ -257,9 +263,6 @@
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\Pixmap.h">
       <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Utils\readVector.h">
-      <Filter>Header Files\Private\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\Semaphore.h">
       <Filter>Header Files\Public\Utils</Filter>

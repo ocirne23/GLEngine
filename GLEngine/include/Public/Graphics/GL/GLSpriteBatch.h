@@ -7,7 +7,7 @@
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Wrappers/GLUniform.h"
 #include "Graphics/TextureRegion.h"
-#include "eastl/uvector.h"
+#include "EASTL/vector.h"
 
 #include <glm/glm.hpp>
 
@@ -18,7 +18,6 @@ class GLSpriteBatch
 public:
 
 	void initialize(uint size);
-
 	void begin(const glm::mat4& mvpMatrix);
 	void draw(const TextureRegion& region, float x, float y, float width, float height);
 	void end();

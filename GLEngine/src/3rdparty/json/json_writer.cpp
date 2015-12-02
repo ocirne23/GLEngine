@@ -4,8 +4,8 @@
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
-#include <3rdparty/json/writer.h>
-#include <3rdparty/json/json_tool.h>
+#include <json/writer.h>
+#include <json/json_tool.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <iomanip>
 #include <memory>

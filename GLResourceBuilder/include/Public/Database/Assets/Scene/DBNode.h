@@ -2,6 +2,8 @@
 
 #include "BuilderCore.h"
 #include "Database/IAsset.h"
+#include "EASTL/string.h"
+#include "EASTL/vector.h"
 
 struct aiNode;
 
@@ -22,9 +24,9 @@ public:
 
 private:
 
-	rde::string m_name;
+	eastl::string m_name;
 	float m_transform[3 * 3];
 	uint m_parentIdx = 0;
-	rde::vector<uint> m_childIndices;
-	rde::vector<uint> m_meshIndices;
+	eastl::vector<uint> m_childIndices;
+	eastl::vector<uint> m_meshIndices;
 };

@@ -3,13 +3,14 @@
 #include "Database/Assets/DBTexture.h"
 #include "Database/EAssetType.h"
 #include "Database/AssetDatabase.h"
-
 #include "Utils/stb_image.h"
+
 #include <fstream>
 #include <assert.h>
 
-bool ByteImageProcessor::process(const std::string& a_resourcePath, AssetDatabase& a_assetDatabase)
+bool ByteImageProcessor::process(const eastl::string& a_resourcePath, AssetDatabase& a_assetDatabase)
 {
+	/*
 	DBTexture* texture = new DBTexture(a_resourcePath);
 	a_assetDatabase.addAsset(a_resourcePath.c_str(), texture);
 
@@ -35,5 +36,6 @@ bool ByteImageProcessor::process(const std::string& a_resourcePath, AssetDatabas
 	file.close();
 
 	delete[] data;
-	return true;
+	*/
+	return false;
 }

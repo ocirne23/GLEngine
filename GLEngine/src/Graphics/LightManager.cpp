@@ -2,7 +2,7 @@
 
 #include "Graphics/PerspectiveCamera.h"
 #include "Graphics/GL/GLMesh.h"
-#include "3rdparty/rde/algorithm.h"
+#include "EASTL/algorithm.h"
 
 #include <glm/glm.hpp>
 
@@ -45,8 +45,8 @@ void LightManager::deleteLight(LightHandle a_handle)
 	{
 		const ushort last = m_lightHandles[m_numUsedLights];
 		const ushort idx = m_lightHandles[a_handle];
-		rde::swap(m_lightPositionRanges[last], m_lightPositionRanges[idx]);
-		rde::swap(m_lightColorIntensities[last], m_lightColorIntensities[idx]);
+		eastl::swap(m_lightPositionRanges[last], m_lightPositionRanges[idx]);
+		eastl::swap(m_lightColorIntensities[last], m_lightColorIntensities[idx]);
 	}
 }
 

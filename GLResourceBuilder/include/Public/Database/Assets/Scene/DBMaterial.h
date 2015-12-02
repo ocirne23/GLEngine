@@ -3,6 +3,7 @@
 #include "Database/IAsset.h"
 #include "Database/Assets/Scene/DBAtlasRegion.h"
 #include "Utils/Vec.h"
+#include "EASTL/string.h"
 
 #include <assimp/scene.h>
 
@@ -19,16 +20,16 @@ public:
 	virtual void write(AssetDatabaseEntry& entry) override;
 	virtual void read(AssetDatabaseEntry& entry) override;
 
-	const rde::string& getDiffuseTexturePath() const;
-	const rde::string& getNormalTexturePath() const;
+	const eastl::string& getDiffuseTexturePath() const;
+	const eastl::string& getNormalTexturePath() const;
 
 	void setDiffuseTextureRegion(const DBAtlasRegion& region);
 	void setNormalTextureRegion(const DBAtlasRegion& region);
 
 private:
 
-	void setDiffuseTexturePath(const rde::string& filePath);
-	void setNormalTexturePath(const rde::string& filePath);
+	void setDiffuseTexturePath(const eastl::string& filePath);
+	void setNormalTexturePath(const eastl::string& filePath);
 
 private:
 	/*	

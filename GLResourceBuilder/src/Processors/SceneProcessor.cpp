@@ -9,7 +9,6 @@
 
 #include "Utils/FileUtils.h"
 #include "Utils/stb_image.h"
-#include "Utils/writeVector.h"
 #include "Utils/AtlasBuilder.h"
 
 #include <assimp/cimport.h>
@@ -149,7 +148,7 @@ void addScenegraphToDatabase(const aiScene* a_scene, const std::string& a_baseSc
 */
 END_UNNAMED_NAMESPACE()
 
-bool SceneProcessor::process(const std::string& a_inResourcePath, AssetDatabase& a_assetDatabase)
+bool SceneProcessor::process(const eastl::string& a_inResourcePath, AssetDatabase& a_assetDatabase)
 {
 	const uint flags = 0
 		| aiPostProcessSteps::aiProcess_Triangulate

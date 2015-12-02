@@ -1,18 +1,18 @@
 #include "Utils/FileHandle.h"
 
 #include "Core.h"
-#include "3rdparty/rde/vector.h"
-#include "3rdparty/rde/rde_string.h"
+#include "EASTL/vector.h"
+#include "EASTL/string.h"
 
 #include <SDL/SDL_rwops.h>
-
 #include <conio.h>
 #include <stdlib.h>
 #include <direct.h>
+#include <assert.h>
 
-const rde::string FileHandle::ASSETS_DIR("assets/");
+const eastl::string FileHandle::ASSETS_DIR("assets/");
 
-FileHandle::FileHandle(const rde::string& a_filePath, EFileMode a_fileMode) : m_rwops(0), m_size(0), m_fileMode(a_fileMode)
+FileHandle::FileHandle(const eastl::string& a_filePath, EFileMode a_fileMode) : m_rwops(0), m_size(0), m_fileMode(a_fileMode)
 {
 	initialize(a_filePath.c_str(), a_fileMode);
 }
@@ -24,7 +24,7 @@ FileHandle::FileHandle(const char* a_filePath, EFileMode a_fileMode) : m_rwops(0
 
 void FileHandle::initialize(const char* a_filePath, EFileMode a_fileMode)
 {
-	rde::string dir(ASSETS_DIR);
+	eastl::string dir(ASSETS_DIR);
 	dir.append(a_filePath);
 	a_filePath = dir.c_str();
 
@@ -80,16 +80,16 @@ void FileHandle::writeBytes(const char* a_bytes, uint64 a_numBytes)
 	m_size += a_numBytes;
 }
 
-rde::string FileHandle::readString(uint64 a_numChars) const
+eastl::string FileHandle::readString(uint64 a_numChars) const
 {
 	char* chars = new char[a_numChars];
 	readBytes(chars, a_numChars, 0);
-	rde::string str(chars, (int) a_numChars);
+	eastl::string str(chars, (int)a_numChars);
 	delete [] chars;
 	return str;
 }
 
-rde::string FileHandle::readString() const
+eastl::string FileHandle::readString() const
 {
 	return readString(m_size);
 }

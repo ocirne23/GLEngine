@@ -1,20 +1,21 @@
 #include "Database/Assets/Scene/DBScene.h"
 
 #include "Utils/AtlasBuilder.h"
+#include "EASTL/string.h"
 
 #include <assimp/scene.h>
 
-DBScene::DBScene(const aiScene& a_assimpScene, const std::string& a_baseAssetPath)
+DBScene::DBScene(const aiScene& a_assimpScene, const eastl::string& a_baseAssetPath)
 {
 	processNodes(a_assimpScene.mRootNode, 0);
 
-	m_meshes.reserve(a_assimpScene.mNumMeshes);
-	m_materials.reserve(a_assimpScene.mNumMaterials);
+	m_meshes.resize(a_assimpScene.mNumMeshes);
+	m_materials.resize(a_assimpScene.mNumMaterials);
 	
 	for (uint i = 0; i < a_assimpScene.mNumMeshes; ++i)
-		m_meshes.emplace_back(*a_assimpScene.mMeshes[i]);
+		m_meshes[i] = DBMesh(*a_assimpScene.mMeshes[i]);
 	for (uint i = 0; i < a_assimpScene.mNumMaterials; ++i)
-		m_materials.emplace_back(*a_assimpScene.mMaterials[i]);
+		m_materials[i] = DBMaterial(*a_assimpScene.mMaterials[i]);
 
 	m_atlasTextures = AtlasBuilder::createAtlases(m_materials, a_baseAssetPath);
 }
@@ -22,7 +23,7 @@ DBScene::DBScene(const aiScene& a_assimpScene, const std::string& a_baseAssetPat
 uint DBScene::processNodes(const aiNode* a_assimpNode, uint a_parentIdx)
 {
 	uint idx = (uint) m_nodes.size();
-	m_nodes.emplace_back(*a_assimpNode, a_parentIdx);
+	m_nodes.push_back(DBNode(*a_assimpNode, a_parentIdx));
 	if (idx != a_parentIdx)
 		m_nodes[a_parentIdx].addChild(idx);
 	for (uint i = 0; i < a_assimpNode->mNumChildren; i++)

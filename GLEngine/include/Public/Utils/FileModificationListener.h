@@ -1,6 +1,6 @@
 #pragma once
 
-#include "3rdparty/rde/rde_string.h"
+#include "EASTL/string.h"
 
 #include <functional>
 
@@ -12,7 +12,7 @@ public:
 
 private:
 
-	FileModificationListener(const rde::string& filePath, std::function<void()> onFileModification)
+	FileModificationListener(const eastl::string& filePath, std::function<void()> onFileModification)
 		: m_filePath(filePath), m_onFileModification(onFileModification)
 	{}
 	~FileModificationListener() {};
@@ -27,7 +27,7 @@ private:
 
 private:
 
-	rde::string m_filePath;
+	eastl::string m_filePath;
 	std::function<void()> m_onFileModification;
 	WriteTime m_lastWriteTime;
 };

@@ -2,7 +2,8 @@
 
 #include "Graphics/TextureRegion.h"
 #include "UI/Font.h"
-#include "eastl/umap.h"
+#include "EASTL/string.h"
+#include "EASTL/hash_map.h"
 
 class GLTexture;
 
@@ -27,5 +28,5 @@ private:
 	TextureRegion m_imageButtonTex;
 
 	bool m_isDisposed = false;
-	eastl::hash<eastl::string, GLTexture*> m_textures;
+	eastl::hash_map<eastl::string, GLTexture*> m_textures;
 };

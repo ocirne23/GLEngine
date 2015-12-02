@@ -1,6 +1,7 @@
 #pragma once
 
-#include "eastl/ulist.h"
+#include "EASTL/list.h"
+#include "EASTL/functional.h"
 
 #include <functional>
 

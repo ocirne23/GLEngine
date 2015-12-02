@@ -1,5 +1,6 @@
 #include "Utils/FileUtils.h"
 
+#include "EASTL/heap.h"
 #include "EASTL/string.h"
 #include "EASTL/to_string.h"
 
@@ -14,7 +15,7 @@
 eastl::string FileUtils::getFileExtension(const eastl::string& a_filePath)
 {
 	auto dotIdx = a_filePath.find_last_of('.');
-	if (dotIdx != std::string::npos)
+	if (dotIdx != eastl::string::npos)
 		return a_filePath.substr(dotIdx + 1);
 	else
 		return "";
@@ -31,8 +32,7 @@ eastl::string FileUtils::getFolderPathForFile(const eastl::string& a_filePath)
 
 eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 {
-	std::wstring stemp = std::wstring(a_filePath.begin(), a_filePath.end());
-	LPCWSTR filePath = stemp.c_str();
+	LPCWSTR filePath = eastl::wstring(a_filePath.c_str()).c_str();
 
 	WIN32_FILE_ATTRIBUTE_DATA fileAttrData = {0};
 	GetFileAttributesExW(filePath, GetFileExInfoStandard, &fileAttrData);
@@ -55,22 +55,22 @@ eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 	return time;
 }
 
-std::vector<std::string> FileUtils::listFiles(const std::string& a_path, const std::string& a_mask)
+eastl::vector<eastl::string> FileUtils::listFiles(const eastl::string& a_path, const eastl::string& a_mask)
 {
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA ffd;
 
-	std::vector<std::string> files;
-	std::stack<std::string> directories;
-	std::string path = a_path;
-	directories.push(a_path);
+	eastl::vector<eastl::string> files;
+	eastl::vector<eastl::string> directories;
+	eastl::string path = a_path;
+	directories.push_back(a_path);
 
 	while (!directories.empty())
 	{
-		path = directories.top();
-		directories.pop();
+		path = directories.back();
+		directories.pop_back();
 
-		std::string spec = path + "\\" + a_mask;
+		eastl::string spec = path + "\\" + a_mask;
 		hFind = FindFirstFile(spec.c_str(), &ffd);
 		if (hFind == INVALID_HANDLE_VALUE)
 			return files;
@@ -79,10 +79,10 @@ std::vector<std::string> FileUtils::listFiles(const std::string& a_path, const s
 			if (strcmp(ffd.cFileName, ".") && strcmp(ffd.cFileName, ".."))
 			{
 				if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) // If directory, add to list of directories to search
-					directories.push(path + "\\" + ffd.cFileName);
+					directories.push_back(path + "\\" + ffd.cFileName);
 				else
 				{
-					const std::string fullPath = path + "\\" + ffd.cFileName;
+					const eastl::string fullPath = path + "\\" + ffd.cFileName;
 					files.push_back(fullPath);
 				}
 			}
@@ -100,34 +100,34 @@ std::vector<std::string> FileUtils::listFiles(const std::string& a_path, const s
 	return files;
 }
 
-std::string FileUtils::getExtensionForFilePath(const std::string& a_path)
+eastl::string FileUtils::getExtensionForFilePath(const eastl::string& a_path)
 {
-	const std::string::size_type extIdx = a_path.find_last_of('.');
-	if (extIdx == std::string::npos)
+	const eastl::string::size_type extIdx = a_path.find_last_of('.');
+	if (extIdx == eastl::string::npos)
 		return "";
-	std::string extension = a_path.substr(extIdx + 1, a_path.length() - extIdx - 1);
-	std::transform(extension.begin(), extension.end(), extension.begin(), tolower);
+	eastl::string extension = a_path.substr(extIdx + 1, a_path.length() - extIdx - 1);
+	extension.make_lower();
 	return extension;
 }
 
-void FileUtils::createDirectoryForFile(const std::string& a_filePath)
+void FileUtils::createDirectoryForFile(const eastl::string& a_filePath)
 {
-	std::string directory = a_filePath.substr(0, a_filePath.find_last_of("\\"));
+	eastl::string directory = a_filePath.substr(0, a_filePath.find_last_of("\\"));
 
-	std::string::size_type from = 0;
-	while (from != std::string::npos)
+	eastl::string::size_type from = 0;
+	while (from != eastl::string::npos)
 	{	// create sub directories for file if not exists
 		from = directory.find_first_of("\\", from + 1);
-		const std::string makeDirPath = directory.substr(0, from);
+		const eastl::string makeDirPath = directory.substr(0, from);
 		CreateDirectory(makeDirPath.c_str(), NULL);
 	}
 }
 
-bool FileUtils::fileExists(const std::string& a_filePath)
+bool FileUtils::fileExists(const eastl::string& a_filePath)
 {
 	bool exists = false;
 	std::fstream file;
-	file.open(a_filePath, std::fstream::in); // prolly not the right way to check for exists
+	file.open(a_filePath.c_str(), std::fstream::in); // prolly not the right way to check for exists
 	exists = file.is_open();
 	if (exists)
 		file.close();

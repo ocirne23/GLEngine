@@ -1,8 +1,8 @@
 #pragma once
 
-#include "eastl/ustring.h"
+#include "EASTL/string.h"
+#include "EASTL/hash_map.h"
 
-#include <unordered_map>
 #include <functional>
 
 class FileModificationListener;
@@ -31,5 +31,5 @@ private:
 private:
 	
 	// Maps filepath to a map of owner pointers to the listeners.
-	static std::hash_map<eastl::string, std::hash_map<void*, FileModificationListener*>*> s_listeners;
+	static eastl::hash_map<eastl::string, eastl::hash_map<void*, FileModificationListener*>*> s_listeners;
 };

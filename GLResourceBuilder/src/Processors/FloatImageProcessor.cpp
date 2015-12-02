@@ -2,11 +2,12 @@
 
 #include "Database/EAssetType.h"
 #include "Utils/stb_image.h"
+#include "EASTL/string.h"
 
 #include <fstream>
 #include <assert.h>
 
-bool FloatImageProcessor::process(const std::string& a_resourcePath, AssetDatabase& a_assetDatabase)
+bool FloatImageProcessor::process(const eastl::string& a_resourcePath, AssetDatabase& a_assetDatabase)
 {
 	const int type = (int) EAssetType::TEXTURE;
 	const bool isFloatImage = true;

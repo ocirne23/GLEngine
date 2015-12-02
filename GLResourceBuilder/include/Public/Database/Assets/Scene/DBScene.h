@@ -7,8 +7,8 @@
 #include "Database/Assets/Scene/DBMesh.h"
 #include "Database/Assets/Scene/DBNode.h"
 
-#include "3rdparty/rde/rde_string.h"
-#include "3rdparty/rde/vector.h"
+#include "EASTL/string.h"
+#include "EASTL/vector.h"
 
 struct aiScene;
 struct aiNode;
@@ -24,7 +24,7 @@ class DBScene : public IAsset
 public:
 
 	DBScene() {}
-	DBScene(const aiScene& assimpScene, const rde::string& baseAssetPath);
+	DBScene(const aiScene& assimpScene, const eastl::string& baseAssetPath);
 	virtual ~DBScene() {}
 
 	virtual uint64 getByteSize() const override;
@@ -37,12 +37,12 @@ private:
 	uint processNodes(const aiNode* assimpNode, uint parentIdx);
 
 private:
-	// Scenegraph
-	rde::vector<DBNode> m_nodes;
+	// Scene graph
+	eastl::vector<DBNode> m_nodes;
 	// Geometry info
-	rde::vector<DBMesh> m_meshes;
+	eastl::vector<DBMesh> m_meshes;
 	// Material/texture info
-	rde::vector<DBMaterial> m_materials;
+	eastl::vector<DBMaterial> m_materials;
 	// Multiple atlas textures containing all textures in the scene
-	rde::vector<DBAtlasTexture> m_atlasTextures;
+	eastl::vector<DBAtlasTexture> m_atlasTextures;
 };

@@ -8,27 +8,15 @@
 
 #include "Utils/EAssetType.h"
 #include "Utils/FileHandle.h"
-#include "Utils/readVector.h"
 
 #include "Input/Input.h"
 #include "Input/EKey.h"
-
-#include "3rdparty/rde/rde_string.h"
 
 #include <glm/glm.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 
 static const glm::vec4 NO_TEX_COLOR(0.8f, 0.8f, 0.8f, 1.0f);
-
-struct MeshEntry
-{
-	uint meshIndex;
-	uint numIndices;
-	uint baseVertex;
-	uint baseIndex;
-	uint materialIndex;
-};
 
 struct Vertex
 {
@@ -47,36 +35,12 @@ byte floatToByteCol(float f)
 
 END_UNNAMED_NAMESPACE()
 
-void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_matUBOBindingPoint)
+void GLMesh::loadFromDB(const char* a_filePath)
 {
-	assert(!m_initialized);
-
-	FileHandle file(a_filePath);
-	if (!file.exists())
-	{
-		print("Mesh file does not exist: %s \n", a_filePath);
-		return;
-	}
-
-	m_textureUnit = a_textureUnit;
-	m_matUBOBindingPoint = a_matUBOBindingPoint;
-
-	rde::vector<uint> indices;
-	rde::vector<Vertex> vertices;
-	rde::vector<uint> baseIndices;
-
-	int type;
-	file.readBytes(reinterpret_cast<char*>(&type), sizeof(int), 0);
-	assert(type == (int) EAssetType::MESH);
-
-	int numAtlases;
-	file.readBytes(reinterpret_cast<char*>(&numAtlases), sizeof(int), sizeof(int) * 1);
-	uint offset = sizeof(uint) * 2;
-
-	offset = readVector(file, m_matProperties, offset);
-	offset = readVector(file, indices, offset);
-	offset = readVector(file, vertices, offset);
-	file.close();
+	eastl::vector<uint> indices;
+	eastl::vector<Vertex> vertices;
+	// TODO: Load stuff
+	assert(false);
 
 	m_numIndices = indices.size();
 
@@ -101,53 +65,14 @@ void GLMesh::loadFromFile(const char* a_filePath, uint a_textureUnit, uint a_mat
 
 	m_vertexBuffer.setVertexAttributes(ARRAY_SIZE(attributes), attributes);
 	m_stateBuffer.end();
-
-	if (numAtlases)
-	{
-		rde::string atlasBasePath(a_filePath);
-		atlasBasePath = atlasBasePath.substr(0, atlasBasePath.find_index_of_last('.'));
-		atlasBasePath.append("-atlas-");
-
-		rde::vector<rde::string> atlasImagePaths;
-		int atlasCounter = 0;
-		for (int i = 0; i < numAtlases; ++i, ++atlasCounter)
-			atlasImagePaths.push_back(rde::string(atlasBasePath).append(rde::to_string(atlasCounter)).append(".da"));
-		m_textureArray.initialize(atlasImagePaths);
-		assert(m_textureArray.isInitialized());
-	}
-	else
-	{	// If the model doesnt have any textures, just create a 2x2 atlas
-		rde::vector<Pixmap> pixmaps(1);
-		pixmaps[0].set(2, 2, 3, NO_TEX_COLOR);
-		m_textureArray.initialize(pixmaps, 0, GLTextureArray::ETextureMinFilter::NEAREST, GLTextureArray::ETextureMagFilter::NEAREST);
-		assert(m_textureArray.isInitialized());
-	}
-
-	m_initialized = true;
 }
 
-void GLMesh::initializeUBO(const GLShader& a_shader)
+void GLMesh::render()
 {
 	m_stateBuffer.begin();
-	m_matUniformBuffer.initialize(a_shader, m_matUBOBindingPoint, "MaterialProperties", GLConstantBuffer::EDrawUsage::STREAM);
-	m_matUniformBuffer.upload(m_matProperties.size() * sizeof(m_matProperties[0]), &m_matProperties[0]);
-	m_stateBuffer.end();
-	m_matProperties.clear();
-}
-
-void GLMesh::render(const GLShader& shader, bool a_renderOpague, bool a_renderTransparent, bool a_bindMaterials)
-{
-	assert(shader.isBegun());
-
-	if (!m_matUniformBuffer.isInitialized())
-		initializeUBO(shader);
-	m_matUniformBuffer.bind();
-
-	m_stateBuffer.begin();
-	if (m_textureArray.isInitialized())
-		m_textureArray.bind(m_textureUnit);
 	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, NULL);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); wireframe rendering
 	m_stateBuffer.end();
 }
+
+// glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); wireframe rendering
 

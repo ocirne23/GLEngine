@@ -1,8 +1,8 @@
 #pragma once
 
-#include "3rdparty/entityx/System.h"
-#include "3rdparty/rde/vector.h"
-#include "3rdparty/rde/rde_string.h"
+#include "entityx/System.h"
+#include "EASTL/vector.h"
+#include "EASTL/string.h"
 
 class UIComponent;
 class UIFrame;
@@ -17,12 +17,10 @@ public:
 
 	void reloadJsonFiles();
 	void updateLayout();
-
 	void update(entityx::EntityManager& entities, entityx::EventManager& events, entityx::TimeDelta dt) override;
 	void configure(entityx::EventManager& eventManager) override;
 	void receive(entityx::ComponentAddedEvent<UIComponent>& uiComponentAddedEvent);
-
-	const rde::vector<UIComponent*>& getSortedUIComponents() const { return m_uiComponents; }
+	const eastl::vector<UIComponent*>& getSortedUIComponents() const { return m_uiComponents; }
 
 private:
 
@@ -30,5 +28,5 @@ private:
 
 private:
 
-	rde::vector<UIComponent*> m_uiComponents;
+	eastl::vector<UIComponent*> m_uiComponents;
 };

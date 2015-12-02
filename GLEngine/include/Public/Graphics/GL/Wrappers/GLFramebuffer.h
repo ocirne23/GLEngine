@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include "eastl/uvector.h"
+#include "EASTL/vector.h"
 
 class GLFramebuffer
 {

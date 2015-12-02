@@ -90,9 +90,6 @@
     <ClInclude Include="include\Private\Processors\ByteImageProcessor.h">
       <Filter>Header Files\Processors</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\Utils\writeVector.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\Vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>

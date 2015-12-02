@@ -20,7 +20,7 @@ inline void getPixel(const byte* a_data, uint a_width, uint a_height, uint a_x, 
 END_UNNAMED_NAMESPACE()
 
 DBAtlasTexture::DBAtlasTexture(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps)
-	: m_width(a_width), m_height(a_height), m_numComponents(a_numComponents), m_numMipMaps(a_numMipMaps))
+	: m_width(a_width), m_height(a_height), m_numComponents(a_numComponents), m_numMipMaps(a_numMipMaps)
 {
 	m_atlasTextureData.resize(m_width * m_height * m_numComponents);
 
@@ -154,7 +154,7 @@ uint64 DBAtlasTexture::getByteSize() const
 	totalSize += sizeof(m_height);
 	totalSize += sizeof(m_numComponents);
 	totalSize += sizeof(m_numMipMaps);
-	totalSize += AssetDatabaseEntry::getArrayWriteSize(m_atlasTextureData.get(), m_width * m_height * m_numComponents);
+	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_atlasTextureData);
 	return totalSize;
 }
 
@@ -164,7 +164,7 @@ void DBAtlasTexture::write(AssetDatabaseEntry& entry)
 	entry.writeVal(m_height);
 	entry.writeVal(m_numComponents);
 	entry.writeVal(m_numMipMaps);
-	entry.writeArray(m_atlasTextureData.get(), m_width * m_height * m_numComponents);
+	entry.writeVector(m_atlasTextureData);
 }
 
 void DBAtlasTexture::read(AssetDatabaseEntry& entry)

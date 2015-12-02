@@ -1,9 +1,9 @@
 #pragma once
 
-#include "3rdparty/entityx/entityx.h"
-#include "3rdparty/rde/vector.h"
+#include "entityx/entityx.h"
 #include "Core.h"
 #include "Input/Input.h"
+#include "EASTL/vector.h"
 
 class TestScreen
 {
@@ -22,6 +22,6 @@ private:
 	Input::KeyDownListener m_keyDownListener;
 	Input::WindowQuitListener m_windowQuitListener;
 
-	rde::vector<entityx::Entity> m_lightEntities;
+	eastl::vector<entityx::Entity> m_lightEntities;
 	entityx::EntityX m_entityx;
 };

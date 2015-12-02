@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Database/IAsset.h"
-#include "3rdparty/rde/vector.h"
+#include "EASTL/vector.h"
 
 class DBAtlasRegion;
 
@@ -26,5 +26,5 @@ public:
 	uint m_height            = 0;
 	uint m_numComponents     = 0;
 	uint m_numMipMaps        = 0;
-	rde::vector<byte> m_atlasTextureData;
+	eastl::vector<byte> m_atlasTextureData;
 };

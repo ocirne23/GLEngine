@@ -4,7 +4,6 @@
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLContext.h"
 #include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
-#include "3rdparty/rde/rde_string.h"
 #include "Graphics/GL/Utils/CheckGLError.h"
 
 #include <glm/glm.hpp>

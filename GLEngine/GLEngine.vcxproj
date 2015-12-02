@@ -19,6 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\3rdparty\EASTL\allocator.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\assert.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\fixed_pool.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\hashtable.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\red_black_tree.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\string.cpp" />
     <ClCompile Include="src\Graphics\GL\Utils\QuadDrawUtils.cpp" />
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
@@ -116,7 +122,6 @@
     <ClInclude Include="include\3rdparty\EASTL\vector.h" />
     <ClInclude Include="include\3rdparty\EASTL\vector_map.h" />
     <ClInclude Include="include\Private\Threading\ThreadManager.h" />
-    <ClInclude Include="include\Private\Utils\readVector.h" />
     <ClInclude Include="include\Public\Core.h" />
     <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h" />

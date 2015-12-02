@@ -8,7 +8,7 @@
  * Author: Alec Thomas <alec@swapoff.org>
  */
 
-#include "3rdparty/entityx/help/Pool.h"
+#include "entityx/help/Pool.h"
 
 namespace entityx {
 

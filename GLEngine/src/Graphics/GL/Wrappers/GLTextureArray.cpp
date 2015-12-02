@@ -4,6 +4,7 @@
 #include "Graphics/GL/GL.h"
 #include "Graphics/Pixmap.h"
 #include "Graphics/GL/Utils/getGLTextureFormat.h"
+#include "EASTL/vector.h"
 
 #include <assert.h>
 
@@ -17,7 +18,7 @@ GLTextureArray::~GLTextureArray()
 		glDeleteTextures(1, &m_textureID);
 }
 
-void GLTextureArray::initialize(const rde::vector<Pixmap>& a_pixmaps, uint a_numMipMaps,
+void GLTextureArray::initialize(const eastl::vector<Pixmap>& a_pixmaps, uint a_numMipMaps,
 								ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	assert(!a_pixmaps.empty());
@@ -58,7 +59,7 @@ void GLTextureArray::initialize(const rde::vector<Pixmap>& a_pixmaps, uint a_num
 	const int depth = a_pixmaps.size();
 	glTexStorage3D(GL_TEXTURE_2D_ARRAY, a_numMipMaps + 1, internalFormat, m_width, m_height, depth);
 
-	for (int i = 0; i < a_pixmaps.size(); ++i)
+	for (uint i = 0; i < a_pixmaps.size(); ++i)
 	{
 		assert(a_pixmaps[i].m_width == m_width);
 		assert(a_pixmaps[i].m_height == m_height);
@@ -73,13 +74,13 @@ void GLTextureArray::initialize(const rde::vector<Pixmap>& a_pixmaps, uint a_num
 	m_initialized = true;
 }
 
-void GLTextureArray::initialize(const rde::vector<rde::string>& a_filePaths, uint a_numMipMaps,
+void GLTextureArray::initialize(const eastl::vector<eastl::string>& a_filePaths, uint a_numMipMaps,
 								ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	assert(!a_filePaths.empty());
-	rde::vector<Pixmap> pixmaps;
+	eastl::vector<Pixmap> pixmaps;
 	pixmaps.resize(a_filePaths.size());
-	for (int i = 0; i < a_filePaths.size(); ++i)
+	for (uint i = 0; i < a_filePaths.size(); ++i)
 		pixmaps[i].read(a_filePaths[i].c_str());
 	initialize(pixmaps, a_numMipMaps, a_minFilter, a_magFilter, a_textureWrapS, a_textureWrapT);
 }

@@ -86,7 +86,7 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLight
 		const int lightIndicesSize = m_lightIndices.size();
 		m_lightGrid[i].x = lightIndicesSize;
 		m_lightGrid[i].y = lightIndicesSize + m_tileLightIndices[i].size();
-		for (int j = 0; j < m_tileLightIndices[i].size(); ++j)
+		for (uint j = 0; j < m_tileLightIndices[i].size(); ++j)
 			m_lightIndices.push_back(m_tileLightIndices[i][j]);
 	}
 }

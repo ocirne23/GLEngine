@@ -4,10 +4,9 @@
 
 #include "Graphics/GL/GLSpriteBatch.h"
 #include "UI/Style.h"
-
-#include "3rdparty/json/json.h"
-#include "3rdparty/rde/rde_string.h"
-#include "3rdparty/rde/hash_map.h"
+#include "json/json.h"
+#include "EASTL/string.h"
+#include "EASTL/hash_map.h"
 
 #include <glm/glm.hpp>
 
@@ -28,14 +27,14 @@ public:
 
 	float getWidth() const  { return m_width; }
 	float getHeight() const { return m_height; }
-	const rde::string& getJsonFilePath() const { return m_filePath; }
+	const eastl::string& getJsonFilePath() const { return m_filePath; }
 
 private:
 
-	rde::string m_filePath;
+	eastl::string m_filePath;
 	Style m_style;
 
-	rde::hash_map<rde::string, Widget*> m_widgets;
+	eastl::hash_map<eastl::string, Widget*> m_widgets;
 	glm::mat4 m_vpMatrix;
 
 	float m_width      = 0;

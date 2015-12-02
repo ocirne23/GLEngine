@@ -1,13 +1,15 @@
 #pragma once
 
 #include "Database/IAsset.h"
+#include "EASTL/string.h"
+#include "EASTL/vector.h"
 
 class DBTexture : public IAsset
 {
 public:
 
 	DBTexture() {}
-	DBTexture(const rde::string& sourceFilePath);
+	//DBTexture(const rde::string& sourceFilePath);
 	virtual ~DBTexture() {}
 
 	virtual uint64 getByteSize() const override;
@@ -17,10 +19,10 @@ public:
 
 private:
 
-	rde::string m_filePath;
+	eastl::string m_filePath;
 	int m_width         = 0;
 	int m_height        = 0;
 	int m_numComp       = 0;
 	bool m_isFloatImage = false;
-	rde::vector<byte> m_data;
+	eastl::vector<byte> m_data;
 };

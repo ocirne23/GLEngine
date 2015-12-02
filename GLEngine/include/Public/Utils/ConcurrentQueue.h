@@ -1,6 +1,6 @@
 #pragma once
 
-#include "3rdparty/rde/list.h"
+#include "EASTL/list.h"
 #include "Utils/Semaphore.h"
 
 template <typename T>
@@ -37,11 +37,11 @@ public:
 
 	void block() { m_semaphore.acquire(); }
 	void release() { m_semaphore.release(); }
-	rde::list<T>& getBackingQueue() { return m_queue; }
+	eastl::list<T>& getBackingQueue() { return m_queue; }
 
 private:
 
 	Semaphore m_semaphore;
 	T m_emptyVal;
-	rde::list<T> m_queue;
+	eastl::list<T> m_queue;
 };

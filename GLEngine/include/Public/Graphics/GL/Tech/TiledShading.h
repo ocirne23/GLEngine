@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Utils/VecForward.h"
-#include "eastl/uvector.h"
+#include "EASTL/vector.h"
 
 class PerspectiveCamera;
 

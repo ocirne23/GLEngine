@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "UI/Layout.h"
-#include "eastl/ustring.h"
+#include "EASTL/string.h"
 
 #include <glm/glm.hpp>
 
@@ -30,7 +30,7 @@ public:
 	void updateLayout(const UIFrame& frame);
 
 	EWidgetType getType() const                { return m_type; }
-	const eastl::string& getName() const        { return m_name; }
+	const eastl::string& getName() const       { return m_name; }
 	const Layout& getLayout() const            { return m_layout; }
 	const Widget* getParent() const            { return m_parent; }
 	const glm::vec4& getAbsoluteBounds() const { return m_absBounds; }

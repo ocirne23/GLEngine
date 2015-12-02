@@ -5,8 +5,9 @@
 #include "Utils/FileHandle.h"
 #include "Utils/MatForward.h"
 #include "Utils/VecForward.h"
-#include "eastl/uvector.h"
-#include "eastl/ustring.h"
+#include "EASTL/hash_map.h"
+#include "EASTL/vector.h"
+#include "EASTL/string.h"
 
 class FileHandle;
 
@@ -14,7 +15,8 @@ class GLShader
 {
 public:
 
-	typedef rde::hash_map<const char*, int> UniformLocMap;
+	typedef eastl::hash_map<eastl::string, int> UniformLocMap;
+
 public:
 
 	GLShader() {}

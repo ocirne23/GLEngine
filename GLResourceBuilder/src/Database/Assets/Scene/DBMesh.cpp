@@ -14,7 +14,7 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 	uint baseVertex = (uint) m_vertices.size();
 
 	m_indices.reserve(m_indices.size() + numIndices);
-	m_vertices.reserve(m_vertices.size() + numVertices);
+	m_vertices.resize(m_vertices.size() + numVertices);
 
 	for (uint i = 0; i < numFaces; ++i)
 	{
@@ -24,9 +24,10 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 		m_indices.push_back(face.mIndices[2] + baseVertex);
 	}
 
+	uint vertexStartIdx = m_vertices.size();
 	for (uint i = 0; i < numVertices; ++i)
 	{
-		m_vertices.emplace_back(
+		m_vertices[vertexStartIdx + i] = Vertex(
 			a_assimpMesh.mVertices[i],
 			hasTextureCoords ? a_assimpMesh.mTextureCoords[0][i] : aiVector3D(0.0f, 0.0f, 0.0f),
 			a_assimpMesh.mNormals[i],

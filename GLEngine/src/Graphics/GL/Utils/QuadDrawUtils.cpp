@@ -3,6 +3,8 @@
 #include "Core.h"
 #include "Graphics/GL/GL.h"
 
+#include <assert.h>
+
 GLShader QuadDrawUtils::s_quadShader;
 GLVertexBuffer QuadDrawUtils::s_vertexBuffer;
 GLVertexBuffer QuadDrawUtils::s_indiceBuffer;

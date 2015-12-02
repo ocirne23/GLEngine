@@ -5,7 +5,7 @@
 #include "GLEngine.h"
 #include "Graphics/GL/GL.h"
 #include "Utils/FileHandle.h"
-#include "3rdparty/rde/rde_string.h"
+#include "EASTL/string.h"
 
 #include <glm/glm.hpp>
 
@@ -13,14 +13,14 @@ bool GLShader::s_begun = false;
 
 BEGIN_UNNAMED_NAMESPACE()
 
-rde::string getVersionStr()
+eastl::string getVersionStr()
 {
-	return rde::string("#version 330\n");
+	return eastl::string("#version 330\n");
 }
 
-rde::string processIncludes(const rde::string& a_str)
+eastl::string processIncludes(const eastl::string& a_str)
 {
-	rde::string src = a_str;
+	eastl::string src = a_str;
 
 	static const char* INCLUDE_STR = "#include \"";
 	static const uint INCLUDE_STR_LEN = (uint) strlen(INCLUDE_STR);
@@ -30,7 +30,7 @@ rde::string processIncludes(const rde::string& a_str)
 	{
 		auto fileStartPos = includePos + INCLUDE_STR_LEN;
 		auto fileEndPos = src.find("\"", fileStartPos) + fileStartPos;
-		rde::string path = src.substr(fileStartPos, fileEndPos);
+		eastl::string path = src.substr(fileStartPos, fileEndPos);
 		src = src.substr(0, includePos).append(FileHandle(path.c_str()).readString()).append(src.substr(fileEndPos + 1, src.length()));
 		auto next = src.find(INCLUDE_STR, includePos);
 		includePos = next == src.npos ? next : next + includePos;
@@ -55,7 +55,7 @@ void checkProgramForErrors(const GLuint a_program)
 		glGetProgramiv(a_program, GL_INFO_LOG_LENGTH, &maxLength);
 		if (maxLength)
 		{
-			rde::vector<GLchar> infoLog(maxLength);
+			eastl::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(a_program, maxLength, &maxLength, &infoLog[0]);
 			print("link error: %s \n", &infoLog[0]);
 		}
@@ -73,7 +73,7 @@ void checkProgramForErrors(const GLuint a_program)
 		glGetProgramiv(a_program, GL_INFO_LOG_LENGTH, &maxLength);
 		if (maxLength)
 		{
-			rde::vector<GLchar> infoLog(maxLength);
+			eastl::vector<GLchar> infoLog(maxLength);
 			glGetProgramInfoLog(a_program, maxLength, &maxLength, &infoLog[0]);
 			print("Validation error: %s \n", &infoLog[0]);
 		}
@@ -118,14 +118,15 @@ void checkShaderForErrors(const GLuint a_shader, const GLenum a_shaderType, cons
 	}
 }
 
-rde::string preprocessShaderFile(const char* a_shaderFilePath, const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
+eastl::string preprocessShaderFile(const char* a_shaderFilePath, const eastl::vector<eastl::string>* a_defines, 
+	                               const eastl::vector<eastl::string>* a_extensions)
 {
-	rde::string contents = getVersionStr();						// #version xxx at top
+	eastl::string contents = getVersionStr();					// #version xxx at top
 	if (a_defines)												// add user defines
-		for (const rde::string& str : *a_defines)
+		for (const eastl::string& str : *a_defines)
 			contents.append("#define ").append(str).append("\n");
 	if (a_extensions)											// add user extensions
-		for (const rde::string& str : *a_extensions)
+		for (const eastl::string& str : *a_extensions)
 			contents.append("#extension ").append(str).append(" : require\n");
 	
 	FileHandle shaderFile(a_shaderFilePath);
@@ -158,7 +159,7 @@ GLShader::~GLShader()
 }
 
 void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_fragmentShaderFilePath,
-						  const rde::vector<rde::string>* a_defines, const rde::vector<rde::string>* a_extensions)
+	                      const eastl::vector<eastl::string>* a_defines, const eastl::vector<eastl::string>* a_extensions)
 {
 	if (m_shaderID)
 		glDeleteProgram(m_shaderID);
@@ -170,8 +171,8 @@ void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_frag
 	const GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	assert(vertexShader && fragmentShader);
 
-	const rde::string vertexShaderStr = preprocessShaderFile(a_vertexShaderFilePath, a_defines, a_extensions);
-	const rde::string fragmentShaderStr = preprocessShaderFile(a_fragmentShaderFilePath, a_defines, a_extensions);
+	const eastl::string vertexShaderStr = preprocessShaderFile(a_vertexShaderFilePath, a_defines, a_extensions);
+	const eastl::string fragmentShaderStr = preprocessShaderFile(a_fragmentShaderFilePath, a_defines, a_extensions);
 	const char* vertexShaderSource = vertexShaderStr.c_str();
 	const char* fragmentShaderSource = fragmentShaderStr.c_str();
 	//print("Vertex shader:\n%s", vertexShaderSource);
@@ -222,7 +223,7 @@ void GLShader::setUniform1i(const char* a_uniformName, int a_val)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniform1i(loc, a_val);
 	}
 	else
@@ -236,7 +237,7 @@ void GLShader::setUniform1f(const char* a_uniformName, float a_val)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniform1f(loc, a_val);
 	}
 	else
@@ -250,7 +251,7 @@ void GLShader::setUniform2f(const char* a_uniformName, const glm::vec2& a_vec)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniform2f(loc, a_vec.x, a_vec.y);
 	}
 	else
@@ -264,7 +265,7 @@ void GLShader::setUniform2i(const char* a_uniformName, const glm::ivec2& a_vec)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniform2i(loc, a_vec.x, a_vec.y);
 	}
 	else
@@ -277,7 +278,7 @@ void GLShader::setUniform2fv(const char* a_uniformName, uint a_count, const glm:
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniform2fv(loc, a_count, &a_vecs[0][0]);
 	}
 	else
@@ -291,7 +292,7 @@ void GLShader::setUniform3f(const char* a_uniformName, const glm::vec3& a_vec)
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniform3f(loc, a_vec.x, a_vec.y, a_vec.z);
 	}
 	else
@@ -304,7 +305,7 @@ void GLShader::setUniformMatrix4f(const char* a_uniformName, const glm::mat4& a_
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniformMatrix4fv(loc, 1, GL_FALSE, &a_mat[0][0]);
 	}
 	else
@@ -317,7 +318,7 @@ void GLShader::setUniformMatrix3f(const char* a_uniformName, const glm::mat3& ma
 	if (it == m_uniformLocMap.end())
 	{
 		const GLint loc = glGetUniformLocation(m_shaderID, a_uniformName);
-		m_uniformLocMap.insert(rde::make_pair(a_uniformName, loc));
+		m_uniformLocMap.insert(eastl::make_pair(a_uniformName, loc));
 		glUniformMatrix3fv(loc, 1, GL_FALSE, &mat[0][0]);
 	}
 	else

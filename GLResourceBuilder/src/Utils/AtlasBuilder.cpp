@@ -6,8 +6,9 @@
 #include "Utils/AtlasPosition.h"
 #include "Utils/TextureAtlas.h"
 #include "Utils/stb_image.h"
+#include "EASTL/algorithm.h"
+#include "EASTL/hash_map.h"
 
-#include <algorithm>
 #include <numeric>
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -60,7 +61,7 @@ bool getNextAtlasSize(uint& width, uint& height)
 	return true;
 }
 
-void increaseAtlasesSize(std::vector<TextureAtlas*>& a_atlases)
+void increaseAtlasesSize(eastl::vector<TextureAtlas*>& a_atlases)
 {
 	if (!a_atlases.size())
 	{
@@ -83,7 +84,7 @@ void increaseAtlasesSize(std::vector<TextureAtlas*>& a_atlases)
 	}
 }
 
-bool containTexturesInAtlases(std::unordered_map<std::string, DBAtlasRegion>& a_regions, std::vector<TextureAtlas*>& a_atlases)
+bool containTexturesInAtlases(eastl::hash_map<eastl::string, DBAtlasRegion>& a_regions, eastl::vector<TextureAtlas*>& a_atlases)
 {
 	if (!a_atlases.size())
 		return false;
@@ -112,13 +113,13 @@ bool containTexturesInAtlases(std::unordered_map<std::string, DBAtlasRegion>& a_
 
 END_UNNAMED_NAMESPACE()
 
-std::vector<DBAtlasTexture> AtlasBuilder::createAtlases(std::vector<DBMaterial>& a_materials, const std::string& a_baseAssetPath)
+eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMaterial>& a_materials, const eastl::string& a_baseAssetPath)
 {
 	// First we create an unique set of regions so we dont have multiple AtlasRegion instances for the same texture
-	std::unordered_map<std::string, DBAtlasRegion> uniqueRegions;
+	eastl::hash_map<eastl::string, DBAtlasRegion> uniqueRegions;
 	for (const DBMaterial& mat : a_materials) 
 	{
-		const std::string& diffuseFilePath = mat.getDiffuseTexturePath();
+		const eastl::string& diffuseFilePath = mat.getDiffuseTexturePath();
 		if (uniqueRegions.find(diffuseFilePath) == uniqueRegions.end())
 		{
 			DBAtlasRegion reg;
@@ -126,7 +127,7 @@ std::vector<DBAtlasTexture> AtlasBuilder::createAtlases(std::vector<DBMaterial>&
 			uniqueRegions.insert({diffuseFilePath, reg});
 		}
 
-		const std::string& normalFilePath = mat.getNormalTexturePath();
+		const eastl::string& normalFilePath = mat.getNormalTexturePath();
 		if (uniqueRegions.find(normalFilePath) == uniqueRegions.end())
 		{
 			DBAtlasRegion reg;
@@ -136,7 +137,7 @@ std::vector<DBAtlasTexture> AtlasBuilder::createAtlases(std::vector<DBMaterial>&
 	}
 	
 	// Then we fit these textures into atlases (not the image data, just fitting rectangles)
-	std::vector<TextureAtlas*> atlases;
+	eastl::vector<TextureAtlas*> atlases;
 	while (!containTexturesInAtlases(uniqueRegions, atlases))
 		increaseAtlasesSize(atlases);
 
@@ -148,11 +149,11 @@ std::vector<DBAtlasTexture> AtlasBuilder::createAtlases(std::vector<DBMaterial>&
 	}
 
 	// Create AtlasTexture objects out of the TextureAtlases (which are IAssets)
-	std::vector<DBAtlasTexture> atlasTextures;
+	eastl::vector<DBAtlasTexture> atlasTextures;
 	atlasTextures.reserve(atlases.size());
 	for (TextureAtlas* atlas : atlases)
 	{
-		atlasTextures.emplace_back(atlas->m_width, atlas->m_width, atlas->m_numComponents, atlas->m_numMipMaps);
+		atlasTextures.push_back(DBAtlasTexture(atlas->m_width, atlas->m_width, atlas->m_numComponents, atlas->m_numMipMaps));
 		SAFE_DELETE(atlas);
 	}
 	atlases.clear();

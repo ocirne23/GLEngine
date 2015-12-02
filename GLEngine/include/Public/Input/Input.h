@@ -6,7 +6,7 @@
 #include "Input/EMouseButton.h"
 #include "Input/InputListener.h"
 #include "Utils/ConcurrentQueue.h"
-#include "eastl/uvector.h"
+#include "EASTL/vector.h"
 
 /*** Usage examples ***
 Polling input:

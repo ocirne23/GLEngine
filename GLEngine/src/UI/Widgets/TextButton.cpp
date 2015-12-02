@@ -8,7 +8,7 @@ TextButton::~TextButton()
 void TextButton::fromJson(const Json::Value& a_json)
 {
 	Widget::fromJson(a_json);
-	m_text = rde::string(a_json["properties"]["text"].asCString());
+	m_text = eastl::string(a_json["properties"]["text"].asCString());
 }
 
 Json::Value TextButton::toJson()

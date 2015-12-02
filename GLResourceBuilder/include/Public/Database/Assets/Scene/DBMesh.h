@@ -3,6 +3,8 @@
 #include "BuilderCore.h"
 #include "Database/IAsset.h"
 #include "Utils/Vec.h"
+#include "EASTL/vector.h"
+#include "EASTL/string.h"
 
 #include <assimp/scene.h>
 
@@ -14,7 +16,7 @@ public:
 	DBMesh(const aiMesh& assimpMesh);
 	virtual ~DBMesh() {}
 
-	const rde::string& getName() { return m_name; }
+	const eastl::string& getName() { return m_name; }
 	virtual uint64 getByteSize() const override;
 	virtual EAssetType getAssetType() const override { return EAssetType::MESH; }
 	virtual void write(AssetDatabaseEntry& entry) override;
@@ -39,7 +41,7 @@ private:
 
 private:
 
-	rde::string m_name;
-	rde::vector<Vertex> m_vertices;
-	rde::vector<uint> m_indices;
+	eastl::string m_name;
+	eastl::vector<Vertex> m_vertices;
+	eastl::vector<uint> m_indices;
 };

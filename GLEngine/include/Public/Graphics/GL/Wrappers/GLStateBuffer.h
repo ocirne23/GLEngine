@@ -2,8 +2,6 @@
 
 #include "Core.h"
 
-#include "3rdparty/rde/vector.h"
-
 class GLStateBuffer
 {
 public:

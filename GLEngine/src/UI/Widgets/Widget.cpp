@@ -6,20 +6,20 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-static const rde::string WIDGET_TYPE_STRINGS[] =
+static const eastl::string WIDGET_TYPE_STRINGS[] =
 {
-	rde::string("textbutton"),
-	rde::string("imagebutton")
+	eastl::string("textbutton"),
+	eastl::string("imagebutton")
 };
 
 END_UNNAMED_NAMESPACE()
 
-const rde::string& getStringForWidgetType(EWidgetType a_widgetType)
+const eastl::string& getStringForWidgetType(EWidgetType a_widgetType)
 {
 	return WIDGET_TYPE_STRINGS[(int) a_widgetType];
 }
 
-const EWidgetType getWidgetTypeForString(const rde::string& a_str)
+const EWidgetType getWidgetTypeForString(const eastl::string& a_str)
 {
 	for (int i = 0; i < (int) EWidgetType::NUM_WIDGET_TYPES; ++i)
 	{
@@ -31,8 +31,8 @@ const EWidgetType getWidgetTypeForString(const rde::string& a_str)
 
 void Widget::fromJson(const Json::Value& a_json)
 {
-	m_type = getWidgetTypeForString(rde::string(a_json["type"].asCString()));
-	m_name = rde::string(a_json["name"].asCString());
+	m_type = getWidgetTypeForString(eastl::string(a_json["type"].asCString()));
+	m_name = eastl::string(a_json["name"].asCString());
 	m_layout.fromJson(a_json["layout"]);
 }
 

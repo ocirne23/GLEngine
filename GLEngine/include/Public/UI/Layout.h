@@ -1,6 +1,6 @@
 #pragma once
 
-#include "3rdparty/json/json.h"
+#include "json/json.h"
 
 struct Layout
 {

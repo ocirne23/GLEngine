@@ -27,7 +27,7 @@ void DBAtlasRegion::read(AssetDatabaseEntry& entry)
 	
 }
 
-void DBAtlasRegion::loadInfo(const std::string& a_filePath)
+void DBAtlasRegion::loadInfo(const eastl::string& a_filePath)
 {
 	int result = stbi_info(a_filePath.c_str(), (int*) &m_width, (int*) &m_height, (int*) &m_numComp);
 	if (result)
