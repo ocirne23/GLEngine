@@ -1,7 +1,8 @@
 #pragma once
 
+#include "eastl/ulist.h"
+
 #include <functional>
-#include "3rdparty/rde/list.h"
 
 enum class EJobRepeat 
 { 
@@ -25,5 +26,5 @@ private:
 		std::function<EJobRepeat(float, void*)> func;
 	};
 
-	rde::list<Job> m_jobs;
+	eastl::list<Job> m_jobs;
 };

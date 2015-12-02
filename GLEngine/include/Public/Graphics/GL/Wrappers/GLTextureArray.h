@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Core.h"
-
-#include "3rdparty/rde/vector.h"
-
-#include "3rdparty/rde/rde_string.h"
+#include "eastl/uvector.h"
+#include "eastl/ustring.h"
 
 class Pixmap;
 
@@ -41,13 +39,13 @@ public:
 	~GLTextureArray();
 	GLTextureArray(const GLTextureArray& copyMe) = delete;
 
-	void initialize(const rde::vector<Pixmap>& pixmaps, uint numMipMaps = 4,
+	void initialize(const eastl::vector<Pixmap>& pixmaps, uint numMipMaps = 4,
 				ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
 				ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
 				ETextureWrap textureWrapS = ETextureWrap::CLAMP_TO_EDGE,
 				ETextureWrap textureWrapT = ETextureWrap::CLAMP_TO_EDGE);
 
-	void initialize(const rde::vector<rde::string>& filePaths, uint numMipMaps = 4,
+	void initialize(const eastl::vector<eastl::string>& filePaths, uint numMipMaps = 4,
 	                ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
 	                ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
 	                ETextureWrap textureWrapS   = ETextureWrap::CLAMP_TO_EDGE, 

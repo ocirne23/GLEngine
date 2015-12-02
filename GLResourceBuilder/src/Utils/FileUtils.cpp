@@ -1,5 +1,8 @@
 #include "Utils/FileUtils.h"
 
+#include "EASTL/string.h"
+#include "EASTL/to_string.h"
+
 #include <algorithm>
 #include <assert.h>
 #include <codecvt>
@@ -8,7 +11,7 @@
 #define NOMINMAX
 #include <Windows.h>
 
-std::string FileUtils::getFileExtension(const std::string& a_filePath)
+eastl::string FileUtils::getFileExtension(const eastl::string& a_filePath)
 {
 	auto dotIdx = a_filePath.find_last_of('.');
 	if (dotIdx != std::string::npos)
@@ -17,16 +20,16 @@ std::string FileUtils::getFileExtension(const std::string& a_filePath)
 		return "";
 }
 
-std::string FileUtils::getFolderPathForFile(const std::string& a_filePath)
+eastl::string FileUtils::getFolderPathForFile(const eastl::string& a_filePath)
 {
 	auto dirIdx = std::min(a_filePath.find_last_of('/'), a_filePath.find_last_of('\\'));
-	if (dirIdx != std::string::npos)
+	if (dirIdx != eastl::string::npos)
 		return a_filePath.substr(0, dirIdx).append("\\");
 	else
 		return "";
 }
 
-std::string FileUtils::getFileTime(const std::string& a_filePath)
+eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 {
 	std::wstring stemp = std::wstring(a_filePath.begin(), a_filePath.end());
 	LPCWSTR filePath = stemp.c_str();
@@ -37,69 +40,64 @@ std::string FileUtils::getFileTime(const std::string& a_filePath)
 	SYSTEMTIME sysWriteTime;
 	FileTimeToSystemTime(&fileAttrData.ftLastWriteTime, &sysWriteTime);
 
-	std::string time;
-	time += std::to_string((int) sysWriteTime.wYear) + ":";
-	time += std::to_string((int) sysWriteTime.wMonth) + ":";
-	time += std::to_string((int) sysWriteTime.wDay) + ":";
-	time += std::to_string((int) sysWriteTime.wHour) + ":";
-	time += std::to_string((int) sysWriteTime.wMinute) + ":";
-	time += std::to_string((int) sysWriteTime.wSecond) + ":";
-	time += std::to_string((int) sysWriteTime.wMilliseconds);
+	eastl::string time;
+
+	time += eastl::to_string((int) sysWriteTime.wYear) + ":";
+	time += eastl::to_string((int) sysWriteTime.wMonth) + ":";
+	time += eastl::to_string((int) sysWriteTime.wDay) + ":";
+	time += eastl::to_string((int) sysWriteTime.wHour) + ":";
+	time += eastl::to_string((int) sysWriteTime.wMinute) + ":";
+	time += eastl::to_string((int) sysWriteTime.wSecond) + ":";
+	time += eastl::to_string((int) sysWriteTime.wMilliseconds);
 
 	assert(sysWriteTime.wYear != 1601);
 
 	return time;
 }
 
-bool FileUtils::listFiles(std::string a_path, std::string a_mask, std::vector<std::string>& a_files)
+std::vector<std::string> FileUtils::listFiles(const std::string& a_path, const std::string& a_mask)
 {
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA ffd;
 
+	std::vector<std::string> files;
 	std::stack<std::string> directories;
-	std::string root = a_path;
-
+	std::string path = a_path;
 	directories.push(a_path);
-	a_files.clear();
 
 	while (!directories.empty())
 	{
-		a_path = directories.top();
-		std::string spec = a_path + "\\" + a_mask;
+		path = directories.top();
 		directories.pop();
 
+		std::string spec = path + "\\" + a_mask;
 		hFind = FindFirstFile(spec.c_str(), &ffd);
 		if (hFind == INVALID_HANDLE_VALUE)
-			return false;
-
+			return files;
 		do
 		{
 			if (strcmp(ffd.cFileName, ".") && strcmp(ffd.cFileName, ".."))
 			{
-				if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-				{
-					directories.push(a_path + "\\" + ffd.cFileName);
-				}
+				if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) // If directory, add to list of directories to search
+					directories.push(path + "\\" + ffd.cFileName);
 				else
 				{
-					const std::string fullPath = a_path + "\\" + ffd.cFileName;
-					a_files.push_back(fullPath.substr(root.length() + 1, fullPath.length() - (root.length() + 1)));
+					const std::string fullPath = path + "\\" + ffd.cFileName;
+					files.push_back(fullPath);
 				}
 			}
 		}
 		while (FindNextFile(hFind, &ffd));
-
 		if (GetLastError() != ERROR_NO_MORE_FILES)
 		{
 			FindClose(hFind);
-			return false;
+			return files;
 		}
-
 		FindClose(hFind);
 		hFind = INVALID_HANDLE_VALUE;
 	}
 
-	return true;
+	return files;
 }
 
 std::string FileUtils::getExtensionForFilePath(const std::string& a_path)

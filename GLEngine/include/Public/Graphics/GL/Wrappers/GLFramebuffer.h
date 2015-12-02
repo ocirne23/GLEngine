@@ -1,8 +1,7 @@
 #pragma once
 
 #include "Core.h"
-
-#include "3rdparty/rde/vector.h"
+#include "eastl/uvector.h"
 
 class GLFramebuffer
 {
@@ -109,11 +108,9 @@ private:
 	bool m_begun        = false;
 	uint m_fbo          = 0;
 	uint m_depthTexture = 0;
-
 	EMultiSampleType m_multiSampleType = EMultiSampleType::NONE;
-
-	rde::vector<uint> m_textures;
-	rde::vector<EAttachment> m_drawBuffers;
+	eastl::vector<uint> m_textures;
+	eastl::vector<EAttachment> m_drawBuffers;
 
 private:
 

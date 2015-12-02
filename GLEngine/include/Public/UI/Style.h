@@ -1,10 +1,8 @@
 #pragma once
 
-#include "UI/Font.h"
-
 #include "Graphics/TextureRegion.h"
-#include "3rdparty/rde/rde_string.h"
-#include "3rdparty/rde/hash_map.h"
+#include "UI/Font.h"
+#include "eastl/umap.h"
 
 class GLTexture;
 
@@ -29,5 +27,5 @@ private:
 	TextureRegion m_imageButtonTex;
 
 	bool m_isDisposed = false;
-	rde::hash_map<rde::string, GLTexture*> m_textures;
+	eastl::hash<eastl::string, GLTexture*> m_textures;
 };

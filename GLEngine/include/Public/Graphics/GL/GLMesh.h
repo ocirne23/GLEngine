@@ -6,8 +6,7 @@
 #include "Graphics/GL/Wrappers/GLStateBuffer.h"
 #include "Graphics/GL/Wrappers/GLTextureArray.h"
 #include "Graphics/GL/Wrappers/GLVertexBuffer.h"
-#include "3rdparty/rde/rde_string.h"
-#include "3rdparty/rde/vector.h"
+#include "eastl/uvector.h"
 
 #include <glm/glm.hpp>
 
@@ -32,27 +31,26 @@ private:
 
 private:
 
-	bool m_initialized = false;
-
-	GLStateBuffer m_stateBuffer;
-	GLVertexBuffer m_indiceBuffer;
-	GLVertexBuffer m_vertexBuffer;
-	GLTextureArray m_textureArray;
-	GLConstantBuffer m_matUniformBuffer;
-
-	uint m_matUBOBindingPoint = 0;
-	uint m_textureUnit        = 0;
-	uint m_numIndices         = 0;
-
 	struct MaterialProperty
 	{
 		glm::vec4 diffuseTexMapping;
 		glm::vec4 normalTexMapping;
 		int diffuseAtlasNr = -1;
 		int bumpAtlasNr = -1;
-		int padding = 0;
+		int padding1 = 0;
 		int padding2 = 0;
 	};
 
-	rde::vector<MaterialProperty> m_matProperties;
+private:
+
+	GLStateBuffer m_stateBuffer;
+	GLVertexBuffer m_indiceBuffer;
+	GLVertexBuffer m_vertexBuffer;
+	GLTextureArray m_textureArray;
+	GLConstantBuffer m_matUniformBuffer;
+	eastl::vector<MaterialProperty> m_matProperties;
+	bool m_initialized        = false;
+	uint m_matUBOBindingPoint = 0;
+	uint m_textureUnit        = 0;
+	uint m_numIndices         = 0;
 };

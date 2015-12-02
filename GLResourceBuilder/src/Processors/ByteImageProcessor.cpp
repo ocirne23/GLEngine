@@ -1,6 +1,6 @@
-#include "ByteImageProcessor.h"
+#include "Processors/ByteImageProcessor.h"
 
-#include "Database/Assets/Texture.h"
+#include "Database/Assets/DBTexture.h"
 #include "Database/EAssetType.h"
 #include "Database/AssetDatabase.h"
 
@@ -10,7 +10,7 @@
 
 bool ByteImageProcessor::process(const std::string& a_resourcePath, AssetDatabase& a_assetDatabase)
 {
-	Texture* texture = new Texture(a_resourcePath);
+	DBTexture* texture = new DBTexture(a_resourcePath);
 	a_assetDatabase.addAsset(a_resourcePath.c_str(), texture);
 
 

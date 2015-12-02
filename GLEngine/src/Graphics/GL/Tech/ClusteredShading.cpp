@@ -39,7 +39,7 @@ void ClusteredShading::initialize(const PerspectiveCamera& a_camera, uint a_scre
 	m_gridSize = m_gridWidth * m_gridHeight * m_gridDepth;
 
 	m_lightGrid = new glm::uvec2[m_gridSize];
-	m_tileLightIndices = new rde::vector<ushort>[m_gridSize];
+	m_tileLightIndices = new eastl::vector<ushort>[m_gridSize];
 
 	m_initialized = true;
 }

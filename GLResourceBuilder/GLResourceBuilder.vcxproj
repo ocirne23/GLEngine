@@ -67,34 +67,34 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
     <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src;</IncludePath>
     <LibraryPath>$(ProjectDir)/libs/x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)\src</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\include\3rdparty;</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -108,7 +108,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\include\3rdparty;</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <OpenMPSupport>true</OpenMPSupport>
       <PreprocessToFile>false</PreprocessToFile>
@@ -125,7 +125,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\include\3rdparty;</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
@@ -143,7 +143,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\libs\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\include\3rdparty;</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <OpenMPSupport>true</OpenMPSupport>
       <PreprocessToFile>false</PreprocessToFile>
@@ -158,54 +158,54 @@
   <ItemGroup>
     <ClCompile Include="src\BuilderCore.cpp" />
     <ClCompile Include="src\Database\AssetDatabase.cpp" />
-    <ClCompile Include="src\Database\AssetDatabaseEntry.cpp" />
-    <ClCompile Include="src\Database\Assets\Material.cpp" />
-    <ClCompile Include="src\Database\Assets\Mesh.cpp" />
-    <ClCompile Include="src\Database\Assets\Scene.cpp" />
-    <ClCompile Include="src\Database\Assets\AtlasTexture.cpp" />
-    <ClCompile Include="src\Database\Assets\Shader.cpp" />
-    <ClCompile Include="src\Database\Assets\Texture.cpp" />
+    <ClCompile Include="src\Database\Assets\Scene\DBAtlasTexture.cpp" />
+    <ClCompile Include="src\Database\Assets\Scene\DBMaterial.cpp" />
+    <ClCompile Include="src\Database\Assets\Scene\DBMesh.cpp" />
+    <ClCompile Include="src\Database\Assets\Scene\DBNode.cpp" />
+    <ClCompile Include="src\Database\Assets\Scene\DBScene.cpp" />
+    <ClCompile Include="src\Database\Assets\Scene\DBAtlasRegion.cpp" />
+    <ClCompile Include="src\Database\Assets\DBShader.cpp" />
+    <ClCompile Include="src\Database\Assets\DBTexture.cpp" />
+    <ClCompile Include="src\Database\IAsset.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Processors\FloatImageProcessor.cpp" />
     <ClCompile Include="src\Processors\SceneProcessor.cpp" />
-    <ClCompile Include="src\Processors\ModelProcessor.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\AtlasBuilder.cpp" />
     <ClCompile Include="src\Utils\CRC64.cpp" />
     <ClCompile Include="src\Utils\FileUtils.cpp" />
     <ClCompile Include="src\Utils\stb_image.c" />
-    <ClCompile Include="src\Database\Assets\TextureAtlas.cpp" />
-    <ClCompile Include="src\Utils\TextureLoader.cpp" />
+    <ClCompile Include="src\Utils\TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Database\AssetDatabaseEntry.h" />
-    <ClInclude Include="src\Database\Assets\Shader.h" />
-    <ClInclude Include="src\Database\Assets\Texture.h" />
-    <ClInclude Include="src\Database\IAsset.h" />
-    <ClInclude Include="src\Database\AssetDatabase.h" />
-    <ClInclude Include="src\BuilderCore.h" />
-    <ClInclude Include="src\Database\Assets\Mesh.h" />
-    <ClInclude Include="src\Database\Assets\Scene.h" />
-    <ClInclude Include="src\Database\Assets\AtlasTexture.h" />
-    <ClInclude Include="src\Database\EAssetType.h" />
-    <ClInclude Include="src\Database\Assets\Material.h" />
-    <ClInclude Include="src\Processors\ByteImageProcessor.h" />
-    <ClInclude Include="src\Processors\FloatImageProcessor.h" />
-    <ClInclude Include="src\Processors\ModelProcessor.h" />
-    <ClInclude Include="src\Processors\ResourceProcessor.h" />
-    <ClInclude Include="src\Processors\SceneProcessor.h" />
-    <ClInclude Include="src\ResourceBuilder.h" />
-    <ClInclude Include="src\Utils\AtlasBuilder.h" />
-    <ClInclude Include="src\Utils\AtlasPosition.h" />
-    <ClInclude Include="src\Utils\CRC64.h" />
-    <ClInclude Include="src\Utils\FileUtils.h" />
-    <ClInclude Include="src\Utils\MeshMerger.h" />
-    <ClInclude Include="src\Utils\stb_image.h" />
-    <ClInclude Include="src\Database\Assets\TextureAtlas.h" />
-    <ClInclude Include="src\Utils\TextureLoader.h" />
-    <ClInclude Include="src\Utils\Vec.h" />
-    <ClInclude Include="src\Utils\writeVector.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
+    <ClInclude Include="include\Public\Database\Assets\Scene\DBAtlasTexture.h" />
+    <ClInclude Include="include\Public\Database\Assets\Scene\DBNode.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBTexture.h" />
+    <ClInclude Include="include\Public\Database\IAsset.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabase.h" />
+    <ClInclude Include="include\Public\BuilderCore.h" />
+    <ClInclude Include="include\Public\Database\Assets\Scene\DBMesh.h" />
+    <ClInclude Include="include\Public\Database\Assets\Scene\DBScene.h" />
+    <ClInclude Include="include\Public\Database\Assets\Scene\DBAtlasRegion.h" />
+    <ClInclude Include="include\Public\Database\EAssetType.h" />
+    <ClInclude Include="include\Public\Database\Assets\Scene\DBMaterial.h" />
+    <ClInclude Include="include\Private\Processors\ByteImageProcessor.h" />
+    <ClInclude Include="include\Private\Processors\FloatImageProcessor.h" />
+    <ClInclude Include="include\Private\Processors\ResourceProcessor.h" />
+    <ClInclude Include="include\Private\Processors\SceneProcessor.h" />
+    <ClInclude Include="include\Private\ResourceBuilder.h" />
+    <ClInclude Include="include\Public\Utils\AtlasBuilder.h" />
+    <ClInclude Include="include\Public\Utils\AtlasPosition.h" />
+    <ClInclude Include="include\Public\Utils\CRC64.h" />
+    <ClInclude Include="include\Public\Utils\FileUtils.h" />
+    <ClInclude Include="include\Public\Utils\MeshMerger.h" />
+    <ClInclude Include="include\Public\Utils\stb_image.h" />
+    <ClInclude Include="include\Public\Utils\TextureAtlas.h" />
+    <ClInclude Include="include\Public\Utils\Vec.h" />
+    <ClInclude Include="include\Public\Utils\writeVector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

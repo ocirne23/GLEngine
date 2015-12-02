@@ -121,24 +121,6 @@
     <ClCompile Include="src\3rdparty\json\json_writer.cpp">
       <Filter>Source Files\3rdparty\json</Filter>
     </ClCompile>
-    <ClCompile Include="src\3rdparty\rde\allocator.cpp">
-      <Filter>Source Files\3rdparty\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\rde\intrusive_list.cpp">
-      <Filter>Source Files\3rdparty\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\rde\intrusive_slist.cpp">
-      <Filter>Source Files\3rdparty\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\rde\list.cpp">
-      <Filter>Source Files\3rdparty\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\rde\rde_string.cpp">
-      <Filter>Source Files\3rdparty\rde</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\rde\slist.cpp">
-      <Filter>Source Files\3rdparty\rde</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
       <Filter>Source Files\Graphics\GL\Utils</Filter>
     </ClCompile>
@@ -303,189 +285,6 @@
     <ClInclude Include="src\json\json_tool.h">
       <Filter>Header Files\Public\3rdparty\json</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\3rdparty\catch.hpp">
-      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\3rdparty\simplesignal.h">
-      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\deps\Dependencies.h">
-      <Filter>Header Files\Public\3rdparty\entityx\deps</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\help\NonCopyable.h">
-      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\help\Pool.h">
-      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\help\Timer.h">
-      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\config.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\Entity.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\entityx.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\Event.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\quick.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\entityx\System.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\algorithm.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\alignment.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\allocator.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\basic_string.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\buffer_allocator.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\cow_string_storage.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_array.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_list.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_sorted_vector.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_substring.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_vector.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\functional.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\hash.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\hash_map.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\int_to_type.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\intrusive_list.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\intrusive_slist.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\iterator.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\list.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\map.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\pair.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\radix_sorter.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\rb_tree.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\rde_string.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\rdestl.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\rdestl_common.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\set.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\simple_string_storage.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\slist.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\sort.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\sorted_vector.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\sstream.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\stack.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\stack_allocator.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\string_utils.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\stringforward.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\type_traits.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\utility.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\rde\vector.h">
-      <Filter>Header Files\Public\3rdparty\rde</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\assertions.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\autolink.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\config.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\features.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\forwards.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\json.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\reader.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\value.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\version.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\3rdparty\json\writer.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
     <ClInclude Include="include\Private\Graphics\GL\Utils\tryEnableARBDebugOutput.h">
       <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
     </ClInclude>
@@ -519,6 +318,119 @@
     <ClInclude Include="include\Public\Utils\EAssetType.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Scene.h" />
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp">
+      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h">
+      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\deps\Dependencies.h">
+      <Filter>Header Files\Public\3rdparty\entityx\deps</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\help\NonCopyable.h">
+      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\help\Pool.h">
+      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\help\Timer.h">
+      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\config.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\Entity.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\entityx.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\Event.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\quick.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\entityx\System.h">
+      <Filter>Header Files\Public\3rdparty\entityx</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\assertions.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\autolink.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\config.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\features.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\forwards.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\json.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\reader.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\value.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\version.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\json\writer.h">
+      <Filter>Header Files\Public\3rdparty\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\3rdparty\EABase\config\eacompiler.h" />
+    <ClInclude Include="include\3rdparty\EABase\config\eacompilertraits.h" />
+    <ClInclude Include="include\3rdparty\EABase\config\eaplatform.h" />
+    <ClInclude Include="include\3rdparty\EABase\eabase.h" />
+    <ClInclude Include="include\3rdparty\EABase\earesult.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\config.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\eastl_rw.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\fixed_pool.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\generic_iterator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\hashtable.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\red_black_tree.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_compound.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_fundamental.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_pod.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_properties.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_transformations.h" />
+    <ClInclude Include="include\3rdparty\EASTL\algorithm.h" />
+    <ClInclude Include="include\3rdparty\EASTL\allocator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bitset.h" />
+    <ClInclude Include="include\3rdparty\EASTL\core_allocator_adapter.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_allocator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_hash_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_hash_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_string.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_substring.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_vector.h" />
+    <ClInclude Include="include\3rdparty\EASTL\functional.h" />
+    <ClInclude Include="include\3rdparty\EASTL\hash_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\hash_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\heap.h" />
+    <ClInclude Include="include\3rdparty\EASTL\iterator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\memory.h" />
+    <ClInclude Include="include\3rdparty\EASTL\set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\sort.h" />
+    <ClInclude Include="include\3rdparty\EASTL\string.h" />
+    <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
+    <ClInclude Include="include\3rdparty\EASTL\utility.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\to_string.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

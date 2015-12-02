@@ -1,18 +1,23 @@
 #include "Utils/AtlasBuilder.h"
 
+#include "Database/Assets/Scene/DBAtlasRegion.h"
+#include "Database/Assets/Scene/DBAtlasTexture.h"
+#include "Database/Assets/Scene/DBMaterial.h"
+#include "Utils/AtlasPosition.h"
+#include "Utils/TextureAtlas.h"
 #include "Utils/stb_image.h"
+
+#include <algorithm>
 #include <numeric>
 
 BEGIN_UNNAMED_NAMESPACE()
 
 enum { 
-	SUPPORT_NPOT         = false, 
 	ATLAS_MAX_WIDTH      = 4096, 
 	ATLAS_MAX_HEIGHT     = 4096, 
 	ATLAS_NUM_COMPONENTS = 3, 
-	ATLAS_START_WIDTH    = 256, 
-	ATLAS_START_HEIGHT   = 256, 
-	ATLAS_INCREMENT      = 256, 
+	ATLAS_START_WIDTH    = 64, 
+	ATLAS_START_HEIGHT   = 64, 
 	ATLAS_NUM_MIPMAPS    = 4 
 };
 
@@ -44,26 +49,10 @@ bool getNextAtlasSize(uint& width, uint& height)
 	if (width >= ATLAS_MAX_WIDTH && height >= ATLAS_MAX_HEIGHT)
 		return false;
 
-	if (SUPPORT_NPOT)
-	{
-		if (width < height)
-			width += ATLAS_INCREMENT;
-		else
-			height += ATLAS_INCREMENT;
-
-		// Make even
-		if (width % 2 != 0)
-			width++;
-		if (height % 2 != 0)
-			height++;
-	}
+	if (width < height)
+		width = getNextPOT(width);
 	else
-	{
-		if (width < height)
-			width = getNextPOT(width);
-		else
-			height = getNextPOT(height);
-	}
+		height = getNextPOT(height);
 
 	width = std::min((int) width, (int) ATLAS_MAX_WIDTH);
 	height = std::min((int) height, (int) ATLAS_MAX_HEIGHT);
@@ -71,11 +60,11 @@ bool getNextAtlasSize(uint& width, uint& height)
 	return true;
 }
 
-void increaseAtlasesSize(std::vector<AtlasTexture>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
+void increaseAtlasesSize(std::vector<TextureAtlas*>& a_atlases)
 {
 	if (!a_atlases.size())
 	{
-		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS));
+		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, 0));
 		return;
 	}
 	uint width = a_atlases[0]->m_width;
@@ -83,35 +72,34 @@ void increaseAtlasesSize(std::vector<AtlasTexture>& a_textureInfoList, std::vect
 	bool canIncrement = getNextAtlasSize(width, height);
 	if (canIncrement)
 	{	// resize all atlases to the new size
-		for (TextureAtlas* a : a_atlases)
-			a->initialize(width, height, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS);
+		for (uint i = 0; i < a_atlases.size(); ++i)
+			a_atlases[i]->initialize(width, height, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, i);
 	}
 	else
 	{	// Add one new atlas and reset all atlas sizes back to smallest (not efficient)
-		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS));
-		for (TextureAtlas* a : a_atlases)
-			a->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS);
+		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, (uint) a_atlases.size()));
+		for (uint i = 0; i < a_atlases.size(); ++i)
+			a_atlases[i]->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, i);
 	}
 }
 
-bool containTexturesInAtlases(std::vector<AtlasTexture*>& a_textureInfoList, std::vector<TextureAtlas*>& a_atlases)
+bool containTexturesInAtlases(std::unordered_map<std::string, DBAtlasRegion>& a_regions, std::vector<TextureAtlas*>& a_atlases)
 {
 	if (!a_atlases.size())
 		return false;
 	for (TextureAtlas* a : a_atlases)
 		a->clear();
 
-	for (uint i = 0; i < a_textureInfoList.size(); ++i)
+	for (auto& pair: a_regions)
 	{
-		AtlasTexture* tex = a_textureInfoList[i];
+		DBAtlasRegion& reg = pair.second;
 		bool contained = false;
-		for (uint j = 0; j < a_atlases.size(); ++j)
+		for (TextureAtlas* atlas : a_atlases)
 		{
-			TextureAtlas* atlas = a_atlases[j];
-			AtlasPosition pos = atlas->getRegion(tex->width, tex->height);
-			if (pos.atlasIdx != -1)
+			AtlasPosition pos = atlas->getRegion(reg.m_width, reg.m_height);
+			if (pos.isValid())
 			{
-				tex->atlasPosition = pos;
+				reg.m_atlasPosition = pos;
 				contained = true;
 				break;
 			}
@@ -124,35 +112,54 @@ bool containTexturesInAtlases(std::vector<AtlasTexture*>& a_textureInfoList, std
 
 END_UNNAMED_NAMESPACE()
 
-std::vector<TextureAtlas*> AtlasBuilder::fitTextures(std::vector<AtlasTexture*>& a_textures)
+std::vector<DBAtlasTexture> AtlasBuilder::createAtlases(std::vector<DBMaterial>& a_materials, const std::string& a_baseAssetPath)
 {
-	std::vector<TextureAtlas*> atlases;
-	if (a_textures.size())
-		while (!containTexturesInAtlases(a_textures, atlases))
-			increaseAtlasesSize(a_textures, atlases); // Allocates atlases
-	return atlases;
-}
-
-void AtlasBuilder::fillAtlases(std::vector<TextureAtlas*>& a_atlases, std::vector<AtlasTexture*>& a_textures)
-{
-	for (const AtlasTexture& tex : a_textures)
+	// First we create an unique set of regions so we dont have multiple AtlasRegion instances for the same texture
+	std::unordered_map<std::string, DBAtlasRegion> uniqueRegions;
+	for (const DBMaterial& mat : a_materials) 
 	{
-		TextureAtlas* atlas = a_atlases[tex.atlasPosition.atlasIdx];
-
-		int width, height, numComponents;
-		const unsigned char* data = stbi_load(tex.filePath.c_str(), &width, &height, &numComponents, atlas->m_numComponents);
-		if (!data)
+		const std::string& diffuseFilePath = mat.getDiffuseTexturePath();
+		if (uniqueRegions.find(diffuseFilePath) == uniqueRegions.end())
 		{
-			printf("FAILED TO LOAD IMAGE: %s \n", tex.filePath.c_str());
-			assert(false);
-			return;
+			DBAtlasRegion reg;
+			reg.loadInfo(a_baseAssetPath + "\\" + diffuseFilePath);
+			uniqueRegions.insert({diffuseFilePath, reg});
 		}
-		atlas->setRegion(tex.atlasPosition.xPos,
-						 tex.atlasPosition.yPos,
-						 tex.atlasPosition.width,
-						 tex.atlasPosition.height,
-						 data,
-						 atlas->m_numComponents);
-		delete data;
+
+		const std::string& normalFilePath = mat.getNormalTexturePath();
+		if (uniqueRegions.find(normalFilePath) == uniqueRegions.end())
+		{
+			DBAtlasRegion reg;
+			reg.loadInfo(a_baseAssetPath + "\\" + normalFilePath);
+			uniqueRegions.insert({normalFilePath, reg});
+		}
 	}
+	
+	// Then we fit these textures into atlases (not the image data, just fitting rectangles)
+	std::vector<TextureAtlas*> atlases;
+	while (!containTexturesInAtlases(uniqueRegions, atlases))
+		increaseAtlasesSize(atlases);
+
+	// Update all the materials so they correctly reference the regions
+	for (DBMaterial& mat : a_materials)
+	{
+		mat.setDiffuseTextureRegion(uniqueRegions.find(mat.getDiffuseTexturePath())->second);
+		mat.setNormalTextureRegion(uniqueRegions.find(mat.getNormalTexturePath())->second);
+	}
+
+	// Create AtlasTexture objects out of the TextureAtlases (which are IAssets)
+	std::vector<DBAtlasTexture> atlasTextures;
+	atlasTextures.reserve(atlases.size());
+	for (TextureAtlas* atlas : atlases)
+	{
+		atlasTextures.emplace_back(atlas->m_width, atlas->m_width, atlas->m_numComponents, atlas->m_numMipMaps);
+		SAFE_DELETE(atlas);
+	}
+	atlases.clear();
+
+	// Write the image data of every region into the atlas textures
+	for (auto& pair : uniqueRegions)
+		atlasTextures[pair.second.m_atlasPosition.atlasIdx].setRegion(pair.second);
+
+	return atlasTextures; // rvo
 }

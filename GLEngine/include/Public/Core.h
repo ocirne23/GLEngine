@@ -17,4 +17,3 @@ typedef long long int64;
 typedef unsigned long long uint64;
 
 void print(const char* format, ...);
-void printNow(const char* format, ...);

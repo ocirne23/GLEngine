@@ -1,4 +1,4 @@
-#include "stb_image.h"
+#include "Utils/stb_image.h"
 
 #ifndef STBI_NO_HDR
 #include <math.h>  // ldexp

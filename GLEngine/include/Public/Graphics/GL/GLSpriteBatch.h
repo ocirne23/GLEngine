@@ -6,9 +6,8 @@
 #include "Graphics/GL/Wrappers/GLStateBuffer.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Wrappers/GLUniform.h"
-#include "3rdparty/rde/vector.h"
-
 #include "Graphics/TextureRegion.h"
+#include "eastl/uvector.h"
 
 #include <glm/glm.hpp>
 
@@ -37,19 +36,16 @@ private:
 
 private:
 
+	GLShader m_shader;
+	GLStateBuffer m_stateBuffer;
+	GLVertexBuffer m_vertexBuffer;
+	GLVertexBuffer m_indiceBuffer;
+	GLUniform<glm::mat4> m_mvpUniform;
+	eastl::vector<Vertex> m_vertices;
+
+	GLTexture* m_currentTexture = NULL;
 	bool m_initialzied = false;
 	bool m_begun       = false;
 	uint m_size        = 0;
 	uint m_drawCount   = 0;
-
-	GLTexture* m_currentTexture = NULL;
-
-	GLShader m_shader;
-	GLUniform<glm::mat4> m_mvpUniform;
-
-	GLStateBuffer m_stateBuffer;
-	GLVertexBuffer m_vertexBuffer;
-	GLVertexBuffer m_indiceBuffer;
-
-	rde::vector<Vertex> m_vertices;
 };

@@ -5,10 +5,8 @@
 #include "Utils/FileHandle.h"
 #include "Utils/MatForward.h"
 #include "Utils/VecForward.h"
-
-#include "3rdparty/rde/hash_map.h"
-#include "3rdparty/rde/vector.h"
-#include "3rdparty/rde/rde_string.h"
+#include "eastl/uvector.h"
+#include "eastl/ustring.h"
 
 class FileHandle;
 
@@ -24,7 +22,7 @@ public:
 	GLShader(const GLShader& copy) = delete;
 
 	void initialize(const char* vertexShaderFilePath, const char* fragmentShaderFilePath,
-	                const rde::vector<rde::string>* defines = NULL, const rde::vector<rde::string>* extensions = NULL);
+	                const eastl::vector<eastl::string>* defines = NULL, const eastl::vector<eastl::string>* extensions = NULL);
 
 	void begin();
 	void end();

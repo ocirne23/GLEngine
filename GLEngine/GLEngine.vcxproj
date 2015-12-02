@@ -51,12 +51,6 @@
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
     <ClCompile Include="src\3rdparty\json\json_writer.cpp" />
-    <ClCompile Include="src\3rdparty\rde\allocator.cpp" />
-    <ClCompile Include="src\3rdparty\rde\intrusive_list.cpp" />
-    <ClCompile Include="src\3rdparty\rde\intrusive_slist.cpp" />
-    <ClCompile Include="src\3rdparty\rde\list.cpp" />
-    <ClCompile Include="src\3rdparty\rde\rde_string.cpp" />
-    <ClCompile Include="src\3rdparty\rde\slist.cpp" />
     <ClCompile Include="src\Threading\ThreadManager.cpp" />
     <ClCompile Include="src\UI\UIFrame.cpp" />
     <ClCompile Include="src\UI\Layout.cpp" />
@@ -75,26 +69,73 @@
     <ClCompile Include="src\Utils\Semaphore.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\3rdparty\EABase\config\eacompiler.h" />
+    <ClInclude Include="include\3rdparty\EABase\config\eacompilertraits.h" />
+    <ClInclude Include="include\3rdparty\EABase\config\eaplatform.h" />
+    <ClInclude Include="include\3rdparty\EABase\eabase.h" />
+    <ClInclude Include="include\3rdparty\EABase\earesult.h" />
+    <ClInclude Include="include\3rdparty\EASTL\algorithm.h" />
+    <ClInclude Include="include\3rdparty\EASTL\allocator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bitset.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
+    <ClInclude Include="include\3rdparty\EASTL\core_allocator_adapter.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_allocator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_hash_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_hash_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_string.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_substring.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_vector.h" />
+    <ClInclude Include="include\3rdparty\EASTL\functional.h" />
+    <ClInclude Include="include\3rdparty\EASTL\hash_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\hash_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\heap.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\config.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\eastl_rw.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\fixed_pool.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\generic_iterator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\hashtable.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\red_black_tree.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_compound.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_fundamental.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_pod.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_properties.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_transformations.h" />
+    <ClInclude Include="include\3rdparty\EASTL\iterator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\memory.h" />
+    <ClInclude Include="include\3rdparty\EASTL\set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\sort.h" />
+    <ClInclude Include="include\3rdparty\EASTL\string.h" />
+    <ClInclude Include="include\3rdparty\EASTL\to_string.h" />
+    <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
+    <ClInclude Include="include\3rdparty\EASTL\utility.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector_map.h" />
     <ClInclude Include="include\Private\Threading\ThreadManager.h" />
     <ClInclude Include="include\Private\Utils\readVector.h" />
     <ClInclude Include="include\Public\Core.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\3rdparty\catch.hpp" />
-    <ClInclude Include="include\Public\3rdparty\entityx\3rdparty\simplesignal.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\config.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\deps\Dependencies.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\Entity.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\entityx.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\Event.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\help\NonCopyable.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\help\Pool.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\help\Timer.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\quick.h" />
-    <ClInclude Include="include\Public\3rdparty\entityx\System.h" />
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp" />
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h" />
+    <ClInclude Include="include\3rdparty\entityx\config.h" />
+    <ClInclude Include="include\3rdparty\entityx\deps\Dependencies.h" />
+    <ClInclude Include="include\3rdparty\entityx\Entity.h" />
+    <ClInclude Include="include\3rdparty\entityx\entityx.h" />
+    <ClInclude Include="include\3rdparty\entityx\Event.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\NonCopyable.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\Pool.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\Timer.h" />
+    <ClInclude Include="include\3rdparty\entityx\quick.h" />
+    <ClInclude Include="include\3rdparty\entityx\System.h" />
     <ClInclude Include="include\Public\GLEngine.h" />
     <ClInclude Include="include\Public\Graphics\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
+    <ClInclude Include="include\Public\Graphics\Scene.h" />
     <ClInclude Include="include\Public\Input\InputListener.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
@@ -120,55 +161,16 @@
     <ClInclude Include="include\Public\Input\EKey.h" />
     <ClInclude Include="include\Public\Input\EMouseButton.h" />
     <ClInclude Include="include\Public\Input\Input.h" />
-    <ClInclude Include="include\Public\3rdparty\json\assertions.h" />
-    <ClInclude Include="include\Public\3rdparty\json\autolink.h" />
-    <ClInclude Include="include\Public\3rdparty\json\config.h" />
-    <ClInclude Include="include\Public\3rdparty\json\features.h" />
-    <ClInclude Include="include\Public\3rdparty\json\forwards.h" />
-    <ClInclude Include="include\Public\3rdparty\json\json.h" />
-    <ClInclude Include="include\Public\3rdparty\json\reader.h" />
-    <ClInclude Include="include\Public\3rdparty\json\value.h" />
-    <ClInclude Include="include\Public\3rdparty\json\version.h" />
-    <ClInclude Include="include\Public\3rdparty\json\writer.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\algorithm.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\alignment.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\allocator.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\basic_string.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\buffer_allocator.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\cow_string_storage.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_array.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_list.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_sorted_vector.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_substring.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\fixed_vector.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\functional.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\hash.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\hash_map.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\intrusive_list.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\intrusive_slist.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\int_to_type.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\iterator.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\list.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\map.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\pair.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\radix_sorter.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\rb_tree.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\rdestl.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\rdestl_common.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\rde_string.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\set.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\simple_string_storage.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\slist.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\sort.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\sorted_vector.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\sstream.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\stack.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\stack_allocator.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\stringforward.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\string_utils.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\type_traits.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\utility.h" />
-    <ClInclude Include="include\Public\3rdparty\rde\vector.h" />
+    <ClInclude Include="include\3rdparty\json\assertions.h" />
+    <ClInclude Include="include\3rdparty\json\autolink.h" />
+    <ClInclude Include="include\3rdparty\json\config.h" />
+    <ClInclude Include="include\3rdparty\json\features.h" />
+    <ClInclude Include="include\3rdparty\json\forwards.h" />
+    <ClInclude Include="include\3rdparty\json\json.h" />
+    <ClInclude Include="include\3rdparty\json\reader.h" />
+    <ClInclude Include="include\3rdparty\json\value.h" />
+    <ClInclude Include="include\3rdparty\json\version.h" />
+    <ClInclude Include="include\3rdparty\json\writer.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLSpriteBatch.h" />
     <ClInclude Include="include\Public\UI\Widgets\ImageButton.h" />
     <ClInclude Include="include\Public\UI\Widgets\TextButton.h" />
@@ -278,7 +280,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
@@ -291,7 +293,7 @@
       <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -302,7 +304,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <AdditionalOptions>
@@ -315,7 +317,7 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -328,7 +330,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
@@ -341,7 +343,7 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
@@ -357,7 +359,7 @@
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -368,7 +370,7 @@
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
-      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

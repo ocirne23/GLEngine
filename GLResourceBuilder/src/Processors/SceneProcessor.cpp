@@ -1,17 +1,16 @@
-#include "SceneProcessor.h"
+#include "Processors/SceneProcessor.h"
 
 #include "BuilderCore.h"
 #include "Database/EAssetType.h"
 #include "Database/AssetDatabase.h"
-#include "Database/Assets/Scene.h"
-#include "Database/Assets/Material.h"
-#include "Database/Assets/Mesh.h"
+#include "Database/Assets/Scene/DBScene.h"
+#include "Database/Assets/Scene/DBMaterial.h"
+#include "Database/Assets/Scene/DBMesh.h"
 
 #include "Utils/FileUtils.h"
 #include "Utils/stb_image.h"
 #include "Utils/writeVector.h"
 #include "Utils/AtlasBuilder.h"
-#include "Utils/TextureLoader.h"
 
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
@@ -26,9 +25,20 @@ const std::string TEXTURE_SUB_PATH_NAME = "/TEXTURES/";
 const std::string MATERIAL_SUB_PATH_NAME = "/MATERIALS/";
 const std::string MESH_SUB_PATH_NAME = "/MESHES/";
 
-struct vec4 { float x, y, z, w; };
-struct vec3 { float x, y, z; };
-struct vec2 { float x, y; };
+std::string getTextureDBPath(const std::string& a_baseScenePath, const std::string& a_textureName)
+{
+	return a_baseScenePath + TEXTURE_SUB_PATH_NAME + a_textureName.c_str();
+}
+
+std::string getMaterialDBPath(const std::string& a_baseScenePath, uint materialIdx)
+{
+	return a_baseScenePath + MATERIAL_SUB_PATH_NAME + "#" + std::to_string(materialIdx);
+}
+
+std::string getMeshDBPath(const std::string& a_baseScenePath, const std::string& a_meshName)
+{
+	return a_baseScenePath + MESH_SUB_PATH_NAME + a_meshName;
+}
 
 // !Meshes stuff
 /*
@@ -41,7 +51,7 @@ vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const AtlasPositio
 	return {xOffset, yOffset, width, height};
 }
 */
-
+/*
 void addTextureInfo(AssetDatabase& a_assetDatabase, aiTextureType a_textureType, const aiMaterial* a_material, const std::string& a_baseScenePath)
 {
 	std::string texturePath;
@@ -72,10 +82,10 @@ void addTextureInfo(AssetDatabase& a_assetDatabase, aiTextureType a_textureType,
 	if (result)
 	{
 		AtlasTexture* tex = new AtlasTexture();
-		tex->filePath = texturePath;
-		tex->width = width;
-		tex->height = height;
-		tex->numComp = numComp;
+		tex->m_filePath = texturePath;
+		tex->m_width = width;
+		tex->m_height = height;
+		tex->m_numComp = numComp;
 		a_assetDatabase.addAsset(texturePath.c_str(), tex);
 	}
 	else
@@ -105,12 +115,8 @@ void addMeshesToDatabase(const aiScene* a_scene, const std::string& a_baseSceneP
 {
 	for (uint i = 0; i < a_scene->mNumMeshes; ++i)
 	{
-		const aiMesh* assimpMesh = a_scene->mMeshes[i];
-		const std::string meshFileName = a_baseScenePath + MESH_SUB_PATH_NAME + assimpMesh->mName.C_Str();
-
-		Mesh* mesh = new Mesh(meshFileName);
-		mesh->addVerticesIndices(assimpMesh, NULL);
-		a_assetDatabase.addAsset(meshFileName.c_str(), mesh);
+		const std::string dbPath = getMeshDBPath(a_baseScenePath, a_scene->mMeshes[i]->mName.C_Str());
+		a_assetDatabase.addAsset(dbPath, new Mesh(*a_scene->mMeshes[i]));
 	}
 }
 
@@ -118,17 +124,8 @@ void addMaterialsToDatabase(const aiScene* a_scene, const std::string& a_baseSce
 {
 	for (uint i = 0; i < a_scene->mNumMaterials; ++i)
 	{
-		const aiMaterial* assimpMaterial = a_scene->mMaterials[i];
-		const std::string materialFileName = a_baseScenePath + MATERIAL_SUB_PATH_NAME + "#" + std::to_string(i);
-		Material* material = new Material();
-		if (assimpMaterial->GetTextureCount(aiTextureType_DIFFUSE))
-		{
-			//TODO
-		}
-		else
-		{
-			material->diffuseTexturePath = "";
-		}
+		std::string dbPath = getMaterialDBPath(a_baseScenePath, i);
+		a_assetDatabase.addAsset(dbPath, new Material(*a_scene->mMaterials[i]));
 	}
 }
 
@@ -141,6 +138,7 @@ void addNode(Scene* a_scene, aiNode* a_node, uint a_parentIdx)
 		a_scene->addMesh(idx, a_node->mMeshes[i]);
 }
 
+
 void addScenegraphToDatabase(const aiScene* a_scene, const std::string& a_baseScenePath, AssetDatabase& a_assetDatabase)
 {
 	aiNode* rootNode = a_scene->mRootNode;
@@ -148,10 +146,10 @@ void addScenegraphToDatabase(const aiScene* a_scene, const std::string& a_baseSc
 	Scene* scene = new Scene();
 	addNode(scene, rootNode, 0);
 }
-
+*/
 END_UNNAMED_NAMESPACE()
 
-void SceneProcessor::process(const char* a_inResourcePath, AssetDatabase& a_assetDatabase, std::vector<std::string>& a_rebuildOnFileModificationList)
+bool SceneProcessor::process(const std::string& a_inResourcePath, AssetDatabase& a_assetDatabase)
 {
 	const uint flags = 0
 		| aiPostProcessSteps::aiProcess_Triangulate
@@ -160,53 +158,11 @@ void SceneProcessor::process(const char* a_inResourcePath, AssetDatabase& a_asse
 		| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
 		| aiPostProcessSteps::aiProcess_FlipUVs; // Flip uv's because OpenGL
 
-	const std::string baseScenePath = FileUtils::getFolderPathForFile(a_inResourcePath);
-	const aiScene* assimpScene = aiImportFile(a_inResourcePath, flags);
-	printf("building: %s\n", a_inResourcePath);
-
-	addMeshesToDatabase(assimpScene, a_inResourcePath, a_assetDatabase);
-	addMaterialsToDatabase(assimpScene, a_inResourcePath, a_assetDatabase);
-	addScenegraphToDatabase(assimpScene, a_inResourcePath, a_assetDatabase);
-	addTexturesToDatabase(assimpScene, a_inResourcePath, a_assetDatabase);
+	const aiScene* assimpScene = aiImportFile(a_inResourcePath.c_str(), flags);
+	printf("building: %s\n", a_inResourcePath.c_str());
+	
+	a_assetDatabase.addAsset(a_inResourcePath, new DBScene(*assimpScene, FileUtils::getFolderPathForFile(a_inResourcePath)));
 
 	aiReleaseImport(assimpScene);
-}
-
-
-
-bool SceneProcessor::process(const char* a_inResourcePath, const char* a_outResourcePath, std::vector<std::string>& a_rebuildDependencies)
-{
-	AssetDatabase db;
-	process(a_inResourcePath, db, a_rebuildDependencies);
-	return true;
-
-	const std::string inResourcePathStr(a_inResourcePath);
-	const std::string outResourcePathstr(a_outResourcePath);
-
-	const uint flags = 0
-		| aiPostProcessSteps::aiProcess_Triangulate
-		| aiPostProcessSteps::aiProcess_CalcTangentSpace
-		| aiPostProcessSteps::aiProcess_GenNormals
-		| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
-		| aiPostProcessSteps::aiProcess_FlipUVs; // Flip uv's because OpenGL
-
-	const aiScene* scene = aiImportFile(a_inResourcePath, flags);
-
-	print("building: %s \n", a_inResourcePath);
-
-	if (!scene)
-	{
-		print("Error parsing scene '%s' : %s\n", a_inResourcePath, aiGetErrorString());
-		return false;
-	}
-
-	std::ofstream file(a_outResourcePath, std::ios::out | std::ios::binary);
-	assert(file.is_open());
-
-	file.close();
-
-	aiReleaseImport(scene);
-	scene = NULL;
-
 	return true;
 }

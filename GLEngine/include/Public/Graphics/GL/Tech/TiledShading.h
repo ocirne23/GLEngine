@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core.h"
-#include "3rdparty/rde/vector.h"
 #include "Utils/VecForward.h"
+#include "eastl/uvector.h"
 
 class PerspectiveCamera;
 
@@ -35,6 +35,6 @@ private:
 	uint m_pixelsPerTileH = 0;
 
 	glm::uvec2* m_lightGrid                 = NULL;
-	rde::vector<ushort>* m_tileLightIndices = NULL;
-	rde::vector<ushort> m_lightIndices;
+	eastl::vector<ushort>* m_tileLightIndices = NULL;
+	eastl::vector<ushort> m_lightIndices;
 };

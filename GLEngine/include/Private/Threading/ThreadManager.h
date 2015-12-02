@@ -1,6 +1,6 @@
 #pragma once
 
-#include "3rdparty/rde/vector.h"
+#include "eastl/uvector.h"
 
 #include <functional>
 #include <SDL/SDL.h>
@@ -23,5 +23,5 @@ private:
 private:
 
 	SDL_threadID m_mainThreadID;
-	rde::vector<SDL_Thread*> m_threads;
+	eastl::vector<SDL_Thread*> m_threads;
 };

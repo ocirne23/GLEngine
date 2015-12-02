@@ -9,13 +9,6 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-std::vector<std::string> getAllFilesInFolder(const std::string& a_folder)
-{
-	std::vector<std::string> files;
-	FileUtils::listFiles(a_folder, "*", files);
-	return files;
-}
-
 ResourceProcessor* getResourceProcessorForFile(const std::string& a_filePath, const ResourceBuilder::ResourceProcessorMap& a_processors)
 {
 	const std::string extension = FileUtils::getExtensionForFilePath(a_filePath);
@@ -28,42 +21,32 @@ ResourceProcessor* getResourceProcessorForFile(const std::string& a_filePath, co
 
 END_UNNAMED_NAMESPACE()
 
-void ResourceBuilder::buildResourcesDB(const std::unordered_map<std::string, ResourceProcessor*>& a_processors, const char* a_inDirectoryPath, AssetDatabase& a_assetDatabase, bool a_incremental)
+void ResourceBuilder::buildResourcesDB(const ResourceProcessorMap& a_processors, const std::string& a_inDirectoryPath, AssetDatabase& a_assetDatabase)
 {
-	const std::string inDirectoryPathStr(a_inDirectoryPath);
-	std::vector<std::string> fileList = getAllFilesInFolder(inDirectoryPathStr);
-	for (auto filePath : fileList)
+	for (const std::string& filePath : FileUtils::listFiles(a_inDirectoryPath, "*"))
 	{
 		ResourceProcessor* processor = getResourceProcessorForFile(filePath, a_processors);
 		if (processor)
 		{
-			std::vector<std::string> temp;
 			print("Processing: %s\n", filePath.c_str());
-			processor->process(filePath, a_assetDatabase, temp);
+			processor->process(filePath, a_assetDatabase);
 			print("Finished processing %s\n", filePath.c_str());
 		}
 	}
 }
 
-void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, const char* a_inDirectoryPath, const char* a_outDirectoryPath, bool a_incremental)
+void ResourceBuilder::copyFiles(const std::vector<std::string>& a_extensions, const std::string& a_inDirectoryPath, const std::string& a_outDirectoryPath)
 {
 	printf("Copying files from %s to %s\n", a_inDirectoryPath, a_outDirectoryPath);
-	const std::string inDirectoryPathStr(a_inDirectoryPath);
-	const std::string outDirectoryPathStr(a_outDirectoryPath);
-
-	std::vector<std::string> files;
-	if (FileUtils::listFiles(a_inDirectoryPath, "*", files))
+	for (const std::string& filePath : FileUtils::listFiles(a_inDirectoryPath, "*"))
 	{
-		for (const auto& filePath : files)
+		const std::string extension = FileUtils::getExtensionForFilePath(filePath);
+		if (std::find(a_extensions.begin(), a_extensions.end(), extension) != a_extensions.end())
 		{
-			const std::string extension = FileUtils::getExtensionForFilePath(filePath);
-			if (std::find(a_extensions.begin(), a_extensions.end(), extension) != a_extensions.end())
-			{
-				const std::string from = inDirectoryPathStr + "\\" + filePath;
-				const std::string to = outDirectoryPathStr + "\\" + filePath;
-				FileUtils::createDirectoryForFile(to);
-				CopyFile(from.c_str(), to.c_str(), false);
-			}
+			const std::string from = a_inDirectoryPath + "\\" + filePath;
+			const std::string to = a_outDirectoryPath + "\\" + filePath;
+			FileUtils::createDirectoryForFile(to);
+			CopyFile(from.c_str(), to.c_str(), false);
 		}
 	}
 	printf("Finished copying files.\n");

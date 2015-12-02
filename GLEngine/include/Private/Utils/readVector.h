@@ -1,7 +1,10 @@
 #pragma once
 
+#include "Core.h"
+#include "eastl/uvector.h"
+
 template <typename T>
-uint readVector(FileHandle& a_handle, rde::vector<T>& a_vector, uint a_offset)
+uint readVector(FileHandle& a_handle, eastl::vector<T>& a_vector, uint a_offset)
 {
 	int size;
 	a_handle.readBytes(reinterpret_cast<char*>(&size), sizeof(int), a_offset);

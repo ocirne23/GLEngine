@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core.h"
-#include "3rdparty/rde/vector.h"
+#include "eastl/uvector.h"
 #include "Utils/VecForward.h"
 
 class PerspectiveCamera;
@@ -10,10 +10,10 @@ class ClusteredShading
 {
 public:
 	ClusteredShading() {}
+	ClusteredShading(const ClusteredShading& copy) = delete;
 	~ClusteredShading();
 
-	void initialize(const PerspectiveCamera& camera, uint screenWidth, uint screenHeight,
-	                uint pixelsPerTileW, uint pixelsPerTileH);
+	void initialize(const PerspectiveCamera& camera, uint screenWidth, uint screenHeight, uint pixelsPerTileW, uint pixelsPerTileH);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* viewSpaceLightPositionRangeList);
 
 	uint getGridWidth() const  { return m_gridWidth; }
@@ -41,7 +41,7 @@ private:
 	float m_recLogSD1     = 0.0f;
 	float m_recNear       = 0.0f;
 
-	glm::uvec2* m_lightGrid                 = NULL;
-	rde::vector<ushort>* m_tileLightIndices = NULL;
-	rde::vector<ushort> m_lightIndices;
+	glm::uvec2* m_lightGrid                  = NULL;
+	eastl::vector<ushort>* m_tileLightIndices = NULL;
+	eastl::vector<ushort> m_lightIndices;
 };

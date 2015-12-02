@@ -4,10 +4,9 @@
 
 #include "Input/EKey.h"
 #include "Input/EMouseButton.h"
-
-#include "Utils/ConcurrentQueue.h"
 #include "Input/InputListener.h"
-#include "3rdparty/rde/vector.h"
+#include "Utils/ConcurrentQueue.h"
+#include "eastl/uvector.h"
 
 /*** Usage examples ***
 Polling input:
@@ -76,8 +75,8 @@ private:
 
 #define LISTENERS_GET(TYPE, LISTNAME) \
 	friend class TYPE; \
-	rde::vector<TYPE*>& getListeners(const TYPE& a_listener) { return LISTNAME;} \
-	rde::vector<TYPE*> LISTNAME;
+	eastl::vector<TYPE*>& getListeners(const TYPE& a_listener) { return LISTNAME;} \
+	eastl::vector<TYPE*> LISTNAME;
 
 	LISTENERS_GET(KeyDownListener, m_keyDownListeners);
 	LISTENERS_GET(KeyUpListener, m_keyUpListeners);

@@ -1,4 +1,4 @@
-#include "FloatImageProcessor.h"
+#include "Processors/FloatImageProcessor.h"
 
 #include "Database/EAssetType.h"
 #include "Utils/stb_image.h"

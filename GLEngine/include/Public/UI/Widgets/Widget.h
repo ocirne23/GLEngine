@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Core.h"
-
-#include "3rdparty/rde/rde_string.h"
 #include "UI/Layout.h"
+#include "eastl/ustring.h"
 
 #include <glm/glm.hpp>
 
@@ -17,8 +16,8 @@ enum class EWidgetType
 	INVALID_TYPE
 };
 
-const rde::string& getStringForWidgetType(EWidgetType widgetType);
-const EWidgetType getWidgetTypeForString(const rde::string& str);
+const eastl::string& getStringForWidgetType(EWidgetType widgetType);
+const EWidgetType getWidgetTypeForString(const eastl::string& str);
 
 class Widget
 {
@@ -31,7 +30,7 @@ public:
 	void updateLayout(const UIFrame& frame);
 
 	EWidgetType getType() const                { return m_type; }
-	const rde::string& getName() const         { return m_name; }
+	const eastl::string& getName() const        { return m_name; }
 	const Layout& getLayout() const            { return m_layout; }
 	const Widget* getParent() const            { return m_parent; }
 	const glm::vec4& getAbsoluteBounds() const { return m_absBounds; }
@@ -39,7 +38,7 @@ public:
 protected:
 
 	EWidgetType m_type;
-	rde::string m_name;
+	eastl::string m_name;
 	Layout m_layout;
 	Widget* m_parent = NULL;
 	glm::vec4 m_absBounds = glm::vec4(0);
