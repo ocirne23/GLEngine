@@ -4,11 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLEngine", "GLEngine\GLEngine.vcxproj", "{CE0F2368-C0DB-4372-A4BB-86FEFD09F1E6}"
-	ProjectSection(ProjectDependencies) = postProject
-		{0F3E4B8F-D9D0-403E-BFED-C06FCA069B58} = {0F3E4B8F-D9D0-403E-BFED-C06FCA069B58}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLResourceBuilder", "GLResourceBuilder\GLResourceBuilder.vcxproj", "{0F3E4B8F-D9D0-403E-BFED-C06FCA069B58}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CE0F2368-C0DB-4372-A4BB-86FEFD09F1E6} = {CE0F2368-C0DB-4372-A4BB-86FEFD09F1E6}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLApp", "GLApp\GLApp.vcxproj", "{A7F44879-8351-4675-A471-8FA1F224AFD8}"
 	ProjectSection(ProjectDependencies) = postProject

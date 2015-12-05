@@ -2,8 +2,8 @@
 
 #include "Core.h"
 
-#include "3rdparty/entityx/System.h"
-#include "Graphics/LightManager.h"
+#include "entityx/System.h"
+#include "Graphics/Utils/LightManager.h"
 
 #include <glm/glm.hpp>
 
@@ -13,7 +13,7 @@ class PointLightComponent;
 class LightSystem : public entityx::System<LightSystem>, public entityx::Receiver<LightSystem>
 {
 public:
-	enum { MAX_LIGHTS = 1024 };
+	enum { MAX_LIGHTS = 500 };
 
 	LightSystem(const CameraSystem& cameraSystem);
 	~LightSystem();

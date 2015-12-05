@@ -35,8 +35,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include <EASTL/internal/fixed_pool.h>
-#include <EASTL/fixed_allocator.h>
+#include "EASTL/internal/fixed_pool.h"
+#include "EASTL/fixed_allocator.h"
 
 
 

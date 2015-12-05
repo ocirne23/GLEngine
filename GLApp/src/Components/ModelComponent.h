@@ -1,14 +1,14 @@
 #pragma once
 
-#include "3rdparty/rde/rde_string.h"
+#include "EASTL/string.h"
 
 class GLMesh;
 
 struct ModelComponent
 {
 	ModelComponent() {}
-	ModelComponent(const rde::string& filePath) : filePath(filePath) {}
+	ModelComponent(const eastl::string& filePath) : filePath(filePath) {}
 
-	rde::string filePath;
+	eastl::string filePath;
 	GLMesh* mesh = NULL;
 };

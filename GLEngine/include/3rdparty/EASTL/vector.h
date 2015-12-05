@@ -312,6 +312,8 @@ namespace eastl
         iterator insert(iterator position, const value_type& value);
         void     insert(iterator position, size_type n, const value_type& value);
 
+		void remove(const value_type& value);
+
         template <typename InputIterator>
         void insert(iterator position, InputIterator first, InputIterator last);
 
@@ -1043,6 +1045,15 @@ namespace eastl
     {
         DoInsert(position, first, last, is_integral<InputIterator>());
     }
+
+
+	template <typename T, typename Allocator>
+	void vector<T, Allocator>::remove(const T& val)
+	{
+		auto it = eastl::find(begin(), end(), val);
+		if (it != end())
+			erase(it);
+	}
 
 
     template <typename T, typename Allocator>

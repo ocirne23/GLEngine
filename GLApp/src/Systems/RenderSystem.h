@@ -3,15 +3,15 @@
 #include "Core.h"
 
 #include "AppUtils/FPSMeasurer.h"
-#include "Graphics/LightManager.h"
-#include "Graphics/GL/GLSpriteBatch.h"
+#include "Graphics/Utils/LightManager.h"
+#include "Graphics/GL/Tech/SpriteBatch.h"
 #include "Graphics/GL/Wrappers/GLConstantBuffer.h"
 #include "Graphics/GL/Wrappers/GLFramebuffer.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Wrappers/GLTexture.h"
 #include "Graphics/GL/Wrappers/GLTextureBuffer.h"
 #include "Graphics/GL/Wrappers/GLUniform.h"
-#include "Graphics/GL/Tech/ClusteredShading.h"
+#include "Graphics/Utils/ClusteredShading.h"
 #include "Graphics/GL/Tech/HBAO.h"
 #include "entityx/System.h"
 
@@ -78,9 +78,6 @@ private:
 	bool m_hbaoEnabled = true;
 	HBAO m_hbao;
 
-	glm::mat4 m_uiMatrix;
-
-	GLSpriteBatch m_uiSpriteBatch;
 	GLTexture m_dfvTexture;
 
 	GLConstantBuffer m_cameraBuffer;
@@ -96,6 +93,9 @@ private:
 
 	GLShader m_skyboxShader;
 	GLUniform<glm::mat4> m_skyboxModelMatrixUniform;
+
+	glm::mat4 m_uiMatrix;
+	SpriteBatch m_uiSpriteBatch;
 
 	FPSMeasurer m_fpsMeasurer;
 };

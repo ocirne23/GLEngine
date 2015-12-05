@@ -62,14 +62,15 @@ public:
 	struct WindowResizedTag {};
 	struct WindowQuitTag {};
 	
-	typedef InputListener<KeyDownTag, void,       EKey>                     KeyDownListener;
-	typedef InputListener<KeyUpTag, void,         EKey>                     KeyUpListener;
-	typedef InputListener<MouseDownTag, void,     EMouseButton, uint, uint> MouseDownListener;
-	typedef InputListener<MouseUpTag, void,       EMouseButton, uint, uint> MouseUpListener;
-	typedef InputListener<MouseMovedTag, void,    uint, uint, int, int>     MouseMovedListener;
+	//                                      Ret   Args                      Name
+	typedef InputListener<KeyDownTag,       void, EKey>                     KeyDownListener;
+	typedef InputListener<KeyUpTag,         void, EKey>                     KeyUpListener;
+	typedef InputListener<MouseDownTag,     void, EMouseButton, uint, uint> MouseDownListener;
+	typedef InputListener<MouseUpTag,       void, EMouseButton, uint, uint> MouseUpListener;
+	typedef InputListener<MouseMovedTag,    void, uint, uint, int, int>     MouseMovedListener;
 	typedef InputListener<MouseScrolledTag, void, int>                      MouseScrolledListener;
 	typedef InputListener<WindowResizedTag, void, uint, uint>               WindowResizedListener;
-	typedef InputListener<WindowQuitTag, void>                              WindowQuitListener;
+	typedef InputListener<WindowQuitTag,    void>                           WindowQuitListener;
 
 private:
 

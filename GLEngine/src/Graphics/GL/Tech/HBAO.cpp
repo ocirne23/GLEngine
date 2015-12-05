@@ -2,11 +2,11 @@
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/PerspectiveCamera.h"
-#include "Graphics/Pixmap.h"
+#include "Graphics/Utils/PerspectiveCamera.h"
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/Utils/QuadDrawUtils.h"
-#include "Graphics/GL/Utils/CheckGLError.h"
+#include "Graphics/GL/Tech/QuadDrawer.h"
+#include "Graphics/Utils/CheckGLError.h"
+#include "Database/Assets/DBTexture.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/random.hpp>
@@ -20,34 +20,6 @@ static const uint AO_SAMPLES = 6;
 static const float AO_STRENGTH = 1.5f;
 static const float AO_ANGLE_BIAS_DEG = 30.0f;
 static const uint NOISE_RES = 8;
-
-struct HBAOGlobals
-{
-	glm::vec2 fullResolution;
-	glm::vec2 invFullResolution;
-
-	glm::vec2 aoResolution;
-	glm::vec2 invAOResolution;
-
-	glm::vec2 focalLen;
-	glm::vec2 invFocalLen;
-
-	glm::vec2 uvToViewA;
-	glm::vec2 uvToViewB;
-
-	float r;
-	float r2;
-	float negInvR2;
-	float maxRadiusPixels;
-
-	float angleBias;
-	float tanAngleBias;
-	float strength;
-	float dummy;
-
-	glm::vec2 noiseTexScale;
-	glm::vec2 ndcDepthConv;
-};
 
 END_UNNAMED_NAMESPACE()
 
@@ -94,10 +66,9 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 			noise[offset + 3] = w;
 		}
 	}
-	Pixmap pixmap;
-	pixmap.set(noiseTexWidth, noiseTexHeight, 4, true, noise);
+	DBTexture tex(noiseTexWidth, noiseTexHeight, 4, DBTexture::EFormat::FLOAT, (byte*) noise);
 	
-	m_noiseTexture.initialize(pixmap,
+	m_noiseTexture.initialize(tex, 0,
 		GLTexture::ETextureMinFilter::NEAREST, GLTexture::ETextureMagFilter::NEAREST,
 		GLTexture::ETextureWrap::REPEAT, GLTexture::ETextureWrap::REPEAT);
 
@@ -105,7 +76,7 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	float near = a_camera.getNear();
 	float far = a_camera.getFar();
 
-	HBAOGlobals globals;
+	GlobalsUBO globals;
 	globals.fullResolution    = glm::vec2(screenWidth, screenHeight);
 	globals.invFullResolution = 1.0f / globals.fullResolution;
 	globals.aoResolution      = glm::vec2(aoWidth, aoHeight);
@@ -122,7 +93,7 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	globals.angleBias         = glm::radians(AO_ANGLE_BIAS_DEG);
 	globals.tanAngleBias      = tanf(globals.angleBias);
 	globals.strength          = AO_STRENGTH;
-	globals.dummy             = 0.0f;
+	globals.padding           = 0.0f;
 	globals.noiseTexScale     = glm::vec2(screenWidth / (float) noiseTexWidth, screenHeight / (float) noiseTexHeight);
 	globals.ndcDepthConv.x    = (near - far) / (2.0f * near * far);
 	globals.ndcDepthConv.y    = (near + far) / (2.0f * near * far);
@@ -134,18 +105,16 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 
 	m_blurXShader.begin();
 	m_blurXShader.setUniform1i("u_aoDepthTex", 0);
-	m_blurXShader.setUniform2f("u_invFullRes", globals.invFullResolution);
 	m_blurXShader.end();
 
 	m_blurYShader.begin();
 	m_blurYShader.setUniform1i("u_aoDepthTex", 0);
 	m_blurYShader.setUniform1i("u_colorTex", 1);
-	m_blurYShader.setUniform2f("u_invFullRes", globals.invFullResolution);
 	m_blurYShader.end();
 
 	m_hbaoFullShader.begin();
-	m_hbaoGlobalsBuffer.initialize(m_hbaoFullShader, a_hbaoGlobalsUBOBindingPoint, "HBAOGlobals", GLConstantBuffer::EDrawUsage::STATIC);
-	m_hbaoGlobalsBuffer.upload(sizeof(HBAOGlobals), &globals);
+	m_hbaoGlobalsBuffer.initialize(a_hbaoGlobalsUBOBindingPoint, "HBAOGlobals", GLConstantBuffer::EDrawUsage::STATIC, sizeof(GlobalsUBO));
+	m_hbaoGlobalsBuffer.upload(sizeof(GlobalsUBO), &globals);
 	m_hbaoFullShader.end();
 
 	m_initialized = true;
@@ -171,7 +140,7 @@ void HBAO::endAndRender()
 	m_blurXFbo.begin();
 	m_hbaoFullShader.begin();
 	m_hbaoGlobalsBuffer.bind();
-	QuadDrawUtils::drawQuad(m_hbaoFullShader);
+	QuadDrawer::drawQuad(m_hbaoFullShader);
 	m_hbaoFullShader.end();
 	m_blurXFbo.end();
 	
@@ -179,7 +148,7 @@ void HBAO::endAndRender()
 	m_blurXFbo.bindTexture(0, 0);
 	m_blurYFbo.begin();
 	m_blurXShader.begin();
-	QuadDrawUtils::drawQuad(m_blurXShader);
+	QuadDrawer::drawQuad(m_blurXShader);
 	m_blurXShader.end();
 	m_blurYFbo.end();
 
@@ -187,7 +156,7 @@ void HBAO::endAndRender()
 	m_blurYFbo.bindTexture(0, 0);
 	m_fboFullRes.bindTexture(0, 1);
 	m_blurYShader.begin();
-	QuadDrawUtils::drawQuad(m_blurYShader);
+	QuadDrawer::drawQuad(m_blurYShader);
 	m_blurYShader.end();
 	glEnable(GL_DEPTH_TEST);	
 	CHECK_GL_ERROR();

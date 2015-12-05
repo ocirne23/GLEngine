@@ -1,6 +1,6 @@
 #include "Components/PointLightComponent.h"
 
-#include "Graphics/LightManager.h"
+#include "Graphics/Utils/LightManager.h"
 
 PointLightComponent::~PointLightComponent()
 {

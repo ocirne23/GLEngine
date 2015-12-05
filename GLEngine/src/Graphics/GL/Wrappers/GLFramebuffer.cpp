@@ -114,7 +114,7 @@ void GLFramebuffer::begin()
 void GLFramebuffer::bindTextures(uint a_fromTextureUnit)
 {
 	assert(m_initialized);
-	for (int i = 0; i < m_textures.size(); ++i)
+	for (uint i = 0; i < m_textures.size(); ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + i + a_fromTextureUnit);
 		GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;

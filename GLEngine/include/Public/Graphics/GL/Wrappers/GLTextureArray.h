@@ -4,7 +4,7 @@
 #include "EASTL/vector.h"
 #include "EASTL/string.h"
 
-class Pixmap;
+class DBTexture;
 
 class GLTextureArray
 {
@@ -37,37 +37,41 @@ public:
 
 	GLTextureArray() {}
 	~GLTextureArray();
-	GLTextureArray(const GLTextureArray& copyMe) = delete;
+	GLTextureArray(const GLTextureArray& copy) = delete;
 
-	void initialize(const eastl::vector<Pixmap>& pixmaps, uint numMipMaps = 4,
-				ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
-				ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
-				ETextureWrap textureWrapS = ETextureWrap::CLAMP_TO_EDGE,
-				ETextureWrap textureWrapT = ETextureWrap::CLAMP_TO_EDGE);
+	void startInit(uint width, uint height, uint depth, uint numComponents, bool isFloatTexture, uint numMipMaps = 4,
+			ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
+			ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
+			ETextureWrap textureWrapS = ETextureWrap::CLAMP_TO_EDGE,
+			ETextureWrap textureWrapT = ETextureWrap::CLAMP_TO_EDGE);
 
-	void initialize(const eastl::vector<eastl::string>& filePaths, uint numMipMaps = 4,
-	                ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
-	                ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
-	                ETextureWrap textureWrapS   = ETextureWrap::CLAMP_TO_EDGE, 
-	                ETextureWrap textureWrapT   = ETextureWrap::CLAMP_TO_EDGE);
+	// Add a texture, returning the index it is placed in
+	uint addTexture(const DBTexture& tex);
+	void finishInit();
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 	
 	bool isInitialized() const    { return m_initialized; }
+	uint getNumMipMaps() const    { return m_numMipmaps; }
+	uint getTextureID() const     { return m_textureID; }
+
 	uint getWidth() const         { return m_width; }
 	uint getHeight() const        { return m_height; }
+	uint getDepth() const         { return m_depth; }
 	uint getNumComponents() const { return m_numComponents; }
-	uint getTextureID() const     { return m_textureID; }
+	bool isFloatTexture() const   { return m_isFloatTexture; }
 
 private:
 
-	bool m_initialized     = false;
-	uint m_width           = 0;
-	uint m_height          = 0;
-	uint m_numMipmaps      = 0;
-	uint m_numComponents   = 0;
-	bool m_isFloatTexture  = false;
-	bool m_generateMipMaps = false;
-	uint m_textureID       = 0;
+	bool m_initialized      = false;
+	uint m_numMipmaps       = 0;
+	uint m_textureID        = 0;
+	uint m_numTexturesAdded = 0;
+
+	uint m_width          = 0;
+	uint m_height         = 0;
+	uint m_depth          = 0;
+	uint m_numComponents  = 0;
+	bool m_isFloatTexture = false;
 };

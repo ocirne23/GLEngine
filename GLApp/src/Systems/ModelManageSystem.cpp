@@ -1,9 +1,9 @@
 #include "Systems/ModelManageSystem.h"
 
-#include "3rdparty/rde/rde_string.h"
 #include "Components/ModelComponent.h"
-#include "Graphics/GL/GLMesh.h"
+#include "Graphics/GL/Scene/GLMesh.h"
 #include "Systems/RenderSystem.h"
+#include "EASTL/string.h"
 
 ModelManageSystem::ModelManageSystem()
 {
@@ -35,12 +35,12 @@ void ModelManageSystem::receive(entityx::ComponentAddedEvent<ModelComponent>& a_
 	if (it == m_meshes.end())
 	{
 		mesh = new GLMesh();	
-		mesh->loadFromFile(component->filePath.c_str(), TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
+		//mesh->loadFromFile(component->filePath.c_str(), TextureUnits::MODEL_TEXTURE_ARRAY, UBOBindingPoints::MODEL_MATERIAL_UBO_BINDING_POINT);
 		m_meshes.insert({component->filePath, mesh});
 	}
 	else
 	{
-		mesh = it->second;
+		//mesh = it->second;
 	}
 	component->mesh = mesh;
 }

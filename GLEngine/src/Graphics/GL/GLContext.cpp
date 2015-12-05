@@ -7,8 +7,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-static const uint MAX_GL_MAJOR_VERSION = 3;
-static const uint MAX_GL_MINOR_VERSION = 3;
+static const uint MAX_GL_MAJOR_VERSION = 4;
+static const uint MAX_GL_MINOR_VERSION = 5;
 
 SDL_GLContext createHighestGLContext(SDL_Window* a_window, uint& a_outMaxMajorVersion, uint& a_outMaxMinorVersion)
 {

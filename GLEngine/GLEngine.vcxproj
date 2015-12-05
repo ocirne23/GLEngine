@@ -25,7 +25,20 @@
     <ClCompile Include="src\3rdparty\EASTL\hashtable.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\red_black_tree.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\string.cpp" />
-    <ClCompile Include="src\Graphics\GL\Utils\QuadDrawUtils.cpp" />
+    <ClCompile Include="src\Database\AssetDatabase.cpp" />
+    <ClCompile Include="src\Database\Assets\DBShader.cpp" />
+    <ClCompile Include="src\Database\Assets\DBTexture.cpp" />
+    <ClCompile Include="src\Database\Assets\DBAtlasRegion.cpp" />
+    <ClCompile Include="src\Database\Assets\DBAtlasTexture.cpp" />
+    <ClCompile Include="src\Database\Assets\DBMaterial.cpp" />
+    <ClCompile Include="src\Database\Assets\DBMesh.cpp" />
+    <ClCompile Include="src\Database\Assets\DBNode.cpp" />
+    <ClCompile Include="src\Database\Assets\DBScene.cpp" />
+    <ClCompile Include="src\Database\Assets\IAsset.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLConfig.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLMaterial.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLRenderer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\QuadDrawer.cpp" />
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
     <ClCompile Include="src\3rdparty\entityx\Event.cc" />
@@ -36,8 +49,8 @@
     <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp" />
     <ClCompile Include="src\Graphics\GL\GLContext.cpp" />
-    <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp" />
-    <ClCompile Include="src\Graphics\Frustum.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ARBDebugOutput.cpp" />
+    <ClCompile Include="src\Graphics\Utils\Frustum.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLShader.cpp" />
@@ -46,33 +59,42 @@
     <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureArray.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp" />
-    <ClCompile Include="src\Graphics\GL\GLMesh.cpp" />
-    <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
-    <ClCompile Include="src\Graphics\GL\Tech\TiledShading.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLMesh.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ClusteredShading.cpp" />
+    <ClCompile Include="src\Graphics\Utils\TiledShading.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
-    <ClCompile Include="src\Graphics\LightManager.cpp" />
-    <ClCompile Include="src\Graphics\PerspectiveCamera.cpp" />
-    <ClCompile Include="src\Graphics\Pixmap.cpp" />
+    <ClCompile Include="src\Graphics\Utils\LightManager.cpp" />
+    <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
     <ClCompile Include="src\3rdparty\json\json_writer.cpp" />
-    <ClCompile Include="src\Threading\ThreadManager.cpp" />
-    <ClCompile Include="src\UI\UIFrame.cpp" />
-    <ClCompile Include="src\UI\Layout.cpp" />
-    <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp" />
-    <ClCompile Include="src\UI\Style.cpp" />
-    <ClCompile Include="src\UI\Widgets\Widget.cpp" />
-    <ClCompile Include="src\UI\Widgets\ImageButton.cpp" />
-    <ClCompile Include="src\UI\Widgets\TextButton.cpp" />
-    <ClCompile Include="src\Utils\CheckGLError.cpp" />
+    <ClCompile Include="src\Database\Processors\ByteImageProcessor.cpp" />
+    <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
+    <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
+    <ClCompile Include="src\ResourceBuilder.cpp" />
+    <ClCompile Include="src\Utils\ThreadManager.cpp" />
+    <ClCompile Include="src\Graphics\UI\UIFrame.cpp" />
+    <ClCompile Include="src\Graphics\UI\Layout.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\SpriteBatch.cpp" />
+    <ClCompile Include="src\Graphics\UI\Style.cpp" />
+    <ClCompile Include="src\Graphics\UI\Widgets\Widget.cpp" />
+    <ClCompile Include="src\Graphics\UI\Widgets\ImageButton.cpp" />
+    <ClCompile Include="src\Graphics\UI\Widgets\TextButton.cpp" />
+    <ClCompile Include="src\Database\Utils\AtlasBuilder.cpp" />
+    <ClCompile Include="src\Graphics\Utils\CheckGLError.cpp" />
+    <ClCompile Include="src\Database\Utils\CRC64.cpp" />
     <ClCompile Include="src\Utils\FileHandle.cpp" />
     <ClCompile Include="src\Utils\FileModificationManager.cpp" />
-    <ClCompile Include="src\Utils\FPSCameraController.cpp" />
-    <ClCompile Include="src\Utils\getGLTextureFormat.cpp" />
+    <ClCompile Include="src\Utils\FileUtils.cpp" />
+    <ClCompile Include="src\Graphics\Utils\FPSCameraController.cpp" />
+    <ClCompile Include="src\Graphics\Utils\TextureFormatUtils.cpp" />
     <ClCompile Include="src\Utils\JobScheduler.cpp" />
-    <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp" />
     <ClCompile Include="src\Utils\Semaphore.cpp" />
+    <ClCompile Include="src\Database\Utils\stb_image.c" />
+    <ClCompile Include="src\Database\Utils\TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EABase\config\eacompiler.h" />
@@ -85,6 +107,7 @@
     <ClInclude Include="include\3rdparty\EASTL\bitset.h" />
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
     <ClInclude Include="include\3rdparty\EASTL\core_allocator_adapter.h" />
+    <ClInclude Include="include\3rdparty\EASTL\custom_glengine_allocator.h" />
     <ClInclude Include="include\3rdparty\EASTL\fixed_allocator.h" />
     <ClInclude Include="include\3rdparty\EASTL\fixed_hash_map.h" />
     <ClInclude Include="include\3rdparty\EASTL\fixed_hash_set.h" />
@@ -121,7 +144,12 @@
     <ClInclude Include="include\3rdparty\EASTL\utility.h" />
     <ClInclude Include="include\3rdparty\EASTL\vector.h" />
     <ClInclude Include="include\3rdparty\EASTL\vector_map.h" />
-    <ClInclude Include="include\Private\Threading\ThreadManager.h" />
+    <ClInclude Include="include\Public\Database\Processors\ByteImageProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\FloatImageProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\ResourceProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\SceneProcessor.h" />
+    <ClInclude Include="include\Public\Database\ResourceBuilder.h" />
+    <ClInclude Include="include\Private\Utils\ThreadManager.h" />
     <ClInclude Include="include\Public\Core.h" />
     <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h" />
@@ -135,19 +163,34 @@
     <ClInclude Include="include\3rdparty\entityx\help\Timer.h" />
     <ClInclude Include="include\3rdparty\entityx\quick.h" />
     <ClInclude Include="include\3rdparty\entityx\System.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabase.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBTexture.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBAtlasRegion.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBAtlasTexture.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBMaterial.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBMesh.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBNode.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBScene.h" />
+    <ClInclude Include="include\Public\Database\Assets\EAssetType.h" />
+    <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
     <ClInclude Include="include\Public\GLEngine.h" />
-    <ClInclude Include="include\Public\Graphics\Frustum.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
-    <ClInclude Include="include\Public\Graphics\Scene.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLScene.h" />
     <ClInclude Include="include\Public\Input\InputListener.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLMesh.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMesh.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLContext.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\ClusteredShading.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\TiledShading.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\QuadDrawer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h" />
@@ -158,11 +201,10 @@
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h" />
     <ClInclude Include="include\Public\Graphics\Graphics.h" />
-    <ClInclude Include="include\Public\Graphics\LightManager.h" />
-    <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h" />
-    <ClInclude Include="include\Public\Graphics\Pixmap.h" />
-    <ClInclude Include="include\Private\Graphics\GL\Utils\tryEnableARBDebugOutput.h" />
-    <ClInclude Include="include\Public\Graphics\TextureRegion.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\LightManager.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\PerspectiveCamera.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\ARBDebugOutput.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\TextureRegion.h" />
     <ClInclude Include="include\Public\Input\EKey.h" />
     <ClInclude Include="include\Public\Input\EMouseButton.h" />
     <ClInclude Include="include\Public\Input\Input.h" />
@@ -176,28 +218,35 @@
     <ClInclude Include="include\3rdparty\json\value.h" />
     <ClInclude Include="include\3rdparty\json\version.h" />
     <ClInclude Include="include\3rdparty\json\writer.h" />
-    <ClInclude Include="include\Public\Graphics\GL\GLSpriteBatch.h" />
-    <ClInclude Include="include\Public\UI\Widgets\ImageButton.h" />
-    <ClInclude Include="include\Public\UI\Widgets\TextButton.h" />
-    <ClInclude Include="include\Public\UI\Layout.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\SpriteBatch.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\ImageButton.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\TextButton.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Layout.h" />
     <ClInclude Include="include\Private\Utils\Bounds2D.h" />
     <ClInclude Include="include\Private\Utils\Bounds3D.h" />
-    <ClInclude Include="include\Private\Graphics\GL\Utils\CheckGLError.h" />
-    <ClInclude Include="include\Public\UI\Font.h" />
-    <ClInclude Include="include\Public\UI\UIFrame.h" />
-    <ClInclude Include="include\Public\UI\Style.h" />
-    <ClInclude Include="include\Public\UI\Widgets\Widget.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Font.h" />
+    <ClInclude Include="include\Public\Graphics\UI\UIFrame.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Style.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\Widget.h" />
+    <ClInclude Include="include\Public\Database\Utils\AtlasBuilder.h" />
+    <ClInclude Include="include\Public\Database\Utils\AtlasPosition.h" />
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
-    <ClInclude Include="include\Public\Utils\EAssetType.h" />
+    <ClInclude Include="include\Public\Database\Utils\CRC64.h" />
     <ClInclude Include="include\Public\Utils\FileHandle.h" />
     <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
     <ClInclude Include="include\Public\Utils\FileModificationManager.h" />
-    <ClInclude Include="include\Public\Utils\FPSCameraController.h" />
-    <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h" />
+    <ClInclude Include="include\Public\Utils\FileUtils.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\FPSCameraController.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\TextureFormatUtils.h" />
     <ClInclude Include="include\Public\Utils\JobScheduler.h" />
     <ClInclude Include="include\Public\Utils\MatForward.h" />
+    <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
     <ClInclude Include="include\Public\Utils\Semaphore.h" />
-    <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h" />
+    <ClInclude Include="include\Public\Database\Utils\stb_image.h" />
+    <ClInclude Include="include\Public\Database\Utils\TextureAtlas.h" />
+    <ClInclude Include="include\Public\Utils\Vec.h" />
     <ClInclude Include="include\Public\Utils\VecForward.h" />
     <ClInclude Include="src\json\json_tool.h" />
   </ItemGroup>
@@ -285,7 +334,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
@@ -295,7 +344,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
@@ -309,7 +358,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <AdditionalOptions>
@@ -321,7 +370,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference>
@@ -335,7 +384,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
@@ -347,7 +396,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference>
@@ -364,7 +413,7 @@
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;$(ProjectDir)..\GLResourceBuilder\include\Public;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -374,7 +423,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference>

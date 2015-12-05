@@ -1,8 +1,8 @@
 #pragma once
 
-#include "3rdparty/entityx/System.h"
-#include "3rdparty/rde/hash_map.h"
-#include "3rdparty/rde/rde_string.h"
+#include "entityx/System.h"
+#include "EASTL/hash_map.h"
+#include "EASTL/string.h"
 
 struct ModelComponent;
 class GLMesh;
@@ -20,5 +20,5 @@ public:
 
 private:
 
-	rde::hash_map<rde::string, GLMesh*> m_meshes;
+	eastl::hash_map<eastl::string, GLMesh*> m_meshes;
 };

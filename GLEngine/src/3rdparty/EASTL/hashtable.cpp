@@ -35,8 +35,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include <EASTL/internal/hashtable.h>
-#include <EASTL/utility.h>
+#include "EASTL/internal/hashtable.h"
+#include "EASTL/utility.h"
 #include <math.h>  // Not all compilers support <cmath> and std::ceil(), which we need below.
 #include <stddef.h>
 

@@ -2,8 +2,9 @@
 
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
-#include "Threading/ThreadManager.h"
+#include "Utils/ThreadManager.h"
 #include "Utils/FileModificationManager.h"
+#include "EASTL/custom_glengine_allocator.h"
 
 #include <SDL/SDL.h>
 

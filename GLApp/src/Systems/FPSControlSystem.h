@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Input/Input.h"
-#include "3rdparty/entityx/System.h"
+#include "entityx/System.h"
 #include <glm/glm.hpp>
 
 class FPSControlSystem : public entityx::System<FPSControlSystem>

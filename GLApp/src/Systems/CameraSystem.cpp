@@ -2,7 +2,7 @@
 
 #include "Components/CameraComponent.h"
 #include "Components/TransformComponent.h"
-#include "Graphics/PerspectiveCamera.h"
+#include "Graphics/Utils/PerspectiveCamera.h"
 
 void CameraSystem::configure(entityx::EventManager& a_eventManager)
 {

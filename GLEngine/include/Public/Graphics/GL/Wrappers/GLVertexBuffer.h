@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "EASTL/vector.h"
 
 struct VertexAttribute
 {
@@ -12,16 +13,14 @@ struct VertexAttribute
 		FLOAT         = 0x1406  // GL_FLOAT
 	};
 
-	VertexAttribute(uint idx, const char* name, EFormat format, uint numElements, bool normalize = false) :
+	VertexAttribute(uint idx, EFormat format, uint numElements, bool normalize = false) :
 		attributeIndex(idx),
-		attributeName(name),
 		format(format),
 		numElements(numElements),
 		normalize(normalize)
 	{}
 
 	uint attributeIndex       = 0;
-	const char* attributeName = NULL;
 	EFormat format            = EFormat::UNSIGNED_BYTE;
 	uint numElements          = 0;
 	bool normalize            = false;
@@ -45,16 +44,24 @@ public:
 		STREAM  = 0x88E0  // GL_STREAM_DRAW
 	};
 
+	struct Config
+	{
+		EBufferType bufferType;
+		EDrawUsage drawUsage;
+		eastl::vector<VertexAttribute> vertexAttributes;
+	};
+
 public:
 
 	GLVertexBuffer() {}
 	~GLVertexBuffer();
-	GLVertexBuffer(const GLVertexBuffer& copy) = delete;
+	GLVertexBuffer(const GLVertexBuffer& copy);
 
+	void initialize(const Config& config);
 	void initialize(EBufferType bufferType, EDrawUsage drawUsage);
 	void upload(uint numBytes, const void* data = 0);
 	void bind();
-	void setVertexAttributes(uint numAttributes, VertexAttribute* attributes);
+	void setVertexAttributes(uint numAttributes, const VertexAttribute* attributes);
 	bool isInitialized() const { return m_initialized; }
 
 private:

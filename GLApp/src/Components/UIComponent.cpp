@@ -1,9 +1,9 @@
 #include "Components/UIComponent.h"
 
-#include "UI/UIFrame.h"
+#include "Graphics/UI/UIFrame.h"
 #include "Systems/UISystem.h"
 
-UIComponent::UIComponent(const rde::string& a_jsonFilePath, ELayer a_layer)
+UIComponent::UIComponent(const eastl::string& a_jsonFilePath, ELayer a_layer)
 	: m_layer(a_layer)
 {
 	m_uiFrame = new UIFrame();

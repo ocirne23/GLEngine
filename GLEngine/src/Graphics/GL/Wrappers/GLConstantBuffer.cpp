@@ -2,8 +2,34 @@
 
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
+#include "Graphics/Utils/CheckGLError.h"
 
 #include <assert.h>
+
+void GLConstantBuffer::initialize(const Config& a_config)
+{
+	initialize(a_config.bindingPoint, a_config.name.c_str(), a_config.drawUsage, a_config.dataSize);
+}
+
+void GLConstantBuffer::initialize(uint a_bindingPoint, const char* a_blockName, EDrawUsage a_drawUsage, uint dataSize)
+{
+	if (m_initialized)
+		glDeleteBuffers(1, &m_ubo);
+
+	m_drawUsage = a_drawUsage;
+	m_bindingPoint = a_bindingPoint;
+
+	CHECK_GL_ERROR();
+
+	glGenBuffers(1, &m_ubo);
+	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
+	glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
+	glBufferData(GL_UNIFORM_BUFFER, dataSize, NULL, (GLenum) a_drawUsage); // Reserve memory with glBufferData
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	CHECK_GL_ERROR();
+
+	m_initialized = true;
+}
 
 GLConstantBuffer::~GLConstantBuffer()
 {
@@ -11,58 +37,9 @@ GLConstantBuffer::~GLConstantBuffer()
 		glDeleteBuffers(1, &m_ubo);
 }
 
-void GLConstantBuffer::initialize(const GLShader** a_shaders, uint a_numShaders, uint a_bindingPoint, const char* a_blockName, EDrawUsage a_drawUsage)
+GLConstantBuffer::GLConstantBuffer(const GLConstantBuffer& copy)
 {
-	if (m_initialized)
-		glDeleteBuffers(1, &m_ubo);
-
-	m_drawUsage = a_drawUsage;
-	m_bindingPoint = a_bindingPoint;
-
-	glGenBuffers(1, &m_ubo);
-	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
-	for (uint i = 0; i < a_numShaders; ++i)
-	{
-		const GLShader* shader = a_shaders[i];
-
-		GLuint uboIndex = glGetUniformBlockIndex(shader->getID(), a_blockName);
-		if (uboIndex == GL_INVALID_INDEX)
-		{
-			print("Failed to initialize ubo: %s \n", a_blockName);
-			glDeleteBuffers(1, &m_ubo);
-			return;
-		}
-		glUniformBlockBinding(shader->getID(), uboIndex, m_bindingPoint);
-		glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
-	}
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	m_initialized = true;
-}
-
-void GLConstantBuffer::initialize(const GLShader& a_shader, uint a_bindingPoint, const char* a_blockName, EDrawUsage a_drawUsage)
-{
-	if (m_initialized)
-		glDeleteBuffers(1, &m_ubo);
-
-	m_drawUsage = a_drawUsage;
-	m_bindingPoint = a_bindingPoint;
-
-	GLuint uboIndex = glGetUniformBlockIndex(a_shader.getID(), a_blockName);
-	if (uboIndex == GL_INVALID_INDEX)
-	{
-		print("Failed to initialize ubo: %s \n", a_blockName);
-		return;
-	}
-
-	glGenBuffers(1, &m_ubo);
-	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
-
-	glUniformBlockBinding(a_shader.getID(), uboIndex, m_bindingPoint);
-	glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	m_initialized = true;
+	assert(!m_initialized);
 }
 
 void GLConstantBuffer::upload(uint a_numBytes, const void* a_data)
@@ -80,3 +57,25 @@ void GLConstantBuffer::bind()
 	assert(m_initialized);
 	glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
 }
+
+byte* GLConstantBuffer::mapBuffer()
+{
+	assert(m_initialized);
+	assert(!m_isMapped);
+	CHECK_GL_ERROR();
+	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
+	byte* buffer = (byte*) glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+	CHECK_GL_ERROR();
+	assert(buffer);
+	m_isMapped = true;
+	return buffer;
+}
+
+void GLConstantBuffer::unmapBuffer()
+{
+	assert(m_initialized);
+	assert(m_isMapped);
+	m_isMapped = false;
+	glUnmapBuffer(GL_UNIFORM_BUFFER);
+}
+

@@ -11,6 +11,19 @@ GLVertexBuffer::~GLVertexBuffer()
 		glDeleteBuffers(1, &m_id);
 }
 
+GLVertexBuffer::GLVertexBuffer(const GLVertexBuffer& copy)
+{
+	// Cannot copy after being initialized because there should be just one object keeping track of each gpu state
+	assert(!m_initialized); 
+}
+
+void GLVertexBuffer::initialize(const Config& a_config)
+{
+	initialize(a_config.bufferType, a_config.drawUsage);
+	if (a_config.vertexAttributes.size())
+		setVertexAttributes(a_config.vertexAttributes.size(), &a_config.vertexAttributes[0]);
+}
+
 void GLVertexBuffer::initialize(EBufferType a_bufferType, EDrawUsage a_drawUsage)
 {
 	if (m_initialized)
@@ -40,7 +53,7 @@ void GLVertexBuffer::bind()
 	glBindBuffer((GLenum) m_bufferType, m_id);
 }
 
-void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, VertexAttribute* a_attributes)
+void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, const VertexAttribute* a_attributes)
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);

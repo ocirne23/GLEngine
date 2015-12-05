@@ -15,27 +15,26 @@ BEGIN_UNNAMED_NAMESPACE()
 
 eastl::string getVersionStr()
 {
-	return eastl::string("#version 330\n");
+	return eastl::string("#version 420\n");
 }
 
 eastl::string processIncludes(const eastl::string& a_str)
 {
 	eastl::string src = a_str;
-
 	static const char* INCLUDE_STR = "#include \"";
 	static const uint INCLUDE_STR_LEN = (uint) strlen(INCLUDE_STR);
-
 	auto includePos = src.find(INCLUDE_STR);
 	while (includePos != src.npos)
 	{
-		auto fileStartPos = includePos + INCLUDE_STR_LEN;
-		auto fileEndPos = src.find("\"", fileStartPos) + fileStartPos;
-		eastl::string path = src.substr(fileStartPos, fileEndPos);
-		src = src.substr(0, includePos).append(FileHandle(path.c_str()).readString()).append(src.substr(fileEndPos + 1, src.length()));
-		auto next = src.find(INCLUDE_STR, includePos);
-		includePos = next == src.npos ? next : next + includePos;
+		auto includeStartPos = includePos + INCLUDE_STR_LEN;
+		auto includeEndPos = src.find("\"", includeStartPos);
+		uint numChars = includeEndPos - includeStartPos;
+		const eastl::string path = src.substr(includeStartPos, numChars);
+		const eastl::string includedFileContents = FileHandle(path).readString();
+		const eastl::string toReplace = "#include \"" + path + "\"";
+		src.replace(src.find(toReplace), toReplace.length(), includedFileContents);
+		includePos = src.find(INCLUDE_STR);
 	}
-
 	return src;
 }
 

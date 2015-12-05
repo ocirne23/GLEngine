@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-#include "3rdparty/entityx/System.h"
+#include "entityx/System.h"
 
 class PerspectiveCamera;
 struct CameraComponent;

@@ -7,14 +7,17 @@
 #include "Components/UIComponent.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/PerspectiveCamera.h"
-#include "Graphics/GL/GLMesh.h"
+#include "Graphics/Utils/PerspectiveCamera.h"
+#include "Graphics/GL/Scene/GLMesh.h"
 #include "Systems/LightSystem.h"
 #include "Systems/CameraSystem.h"
 #include "Systems/UISystem.h"
-#include "UI/UIFrame.h"
+#include "Graphics/UI/UIFrame.h"
 #include "Utils/FileModificationManager.h"
-#include "3rdparty/entityx/Entity.h"
+#include "entityx/Entity.h"
+#include "EASTL/to_string.h"
+#include "EASTL/string.h"
+#include "Database/Assets/DBTexture.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -54,7 +57,8 @@ m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem), m_uiSystem(a_uiSys
 	m_xRes = GLEngine::graphics->getViewportWidth();
 	m_yRes = GLEngine::graphics->getViewportHeight();
 
-	m_dfvTexture.initialize(DFV_TEX_PATH, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
+	DBTexture tex(DFV_TEX_PATH, DBTexture::EFormat::FLOAT);
+	m_dfvTexture.initialize(tex, 0, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR, GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
 	//m_uiSpriteBatch.initialize(UI_SPRITE_BATCH_SIZE);
 	
 	auto onShaderEdited = [&]()
@@ -64,10 +68,10 @@ m_cameraSystem(a_cameraSystem), m_lightSystem(a_lightSystem), m_uiSystem(a_uiSys
 		if (camera)
 			initializeShaderForCamera(*camera);
 	};
-	FileModificationManager::createModificationListener(this, rde::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
-	FileModificationManager::createModificationListener(this, rde::string(MODEL_FRAG_SHADER_PATH), onShaderEdited);
-	FileModificationManager::createModificationListener(this, rde::string(CLUSTERED_SHADING_PATH), onShaderEdited);
-	FileModificationManager::createModificationListener(this, rde::string(MATERIAL_LIGHTING_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, eastl::string(MODEL_VERT_SHADER_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, eastl::string(MODEL_FRAG_SHADER_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, eastl::string(CLUSTERED_SHADING_PATH), onShaderEdited);
+	FileModificationManager::createModificationListener(this, eastl::string(MATERIAL_LIGHTING_PATH), onShaderEdited);
 
 	onResize(m_xRes, m_yRes);
 }
@@ -96,13 +100,13 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& a_camera)
 	m_clusteredShading.initialize(a_camera, m_xRes, m_yRes, TILE_WIDTH_PX, TILE_HEIGHT_PX);
 	m_hbao.initialize(a_camera, m_xRes, m_yRes, UBOBindingPoints::HBAO_GLOBALS_UBO_BINDING_POINT);
 
-	rde::vector<rde::string> defines;
-	defines.push_back(rde::string("MAX_LIGHTS ").append(rde::to_string((int) LightSystem::MAX_LIGHTS)));
-	defines.push_back(rde::string("LIGHT_GRID_WIDTH ").append(rde::to_string(m_clusteredShading.getGridWidth())));
-	defines.push_back(rde::string("LIGHT_GRID_HEIGHT ").append(rde::to_string(m_clusteredShading.getGridHeight())));
-	defines.push_back(rde::string("LIGHT_GRID_DEPTH ").append(rde::to_string(m_clusteredShading.getGridDepth())));
-	defines.push_back(rde::string("LIGHT_GRID_TILE_WIDTH ").append(rde::to_string(TILE_WIDTH_PX)));
-	defines.push_back(rde::string("LIGHT_GRID_TILE_HEIGHT ").append(rde::to_string(TILE_HEIGHT_PX)));
+	eastl::vector<eastl::string> defines;
+	defines.push_back(eastl::string("MAX_LIGHTS ").append(eastl::to_string((int) LightSystem::MAX_LIGHTS)));
+	defines.push_back(eastl::string("LIGHT_GRID_WIDTH ").append(eastl::to_string(m_clusteredShading.getGridWidth())));
+	defines.push_back(eastl::string("LIGHT_GRID_HEIGHT ").append(eastl::to_string(m_clusteredShading.getGridHeight())));
+	defines.push_back(eastl::string("LIGHT_GRID_DEPTH ").append(eastl::to_string(m_clusteredShading.getGridDepth())));
+	defines.push_back(eastl::string("LIGHT_GRID_TILE_WIDTH ").append(eastl::to_string(TILE_WIDTH_PX)));
+	defines.push_back(eastl::string("LIGHT_GRID_TILE_HEIGHT ").append(eastl::to_string(TILE_HEIGHT_PX)));
 
 	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &defines);
 	m_modelShader.begin();
@@ -111,15 +115,16 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& a_camera)
 		m_modelShader.setUniform1i("u_textureArray", TextureUnits::MODEL_TEXTURE_ARRAY);
 		m_modelShader.setUniform1i("u_lightGrid", TextureUnits::CLUSTERED_LIGHTING_GRID_TEXTURE);
 		m_modelShader.setUniform1i("u_lightIndices", TextureUnits::CLUSTERED_LIGHTING_LIGHT_ID_TEXTURE);
-
-		m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
-		m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
+		assert(false);
+	//	m_modelShader.setUniform1f("u_recLogSD1", m_clusteredShading.getRecLogSD1());
+	//	m_modelShader.setUniform1f("u_recNear", m_clusteredShading.getRecNear());
 		m_modelShader.setUniform3f("u_ambient", AMBIENT);
 
 		m_modelMatrixUniform.initialize(m_modelShader, "u_modelMatrix");
 
-		m_lightPositionRangeBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GLConstantBuffer::EDrawUsage::STREAM);
-		m_lightColorBuffer.initialize(m_modelShader, UBOBindingPoints::LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GLConstantBuffer::EDrawUsage::STREAM);
+		uint maxLights = LightSystem::MAX_LIGHTS;
+		m_lightPositionRangeBuffer.initialize(UBOBindingPoints::LIGHT_POSITION_RANGE_UBO_BINDING_POINT, "LightPositionRanges", GLConstantBuffer::EDrawUsage::STREAM, sizeof(glm::vec4) * maxLights);
+		m_lightColorBuffer.initialize(UBOBindingPoints::LIGHT_COLOR_UBO_BINDING_POINT, "LightColorsIntensities", GLConstantBuffer::EDrawUsage::STREAM, sizeof(glm::vec4) * maxLights);
 	}
 	m_modelShader.end();
 
@@ -135,7 +140,7 @@ void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& a_camera)
 	m_skyboxShader.end();
 
 	const GLShader* shaders[]{&m_modelShader, &m_skyboxShader};
-	m_cameraBuffer.initialize(shaders, ARRAY_SIZE(shaders), UBOBindingPoints::CAMERA_VARS_UBO_BINDING_POINT, "CameraVars", GLConstantBuffer::EDrawUsage::STREAM);
+	m_cameraBuffer.initialize(UBOBindingPoints::CAMERA_VARS_UBO_BINDING_POINT, "CameraVars", GLConstantBuffer::EDrawUsage::STREAM, sizeof(CameraVars));
 
 	m_shaderInitialized = true;
 }
@@ -201,7 +206,7 @@ void RenderSystem::renderSkybox(entityx::EntityManager& a_entities)
 				trans[3] = glm::vec4(pos, 1.0f);
 
 			m_skyboxModelMatrixUniform.set(trans);
-			model->mesh->render(m_skyboxShader);
+			model->mesh->render();
 		}
 	}
 	m_skyboxShader.end();
@@ -232,7 +237,7 @@ void RenderSystem::renderModels(entityx::EntityManager& a_entities)
 		for (entityx::Entity entity : a_entities.entities_with_components(transform, model))
 		{
 			m_modelMatrixUniform.set(transform->transform);
-			model->mesh->render(m_modelShader);
+			model->mesh->render();
 		}
 	}
 	m_modelShader.end();

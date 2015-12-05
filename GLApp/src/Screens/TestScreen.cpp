@@ -1,6 +1,6 @@
 #include "Screens/TestScreen.h"
 
-#include "3rdparty/rde/rde_string.h"
+#include "EASTL/string.h"
 
 #include "Components/CameraComponent.h"
 #include "Components/FPSControlledComponent.h"
@@ -26,12 +26,12 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-static const rde::string MODEL_FILE_PATH("Models/palace/palace.obj.da");
-static const rde::string MODEL2_FILE_PATH("Models/meshes/dragon.obj.da");
-static const rde::string SKYBOX_FILE_PATH("Models/skybox/skysphere.obj.da");
-static const rde::string IFCTEST_FILE_PATH("Models/meshes/ifctest.ifc.da");
-static const rde::string IFC1_FILE_PATH("Models/BIM/ifc2.ifc.da");
-static const rde::string UI_JSON_FILE_PATH("UI/uitest.json");
+static const eastl::string MODEL_FILE_PATH("Models/palace/palace.obj.da");
+static const eastl::string MODEL2_FILE_PATH("Models/meshes/dragon.obj.da");
+static const eastl::string SKYBOX_FILE_PATH("Models/skybox/skysphere.obj.da");
+static const eastl::string IFCTEST_FILE_PATH("Models/meshes/ifctest.ifc.da");
+static const eastl::string IFC1_FILE_PATH("Models/BIM/ifc2.ifc.da");
+static const eastl::string UI_JSON_FILE_PATH("UI/uitest.json");
 
 END_UNNAMED_NAMESPACE()
 

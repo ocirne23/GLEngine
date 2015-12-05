@@ -54,8 +54,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include <EASTL/internal/config.h>
-#include <EASTL/internal/red_black_tree.h>
+#include "EASTL/internal/config.h"
+#include "EASTL/internal/red_black_tree.h"
 #include <stddef.h>
 
 

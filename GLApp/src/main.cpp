@@ -1,16 +1,16 @@
 #include "GLEngine.h"
 
 #include "AppUtils/DeltaTimeMeasurer.h"
-#include "Screens/TestScreen.h"
+#include "Screens/DBTestScreen.h"
 
 int main()
 {
 	GLEngine::initialize();
-
+	
 	GLEngine::createThread("RenderThread", [&]()
 	{
 		GLEngine::createGLContext();
-		TestScreen testScreen;
+		DBTestScreen testScreen;
 		DeltaTimeMeasurer deltaTimeMeasurer;
 		while (!GLEngine::isShutdown())
 		{
@@ -22,7 +22,7 @@ int main()
 
 	while (!GLEngine::isShutdown())
 		GLEngine::doMainThreadTick();
-
+	
 	GLEngine::finish();
 	return 0;
 }

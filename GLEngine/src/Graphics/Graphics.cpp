@@ -3,8 +3,8 @@
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLContext.h"
-#include "Graphics/GL/Utils/tryEnableARBDebugOutput.h"
-#include "Graphics/GL/Utils/CheckGLError.h"
+#include "Graphics/Utils/ARBDebugOutput.h"
+#include "Graphics/Utils/CheckGLError.h"
 
 #include <glm/glm.hpp>
 #include <SDL/SDL.h>
@@ -45,7 +45,7 @@ void Graphics::createGLContext()
 	}
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
 
-	tryEnableARBDebugOutput();
+	ARBDebugOutput::tryEnable();
 
 	SDL_GL_SetSwapInterval(m_vsync);
 

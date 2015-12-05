@@ -1082,7 +1082,7 @@ namespace eastl
         else // Else we are creating a potentially non-empty hashtable...
         {
             EASTL_ASSERT(nBucketCount < 10000000);
-            mnBucketCount = (size_type)mRehashPolicy.GetNextBucketCount((uint32_t)nBucketCount);
+            mnBucketCount = (size_type)mRehashPolicy.GetNextBucketCount((unsigned int)nBucketCount);
             mpBucketArray = DoAllocateBuckets(mnBucketCount); // mnBucketCount will always be at least 2.
         }
     }

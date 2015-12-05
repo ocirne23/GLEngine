@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics/PerspectiveCamera.h"
+#include "Graphics/Utils/PerspectiveCamera.h"
 
 struct CameraComponent
 {
@@ -8,6 +8,5 @@ struct CameraComponent
 	{
 		camera.initialize(viewportWidth, viewportHeight, horizontalFov, near, far);
 	}
-
 	PerspectiveCamera camera;
 };

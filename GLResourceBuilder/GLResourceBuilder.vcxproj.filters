@@ -1,149 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\Processors\FloatImageProcessor.cpp">
-      <Filter>Source Files\Processors</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ResourceBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Processors\ByteImageProcessor.cpp">
-      <Filter>Source Files\Processors</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\FileUtils.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Processors\SceneProcessor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\BuilderCore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\AssetDatabase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\CRC64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\AtlasBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\TextureAtlas.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\stb_image.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\IAsset.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\Scene\DBAtlasRegion.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\Scene\DBAtlasTexture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\Scene\DBMaterial.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\Scene\DBMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\Scene\DBNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\Scene\DBScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\DBShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Database\Assets\DBTexture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\Public\Database\AssetDatabase.h">
-      <Filter>Header Files\Database</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\EAssetType.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\IAsset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Processors\SceneProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Processors\ResourceProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Processors\FloatImageProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Processors\ByteImageProcessor.h">
-      <Filter>Header Files\Processors</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\Vec.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\TextureAtlas.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\stb_image.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\MeshMerger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\FileUtils.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\CRC64.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\AtlasPosition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\AtlasBuilder.h">
-      <Filter>Header Files\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\BuilderCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\ResourceBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\Scene\DBScene.h">
-      <Filter>Header Files\Database</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\Scene\DBAtlasRegion.h">
-      <Filter>Header Files\Database</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\Scene\DBAtlasTexture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\Scene\DBMaterial.h">
-      <Filter>Header Files\Database</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\Scene\DBMesh.h">
-      <Filter>Header Files\Database</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\Scene\DBNode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\DBShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Assets\DBTexture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -154,20 +14,11 @@
       <UniqueIdentifier>{6188d9bd-4d1b-4724-a184-0e0b5e6ce1f0}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\Utils">
-      <UniqueIdentifier>{985dddb2-818e-4716-b69f-bbdf23e6e456}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Processors">
-      <UniqueIdentifier>{bd2d81e6-4fb6-4b7d-9b14-61968ee2a730}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Utils">
       <UniqueIdentifier>{fb4bda26-3ce1-4dcf-acd9-283eb28989c9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Database">
       <UniqueIdentifier>{de78dadb-fe58-40b6-96b8-a6c5dadf48cd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Database">
-      <UniqueIdentifier>{60476da6-3282-47b1-b3d1-52925830d0d4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\Processors">
       <UniqueIdentifier>{0f61f029-1dd2-4fd1-ba13-b2538fd7ed11}</UniqueIdentifier>

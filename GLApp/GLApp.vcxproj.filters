@@ -62,6 +62,9 @@
     <ClCompile Include="src\Components\UIComponent.cpp">
       <Filter>Source Files\Components</Filter>
     </ClCompile>
+    <ClCompile Include="src\Screens\DBTestScreen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AppUtils\FPSMeasurer.h">
@@ -111,6 +114,9 @@
     </ClInclude>
     <ClInclude Include="src\Systems\UISystem.h">
       <Filter>Header Files\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Screens\DBTestScreen.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

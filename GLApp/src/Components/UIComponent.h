@@ -1,6 +1,6 @@
 #pragma once
 
-#include "3rdparty/rde/rde_string.h"
+#include "EASTL/string.h"
 
 class UIFrame;
 
@@ -16,7 +16,7 @@ public:
 
 public:
 
-	UIComponent(const rde::string& jsonFilePath, ELayer layer);
+	UIComponent(const eastl::string& jsonFilePath, ELayer layer);
 	~UIComponent();
 	
 	ELayer getLayer() const { return m_layer; }

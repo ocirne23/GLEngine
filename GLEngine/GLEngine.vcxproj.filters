@@ -13,38 +13,11 @@
     <ClCompile Include="src\Graphics\Graphics.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\PerspectiveCamera.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Pixmap.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Frustum.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\GLMesh.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Utils\FileHandle.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\FPSCameraController.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp">
-      <Filter>Source Files\Graphics\GL\Tech</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Tech\TiledShading.cpp">
-      <Filter>Source Files\Graphics\GL\Tech</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\sphereToScreenSpaceBounds.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
     <ClCompile Include="src\Utils\FileModificationManager.cpp">
       <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\LightManager.cpp">
-      <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp">
       <Filter>Source Files\Graphics\GL\Wrappers</Filter>
@@ -79,24 +52,6 @@
     <ClCompile Include="src\Utils\JobScheduler.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\GLSpriteBatch.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UI\Widgets\Widget.cpp">
-      <Filter>Source Files\UI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UI\Widgets\ImageButton.cpp">
-      <Filter>Source Files\UI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UI\Widgets\TextButton.cpp">
-      <Filter>Source Files\UI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UI\Layout.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UI\Style.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
     <ClCompile Include="src\3rdparty\entityx\help\Pool.cc">
       <Filter>Source Files\3rdparty\entityx\help</Filter>
     </ClCompile>
@@ -121,29 +76,11 @@
     <ClCompile Include="src\3rdparty\json\json_writer.cpp">
       <Filter>Source Files\3rdparty\json</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GL\tryEnableARBDebugOutput.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\CheckGLError.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\getGLTextureFormat.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp">
       <Filter>Source Files\Graphics\GL\Tech</Filter>
     </ClCompile>
-    <ClCompile Include="src\Threading\ThreadManager.cpp">
-      <Filter>Source Files\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Utils\QuadDrawUtils.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\GLContext.cpp">
       <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\UI\UIFrame.cpp">
-      <Filter>Source Files\UI</Filter>
     </ClCompile>
     <ClCompile Include="src\3rdparty\EASTL\allocator.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\assert.cpp" />
@@ -151,6 +88,89 @@
     <ClCompile Include="src\3rdparty\EASTL\hashtable.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\red_black_tree.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\string.cpp" />
+    <ClCompile Include="src\Database\Assets\DBShader.cpp" />
+    <ClCompile Include="src\Database\Assets\DBTexture.cpp" />
+    <ClCompile Include="src\Database\AssetDatabase.cpp" />
+    <ClCompile Include="src\ResourceBuilder.cpp" />
+    <ClCompile Include="src\Utils\FileUtils.cpp" />
+    <ClCompile Include="src\Database\Processors\ByteImageProcessor.cpp" />
+    <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
+    <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
+    <ClCompile Include="src\Graphics\UI\Widgets\ImageButton.cpp">
+      <Filter>Source Files\UI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\UI\Widgets\TextButton.cpp">
+      <Filter>Source Files\UI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\UI\Widgets\Widget.cpp">
+      <Filter>Source Files\UI\Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\UI\Layout.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\UI\Style.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\UI\UIFrame.cpp">
+      <Filter>Source Files\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils\ThreadManager.cpp">
+      <Filter>Source Files\Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\Frustum.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\LightManager.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Assets\DBAtlasRegion.cpp" />
+    <ClCompile Include="src\Database\Assets\DBAtlasTexture.cpp" />
+    <ClCompile Include="src\Database\Assets\DBMaterial.cpp" />
+    <ClCompile Include="src\Database\Assets\DBMesh.cpp" />
+    <ClCompile Include="src\Database\Assets\DBNode.cpp" />
+    <ClCompile Include="src\Database\Assets\DBScene.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\QuadDrawer.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLMaterial.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLMesh.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Tech\SpriteBatch.cpp">
+      <Filter>Source Files\Graphics\GL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database\Utils\TextureAtlas.cpp" />
+    <ClCompile Include="src\Database\Utils\stb_image.c" />
+    <ClCompile Include="src\Database\Utils\CRC64.cpp" />
+    <ClCompile Include="src\Database\Utils\AtlasBuilder.cpp" />
+    <ClCompile Include="src\Database\Assets\IAsset.cpp" />
+    <ClCompile Include="src\Graphics\Utils\CheckGLError.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\FPSCameraController.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\ARBDebugOutput.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\TextureFormatUtils.cpp">
+      <Filter>Source Files\Graphics\GL\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Scene\GLRenderer.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ClusteredShading.cpp">
+      <Filter>Source Files\Graphics\GL\Tech</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\Utils\TiledShading.cpp">
+      <Filter>Source Files\Graphics\GL\Tech</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Graphics\GL\Scene\GLConfig.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Private\Utils\Bounds2D.h">
@@ -158,9 +178,6 @@
     </ClInclude>
     <ClInclude Include="include\Private\Utils\Bounds3D.h">
       <Filter>Header Files\Private\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h">
-      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h">
       <Filter>Header Files\Public\Utils</Filter>
@@ -183,15 +200,6 @@
     <ClInclude Include="include\Public\Utils\FileModificationManager.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\UI\Font.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\FPSCameraController.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Frustum.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="include\Private\Graphics\GL\GL.h">
       <Filter>Header Files\Private\Graphics\GL</Filter>
     </ClInclude>
@@ -207,14 +215,8 @@
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h">
       <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\GLMesh.h">
-      <Filter>Header Files\Public\Graphics\GL</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h">
       <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\GLSpriteBatch.h">
-      <Filter>Header Files\Public\Graphics\GL</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLStateBuffer.h">
       <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
@@ -240,65 +242,23 @@
     <ClInclude Include="include\Public\Graphics\Graphics.h">
       <Filter>Header Files\Public\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\UI\Widgets\ImageButton.h">
-      <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Input\Input.h">
       <Filter>Header Files\Public\Input</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\JobScheduler.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\UI\Layout.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\LightManager.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\MatForward.h">
       <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\PerspectiveCamera.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Pixmap.h">
-      <Filter>Header Files\Public\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Utils\Semaphore.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Private\Utils\sphereToScreenSpaceBounds.h">
-      <Filter>Header Files\Private\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\UI\Style.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\UI\Widgets\TextButton.h">
-      <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Tech\TiledShading.h">
-      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Utils\VecForward.h">
       <Filter>Header Files\Public\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\UI\Widgets\Widget.h">
-      <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
     <ClInclude Include="src\json\json_tool.h">
       <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\GL\Utils\tryEnableARBDebugOutput.h">
-      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Utils\QuadDrawUtils.h">
-      <Filter>Header Files\Public\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\GL\Utils\CheckGLError.h">
-      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\GL\Utils\getGLTextureFormat.h">
-      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Input\InputListener.h">
       <Filter>Header Files\Public\Input</Filter>
@@ -306,22 +266,9 @@
     <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h">
       <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
     </ClInclude>
-    <ClInclude Include="include\Private\Threading\ThreadManager.h">
-      <Filter>Header Files\Private\Threading</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\TextureRegion.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\GLContext.h">
       <Filter>Header Files\Public\Graphics\GL</Filter>
     </ClInclude>
-    <ClInclude Include="include\Public\UI\UIFrame.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\EAssetType.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Scene.h" />
     <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp">
       <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
     </ClInclude>
@@ -434,6 +381,102 @@
     <ClInclude Include="include\3rdparty\EASTL\vector.h" />
     <ClInclude Include="include\3rdparty\EASTL\vector_map.h" />
     <ClInclude Include="include\3rdparty\EASTL\to_string.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBTexture.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabase.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
+    <ClInclude Include="include\Public\Utils\FileUtils.h" />
+    <ClInclude Include="include\Public\Utils\Vec.h" />
+    <ClInclude Include="include\3rdparty\EASTL\custom_glengine_allocator.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBAtlasRegion.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBAtlasTexture.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBMaterial.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBMesh.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBNode.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBScene.h" />
+    <ClInclude Include="include\Public\Database\Processors\ByteImageProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\FloatImageProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\ResourceProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\SceneProcessor.h" />
+    <ClInclude Include="include\Public\Database\ResourceBuilder.h" />
+    <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
+    <ClInclude Include="include\Public\Database\Assets\EAssetType.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\ImageButton.h">
+      <Filter>Header Files\Public\UI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\TextButton.h">
+      <Filter>Header Files\Public\UI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\Widget.h">
+      <Filter>Header Files\Public\UI\Widgets</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\UI\Font.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\UI\Layout.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\UI\Style.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\UI\UIFrame.h">
+      <Filter>Header Files\Public\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Utils\ThreadManager.h">
+      <Filter>Header Files\Private\Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Utils\Frustum.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Utils\LightManager.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Utils\TextureRegion.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Utils\PerspectiveCamera.h">
+      <Filter>Header Files\Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Tech\QuadDrawer.h">
+      <Filter>Header Files\Public\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Tech\SpriteBatch.h">
+      <Filter>Header Files\Public\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Database\Utils\stb_image.h" />
+    <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
+    <ClInclude Include="include\Public\Database\Utils\CRC64.h" />
+    <ClInclude Include="include\Public\Database\Utils\AtlasPosition.h" />
+    <ClInclude Include="include\Public\Database\Utils\AtlasBuilder.h" />
+    <ClInclude Include="include\Public\Database\Utils\TextureAtlas.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\FPSCameraController.h">
+      <Filter>Header Files\Public\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h">
+      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\Utils\TextureFormatUtils.h">
+      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\Utils\ARBDebugOutput.h">
+      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h">
+      <Filter>Header Files\Private\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLScene.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMesh.h">
+      <Filter>Header Files\Public\Graphics\GL</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\TiledShading.h">
+      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\Utils\ClusteredShading.h">
+      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

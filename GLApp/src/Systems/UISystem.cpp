@@ -1,10 +1,9 @@
 #include "Systems/UISystem.h"
 
-#include "3rdparty/rde/rde_string.h"
-#include "3rdparty/rde/sort.h"
+#include "EASTL/sort.h"
 #include "Components/UIComponent.h"
 #include "Systems/RenderSystem.h"
-#include "UI/UIFrame.h"
+#include "Graphics/UI/UIFrame.h"
 
 UISystem::~UISystem()
 {
@@ -26,7 +25,7 @@ void UISystem::receive(entityx::ComponentAddedEvent<UIComponent>& a_uiComponentA
 	auto& component = a_uiComponentAddedEvent.component;
 	// We keep track of a sorted list of components so the render system can draw them in order 
 	m_uiComponents.push_back(component.get());
-	rde::quick_sort(m_uiComponents.begin(), m_uiComponents.end(), [](UIComponent* l, UIComponent* r) {
+	eastl::quick_sort(m_uiComponents.begin(), m_uiComponents.end(), [](UIComponent* l, UIComponent* r) {
 		return l->getLayer() < r->getLayer();
 	});
 	component->m_uiFrame->updateLayout();
@@ -50,6 +49,6 @@ void UISystem::updateLayout()
 
 void UISystem::onUIComponentRemoved(UIComponent* component)
 {
-	m_uiComponents.remove(component);
+	eastl::remove(m_uiComponents.begin(), m_uiComponents.end(), component);
 }
 

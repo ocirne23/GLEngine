@@ -2,7 +2,7 @@
 
 #include "Core.h"
 
-class Pixmap;
+class DBTexture;
 
 class GLTexture
 {
@@ -37,17 +37,11 @@ public:
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
-	void initialize(const Pixmap& pixmap,
+	void initialize(const DBTexture& texture, uint numMipmaps = 4,
 				ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
 				ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
 				ETextureWrap textureWrapS = ETextureWrap::REPEAT,
 				ETextureWrap textureWrapT = ETextureWrap::REPEAT);
-
-	void initialize(const char* filePath,
-					ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
-					ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
-					ETextureWrap textureWrapS = ETextureWrap::REPEAT,
-					ETextureWrap textureWrapT = ETextureWrap::REPEAT);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);

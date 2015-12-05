@@ -22,8 +22,7 @@ public:
 
 	~InputListener()
 	{
-		// unordered?
-		GLEngine::input->getListeners(*this).remove_unordered(this);
+		GLEngine::input->getListeners(*this).remove(this);
 	}
 
 	void setFunc(std::function<RetType(Args...)> a_func)
