@@ -2,16 +2,14 @@
 // GLSL port of Nvidia's HBAO implementation from the DX11 samples
 // https://developer.nvidia.com/dx11-samples
 
-#define KERNEL_RADIUS 8.0
+layout(binding = HBAO_DEPTH_TEXTURE_BINDING_POINT) uniform sampler2D u_aoDepthTex;
 
-#define MS_FBO
-#ifdef MS_FBO
-uniform sampler2DMS u_colorTex;
+#if HBAO_USE_MS_FBO
+layout(binding = HBAO_COLOR_TEXTURE_BINDING_POINT) uniform sampler2DMS u_colorTex;
 #else
-uniform sampler2D u_colorTex;
+layout(binding = HBAO_COLOR_TEXTURE_BINDING_POINT) uniform sampler2D u_colorTex;
 #endif
 
-uniform sampler2D u_aoDepthTex;
 in vec2 v_texcoord;
 
 layout(location = 0) out vec3 out_color;
@@ -23,7 +21,7 @@ vec2 sampleAODepth(vec2 a_uv)
 
 float crossBilateralWeight(float a_r, float a_z, float a_z0)
 {
-    float blurSigma = (KERNEL_RADIUS + 1.0f) * 0.5f;
+    float blurSigma = (HBAO_BLUR_KERNEL_RADIUS + 1.0f) * 0.5f;
     float blurFalloff = 1.0f / (2.0f * blurSigma * blurSigma);
 
     float dz = a_z0 - a_z;
@@ -40,7 +38,7 @@ void main()
     float totalWeight = w;
     float i = 1.0;
 
-    for(; i <= KERNEL_RADIUS / 2; i += 1.0)
+    for(; i <= HBAO_BLUR_KERNEL_RADIUS / 2; i += 1.0)
     {
 		aoDepth = sampleAODepth(vec2(0, i));
 		w = crossBilateralWeight(i, aoDepth.y, centerZ);
@@ -53,7 +51,7 @@ void main()
 		totalWeight += w;
     }
 
-    for(; i <= KERNEL_RADIUS; i += 2.0)
+    for(; i <= HBAO_BLUR_KERNEL_RADIUS; i += 2.0)
     {
 		aoDepth = sampleAODepth(vec2(0, 0.5 + i));
 		w = crossBilateralWeight(i, aoDepth.y, centerZ);
@@ -67,7 +65,7 @@ void main()
     }
     float ao = totalAO / totalWeight;
 
-#ifdef MS_FBO
+#if HBAO_USE_MS_FBO
 	vec3 color = texelFetch(u_colorTex, ivec2(gl_FragCoord.xy), gl_SampleID).rgb;
 #else
 	vec3 color = texture(u_colorTex, v_texcoord).rgb;

@@ -14,8 +14,6 @@ BEGIN_UNNAMED_NAMESPACE()
 static const char* const DFV_TEX_PATH = "Assets/Utils/ggx-helper-dfv.hdr";
 static const char* const MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
 static const char* const MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
-static const uint CLUSTERED_SHADING_TILE_WIDTH_PX = 64;
-static const uint CLUSTERED_SHADING_TILE_HEIGHT_PX = 64;
 
 static const glm::vec3 AMBIENT(0.15f);
 
@@ -25,8 +23,9 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 {
 	uint screenWidth = GLEngine::graphics->getViewportWidth();
 	uint screenheight = GLEngine::graphics->getViewportHeight();
-	m_hbao.initialize(a_camera, screenWidth, screenheight, GLFramebuffer::EMultiSampleType::MSAA_4X);
-	m_clusteredShading.initialize(a_camera, screenWidth, screenheight, CLUSTERED_SHADING_TILE_WIDTH_PX, CLUSTERED_SHADING_TILE_HEIGHT_PX);
+
+	m_hbao.initialize(a_camera, screenWidth, screenheight, GLConfig::MULTISAMPLE_TYPE);
+	m_clusteredShading.initialize(a_camera, screenWidth, screenheight, GLConfig::CLUSTERED_SHADING_TILE_WIDTH, GLConfig::CLUSTERED_SHADING_TILE_HEIGHT);
 
 	m_modelMatrixUBO.initialize(GLConfig::MODEL_MATRIX_UBO);
 	m_cameraVarsUBO.initialize(GLConfig::CAMERA_VARS_UBO);
@@ -35,21 +34,7 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_lightColorIntensitiesUBO.initialize(GLConfig::LIGHT_COLOR_INTENSITIES_UBO);
 	m_clusteredShadingGlobalsUBO.initialize(GLConfig::CLUSTERED_SHADING_GLOBALS_UBO);
 
-	eastl::vector<eastl::string> defines;
-	defines.push_back(eastl::string("MAX_LIGHTS ").append(StringUtils::to_string((int) GLConfig::MAX_LIGHTS)));
-	defines.push_back(eastl::string("LIGHT_GRID_WIDTH ").append(StringUtils::to_string(m_clusteredShading.getGridWidth())));
-	defines.push_back(eastl::string("LIGHT_GRID_HEIGHT ").append(StringUtils::to_string(m_clusteredShading.getGridHeight())));
-	defines.push_back(eastl::string("LIGHT_GRID_DEPTH ").append(StringUtils::to_string(m_clusteredShading.getGridDepth())));
-	defines.push_back(eastl::string("LIGHT_GRID_TILE_WIDTH ").append(StringUtils::to_string(m_clusteredShading.getTileWidth())));
-	defines.push_back(eastl::string("LIGHT_GRID_TILE_HEIGHT ").append(StringUtils::to_string(m_clusteredShading.getTileHeight())));
-
-	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &defines);
-	m_modelShader.begin();
-	m_modelShader.setUniform1i("u_textureAtlasArray", 1);
-	m_modelShader.setUniform1i("u_dfvTexture", 2);
-	m_modelShader.setUniform1i("u_lightGrid", 3);
-	m_modelShader.setUniform1i("u_lightIndices", 4);
-	m_modelShader.end();
+	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 
 	LightingGlobalsUBO* lightingGlobals = (LightingGlobalsUBO*) m_lightningGlobalsUBO.mapBuffer();
 	lightingGlobals->u_ambient = AMBIENT;
@@ -101,9 +86,9 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 		m_lightIndiceTextureBuffer.upload(m_clusteredShading.getNumLightIndices() * sizeof(ushort), m_clusteredShading.getLightIndices());
 	}
 
-	m_dfvTexture.bind(2);
-	m_lightGridTextureBuffer.bind(3);
-	m_lightIndiceTextureBuffer.bind(4);
+	m_dfvTexture.bind(GLConfig::DFV_TEXTURE_BINDING_POINT);
+	m_lightGridTextureBuffer.bind(GLConfig::LIGHT_GRID_TEXTURE_BINDING_POINT);
+	m_lightIndiceTextureBuffer.bind(GLConfig::LIGHT_INDICE_TEXTURE_BINDING_POINT);
 
 	m_modelShader.begin();
 

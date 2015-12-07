@@ -3,18 +3,13 @@
 
 #include "Shaders/globals.glsl"
 
-#define NUM_DIRECTIONS 6
-#define NUM_STEPS 6
-#define RANDOM_TEXTURE_WIDTH 8
-
-#define MS_FBO
-#ifdef MS_FBO
-uniform sampler2DMS u_linearDepthTex;
+#if HBAO_USE_MS_FBO
+layout(binding = HBAO_DEPTH_TEXTURE_BINDING_POINT) uniform sampler2DMS u_linearDepthTex;
 #else
-uniform sampler2D u_linearDepthTex;
+layout(binding = HBAO_DEPTH_TEXTURE_BINDING_POINT) uniform sampler2D u_linearDepthTex;
 #endif
 
-uniform sampler2D u_randomTex;
+layout (binding = HBAO_NOISE_TEXTURE_BINDING_POINT) uniform sampler2D u_noiseTex;
 
 in vec2 v_position;
 in vec2 v_texcoord;
@@ -55,7 +50,7 @@ vec3 uvToEye(vec2 a_uv, float a_eyeZ)
 
 vec3 fetchEyePos(vec2 a_uv)
 {
-#ifdef MS_FBO
+#if HBAO_USE_MS_FBO
 	float depth = texelFetch(u_linearDepthTex, ivec2(a_uv * u_aoResolution), gl_SampleID).r;
 #else
 	float depth = texture(u_linearDepthTex, a_uv).r;
@@ -99,12 +94,12 @@ vec3 tangentVector(vec2 a_deltaUV, vec3 a_dPdu, vec3 a_dPdv)
 vec2 rotateDirections(vec2 a_dir, vec2 a_cosSin)
 {
     return vec2(a_dir.x * a_cosSin.x - a_dir.y * a_cosSin.y,
-		a_dir.x * a_cosSin.y + a_dir.y * a_cosSin.x);
+	            a_dir.x * a_cosSin.y + a_dir.y * a_cosSin.x);
 }
 
 void computeSteps(inout vec2 a_stepSizeUV, inout float a_numSteps, float a_rayRadiusPx, float a_rand)
 {
-    a_numSteps = min(NUM_STEPS, a_rayRadiusPx);
+    a_numSteps = min(HBAO_NUM_STEPS, a_rayRadiusPx);
     float stepSizePx = a_rayRadiusPx / (a_numSteps + 1);
     float maxNumSteps = u_maxRadiusPixels / stepSizePx;
     
@@ -153,7 +148,7 @@ void main()
 	float ao = 1.0;
 
 	vec3 p = fetchEyePos(v_texcoord);
-	vec3 rand = texture(u_randomTex, v_texcoord.xy * u_noiseTexScale).rgb;
+	vec3 rand = texture(u_noiseTex, v_texcoord.xy * u_noiseTexScale).rgb;
 	vec2 rayRadiusUV = (0.5 * u_r * u_focalLen) / -p.z;
 	float rayRadiusPx = rayRadiusUV.x * u_aoResolution.x;
 	if (rayRadiusPx > 1.0)
@@ -172,16 +167,16 @@ void main()
 		vec3 dPdu = minDiff(p, pr, pl);
 		vec3 dPdv = minDiff(p, pt, pb) * (u_aoResolution.y * u_invAOResolution.x);
 
-		float alpha = 2.0 * PI / NUM_DIRECTIONS;
+		float alpha = 2.0 * PI / HBAO_NUM_DIRECTIONS;
 
-		for (float d = 0.0; d < NUM_DIRECTIONS; ++d)
+		for (float d = 0.0; d < HBAO_NUM_DIRECTIONS; ++d)
 		{
 			float angle = alpha * d;
 			vec2 dir = rotateDirections(vec2(cos(angle), sin(angle)), rand.xy);
 			vec2 deltaUV = dir * stepSize;
 			ao += horizonOcclusion(deltaUV, p, numSteps, rand.z, dPdu, dPdv);
 		}
-		ao = 1.0 - ao / NUM_DIRECTIONS * u_strength;
+		ao = 1.0 - ao / HBAO_NUM_DIRECTIONS * u_strength;
 	}
 	out_aoDepth = vec2(ao, p.z);
 }

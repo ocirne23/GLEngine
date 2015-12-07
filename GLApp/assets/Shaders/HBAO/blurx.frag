@@ -2,11 +2,9 @@
 // GLSL port of Nvidia's HBAO implementation from the DX11 samples
 // https://developer.nvidia.com/dx11-samples
 
-#define KERNEL_RADIUS 8.0
-
 in vec2 v_texcoord;
 
-uniform sampler2D u_aoDepthTex;
+layout(binding = HBAO_DEPTH_TEXTURE_BINDING_POINT) uniform sampler2D u_aoDepthTex;
 
 layout(location = 0) out vec2 out_aoDepth;
 
@@ -17,7 +15,7 @@ vec2 sampleAODepth(vec2 a_uv)
 
 float crossBilateralWeight(float a_r, float a_z, float a_z0)
 {
-    float blurSigma = (KERNEL_RADIUS + 1.0f) * 0.5f;
+    float blurSigma = (HBAO_BLUR_KERNEL_RADIUS + 1.0f) * 0.5f;
     float blurFalloff = 1.0f / (2.0f * blurSigma * blurSigma);
 
     float dz = a_z0 - a_z;
@@ -34,7 +32,7 @@ void main()
     float totalWeight = w;
     float i = 1.0;
 
-    for(; i <= KERNEL_RADIUS / 2; i += 1.0)
+    for(; i <= HBAO_BLUR_KERNEL_RADIUS / 2; i += 1.0)
     {
 		aoDepth = sampleAODepth(vec2(i, 0));
 		w = crossBilateralWeight(i, aoDepth.y, centerZ);
@@ -47,7 +45,7 @@ void main()
 		totalWeight += w;
     }
 
-    for(; i <= KERNEL_RADIUS; i += 2.0)
+    for(; i <= HBAO_BLUR_KERNEL_RADIUS; i += 2.0)
     {
 		aoDepth = sampleAODepth(vec2(0.5 + i, 0));
 		w = crossBilateralWeight(i, aoDepth.y, centerZ);

@@ -12,7 +12,6 @@
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
 	DBScene* scene = (DBScene*) a_database.loadAsset(a_assetName, EAssetType::SCENE);
-	print("Nummaterials: %i\n", scene->getMaterials().size());
 	m_nodes = scene->getNodes();
 
 	m_meshes.resize(scene->numMeshes());
@@ -42,7 +41,6 @@ void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_data
 	for (uint i = 0; i < scene->numMaterials(); ++i)
 		materials[i].initialize(scene->getMaterials()[i]);
 
-
 	if (scene->numAtlasTextures())
 	{
 		const eastl::vector<DBAtlasTexture>& atlasTextures = scene->getAtlasTextures();
@@ -66,15 +64,15 @@ void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_data
 
 void GLScene::render(GLConstantBuffer& a_modelMatrixUBO)
 {
-	if (!m_visible)
-		return;
-
-	m_materialBuffer.bind();
-	if (m_textureArray.getNumTexturesAdded())
-		m_textureArray.bind(1);
-	else
-		m_textureArray.unbind(1);
-	renderNode(a_modelMatrixUBO, m_baseTransform, 0);
+	if (m_visible)
+	{
+		m_materialBuffer.bind();
+		if (m_textureArray.getNumTexturesAdded())
+			m_textureArray.bind(GLConfig::TEXTURE_ATLAS_ARRAY_BINDING_POINT);
+		else
+			m_textureArray.unbind(GLConfig::TEXTURE_ATLAS_ARRAY_BINDING_POINT);
+		renderNode(a_modelMatrixUBO, m_baseTransform, 0);
+	}
 }
 
 void GLScene::renderNode(GLConstantBuffer& a_modelMatrixUBO, const glm::mat4& a_parentTransform, uint a_node)

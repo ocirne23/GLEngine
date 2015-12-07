@@ -41,13 +41,9 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	m_blurYFbo.addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 	CHECK_GL_ERROR();
 
-	eastl::vector<eastl::string> defines;
-	if (m_fboFullRes.isMultisampleEnabled())
-		defines.push_back("MS_FBO");
-
-	m_hbaoFullShader.initialize("Shaders/quad.vert", "Shaders/HBAO/HBAO.frag", &defines);
-	m_blurXShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blurx.frag", &defines);
-	m_blurYShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blury.frag", &defines);
+	m_hbaoFullShader.initialize("Shaders/quad.vert", "Shaders/HBAO/HBAO.frag", &GLConfig::getGlobalShaderDefines());
+	m_blurXShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blurx.frag", &GLConfig::getGlobalShaderDefines());
+	m_blurYShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blury.frag", &GLConfig::getGlobalShaderDefines());
 
 	uint noiseTexWidth = NOISE_RES;
 	uint noiseTexHeight = NOISE_RES;
@@ -100,20 +96,6 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	globals.ndcDepthConv.y    = (near + far) / (2.0f * near * far);
 
 	m_hbaoFullShader.begin();
-	m_hbaoFullShader.setUniform1i("u_linearDepthTex", 0);
-	m_hbaoFullShader.setUniform1i("u_randomTex", 1);
-	m_hbaoFullShader.end();
-
-	m_blurXShader.begin();
-	m_blurXShader.setUniform1i("u_aoDepthTex", 0);
-	m_blurXShader.end();
-
-	m_blurYShader.begin();
-	m_blurYShader.setUniform1i("u_aoDepthTex", 0);
-	m_blurYShader.setUniform1i("u_colorTex", 1);
-	m_blurYShader.end();
-
-	m_hbaoFullShader.begin();
 	m_hbaoGlobalsBuffer.initialize(GLConfig::HBAO_GLOBALS_UBO);
 	m_hbaoGlobalsBuffer.upload(sizeof(GlobalsUBO), &globals);
 	m_hbaoFullShader.end();
@@ -125,20 +107,19 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 
 void HBAO::begin()
 {
-	m_fboFullRes.begin();
 	CHECK_GL_ERROR();
+	m_fboFullRes.begin();
 }
 
 void HBAO::endAndRender()
 {
 	CHECK_GL_ERROR();
-
 	m_fboFullRes.end();
 	glDisable(GL_DEPTH_TEST);
 
 	// Apply HBAO //
-	m_fboFullRes.bindDepthTexture(0);
-	m_noiseTexture.bind(1);
+	m_fboFullRes.bindDepthTexture(GLConfig::HBAO_DEPTH_TEXTURE_BINDING_POINT);
+	m_noiseTexture.bind(GLConfig::HBAO_NOISE_TEXTURE_BINDING_POINT);
 
 	m_blurXFbo.begin();
 	m_hbaoFullShader.begin();
@@ -148,7 +129,7 @@ void HBAO::endAndRender()
 	m_blurXFbo.end();
 	
 	// Blur X //
-	m_blurXFbo.bindTexture(0, 0);
+	m_blurXFbo.bindTexture(0, GLConfig::HBAO_DEPTH_TEXTURE_BINDING_POINT);
 	m_blurYFbo.begin();
 	m_blurXShader.begin();
 	QuadDrawer::drawQuad(m_blurXShader);
@@ -156,8 +137,8 @@ void HBAO::endAndRender()
 	m_blurYFbo.end();
 
 	// Blur Y and combine // 
-	m_blurYFbo.bindTexture(0, 0);
-	m_fboFullRes.bindTexture(0, 1);
+	m_blurYFbo.bindTexture(0, GLConfig::HBAO_DEPTH_TEXTURE_BINDING_POINT);
+	m_fboFullRes.bindTexture(0, GLConfig::HBAO_COLOR_TEXTURE_BINDING_POINT);
 	m_blurYShader.begin();
 	QuadDrawer::drawQuad(m_blurYShader);
 	m_blurYShader.end();

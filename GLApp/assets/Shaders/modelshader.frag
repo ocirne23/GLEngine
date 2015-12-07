@@ -11,7 +11,7 @@ flat in uint v_materialID;
 
 layout (location = 0) out vec3 out_color;
 
-uniform sampler2D u_dfvTexture;
+layout (binding = DFV_TEXTURE_BINDING_POINT) uniform sampler2D u_dfvTexture;
 
 vec3 rotateNormal(vec3 tangentSpaceNormal)
 {
@@ -83,7 +83,6 @@ void main()
 		vec3 lightContrib = light.colorIntensity.rgb * attenuation * light.colorIntensity.a;
 		diffuseAccum += lightContrib * diffuseBurley(diffuse, roughness, NdotV, NdotL, VdotH);
 		specularAccum += lightContrib * specularGGX(roughness, F0, NdotH, HdotL, NdotL);
-		//diffuseAccum += vec3(0.0, 0.1, 0.0);
 	}
 	diffuseAccum += diffuse * u_ambient;
 	vec3 finalColor = diffuseAccum + specularAccum;

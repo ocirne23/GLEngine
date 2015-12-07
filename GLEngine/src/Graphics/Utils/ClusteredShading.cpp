@@ -90,3 +90,15 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLight
 			m_lightIndices.push_back(m_tileLightIndices[i][j]);
 	}
 }
+
+ClusteredShading::GlobalsUBO ClusteredShading::getUBOData() const
+{
+	GlobalsUBO ubo;
+	ubo.u_recNear    = m_recNear;
+	ubo.u_recLogSD1  = m_recLogSD1;
+	ubo.u_tileWidth  = m_pixelsPerTileW;
+	ubo.u_tileHeight = m_pixelsPerTileH;
+	ubo.u_gridHeight = m_gridHeight;
+	ubo.u_gridDepth  = m_gridDepth;
+	return ubo;
+}

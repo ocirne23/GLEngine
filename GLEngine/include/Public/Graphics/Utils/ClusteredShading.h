@@ -14,6 +14,12 @@ public:
 	{
 		float u_recNear;
 		float u_recLogSD1;
+
+		int u_tileWidth;
+		int u_tileHeight;
+
+		int u_gridHeight;
+		int u_gridDepth;
 	};
 
 public:
@@ -34,7 +40,7 @@ public:
 	uint getNumLightIndices() const        { return m_lightIndices.size(); }
 	const glm::uvec2* getLightGrid() const { return m_lightGrid; }
 	const ushort* getLightIndices() const  { return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
-	GlobalsUBO getUBOData() const          { return {m_recNear, m_recLogSD1}; }
+	GlobalsUBO getUBOData() const;
 
 private:
 
