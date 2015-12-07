@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+
 #include <functional>
 
 class Input;
@@ -37,7 +38,7 @@ class GLEngine
 public:
 
 	/** Should be called prior to anything else related to the library */
-	static void initialize();
+	static void initialize(const char* windowName, uint width, uint height, bool createWindow = true);
 	static void createThread(const char* threadName, std::function<void()> func);
 
 	/** Setup a thread with a GL context to allow for rendering */

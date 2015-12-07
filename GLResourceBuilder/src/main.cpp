@@ -8,13 +8,12 @@
 
 int main()
 {
-	GLEngine::initialize();
+	GLEngine::initialize("GLResourceBuilder", 0, 0, false);
 
 	SceneProcessor sceneProcessor;
 
 	ResourceBuilder::ResourceProcessorMap ifcProcessors;
 	ifcProcessors.insert({"ifc", &sceneProcessor});
-
 	AssetDatabase ifcDB;
 	ifcDB.createNew("..\\GLApp\\assets\\IFC-DB.da");
 	ResourceBuilder::buildResourcesDB(ifcProcessors, "..\\GLApp\\assets-source\\Models", ifcDB);

@@ -5,7 +5,7 @@
 
 int main()
 {
-	GLEngine::initialize();
+	GLEngine::initialize("GLApp", 1200, 720);
 	
 	GLEngine::createThread("RenderThread", [&]()
 	{
