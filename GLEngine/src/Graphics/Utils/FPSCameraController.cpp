@@ -2,184 +2,88 @@
 
 #include "Graphics/Utils/PerspectiveCamera.h"
 
-#include "Input/EKey.h"
-#include "Input/EMouseButton.h"
-
-#include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/compatibility.hpp>
 
-static const float DEFAULT_CAMERA_SPEED = 1.0f;
-static const float MOUSE_LOOK_SENSITIVITY = 0.7f;
+BEGIN_UNNAMED_NAMESPACE()
+
 static const glm::vec3 UP(0, 1, 0);
+static const glm::vec3 FORWARD(0, 0, -1);
+
+END_UNNAMED_NAMESPACE()
 
 FPSCameraController::FPSCameraController()
-	: m_lmbPressed(false)
-	, m_rmbPressed(false)
-	, m_isWPressed(false), m_isAPressed(false), m_isSPressed(false), m_isDPressed(false)
-	, m_isSpacePressed(false), m_isShiftPressed(false)
 {
-	setCameraSpeed(DEFAULT_CAMERA_SPEED);
-}
-
-void FPSCameraController::initialize(PerspectiveCamera& a_camera)
-{
-	m_camera = &a_camera;
-	m_lookDir = a_camera.getDirection();
-	m_initialized = true;
-}
-
-void FPSCameraController::setCameraSpeed(float a_cameraSpeed)
-{
-	m_cameraSpeed = a_cameraSpeed;
-	m_diagonalCameraSpeed = glm::sqrt((a_cameraSpeed * a_cameraSpeed) * 0.5f);
-}
-
-void FPSCameraController::update(float a_deltaSec)
-{
-	if (!m_initialized)
-		return;
-
-	bool w = m_isWPressed;
-	bool a = m_isAPressed;
-	bool s = m_isSPressed;
-	bool d = m_isDPressed;
-	bool space = m_isSpacePressed;
-	bool shift = m_isShiftPressed;
-
-	if (w && s)
-		w = false, s = false;
-	if (a && d)
-		a = false, d = false;
-	if (space && shift)
-		space = false, shift = false;
-
-	if (w)
+	m_mouseMovedListener.setFunc([this](uint a_xPos, uint a_yPos, int a_deltaX, int a_deltaY)
 	{
-		if (a)
-			m_camera->translateRelative(-m_diagonalCameraSpeed * a_deltaSec, 0.0f, -m_diagonalCameraSpeed * a_deltaSec);
-		else if (d)
-			m_camera->translateRelative(m_diagonalCameraSpeed * a_deltaSec, 0.0f, -m_diagonalCameraSpeed * a_deltaSec);
-		else
-			m_camera->translateRelative(0.0f, 0.0f, -m_cameraSpeed * a_deltaSec);
-	}
-	else if (s)
-	{
-		if (a)
-			m_camera->translateRelative(-m_diagonalCameraSpeed * a_deltaSec, 0.0f, m_diagonalCameraSpeed * a_deltaSec);
-		else if (d)
-			m_camera->translateRelative(m_diagonalCameraSpeed * a_deltaSec, 0.0f, m_diagonalCameraSpeed * a_deltaSec);
-		else
-			m_camera->translateRelative(0.0f, 0.0f, m_cameraSpeed * a_deltaSec);
-	}
-	else if (a)
-		m_camera->translateRelative(-m_cameraSpeed * a_deltaSec, 0.0f, 0.0f);
-	else if (d)
-		m_camera->translateRelative(m_cameraSpeed * a_deltaSec, 0.0f, 0.0f);
-
-	if (space)
-		m_camera->translateRelative(0.0f, m_cameraSpeed * a_deltaSec, 0.0f);
-	else if (shift)
-		m_camera->translateRelative(0.0f, -m_cameraSpeed * a_deltaSec, 0.0f);
-
-	m_camera->lookAtDir(m_lookDir);
-	m_camera->updateMatrices();
+		if (GLEngine::input->isMousePressed(EMouseButton::LEFT))
+		{
+			m_mouseXMoveAmount += a_deltaX;
+			m_mouseYMoveAmount += a_deltaY;
+		}
+	});
 }
 
-bool FPSCameraController::mouseDown(EMouseButton a_key, int a_xPos, int a_yPos)
+void FPSCameraController::update(PerspectiveCamera& a_camera, float a_deltaSec)
 {
-	if (a_key == EMouseButton::LEFT)
-		m_lmbPressed = true;
-	if (a_key == EMouseButton::RIGHT)
-		m_rmbPressed = true;
-	return false;
-}
+	glm::vec3 movement = getLocalSpaceMovementVector();
 
-bool FPSCameraController::mouseUp(EMouseButton a_key, int a_xPos, int a_yPos)
-{
-	if (a_key == EMouseButton::LEFT)
-		m_lmbPressed = false;
-	if (a_key == EMouseButton::RIGHT)
-		m_rmbPressed = false;
-	return false;
-}
+	float xLookRotation = -m_mouseXMoveAmount * m_mouseLookSensitivity;
+	float yLookRotation = -m_mouseYMoveAmount * m_mouseLookSensitivity;
 
-bool FPSCameraController::mouseMoved(uint a_xPos, uint a_yPos, int a_xMove, int a_yMove)
-{
-	if (!m_lmbPressed)
-		return false;
-	//rotate horizontally
-	m_lookDir = glm::rotate(m_lookDir, -a_xMove * MOUSE_LOOK_SENSITIVITY, UP);
+	glm::vec3 position = a_camera.getPosition();
+	glm::mat3 rotation(a_camera.getViewMatrix());
+	glm::vec3 direction(FORWARD * rotation);
 
-	//calculate axis to rotate vertically on
-	float xzAngle = glm::atan2(m_lookDir.x, m_lookDir.z);
+	// Rotate horizontally
+	direction = glm::rotate(direction, xLookRotation, UP);
+	float xzAngle = glm::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
 
+	// Rotate vertically
 	glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));
+	glm::vec3 tmp = direction;
+	direction = glm::rotate(direction, yLookRotation, yRotAxis);
 
-	//rotate vertically
-	glm::vec3 tmp = m_lookDir;
-	m_lookDir = glm::rotate(m_lookDir, -a_yMove * MOUSE_LOOK_SENSITIVITY, yRotAxis);
-	//limit vertical look movement
+	// Limit vertical look movement
+	if (direction.y > 0.99f || direction.y < -0.99f)
+		direction = tmp;
 
-	if (m_lookDir.y > 0.99f || m_lookDir.y < -0.99f)
-		m_lookDir = tmp;
+	// Rotate xz movement based on direction
+	float xTrans = movement.x * glm::cos(xzAngle) + movement.z * glm::sin(xzAngle);
+	float zTrans = movement.z * glm::cos(xzAngle) - movement.x * glm::sin(xzAngle);
 
-	return false;
+	float speed = m_cameraSpeed * a_deltaSec;
+	position.x += -xTrans * speed;
+	position.z += -zTrans * speed;
+	position.y += movement.y * speed;
+
+	a_camera.lookAtDir(direction);
+	a_camera.setPosition(position);
+	a_camera.updateMatrices();
+
+	m_mouseXMoveAmount = 0;
+	m_mouseYMoveAmount = 0;
 }
 
-bool FPSCameraController::mouseScrolled(int a_amount)
-{
-	return false;
-}
 
-bool FPSCameraController::keyDown(EKey a_key)
+glm::vec3 FPSCameraController::getLocalSpaceMovementVector()
 {
-	switch (a_key)
-	{
-	case EKey::W:
-		m_isWPressed = true;
-		break;
-	case EKey::A:
-		m_isAPressed = true;
-		break;
-	case EKey::S:
-		m_isSPressed = true;
-		break;
-	case EKey::D:
-		m_isDPressed = true;
-		break;
-	case EKey::SPACE:
-		m_isSpacePressed = true;
-		break;
-	case EKey::LSHIFT:
-		m_isShiftPressed = true;
-		break;
-	}
-	return false;
-}
+	static const float DIAGONAL_1F = glm::sqrt(0.5f);
 
-bool FPSCameraController::keyUp(EKey a_key)
-{
-	switch (a_key)
-	{
-	case EKey::W:
-		m_isWPressed = false;
-		break;
-	case EKey::A:
-		m_isAPressed = false;
-		break;
-	case EKey::S:
-		m_isSPressed = false;
-		break;
-	case EKey::D:
-		m_isDPressed = false;
-		break;
-	case EKey::SPACE:
-		m_isSpacePressed = false;
-		break;
-	case EKey::LSHIFT:
-		m_isShiftPressed = false;
-		break;
-	}
-	return false;
+	Input& input = *GLEngine::input;
+	glm::vec3 movementVector(0);
+	if (input.isKeyPressed(EKey::W))
+		if (input.isKeyPressed(EKey::A))      movementVector = glm::vec3(-DIAGONAL_1F, 0, -DIAGONAL_1F);
+		else if (input.isKeyPressed(EKey::D)) movementVector = glm::vec3(DIAGONAL_1F, 0, -DIAGONAL_1F);
+		else                                  movementVector = glm::vec3(0, 0, -1.0f);
+	else if (input.isKeyPressed(EKey::S))
+		if (input.isKeyPressed(EKey::A))      movementVector = glm::vec3(-DIAGONAL_1F, 0, DIAGONAL_1F);
+		else if (input.isKeyPressed(EKey::D)) movementVector = glm::vec3(DIAGONAL_1F, 0, DIAGONAL_1F);
+		else                                  movementVector = glm::vec3(0, 0, 1.0f);
+	else if (input.isKeyPressed(EKey::A))     movementVector = glm::vec3(-1.0f, 0, 0);
+	else if (input.isKeyPressed(EKey::D))     movementVector = glm::vec3(1.0f, 0, 0);
+	if (input.isKeyPressed(EKey::SPACE))      movementVector.y += 1.0f;
+	if (input.isKeyPressed(EKey::LSHIFT))     movementVector.y -= 1.0f;
+
+	return movementVector;
 }

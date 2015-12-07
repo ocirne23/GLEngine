@@ -7,16 +7,16 @@
 #include "Graphics/GL/Scene/GLRenderer.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
 #include "Graphics/Utils/LightManager.h"
-#include "AppUtils/FPSMeasurer.h"
+#include "Utils/FPSMeasurer.h"
 
 #include "Graphics/Utils/FPSCameraController.h"
 
-class DBTestScreen
+class TestScreen
 {
 public:
-	DBTestScreen();
-	DBTestScreen(const DBTestScreen& copy) = delete;
-	~DBTestScreen();
+	TestScreen();
+	TestScreen(const TestScreen& copy) = delete;
+	~TestScreen();
 
 	void render(float deltaSec);
 
@@ -28,18 +28,13 @@ private:
 	GLScene m_ifcScene;
 	GLScene m_objScene;
 
-	GLRenderer m_renderer;
-	PerspectiveCamera m_camera;
 	FPSCameraController m_cameraController;
+	PerspectiveCamera m_camera;
 
 	LightManager m_lightManager;
+	GLRenderer m_renderer;
 
 	FPSMeasurer m_fpsMeasurer;
-
 	Input::KeyDownListener m_keyDownListener;
-	Input::KeyUpListener m_keyUpListener;
-	Input::MouseMovedListener m_mouseMovedListener;
-	Input::MouseDownListener m_mouseDownListener;
-	Input::MouseUpListener m_mouseUpListener;
 	Input::WindowQuitListener m_windowQuitListener;
 };

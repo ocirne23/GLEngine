@@ -1,27 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{9d2caa92-9c67-45e4-8637-ca45167f14ff}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{6188d9bd-4d1b-4724-a184-0e0b5e6ce1f0}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files\Utils">
-      <UniqueIdentifier>{fb4bda26-3ce1-4dcf-acd9-283eb28989c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Database">
-      <UniqueIdentifier>{de78dadb-fe58-40b6-96b8-a6c5dadf48cd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Processors">
-      <UniqueIdentifier>{0f61f029-1dd2-4fd1-ba13-b2538fd7ed11}</UniqueIdentifier>
-    </Filter>
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
 </Project>

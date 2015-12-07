@@ -11,7 +11,6 @@ void AssetDatabase::createNew(const eastl::string& a_filePath)
 {
 	assert(m_openMode == EOpenMode::UNOPENED);
 	
-	print("Creating new database\n");
 	m_openMode = EOpenMode::WRITE;
 	m_file.open(a_filePath.c_str(), std::ios::out | std::ios::binary);
 	assert(m_file.is_open());
@@ -28,7 +27,6 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 {
 	assert(m_openMode == EOpenMode::UNOPENED);
 	
-	print("Opening existing database\n");
 	m_openMode = EOpenMode::READ;
 	m_file.open(a_filePath.c_str(), std::ios::in | std::ios::binary);
 	assert(m_file.is_open());
@@ -47,7 +45,6 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 
 	uint assetTableSize;
 	assetTableEntry.readVal(assetTableSize);
-
 	for (uint i = 0; i < assetTableSize; ++i)
 	{
 		uint64 filePathHash, filePos, byteSize;
@@ -57,8 +54,7 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 		AssetDatabaseEntry entry(m_file, filePos, byteSize);
 		m_writtenAssets.insert({filePathHash, entry});
 	}
-
-	print("Opened DB, num assets: %i filesize: %iMB\n", m_writtenAssets.size(), fileSize / 1024 / 1024);
+	print("Opened DB: %s, num assets: %i filesize: %iMB\n", a_filePath.c_str(), m_writtenAssets.size(), fileSize / 1024 / 1024);
 }
 
 void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, IAsset* a_asset)

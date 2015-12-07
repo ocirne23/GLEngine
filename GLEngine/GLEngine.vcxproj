@@ -223,8 +223,6 @@
     <ClInclude Include="include\Public\Graphics\UI\Widgets\ImageButton.h" />
     <ClInclude Include="include\Public\Graphics\UI\Widgets\TextButton.h" />
     <ClInclude Include="include\Public\Graphics\UI\Layout.h" />
-    <ClInclude Include="include\Private\Utils\Bounds2D.h" />
-    <ClInclude Include="include\Private\Utils\Bounds3D.h" />
     <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h" />
     <ClInclude Include="include\Public\Graphics\UI\Font.h" />
     <ClInclude Include="include\Public\Graphics\UI\UIFrame.h" />
@@ -234,12 +232,14 @@
     <ClInclude Include="include\Public\Database\Utils\AtlasPosition.h" />
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
     <ClInclude Include="include\Public\Database\Utils\CRC64.h" />
+    <ClInclude Include="include\Public\Utils\DeltaTimeMeasurer.h" />
     <ClInclude Include="include\Public\Utils\FileHandle.h" />
     <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
     <ClInclude Include="include\Public\Utils\FileModificationManager.h" />
     <ClInclude Include="include\Public\Utils\FileUtils.h" />
     <ClInclude Include="include\Public\Graphics\Utils\FPSCameraController.h" />
     <ClInclude Include="include\Private\Graphics\Utils\TextureFormatUtils.h" />
+    <ClInclude Include="include\Public\Utils\FPSMeasurer.h" />
     <ClInclude Include="include\Public\Utils\JobScheduler.h" />
     <ClInclude Include="include\Public\Utils\MatForward.h" />
     <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
@@ -350,9 +350,7 @@
       </ForceSymbolReferences>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
-    <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -374,9 +372,7 @@
       <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
-    <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -400,9 +396,7 @@
       <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
-    <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -427,9 +421,7 @@
       <AdditionalDependencies>SDL2.lib;opengl32.lib;glu32.lib;glew32.lib;assimp.lib;</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
-    <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
     <ClCompile>

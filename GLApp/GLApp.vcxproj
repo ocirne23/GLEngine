@@ -23,36 +23,11 @@
     <RootNamespace>GLApp</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="src\Components\PointLightComponent.cpp" />
-    <ClCompile Include="src\Components\UIComponent.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Screens\DBTestScreen.cpp" />
-    <ClCompile Include="src\Screens\TestScreen.cpp" />
-    <ClCompile Include="src\Systems\CameraSystem.cpp" />
-    <ClCompile Include="src\Systems\FPSControlSystem.cpp" />
-    <ClCompile Include="src\Systems\LightSystem.cpp" />
-    <ClCompile Include="src\Systems\ModelManageSystem.cpp" />
-    <ClCompile Include="src\Systems\RenderSystem.cpp" />
-    <ClCompile Include="src\Systems\UISystem.cpp" />
+    <ClCompile Include="src\TestScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\AppUtils\DeltaTimeMeasurer.h" />
-    <ClInclude Include="src\AppUtils\FPSMeasurer.h" />
-    <ClInclude Include="src\Components\CameraComponent.h" />
-    <ClInclude Include="src\Components\FPSControlledComponent.h" />
-    <ClInclude Include="src\Components\ModelComponent.h" />
-    <ClInclude Include="src\Components\PointLightComponent.h" />
-    <ClInclude Include="src\Components\SkyComponent.h" />
-    <ClInclude Include="src\Components\TransformComponent.h" />
-    <ClInclude Include="src\Components\UIComponent.h" />
-    <ClInclude Include="src\Screens\DBTestScreen.h" />
-    <ClInclude Include="src\Screens\TestScreen.h" />
-    <ClInclude Include="src\Systems\CameraSystem.h" />
-    <ClInclude Include="src\Systems\FPSControlSystem.h" />
-    <ClInclude Include="src\Systems\LightSystem.h" />
-    <ClInclude Include="src\Systems\ModelManageSystem.h" />
-    <ClInclude Include="src\Systems\RenderSystem.h" />
-    <ClInclude Include="src\Systems\UISystem.h" />
+    <ClInclude Include="src\TestScreen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -143,9 +118,7 @@
       <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -164,9 +137,7 @@
       <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -192,9 +163,7 @@
       <Command>
       </Command>
     </PreBuildEvent>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -217,9 +186,7 @@
       <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
-    <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

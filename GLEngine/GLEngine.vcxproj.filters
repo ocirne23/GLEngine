@@ -1,87 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\Core.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GLEngine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Input\Input.cpp">
-      <Filter>Source Files\Input</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Graphics.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\FileHandle.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\FileModificationManager.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLShader.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLStateBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLTexture.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureArray.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp">
-      <Filter>Source Files\Graphics\GL\Wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\Semaphore.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\JobScheduler.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\entityx\help\Pool.cc">
-      <Filter>Source Files\3rdparty\entityx\help</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\entityx\help\Timer.cc">
-      <Filter>Source Files\3rdparty\entityx\help</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\entityx\Entity.cc">
-      <Filter>Source Files\3rdparty\entityx</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\entityx\Event.cc">
-      <Filter>Source Files\3rdparty\entityx</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\entityx\System.cc">
-      <Filter>Source Files\3rdparty\entityx</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\json\json_reader.cpp">
-      <Filter>Source Files\3rdparty\json</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\json\json_value.cpp">
-      <Filter>Source Files\3rdparty\json</Filter>
-    </ClCompile>
-    <ClCompile Include="src\3rdparty\json\json_writer.cpp">
-      <Filter>Source Files\3rdparty\json</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp">
-      <Filter>Source Files\Graphics\GL\Tech</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\GLContext.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\3rdparty\EASTL\allocator.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\assert.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\fixed_pool.cpp" />
@@ -96,252 +15,76 @@
     <ClCompile Include="src\Database\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
-    <ClCompile Include="src\Graphics\UI\Widgets\ImageButton.cpp">
-      <Filter>Source Files\UI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\UI\Widgets\TextButton.cpp">
-      <Filter>Source Files\UI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\UI\Widgets\Widget.cpp">
-      <Filter>Source Files\UI\Widgets</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\UI\Layout.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\UI\Style.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\UI\UIFrame.cpp">
-      <Filter>Source Files\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Utils\ThreadManager.cpp">
-      <Filter>Source Files\Threading</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\Frustum.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\LightManager.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\Database\Assets\DBAtlasRegion.cpp" />
     <ClCompile Include="src\Database\Assets\DBAtlasTexture.cpp" />
     <ClCompile Include="src\Database\Assets\DBMaterial.cpp" />
     <ClCompile Include="src\Database\Assets\DBMesh.cpp" />
     <ClCompile Include="src\Database\Assets\DBNode.cpp" />
     <ClCompile Include="src\Database\Assets\DBScene.cpp" />
-    <ClCompile Include="src\Graphics\GL\Tech\QuadDrawer.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLMaterial.cpp" />
-    <ClCompile Include="src\Graphics\GL\Scene\GLMesh.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\GL\Tech\SpriteBatch.cpp">
-      <Filter>Source Files\Graphics\GL</Filter>
-    </ClCompile>
     <ClCompile Include="src\Database\Utils\TextureAtlas.cpp" />
     <ClCompile Include="src\Database\Utils\stb_image.c" />
     <ClCompile Include="src\Database\Utils\CRC64.cpp" />
     <ClCompile Include="src\Database\Utils\AtlasBuilder.cpp" />
     <ClCompile Include="src\Database\Assets\IAsset.cpp" />
-    <ClCompile Include="src\Graphics\Utils\CheckGLError.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\FPSCameraController.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\ARBDebugOutput.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\TextureFormatUtils.cpp">
-      <Filter>Source Files\Graphics\GL\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp">
-      <Filter>Source Files\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Scene\GLRenderer.cpp" />
-    <ClCompile Include="src\Graphics\Utils\ClusteredShading.cpp">
-      <Filter>Source Files\Graphics\GL\Tech</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Graphics\Utils\TiledShading.cpp">
-      <Filter>Source Files\Graphics\GL\Tech</Filter>
-    </ClCompile>
     <ClCompile Include="src\Graphics\GL\Scene\GLConfig.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ARBDebugOutput.cpp" />
+    <ClCompile Include="src\Graphics\Utils\CheckGLError.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ClusteredShading.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp" />
+    <ClCompile Include="src\Core.cpp" />
+    <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
+    <ClCompile Include="src\3rdparty\entityx\Event.cc" />
+    <ClCompile Include="src\Utils\FileHandle.cpp" />
+    <ClCompile Include="src\Utils\FileModificationManager.cpp" />
+    <ClCompile Include="src\Graphics\Utils\FPSCameraController.cpp" />
+    <ClCompile Include="src\Graphics\Utils\Frustum.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLContext.cpp" />
+    <ClCompile Include="src\GLEngine.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLMesh.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLShader.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLStateBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTexture.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureArray.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp" />
+    <ClCompile Include="src\Graphics\Graphics.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp" />
+    <ClCompile Include="src\Graphics\UI\Widgets\ImageButton.cpp" />
+    <ClCompile Include="src\Input\Input.cpp" />
+    <ClCompile Include="src\Utils\JobScheduler.cpp" />
+    <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
+    <ClCompile Include="src\3rdparty\json\json_value.cpp" />
+    <ClCompile Include="src\3rdparty\json\json_writer.cpp" />
+    <ClCompile Include="src\Graphics\UI\Layout.cpp" />
+    <ClCompile Include="src\Graphics\Utils\LightManager.cpp" />
+    <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\3rdparty\entityx\help\Pool.cc" />
+    <ClCompile Include="src\Graphics\GL\Tech\QuadDrawer.cpp" />
+    <ClCompile Include="src\Utils\Semaphore.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\SpriteBatch.cpp" />
+    <ClCompile Include="src\Graphics\UI\Style.cpp" />
+    <ClCompile Include="src\3rdparty\entityx\System.cc" />
+    <ClCompile Include="src\Graphics\UI\Widgets\TextButton.cpp" />
+    <ClCompile Include="src\Graphics\Utils\TextureFormatUtils.cpp" />
+    <ClCompile Include="src\Utils\ThreadManager.cpp" />
+    <ClCompile Include="src\Graphics\Utils\TiledShading.cpp" />
+    <ClCompile Include="src\3rdparty\entityx\help\Timer.cc" />
+    <ClCompile Include="src\Graphics\UI\UIFrame.cpp" />
+    <ClCompile Include="src\Graphics\UI\Widgets\Widget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Private\Utils\Bounds2D.h">
-      <Filter>Header Files\Private\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Utils\Bounds3D.h">
-      <Filter>Header Files\Private\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\ConcurrentQueue.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Core.h">
-      <Filter>Header Files\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Input\EKey.h">
-      <Filter>Header Files\Public\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Input\EMouseButton.h">
-      <Filter>Header Files\Public\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\FileHandle.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\FileModificationListener.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\FileModificationManager.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\GL\GL.h">
-      <Filter>Header Files\Private\Graphics\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\GL\GLDefines.h">
-      <Filter>Header Files\Private\Graphics\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\GLEngine.h">
-      <Filter>Header Files\Public</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLStateBuffer.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTexture.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureArray.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureBuffer.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\GL\GLTypes.h">
-      <Filter>Header Files\Private\Graphics\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h">
-      <Filter>Header Files\Public\Graphics\GL\Wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Graphics.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Input\Input.h">
-      <Filter>Header Files\Public\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\JobScheduler.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\MatForward.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\Semaphore.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Utils\VecForward.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="src\json\json_tool.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Input\InputListener.h">
-      <Filter>Header Files\Public\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h">
-      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\GLContext.h">
-      <Filter>Header Files\Public\Graphics\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp">
-      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h">
-      <Filter>Header Files\Public\3rdparty\entityx\3rdparty</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\deps\Dependencies.h">
-      <Filter>Header Files\Public\3rdparty\entityx\deps</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\help\NonCopyable.h">
-      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\help\Pool.h">
-      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\help\Timer.h">
-      <Filter>Header Files\Public\3rdparty\entityx\help</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\config.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\Entity.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\entityx.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\Event.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\quick.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\entityx\System.h">
-      <Filter>Header Files\Public\3rdparty\entityx</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\assertions.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\autolink.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\config.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\features.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\forwards.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\json.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\reader.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\value.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\version.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
-    <ClInclude Include="include\3rdparty\json\writer.h">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </ClInclude>
     <ClInclude Include="include\3rdparty\EABase\config\eacompiler.h" />
     <ClInclude Include="include\3rdparty\EABase\config\eacompilertraits.h" />
     <ClInclude Include="include\3rdparty\EABase\config\eaplatform.h" />
     <ClInclude Include="include\3rdparty\EABase\eabase.h" />
     <ClInclude Include="include\3rdparty\EABase\earesult.h" />
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
-    <ClInclude Include="include\3rdparty\EASTL\internal\config.h" />
     <ClInclude Include="include\3rdparty\EASTL\internal\eastl_rw.h" />
     <ClInclude Include="include\3rdparty\EASTL\internal\fixed_pool.h" />
     <ClInclude Include="include\3rdparty\EASTL\internal\generic_iterator.h" />
@@ -352,10 +95,6 @@
     <ClInclude Include="include\3rdparty\EASTL\internal\type_pod.h" />
     <ClInclude Include="include\3rdparty\EASTL\internal\type_properties.h" />
     <ClInclude Include="include\3rdparty\EASTL\internal\type_transformations.h" />
-    <ClInclude Include="include\3rdparty\EASTL\algorithm.h" />
-    <ClInclude Include="include\3rdparty\EASTL\allocator.h" />
-    <ClInclude Include="include\3rdparty\EASTL\bitset.h" />
-    <ClInclude Include="include\3rdparty\EASTL\core_allocator_adapter.h" />
     <ClInclude Include="include\3rdparty\EASTL\fixed_allocator.h" />
     <ClInclude Include="include\3rdparty\EASTL\fixed_hash_map.h" />
     <ClInclude Include="include\3rdparty\EASTL\fixed_hash_set.h" />
@@ -383,10 +122,46 @@
     <ClInclude Include="include\3rdparty\EASTL\to_string.h" />
     <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
     <ClInclude Include="include\Public\Database\Assets\DBTexture.h" />
-    <ClInclude Include="include\Public\Database\AssetDatabase.h" />
-    <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
     <ClInclude Include="include\Public\Utils\FileUtils.h" />
     <ClInclude Include="include\Public\Utils\Vec.h" />
+    <ClInclude Include="include\Public\Database\Processors\FloatImageProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\ResourceProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\SceneProcessor.h" />
+    <ClInclude Include="include\Public\Database\ResourceBuilder.h" />
+    <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
+    <ClInclude Include="include\Public\Database\Assets\EAssetType.h" />
+    <ClInclude Include="include\Public\Database\Utils\stb_image.h" />
+    <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
+    <ClInclude Include="include\Public\Database\Utils\TextureAtlas.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLScene.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLLightManager.h" />
+    <ClInclude Include="include\Public\Utils\FPSMeasurer.h" />
+    <ClInclude Include="include\Public\Utils\DeltaTimeMeasurer.h" />
+    <ClInclude Include="include\3rdparty\EASTL\algorithm.h" />
+    <ClInclude Include="include\3rdparty\EASTL\allocator.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\ARBDebugOutput.h" />
+    <ClInclude Include="include\3rdparty\json\assertions.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabase.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
+    <ClInclude Include="include\Public\Database\Utils\AtlasBuilder.h" />
+    <ClInclude Include="include\Public\Database\Utils\AtlasPosition.h" />
+    <ClInclude Include="include\3rdparty\json\autolink.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bitset.h" />
+    <ClInclude Include="include\Public\Database\Processors\ByteImageProcessor.h" />
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp" />
+    <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\ClusteredShading.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h" />
+    <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
+    <ClInclude Include="include\3rdparty\entityx\config.h" />
+    <ClInclude Include="include\3rdparty\json\config.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\config.h" />
+    <ClInclude Include="include\Public\Core.h" />
+    <ClInclude Include="include\3rdparty\EASTL\core_allocator_adapter.h" />
+    <ClInclude Include="include\Public\Database\Utils\CRC64.h" />
     <ClInclude Include="include\3rdparty\EASTL\custom_glengine_allocator.h" />
     <ClInclude Include="include\Public\Database\Assets\DBAtlasRegion.h" />
     <ClInclude Include="include\Public\Database\Assets\DBAtlasTexture.h" />
@@ -394,216 +169,71 @@
     <ClInclude Include="include\Public\Database\Assets\DBMesh.h" />
     <ClInclude Include="include\Public\Database\Assets\DBNode.h" />
     <ClInclude Include="include\Public\Database\Assets\DBScene.h" />
-    <ClInclude Include="include\Public\Database\Processors\ByteImageProcessor.h" />
-    <ClInclude Include="include\Public\Database\Processors\FloatImageProcessor.h" />
-    <ClInclude Include="include\Public\Database\Processors\ResourceProcessor.h" />
-    <ClInclude Include="include\Public\Database\Processors\SceneProcessor.h" />
-    <ClInclude Include="include\Public\Database\ResourceBuilder.h" />
-    <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
-    <ClInclude Include="include\Public\Database\Assets\EAssetType.h" />
-    <ClInclude Include="include\Public\Graphics\UI\Widgets\ImageButton.h">
-      <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\UI\Widgets\TextButton.h">
-      <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\UI\Widgets\Widget.h">
-      <Filter>Header Files\Public\UI\Widgets</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\UI\Font.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\UI\Layout.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\UI\Style.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\UI\UIFrame.h">
-      <Filter>Header Files\Public\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Utils\ThreadManager.h">
-      <Filter>Header Files\Private\Threading</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Utils\Frustum.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Utils\LightManager.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Utils\TextureRegion.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Utils\PerspectiveCamera.h">
-      <Filter>Header Files\Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Tech\QuadDrawer.h">
-      <Filter>Header Files\Public\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Tech\SpriteBatch.h">
-      <Filter>Header Files\Public\Graphics\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Database\Utils\stb_image.h" />
-    <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
-    <ClInclude Include="include\Public\Database\Utils\CRC64.h" />
-    <ClInclude Include="include\Public\Database\Utils\AtlasPosition.h" />
-    <ClInclude Include="include\Public\Database\Utils\AtlasBuilder.h" />
-    <ClInclude Include="include\Public\Database\Utils\TextureAtlas.h" />
-    <ClInclude Include="include\Public\Graphics\Utils\FPSCameraController.h">
-      <Filter>Header Files\Public\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h">
-      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\Utils\TextureFormatUtils.h">
-      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\Utils\ARBDebugOutput.h">
-      <Filter>Header Files\Private\Graphics\GL\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h">
-      <Filter>Header Files\Private\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Scene\GLScene.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMesh.h">
-      <Filter>Header Files\Public\Graphics\GL</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
-    <ClInclude Include="include\Public\Graphics\Utils\TiledShading.h">
-      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\Utils\ClusteredShading.h">
-      <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Scene\GLLightManager.h" />
+    <ClInclude Include="include\3rdparty\entityx\deps\Dependencies.h" />
+    <ClInclude Include="include\Public\Input\EKey.h" />
+    <ClInclude Include="include\Public\Input\EMouseButton.h" />
+    <ClInclude Include="include\3rdparty\entityx\Entity.h" />
+    <ClInclude Include="include\3rdparty\entityx\entityx.h" />
+    <ClInclude Include="include\3rdparty\entityx\Event.h" />
+    <ClInclude Include="include\3rdparty\json\features.h" />
+    <ClInclude Include="include\Public\Utils\FileHandle.h" />
+    <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
+    <ClInclude Include="include\Public\Utils\FileModificationManager.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Font.h" />
+    <ClInclude Include="include\3rdparty\json\forwards.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\FPSCameraController.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\Frustum.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GL.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLContext.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Public\GLEngine.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMesh.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLStateBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTexture.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureArray.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureBuffer.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Graphics.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\ImageButton.h" />
+    <ClInclude Include="include\Public\Input\Input.h" />
+    <ClInclude Include="include\Public\Input\InputListener.h" />
+    <ClInclude Include="include\Public\Utils\JobScheduler.h" />
+    <ClInclude Include="include\3rdparty\json\json.h" />
+    <ClInclude Include="src\json\json_tool.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Layout.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\LightManager.h" />
+    <ClInclude Include="include\Public\Utils\MatForward.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\NonCopyable.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\PerspectiveCamera.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\Pool.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\QuadDrawer.h" />
+    <ClInclude Include="include\3rdparty\entityx\quick.h" />
+    <ClInclude Include="include\3rdparty\json\reader.h" />
+    <ClInclude Include="include\Public\Utils\Semaphore.h" />
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\SpriteBatch.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Style.h" />
+    <ClInclude Include="include\3rdparty\entityx\System.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\TextButton.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\TextureFormatUtils.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\TextureRegion.h" />
+    <ClInclude Include="include\Private\Utils\ThreadManager.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\TiledShading.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\Timer.h" />
+    <ClInclude Include="include\Public\Graphics\UI\UIFrame.h" />
+    <ClInclude Include="include\3rdparty\json\value.h" />
+    <ClInclude Include="include\Public\Utils\VecForward.h" />
+    <ClInclude Include="include\3rdparty\json\version.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\Widget.h" />
+    <ClInclude Include="include\3rdparty\json\writer.h" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{c3929a23-77d5-4d5d-bcd2-5b7d4849cb9f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{ce916186-5d2f-42e7-b721-6d332aa7c9da}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics">
-      <UniqueIdentifier>{bec5600e-bf8c-4af0-a279-1dbc737dcfe6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Input">
-      <UniqueIdentifier>{b67d66d6-b553-4723-9bb4-2848fca31a51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Utils">
-      <UniqueIdentifier>{21df264a-d635-4382-aef5-fd92dfe50d29}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\GL">
-      <UniqueIdentifier>{dfa02db1-8009-4425-858c-aad50a68dd1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\GL\Tech">
-      <UniqueIdentifier>{59c56805-b4e3-4e2f-a3b4-26c566273747}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\GL\Wrappers">
-      <UniqueIdentifier>{d4e65135-cafc-4abf-8c55-8cd95328083e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public">
-      <UniqueIdentifier>{e68585c1-1392-4c6d-9032-0df905922c4d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\Graphics">
-      <UniqueIdentifier>{b249c0a9-2602-4c93-be42-a4a3886608fe}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\Graphics\GL">
-      <UniqueIdentifier>{eda25695-8fbe-4fe4-8c8a-f0dd55c52d66}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\Graphics\GL\Wrappers">
-      <UniqueIdentifier>{9ae7c1fb-6b6b-45a0-bd9c-fbf7ac2dcbe9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\Graphics\GL\Tech">
-      <UniqueIdentifier>{545e9a04-f1ac-451c-9b83-e258e8b003a5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\Input">
-      <UniqueIdentifier>{8a3f4f49-5797-4d5d-b59e-802b5e585ffb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\Utils">
-      <UniqueIdentifier>{cb1ddaf1-aedf-4453-b457-54817d26e244}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\UI">
-      <UniqueIdentifier>{bbd706cf-5644-4e83-b4e8-2f61b4664b9d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\UI\Widgets">
-      <UniqueIdentifier>{c97e4a10-a9ff-4675-a7a9-94ce2331486f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Private">
-      <UniqueIdentifier>{9b0613f6-8265-4abd-a0cf-c47f2331dc07}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Private\Graphics">
-      <UniqueIdentifier>{42821d52-d005-4268-9d15-0f6a4971e863}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Private\Utils">
-      <UniqueIdentifier>{c9c2fe74-68e2-4bc9-9655-698197d93aac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Private\Graphics\GL">
-      <UniqueIdentifier>{9b2bacfe-449f-48fa-9fe6-e053e4c57a13}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\UI">
-      <UniqueIdentifier>{378ca07a-f36f-46c4-b700-d0d51e33f8e9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\UI\Widgets">
-      <UniqueIdentifier>{80518bdd-6523-4e76-ac16-f3348a235a64}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\3rdparty">
-      <UniqueIdentifier>{1bea2067-fdef-422f-aee9-1f099d049ab1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\3rdparty\json">
-      <UniqueIdentifier>{9dda1e27-4eaa-453b-9d2b-fdb6b0b48d40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\3rdparty\entityx">
-      <UniqueIdentifier>{097b4e0e-66ca-4df8-96d6-9bf5e6b0cb58}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\3rdparty\entityx\help">
-      <UniqueIdentifier>{8d5453e2-86fd-4d66-a1d8-20d3b08e9467}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\3rdparty\rde">
-      <UniqueIdentifier>{fe024b94-f287-4ca6-9bff-003e4fbb4081}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\3rdparty">
-      <UniqueIdentifier>{bce36e92-948d-42b1-88ed-b2a6b0b7ea86}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\3rdparty\json">
-      <UniqueIdentifier>{91908f5b-0a00-4862-bedc-22e8b49dd449}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\3rdparty\rde">
-      <UniqueIdentifier>{0385059d-b9de-4467-b553-07009e1b8497}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\3rdparty\entityx">
-      <UniqueIdentifier>{7d8de4e9-e654-494b-a180-9020ef09ac05}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\3rdparty\entityx\3rdparty">
-      <UniqueIdentifier>{00805095-f44b-4bca-ba50-3262d9a7e7fb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\3rdparty\entityx\deps">
-      <UniqueIdentifier>{3a31d377-cab8-4bf6-b0c8-abbe1d9372c7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\3rdparty\entityx\help">
-      <UniqueIdentifier>{9d040f44-f539-420d-88c7-8826a3a7acc8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics\GL\Utils">
-      <UniqueIdentifier>{1e893fa5-0b2e-40d0-a2a1-61f1f58633e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Private\Graphics\GL\Utils">
-      <UniqueIdentifier>{dc43bd5f-225e-48cf-87eb-b5025c9f445d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Public\Graphics\GL\Utils">
-      <UniqueIdentifier>{73dac75e-0b94-4c95-bd09-651aa6c7a93d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Threading">
-      <UniqueIdentifier>{f1110ce9-b712-4df5-ba88-5527d44ca774}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Private\Threading">
-      <UniqueIdentifier>{1cde2eba-3e3e-41d0-92dc-847265112bc4}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="src\3rdparty\json\json_valueiterator.inl">
-      <Filter>Header Files\Public\3rdparty\json</Filter>
-    </None>
+    <None Include="src\3rdparty\json\json_valueiterator.inl" />
   </ItemGroup>
 </Project>
