@@ -8,7 +8,7 @@ class FPSMeasurer
 {
 public:
 
-	void setLogFunction(float a_timeInterval, std::function<void(const FPSMeasurer&)> a_logFunc)
+	void setLogFunction(float a_timeInterval, std::function<void()> a_logFunc)
 	{
 		m_timeInterval = a_timeInterval;
 		m_logFunc = a_logFunc;
@@ -20,7 +20,7 @@ public:
 		m_timeAccumulator += deltaSec;
 		if (m_timeAccumulator >= m_timeInterval)
 		{
-			m_logFunc(*this);
+			m_logFunc();
 			m_timeAccumulator -= m_timeInterval;
 			m_frameCounter = 0;
 		}
@@ -34,7 +34,7 @@ public:
 
 private:
 
-	std::function<void(const FPSMeasurer&)> m_logFunc;
+	std::function<void()> m_logFunc;
 	uint m_frameCounter     = 0;
 	float m_timeAccumulator = 0;
 	float m_timeInterval    = 0;

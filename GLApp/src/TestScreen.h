@@ -5,18 +5,18 @@
 #include "Database/AssetDatabase.h"
 #include "Graphics/GL/Scene/GLScene.h"
 #include "Graphics/GL/Scene/GLRenderer.h"
-#include "Graphics/Utils/PerspectiveCamera.h"
+#include "Graphics/Utils/FPSCameraController.h"
 #include "Graphics/Utils/LightManager.h"
+#include "Graphics/Utils/PerspectiveCamera.h"
 #include "Utils/FPSMeasurer.h"
 
-#include "Graphics/Utils/FPSCameraController.h"
 
 class TestScreen
 {
 public:
 	TestScreen();
 	TestScreen(const TestScreen& copy) = delete;
-	~TestScreen();
+	~TestScreen() {}
 
 	void render(float deltaSec);
 

@@ -1,7 +1,7 @@
 #include "GLEngine.h"
 
-#include "Utils/DeltaTimeMeasurer.h"
 #include "TestScreen.h"
+#include "Utils/DeltaTimeMeasurer.h"
 
 int main()
 {
