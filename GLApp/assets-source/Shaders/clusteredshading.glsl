@@ -10,21 +10,23 @@
 * 
 * FOR_LIGHT_ITERATOR(light, v_position.z)
 * {
-*	// operate with light
+*	// operate with light.positionRange (vec4) and light.colorIntensity (vec4)
 * }
 */
 
 /* REQUIRED DEFINES /*
-* MAX_LIGHTS
-* LIGHT_GRID_WIDTH
-* LIGHT_GRID_HEIGHT
-* LIGHT_GRID_DEPTH
-* LIGHT_GRID_TILE_WIDTH
-* LIGHT_GRID_TILE_HEIGHT
+* MAX_LIGHTS							int
+* LIGHT_GRID_WIDTH						int
+* LIGHT_GRID_HEIGHT						int
+* LIGHT_GRID_DEPTH						int
+* LIGHT_GRID_TILE_WIDTH					int
+* LIGHT_GRID_TILE_HEIGHT				int
+* LIGHT_POSITION_RANGES_BINDING_POINT	int
+* LIGHT_COLOR_INTENSITIES_BINDING_POINT int
 */
 
 /* REQUIRED UNIFORMS /*
-* LightPositionRanges 	UBO
+* LightPositionRanges	UBO
 * LightColors 			UBO
 * u_lightIndices 		isamplerBuffer
 * u_lightGrid 			isamplerBuffer 
@@ -40,17 +42,6 @@ struct Light
 
 uniform isamplerBuffer u_lightIndices;
 uniform isamplerBuffer u_lightGrid;
-uniform float u_recNear;
-uniform float u_recLogSD1;
-
-layout (std140) uniform LightPositionRanges
-{
-	vec4 u_lightPositionRanges[MAX_LIGHTS];
-};
-layout (std140) uniform LightColorsIntensities
-{
-	vec4 u_lightColorIntensities[MAX_LIGHTS];
-};
 
 #define FOR_LIGHT_ITERATOR(LIGHT, VSDEPTH) \
  	Light LIGHT; \

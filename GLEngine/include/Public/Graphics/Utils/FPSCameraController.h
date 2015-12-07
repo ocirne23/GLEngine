@@ -13,9 +13,10 @@ class FPSCameraController
 public:
 	FPSCameraController();
 
-	void initialize(PerspectiveCamera& camera, const glm::vec3& startDir);
+	void initialize(PerspectiveCamera& camera);
 	void update(float deltaSec);
 	void setCameraSpeed(float cameraSpeed);
+	float getCameraSpeed() const { return m_cameraSpeed; }
 
 	bool keyDown(EKey key);
 	bool keyUp(EKey key);

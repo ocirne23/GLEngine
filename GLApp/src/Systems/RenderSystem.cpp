@@ -98,15 +98,15 @@ void RenderSystem::onResize(uint a_width, uint a_height)
 void RenderSystem::initializeShaderForCamera(const PerspectiveCamera& a_camera)
 {
 	m_clusteredShading.initialize(a_camera, m_xRes, m_yRes, TILE_WIDTH_PX, TILE_HEIGHT_PX);
-	m_hbao.initialize(a_camera, m_xRes, m_yRes, UBOBindingPoints::HBAO_GLOBALS_UBO_BINDING_POINT);
+	m_hbao.initialize(a_camera, m_xRes, m_yRes, GLFramebuffer::EMultiSampleType::NONE);
 
 	eastl::vector<eastl::string> defines;
-	defines.push_back(eastl::string("MAX_LIGHTS ").append(eastl::to_string((int) LightSystem::MAX_LIGHTS)));
-	defines.push_back(eastl::string("LIGHT_GRID_WIDTH ").append(eastl::to_string(m_clusteredShading.getGridWidth())));
-	defines.push_back(eastl::string("LIGHT_GRID_HEIGHT ").append(eastl::to_string(m_clusteredShading.getGridHeight())));
-	defines.push_back(eastl::string("LIGHT_GRID_DEPTH ").append(eastl::to_string(m_clusteredShading.getGridDepth())));
-	defines.push_back(eastl::string("LIGHT_GRID_TILE_WIDTH ").append(eastl::to_string(TILE_WIDTH_PX)));
-	defines.push_back(eastl::string("LIGHT_GRID_TILE_HEIGHT ").append(eastl::to_string(TILE_HEIGHT_PX)));
+	defines.push_back(eastl::string("MAX_LIGHTS ").append(StringUtils::to_string((int) LightSystem::MAX_LIGHTS)));
+	defines.push_back(eastl::string("LIGHT_GRID_WIDTH ").append(StringUtils::to_string(m_clusteredShading.getGridWidth())));
+	defines.push_back(eastl::string("LIGHT_GRID_HEIGHT ").append(StringUtils::to_string(m_clusteredShading.getGridHeight())));
+	defines.push_back(eastl::string("LIGHT_GRID_DEPTH ").append(StringUtils::to_string(m_clusteredShading.getGridDepth())));
+	defines.push_back(eastl::string("LIGHT_GRID_TILE_WIDTH ").append(StringUtils::to_string(TILE_WIDTH_PX)));
+	defines.push_back(eastl::string("LIGHT_GRID_TILE_HEIGHT ").append(StringUtils::to_string(TILE_HEIGHT_PX)));
 
 	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &defines);
 	m_modelShader.begin();

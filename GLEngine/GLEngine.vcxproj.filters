@@ -477,6 +477,7 @@
       <Filter>Header Files\Public\Graphics\GL\Tech</Filter>
     </ClInclude>
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLLightManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

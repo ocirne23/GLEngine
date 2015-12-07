@@ -28,7 +28,11 @@ public:
 	const DBAtlasRegion& getNormalRegion() const { return m_normalRegion; }
 	float getRoughness() const { return m_roughness; }
 	float getMetalness() const { return m_metalness; }
-	const glm::vec3& getVertexColor() const { return m_vertexColor; }
+	const glm::vec4& getMaterialColor() const { return m_materialColor; }
+
+	float getOpacity() const { return m_opacity; }
+	float getShininess() const { return m_shininess; }
+	const glm::vec4& getSpecularColor() const { return m_specColor; }
 
 	void setDiffuseAtlasRegion(const DBAtlasRegion& region);
 	void setNormalAtlasRegion(const DBAtlasRegion& region);
@@ -54,9 +58,14 @@ private:
 
 	DBAtlasRegion m_diffuseRegion;
 	DBAtlasRegion m_normalRegion;
-	glm::vec3 m_vertexColor;
+	glm::vec4 m_materialColor;
 	float m_roughness;
 	float m_metalness;
+
+	float m_opacity;
+	float m_shininess;
+	glm::vec4 m_specColor;
+
 	/*
 	EBlendMode m_blendmode;
 	EShadingMode m_shadingmode;

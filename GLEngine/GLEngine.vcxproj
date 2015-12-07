@@ -177,6 +177,7 @@
     <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
     <ClInclude Include="include\Public\GLEngine.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLLightManager.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Frustum.h" />

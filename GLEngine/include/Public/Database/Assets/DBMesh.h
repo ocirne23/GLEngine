@@ -27,7 +27,7 @@ public:
 public:
 
 	DBMesh() {}
-	DBMesh(const aiMesh& assimpMesh);
+	DBMesh(const aiMesh& assimpMesh, bool invertNormals = false);
 	virtual ~DBMesh() {}
 
 	virtual uint64 getByteSize() const override;

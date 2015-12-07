@@ -43,9 +43,9 @@ public:
 
 public:
 	HBAO() {}
-	~HBAO();
+	~HBAO() {}
 
-	void initialize(const PerspectiveCamera& camera, uint xRes, uint yRes, uint hbaoGlobalsUBOBindingPoint);
+	void initialize(const PerspectiveCamera& camera, uint xRes, uint yRes, GLFramebuffer::EMultiSampleType multisampleType);
 
 	void begin();
 	void endAndRender();

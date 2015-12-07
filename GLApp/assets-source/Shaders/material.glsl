@@ -10,29 +10,7 @@
 * to sample a texture of the material at the texture coordionate
 */
 
-/* REQUIRED UNIFORMS /*
-* u_textureArray 						sampler2DArray
-* u_materialProperties[MAX_MATERIALS] 	MaterialProperty (set by GLMesh)
-*/
-
-#define MAX_MATERIALS 409u
-
-struct MaterialProperty
-{
-	vec4 diffuseTexMapping;
-	vec4 normalTexMapping;
-	int diffuseAtlasNr;
-	int normalAtlasNr;
-	int padding;
-	int padding2;
-};
-
-uniform sampler2DArray u_textureArray;
-
-layout (std140) uniform MaterialProperties
-{
-	MaterialProperty u_materialProperties[MAX_MATERIALS];
-};
+uniform sampler2DArray u_textureAtlasArray;
 
 float _getMipMapLevel(vec2 texCoord)
 {
@@ -60,11 +38,17 @@ MaterialProperty getMaterial(uint materialID)
 
 vec4 getDiffuseSample(MaterialProperty material, vec2 texcoord)
 {
-	return _sampleAtlasArray(u_textureArray, vec3(texcoord, material.diffuseAtlasNr), material.diffuseTexMapping);
+	if (material.diffuseAtlasNr == -1)
+		return vec4(0);
+	else
+		return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.diffuseAtlasNr), material.diffuseTexMapping);
 }
 
 vec4 getNormalSample(MaterialProperty material, vec2 texcoord)
 {
-	return _sampleAtlasArray(u_textureArray, vec3(texcoord, material.normalAtlasNr), material.normalTexMapping);
+	if (material.normalAtlasNr == -1)
+		return vec4(0);
+	else
+		return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.normalAtlasNr), material.normalTexMapping);
 }
 #endif // MATERIAL_LIGHTING

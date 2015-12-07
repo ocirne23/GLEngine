@@ -1,6 +1,7 @@
 #include "Graphics/GL/Wrappers/GLFramebuffer.h"
 
 #include "Graphics/GL/GL.h"
+#include "Graphics/Utils/CheckGLError.h"
 
 #include <assert.h>
 
@@ -26,57 +27,49 @@ void GLFramebuffer::initialize(EMultiSampleType a_multiSampleType)
 void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, uint a_height)
 {
 	assert(m_initialized);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
 	glGenTextures(1, &m_depthTexture);
-	glBindTexture(textureType, m_depthTexture);
 	if (m_multiSampleType == EMultiSampleType::NONE)
 	{
+		GLenum textureType = GL_TEXTURE_2D;
+		glBindTexture(textureType, m_depthTexture);
 		glTexStorage2D(textureType, 1, (GLenum) a_format, a_width, a_height);
-		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 	else
 	{
+		GLenum textureType = GL_TEXTURE_2D_MULTISAMPLE;
+		glBindTexture(textureType, m_depthTexture);
 		glTexStorage2DMultisample(textureType, (GLsizei) m_multiSampleType, (GLenum) a_format, a_width, a_height, GL_TRUE);
 	}
-	
-	begin();
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureType, m_depthTexture, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	assert(status == GL_FRAMEBUFFER_COMPLETE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	end();
-
-	glBindTexture(textureType, 0);
 }
 
 void GLFramebuffer::addFramebufferTexture(ESizedFormat a_format, EAttachment a_attachment, uint a_width, uint a_height)
 {
 	assert(m_initialized);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	GLenum textureType = (m_multiSampleType == EMultiSampleType::NONE) ? GL_TEXTURE_2D : GL_TEXTURE_2D_MULTISAMPLE;
+	CHECK_GL_ERROR();
+	
 	uint textureID;
 	glGenTextures(1, &textureID);
-	glBindTexture(textureType, textureID);
 	if (m_multiSampleType == EMultiSampleType::NONE)
 	{
+		GLenum textureType = GL_TEXTURE_2D;
+		glBindTexture(textureType, textureID);
 		glTexStorage2D(textureType, 1, (GLenum) a_format, a_width, a_height);
-		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 	else
 	{
-		glTexStorage2DMultisample(textureType, (GLsizei) m_multiSampleType, (GLenum) a_format, a_width, a_height, GL_FALSE);
+		GLenum textureType = GL_TEXTURE_2D_MULTISAMPLE;
+		glBindTexture(textureType, textureID);
+		glTexStorage2DMultisample(textureType, (GLsizei) m_multiSampleType, (GLenum) a_format, a_width, a_height, GL_TRUE);
 	}
 
-	begin();
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum) a_attachment, textureType, textureID, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glFramebufferTexture(GL_FRAMEBUFFER, (GLenum) a_attachment, textureID, 0);
 
 	m_textures.push_back(textureID);
 	m_drawBuffers.push_back(a_attachment);
@@ -86,9 +79,7 @@ void GLFramebuffer::addFramebufferTexture(ESizedFormat a_format, EAttachment a_a
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	assert(status == GL_FRAMEBUFFER_COMPLETE);
 	
-	end();
-
-	glBindTexture(textureType, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void GLFramebuffer::end()
@@ -109,6 +100,7 @@ void GLFramebuffer::begin()
 	m_begun = true;
 	s_begun = true;
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	glEnable(GL_MULTISAMPLE);
 }
 
 void GLFramebuffer::bindTextures(uint a_fromTextureUnit)

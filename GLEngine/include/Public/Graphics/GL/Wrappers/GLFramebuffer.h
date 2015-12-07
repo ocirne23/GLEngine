@@ -100,6 +100,8 @@ public:
 	void bindTexture(uint textureIndex, uint textureUnit);
 	void deleteTextures();
 
+	bool isMultisampleEnabled() const { return m_multiSampleType == EMultiSampleType::NONE; }
+
 private:
 
 private:

@@ -7,9 +7,10 @@ DBNode::DBNode(const aiNode& a_assimpNode, uint a_parentIdx)
 	m_name = a_assimpNode.mName.C_Str();
 	m_parentIdx = a_parentIdx;
 	aiMatrix4x4 mat = a_assimpNode.mTransformation;
-	m_transform = glm::mat3(mat.a1, mat.a2, mat.a3,
-							mat.b1, mat.b2, mat.b3,
-							mat.c1, mat.c2, mat.c3);
+	m_transform = glm::mat4(mat.a1, mat.b1, mat.c1, mat.d1,
+							mat.a2, mat.b2, mat.c2, mat.d2,
+							mat.a3, mat.b3, mat.c3, mat.d3,
+							mat.a4, mat.b4, mat.c4, mat.d4);
 
 	m_childIndices.reserve(a_assimpNode.mNumChildren);
 

@@ -1,3 +1,4 @@
+#include "Shaders/globals.glsl"
 #include "Shaders/material.glsl"
 
 in vec3 v_position;
@@ -9,14 +10,13 @@ flat in uint v_materialID;
 
 layout (location = 0) out vec3 out_color;
 
-uniform vec3 u_eyePos;
-uniform vec3 u_ambient;
-
 void main()
 {
 	MaterialProperty material = getMaterial(v_materialID);
-	vec3 diffuse = getDiffuseSample(material, v_texcoord).rgb;
-	out_color = diffuse;
+	if (material.color.a < 0.4 && material.color.a > 0.1)
+		discard;
 	
-	//out_color = vec4(vec3(normal), 1.0) + out_color * 0.00000000001; // for testing values without unused variable errors
+	vec3 diffuse = getDiffuseSample(material, v_texcoord).rgb;
+	diffuse += material.color.rgb;
+	out_color = vec3(diffuse);
 }

@@ -24,6 +24,8 @@ public:
 	void initialize(const PerspectiveCamera& camera, uint screenWidth, uint screenHeight, uint pixelsPerTileW, uint pixelsPerTileH);
 	void update(const PerspectiveCamera& camera, uint numLights, const glm::vec4* viewSpaceLightPositionRangeList);
 
+	uint getTileWidth() const  { return m_pixelsPerTileW; }
+	uint getTileHeight() const { return m_pixelsPerTileH; }
 	uint getGridWidth() const  { return m_gridWidth; }
 	uint getGridHeight() const { return m_gridHeight; }
 	uint getGridDepth() const  { return m_gridDepth; }

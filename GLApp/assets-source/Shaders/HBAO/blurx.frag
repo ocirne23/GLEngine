@@ -1,18 +1,18 @@
+#include "Shaders/globals.glsl"
 // GLSL port of Nvidia's HBAO implementation from the DX11 samples
 // https://developer.nvidia.com/dx11-samples
 
 #define KERNEL_RADIUS 8.0
 
-uniform sampler2D u_aoDepthTex;
-uniform vec2 u_invFullRes;
-
 in vec2 v_texcoord;
+
+uniform sampler2D u_aoDepthTex;
 
 layout(location = 0) out vec2 out_aoDepth;
 
 vec2 sampleAODepth(vec2 a_uv)
 {
-    return texture(u_aoDepthTex, v_texcoord + a_uv * u_invFullRes).rg;
+	return texture(u_aoDepthTex, v_texcoord + a_uv * u_invFullResolution).rg;
 }
 
 float crossBilateralWeight(float a_r, float a_z, float a_z0)
@@ -36,30 +36,30 @@ void main()
 
     for(; i <= KERNEL_RADIUS / 2; i += 1.0)
     {
-	aoDepth = sampleAODepth(vec2(i, 0));
-	w = crossBilateralWeight(i, aoDepth.y, centerZ);
-	totalAO += aoDepth.x * w;
-	totalWeight += w;
+		aoDepth = sampleAODepth(vec2(i, 0));
+		w = crossBilateralWeight(i, aoDepth.y, centerZ);
+		totalAO += aoDepth.x * w;
+		totalWeight += w;
 
-	aoDepth = sampleAODepth(vec2(-i, 0));
-	w = crossBilateralWeight(i, aoDepth.y, centerZ);
-	totalAO += aoDepth.x * w;
-	totalWeight += w;
+		aoDepth = sampleAODepth(vec2(-i, 0));
+		w = crossBilateralWeight(i, aoDepth.y, centerZ);
+		totalAO += aoDepth.x * w;
+		totalWeight += w;
     }
 
     for(; i <= KERNEL_RADIUS; i += 2.0)
     {
-	aoDepth = sampleAODepth(vec2(0.5 + i, 0));
-	w = crossBilateralWeight(i, aoDepth.y, centerZ);
-	totalAO += aoDepth.x * w;
-	totalWeight += w;
+		aoDepth = sampleAODepth(vec2(0.5 + i, 0));
+		w = crossBilateralWeight(i, aoDepth.y, centerZ);
+		totalAO += aoDepth.x * w;
+		totalWeight += w;
 
-	aoDepth = sampleAODepth(vec2(-0.5 - i, 0));
-	w = crossBilateralWeight(i, aoDepth.y, centerZ);
-	totalAO += aoDepth.x * w;
-	totalWeight += w;
+		aoDepth = sampleAODepth(vec2(-0.5 - i, 0));
+		w = crossBilateralWeight(i, aoDepth.y, centerZ);
+		totalAO += aoDepth.x * w;
+		totalWeight += w;
     }
-
+	
     float ao = totalAO / totalWeight;
     out_aoDepth = vec2(ao, centerZ);
 }

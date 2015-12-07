@@ -23,7 +23,7 @@ class DBScene : public IAsset
 public:
 
 	DBScene() {}
-	DBScene(const aiScene& assimpScene, const eastl::string& baseAssetPath);
+	DBScene(const aiScene& assimpScene, const eastl::string& baseAssetPath, bool invertNormals = false);
 	virtual ~DBScene() {}
 
 	virtual uint64 getByteSize() const override;

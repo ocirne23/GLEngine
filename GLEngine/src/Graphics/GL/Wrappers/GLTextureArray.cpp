@@ -95,7 +95,6 @@ void GLTextureArray::bind(uint a_index)
 
 void GLTextureArray::unbind(uint a_index)
 {
-	assert(m_initialized);
 	glActiveTexture(GL_TEXTURE0 + a_index);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }

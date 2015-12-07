@@ -11,13 +11,22 @@ int main()
 	GLEngine::initialize();
 
 	SceneProcessor sceneProcessor;
-	ResourceBuilder::ResourceProcessorMap processors;
-	processors.insert({"obj", &sceneProcessor});
 
-	AssetDatabase db;
-	db.createNew("..\\GLApp\\assets\\db.da");
-	ResourceBuilder::buildResourcesDB(processors, "..\\GLApp\\assets-source\\Models", db);
-	db.writeAssetTableAndClose();
+	ResourceBuilder::ResourceProcessorMap ifcProcessors;
+	ifcProcessors.insert({"ifc", &sceneProcessor});
+
+	AssetDatabase ifcDB;
+	ifcDB.createNew("..\\GLApp\\assets\\IFC-DB.da");
+	ResourceBuilder::buildResourcesDB(ifcProcessors, "..\\GLApp\\assets-source\\Models", ifcDB);
+	ifcDB.writeAssetTableAndClose();
+
+	ResourceBuilder::ResourceProcessorMap objProcessors;
+	objProcessors.insert({"obj", &sceneProcessor});
+	AssetDatabase objDB;
+	objDB.createNew("..\\GLApp\\assets\\OBJ-DB.da");
+	ResourceBuilder::buildResourcesDB(objProcessors, "..\\GLApp\\assets-source\\Models", objDB);
+	objDB.writeAssetTableAndClose();
+
 	print("Press enter to exit\n");
 	std::cin.ignore();
 

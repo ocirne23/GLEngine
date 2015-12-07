@@ -2,7 +2,7 @@
 
 #include <assimp/scene.h>
 
-DBMesh::DBMesh(const aiMesh& a_assimpMesh)
+DBMesh::DBMesh(const aiMesh& a_assimpMesh, bool a_invertNormals)
 {
 	m_name = a_assimpMesh.mName.C_Str();
 	
@@ -13,29 +13,32 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 	bool hasTangentsAndBitangents = a_assimpMesh.HasTangentsAndBitangents();
 	uint baseVertex = (uint) m_vertices.size();
 
-	uint vertexStartIdx = m_vertices.size();
-	uint indiceStartIdx = m_indices.size();
-	m_indices.resize(indiceStartIdx + numIndices);
-	m_vertices.resize(vertexStartIdx + numVertices);
+	m_indices.resize(numIndices);
+	m_vertices.resize(numVertices);
 
+	int indiceCounter = 0;
 	for (uint i = 0; i < numFaces; ++i)
 	{
 		const aiFace& face = a_assimpMesh.mFaces[i];
-		m_indices[indiceStartIdx++] = face.mIndices[0] + baseVertex;
-		m_indices[indiceStartIdx++] = face.mIndices[1] + baseVertex;
-		m_indices[indiceStartIdx++] = face.mIndices[2] + baseVertex;
+		m_indices[indiceCounter++] = face.mIndices[0] + baseVertex;
+		m_indices[indiceCounter++] = face.mIndices[1] + baseVertex;
+		m_indices[indiceCounter++] = face.mIndices[2] + baseVertex;
 	}
 
 	for (uint i = 0; i < numVertices; ++i)
 	{
-		Vertex& v = m_vertices[vertexStartIdx + i];
+		Vertex& v = m_vertices[i];
 		v.position =                               *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mVertices[i]);
 		v.texcoords =          (hasTextureCoords ? *reinterpret_cast<glm::vec2*>(&a_assimpMesh.mTextureCoords[0][i]) : glm::vec2(0));
-		v.normal =                                 *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mNormals[i]);
+		v.normal =                                (*reinterpret_cast<glm::vec3*>(&a_assimpMesh.mNormals[i]));
 		v.tangents =   (hasTangentsAndBitangents ? *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mTangents[i]) : glm::vec3(0));
 		v.bitangents = (hasTangentsAndBitangents ? *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mBitangents[i]) : glm::vec3(0));
 		v.materialID = a_assimpMesh.mMaterialIndex;
 	}
+
+	if (a_invertNormals)
+		for (Vertex& v : m_vertices)
+			v.normal = -v.normal;
 }
 
 uint64 DBMesh::getByteSize() const

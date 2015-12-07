@@ -9,7 +9,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/compatibility.hpp>
 
-static const float DEFAULT_CAMERA_SPEED = 10.0f;
+static const float DEFAULT_CAMERA_SPEED = 1.0f;
 static const float MOUSE_LOOK_SENSITIVITY = 0.7f;
 static const glm::vec3 UP(0, 1, 0);
 
@@ -22,10 +22,10 @@ FPSCameraController::FPSCameraController()
 	setCameraSpeed(DEFAULT_CAMERA_SPEED);
 }
 
-void FPSCameraController::initialize(PerspectiveCamera& a_camera, const glm::vec3& a_lookDir)
+void FPSCameraController::initialize(PerspectiveCamera& a_camera)
 {
 	m_camera = &a_camera;
-	m_lookDir = a_lookDir;
+	m_lookDir = a_camera.getDirection();
 	m_initialized = true;
 }
 
@@ -83,6 +83,7 @@ void FPSCameraController::update(float a_deltaSec)
 		m_camera->translateRelative(0.0f, -m_cameraSpeed * a_deltaSec, 0.0f);
 
 	m_camera->lookAtDir(m_lookDir);
+	m_camera->updateMatrices();
 }
 
 bool FPSCameraController::mouseDown(EMouseButton a_key, int a_xPos, int a_yPos)
@@ -105,6 +106,8 @@ bool FPSCameraController::mouseUp(EMouseButton a_key, int a_xPos, int a_yPos)
 
 bool FPSCameraController::mouseMoved(uint a_xPos, uint a_yPos, int a_xMove, int a_yMove)
 {
+	if (!m_lmbPressed)
+		return false;
 	//rotate horizontally
 	m_lookDir = glm::rotate(m_lookDir, -a_xMove * MOUSE_LOOK_SENSITIVITY, UP);
 

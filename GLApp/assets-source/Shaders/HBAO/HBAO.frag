@@ -1,15 +1,19 @@
 // GLSL port of Nvidia's HBAO implementation from the DX11 samples
 // https://developer.nvidia.com/dx11-samples
 
-#include "Shaders/HBAO/HBAOGlobals.glsl"
-
-#define PI 3.14159265
+#include "Shaders/globals.glsl"
 
 #define NUM_DIRECTIONS 6
 #define NUM_STEPS 6
 #define RANDOM_TEXTURE_WIDTH 8
 
+#define MS_FBO
+#ifdef MS_FBO
+uniform sampler2DMS u_linearDepthTex;
+#else
 uniform sampler2D u_linearDepthTex;
+#endif
+
 uniform sampler2D u_randomTex;
 
 in vec2 v_position;
@@ -51,7 +55,12 @@ vec3 uvToEye(vec2 a_uv, float a_eyeZ)
 
 vec3 fetchEyePos(vec2 a_uv)
 {
-    float z = viewSpaceZFromDepth(texture(u_linearDepthTex, a_uv).r);
+#ifdef MS_FBO
+	float depth = texelFetch(u_linearDepthTex, ivec2(a_uv * u_aoResolution), gl_SampleID).r;
+#else
+	float depth = texture(u_linearDepthTex, a_uv).r;
+#endif
+    float z = viewSpaceZFromDepth(depth);
     return uvToEye(a_uv, z);
 }
 
@@ -141,38 +150,38 @@ float horizonOcclusion(vec2 a_deltaUV, vec3 a_p, float a_numSteps,
 
 void main()
 {
-    float ao = 1.0;
+	float ao = 1.0;
 
-    vec3 p = fetchEyePos(v_texcoord);
-    vec3 rand = texture(u_randomTex, v_texcoord.xy * u_noiseTexScale).rgb;
-    vec2 rayRadiusUV = (0.5 * u_r * u_focalLen) / -p.z;
-    float rayRadiusPx = rayRadiusUV.x * u_aoResolution.x;
-    if (rayRadiusPx > 1.0)
-    {
-	ao = 0.0;
-	float numSteps;
-	vec2 stepSize;
-	computeSteps(stepSize, numSteps, rayRadiusPx, rand.z);
-
-	vec3 pr, pl, pt, pb;
-	pr = fetchEyePos(v_texcoord + vec2(u_invAOResolution.x, 0));
-	pl = fetchEyePos(v_texcoord + vec2(-u_invAOResolution.x, 0));
-	pt = fetchEyePos(v_texcoord + vec2(0, u_invAOResolution.y));
-	pb = fetchEyePos(v_texcoord + vec2(0, -u_invAOResolution.y));
-
-	vec3 dPdu = minDiff(p, pr, pl);
-	vec3 dPdv = minDiff(p, pt, pb) * (u_aoResolution.y * u_invAOResolution.x);
-
-	float alpha = 2.0 * PI / NUM_DIRECTIONS;
-
-	for (float d = 0.0; d < NUM_DIRECTIONS; ++d)
+	vec3 p = fetchEyePos(v_texcoord);
+	vec3 rand = texture(u_randomTex, v_texcoord.xy * u_noiseTexScale).rgb;
+	vec2 rayRadiusUV = (0.5 * u_r * u_focalLen) / -p.z;
+	float rayRadiusPx = rayRadiusUV.x * u_aoResolution.x;
+	if (rayRadiusPx > 1.0)
 	{
-	    float angle = alpha * d;
-	    vec2 dir = rotateDirections(vec2(cos(angle), sin(angle)), rand.xy);
-	    vec2 deltaUV = dir * stepSize;
-	    ao += horizonOcclusion(deltaUV, p, numSteps, rand.z, dPdu, dPdv);
+		ao = 0.0;
+		float numSteps;
+		vec2 stepSize;
+		computeSteps(stepSize, numSteps, rayRadiusPx, rand.z);
+
+		vec3 pr, pl, pt, pb;
+		pr = fetchEyePos(v_texcoord + vec2(u_invAOResolution.x, 0));
+		pl = fetchEyePos(v_texcoord + vec2(-u_invAOResolution.x, 0));
+		pt = fetchEyePos(v_texcoord + vec2(0, u_invAOResolution.y));
+		pb = fetchEyePos(v_texcoord + vec2(0, -u_invAOResolution.y));
+
+		vec3 dPdu = minDiff(p, pr, pl);
+		vec3 dPdv = minDiff(p, pt, pb) * (u_aoResolution.y * u_invAOResolution.x);
+
+		float alpha = 2.0 * PI / NUM_DIRECTIONS;
+
+		for (float d = 0.0; d < NUM_DIRECTIONS; ++d)
+		{
+			float angle = alpha * d;
+			vec2 dir = rotateDirections(vec2(cos(angle), sin(angle)), rand.xy);
+			vec2 deltaUV = dir * stepSize;
+			ao += horizonOcclusion(deltaUV, p, numSteps, rand.z, dPdu, dPdv);
+		}
+		ao = 1.0 - ao / NUM_DIRECTIONS * u_strength;
 	}
-	ao = 1.0 - ao / NUM_DIRECTIONS * u_strength;
-    }
-    out_aoDepth = vec2(ao, p.z);
+	out_aoDepth = vec2(ao, p.z);
 }

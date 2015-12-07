@@ -28,6 +28,7 @@ public:
 	bool isKeyPressed(EKey key);
 	bool isMousePressed(EMouseButton button);
 	void setMouseCaptured(bool captured);
+	bool isMouseCaptured();
 
 private:
 

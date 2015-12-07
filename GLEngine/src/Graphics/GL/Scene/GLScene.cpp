@@ -7,10 +7,12 @@
 #include "Database/AssetDatabase.h"
 #include "Database/Assets/DBScene.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
 	DBScene* scene = (DBScene*) a_database.loadAsset(a_assetName, EAssetType::SCENE);
-
+	print("Nummaterials: %i\n", scene->getMaterials().size());
 	m_nodes = scene->getNodes();
 
 	m_meshes.resize(scene->numMeshes());
@@ -62,12 +64,57 @@ void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_data
 	a_database.unloadAsset(scene);
 }
 
-void GLScene::render(GLConstantBuffer& modelMatrixUBO)
+void GLScene::render(GLConstantBuffer& a_modelMatrixUBO)
 {
-	GLRenderer::ModelMatrixUBO* modelMatrix = (GLRenderer::ModelMatrixUBO*) modelMatrixUBO.mapBuffer();
-	modelMatrix->u_modelMatrix = glm::mat4(1);
-	modelMatrixUBO.unmapBuffer();
+	if (!m_visible)
+		return;
 
-	for (GLMesh& mesh : m_meshes)
-		mesh.render();
+	m_materialBuffer.bind();
+	if (m_textureArray.getNumTexturesAdded())
+		m_textureArray.bind(1);
+	else
+		m_textureArray.unbind(1);
+	renderNode(a_modelMatrixUBO, m_baseTransform, 0);
+}
+
+void GLScene::renderNode(GLConstantBuffer& a_modelMatrixUBO, const glm::mat4& a_parentTransform, uint a_node)
+{
+	const DBNode& node = m_nodes[a_node];
+	glm::mat4 transform = a_parentTransform * node.getTransform();
+
+	GLRenderer::ModelMatrixUBO* modelMatrix = (GLRenderer::ModelMatrixUBO*) a_modelMatrixUBO.mapBuffer();
+	modelMatrix->u_modelMatrix = transform;
+	a_modelMatrixUBO.unmapBuffer();
+
+	for (uint i : node.getMeshIndices())
+		m_meshes[i].render();
+
+	for (uint i : node.getChildIndices())
+		renderNode(a_modelMatrixUBO, transform, i);
+}
+
+void GLScene::setScale(float a_scale)
+{
+	m_scale = a_scale;
+	updateBaseTransform();
+}
+
+void GLScene::setTranslation(const glm::vec3& a_translation)
+{
+	m_translation = a_translation;
+	updateBaseTransform();
+}
+
+void GLScene::setRotation(const glm::vec3& a_axis, float a_degrees)
+{
+	m_axisRotation = glm::vec4(a_axis, a_degrees);
+	updateBaseTransform();
+}
+
+void GLScene::updateBaseTransform()
+{
+	glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(m_scale));
+	glm::mat4 translation = glm::translate(glm::mat4(1), m_translation);
+	glm::mat4 rotation = glm::rotate(glm::mat4(1), m_axisRotation.w, glm::vec3(m_axisRotation.x, m_axisRotation.y, m_axisRotation.z));
+	m_baseTransform = translation * rotation * scale;
 }

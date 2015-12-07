@@ -36,7 +36,6 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 	// Tell the file size
 	m_file.seekg(0, std::ios::end);
 	uint64 fileSize = m_file.tellg();
-	print("Database file size: %i\n", fileSize);
 	
 	// Load the asset table
 	uint64 assetTablePos, assetTableByteSize;
@@ -44,14 +43,10 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 	m_file.read(reinterpret_cast<char*>(&assetTablePos), sizeof(assetTablePos));
 	m_file.read(reinterpret_cast<char*>(&assetTableByteSize), sizeof(assetTableByteSize));
 
-	print("assetTablePos: %i\n", assetTablePos);
-	print("assetTableByteSize: %i\n", assetTableByteSize);
-
 	AssetDatabaseEntry assetTableEntry(m_file, assetTablePos, assetTableByteSize);
 
 	uint assetTableSize;
 	assetTableEntry.readVal(assetTableSize);
-	print("assetTableSize: %i\n", assetTableSize);
 
 	for (uint i = 0; i < assetTableSize; ++i)
 	{
@@ -63,7 +58,7 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 		m_writtenAssets.insert({filePathHash, entry});
 	}
 
-	print("Num assets in database: %i\n", m_writtenAssets.size());
+	print("Opened DB, num assets: %i filesize: %iMB\n", m_writtenAssets.size(), fileSize / 1024 / 1024);
 }
 
 void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, IAsset* a_asset)
@@ -147,9 +142,6 @@ void AssetDatabase::writeAssetTableAndClose()
 		assetTableEntry.writeVal(filePos);
 		assetTableEntry.writeVal(byteSize);
 	}
-
-	print("assetTablePos: %i\n", assetTablePos);
-	print("assetTableByteSize: %i\n", assetTableByteSize);
 
 	// Write location and size of the asset table at the start of the database file
 	m_file.seekp(0, std::ios::beg);

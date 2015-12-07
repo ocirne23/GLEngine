@@ -21,6 +21,10 @@ DBMaterial::DBMaterial(const aiMaterial& a_assimpMaterial)
 		a_assimpMaterial.GetTexture(aiTextureType_HEIGHT, 0, &path);
 		setNormalTexturePath(path.C_Str());
 	}
+	a_assimpMaterial.Get(AI_MATKEY_COLOR_DIFFUSE, (aiColor4D&) m_materialColor);
+	a_assimpMaterial.Get(AI_MATKEY_OPACITY, m_opacity);
+	a_assimpMaterial.Get(AI_MATKEY_SHININESS, m_shininess);
+	a_assimpMaterial.Get(AI_MATKEY_COLOR_SPECULAR, (aiColor4D&) m_specColor);
 }
 
 const eastl::string& DBMaterial::getDiffuseTexturePath() const
@@ -58,9 +62,13 @@ uint64 DBMaterial::getByteSize() const
 	uint64 totalSize = 0;
 	totalSize += m_diffuseRegion.getByteSize();
 	totalSize += m_normalRegion.getByteSize();
-	totalSize += sizeof(m_vertexColor);
+	totalSize += sizeof(m_materialColor);
 	totalSize += sizeof(m_roughness);
 	totalSize += sizeof(m_metalness);
+
+	totalSize += sizeof(m_opacity);
+	totalSize += sizeof(m_shininess);
+	totalSize += sizeof(m_specColor);
 	return totalSize;
 }
 
@@ -68,16 +76,24 @@ void DBMaterial::write(AssetDatabaseEntry& entry)
 {
 	m_diffuseRegion.write(entry);
 	m_normalRegion.write(entry);
-	entry.writeVal(m_vertexColor);
+	entry.writeVal(m_materialColor);
 	entry.writeVal(m_roughness);
 	entry.writeVal(m_metalness);
+
+	entry.writeVal(m_opacity);
+	entry.writeVal(m_shininess);
+	entry.writeVal(m_specColor);
 }
 
 void DBMaterial::read(AssetDatabaseEntry& entry)
 {
 	m_diffuseRegion.read(entry);
 	m_normalRegion.read(entry);
-	entry.readVal(m_vertexColor);
+	entry.readVal(m_materialColor);
 	entry.readVal(m_roughness);
 	entry.readVal(m_metalness);
+
+	entry.readVal(m_opacity);
+	entry.readVal(m_shininess);
+	entry.readVal(m_specColor);
 }

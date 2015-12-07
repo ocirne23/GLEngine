@@ -133,7 +133,7 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 	for (const DBMaterial& mat : a_materials) 
 	{
 		const eastl::string& diffuseFilePath = mat.getDiffuseTexturePath();
-		if (uniqueRegions.find(diffuseFilePath) == uniqueRegions.end())
+		if (diffuseFilePath.length() && uniqueRegions.find(diffuseFilePath) == uniqueRegions.end())
 		{
 			DBAtlasRegion reg;
 			reg.loadInfo(a_baseAssetPath + "\\" + diffuseFilePath);
@@ -141,7 +141,7 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 		}
 
 		const eastl::string& normalFilePath = mat.getNormalTexturePath();
-		if (uniqueRegions.find(normalFilePath) == uniqueRegions.end())
+		if (normalFilePath.length() && uniqueRegions.find(normalFilePath) == uniqueRegions.end())
 		{
 			DBAtlasRegion reg;
 			reg.loadInfo(a_baseAssetPath + "\\" + normalFilePath);
@@ -172,9 +172,9 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 		// Update the region in each material with the correct atlasposition
 		for (DBMaterial& mat : a_materials)
 		{
-			if (mat.getDiffuseTexturePath() == reg.m_filePath)
+			if (mat.getDiffuseTexturePath() == pair.first)
 				mat.setDiffuseAtlasRegion(reg);
-			if (mat.getNormalTexturePath() == reg.m_filePath)
+			if (mat.getNormalTexturePath() == pair.first)
 				mat.setNormalAtlasRegion(reg);
 		}
 	}

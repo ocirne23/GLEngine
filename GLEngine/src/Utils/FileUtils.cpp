@@ -51,13 +51,13 @@ eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 
 	eastl::string time;
 
-	time += eastl::to_string((int) sysWriteTime.wYear) + ":";
-	time += eastl::to_string((int) sysWriteTime.wMonth) + ":";
-	time += eastl::to_string((int) sysWriteTime.wDay) + ":";
-	time += eastl::to_string((int) sysWriteTime.wHour) + ":";
-	time += eastl::to_string((int) sysWriteTime.wMinute) + ":";
-	time += eastl::to_string((int) sysWriteTime.wSecond) + ":";
-	time += eastl::to_string((int) sysWriteTime.wMilliseconds);
+	time += StringUtils::to_string((int) sysWriteTime.wYear) + ":";
+	time += StringUtils::to_string((int) sysWriteTime.wMonth) + ":";
+	time += StringUtils::to_string((int) sysWriteTime.wDay) + ":";
+	time += StringUtils::to_string((int) sysWriteTime.wHour) + ":";
+	time += StringUtils::to_string((int) sysWriteTime.wMinute) + ":";
+	time += StringUtils::to_string((int) sysWriteTime.wSecond) + ":";
+	time += StringUtils::to_string((int) sysWriteTime.wMilliseconds);
 
 	assert(sysWriteTime.wYear != 1601);
 

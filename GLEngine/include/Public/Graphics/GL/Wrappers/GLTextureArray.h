@@ -52,15 +52,15 @@ public:
 	void bind(uint index = 0);
 	void unbind(uint index = 0);
 	
-	bool isInitialized() const    { return m_initialized; }
-	uint getNumMipMaps() const    { return m_numMipmaps; }
-	uint getTextureID() const     { return m_textureID; }
-
-	uint getWidth() const         { return m_width; }
-	uint getHeight() const        { return m_height; }
-	uint getDepth() const         { return m_depth; }
-	uint getNumComponents() const { return m_numComponents; }
-	bool isFloatTexture() const   { return m_isFloatTexture; }
+	bool isInitialized() const       { return m_initialized; }
+	uint getNumMipMaps() const       { return m_numMipmaps; }
+	uint getTextureID() const        { return m_textureID; }
+	uint getNumTexturesAdded() const { return m_numTexturesAdded; }
+	uint getWidth() const            { return m_width; }
+	uint getHeight() const           { return m_height; }
+	uint getDepth() const            { return m_depth; }
+	uint getNumComponents() const    { return m_numComponents; }
+	bool isFloatTexture() const      { return m_isFloatTexture; }
 
 private:
 

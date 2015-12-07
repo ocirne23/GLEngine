@@ -29,5 +29,5 @@ public:
 
 	AtlasPosition m_atlasPosition; // position in pixels
 	glm::vec4 m_atlasMapping;      // position in texture space (floats)
-	uint m_atlasIdx = 0;           // idx of the atlas the texture is located in in the scene.
+	int m_atlasIdx = -1;           // idx of the atlas the texture is located in in the scene.
 };

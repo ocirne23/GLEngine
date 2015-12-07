@@ -13,8 +13,9 @@ struct GLMaterial
 
 	glm::vec4 diffuseMapping;
 	glm::vec4 normalMapping;
-	uint diffuseAtlasIdx;
-	uint normalAtlasIdx;
+	int diffuseAtlasIdx;
+	int normalAtlasIdx;
 	float roughness;
 	float metalness;
+	glm::vec4 materialColor;
 };

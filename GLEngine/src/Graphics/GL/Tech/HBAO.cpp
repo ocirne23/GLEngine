@@ -7,6 +7,7 @@
 #include "Graphics/GL/Tech/QuadDrawer.h"
 #include "Graphics/Utils/CheckGLError.h"
 #include "Database/Assets/DBTexture.h"
+#include "Graphics/GL/Scene/GLConfig.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/random.hpp>
@@ -14,39 +15,39 @@
 BEGIN_UNNAMED_NAMESPACE()
 
 static const float RES_RATIO = 1.0f;
-static const float AO_RADIUS = 1.5f;
+static const float AO_RADIUS = 0.15f; // In meters
 static const uint AO_DIRS = 6;
 static const uint AO_SAMPLES = 6;
-static const float AO_STRENGTH = 1.5f;
+static const float AO_STRENGTH = 1.0f;
 static const float AO_ANGLE_BIAS_DEG = 30.0f;
 static const uint NOISE_RES = 8;
 
 END_UNNAMED_NAMESPACE()
 
-HBAO::~HBAO()
-{
-
-}
-
-void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRes, uint a_hbaoGlobalsUBOBindingPoint)
+void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRes, GLFramebuffer::EMultiSampleType a_multisampleType)
 {
 	const uint screenWidth = a_xRes;
 	const uint screenHeight = a_yRes;
 	const float aoWidth = screenWidth / RES_RATIO;
 	const float aoHeight = screenHeight / RES_RATIO;
 
-	m_hbaoFullShader.initialize("Shaders/quad.vert", "Shaders/HBAO/HBAO.frag");
-	m_blurXShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blurx.frag");
-	m_blurYShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blury.frag");
-	m_fboFullRes.initialize(GLFramebuffer::EMultiSampleType::NONE);
+	m_fboFullRes.initialize(a_multisampleType);
 	m_blurXFbo.initialize();
 	m_blurYFbo.initialize();
 
-	m_fboFullRes.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
+	m_fboFullRes.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH32, screenWidth, screenHeight);
 	m_fboFullRes.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 	m_blurXFbo.addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 	m_blurYFbo.addFramebufferTexture(GLFramebuffer::ESizedFormat::RG16F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 	CHECK_GL_ERROR();
+
+	eastl::vector<eastl::string> defines;
+	if (m_fboFullRes.isMultisampleEnabled())
+		defines.push_back("MS_FBO");
+
+	m_hbaoFullShader.initialize("Shaders/quad.vert", "Shaders/HBAO/HBAO.frag", &defines);
+	m_blurXShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blurx.frag", &defines);
+	m_blurYShader.initialize("Shaders/quad.vert", "Shaders/HBAO/blury.frag", &defines);
 
 	uint noiseTexWidth = NOISE_RES;
 	uint noiseTexHeight = NOISE_RES;
@@ -113,9 +114,11 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	m_blurYShader.end();
 
 	m_hbaoFullShader.begin();
-	m_hbaoGlobalsBuffer.initialize(a_hbaoGlobalsUBOBindingPoint, "HBAOGlobals", GLConstantBuffer::EDrawUsage::STATIC, sizeof(GlobalsUBO));
+	m_hbaoGlobalsBuffer.initialize(GLConfig::HBAO_GLOBALS_UBO);
 	m_hbaoGlobalsBuffer.upload(sizeof(GlobalsUBO), &globals);
 	m_hbaoFullShader.end();
+
+	CHECK_GL_ERROR();
 
 	m_initialized = true;
 }
@@ -158,6 +161,7 @@ void HBAO::endAndRender()
 	m_blurYShader.begin();
 	QuadDrawer::drawQuad(m_blurYShader);
 	m_blurYShader.end();
+	
 	glEnable(GL_DEPTH_TEST);	
 	CHECK_GL_ERROR();
 }

@@ -25,7 +25,7 @@ public:
 	virtual void read(AssetDatabaseEntry& entry) override;
 
 	const eastl::string& getName() const               { return m_name; }
-	const glm::mat3x3& getTransform() const            { return m_transform; }
+	const glm::mat4& getTransform() const              { return m_transform; }
 	uint getParentIdx() const                          { return m_parentIdx; }
 	const eastl::vector<uint>& getChildIndices() const { return m_childIndices; }
 	const eastl::vector<uint>& getMeshIndices() const  { return m_meshIndices; }
@@ -33,7 +33,7 @@ public:
 private:
 
 	eastl::string m_name;
-	glm::mat3 m_transform;
+	glm::mat4 m_transform;
 	uint m_parentIdx = 0;
 	eastl::vector<uint> m_childIndices;
 	eastl::vector<uint> m_meshIndices;

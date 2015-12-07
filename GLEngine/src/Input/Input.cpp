@@ -48,6 +48,11 @@ void Input::setMouseCaptured(bool a_captured)
 	SDL_SetRelativeMouseMode((SDL_bool) a_captured);
 }
 
+bool Input::isMouseCaptured()
+{
+	return SDL_GetRelativeMouseMode() == SDL_TRUE;
+}
+
 bool Input::isKeyPressed(EKey a_key)
 {
 	return SDL_GetKeyboardState(NULL)[(int) a_key] == 1;

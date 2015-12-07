@@ -20,7 +20,7 @@ uint processNodes(eastl::vector<DBNode>& a_nodes, const aiNode* a_assimpNode, ui
 
 END_UNNAMED_NAMESPACE()
 
-DBScene::DBScene(const aiScene& a_assimpScene, const eastl::string& a_baseAssetPath)
+DBScene::DBScene(const aiScene& a_assimpScene, const eastl::string& a_baseAssetPath, bool a_invertNormals)
 {
 	processNodes(m_nodes, a_assimpScene.mRootNode, 0);
 
@@ -28,7 +28,7 @@ DBScene::DBScene(const aiScene& a_assimpScene, const eastl::string& a_baseAssetP
 	m_materials.resize(a_assimpScene.mNumMaterials);
 	
 	for (uint i = 0; i < a_assimpScene.mNumMeshes; ++i)
-		m_meshes[i] = DBMesh(*a_assimpScene.mMeshes[i]);
+		m_meshes[i] = DBMesh(*a_assimpScene.mMeshes[i], a_invertNormals);
 	for (uint i = 0; i < a_assimpScene.mNumMaterials; ++i)
 		m_materials[i] = DBMaterial(*a_assimpScene.mMaterials[i]);
 
@@ -55,7 +55,6 @@ uint64 DBScene::getByteSize() const
 	for (uint i = 0; i < m_atlasTextures.size(); ++i)
 		totalSize += m_atlasTextures[i].getByteSize();
 	
-	print("Scene byte size: %i\n", totalSize);
 	return totalSize;
 }
 
