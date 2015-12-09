@@ -12,6 +12,7 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh, bool a_invertNormals)
 	bool hasTextureCoords = a_assimpMesh.HasTextureCoords(0);
 	bool hasTangentsAndBitangents = a_assimpMesh.HasTangentsAndBitangents();
 	uint baseVertex = (uint) m_vertices.size();
+	//assert(hasTangentsAndBitangents);
 
 	m_indices.resize(numIndices);
 	m_vertices.resize(numVertices);

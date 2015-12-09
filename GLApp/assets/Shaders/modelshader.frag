@@ -88,5 +88,5 @@ void main()
 	vec3 finalColor = diffuseAccum + specularAccum;
 	out_color = finalColor;
 
-	//out_color = vec3(v_normal) + finalColor * 0.00000000001; // for testing values without unused variable errors
+	out_color = vec3(N) + finalColor * 0.00000000001; // for testing values without unused variable errors
 }

@@ -29,6 +29,17 @@ HBAO_DEPTH_TEXTURE_BINDING_POINT
 HBAO_COLOR_TEXTURE_BINDING_POINT
 */
 
+struct MaterialProperty
+{
+	vec4 diffuseTexMapping;
+	vec4 normalTexMapping;
+	int diffuseAtlasNr;
+	int normalAtlasNr;
+	float roughness;
+	float metalness;
+	vec4 color;
+};
+
 /* ALL UBOS */
 layout (std140, binding = MODEL_MATRIX_BINDING_POINT) uniform ModelMatrix
 {
@@ -49,16 +60,7 @@ layout (std140, binding = LIGHTING_GLOBALS_BINDING_POINT) uniform LightingGlobal
 };
 layout (std140, binding = MATERIAL_PROPERTIES_BINDING_POINT) uniform MaterialProperties
 {
-	struct MaterialProperty
-	{
-		vec4 diffuseTexMapping;
-		vec4 normalTexMapping;
-		int diffuseAtlasNr;
-		int normalAtlasNr;
-		float roughness;
-		float metalness;
-		vec4 color;
-	} u_materialProperties[MAX_MATERIALS];
+	MaterialProperty u_materialProperties[MAX_MATERIALS];
 };
 
 layout (std140, binding = LIGHT_POSITION_RANGES_BINDING_POINT) uniform LightPositionRanges
@@ -108,4 +110,4 @@ layout (std140, binding = HBAO_GLOBALS_BINDING_POINT) uniform HBAOGlobals
 	vec2 u_ndcDepthConv;
 };
 
-#endif GLOBALS_H
+#endif // GLOBALS_H

@@ -23,7 +23,7 @@ bool SceneProcessor::process(const eastl::string& a_inResourcePath, AssetDatabas
 	const uint flags = 0
 		// Required flags
 		| aiPostProcessSteps::aiProcess_Triangulate
-		| aiPostProcessSteps::aiProcess_CalcTangentSpace
+		//| aiPostProcessSteps::aiProcess_CalcTangentSpace
 		| aiPostProcessSteps::aiProcess_GenNormals
 		| aiPostProcessSteps::aiProcess_FlipUVs // Flip uv's because OpenGL
 		// Optimalizations
@@ -38,7 +38,9 @@ bool SceneProcessor::process(const eastl::string& a_inResourcePath, AssetDatabas
 		| 0;
 
 	const aiScene* assimpScene = aiImportFile(a_inResourcePath.c_str(), flags);
-	
+	const aiScene* res = aiApplyPostProcessing(assimpScene, aiPostProcessSteps::aiProcess_CalcTangentSpace);
+	assert(res);
+
 	eastl::string fileName = FileUtils::getFileNameFromPath(a_inResourcePath);
 
 	bool invertNormals = false;
@@ -46,7 +48,6 @@ bool SceneProcessor::process(const eastl::string& a_inResourcePath, AssetDatabas
 		invertNormals = true;
 
 	a_assetDatabase.addAsset(fileName, new DBScene(*assimpScene, FileUtils::getFolderPathForFile(a_inResourcePath), invertNormals));
-
 	aiReleaseImport(assimpScene);
 	return true;
 }
