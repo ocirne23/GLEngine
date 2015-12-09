@@ -20,7 +20,8 @@ enum {
 	ATLAS_MAX_HEIGHT     = 4096, 
 	ATLAS_NUM_COMPONENTS = 3, 
 	ATLAS_START_WIDTH    = 64, 
-	ATLAS_START_HEIGHT   = 64, 
+	ATLAS_START_HEIGHT   = 64,
+	ATLAS_INCREMENT      = 64,
 	ATLAS_NUM_MIPMAPS    = 4 
 };
 
@@ -60,10 +61,17 @@ bool getNextAtlasSize(uint& width, uint& height)
 	if (width >= ATLAS_MAX_WIDTH && height >= ATLAS_MAX_HEIGHT)
 		return false;
 
+#if ATLAS_POT
 	if (width < height)
 		width = getNextPOT(width);
 	else
 		height = getNextPOT(height);
+#else
+	if (width < height)
+		width += ATLAS_INCREMENT;
+	else
+		height += ATLAS_INCREMENT;
+#endif
 
 	width = eastl::min((int) width, (int) ATLAS_MAX_WIDTH);
 	height = eastl::min((int) height, (int) ATLAS_MAX_HEIGHT);

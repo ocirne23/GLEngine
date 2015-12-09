@@ -56,16 +56,17 @@ public:
 	~GLTextureBuffer();
 	GLTextureBuffer(const GLTextureBuffer& copy) = delete;
 
-	void initialize(ESizedFormat sizedFormat, EDrawUsage drawUsage = EDrawUsage::STATIC);
+	void initialize(uint maxSizeBytes, ESizedFormat sizedFormat, EDrawUsage drawUsage = EDrawUsage::STATIC);
 	void upload(uint numBytes, const void* data);
 	void bind(uint index);
 	bool isInitialized() const { return m_initialized; }
 
 private:
 
-	bool m_initialized = false;
-	uint m_textureID   = 0;
-	uint m_bufferID    = 0;
+	bool m_initialized  = false;
+	uint m_textureID    = 0;
+	uint m_bufferID     = 0;
+	uint m_maxSizeBytes = 0;
 
 	EDrawUsage m_drawUsage             = EDrawUsage::STATIC;
 	ESizedFormat m_sizedInternalFormat = ESizedFormat::R8UI;

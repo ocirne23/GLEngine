@@ -20,7 +20,6 @@ void GLConstantBuffer::initialize(uint a_bindingPoint, const char* a_blockName, 
 	m_bindingPoint = a_bindingPoint;
 
 	CHECK_GL_ERROR();
-
 	glGenBuffers(1, &m_ubo);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
 	glBindBufferBase(GL_UNIFORM_BUFFER, m_bindingPoint, m_ubo);
@@ -62,10 +61,8 @@ byte* GLConstantBuffer::mapBuffer()
 {
 	assert(m_initialized);
 	assert(!m_isMapped);
-	CHECK_GL_ERROR();
 	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
 	byte* buffer = (byte*) glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-	CHECK_GL_ERROR();
 	assert(buffer);
 	m_isMapped = true;
 	return buffer;

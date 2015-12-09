@@ -8,6 +8,12 @@
 #include <assert.h>
 #include <glm/glm.hpp>
 
+BEGIN_UNNAMED_NAMESPACE()
+
+const uint MAX_NUM_INDICES_PER_TILE = 10;
+
+END_UNNAMED_NAMESPACE()
+
 ClusteredShading::~ClusteredShading()
 {
 	SAFE_DELETE_ARRAY(m_lightGrid);
@@ -37,6 +43,7 @@ void ClusteredShading::initialize(const PerspectiveCamera& a_camera, uint a_scre
 	const float zGridLocFar = logf(a_camera.getFar() / a_camera.getNear()) / logf(1.0f + sD);
 	m_gridDepth = uint(ceilf(zGridLocFar) + 0.5f);
 	m_gridSize = m_gridWidth * m_gridHeight * m_gridDepth;
+	m_maxNumLightIndices = m_gridSize * MAX_NUM_INDICES_PER_TILE;
 
 	m_lightGrid = new glm::uvec2[m_gridSize];
 	m_tileLightIndices = new eastl::vector<ushort>[m_gridSize];
@@ -52,6 +59,8 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLight
 	for (uint i = 0; i < m_gridSize; ++i)
 		m_tileLightIndices[i].clear();
 	m_lightIndices.clear();
+
+	uint lightIndiceCtr = 0;
 
 	for (ushort i = 0; i < a_numLights; ++i)
 	{
@@ -76,10 +85,13 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLight
 				{
 					const uint gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
 					m_tileLightIndices[gridIdx].push_back(i);
+					if (lightIndiceCtr++ > m_maxNumLightIndices)
+						goto breakloop;
 				}
 			}
 		}
 	}
+breakloop:
 
 	for (uint i = 0; i < m_gridSize; ++i)
 	{

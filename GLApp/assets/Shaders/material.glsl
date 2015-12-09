@@ -10,7 +10,7 @@
 * to sample a texture of the material at the texture coordionate
 */
 
-uniform sampler2DArray u_textureAtlasArray;
+layout (binding = TEXTURE_ATLAS_ARRAY_BINDING_POINT) uniform sampler2DArray u_textureAtlasArray;
 
 float _getMipMapLevel(vec2 texCoord)
 {

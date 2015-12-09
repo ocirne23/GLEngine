@@ -40,6 +40,10 @@ public:
 	glm::vec4* getLightColorIntensities()             { return m_lightColorIntensities; }
 	glm::vec4* getLightPositionRanges()               { return m_lightPositionRanges; }
 
+public:
+
+	static LightHandle INVALID_HANDLE;
+
 private:
 
 	uint m_maxLights                   = 0;

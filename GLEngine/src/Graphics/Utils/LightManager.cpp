@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+LightHandle LightManager::INVALID_HANDLE = 0xFFFF;
+
 LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights)
 {
 	m_lightPositionRanges = new glm::vec4[m_maxLights];
@@ -27,17 +29,24 @@ LightHandle LightManager::createLight()
 
 LightHandle LightManager::createLight(const glm::vec3& a_pos, float a_radius, const glm::vec3& a_color, float a_intensity)
 {
-	assert(m_numUsedLights < m_maxLights - 1);
-	m_lightHandles[m_numUsedLights] = m_numUsedLights;
-
-	m_lightPositionRanges[m_numUsedLights] = glm::vec4(a_pos, a_radius);
-	m_lightColorIntensities[m_numUsedLights] = glm::vec4(glm::normalize(a_color), a_intensity);
-	return m_numUsedLights++;
+	if (m_numUsedLights < m_maxLights)
+	{
+		m_lightHandles[m_numUsedLights] = m_numUsedLights;
+		m_lightPositionRanges[m_numUsedLights] = glm::vec4(a_pos, a_radius);
+		m_lightColorIntensities[m_numUsedLights] = glm::vec4(glm::normalize(a_color), a_intensity);
+		return m_numUsedLights++;
+	}
+	else
+	{
+		return INVALID_HANDLE;
+	}
 }
 
 void LightManager::deleteLight(LightHandle a_handle)
 {
 	assert(m_numUsedLights > 0);
+	if (a_handle == INVALID_HANDLE)
+		return;
 	--m_numUsedLights;
 	if (a_handle != m_numUsedLights)
 	{

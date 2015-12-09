@@ -5,7 +5,7 @@
 
 #include <assert.h>
 
-void GLTextureBuffer::initialize(ESizedFormat a_sizedFormat, EDrawUsage a_drawUsage)
+void GLTextureBuffer::initialize(uint a_maxSizeBytes, ESizedFormat a_sizedFormat, EDrawUsage a_drawUsage)
 {
 	if (m_bufferID)
 		glDeleteBuffers(1, &m_bufferID);
@@ -14,10 +14,11 @@ void GLTextureBuffer::initialize(ESizedFormat a_sizedFormat, EDrawUsage a_drawUs
 
 	m_drawUsage = a_drawUsage;
 	m_sizedInternalFormat = a_sizedFormat;
+	m_maxSizeBytes = a_maxSizeBytes;
 
 	glGenBuffers(1, &m_bufferID);
 	glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
-	glBufferData(GL_TEXTURE_BUFFER, 0, NULL, (GLenum) m_drawUsage);
+	glBufferData(GL_TEXTURE_BUFFER, a_maxSizeBytes, NULL, (GLenum) m_drawUsage);
 
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_BUFFER, m_textureID);
@@ -40,6 +41,8 @@ GLTextureBuffer::~GLTextureBuffer()
 void GLTextureBuffer::upload(uint a_numBytes, const void* a_data)
 {
 	assert(m_initialized);
+	assert(a_numBytes <= m_maxSizeBytes);
+	a_numBytes = a_numBytes > m_maxSizeBytes ? m_maxSizeBytes : a_numBytes;
 	if (a_numBytes)
 	{
 		glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);

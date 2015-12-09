@@ -36,27 +36,29 @@ public:
 	uint getGridHeight() const { return m_gridHeight; }
 	uint getGridDepth() const  { return m_gridDepth; }
 	uint getGridSize() const   { return m_gridSize; }
-
-	uint getNumLightIndices() const        { return m_lightIndices.size(); }
+	
+	uint getMaxNumLightIndices() const     { return m_maxNumLightIndices; }
+	uint getNumLightIndices() const        { return (m_lightIndices.size() > m_maxNumLightIndices) ? m_maxNumLightIndices : m_lightIndices.size(); }
 	const glm::uvec2* getLightGrid() const { return m_lightGrid; }
 	const ushort* getLightIndices() const  { return m_lightIndices.size() ? &m_lightIndices[0] : NULL; }
 	GlobalsUBO getUBOData() const;
 
 private:
 
-	bool m_initialized    = false;
-	uint m_screenWidth    = 0;
-	uint m_screenHeight   = 0;
-	uint m_gridWidth      = 0;
-	uint m_gridHeight     = 0;
-	uint m_gridDepth      = 0;
-	uint m_gridSize       = 0;
-	uint m_pixelsPerTileW = 0;
-	uint m_pixelsPerTileH = 0;
-	float m_recLogSD1     = 0.0f;
-	float m_recNear       = 0.0f;
+	bool m_initialized        = false;
+	uint m_screenWidth        = 0;
+	uint m_screenHeight       = 0;
+	uint m_gridWidth          = 0;
+	uint m_gridHeight         = 0;
+	uint m_gridDepth          = 0;
+	uint m_gridSize           = 0;
+	uint m_pixelsPerTileW     = 0;
+	uint m_pixelsPerTileH     = 0;
+	uint m_maxNumLightIndices = 0;
+	float m_recLogSD1         = 0.0f;
+	float m_recNear           = 0.0f;
 
-	glm::uvec2* m_lightGrid                  = NULL;
+	glm::uvec2* m_lightGrid                   = NULL;
 	eastl::vector<ushort>* m_tileLightIndices = NULL;
 	eastl::vector<ushort> m_lightIndices;
 };

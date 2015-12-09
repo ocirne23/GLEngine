@@ -49,8 +49,8 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 						    GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR,
 					        GLTexture::ETextureWrap::CLAMP_TO_EDGE, GLTexture::ETextureWrap::CLAMP_TO_EDGE);
 
-	m_lightGridTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::RG32I, GLTextureBuffer::EDrawUsage::STREAM);
-	m_lightIndiceTextureBuffer.initialize(GLTextureBuffer::ESizedFormat::R16I, GLTextureBuffer::EDrawUsage::STREAM);
+	m_lightGridTextureBuffer.initialize(m_clusteredShading.getGridSize() * sizeof(glm::uvec2), GLTextureBuffer::ESizedFormat::RG32I, GLTextureBuffer::EDrawUsage::STREAM);
+	m_lightIndiceTextureBuffer.initialize(m_clusteredShading.getMaxNumLightIndices() * sizeof(ushort), GLTextureBuffer::ESizedFormat::R16I, GLTextureBuffer::EDrawUsage::STREAM);
 }
 
 void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a_lightManager)
