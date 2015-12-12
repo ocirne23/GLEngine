@@ -90,13 +90,8 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 
 void TestScreen::render(float a_deltaSec)
 {
-	//if (!m_renderer.isHBAOEnabled())
-		GLEngine::graphics->clear(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
-
+	m_fpsMeasurer.tickFrame(a_deltaSec);
 	m_cameraController.update(m_camera, a_deltaSec);
 	m_renderer.render(m_camera, m_lightManager);
-
-	m_fpsMeasurer.tickFrame(a_deltaSec);
-
 	GLEngine::graphics->swap();
 }
