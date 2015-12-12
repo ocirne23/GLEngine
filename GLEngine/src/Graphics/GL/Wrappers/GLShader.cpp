@@ -4,6 +4,7 @@
 
 #include "GLEngine.h"
 #include "Graphics/GL/GL.h"
+#include "Graphics/Utils/CheckGLError.h"
 #include "Utils/FileHandle.h"
 #include "EASTL/string.h"
 
@@ -45,8 +46,8 @@ void checkProgramForErrors(const GLuint a_program)
 	if (success != GL_TRUE)
 	{
 		print("Shader program was not linked!\n");
+		assert(false);
 	}
-
 	glGetProgramiv(a_program, GL_LINK_STATUS, &success);
 	if (success != GL_TRUE)
 	{
@@ -59,11 +60,9 @@ void checkProgramForErrors(const GLuint a_program)
 			print("link error: %s \n", &infoLog[0]);
 		}
 		else
-		{
 			print("link error, no info log available\n");
-		}
+		assert(false);
 	}
-
 	glValidateProgram(a_program);
 	glGetProgramiv(a_program, GL_VALIDATE_STATUS, &success);
 	if (success != GL_TRUE)
@@ -77,16 +76,18 @@ void checkProgramForErrors(const GLuint a_program)
 			print("Validation error: %s \n", &infoLog[0]);
 		}
 		else
-		{
 			print("Validation error, no info log available\n");
-		}
+		assert(false);
 	}
-
 	if (!glIsProgram(a_program))
+	{
 		print("failed to create shader!\n");
+		assert(false);
+	}
+	CHECK_GL_ERROR();
 }
 
-void checkShaderForErrors(const GLuint a_shader, const GLenum a_shaderType, const char* a_source)
+void checkShaderForErrors(const char* a_filePath, const GLuint a_shader, const GLenum a_shaderType, const char* a_source)
 {
 	GLint logLen;
 	glGetShaderiv(a_shader, GL_INFO_LOG_LENGTH, &logLen);
@@ -94,27 +95,17 @@ void checkShaderForErrors(const GLuint a_shader, const GLenum a_shaderType, cons
 	{
 		char buffer[4096];
 		glGetShaderInfoLog(a_shader, sizeof(buffer), NULL, buffer);
-		const char* typeString;
-		switch (a_shaderType)
-		{
-		case GL_FRAGMENT_SHADER:
-			typeString = "fragment";
-			break;
-		case GL_VERTEX_SHADER:
-			typeString = "vertex";
-			break;
-		default:
-			typeString = "nan";
-			break;
-		}
-		print("Error in %s shader: %s : %s \n", typeString, buffer, a_source);
+		print("Error in %s shader: %s : %s \n", a_filePath, buffer, a_source);
+		assert(false);
 	}
 	int compileStatus;
 	glGetShaderiv(a_shader, GL_COMPILE_STATUS, &compileStatus);
 	if (compileStatus != GL_TRUE)
 	{
 		print("shader failed to compile \n");
+		assert(false);
 	}
+	CHECK_GL_ERROR();
 }
 
 eastl::string preprocessShaderFile(const char* a_shaderFilePath, const eastl::vector<eastl::string>* a_defines, 
@@ -133,20 +124,6 @@ eastl::string preprocessShaderFile(const char* a_shaderFilePath, const eastl::ve
 	contents.append(shaderFile.readString());					// add shader data from file
 	contents = processIncludes(contents);						// add all the included files
 	return contents;
-}
-
-void attachShaderSource(GLuint a_prog, GLenum a_type, const char* a_source)
-{
-	const GLuint shader = glCreateShader(a_type);
-	assert(shader);
-
-	glShaderSource(shader, 1, &a_source, NULL);
-	glCompileShader(shader);
-
-	checkShaderForErrors(shader, a_type, a_source);
-
-	glAttachShader(a_prog, shader);
-	glDeleteShader(shader);
 }
 
 END_UNNAMED_NAMESPACE()
@@ -179,13 +156,13 @@ void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_frag
 
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
-	checkShaderForErrors(vertexShader, GL_VERTEX_SHADER, vertexShaderSource);
+	checkShaderForErrors(a_vertexShaderFilePath, vertexShader, GL_VERTEX_SHADER, vertexShaderSource);
 	glAttachShader(program, vertexShader);
 	glDeleteShader(vertexShader);
 
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader);
-	checkShaderForErrors(fragmentShader, GL_FRAGMENT_SHADER, fragmentShaderSource);
+	checkShaderForErrors(a_fragmentShaderFilePath, fragmentShader, GL_FRAGMENT_SHADER, fragmentShaderSource);
 	glAttachShader(program, fragmentShader);
 	glDeleteShader(fragmentShader);
 

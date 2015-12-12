@@ -41,7 +41,10 @@ float specularGGX(float roughness, float F0, float NoH, float HoL, float NoL)
 
 float inverseSquareFalloff(float lightDistance, float lightRange)
 {
-	return pow(max(1.0 - pow((lightDistance / lightRange), 4), 0), 2) / (pow(lightDistance, 2) + 1);
+	if (lightRange < 0.0)
+		return 1.0;
+	else
+		return pow(max(1.0 - pow((lightDistance / lightRange), 4), 0), 2) / (pow(lightDistance, 2) + 1);
 }
 
 void main()

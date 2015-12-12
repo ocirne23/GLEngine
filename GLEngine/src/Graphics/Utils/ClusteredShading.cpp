@@ -68,7 +68,15 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, uint a_numLight
 		const float radius = lightPositionRange.w;
 		const glm::vec3 lightPosition(lightPositionRange);
 
-		IBounds3D bounds3D = ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(a_camera, lightPosition, radius, m_screenWidth, m_screenHeight, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
+		IBounds3D bounds3D;
+		if (radius < 0.0f)
+		{
+			bounds3D.maxX = m_gridWidth;
+			bounds3D.maxY = m_gridHeight;
+			bounds3D.maxZ = m_gridDepth;
+		}
+		else
+			bounds3D = ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(a_camera, lightPosition, radius, m_screenWidth, m_screenHeight, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
 
 		bounds3D.minX = glm::clamp(bounds3D.minX, 0, (int) m_gridWidth);
 		bounds3D.maxX = glm::clamp(bounds3D.maxX, 0, (int) m_gridWidth);

@@ -77,6 +77,10 @@
     <ClCompile Include="src\3rdparty\entityx\help\Timer.cc" />
     <ClCompile Include="src\Graphics\UI\UIFrame.cpp" />
     <ClCompile Include="src\Graphics\UI\Widgets\Widget.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\FXAA.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\Bloom.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\BilateralBlur.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\GaussianBlur.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EABase\config\eacompiler.h" />
@@ -232,6 +236,10 @@
     <ClInclude Include="include\3rdparty\json\version.h" />
     <ClInclude Include="include\Public\Graphics\UI\Widgets\Widget.h" />
     <ClInclude Include="include\3rdparty\json\writer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\FXAA.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\Bloom.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\BilateralBlur.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\GaussianBlur.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

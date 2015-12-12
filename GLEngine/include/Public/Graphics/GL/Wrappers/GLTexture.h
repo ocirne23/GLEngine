@@ -37,11 +37,11 @@ public:
 	~GLTexture();
 	GLTexture(const GLTexture& copy) = delete;
 
-	void initialize(const DBTexture& texture, uint numMipmaps = 4,
-				ETextureMinFilter minFilter = ETextureMinFilter::LINEAR_MIPMAP_LINEAR,
-				ETextureMagFilter magFilter = ETextureMagFilter::LINEAR,
-				ETextureWrap textureWrapS = ETextureWrap::REPEAT,
-				ETextureWrap textureWrapT = ETextureWrap::REPEAT);
+	void initialize(const DBTexture& texture, uint numMipmaps = 0,
+				ETextureMinFilter minFilter = ETextureMinFilter::NEAREST,
+				ETextureMagFilter magFilter = ETextureMagFilter::NEAREST,
+				ETextureWrap textureWrapS = ETextureWrap::CLAMP_TO_EDGE,
+				ETextureWrap textureWrapT = ETextureWrap::CLAMP_TO_EDGE);
 
 	void bind(uint index = 0);
 	void unbind(uint index = 0);

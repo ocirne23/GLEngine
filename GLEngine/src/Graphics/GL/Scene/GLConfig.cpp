@@ -6,17 +6,19 @@
 #include "Graphics/GL/Tech/HBAO.h"
 #include "EASTL/to_string.h"
 
+eastl::vector<eastl::string> GLConfig::defines;
+
 const uint GLConfig::CLUSTERED_SHADING_TILE_WIDTH  = 64;
 const uint GLConfig::CLUSTERED_SHADING_TILE_HEIGHT = 64;
 const uint GLConfig::HBAO_NOISE_TEXTURE_RES        = 8;
-const GLFramebuffer::EMultiSampleType GLConfig::MULTISAMPLE_TYPE = GLFramebuffer::EMultiSampleType::MSAA_4X;
+const GLFramebuffer::EMultiSampleType GLConfig::MULTISAMPLE_TYPE = GLFramebuffer::EMultiSampleType::NONE;
 
 // Global shader defines
 const uint GLConfig::MAX_MATERIALS = 200;
 const uint GLConfig::MAX_LIGHTS    = 100;
+const uint GLConfig::USE_MS_FBO    = (GLConfig::MULTISAMPLE_TYPE == GLFramebuffer::EMultiSampleType::NONE) ? 0 : 1;
 
 const float GLConfig::HBAO_BLUR_KERNEL_RADIUS = 8.0f;
-const uint GLConfig::HBAO_USE_MS_FBO          = (GLConfig::MULTISAMPLE_TYPE == GLFramebuffer::EMultiSampleType::NONE) ? 0 : 1;
 const uint GLConfig::HBAO_NUM_DIRECTIONS      = 6;
 const uint GLConfig::HBAO_NUM_STEPS           = 6;
 
@@ -24,9 +26,13 @@ const uint GLConfig::TEXTURE_ATLAS_ARRAY_BINDING_POINT  = 1;
 const uint GLConfig::DFV_TEXTURE_BINDING_POINT          = 2;
 const uint GLConfig::LIGHT_GRID_TEXTURE_BINDING_POINT   = 3;
 const uint GLConfig::LIGHT_INDICE_TEXTURE_BINDING_POINT = 4;
-const uint GLConfig::HBAO_NOISE_TEXTURE_BINDING_POINT   = 5;
-const uint GLConfig::HBAO_DEPTH_TEXTURE_BINDING_POINT   = 6;
-const uint GLConfig::HBAO_COLOR_TEXTURE_BINDING_POINT   = 7;
+const uint GLConfig::DEPTH_TEXTURE_BINDING_POINT        = 5;
+const uint GLConfig::HBAO_NOISE_TEXTURE_BINDING_POINT   = 6;
+const uint GLConfig::BLUR_TEXTURE_BINDING_POINT         = 7;
+
+const uint GLConfig::COLOR_TEXTURE_BINDING_POINT        = 1;
+const uint GLConfig::AO_RESULT_TEXTURE_BINDING_POINT    = 2;
+const uint GLConfig::BLOOM_RESULT_TEXTURE_BINDING_POINT = 3;
 
 const GLConstantBuffer::Config GLConfig::MODEL_MATRIX_UBO =              {0, "ModelMatrix",             GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::ModelMatrixUBO)};
 const GLConstantBuffer::Config GLConfig::CAMERA_VARS_UBO =               {1, "CameraVars",              GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::CameraVarsUBO)};
@@ -62,16 +68,15 @@ const GLVertexBuffer::Config GLConfig::GLMESH_INDICE_BUFFER = {
 
 const eastl::vector<eastl::string>& GLConfig::getGlobalShaderDefines()
 {
-	static eastl::vector<eastl::string> defines;
 	if (!defines.size())
 	{
 		defines.push_back("PI 3.14159265");
 
 		defines.push_back("MAX_MATERIALS " + StringUtils::to_string(GLConfig::MAX_MATERIALS));
 		defines.push_back("MAX_LIGHTS "    + StringUtils::to_string(GLConfig::MAX_LIGHTS));
+		defines.push_back("USE_MS_FBO "    + StringUtils::to_string(GLConfig::USE_MS_FBO));
 
 		defines.push_back("HBAO_BLUR_KERNEL_RADIUS " + StringUtils::to_string(GLConfig::HBAO_BLUR_KERNEL_RADIUS));
-		defines.push_back("HBAO_USE_MS_FBO "         + StringUtils::to_string(GLConfig::HBAO_USE_MS_FBO));
 		defines.push_back("HBAO_NUM_DIRECTIONS "     + StringUtils::to_string(GLConfig::HBAO_NUM_DIRECTIONS));
 		defines.push_back("HBAO_NUM_STEPS "          + StringUtils::to_string(GLConfig::HBAO_NUM_STEPS));
 		defines.push_back("HBAO_NOISE_TEXTURE_RES "  + StringUtils::to_string(GLConfig::HBAO_NOISE_TEXTURE_RES));
@@ -80,9 +85,13 @@ const eastl::vector<eastl::string>& GLConfig::getGlobalShaderDefines()
 		defines.push_back("DFV_TEXTURE_BINDING_POINT "          + StringUtils::to_string(GLConfig::DFV_TEXTURE_BINDING_POINT));
 		defines.push_back("LIGHT_GRID_TEXTURE_BINDING_POINT "   + StringUtils::to_string(GLConfig::LIGHT_GRID_TEXTURE_BINDING_POINT));
 		defines.push_back("LIGHT_INDICE_TEXTURE_BINDING_POINT " + StringUtils::to_string(GLConfig::LIGHT_INDICE_TEXTURE_BINDING_POINT));
+		defines.push_back("DEPTH_TEXTURE_BINDING_POINT "        + StringUtils::to_string(GLConfig::DEPTH_TEXTURE_BINDING_POINT));
 		defines.push_back("HBAO_NOISE_TEXTURE_BINDING_POINT "   + StringUtils::to_string(GLConfig::HBAO_NOISE_TEXTURE_BINDING_POINT));
-		defines.push_back("HBAO_DEPTH_TEXTURE_BINDING_POINT "   + StringUtils::to_string(GLConfig::HBAO_DEPTH_TEXTURE_BINDING_POINT));
-		defines.push_back("HBAO_COLOR_TEXTURE_BINDING_POINT "   + StringUtils::to_string(GLConfig::HBAO_COLOR_TEXTURE_BINDING_POINT));
+		defines.push_back("BLUR_TEXTURE_BINDING_POINT "         + StringUtils::to_string(GLConfig::BLUR_TEXTURE_BINDING_POINT));
+		
+		defines.push_back("COLOR_TEXTURE_BINDING_POINT "        + StringUtils::to_string(GLConfig::COLOR_TEXTURE_BINDING_POINT));
+		defines.push_back("AO_RESULT_TEXTURE_BINDING_POINT "    + StringUtils::to_string(GLConfig::AO_RESULT_TEXTURE_BINDING_POINT));
+		defines.push_back("BLOOM_RESULT_TEXTURE_BINDING_POINT " + StringUtils::to_string(GLConfig::BLOOM_RESULT_TEXTURE_BINDING_POINT));
 
 		defines.push_back("MODEL_MATRIX_BINDING_POINT "              + StringUtils::to_string(GLConfig::MODEL_MATRIX_UBO.bindingPoint));
 		defines.push_back("CAMERA_VARS_BINDING_POINT "               + StringUtils::to_string(GLConfig::CAMERA_VARS_UBO.bindingPoint));

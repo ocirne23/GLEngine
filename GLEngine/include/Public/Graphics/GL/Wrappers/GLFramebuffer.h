@@ -95,14 +95,12 @@ public:
 	void end();
 	void begin();
 
-	void bindTextures(uint fromTextureUnit = 0);
 	void bindDepthTexture(uint textureUnit = 0);
 	void bindTexture(uint textureIndex, uint textureUnit);
+	void unbindTexture(uint textureIndex, uint textureUnit);
 	void deleteTextures();
 
 	bool isMultisampleEnabled() const { return m_multiSampleType == EMultiSampleType::NONE; }
-
-private:
 
 private:
 

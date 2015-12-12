@@ -38,6 +38,10 @@
     <ClCompile Include="src\Graphics\GL\Scene\GLConfig.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLMaterial.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLRenderer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\BilateralBlur.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\Bloom.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\FXAA.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\GaussianBlur.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\QuadDrawer.cpp" />
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
@@ -180,6 +184,10 @@
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLLightManager.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\BilateralBlur.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\Bloom.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\FXAA.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\GaussianBlur.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Frustum.h" />
     <ClInclude Include="include\Private\Graphics\GL\GL.h" />
     <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />

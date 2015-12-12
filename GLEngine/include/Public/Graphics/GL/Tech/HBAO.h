@@ -4,6 +4,7 @@
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Wrappers/GLConstantBuffer.h"
 #include "Graphics/GL/Wrappers/GLTexture.h"
+#include "Graphics/GL/Tech/BilateralBlur.h"
 
 #include <glm/glm.hpp>
 
@@ -42,24 +43,20 @@ public:
 	};
 
 public:
+
 	HBAO() {}
 	~HBAO() {}
 
-	void initialize(const PerspectiveCamera& camera, uint xRes, uint yRes, GLFramebuffer::EMultiSampleType multisampleType);
-
-	void begin();
-	void endAndRender();
+	void initialize(const PerspectiveCamera& camera, uint xRes, uint yRes);
+	GLFramebuffer& getHBAOResultFBO(GLFramebuffer& sceneFBO);
 
 private:
 
-	bool m_initialized;
+	bool m_initialized = false;
 
-	GLFramebuffer m_fboFullRes;
-	GLFramebuffer m_blurXFbo;
-	GLFramebuffer m_blurYFbo;
 	GLShader m_hbaoFullShader;
-	GLShader m_blurXShader;
-	GLShader m_blurYShader;
-	GLTexture m_noiseTexture;
+	GLFramebuffer m_hbaoResultFBO;
 	GLConstantBuffer m_hbaoGlobalsBuffer;
+	GLTexture m_noiseTexture;
+	BilateralBlur m_bilateralBlur;
 };

@@ -23,13 +23,12 @@ public:
 	void setScale(float scale);
 	void setTranslation(const glm::vec3& translation);
 	void setRotation(const glm::vec3& axis, float degrees);
+	void setVisibility(bool a_visible) { m_visible = a_visible; }
 
 	float getScale() const                   { return m_scale; }
 	const glm::vec3& getTranslation() const  { return m_translation; }
 	const glm::vec4& getAxisRotation() const { return m_axisRotation; }
-
-	bool isVisible() const { return m_visible; }
-	void setVisibility(bool a_visible) { m_visible = a_visible; }
+	bool isVisible() const                   { return m_visible; }
 
 private:
 

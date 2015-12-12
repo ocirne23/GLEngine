@@ -23,9 +23,9 @@ public:
 	// Part of global shader defines
 	static const uint MAX_MATERIALS;
 	static const uint MAX_LIGHTS;
+	static const uint USE_MS_FBO;
 
 	static const float HBAO_BLUR_KERNEL_RADIUS;
-	static const uint HBAO_USE_MS_FBO;
 	static const uint HBAO_NUM_DIRECTIONS;
 	static const uint HBAO_NUM_STEPS;
 
@@ -33,9 +33,12 @@ public:
 	static const uint DFV_TEXTURE_BINDING_POINT;
 	static const uint LIGHT_GRID_TEXTURE_BINDING_POINT;
 	static const uint LIGHT_INDICE_TEXTURE_BINDING_POINT;
+	static const uint DEPTH_TEXTURE_BINDING_POINT;
 	static const uint HBAO_NOISE_TEXTURE_BINDING_POINT;
-	static const uint HBAO_DEPTH_TEXTURE_BINDING_POINT;
-	static const uint HBAO_COLOR_TEXTURE_BINDING_POINT;
+	static const uint BLUR_TEXTURE_BINDING_POINT;
+	static const uint COLOR_TEXTURE_BINDING_POINT;
+	static const uint AO_RESULT_TEXTURE_BINDING_POINT;
+	static const uint BLOOM_RESULT_TEXTURE_BINDING_POINT;
 
 	static const GLConstantBuffer::Config MODEL_MATRIX_UBO;
 	static const GLConstantBuffer::Config CAMERA_VARS_UBO;
@@ -52,6 +55,8 @@ public:
 	static const GLVertexBuffer::Config GLMESH_INDICE_BUFFER;
 
 private:
+
+	static eastl::vector<eastl::string> defines;
 
 	GLConfig() {}
 };

@@ -3,144 +3,135 @@
 
 #include "Shaders/globals.glsl"
 
-#if HBAO_USE_MS_FBO
-layout(binding = HBAO_DEPTH_TEXTURE_BINDING_POINT) uniform sampler2DMS u_linearDepthTex;
-#else
-layout(binding = HBAO_DEPTH_TEXTURE_BINDING_POINT) uniform sampler2D u_linearDepthTex;
-#endif
-
+layout (binding = DEPTH_TEXTURE_BINDING_POINT) uniform sampler2D u_linearDepthTex;
 layout (binding = HBAO_NOISE_TEXTURE_BINDING_POINT) uniform sampler2D u_noiseTex;
 
 in vec2 v_position;
 in vec2 v_texcoord;
 
-layout(location = 0) out vec2 out_aoDepth;
+layout(location = 0) out float out_ao;
 
 float viewSpaceZFromDepth(float a_d)
 {
-    a_d = a_d * 2.0 - 1.0;
-    return -1.0 / (u_ndcDepthConv.x * a_d + u_ndcDepthConv.y);
+	a_d = a_d * 2.0 - 1.0;
+	return -1.0 / (u_ndcDepthConv.x * a_d + u_ndcDepthConv.y);
 }
 
 float invLength(vec2 a_v)
 {
-    return inversesqrt(dot(a_v, a_v));
+	return inversesqrt(dot(a_v, a_v));
 }
 
 float tangent(vec3 a_p, vec3 a_s)
 {
-    return -(a_p.z - a_s.z) * invLength(a_s.xy - a_p.xy);
+	return -(a_p.z - a_s.z) * invLength(a_s.xy - a_p.xy);
 }
 
 float tangent(vec3 a_t)
 {
-    return a_t.z * invLength(a_t.xy);
+	return a_t.z * invLength(a_t.xy);
 }
 
 float biasedTangent(vec3 a_t)
 {
-    return a_t.z * invLength(a_t.xy) + u_tanAngleBias;
+	return a_t.z * invLength(a_t.xy) + u_tanAngleBias;
 }
 
 vec3 uvToEye(vec2 a_uv, float a_eyeZ)
 {
-    vec2 uv = u_uvToViewA * a_uv + u_uvToViewB;
-    return vec3(uv * a_eyeZ, a_eyeZ);
+	vec2 uv = u_uvToViewA * a_uv + u_uvToViewB;
+	return vec3(uv * a_eyeZ, a_eyeZ);
 }
 
 vec3 fetchEyePos(vec2 a_uv)
 {
-#if HBAO_USE_MS_FBO
-	float depth = texelFetch(u_linearDepthTex, ivec2(a_uv * u_aoResolution), gl_SampleID).r;
-#else
 	float depth = texture(u_linearDepthTex, a_uv).r;
-#endif
-    float z = viewSpaceZFromDepth(depth);
-    return uvToEye(a_uv, z);
+	float z = viewSpaceZFromDepth(depth);
+	return uvToEye(a_uv, z);
 }
 
 float length2(vec3 a_v)
 {
-    return dot(a_v, a_v);
+	return dot(a_v, a_v);
 }
 
 vec3 minDiff(vec3 a_p, vec3 a_pr, vec3 a_pl)
 {
-    vec3 v1 = a_pr - a_p;
-    vec3 v2 = a_p - a_pl;
-    return length2(v1) < length2(v2) ? v1 : v2; 
+	vec3 v1 = a_pr - a_p;
+	vec3 v2 = a_p - a_pl;
+	return length2(v1) < length2(v2) ? v1 : v2; 
 }
 
 float falloff(float a_d2)
 {
-    return a_d2 * u_negInvR2 + 1.0;
+	return a_d2 * u_negInvR2 + 1.0;
 }
 
 vec2 snapUVOffset(vec2 a_uv)
 {
-    return round(a_uv * u_aoResolution) * u_invAOResolution;
+	return round(a_uv * u_aoResolution) * u_invAOResolution;
 }
 
 float tanToSin(float a_x)
 {
-    return a_x * inversesqrt(a_x * a_x + 1.0);
+	return a_x * inversesqrt(a_x * a_x + 1.0);
 }
 
 vec3 tangentVector(vec2 a_deltaUV, vec3 a_dPdu, vec3 a_dPdv)
 {
-    return a_deltaUV.x * a_dPdu + a_deltaUV.y * a_dPdv;
+	return a_deltaUV.x * a_dPdu + a_deltaUV.y * a_dPdv;
 }
 
 vec2 rotateDirections(vec2 a_dir, vec2 a_cosSin)
 {
-    return vec2(a_dir.x * a_cosSin.x - a_dir.y * a_cosSin.y,
+	return vec2(a_dir.x * a_cosSin.x - a_dir.y * a_cosSin.y,
 	            a_dir.x * a_cosSin.y + a_dir.y * a_cosSin.x);
 }
 
 void computeSteps(inout vec2 a_stepSizeUV, inout float a_numSteps, float a_rayRadiusPx, float a_rand)
 {
-    a_numSteps = min(HBAO_NUM_STEPS, a_rayRadiusPx);
-    float stepSizePx = a_rayRadiusPx / (a_numSteps + 1);
-    float maxNumSteps = u_maxRadiusPixels / stepSizePx;
-    
-    if (maxNumSteps < a_numSteps)
-    {
-	a_numSteps = floor(maxNumSteps + a_rand);
-	a_numSteps = max(a_numSteps, 1);
-	stepSizePx = u_maxRadiusPixels / a_numSteps;
-    }
-    
-    a_stepSizeUV = stepSizePx * u_invAOResolution;
+	a_numSteps = min(HBAO_NUM_STEPS, a_rayRadiusPx);
+	float stepSizePx = a_rayRadiusPx / (a_numSteps + 1);
+	float maxNumSteps = u_maxRadiusPixels / stepSizePx;
+
+	if (maxNumSteps < a_numSteps)
+	{
+		a_numSteps = floor(maxNumSteps + a_rand);
+		a_numSteps = max(a_numSteps, 1);
+		stepSizePx = u_maxRadiusPixels / a_numSteps;
+	}
+
+	a_stepSizeUV = stepSizePx * u_invAOResolution;
 }
 
 float horizonOcclusion(vec2 a_deltaUV, vec3 a_p, float a_numSteps, 
                        float a_randstep, vec3 a_dPdu, vec3 a_dPdv)
 {
-    float ao = 0.0;
+	float ao = 0.0;
 
-    vec2 uv = v_texcoord + snapUVOffset(a_randstep * a_deltaUV);
-    vec2 deltaUV = snapUVOffset(a_deltaUV);
-    vec3 t = deltaUV.x * a_dPdu + deltaUV.y * a_dPdv;
-    float tanH = biasedTangent(t);
-    float sinH = tanToSin(tanH);
+	vec2 uv = v_texcoord + snapUVOffset(a_randstep * a_deltaUV);
+	vec2 deltaUV = snapUVOffset(a_deltaUV);
+	vec3 t = deltaUV.x * a_dPdu + deltaUV.y * a_dPdv;
+	float tanH = biasedTangent(t);
+	float sinH = tanToSin(tanH);
 
-    for (float j = 1; j < a_numSteps; ++j)
-    {
-	uv += deltaUV;
-	vec3 s = fetchEyePos(uv);
-	float tanS = tangent(a_p, s);
-	float d2 = length2(s - a_p);
-
-	if (d2 < u_r2 && tanS > tanH)
+	for (float j = 1; j < a_numSteps; ++j)
 	{
-	    float sinS = tanToSin(tanS);
-	    ao += falloff(d2) * (sinS - sinH);
+		uv += deltaUV;
+		vec3 s = fetchEyePos(uv);
+		float tanS = tangent(a_p, s);
+		float d2 = length2(s - a_p);
 
-	    tanH = tanS;
-	    sinH = sinS;
+		if (d2 < u_r2 && tanS > tanH)
+		{
+			float sinS = tanToSin(tanS);
+			ao += falloff(d2) * (sinS - sinH);
+
+			tanH = tanS;
+			sinH = sinS;
+		}
 	}
-    }
-    return ao;
+	return ao;
 }
 
 void main()
@@ -178,5 +169,5 @@ void main()
 		}
 		ao = 1.0 - ao / HBAO_NUM_DIRECTIONS * u_strength;
 	}
-	out_aoDepth = vec2(ao, p.z);
+	out_ao = ao;
 }

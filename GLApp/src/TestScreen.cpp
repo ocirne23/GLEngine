@@ -25,7 +25,12 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 	m_objScene.setTranslation(glm::vec3(0.0f, -1.5f, 20.0f));
 	m_renderer.addScene(&m_objScene);
 
-	m_fpsMeasurer.setLogFunction(10.0f, [this]() { print("FPS: %i\n", m_fpsMeasurer.getAvgFps()); });
+	m_skyboxScene.initialize("skysphere.obj", m_objDB);
+	m_renderer.addSkybox(&m_skyboxScene);
+
+	m_fpsMeasurer.setLogFunction(10.0f, [this]() { print("FPS: %i\n", m_fpsMeasurer.getAvgFps()); print("%f %f %f\n", m_camera.getPosition().x, m_camera.getPosition().y, m_camera.getPosition().z); });
+
+	m_lightManager.createLight(glm::vec3(22000, 4000, 18000), -1.0, glm::vec3(0.75f, 0.70f, 0.66f), 1.5);
 
 	// Input stuffs
 	m_windowQuitListener.setFunc([]() { GLEngine::shutdown(); });
@@ -34,9 +39,11 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		switch (a_key)
 		{
 		case EKey::ESCAPE:   GLEngine::shutdown(); break;
-		case EKey::KP_9:     m_renderer.setHBAOEnabled(!m_renderer.isHBAOEnabled()); break;
-		case EKey::KP_8:     m_objScene.setVisibility(!m_objScene.isVisible()); break;
-		case EKey::KP_7:     m_ifcScene.setVisibility(!m_ifcScene.isVisible()); break;
+		case EKey::KP_1:     m_renderer.setHBAOEnabled(!m_renderer.isHBAOEnabled()); break;
+		case EKey::KP_2:     m_renderer.setFXAAEnabled(!m_renderer.isFXAAEnabled()); break;
+		case EKey::KP_3:     m_renderer.setBloomEnabled(!m_renderer.isBloomEnabled()); break;
+		case EKey::KP_9:     m_objScene.setVisibility(!m_objScene.isVisible()); break;
+		case EKey::KP_8:     m_ifcScene.setVisibility(!m_ifcScene.isVisible()); break;
 		case EKey::KP_PLUS:  m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 1.2f); break;
 		case EKey::KP_MINUS: m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 0.8f); break;
 		case EKey::Y:        m_lightManager.deleteLights(); break;
@@ -55,7 +62,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 
 void TestScreen::render(float a_deltaSec)
 {
-	if (!m_renderer.isHBAOEnabled())
+	//if (!m_renderer.isHBAOEnabled())
 		GLEngine::graphics->clear(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
 
 	m_cameraController.update(m_camera, a_deltaSec);

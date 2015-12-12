@@ -27,6 +27,7 @@ private:
 
 	GLScene m_ifcScene;
 	GLScene m_objScene;
+	GLScene m_skyboxScene;
 
 	FPSCameraController m_cameraController;
 	PerspectiveCamera m_camera;

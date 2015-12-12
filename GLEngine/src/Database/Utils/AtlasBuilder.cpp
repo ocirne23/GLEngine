@@ -159,6 +159,12 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 	
 	// Then we fit these textures into atlases (not the image data, just fitting rectangles)
 	eastl::vector<TextureAtlas*> atlases;
+	if (uniqueRegions.size() == 1)
+	{
+		auto& pair = *uniqueRegions.begin();
+		const DBAtlasRegion& reg = pair.second;
+		atlases.push_back(new TextureAtlas(reg.m_texWidth, reg.m_texHeight, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, 0));
+	}
 	while (!containTexturesInAtlases(uniqueRegions, atlases))
 		increaseAtlasesSize(atlases);
 
