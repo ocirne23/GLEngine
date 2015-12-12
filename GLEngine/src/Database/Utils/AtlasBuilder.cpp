@@ -144,7 +144,7 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 		if (diffuseFilePath.length() && uniqueRegions.find(diffuseFilePath) == uniqueRegions.end())
 		{
 			DBAtlasRegion reg;
-			reg.loadInfo(a_baseAssetPath + "\\" + diffuseFilePath);
+			reg.loadInfo(a_baseAssetPath + diffuseFilePath);
 			uniqueRegions.insert({diffuseFilePath, reg});
 		}
 
@@ -152,7 +152,7 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 		if (normalFilePath.length() && uniqueRegions.find(normalFilePath) == uniqueRegions.end())
 		{
 			DBAtlasRegion reg;
-			reg.loadInfo(a_baseAssetPath + "\\" + normalFilePath);
+			reg.loadInfo(a_baseAssetPath + normalFilePath);
 			uniqueRegions.insert({normalFilePath, reg});
 		}
 	}

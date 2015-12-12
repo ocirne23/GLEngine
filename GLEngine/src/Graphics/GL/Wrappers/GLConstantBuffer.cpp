@@ -73,6 +73,7 @@ void GLConstantBuffer::unmapBuffer()
 	assert(m_initialized);
 	assert(m_isMapped);
 	m_isMapped = false;
+	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
 	glUnmapBuffer(GL_UNIFORM_BUFFER);
 }
 

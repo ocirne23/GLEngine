@@ -25,9 +25,10 @@ private:
 	AssetDatabase m_ifcDB;
 	AssetDatabase m_objDB;
 
-	GLScene m_ifcScene;
-	GLScene m_objScene;
-	GLScene m_skyboxScene;
+	GLScene m_ifc1Scene;
+	GLScene m_ifc2Scene;
+	GLScene m_palaceScene;
+	GLScene m_skysphereScene;
 
 	FPSCameraController m_cameraController;
 	PerspectiveCamera m_camera;

@@ -8,11 +8,15 @@
 #include "Database/Assets/DBScene.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/random.hpp>
 
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
 	DBScene* scene = (DBScene*) a_database.loadAsset(a_assetName, EAssetType::SCENE);
+	scene->mergeMeshes();
 	m_nodes = scene->getNodes();
+
+	//print("numMeshes: %i\nnumMaterials: %i\nnumNodes: %i\n", scene->numMeshes(), scene->numMaterials(), scene->numNodes());
 
 	m_meshes.resize(scene->numMeshes());
 	for (uint i = 0; i < scene->numMeshes(); ++i)

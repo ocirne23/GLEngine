@@ -1,4 +1,4 @@
-#include "Graphics/Graphics.h"
+﻿#include "Graphics/Graphics.h"
 
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
@@ -146,4 +146,30 @@ void Graphics::setViewportSize(uint a_viewportWidth, uint a_viewportHeight)
 	m_viewportWidth = a_viewportWidth;
 	m_viewportHeight = a_viewportHeight;
 	glViewport(m_viewportXPos, m_viewportYPos, m_viewportWidth, m_viewportHeight);
+}
+
+void Graphics::clearDepthOnly()
+{
+	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void Graphics::beginDepthPrepass()
+{
+	glDepthMask(true);
+	glColorMask(0, 0, 0, 0);
+	glDepthFunc(GL_LESS);
+}
+
+void Graphics::endDepthPrepass()
+{
+	glDepthMask(false);
+	glColorMask(1, 1, 1, 1);
+	glDepthFunc(GL_LEQUAL);
+}
+
+void Graphics::disableDepthPrepass()
+{
+	glDepthMask(true);
+	glColorMask(1, 1, 1, 1);
+	glDepthFunc(GL_LESS);
 }

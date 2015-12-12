@@ -2,9 +2,9 @@
 
 #include "Graphics/GL/Scene/GLRenderer.h"
 #include "Graphics/GL/Scene/GLMaterial.h"
-#include "Graphics/Utils/ClusteredShading.h"
+#include "Graphics/GL/Tech/ClusteredShading.h"
 #include "Graphics/GL/Tech/HBAO.h"
-#include "EASTL/to_string.h"
+#include "Utils/StringUtils.h"
 
 eastl::vector<eastl::string> GLConfig::defines;
 
@@ -49,9 +49,9 @@ VertexAttribute GLMESH_VB_ATTRIBS[] = {
 	VertexAttribute(0, VertexAttribute::EFormat::FLOAT, 3),       // Position
 	VertexAttribute(1, VertexAttribute::EFormat::FLOAT, 2),       // Texcoord
 	VertexAttribute(2, VertexAttribute::EFormat::FLOAT, 3),       // Normals
-	VertexAttribute(3, VertexAttribute::EFormat::FLOAT, 3),       // Tangents
-	VertexAttribute(4, VertexAttribute::EFormat::FLOAT, 3),       // Bitangents
-	VertexAttribute(5, VertexAttribute::EFormat::UNSIGNED_INT, 1) // MaterialID
+	//VertexAttribute(3, VertexAttribute::EFormat::FLOAT, 3),       // Tangents
+	//VertexAttribute(4, VertexAttribute::EFormat::FLOAT, 3),       // Bitangents
+	VertexAttribute(3, VertexAttribute::EFormat::UNSIGNED_INT, 1) // MaterialID
 };
 END_UNNAMED_NAMESPACE()
 

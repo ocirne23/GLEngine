@@ -23,16 +23,35 @@ END_UNNAMED_NAMESPACE()
 DBScene::DBScene(const aiScene& a_assimpScene, const eastl::string& a_baseAssetPath, bool a_invertNormals)
 {
 	processNodes(m_nodes, a_assimpScene.mRootNode, 0);
-
 	m_meshes.resize(a_assimpScene.mNumMeshes);
 	m_materials.resize(a_assimpScene.mNumMaterials);
-	
 	for (uint i = 0; i < a_assimpScene.mNumMeshes; ++i)
 		m_meshes[i] = DBMesh(*a_assimpScene.mMeshes[i], a_invertNormals);
 	for (uint i = 0; i < a_assimpScene.mNumMaterials; ++i)
 		m_materials[i] = DBMaterial(*a_assimpScene.mMaterials[i]);
-
 	m_atlasTextures = AtlasBuilder::createAtlases(m_materials, a_baseAssetPath);
+}
+
+void DBScene::mergeMeshes()
+{
+	DBMesh mergedMesh;
+	mergeMeshes(mergedMesh, m_nodes[0], glm::mat4(1));
+
+	m_nodes.resize(1);  // Clear all nodes except the root node
+	m_meshes.resize(1);
+	m_nodes[0].clearChildren();
+	m_nodes[0].clearMeshes();
+	m_nodes[0].addMesh(0);
+	m_meshes[0] = mergedMesh;
+}
+
+void DBScene::mergeMeshes(DBMesh& mergedMesh, DBNode& node, const glm::mat4& parentTransform)
+{
+	glm::mat4 transform = parentTransform * node.getTransform();
+	for (uint meshIdx : node.getMeshIndices())
+		mergedMesh.merge(m_meshes[meshIdx], transform);
+	for (uint childIdx : node.getChildIndices())
+		mergeMeshes(mergedMesh, m_nodes[childIdx], transform);
 }
 
 uint64 DBScene::getByteSize() const

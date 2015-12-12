@@ -57,3 +57,23 @@ void GLTextureBuffer::bind(uint a_index)
 	glActiveTexture(GL_TEXTURE0 + a_index);
 	glBindTexture(GL_TEXTURE_BUFFER, m_textureID);
 }
+
+byte* GLTextureBuffer::mapBuffer()
+{
+	assert(m_initialized);
+	assert(!m_isMapped);
+	glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
+	byte* buffer = (byte*) glMapBuffer(GL_TEXTURE_BUFFER, GL_WRITE_ONLY);
+	assert(buffer);
+	m_isMapped = true;
+	return buffer;
+}
+
+void GLTextureBuffer::unmapBuffer()
+{
+	assert(m_initialized);
+	assert(m_isMapped);
+	m_isMapped = false;
+	glBindBuffer(GL_TEXTURE_BUFFER, m_bufferID);
+	glUnmapBuffer(GL_TEXTURE_BUFFER);
+}

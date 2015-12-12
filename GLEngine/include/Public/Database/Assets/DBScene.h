@@ -26,6 +26,8 @@ public:
 	DBScene(const aiScene& assimpScene, const eastl::string& baseAssetPath, bool invertNormals = false);
 	virtual ~DBScene() {}
 
+	void mergeMeshes();
+
 	virtual uint64 getByteSize() const override;
 	virtual EAssetType getAssetType() const override { return EAssetType::SCENE; }
 	virtual void write(AssetDatabaseEntry& entry) override;
@@ -40,6 +42,10 @@ public:
 	const uint numMeshes() const        { return m_meshes.size(); }
 	const uint numMaterials() const     { return m_materials.size(); }
 	const uint numAtlasTextures() const { return m_atlasTextures.size(); }
+
+private:
+
+	void mergeMeshes(DBMesh& mergedMesh, DBNode& node, const glm::mat4& parentTransform);
 
 private:
 

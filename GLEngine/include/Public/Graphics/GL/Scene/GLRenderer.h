@@ -5,7 +5,7 @@
 #include "Graphics/GL/Wrappers/GLTextureBuffer.h"
 #include "Graphics/GL/Wrappers/GLTexture.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
-#include "Graphics/Utils/ClusteredShading.h"
+#include "Graphics/GL/Tech/ClusteredShading.h"
 #include "Graphics/GL/Tech/HBAO.h"
 #include "Graphics/GL/Tech/FXAA.h"
 #include "Graphics/GL/Tech/Bloom.h"
@@ -40,6 +40,8 @@ public:
 	{
 		glm::vec3 u_ambient;
 		float padding_LightningGlobals;
+		float u_metalness;
+		float u_smoothness;
 	};
 
 public:
@@ -54,6 +56,8 @@ public:
 	void addSkybox(GLScene* scene);
 	void removeSkybox(GLScene* scene);
 
+	void setMaterial(float smoothness, bool isMetal);
+
 	void setHBAOEnabled(bool a_enabled) { m_hbaoEnabled = a_enabled; }
 	bool isHBAOEnabled() const { return m_hbaoEnabled; }
 
@@ -62,6 +66,9 @@ public:
 
 	void setBloomEnabled(bool a_enabled) { m_bloomEnabled = a_enabled; }
 	bool isBloomEnabled() const { return m_bloomEnabled; }
+
+	void setDepthPrepassEnabled(bool a_enabled);
+	bool isDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
 
 private:
 
@@ -77,8 +84,10 @@ private:
 	Bloom m_bloom;
 	bool m_bloomEnabled = true;
 
+	bool m_depthPrepassEnabled = true;
 	ClusteredShading m_clusteredShading;
 
+	GLShader m_depthPrepassShader;
 	GLShader m_skyboxShader;
 	GLShader m_modelShader;
 	GLShader m_combineShader;
@@ -89,13 +98,8 @@ private:
 	GLTexture m_blackTexture;
 
 	GLTexture m_dfvTexture;
-	GLTextureBuffer m_lightIndiceTextureBuffer;
-	GLTextureBuffer m_lightGridTextureBuffer;
 
 	GLConstantBuffer m_modelMatrixUBO;
 	GLConstantBuffer m_cameraVarsUBO;
 	GLConstantBuffer m_lightningGlobalsUBO;
-	GLConstantBuffer m_lightPositionRangesUBO;
-	GLConstantBuffer m_lightColorIntensitiesUBO;
-	GLConstantBuffer m_clusteredShadingGlobalsUBO;
 };

@@ -18,6 +18,10 @@ public:
 	virtual ~DBNode() {}
 
 	void addChild(uint childIdx);
+	void setTransform(glm::mat4& a_transform) { m_transform = a_transform; }
+	void clearChildren();
+	void clearMeshes();
+	void addMesh(uint meshIdx);
 
 	virtual uint64 getByteSize() const override;
 	virtual EAssetType getAssetType() const override { return EAssetType::NODE; }

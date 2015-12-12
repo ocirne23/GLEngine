@@ -32,6 +32,9 @@ public:
 	void unloadAsset(const eastl::string& databaseEntryName);
 	void unloadAsset(IAsset* asset);
 
+	bool isOpen() const { return m_openMode != EOpenMode::UNOPENED; }
+	bool hasAsset(const eastl::string& databaseEntryName) const;
+
 private:
 
 	enum class EOpenMode

@@ -60,10 +60,13 @@ public:
 	void upload(uint numBytes, const void* data);
 	void bind(uint index);
 	bool isInitialized() const { return m_initialized; }
+	byte* mapBuffer();
+	void unmapBuffer();
 
 private:
 
 	bool m_initialized  = false;
+	bool m_isMapped     = false;
 	uint m_textureID    = 0;
 	uint m_bufferID     = 0;
 	uint m_maxSizeBytes = 0;

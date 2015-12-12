@@ -31,7 +31,7 @@ bool SceneProcessor::process(const eastl::string& a_inResourcePath, AssetDatabas
 		| aiPostProcessSteps::aiProcess_ImproveCacheLocality
 		| aiPostProcessSteps::aiProcess_OptimizeMeshes
 		| aiPostProcessSteps::aiProcess_OptimizeGraph
-		| aiPostProcessSteps::aiProcess_PreTransformVertices // Removes animations
+		//| aiPostProcessSteps::aiProcess_PreTransformVertices // Removes animations
 		| aiPostProcessSteps::aiProcess_FindDegenerates
 		| aiPostProcessSteps::aiProcess_GenUVCoords          
 		| aiPostProcessSteps::aiProcess_JoinIdenticalVertices

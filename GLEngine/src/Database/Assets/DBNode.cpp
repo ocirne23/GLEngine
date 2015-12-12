@@ -52,3 +52,18 @@ void DBNode::addChild(uint a_childIdx)
 {
 	m_childIndices.push_back(a_childIdx);
 }
+
+void DBNode::clearChildren()
+{
+	m_childIndices.clear();
+}
+
+void DBNode::clearMeshes()
+{
+	m_meshIndices.clear();
+}
+
+void DBNode::addMesh(uint meshIdx)
+{
+	m_meshIndices.push_back(meshIdx);
+}

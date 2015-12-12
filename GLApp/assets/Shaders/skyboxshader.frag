@@ -19,6 +19,6 @@ void main()
 	MaterialProperty material = getMaterial(v_materialID);
 	vec2 texcoord = v_texcoord;
 	texcoord.y = texcoord.y * 2.0 - 1.0;
-	vec3 diffuse = getDiffuseSample(material, texcoord).rgb * 0.8;
+	vec3 diffuse = getDiffuseSample(material, texcoord).rgb * 0.6;
 	out_color = diffuse;
 }

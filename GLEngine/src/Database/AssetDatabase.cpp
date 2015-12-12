@@ -27,9 +27,17 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 {
 	assert(m_openMode == EOpenMode::UNOPENED);
 	
-	m_openMode = EOpenMode::READ;
 	m_file.open(a_filePath.c_str(), std::ios::in | std::ios::binary);
-	assert(m_file.is_open());
+	if (m_file.is_open())
+	{
+		m_openMode = EOpenMode::READ;
+	}
+	else
+	{
+		print("Could not find AssetDatabase: %s, did you run the resource builder?\n", a_filePath.c_str());
+		return;
+	}
+
 
 	// Tell the file size
 	m_file.seekg(0, std::ios::end);
@@ -173,5 +181,14 @@ void AssetDatabase::unloadAsset(IAsset* a_asset)
 			return;
 		}
 	}
+}
+
+bool AssetDatabase::hasAsset(const eastl::string& a_databaseEntryName) const
+{
+	uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
+	auto writtenIt = m_writtenAssets.find(hash);
+	auto loadedIt = m_loadedAssets.find(hash);
+	bool found = (writtenIt != m_writtenAssets.end() || loadedIt != m_loadedAssets.end());
+	return found; 
 }
 

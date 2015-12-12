@@ -32,7 +32,6 @@
     <ClCompile Include="src\Graphics\GL\Scene\GLConfig.cpp" />
     <ClCompile Include="src\Graphics\Utils\ARBDebugOutput.cpp" />
     <ClCompile Include="src\Graphics\Utils\CheckGLError.cpp" />
-    <ClCompile Include="src\Graphics\Utils\ClusteredShading.cpp" />
     <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp" />
     <ClCompile Include="src\Core.cpp" />
     <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
@@ -81,6 +80,7 @@
     <ClCompile Include="src\Graphics\GL\Tech\Bloom.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\BilateralBlur.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\GaussianBlur.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EABase\config\eacompiler.h" />
@@ -123,7 +123,6 @@
     <ClInclude Include="include\3rdparty\EASTL\utility.h" />
     <ClInclude Include="include\3rdparty\EASTL\vector.h" />
     <ClInclude Include="include\3rdparty\EASTL\vector_map.h" />
-    <ClInclude Include="include\3rdparty\EASTL\to_string.h" />
     <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
     <ClInclude Include="include\Public\Database\Assets\DBTexture.h" />
     <ClInclude Include="include\Public\Utils\FileUtils.h" />
@@ -141,7 +140,6 @@
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Scene\GLLightManager.h" />
     <ClInclude Include="include\Public\Utils\FPSMeasurer.h" />
     <ClInclude Include="include\Public\Utils\DeltaTimeMeasurer.h" />
     <ClInclude Include="include\3rdparty\EASTL\algorithm.h" />
@@ -157,7 +155,6 @@
     <ClInclude Include="include\Public\Database\Processors\ByteImageProcessor.h" />
     <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp" />
     <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h" />
-    <ClInclude Include="include\Public\Graphics\Utils\ClusteredShading.h" />
     <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h" />
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
     <ClInclude Include="include\3rdparty\entityx\config.h" />
@@ -240,6 +237,8 @@
     <ClInclude Include="include\Public\Graphics\GL\Tech\Bloom.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\BilateralBlur.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\GaussianBlur.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
+    <ClInclude Include="include\Public\Utils\StringUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

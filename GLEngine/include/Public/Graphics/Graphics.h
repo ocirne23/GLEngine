@@ -32,6 +32,10 @@ public:
 	void setDepthWrite(bool enabled);
 	void setBackFaceCulling(bool enabled);
 	void setBlending(bool enabled); //TODO blend func vars
+	void beginDepthPrepass();
+	void endDepthPrepass();
+	void disableDepthPrepass();
+	void clearDepthOnly();
 
 	uint getViewportWidth() const  { return m_viewportWidth; }
 	uint getViewportHeight() const { return m_viewportHeight; }

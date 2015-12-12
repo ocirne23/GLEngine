@@ -19,8 +19,8 @@ public:
 		glm::vec3 position;
 		glm::vec2 texcoords;
 		glm::vec3 normal;
-		glm::vec3 tangents;
-		glm::vec3 bitangents;
+		//glm::vec3 tangents;
+		//glm::vec3 bitangents;
 		uint materialID;
 	};
 
@@ -29,6 +29,8 @@ public:
 	DBMesh() {}
 	DBMesh(const aiMesh& assimpMesh, bool invertNormals = false);
 	virtual ~DBMesh() {}
+
+	void merge(const DBMesh& mesh, const glm::mat4& transform);
 
 	virtual uint64 getByteSize() const override;
 	virtual EAssetType getAssetType() const override { return EAssetType::MESH; }
