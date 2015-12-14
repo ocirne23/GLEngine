@@ -81,6 +81,22 @@ public:
 		MSAA_16X = 16
 	};
 
+	enum class ETextureMinFilter
+	{
+		NEAREST                = 0x2600, // GL_NEAREST
+		LINEAR                 = 0x2601, // GL_LINEAR
+		NEAREST_MIPMAP_NEAREST = 0x2700, // GL_NEAREST_MIPMAP_NEAREST
+		LINEAR_MIPMAP_NEAREST  = 0x2701, // GL_LINEAR_MIPMAP_NEAREST
+		NEAREST_MIPMAP_LINEAR  = 0x2702, // GL_NEAREST_MIPMAP_LINEAR
+		LINEAR_MIPMAP_LINEAR   = 0x2703, // GL_LINEAR_MIPMAP_LINEAR
+	};
+
+	enum class ETextureMagFilter
+	{
+		NEAREST = 0x2600, // GL_NEAREST
+		LINEAR  = 0x2601, // GL_LINEAR
+	};
+
 public:
 
 	GLFramebuffer() {};
@@ -90,7 +106,7 @@ public:
 	void initialize(EMultiSampleType multiSampleType = EMultiSampleType::NONE);
 
 	void addFramebufferTexture(ESizedFormat format, EAttachment attachment, uint width, uint height);
-	void setDepthbufferTexture(ESizedFormat format, uint width, uint height);
+	void setDepthbufferTexture(ESizedFormat format, uint width, uint height, ETextureMagFilter magFilter = ETextureMagFilter::NEAREST, ETextureMinFilter minFilter = ETextureMinFilter::NEAREST);
 
 	void end();
 	void begin();

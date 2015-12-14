@@ -115,10 +115,16 @@ void Graphics::setDepthWrite(bool a_enabled)
 	glDepthMask(a_enabled);
 }
 
-void Graphics::setBackFaceCulling(bool a_enabled)
+void Graphics::setFaceCulling(EFaceCulling a_face)
 {
-	if (a_enabled)
+	if (a_face != EFaceCulling::NONE)
+	{
 		glEnable(GL_CULL_FACE);
+		if (a_face == EFaceCulling::FRONT)
+			glCullFace(GL_FRONT);
+		else
+			glCullFace(GL_BACK);
+	}
 	else
 		glDisable(GL_CULL_FACE);
 }

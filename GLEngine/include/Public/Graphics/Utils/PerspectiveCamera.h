@@ -9,10 +9,13 @@
 class PerspectiveCamera
 {
 public:
+
+	enum class EProjection { PERSPECTIVE, ORTHOGRAPHIC };
+
 	PerspectiveCamera() {}
 	~PerspectiveCamera() {}
 
-	void initialize(float viewportWidth, float viewportHeight, float horizontalFov, float near, float far);
+	void initialize(float viewportWidth, float viewportHeight, float horizontalFov, float near, float far, EProjection projection = EProjection::PERSPECTIVE);
 
 	void updateMatrices();
 
@@ -53,6 +56,7 @@ public:
 
 private:
 
+	EProjection m_projection;
 	Frustum m_frustum;
 
 	glm::mat4 m_combinedMatrix;

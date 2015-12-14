@@ -20,6 +20,8 @@ public:
 
 	void render(float deltaSec);
 
+	void setSunRotation(float angle);
+
 private:
 
 	AssetDatabase m_ifcDB;
@@ -39,4 +41,7 @@ private:
 	FPSMeasurer m_fpsMeasurer;
 	Input::KeyDownListener m_keyDownListener;
 	Input::WindowQuitListener m_windowQuitListener;
+
+	float m_timeAccum = 0.0f;
+	float m_sunRotation = 0.0f;
 };

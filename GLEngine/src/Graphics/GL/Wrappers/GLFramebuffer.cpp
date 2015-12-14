@@ -24,7 +24,7 @@ void GLFramebuffer::initialize(EMultiSampleType a_multiSampleType)
 	m_initialized = true;
 }
 
-void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, uint a_height)
+void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, uint a_height, ETextureMagFilter a_magFilter, ETextureMinFilter a_minFilter)
 {
 	assert(m_initialized);
 	GLenum textureType;
@@ -43,10 +43,12 @@ void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, u
 	}
 	
 	// Filter depth texture as nearest because its only used by anti aliasing and ambient occlusion algorithms which all need nearest filtering.
-	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, (GLint) a_magFilter);
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, (GLint) a_minFilter);
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(textureType, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+	glTexParameteri(textureType, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depthTexture, 0);

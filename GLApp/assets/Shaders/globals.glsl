@@ -52,7 +52,8 @@ layout (std140, binding = CAMERA_VARS_BINDING_POINT) uniform CameraVars
 	mat4 u_viewMatrix;
 	mat4 u_normalMatrix;
 	vec3 u_eyePos;
-	float padding_CameraVars;
+	float u_camNear;
+	float u_camFar;
 };
 layout (std140, binding = LIGHTING_GLOBALS_BINDING_POINT) uniform LightingGlobals
 {

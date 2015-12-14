@@ -16,6 +16,7 @@ class Graphics
 {
 public:
 	friend class GLEngine;
+	enum class EFaceCulling { FRONT, BACK, NONE };
 
 	void clear(const glm::vec4& color, bool clearColor = true, bool clearDepth = true);
 	void swap();
@@ -31,7 +32,7 @@ public:
 	void setVsync(bool enabled);
 	void setDepthTest(bool enabled);
 	void setDepthWrite(bool enabled);
-	void setBackFaceCulling(bool enabled);
+	void setFaceCulling(EFaceCulling face);
 	void setBlending(bool enabled); //TODO blend func vars
 	void beginDepthPrepass();
 	void endDepthPrepass();

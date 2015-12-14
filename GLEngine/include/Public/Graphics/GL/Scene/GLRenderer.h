@@ -33,7 +33,8 @@ public:
 		glm::mat4 u_viewMatrix;
 		glm::mat4 u_normalMatrix;
 		glm::vec3 u_eyePos;
-		float padding_CameraVars;
+		float u_camNear;
+		float u_camFar;
 	};
 
 	struct LightingGlobalsData
@@ -113,4 +114,5 @@ private:
 
 	glm::vec3 m_sunDir;
 	glm::vec4 m_sunColorIntensity;
+	bool m_sunUpdated = false;
 };

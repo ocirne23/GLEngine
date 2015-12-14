@@ -10,8 +10,9 @@ static const glm::vec3 UP(0, 1, 0);
 
 END_UNNAMED_NAMESPACE()
 
-void PerspectiveCamera::initialize(float a_viewportWidth, float a_viewportHeight, float a_horizontalFov, float a_near, float a_far)
+void PerspectiveCamera::initialize(float a_viewportWidth, float a_viewportHeight, float a_horizontalFov, float a_near, float a_far, EProjection a_projection)
 {
+	m_projection = a_projection;
 	m_near = a_near;
 	m_far = a_far;
 	m_viewportWidth = a_viewportWidth;
@@ -77,9 +78,12 @@ void PerspectiveCamera::rotateRelative(float a_xRot, float a_yRot)
 
 void PerspectiveCamera::updateMatrices()
 {
-	//const glm::vec3 side = glm::cross(m_direction, UP);
-	//m_up = glm::cross(side, m_direction);
-	m_projectionMatrix = glm::perspective(m_vFieldOfView, m_viewportWidth / m_viewportHeight, m_near, m_far);
+	const glm::vec3 side = glm::cross(m_direction, UP);
+	m_up = glm::cross(side, m_direction);
+	if (m_projection == EProjection::PERSPECTIVE)
+		m_projectionMatrix = glm::perspective(m_vFieldOfView, m_viewportWidth / m_viewportHeight, m_near, m_far);
+	else if (m_projection == EProjection::ORTHOGRAPHIC)
+		m_projectionMatrix = glm::ortho(m_viewportWidth / 2, -m_viewportWidth / 2, -m_viewportHeight / 2, m_viewportHeight / 2, m_near, m_far);
 	m_viewMatrix = glm::lookAt(m_position, m_position + m_direction, m_up);
 	m_combinedMatrix = m_projectionMatrix * m_viewMatrix;
 	m_frustum.calculateFrustum(m_combinedMatrix);

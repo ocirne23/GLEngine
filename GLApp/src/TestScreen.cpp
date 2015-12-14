@@ -6,6 +6,7 @@
 #include "Utils/StringUtils.h"
 
 #include <glm/gtc/random.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 {
@@ -23,7 +24,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		if (m_ifcDB.hasAsset("ifc1.ifc"))
 		{
 			m_ifc1Scene.initialize("ifc1.ifc", m_ifcDB);
-			m_ifc1Scene.setTranslation(glm::vec3(-40, -0.1, 0));
+			m_ifc1Scene.setTranslation(glm::vec3(10, -0.1, -35));
 			m_renderer.addScene(&m_ifc1Scene);
 		}
 		if (m_ifcDB.hasAsset("ifc2.ifc"))
@@ -46,13 +47,12 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		if (m_objDB.hasAsset("skysphere.obj"))
 		{
 			m_skysphereScene.initialize("skysphere.obj", m_objDB);
-			m_skysphereScene.setRotation(glm::vec3(0, 1, 0), -140);
+			m_skysphereScene.setRotation(glm::vec3(0, 1, 0), 0);
 			m_renderer.addSkybox(&m_skysphereScene);
 		}
 	}
-	
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); });
-	m_renderer.setSun(glm::normalize(glm::vec3(22, 15, 18)), glm::vec3(0.75f, 0.70f, 0.66f), 1.0f);
+	setSunRotation(m_sunRotation);
 
 	// Input stuffs
 	m_windowQuitListener.setFunc([]() { GLEngine::shutdown(); });
@@ -65,6 +65,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		case EKey::KP_2:     m_renderer.setFXAAEnabled(!m_renderer.isFXAAEnabled()); break;
 		case EKey::KP_3:     m_renderer.setBloomEnabled(!m_renderer.isBloomEnabled()); break;
 		case EKey::KP_4:     m_renderer.setDepthPrepassEnabled(!m_renderer.isDepthPrepassEnabled()); break;
+		case EKey::KP_5:     m_sunRotation = 0.0f; break;
 		
 		case EKey::KP_9:     m_palaceScene.setVisibility(!m_palaceScene.isVisible()); break;
 		case EKey::KP_8:     m_ifc1Scene.setVisibility(!m_ifc1Scene.isVisible()); break;
@@ -88,8 +89,24 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 
 void TestScreen::render(float a_deltaSec)
 {
+	m_timeAccum += a_deltaSec;
+	if (m_timeAccum > 1.0f)
+	{
+		m_timeAccum = 0.0f;
+		setSunRotation(m_sunRotation);
+		m_sunRotation += 1.0f;
+	}
+
 	m_fpsMeasurer.tickFrame(a_deltaSec);
 	m_cameraController.update(m_camera, a_deltaSec);
 	m_renderer.render(m_camera, m_lightManager);
 	GLEngine::graphics->swap();
+}
+
+void TestScreen::setSunRotation(float a_angle)
+{
+	glm::vec3 baseSunDir = glm::normalize(glm::vec3(0.597, 0.537, 0.597));
+	glm::mat4 sunRot = glm::rotate(a_angle, glm::vec3(0, 1, 0));
+	m_renderer.setSun(glm::mat3(sunRot) * baseSunDir, glm::vec3(0.75f, 0.70f, 0.66f), 1.0f);
+	m_skysphereScene.setRotation(glm::vec3(0, 1, 0), a_angle - 140);
 }
