@@ -8,6 +8,8 @@ class Input;
 class Graphics;
 class ThreadManager;
 
+enum class EWindowMode { WINDOWED, BORDERLESS, FULLSCREEN, NONE };
+
 /**********************
 Main class providing basic functions and static access to input and graphics
 
@@ -36,9 +38,8 @@ int main()
 class GLEngine
 {
 public:
-
 	/** Should be called prior to anything else related to the library */
-	static void initialize(const char* windowName, uint width, uint height, bool createWindow = true);
+	static void initialize(const char* windowName, uint width, uint height, EWindowMode windowMode);
 	static void createThread(const char* threadName, std::function<void()> func);
 
 	/** Setup a thread with a GL context to allow for rendering */

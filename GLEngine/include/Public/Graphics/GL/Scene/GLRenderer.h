@@ -9,12 +9,12 @@
 #include "Graphics/GL/Tech/HBAO.h"
 #include "Graphics/GL/Tech/FXAA.h"
 #include "Graphics/GL/Tech/Bloom.h"
+#include "Graphics/Utils/PerspectiveCamera.h"
 
 #include "EASTL/vector.h"
 
 #include <glm/glm.hpp>
 
-class PerspectiveCamera;
 class LightManager;
 class GLScene;
 
@@ -22,12 +22,12 @@ class GLRenderer
 {
 public:
 
-	struct ModelMatrixUBO
+	struct ModelMatrixData
 	{
 		glm::mat4 u_modelMatrix;
 	};
 
-	struct CameraVarsUBO
+	struct CameraVarsData
 	{
 		glm::mat4 u_vpMatrix;
 		glm::mat4 u_viewMatrix;
@@ -36,12 +36,14 @@ public:
 		float padding_CameraVars;
 	};
 
-	struct LightingGlobalsUBO
+	struct LightingGlobalsData
 	{
 		glm::vec3 u_ambient;
 		float padding_LightningGlobals;
-		float u_metalness;
-		float u_smoothness;
+		glm::vec3 u_sunDir;
+		float padding2_LightingGlobals;
+		glm::vec4 u_sunColorIntensity;
+		glm::mat4 u_shadowMat;
 	};
 
 public:
@@ -56,7 +58,7 @@ public:
 	void addSkybox(GLScene* scene);
 	void removeSkybox(GLScene* scene);
 
-	void setMaterial(float smoothness, bool isMetal);
+	void setSun(const glm::vec3& direction, const glm::vec3& color, float intensity);
 
 	void setHBAOEnabled(bool a_enabled) { m_hbaoEnabled = a_enabled; }
 	bool isHBAOEnabled() const { return m_hbaoEnabled; }
@@ -69,6 +71,11 @@ public:
 
 	void setDepthPrepassEnabled(bool a_enabled);
 	bool isDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
+
+private:
+
+	void updateLightingGlobalsUBO(const PerspectiveCamera& camera);
+	void updateCameraDataUBO(const PerspectiveCamera& camera);
 
 private:
 
@@ -93,13 +100,17 @@ private:
 	GLShader m_combineShader;
 
 	GLFramebuffer m_sceneFBO;
+	GLFramebuffer m_shadowFBO;
+	PerspectiveCamera m_shadowCamera;
 
 	GLTexture m_whiteTexture;
 	GLTexture m_blackTexture;
-
 	GLTexture m_dfvTexture;
 
 	GLConstantBuffer m_modelMatrixUBO;
 	GLConstantBuffer m_cameraVarsUBO;
 	GLConstantBuffer m_lightningGlobalsUBO;
+
+	glm::vec3 m_sunDir;
+	glm::vec4 m_sunColorIntensity;
 };

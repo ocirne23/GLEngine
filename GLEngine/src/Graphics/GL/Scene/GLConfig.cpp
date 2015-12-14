@@ -34,9 +34,9 @@ const uint GLConfig::COLOR_TEXTURE_BINDING_POINT        = 1;
 const uint GLConfig::AO_RESULT_TEXTURE_BINDING_POINT    = 2;
 const uint GLConfig::BLOOM_RESULT_TEXTURE_BINDING_POINT = 3;
 
-const GLConstantBuffer::Config GLConfig::MODEL_MATRIX_UBO =              {0, "ModelMatrix",             GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::ModelMatrixUBO)};
-const GLConstantBuffer::Config GLConfig::CAMERA_VARS_UBO =               {1, "CameraVars",              GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::CameraVarsUBO)};
-const GLConstantBuffer::Config GLConfig::LIGHTING_GLOBALS_UBO =          {2, "LightingGlobals",         GLConstantBuffer::EDrawUsage::STATIC, sizeof(GLRenderer::LightingGlobalsUBO)};
+const GLConstantBuffer::Config GLConfig::MODEL_MATRIX_UBO =              {0, "ModelMatrix",             GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::ModelMatrixData)};
+const GLConstantBuffer::Config GLConfig::CAMERA_VARS_UBO =               {1, "CameraVars",              GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::CameraVarsData)};
+const GLConstantBuffer::Config GLConfig::LIGHTING_GLOBALS_UBO =          {2, "LightingGlobals",         GLConstantBuffer::EDrawUsage::STATIC, sizeof(GLRenderer::LightingGlobalsData)};
 const GLConstantBuffer::Config GLConfig::MATERIAL_PROPERTIES_UBO =       {3, "MaterialProperties",      GLConstantBuffer::EDrawUsage::STATIC, sizeof(GLMaterial) * MAX_MATERIALS};
 const GLConstantBuffer::Config GLConfig::LIGHT_POSITION_RANGES_UBO =     {4, "LightPositionRanges",     GLConstantBuffer::EDrawUsage::STREAM, sizeof(glm::vec4) * MAX_LIGHTS};
 const GLConstantBuffer::Config GLConfig::LIGHT_COLOR_INTENSITIES_UBO =   {5, "LightColorIntensities",   GLConstantBuffer::EDrawUsage::STREAM, sizeof(glm::vec4) * MAX_LIGHTS};

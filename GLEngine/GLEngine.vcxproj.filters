@@ -72,7 +72,6 @@
     <ClCompile Include="src\Graphics\UI\Widgets\TextButton.cpp" />
     <ClCompile Include="src\Graphics\Utils\TextureFormatUtils.cpp" />
     <ClCompile Include="src\Utils\ThreadManager.cpp" />
-    <ClCompile Include="src\Graphics\Utils\TiledShading.cpp" />
     <ClCompile Include="src\3rdparty\entityx\help\Timer.cc" />
     <ClCompile Include="src\Graphics\UI\UIFrame.cpp" />
     <ClCompile Include="src\Graphics\UI\Widgets\Widget.cpp" />
@@ -225,7 +224,6 @@
     <ClInclude Include="include\Private\Graphics\Utils\TextureFormatUtils.h" />
     <ClInclude Include="include\Public\Graphics\Utils\TextureRegion.h" />
     <ClInclude Include="include\Private\Utils\ThreadManager.h" />
-    <ClInclude Include="include\Public\Graphics\Utils\TiledShading.h" />
     <ClInclude Include="include\3rdparty\entityx\help\Timer.h" />
     <ClInclude Include="include\Public\Graphics\UI\UIFrame.h" />
     <ClInclude Include="include\3rdparty\json\value.h" />

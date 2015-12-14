@@ -10,6 +10,7 @@ typedef uint WindowFlags;
 struct SDL_Window;
 class WindowEventListener;
 class GLContext;
+enum class EWindowMode;
 
 class Graphics
 {
@@ -43,7 +44,7 @@ public:
 
 private:
 
-	Graphics(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos);
+	Graphics(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, const EWindowMode& windowMode);
 	~Graphics();
 	Graphics(const Graphics& copy) = delete;
 

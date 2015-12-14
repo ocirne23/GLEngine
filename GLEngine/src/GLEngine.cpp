@@ -20,7 +20,7 @@ Graphics* GLEngine::graphics             = NULL;
 bool GLEngine::s_shutdown                = false;
 ThreadManager* GLEngine::s_threadManager = NULL;
 
-void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height, bool a_createWindow)
+void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height, EWindowMode a_windowMode)
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
@@ -28,8 +28,8 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 		SDL_Quit();
 		return;
 	}
-	if (a_createWindow)
-		graphics = new Graphics(a_windowName, a_width, a_height, INITIAL_WINDOW_OFFSET_X, INITIAL_WINDOW_OFFSET_Y);
+	if (a_windowMode != EWindowMode::NONE)
+		graphics = new Graphics(a_windowName, a_width, a_height, INITIAL_WINDOW_OFFSET_X, INITIAL_WINDOW_OFFSET_Y, a_windowMode);
 	input = new Input();
 	s_threadManager = new ThreadManager();
 }

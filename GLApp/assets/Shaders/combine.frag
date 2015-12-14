@@ -13,5 +13,6 @@ void main()
 	vec3 color = texture(u_colorTex, v_texcoord).rgb;
 	float ao = texture(u_aoTex, v_texcoord).r;
 	vec3 bloom = texture(u_bloomTex, v_texcoord).rgb;
-    out_color = vec3(bloom) + vec3(color * ao);
+	
+	out_color = vec3(bloom) + vec3(color * ao);
 }

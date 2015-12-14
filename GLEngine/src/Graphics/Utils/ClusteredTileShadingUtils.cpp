@@ -108,12 +108,12 @@ IBounds2D ClusteredTiledShadingUtils::sphereToScreenSpaceBounds2D(
 
 	IBounds2D result;
 
-	result.minX = int(reg.x * float(a_screenWidth));
-	result.minY = int(reg.y * float(a_screenHeight));
-	result.maxX = int(reg.z * float(a_screenWidth));
-	result.maxY = int(reg.w * float(a_screenHeight));
-	result.minX = glm::min(result.minX, result.maxX);
-	result.minY = glm::min(result.minY, result.maxY);
+	result.min.x = int(reg.x * float(a_screenWidth));
+	result.min.y = int(reg.y * float(a_screenHeight));
+	result.max.x = int(reg.z * float(a_screenWidth));
+	result.max.y = int(reg.w * float(a_screenHeight));
+	result.min.x = glm::min(result.min.x, result.max.x);
+	result.min.y = glm::min(result.min.y, result.max.y);
 
 	return result;
 }
@@ -130,12 +130,12 @@ IBounds3D ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(
 	minZ = glm::min(minZ, maxZ);
 
 	IBounds3D bounds3D;
-	bounds3D.minX = bounds2D.minX / a_pixelsPerTileW;
-	bounds3D.maxX = (bounds2D.maxX / a_pixelsPerTileW) + 1;
-	bounds3D.minY = bounds2D.minY / a_pixelsPerTileH;
-	bounds3D.maxY = (bounds2D.maxY / a_pixelsPerTileH) + 1;
-	bounds3D.minZ = minZ;
-	bounds3D.maxZ = maxZ;
+	bounds3D.min.x = bounds2D.min.x / a_pixelsPerTileW;
+	bounds3D.max.x = (bounds2D.max.x / a_pixelsPerTileW) + 1;
+	bounds3D.min.y = bounds2D.min.y / a_pixelsPerTileH;
+	bounds3D.max.y = (bounds2D.max.y / a_pixelsPerTileH) + 1;
+	bounds3D.min.z = minZ;
+	bounds3D.max.z = maxZ;
 
 	return bounds3D;
 }

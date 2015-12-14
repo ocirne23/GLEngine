@@ -1,5 +1,6 @@
 ﻿#include "Graphics/Graphics.h"
 
+#include "GLEngine.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLContext.h"
@@ -12,7 +13,7 @@
 #include <SDL/SDL_video.h>
 #include <assert.h>
 
-Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos)
+Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, const EWindowMode& a_windowMode)
 {
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
@@ -26,7 +27,11 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-	const uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+	if (a_windowMode == EWindowMode::BORDERLESS)
+		flags |= SDL_WINDOW_BORDERLESS;
+	else if (a_windowMode == EWindowMode::FULLSCREEN)
+		flags |= SDL_WINDOW_FULLSCREEN;
 	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
 }
 

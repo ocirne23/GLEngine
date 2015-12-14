@@ -15,7 +15,6 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 	m_camera.setPosition(4.0f, 1.0f, 4.0f);
 	m_camera.lookAtPoint(-4.0f, 6.0f, -4.0f);
 	m_renderer.initialize(m_camera);
-
 	m_cameraController.setCameraSpeed(5.0f);
 
 	m_ifcDB.openExisting("Assets/IFC-DB.da");
@@ -53,7 +52,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 	}
 	
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); });
-	m_lightManager.createLight(glm::normalize(glm::vec3(22, 15, 18)), -1.0, glm::vec3(0.75f, 0.70f, 0.66f), 1.5); // sun
+	m_renderer.setSun(glm::normalize(glm::vec3(22, 15, 18)), glm::vec3(0.75f, 0.70f, 0.66f), 1.0f);
 
 	// Input stuffs
 	m_windowQuitListener.setFunc([]() { GLEngine::shutdown(); });
@@ -66,7 +65,6 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		case EKey::KP_2:     m_renderer.setFXAAEnabled(!m_renderer.isFXAAEnabled()); break;
 		case EKey::KP_3:     m_renderer.setBloomEnabled(!m_renderer.isBloomEnabled()); break;
 		case EKey::KP_4:     m_renderer.setDepthPrepassEnabled(!m_renderer.isDepthPrepassEnabled()); break;
-		case EKey::KP_5:     m_renderer.setMaterial(glm::linearRand(0.0f, 1.0f), (glm::linearRand(0.0f, 1.0f) > 0.5f)); break;
 		
 		case EKey::KP_9:     m_palaceScene.setVisibility(!m_palaceScene.isVisible()); break;
 		case EKey::KP_8:     m_ifc1Scene.setVisibility(!m_ifc1Scene.isVisible()); break;

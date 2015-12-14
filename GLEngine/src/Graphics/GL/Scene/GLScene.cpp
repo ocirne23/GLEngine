@@ -84,7 +84,7 @@ void GLScene::renderNode(GLConstantBuffer& a_modelMatrixUBO, const glm::mat4& a_
 	const DBNode& node = m_nodes[a_node];
 	glm::mat4 transform = a_parentTransform * node.getTransform();
 
-	GLRenderer::ModelMatrixUBO* modelMatrix = (GLRenderer::ModelMatrixUBO*) a_modelMatrixUBO.mapBuffer();
+	GLRenderer::ModelMatrixData* modelMatrix = (GLRenderer::ModelMatrixData*) a_modelMatrixUBO.mapBuffer();
 	modelMatrix->u_modelMatrix = transform;
 	a_modelMatrixUBO.unmapBuffer();
 

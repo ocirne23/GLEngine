@@ -58,8 +58,10 @@ layout (std140, binding = LIGHTING_GLOBALS_BINDING_POINT) uniform LightingGlobal
 {
 	vec3 u_ambient;
 	float padding_LightningGlobals;
-	float u_metalness;
-	float u_smoothness;
+	vec3 u_sunDir;
+	float padding2_LightingGlobals;
+	vec4 u_sunColorIntensity;
+	mat4 u_shadowMat;
 };
 layout (std140, binding = MATERIAL_PROPERTIES_BINDING_POINT) uniform MaterialProperties
 {

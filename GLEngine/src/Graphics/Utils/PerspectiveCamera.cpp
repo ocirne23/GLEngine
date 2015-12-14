@@ -77,6 +77,8 @@ void PerspectiveCamera::rotateRelative(float a_xRot, float a_yRot)
 
 void PerspectiveCamera::updateMatrices()
 {
+	//const glm::vec3 side = glm::cross(m_direction, UP);
+	//m_up = glm::cross(side, m_direction);
 	m_projectionMatrix = glm::perspective(m_vFieldOfView, m_viewportWidth / m_viewportHeight, m_near, m_far);
 	m_viewMatrix = glm::lookAt(m_position, m_position + m_direction, m_up);
 	m_combinedMatrix = m_projectionMatrix * m_viewMatrix;
@@ -96,7 +98,11 @@ void PerspectiveCamera::lookAtDir(const glm::vec3& a_direction)
 void PerspectiveCamera::setHorizontalFieldOfView(float a_fovh)
 {
 	m_hFieldOfView = a_fovh;
-	m_vFieldOfView = glm::degrees(glm::atan(glm::tan(glm::radians(m_hFieldOfView) * (m_viewportHeight / m_viewportWidth))));
+	
+	if (m_viewportWidth == m_viewportHeight)
+		m_vFieldOfView = a_fovh;
+	else
+		m_vFieldOfView = glm::degrees(glm::atan(glm::tan(glm::radians(m_hFieldOfView) * (m_viewportHeight / m_viewportWidth))));
 }
 
 void PerspectiveCamera::resize(int a_width, int a_height)

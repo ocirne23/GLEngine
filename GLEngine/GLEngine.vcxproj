@@ -65,7 +65,6 @@
     <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLMesh.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
-    <ClCompile Include="src\Graphics\Utils\TiledShading.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\Utils\LightManager.cpp" />
     <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp" />
@@ -197,7 +196,6 @@
     <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
     <ClInclude Include="include\Public\Graphics\GL\GLContext.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
-    <ClInclude Include="include\Public\Graphics\Utils\TiledShading.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\QuadDrawer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h" />

@@ -5,7 +5,7 @@
 
 int main()
 {
-	GLEngine::initialize("GLApp", 1200, 720);
+	GLEngine::initialize("GLApp", 1200, 720, EWindowMode::WINDOWED);
 	
 	GLEngine::createThread("RenderThread", [&]()
 	{

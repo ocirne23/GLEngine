@@ -2,14 +2,17 @@
 #include "Shaders/clusteredshading.glsl"
 #include "Shaders/material.glsl"
 
+in vec3 v_rawPos;
 in vec3 v_position;
 in vec2 v_texcoord;
 in vec3 v_normal;
 flat in uint v_materialID;
+in vec4 v_shadowCoord;
 
 layout (location = 0) out vec3 out_color;
 
 layout (binding = DFV_TEXTURE_BINDING_POINT) uniform sampler2D u_dfvTexture;
+layout (binding = 10) uniform sampler2D u_shadowTex;
 
 vec3 rotateNormal(vec3 normal)
 {
@@ -47,6 +50,20 @@ float inverseSquareFalloff(float lightDistance, float lightRange)
 	return pow(max(1.0 - pow((lightDistance / lightRange), 4), 0), 2) / (pow(lightDistance, 2) + 1);
 }
 
+vec3 doLight(vec3 lightContrib, vec3 L, vec3 N, vec3 V, float NdotV, float F0, vec3 diffuse, float smoothness, float metalness)
+{
+	vec3 H = normalize(L + V);
+	float NdotL = clamp(dot(N, L), 0.0, 1.0);
+	float NdotH = clamp(dot(N, H), 0.0, 1.0);
+	float HdotL = clamp(dot(H, L), 0.0, 1.0);
+	float VdotH = clamp(dot(V, H), 0.0, 1.0);
+
+	vec3 diffuseContrib = diffuseBurley(diffuse, smoothness, NdotV, NdotL, VdotH);
+	float specularContrib = specularGGX(smoothness, F0, NdotH, HdotL, NdotL);
+
+	return lightContrib * diffuseContrib + lightContrib * specularContrib;
+}
+
 void main()
 {
 	MaterialProperty material = getMaterial(v_materialID);
@@ -72,36 +89,23 @@ void main()
 	vec3 lightAccum = vec3(0.0);
 	FOR_LIGHT_ITERATOR(light, v_position.z)
 	{
-		float lightRange = light.positionRange.w;
-		vec3 L;
-		float attenuation;
-		if (lightRange < 0.0) 
-		{	// Directional Light
-			L = light.positionRange.xyz;
-			attenuation = 1.0;
-		}
-		else 
-		{	// Point Light
-			L = light.positionRange.xyz - v_position;
-			float lightDistance = length(L);
-			L /= lightDistance;
-			attenuation = inverseSquareFalloff(lightDistance, lightRange);
-		}
-
-		vec3 H = normalize(L + V);
-		float NdotL = clamp(dot(N, L), 0.0, 1.0);
-		float NdotH = clamp(dot(N, H), 0.0, 1.0);
-		float HdotL = clamp(dot(H, L), 0.0, 1.0);
-		float VdotH = clamp(dot(V, H), 0.0, 1.0);
-
+		vec3 L = light.positionRange.xyz - v_position;
+		float lightDistance = length(L);
+		L /= lightDistance;
+		float attenuation = inverseSquareFalloff(lightDistance, light.positionRange.w);
 		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * attenuation;
-		vec3 diffuseContrib = diffuseBurley(diffuse, smoothness, NdotV, NdotL, VdotH);
-		float specularContrib = specularGGX(smoothness, F0, NdotH, HdotL, NdotL);
-
-		lightAccum += lightContrib * diffuseContrib;
-		lightAccum += lightContrib * specularContrib;
+		lightAccum += doLight(lightContrib, L, N, V, NdotV, F0, diffuse, smoothness, metalness);
+	}
+	
+	float shadowDepth = texture(u_shadowTex, v_shadowCoord.xy / v_shadowCoord.w).r;
+	float fragmentDepth = (v_shadowCoord.z - 0.00008) / v_shadowCoord.w;
+	if (shadowDepth > fragmentDepth)
+	{
+		vec3 sunContrib = u_sunColorIntensity.rgb * u_sunColorIntensity.a;
+		lightAccum += doLight(sunContrib, u_sunDir, N, V, NdotV, F0, diffuse, smoothness, metalness);
 	}
 	lightAccum += diffuse * u_ambient;
-	out_color = lightAccum;
-	//out_color = texture(u_textureAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas
+	out_color = vec3(lightAccum);
 }
+
+// out_color = texture(u_textureAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas

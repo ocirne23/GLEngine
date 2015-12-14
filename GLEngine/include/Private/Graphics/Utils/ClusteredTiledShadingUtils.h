@@ -7,28 +7,29 @@
 class Camera;
 class PerspectiveCamera;
 
-template <typename T>
-struct TBounds2D
+struct IBounds2D
 {
-	T minX = (T) 0;
-	T minY = (T) 0;
-	T maxX = (T) 0;
-	T maxY = (T) 0;
+	glm::ivec2 min;
+	glm::ivec2 max;
+
+	void clamp(const glm::ivec2& a_min, const glm::ivec2& a_max)
+	{
+		min = glm::clamp(min, a_min, a_max);
+		max = glm::clamp(max, a_min, a_max);
+	}
 };
 
-template <typename T>
-struct TBounds3D
+struct IBounds3D
 {
-	T minX = (T) 0;
-	T minY = (T) 0;
-	T minZ = (T) 0;
-	T maxX = (T) 0;
-	T maxY = (T) 0;
-	T maxZ = (T) 0;
-};
+	glm::ivec3 min;
+	glm::ivec3 max;
 
-typedef TBounds2D<int> IBounds2D;
-typedef TBounds3D<int> IBounds3D;
+	void clamp(const glm::ivec3& a_min, const glm::ivec3& a_max)
+	{
+		min = glm::clamp(min, a_min, a_max);
+		max = glm::clamp(max, a_min, a_max);
+	}
+};
 
 class ClusteredTiledShadingUtils
 {

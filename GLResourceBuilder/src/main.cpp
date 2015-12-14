@@ -8,7 +8,7 @@
 
 int main()
 {
-	GLEngine::initialize("GLResourceBuilder", 0, 0, false);
+	GLEngine::initialize("GLResourceBuilder", 0, 0, EWindowMode::NONE);
 
 	SceneProcessor sceneProcessor;
 	

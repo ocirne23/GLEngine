@@ -75,34 +75,18 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const LightMana
 	uint lightIndiceCtr = 0;
 	for (ushort i = 0; i < numLights; ++i)
 	{
-		lightPositionRangeViewspaceBuffer[i] = viewMatrix * glm::vec4(glm::vec3(lightPositionRanges[i]), lightPositionRanges[i].w < 0.0 ? 0.0 : 1.0);
+		lightPositionRangeViewspaceBuffer[i] = viewMatrix * glm::vec4(glm::vec3(lightPositionRanges[i]), 1.0);
 		lightPositionRangeViewspaceBuffer[i].w = lightPositionRanges[i].w;
 		const glm::vec3 lightPositionViewSpace(lightPositionRangeViewspaceBuffer[i]);
 		const float range = lightPositionRangeViewspaceBuffer[i].w;
-
-		IBounds3D bounds3D;
-		if (range < 0.0f)
-		{	// Directional Light
-			bounds3D.maxX = m_gridWidth;
-			bounds3D.maxY = m_gridHeight;
-			bounds3D.maxZ = m_gridDepth;
-		}
-		else
-		{	// Point Light
-			bounds3D = ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(a_camera, lightPositionViewSpace, range, m_screenWidth, m_screenHeight, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
-			bounds3D.minX = glm::clamp(bounds3D.minX, 0, (int) m_gridWidth);
-			bounds3D.maxX = glm::clamp(bounds3D.maxX, 0, (int) m_gridWidth);
-			bounds3D.minY = glm::clamp(bounds3D.minY, 0, (int) m_gridHeight);
-			bounds3D.maxY = glm::clamp(bounds3D.maxY, 0, (int) m_gridHeight);
-			bounds3D.minZ = glm::clamp(bounds3D.minZ, 0, (int) m_gridDepth);
-			bounds3D.maxZ = glm::clamp(bounds3D.maxZ, 0, (int) m_gridDepth);
-		}
-
-		for (int x = bounds3D.minX; x < bounds3D.maxX; ++x)
+		IBounds3D bounds3D = ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(a_camera, lightPositionViewSpace, range, m_screenWidth, m_screenHeight, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
+		bounds3D.clamp(glm::ivec3(0), glm::ivec3(m_gridWidth, m_gridHeight, m_gridDepth));
+		
+		for (int x = bounds3D.min.x; x < bounds3D.max.x; ++x)
 		{
-			for (int y = bounds3D.minY; y < bounds3D.maxY; ++y)
+			for (int y = bounds3D.min.y; y < bounds3D.max.y; ++y)
 			{
-				for (int z = bounds3D.minZ; z < bounds3D.maxZ; ++z)
+				for (int z = bounds3D.min.z; z < bounds3D.max.z; ++z)
 				{
 					const uint gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
 					m_tileLightIndices[gridIdx].push_back(i);
@@ -124,7 +108,7 @@ breakloop:
 	for (uint i = 0; i < m_gridSize; ++i)
 	{
 		ushort numIndicesForTile = m_tileLightIndices[i].size();
-		gridBuffer[i].x = indiceCtr; // start idx
+		gridBuffer[i].x = indiceCtr;                     // start idx
 		gridBuffer[i].y = indiceCtr + numIndicesForTile; // end idx
 		memcpy(&indiceBuffer[indiceCtr], &m_tileLightIndices[i][0], numIndicesForTile * sizeof(ushort));
 		indiceCtr += numIndicesForTile;

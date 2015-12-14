@@ -42,6 +42,14 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_sceneFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 	m_sceneFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
 
+	const uint scale = 4;
+	const uint shadowWidth = screenWidth * scale;
+	const uint shadowHeight = screenHeight * scale;
+
+	m_shadowFBO.initialize();
+	m_shadowFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH32, shadowWidth, shadowHeight);
+	m_shadowCamera.initialize((float) screenWidth, (float) screenHeight, 90.0f, 0.1f, 200.0f);
+
 	m_clusteredShading.initialize(a_camera, screenWidth, screenHeight);
 	m_hbao.initialize(a_camera, screenWidth, screenHeight);
 	m_bloom.initialize(screenWidth, screenHeight);
@@ -59,31 +67,41 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_whiteTexture.initialize(DBTexture(WHITE_TEX_PATH));
 	m_blackTexture.initialize(DBTexture(BLACK_TEX_PATH));
 	m_dfvTexture.initialize(DBTexture(DFV_TEX_PATH, DBTexture::EFormat::FLOAT), 0, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR);
-
-	LightingGlobalsUBO* lightingGlobals = (LightingGlobalsUBO*) m_lightningGlobalsUBO.mapBuffer();
-	lightingGlobals->u_ambient = AMBIENT;
-	m_lightningGlobalsUBO.unmapBuffer();
 }
 
 void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a_lightManager)
 {
-	GLEngine::graphics->clear(glm::vec4(0.8f, 0.8f, 0.8f, 1.0f));
+	uint screenWidth = GLEngine::graphics->getViewportWidth();
+	uint screenHeight = GLEngine::graphics->getViewportHeight();
+	const uint scale = 4;
+	const uint shadowWidth = screenWidth * scale;
+	const uint shadowHeight = screenHeight * scale;
 
-	// UPDATE CAMERA DATA //
-	CameraVarsUBO* cameraVars  = (CameraVarsUBO*) m_cameraVarsUBO.mapBuffer();
-	cameraVars->u_vpMatrix     = a_camera.getCombinedMatrix();
-	cameraVars->u_viewMatrix   = a_camera.getViewMatrix();
-	cameraVars->u_normalMatrix = glm::inverse(glm::transpose(a_camera.getViewMatrix()));
-	cameraVars->u_eyePos       = glm::vec3(a_camera.getViewMatrix() * glm::vec4(a_camera.getPosition(), 1.0));
-	m_cameraVarsUBO.unmapBuffer();
-
+	updateLightingGlobalsUBO(a_camera);
 	m_clusteredShading.update(a_camera, a_lightManager);
 	m_clusteredShading.bindTextureBuffers();
 	m_dfvTexture.bind(GLConfig::DFV_TEXTURE_BINDING_POINT);
 
-	m_sceneFBO.begin();
-	GLEngine::graphics->clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
 	GLEngine::graphics->setDepthTest(true);
+
+	// SUN SHADOW MAP GENERATION //
+	updateCameraDataUBO(m_shadowCamera);
+	m_shadowFBO.begin();
+	GLEngine::graphics->setViewportSize(shadowWidth, shadowHeight);
+	GLEngine::graphics->beginDepthPrepass();
+	GLEngine::graphics->clearDepthOnly();
+	m_depthPrepassShader.begin();
+	for (GLScene* scene : m_scenes)
+		scene->render(m_modelMatrixUBO);
+	m_depthPrepassShader.end();
+	GLEngine::graphics->endDepthPrepass();
+	m_shadowFBO.end();
+
+	// MAIN SCENE //
+	updateCameraDataUBO(a_camera);
+	m_sceneFBO.begin();
+	GLEngine::graphics->setViewportSize(screenWidth, screenHeight);
+	GLEngine::graphics->clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
 
 	// DEPTH PREPASS //
 	if (m_depthPrepassEnabled)
@@ -108,6 +126,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	
 	// RENDER MODELS //
 	m_modelShader.begin();
+	m_shadowFBO.bindDepthTexture(10);
 	for (GLScene* scene : m_scenes)
 		scene->render(m_modelMatrixUBO);
 	m_modelShader.end();
@@ -181,12 +200,38 @@ void GLRenderer::setDepthPrepassEnabled(bool a_enabled)
 	m_depthPrepassEnabled = a_enabled;
 }
 
-void GLRenderer::setMaterial(float a_smoothness, bool a_isMetal)
+void GLRenderer::setSun(const glm::vec3& a_direction, const glm::vec3& a_color, float a_intensity)
 {
-	//print("smoothness: %f, isMetal: %i\n", a_smoothness, a_isMetal);
-	LightingGlobalsUBO* lightingGlobals = (LightingGlobalsUBO*) m_lightningGlobalsUBO.mapBuffer();
+	m_shadowCamera.setPosition(glm::vec3(a_direction * 100.0f));
+	m_shadowCamera.lookAtPoint(glm::vec3(a_direction));
+	m_shadowCamera.updateMatrices();
+	m_sunDir = a_direction;
+	m_sunColorIntensity = glm::vec4(a_color, a_intensity);
+}
+
+void GLRenderer::updateLightingGlobalsUBO(const PerspectiveCamera& a_camera)
+{
+	LightingGlobalsData* lightingGlobals = (LightingGlobalsData*) m_lightningGlobalsUBO.mapBuffer();
 	lightingGlobals->u_ambient = AMBIENT;
-	lightingGlobals->u_smoothness = a_smoothness;
-	lightingGlobals->u_metalness = a_isMetal ? 1.0f : 0.0f;
+	lightingGlobals->u_sunDir = glm::normalize(glm::mat3(a_camera.getViewMatrix()) * m_sunDir);
+	lightingGlobals->u_sunColorIntensity = m_sunColorIntensity;
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+
+	lightingGlobals->u_shadowMat = biasMatrix * m_shadowCamera.getCombinedMatrix();
 	m_lightningGlobalsUBO.unmapBuffer();
+}
+
+void GLRenderer::updateCameraDataUBO(const PerspectiveCamera& a_camera)
+{
+	CameraVarsData* cameraVars = (CameraVarsData*) m_cameraVarsUBO.mapBuffer();
+	cameraVars->u_vpMatrix = a_camera.getCombinedMatrix();
+	cameraVars->u_viewMatrix = a_camera.getViewMatrix();
+	cameraVars->u_normalMatrix = glm::inverse(glm::transpose(a_camera.getViewMatrix()));
+	cameraVars->u_eyePos = glm::vec3(a_camera.getViewMatrix() * glm::vec4(a_camera.getPosition(), 1.0));
+	m_cameraVarsUBO.unmapBuffer();
 }
