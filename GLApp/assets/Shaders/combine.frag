@@ -13,6 +13,20 @@ void main()
 	vec3 color = texture(u_colorTex, v_texcoord).rgb;
 	float ao = texture(u_aoTex, v_texcoord).r;
 	vec3 bloom = texture(u_bloomTex, v_texcoord).rgb;
-	
+#if 0
 	out_color = vec3(bloom) + vec3(color * ao);
+#else
+	float exposure = 2.0;
+	float brightMax = 1.0;
+	float bloomFactor = 0.5;
+	
+	color *= ao;
+	color += bloom * bloomFactor;
+	
+	float Y = dot(vec3(0.30, 0.59, 0.11), color);
+	float YD = exposure * (exposure/brightMax + 1.0) / (exposure + 1.0);
+	color *= YD;
+	
+	out_color = color;
+#endif
 }

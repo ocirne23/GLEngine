@@ -14,17 +14,21 @@ void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_data
 {
 	DBScene* scene = (DBScene*) a_database.loadAsset(a_assetName, EAssetType::SCENE);
 	scene->mergeMeshes();
-	m_nodes = scene->getNodes();
+	initialize(*scene);
+	a_database.unloadAsset(scene);
+}
 
+void GLScene::initialize(const DBScene& a_dbScene)
+{
+	m_nodes = a_dbScene.getNodes();
 	//print("numMeshes: %i\nnumMaterials: %i\nnumNodes: %i\n", scene->numMeshes(), scene->numMaterials(), scene->numNodes());
-
-	m_meshes.resize(scene->numMeshes());
-	for (uint i = 0; i < scene->numMeshes(); ++i)
-		m_meshes[i].initialize(scene->getMeshes()[i]);
+	m_meshes.resize(a_dbScene.numMeshes());
+	for (uint i = 0; i < a_dbScene.numMeshes(); ++i)
+		m_meshes[i].initialize(a_dbScene.getMeshes()[i]);
 
 	m_materialBuffer.initialize(GLConfig::MATERIAL_PROPERTIES_UBO);
 
-	uint numMaterials = scene->numMaterials();
+	uint numMaterials = a_dbScene.numMaterials();
 	if (numMaterials > GLConfig::MAX_MATERIALS)
 	{
 		print("Scene has more than %i materials\n", GLConfig::MAX_MATERIALS);
@@ -35,19 +39,19 @@ void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_data
 	GLMaterial* materialBuffer = (GLMaterial*) m_materialBuffer.mapBuffer();
 	for (uint i = 0; i < numMaterials; ++i)
 	{
-		materialBuffer->initialize(scene->getMaterials()[i]);
+		materialBuffer->initialize(a_dbScene.getMaterials()[i]);
 		materialBuffer++;
 	}
 	m_materialBuffer.unmapBuffer();
 
 	eastl::vector<GLMaterial> materials;
-	materials.resize(scene->numMaterials());
-	for (uint i = 0; i < scene->numMaterials(); ++i)
-		materials[i].initialize(scene->getMaterials()[i]);
+	materials.resize(a_dbScene.numMaterials());
+	for (uint i = 0; i < a_dbScene.numMaterials(); ++i)
+		materials[i].initialize(a_dbScene.getMaterials()[i]);
 
-	if (scene->numAtlasTextures())
+	if (a_dbScene.numAtlasTextures())
 	{
-		const eastl::vector<DBAtlasTexture>& atlasTextures = scene->getAtlasTextures();
+		const eastl::vector<DBAtlasTexture>& atlasTextures = a_dbScene.getAtlasTextures();
 		// Use info from the first texture since all textures use the same format.
 		const DBAtlasTexture& firstAtlasTex = atlasTextures[0];
 		uint width = firstAtlasTex.getTexture().getWidth();
@@ -62,8 +66,6 @@ void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_data
 			m_textureArray.addTexture(atlasTexture.getTexture());
 		m_textureArray.finishInit();
 	}
-
-	a_database.unloadAsset(scene);
 }
 
 void GLScene::render(GLConstantBuffer& a_modelMatrixUBO)

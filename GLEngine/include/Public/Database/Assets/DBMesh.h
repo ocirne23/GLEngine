@@ -27,7 +27,7 @@ public:
 public:
 
 	DBMesh() {}
-	DBMesh(const aiMesh& assimpMesh, bool invertNormals = false);
+	DBMesh(const aiMesh& assimpMesh);
 	virtual ~DBMesh() {}
 
 	void merge(const DBMesh& mesh, const glm::mat4& transform);

@@ -2,8 +2,11 @@
 
 #include "Database/Utils/AtlasBuilder.h"
 #include "EASTL/string.h"
+#include "Utils/FileUtils.h"
 
+#include <assimp/cimport.h>
 #include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 BEGIN_UNNAMED_NAMESPACE()
 
@@ -20,16 +23,42 @@ uint processNodes(eastl::vector<DBNode>& a_nodes, const aiNode* a_assimpNode, ui
 
 END_UNNAMED_NAMESPACE()
 
-DBScene::DBScene(const aiScene& a_assimpScene, const eastl::string& a_baseAssetPath, bool a_invertNormals)
+
+DBScene::DBScene(const eastl::string& a_sceneFilePath)
 {
-	processNodes(m_nodes, a_assimpScene.mRootNode, 0);
-	m_meshes.resize(a_assimpScene.mNumMeshes);
-	m_materials.resize(a_assimpScene.mNumMaterials);
-	for (uint i = 0; i < a_assimpScene.mNumMeshes; ++i)
-		m_meshes[i] = DBMesh(*a_assimpScene.mMeshes[i], a_invertNormals);
-	for (uint i = 0; i < a_assimpScene.mNumMaterials; ++i)
-		m_materials[i] = DBMaterial(*a_assimpScene.mMaterials[i]);
-	m_atlasTextures = AtlasBuilder::createAtlases(m_materials, a_baseAssetPath);
+	const uint flags = 0
+	// Required flags
+	| aiPostProcessSteps::aiProcess_Triangulate
+	| aiPostProcessSteps::aiProcess_CalcTangentSpace
+	| aiPostProcessSteps::aiProcess_GenNormals
+	| aiPostProcessSteps::aiProcess_FlipUVs // Flip uv's because OpenGL
+	// Optimalizations
+	| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
+	| aiPostProcessSteps::aiProcess_ImproveCacheLocality
+	| aiPostProcessSteps::aiProcess_OptimizeMeshes
+	| aiPostProcessSteps::aiProcess_OptimizeGraph
+	//| aiPostProcessSteps::aiProcess_PreTransformVertices // Removes animations
+	| aiPostProcessSteps::aiProcess_FindDegenerates
+	| aiPostProcessSteps::aiProcess_GenUVCoords
+	| aiPostProcessSteps::aiProcess_JoinIdenticalVertices
+	| 0;
+
+	const aiScene* assimpScene = aiImportFile(a_sceneFilePath.c_str(), flags);
+	const eastl::string baseAssetPath = FileUtils::getFolderPathForFile(a_sceneFilePath);
+
+	processNodes(m_nodes, assimpScene->mRootNode, 0);
+
+	m_meshes.resize(assimpScene->mNumMeshes);
+	for (uint i = 0; i < assimpScene->mNumMeshes; ++i)
+		m_meshes[i] = DBMesh(*assimpScene->mMeshes[i]);
+	
+	m_materials.resize(assimpScene->mNumMaterials);
+	for (uint i = 0; i < assimpScene->mNumMaterials; ++i)
+		m_materials[i] = DBMaterial(*assimpScene->mMaterials[i]);
+
+	aiReleaseImport(assimpScene);
+
+	m_atlasTextures = AtlasBuilder::createAtlases(m_materials, baseAssetPath);
 }
 
 void DBScene::mergeMeshes()

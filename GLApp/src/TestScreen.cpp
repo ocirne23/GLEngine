@@ -4,6 +4,7 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Utils/StringUtils.h"
+#include "Database/Assets/DBScene.h"
 
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/rotate_vector.hpp>
@@ -50,6 +51,14 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 			m_skysphereScene.setRotation(glm::vec3(0, 1, 0), 0);
 			m_renderer.addSkybox(&m_skysphereScene);
 		}
+		if (m_objDB.hasAsset("sphere.obj"))
+		{
+			
+			m_sphereScene.initialize("sphere.obj", m_objDB);
+			m_sphereScene.setScale(0.5f);
+			m_sphereScene.setTranslation(glm::vec3(-2, 0.5f, -5));
+			m_renderer.addScene(&m_sphereScene);
+		}
 	}
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); });
 	setSunRotation(m_sunRotation);
@@ -66,6 +75,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		case EKey::KP_3:     m_renderer.setBloomEnabled(!m_renderer.isBloomEnabled()); break;
 		case EKey::KP_4:     m_renderer.setDepthPrepassEnabled(!m_renderer.isDepthPrepassEnabled()); break;
 		case EKey::KP_5:     m_sunRotation = 0.0f; break;
+		case EKey::KP_6:     m_renderer.reloadShaders(); break;
 		
 		case EKey::KP_9:     m_palaceScene.setVisibility(!m_palaceScene.isVisible()); break;
 		case EKey::KP_8:     m_ifc1Scene.setVisibility(!m_ifc1Scene.isVisible()); break;
@@ -79,7 +89,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 			glm::vec3 position = m_camera.getPosition();
 			glm::vec3 color = glm::normalize(glm::linearRand(glm::vec3(0.5), glm::vec3(1)));
 			float intensity = glm::linearRand(0.8f, 2.0f);
-			float radius = glm::linearRand(4.0f, 8.0f);
+			float radius = glm::linearRand(40.0f, 80.0f);
 			m_lightManager.createLight(position, radius, color, intensity);
 			break;
 		}

@@ -31,6 +31,7 @@ private:
 	GLScene m_ifc2Scene;
 	GLScene m_palaceScene;
 	GLScene m_skysphereScene;
+	GLScene m_sphereScene;
 
 	FPSCameraController m_cameraController;
 	PerspectiveCamera m_camera;

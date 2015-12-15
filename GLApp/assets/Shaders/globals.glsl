@@ -36,7 +36,7 @@ struct MaterialProperty
 	vec4 normalTexMapping;
 	int diffuseAtlasNr;
 	int normalAtlasNr;
-	float roughness;
+	float smoothness;
 	float metalness;
 	vec4 color;
 };

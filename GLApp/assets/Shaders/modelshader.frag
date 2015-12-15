@@ -16,14 +16,18 @@ layout (binding = 10) uniform sampler2DShadow u_shadowTex;
 
 vec3 rotateNormal(vec3 normal)
 {
-	normal = normal * 2.0 - 1.0; // Convert from [0 -> 1] to [-1 -> 1]
-	vec3 dp1 = dFdx(v_position);
-	vec3 dp2 = dFdy(v_position);
-	vec2 duv1 = dFdx(v_texcoord);
-	vec2 duv2 = dFdy(v_texcoord);
-	vec3 T = normalize(dp1 * duv2.y - dp2 * duv1.y);
-	vec3 B = normalize(-dp1 * duv2.x + dp2 * duv1.x);
-	mat3 rotMat = mat3(T, B, v_normal);
+	normal = normal * 2.0 - 1.0;
+	vec3 N = v_normal;
+    vec3 dp1 = dFdx(v_position);
+    vec3 dp2 = dFdy(v_position);
+    vec2 duv1 = dFdx(v_texcoord);
+    vec2 duv2 = dFdy(v_texcoord);
+    vec3 dp2perp = cross(dp2, N);
+    vec3 dp1perp = cross(N, dp1);
+    vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+    vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+    float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
+    mat3 rotMat = mat3(T * invmax, B * invmax, N);
 	return normalize(rotMat * normal);
 }
 
@@ -106,17 +110,12 @@ void main()
 	if (material.color.a < 0.4 && material.color.a > 0.1) // Hacky transparency for IFC demo
 		discard;
 
-	vec3 diffuse = getDiffuseSample(material, v_texcoord).rgb;
-	vec3 normal = getNormalSample(material, v_texcoord).rgb;
-	vec3 N = rotateNormal(normal);
-	vec3 V = normalize(u_eyePos - v_position);
+	vec3 diffuse = hasDiffuseTexture(material) ? getDiffuseSample(material, v_texcoord).rgb : material.color.rgb;
+	vec3 N       = hasNormalTexture(material) ?  rotateNormal(getNormalSample(material, v_texcoord).rgb) : v_normal;
+	vec3 V       = normalize(u_eyePos - v_position);
 	float NdotV = clamp(dot(N, V), 0.0, 1.0);
 
-	diffuse += material.color.rgb;
-
-	//float smoothness = u_smoothness; //material.roughness;
-	//float metalness  = u_metalness;  //material.metalness;
-	float smoothness = material.roughness;
+	float smoothness = material.smoothness;
 	float metalness = material.metalness;
 
 	float albedo = (diffuse.r + diffuse.g + diffuse.b) / 3.0;

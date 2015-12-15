@@ -29,7 +29,7 @@ static const char* const COMBINE_FRAG_SHADER_PATH = "Shaders/combine.frag";
 static const char* const FXAA_VERT_SHADER_PATH = "Shaders/FXAA/FXAA.vert";
 static const char* const FXAA_FRAG_SHADER_PATH = "Shaders/FXAA/FXAA_High_Quality.frag";
 
-static const glm::vec3 AMBIENT(0.15f);
+static const glm::vec3 AMBIENT(0.05f);
 static const glm::ivec2 SHADOW_MAP_RES(8192);
 
 END_UNNAMED_NAMESPACE()
@@ -40,7 +40,7 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	uint screenHeight = GLEngine::graphics->getViewportHeight();
 
 	m_sceneFBO.initialize();
-	m_sceneFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
+	m_sceneFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB32F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 	m_sceneFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
 
 	m_shadowFBO.initialize();
@@ -56,14 +56,19 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_cameraVarsUBO.initialize(GLConfig::CAMERA_VARS_UBO);
 	m_lightningGlobalsUBO.initialize(GLConfig::LIGHTING_GLOBALS_UBO);
 
+	m_whiteTexture.initialize(DBTexture(WHITE_TEX_PATH));
+	m_blackTexture.initialize(DBTexture(BLACK_TEX_PATH));
+	m_dfvTexture.initialize(DBTexture(DFV_TEX_PATH, DBTexture::EFormat::FLOAT), 0, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR);
+
+	reloadShaders();
+}
+
+void GLRenderer::reloadShaders()
+{
 	m_depthPrepassShader.initialize(DEPTH_VERT_SHADER_PATH, DEPTH_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_combineShader.initialize(COMBINE_VERT_SHADER_PATH, COMBINE_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
-
-	m_whiteTexture.initialize(DBTexture(WHITE_TEX_PATH));
-	m_blackTexture.initialize(DBTexture(BLACK_TEX_PATH));
-	m_dfvTexture.initialize(DBTexture(DFV_TEX_PATH, DBTexture::EFormat::FLOAT), 0, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR);
 }
 
 void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a_lightManager)

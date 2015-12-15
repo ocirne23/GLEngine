@@ -23,7 +23,7 @@ class DBScene : public IAsset
 public:
 
 	DBScene() {}
-	DBScene(const aiScene& assimpScene, const eastl::string& baseAssetPath, bool invertNormals = false);
+	DBScene(const eastl::string& sceneFilePath);
 	virtual ~DBScene() {}
 
 	void mergeMeshes();

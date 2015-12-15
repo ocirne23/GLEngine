@@ -36,19 +36,23 @@ MaterialProperty getMaterial(uint materialID)
 	return u_materialProperties[materialID];
 }
 
+bool hasDiffuseTexture(MaterialProperty material)
+{
+	return material.diffuseAtlasNr != -1;
+}
+
+bool hasNormalTexture(MaterialProperty material)
+{
+	return material.normalAtlasNr != -1;
+}
+
 vec4 getDiffuseSample(MaterialProperty material, vec2 texcoord)
 {
-	if (material.diffuseAtlasNr == -1)
-		return vec4(0);
-	else
-		return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.diffuseAtlasNr), material.diffuseTexMapping);
+	return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.diffuseAtlasNr), material.diffuseTexMapping);
 }
 
 vec4 getNormalSample(MaterialProperty material, vec2 texcoord)
 {
-	if (material.normalAtlasNr == -1)
-		return vec4(0);
-	else
-		return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.normalAtlasNr), material.normalTexMapping);
+	return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.normalAtlasNr), material.normalTexMapping);
 }
 #endif // MATERIAL_LIGHTING

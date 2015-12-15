@@ -59,6 +59,8 @@ public:
 	void addSkybox(GLScene* scene);
 	void removeSkybox(GLScene* scene);
 
+	void reloadShaders();
+
 	void setSun(const glm::vec3& direction, const glm::vec3& color, float intensity);
 
 	void setHBAOEnabled(bool a_enabled) { m_hbaoEnabled = a_enabled; }

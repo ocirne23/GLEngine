@@ -2,7 +2,7 @@
 
 #include <assimp/scene.h>
 
-DBMesh::DBMesh(const aiMesh& a_assimpMesh, bool a_invertNormals)
+DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 {
 	m_name = a_assimpMesh.mName.C_Str();
 	
@@ -34,10 +34,6 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh, bool a_invertNormals)
 		//v.bitangents = (hasTangentsAndBitangents ? *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mBitangents[i]) : glm::vec3(0));
 		v.materialID = a_assimpMesh.mMaterialIndex;
 	}
-
-	if (a_invertNormals)
-		for (Vertex& v : m_vertices)
-			v.normal = -v.normal;
 }
 
 void DBMesh::merge(const DBMesh& a_mesh, const glm::mat4& a_transform)

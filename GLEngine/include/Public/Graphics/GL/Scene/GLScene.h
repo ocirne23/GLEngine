@@ -10,12 +10,14 @@
 #include <glm/glm.hpp>
 
 class AssetDatabase;
+class DBScene;
 
 class GLScene
 {
 public:
 
 	GLScene() {}
+	void initialize(const DBScene& dbScene);
 	void initialize(const eastl::string& assetName, AssetDatabase& database);
 
 	void render(GLConstantBuffer& modelMatrixUBO);
