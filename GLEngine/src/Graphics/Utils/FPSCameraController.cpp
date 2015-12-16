@@ -33,7 +33,7 @@ void FPSCameraController::update(PerspectiveCamera& a_camera, float a_deltaSec)
 
 	glm::vec3 position = a_camera.getPosition();
 	glm::mat3 rotation(a_camera.getViewMatrix());
-	glm::vec3 direction(FORWARD * rotation);
+	glm::vec3 direction(a_camera.getDirection());
 
 	// Rotate horizontally
 	direction = glm::rotate(direction, xLookRotation, UP);

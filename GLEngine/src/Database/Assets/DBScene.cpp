@@ -162,7 +162,6 @@ void DBScene::swapMaterial(const eastl::string& a_matName, const eastl::string& 
 			{
 				if (m_materials[j].getName() == a_withMatName)
 				{
-					print("Swapping material %s:%i with %s:%i", a_matName.c_str(), i, a_withMatName.c_str(), j);
 					eastl::swap(m_materials[i], m_materials[j]);
 					return;
 				}

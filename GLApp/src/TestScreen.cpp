@@ -15,7 +15,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 	uint viewportHeight = GLEngine::graphics->getViewportHeight();
 	m_camera.initialize((float) viewportWidth, (float) viewportHeight, 90.0f, 0.1f, 1000.0f);
 	m_camera.setPosition(4.0f, 1.0f, 4.0f);
-	m_camera.lookAtPoint(-4.0f, 6.0f, -4.0f);
+	m_camera.lookAtPoint(glm::vec3(0.0f, 0.0f, 20.0f));
 	m_renderer.initialize(m_camera);
 	m_cameraController.setCameraSpeed(5.0f);
 

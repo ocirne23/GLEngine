@@ -1032,11 +1032,13 @@ precision highp float;
 
 uniform sampler2D uSourceTex;
 uniform vec2 RCPFrame;
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
+
+layout (location = 0) out vec4 out_color;
 
 void main(void)
 {
-    gl_FragColor = FxaaPixelShader(vTexCoord,
+    out_color = FxaaPixelShader(vTexCoord,
 				FxaaFloat4(0.0f, 0.0f, 0.0f, 0.0f),		// FxaaFloat4 fxaaConsolePosPos,
         uSourceTex,							// FxaaTex tex,
         uSourceTex,							// FxaaTex fxaaConsole360TexExpBiasNegOne,
