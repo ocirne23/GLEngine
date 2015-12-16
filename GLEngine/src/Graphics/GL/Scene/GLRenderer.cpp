@@ -31,6 +31,7 @@ static const char* const FXAA_FRAG_SHADER_PATH = "Shaders/FXAA/FXAA_High_Quality
 
 static const glm::vec3 AMBIENT(0.05f);
 static const glm::ivec2 SHADOW_MAP_RES(8192);
+static const glm::ivec2 CUBE_MAP_RES(4096);
 
 END_UNNAMED_NAMESPACE()
 
@@ -46,6 +47,8 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_shadowFBO.initialize();
 	m_shadowFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH32, SHADOW_MAP_RES.x, SHADOW_MAP_RES.y, GLFramebuffer::ETextureMagFilter::LINEAR, GLFramebuffer::ETextureMinFilter::LINEAR);
 	m_shadowCamera.initialize((float) 200, (float) 200, 90.0f, 0.1f, 200.0f, PerspectiveCamera::EProjection::ORTHOGRAPHIC);
+
+	m_cubeMapGenerator.initialize(CUBE_MAP_RES.x, CUBE_MAP_RES.y);
 
 	m_clusteredShading.initialize(a_camera, screenWidth, screenHeight);
 	m_hbao.initialize(a_camera, screenWidth, screenHeight);

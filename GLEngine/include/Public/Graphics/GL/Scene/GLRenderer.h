@@ -9,6 +9,7 @@
 #include "Graphics/GL/Tech/HBAO.h"
 #include "Graphics/GL/Tech/FXAA.h"
 #include "Graphics/GL/Tech/Bloom.h"
+#include "Graphics/GL/Tech/CubeMapGen.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
 
 #include "EASTL/vector.h"
@@ -99,6 +100,9 @@ private:
 
 	bool m_depthPrepassEnabled = true;
 	ClusteredShading m_clusteredShading;
+
+	bool m_cubeMapGenerated = false;
+	CubeMapGen m_cubeMapGenerator;
 
 	GLShader m_depthPrepassShader;
 	GLShader m_skyboxShader;
