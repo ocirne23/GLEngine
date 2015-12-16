@@ -12,6 +12,7 @@ public:
 	Bloom(const Bloom& copy) = delete;
 
 	void initialize(uint xRes, uint yRes);
+	void reloadShader();
 	GLFramebuffer& getBloomResultFBO(GLFramebuffer& sceneFBO);
 
 private:

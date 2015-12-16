@@ -33,7 +33,7 @@ DBScene::DBScene(const eastl::string& a_sceneFilePath)
 	| aiPostProcessSteps::aiProcess_GenNormals
 	| aiPostProcessSteps::aiProcess_FlipUVs // Flip uv's because OpenGL
 	// Optimalizations
-	| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
+	//| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
 	| aiPostProcessSteps::aiProcess_ImproveCacheLocality
 	| aiPostProcessSteps::aiProcess_OptimizeMeshes
 	| aiPostProcessSteps::aiProcess_OptimizeGraph
@@ -150,4 +150,24 @@ void DBScene::read(AssetDatabaseEntry& entry)
 	m_atlasTextures.resize(numAtlasTextures);
 	for (uint i = 0; i < numAtlasTextures; ++i)
 		m_atlasTextures[i].read(entry);
+}
+
+void DBScene::swapMaterial(const eastl::string& a_matName, const eastl::string& a_withMatName)
+{
+	for (uint i = 0; i < m_materials.size(); ++i)
+	{
+		if (m_materials[i].getName() == a_matName)
+		{
+			for (uint j = 0; j < m_materials.size(); ++j)
+			{
+				if (m_materials[j].getName() == a_withMatName)
+				{
+					print("Swapping material %s:%i with %s:%i", a_matName.c_str(), i, a_withMatName.c_str(), j);
+					eastl::swap(m_materials[i], m_materials[j]);
+					return;
+				}
+			}
+			return;
+		}
+	}
 }

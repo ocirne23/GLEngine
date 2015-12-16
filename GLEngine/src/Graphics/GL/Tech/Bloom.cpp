@@ -14,12 +14,10 @@ END_UNNAMED_NAMESPACE()
 
 void Bloom::initialize(uint a_xRes, uint a_yRes)
 {
-	m_bloomShader.initialize(QUAD_VERT_SHADER_PATH, BLOOM_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
+	reloadShader();
 	m_bloomResultFBO.initialize();
 	m_bloomResultFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB8, GLFramebuffer::EAttachment::COLOR0, a_xRes, a_yRes);
-
 	m_gaussianBlur.initialize(GaussianBlur::EBlurValueType::VEC3, a_xRes, a_yRes);
-
 	m_initialized = true;
 }
 
@@ -34,4 +32,9 @@ GLFramebuffer& Bloom::getBloomResultFBO(GLFramebuffer& a_sceneFBO)
 	m_gaussianBlur.blurFBO(m_bloomResultFBO);
 
 	return m_bloomResultFBO;
+}
+
+void Bloom::reloadShader()
+{
+	m_bloomShader.initialize(QUAD_VERT_SHADER_PATH, BLOOM_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 }

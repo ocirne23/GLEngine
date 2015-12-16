@@ -48,6 +48,7 @@ public:
 	~HBAO() {}
 
 	void initialize(const PerspectiveCamera& camera, uint xRes, uint yRes);
+	void reloadShader();
 	GLFramebuffer& getHBAOResultFBO(GLFramebuffer& sceneFBO);
 
 private:

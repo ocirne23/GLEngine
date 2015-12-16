@@ -27,6 +27,7 @@ public:
 	virtual ~DBScene() {}
 
 	void mergeMeshes();
+	void swapMaterial(const eastl::string& matName, const eastl::string& withMatName);
 
 	virtual uint64 getByteSize() const override;
 	virtual EAssetType getAssetType() const override { return EAssetType::SCENE; }
@@ -37,6 +38,11 @@ public:
 	const eastl::vector<DBMesh>& getMeshes() const                { return m_meshes; }
 	const eastl::vector<DBMaterial>& getMaterials() const         { return m_materials; }
 	const eastl::vector<DBAtlasTexture>& getAtlasTextures() const { return m_atlasTextures; }
+
+	eastl::vector<DBNode>& getNodes()                 { return m_nodes; }
+	eastl::vector<DBMesh>& getMeshes()                { return m_meshes; }
+	eastl::vector<DBMaterial>& getMaterials()         { return m_materials; }
+	eastl::vector<DBAtlasTexture>& getAtlasTextures() { return m_atlasTextures; }
 
 	const uint numNodes() const         { return m_nodes.size(); }
 	const uint numMeshes() const        { return m_meshes.size(); }

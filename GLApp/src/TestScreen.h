@@ -10,6 +10,7 @@
 #include "Graphics/Utils/PerspectiveCamera.h"
 #include "Utils/FPSMeasurer.h"
 
+class DBScene;
 
 class TestScreen
 {
@@ -21,6 +22,8 @@ public:
 	void render(float deltaSec);
 
 	void setSunRotation(float angle);
+
+	void createTestSphere(DBScene& sphereDB, const eastl::string& materialName, const glm::vec3& position);
 
 private:
 

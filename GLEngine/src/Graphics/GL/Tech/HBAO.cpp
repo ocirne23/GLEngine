@@ -36,7 +36,6 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 
 	m_hbaoResultFBO.initialize();
 	m_hbaoResultFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::R8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
-	m_hbaoFullShader.initialize(QUAD_VERT_SHADER_PATH, HBAO_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 
 	uint noiseTexWidth = NOISE_RES;
 	uint noiseTexHeight = NOISE_RES;
@@ -93,10 +92,16 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	m_hbaoFullShader.end();
 
 	m_bilateralBlur.initialize(BilateralBlur::EBlurValueType::FLOAT, screenWidth, screenHeight);
+	reloadShader();
 
 	CHECK_GL_ERROR();
 
 	m_initialized = true;
+}
+
+void HBAO::reloadShader()
+{
+	m_hbaoFullShader.initialize(QUAD_VERT_SHADER_PATH, HBAO_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 }
 
 GLFramebuffer& HBAO::getHBAOResultFBO(GLFramebuffer& a_sceneFBO)

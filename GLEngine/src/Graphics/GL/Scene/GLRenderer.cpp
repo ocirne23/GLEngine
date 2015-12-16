@@ -69,6 +69,8 @@ void GLRenderer::reloadShaders()
 	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_skyboxShader.initialize(MODEL_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_combineShader.initialize(COMBINE_VERT_SHADER_PATH, COMBINE_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
+	m_hbao.reloadShader();
+	m_bloom.reloadShader();
 }
 
 void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a_lightManager)
@@ -84,22 +86,33 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	GLEngine::graphics->setDepthTest(true);
 
 	// SUN SHADOW MAP GENERATION //
-	if (!m_sunUpdated)
+	if (!m_shadowsUpdated)
 	{
-		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::FRONT);
-		updateCameraDataUBO(m_shadowCamera);
-		m_shadowFBO.begin();
-		GLEngine::graphics->setViewportSize(SHADOW_MAP_RES.x, SHADOW_MAP_RES.y);
-		GLEngine::graphics->beginDepthPrepass();
-		GLEngine::graphics->clearDepthOnly();
-		m_depthPrepassShader.begin();
-		for (GLScene* scene : m_scenes)
-			scene->render(m_modelMatrixUBO);
-		m_depthPrepassShader.end();
-		GLEngine::graphics->endDepthPrepass();
-		m_shadowFBO.end();
-		m_sunUpdated = true;
-		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::BACK);
+		if (m_shadowsEnabled)
+		{
+			GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::FRONT);
+			updateCameraDataUBO(m_shadowCamera);
+			m_shadowFBO.begin();
+			GLEngine::graphics->setViewportSize(SHADOW_MAP_RES.x, SHADOW_MAP_RES.y);
+			GLEngine::graphics->beginDepthPrepass();
+			GLEngine::graphics->clearDepthOnly();
+			m_depthPrepassShader.begin();
+			for (GLScene* scene : m_scenes)
+				scene->render(m_modelMatrixUBO);
+			m_depthPrepassShader.end();
+			GLEngine::graphics->endDepthPrepass();
+			m_shadowFBO.end();
+			GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::BACK);
+		}
+		else
+		{
+			m_shadowFBO.begin();
+			GLEngine::graphics->beginDepthPrepass();
+			GLEngine::graphics->clearDepthOnly();
+			GLEngine::graphics->endDepthPrepass();
+			m_shadowFBO.end();
+		}
+		m_shadowsUpdated = true;
 	}
 
 	// MAIN SCENE //
@@ -212,7 +225,8 @@ void GLRenderer::setSun(const glm::vec3& a_direction, const glm::vec3& a_color, 
 	m_shadowCamera.updateMatrices();
 	m_sunDir = a_direction;
 	m_sunColorIntensity = glm::vec4(a_color, a_intensity);
-	m_sunUpdated = false;
+	if (m_shadowsEnabled)
+		m_shadowsUpdated = false;
 }
 
 void GLRenderer::updateLightingGlobalsUBO(const PerspectiveCamera& a_camera)

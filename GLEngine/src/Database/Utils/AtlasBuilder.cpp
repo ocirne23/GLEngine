@@ -187,9 +187,9 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 		for (DBMaterial& mat : a_materials)
 		{
 			if (mat.getDiffuseTexturePath() == pair.first)
-				mat.setDiffuseAtlasRegion(reg);
+				mat.setDiffuseRegion(reg);
 			if (mat.getNormalTexturePath() == pair.first)
-				mat.setNormalAtlasRegion(reg);
+				mat.setNormalRegion(reg);
 		}
 	}
 	return atlasTextures; // rvo

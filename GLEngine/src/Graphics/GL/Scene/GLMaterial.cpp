@@ -12,10 +12,10 @@ void GLMaterial::initialize(const DBMaterial& a_material)
 	materialColor.a = a_material.getOpacity();
 
 	glm::vec4 specCol = a_material.getSpecularColor();
-	roughness = (specCol.r + specCol.g + specCol.b) / 3.0f;
+	smoothness = (specCol.r + specCol.g + specCol.b) / 3.0f;
 	bool isMetal = glm::abs(materialColor.r - materialColor.g) < 0.05f && glm::abs(materialColor.g - materialColor.b) < 0.05f;
 	metalness = isMetal ? 1.0f : 0.0f;
 
-	//roughness = a_material.getRoughness();
-	//metalness = a_material.getMetalness();
+	smoothness = a_material.getSmoothness();
+	metalness = a_material.getMetalness();
 }

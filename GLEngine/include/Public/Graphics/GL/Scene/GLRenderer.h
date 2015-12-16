@@ -75,6 +75,9 @@ public:
 	void setDepthPrepassEnabled(bool a_enabled);
 	bool isDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
 
+	void setShadowsEnabled(bool a_enabled) { m_shadowsEnabled = a_enabled; m_shadowsUpdated = false; }
+	bool isShadowsEnabled() const { return m_shadowsEnabled; }
+
 private:
 
 	void updateLightingGlobalsUBO(const PerspectiveCamera& camera);
@@ -116,5 +119,7 @@ private:
 
 	glm::vec3 m_sunDir;
 	glm::vec4 m_sunColorIntensity;
-	bool m_sunUpdated = false;
+	bool m_shadowsUpdated = false;
+
+	bool m_shadowsEnabled = true;
 };

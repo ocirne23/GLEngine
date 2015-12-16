@@ -31,13 +31,30 @@ vec3 rotateNormal(vec3 normal)
 	return normalize(rotMat * normal);
 }
 
+float inverseSquareFalloff(float lightDistance, float lightRange)
+{
+	return pow(max(1.0 - pow((lightDistance / lightRange), 4), 0), 2) / (pow(lightDistance, 2) + 1);
+}
+
 // [Burley 2012, "Physically-Based Shading at Disney"]
 vec3 diffuseBurley(vec3 diffuse, float Roughness, float NoV, float NoL, float VoH)
 {
-	float FD90 = 0.5 + 2 * VoH * VoH * Roughness;
+	float FD90 = VoH * VoH * Roughness;
 	float FdV = 1 + (FD90 - 1) * exp2( (-5.55473 * NoV - 6.98316) * NoV );
 	float FdL = 1 + (FD90 - 1) * exp2( (-5.55473 * NoL - 6.98316) * NoL );
 	return diffuse / PI * FdV * FdL;
+}
+
+// [Gotanda 2012, "Beyond a Simple Physically Based Blinn-Phong Model in Real-Time"]
+vec3 diffuseOrenNayar( vec3 DiffuseColor, float Roughness, float NoV, float NoL, float VoH )
+{
+	float VoL = 2 * VoH - 1;
+	float m = Roughness * Roughness;
+	float m2 = m * m;
+	float C1 = 1 - 0.5 * m2 / (m2 + 0.33);
+	float Cosri = VoL - NoV * NoL;
+	float C2 = 0.45 * m2 / (m2 + 0.09) * Cosri * ( Cosri >= 0 ? min( 1, NoL / NoV ) : NoL );
+	return DiffuseColor / PI * ( NoL * C1 + C2 );
 }
 
 // [http://www.filmicworlds.com/2014/04/21/optimizing-ggx-shaders-with-dotlh/]
@@ -49,11 +66,6 @@ float specularGGX(float roughness, float F0, float NoH, float HoL, float NoL)
 	return D * FV * NoL;
 }
 
-float inverseSquareFalloff(float lightDistance, float lightRange)
-{
-	return pow(max(1.0 - pow((lightDistance / lightRange), 4), 0), 2) / (pow(lightDistance, 2) + 1);
-}
-
 vec3 doLight(vec3 lightContrib, vec3 L, vec3 N, vec3 V, float NdotV, float F0, vec3 diffuse, float smoothness, float metalness)
 {
 	vec3 H = normalize(L + V);
@@ -61,8 +73,11 @@ vec3 doLight(vec3 lightContrib, vec3 L, vec3 N, vec3 V, float NdotV, float F0, v
 	float NdotH = clamp(dot(N, H), 0.0, 1.0);
 	float HdotL = clamp(dot(H, L), 0.0, 1.0);
 	float VdotH = clamp(dot(V, H), 0.0, 1.0);
-
+#if 1
+	vec3 diffuseContrib = diffuseOrenNayar(diffuse, smoothness, NdotV, NdotL, VdotH);
+#else
 	vec3 diffuseContrib = diffuseBurley(diffuse, smoothness, NdotV, NdotL, VdotH);
+#endif
 	float specularContrib = specularGGX(smoothness, F0, NdotH, HdotL, NdotL);
 
 	return lightContrib * diffuseContrib + lightContrib * specularContrib;
@@ -128,13 +143,13 @@ void main()
 		float lightDistance = length(L);
 		L /= lightDistance;
 		float attenuation = inverseSquareFalloff(lightDistance, light.positionRange.w);
-		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * attenuation;
+		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * PI * attenuation;
 		lightAccum += doLight(lightContrib, L, N, V, NdotV, F0, diffuse, smoothness, metalness);
 	}
 	float visibility = PCSS();
 	if (visibility > 0.0)
 	{
-		vec3 sunContrib = u_sunColorIntensity.rgb * u_sunColorIntensity.a * visibility;
+		vec3 sunContrib = u_sunColorIntensity.rgb * u_sunColorIntensity.a * PI * visibility;
 		lightAccum += doLight(sunContrib, u_sunDir, N, V, NdotV, F0, diffuse, smoothness, metalness);
 	}
 	lightAccum += diffuse * u_ambient;

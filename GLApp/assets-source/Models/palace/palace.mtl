@@ -1,109 +1,59 @@
 newmtl PoO_ArchColumnsSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_WoodOld_01_Diff.png
 map_bump PoO_WoodOld_NRM.png
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 254.00
+Ni 0.00
+Ns 0.05
 
 newmtl PoO_HiddenStairsSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_Pavers_Diff.png
 map_bump PoO_Pavers_NRM.png
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 254.00
+Ni 0.00
+Ns 0.25
 
 newmtl PoO_PlatformSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_Pavers_Diff.png
 map_bump PoO_Pavers_NRM.png
-Ni 1.00
-Ks 0.20 0.20 0.20
-Ns 254.00
+Ni 0.00
+Ns 0.25
 
 newmtl PoO_RoughWoodenPlanksSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_RoughWoodPlanks_Diff.png
 map_bump PoO_RoughWoodPlanks_NRM.png
-Ni 1.00
-Ks 0.20 0.20 0.20
-Ns 254.00
+Ni 0.00
+Ns 0.1
 
 newmtl PoO_StoneWall_LOD0SG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_RockWall_Diff.png
 map_bump PoO_RockWall_NRM.png
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 254.00
+Ni 0.00
+Ns 0.25
 
 newmtl PoO_SupportBeamsSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_WoodOldOrnamentalism_Diff.png
 map_bump PoO_WoodOldOrnamentalism_NRM.png
-Ni 1.00
-Ks 0.20 0.20 0.20
-Ns 254.00
+Ni 0.00
+Ns 0.05
 
 newmtl PoO_WallsLowerSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_WallsLower_Diff.png
 map_bump PoO_WallsLower_NRM.png
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 254.00
+Ni 0.00
+Ns 0.05
 
 newmtl PoO_WallsUpperSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_WallUpper_Diff.png
 map_bump PoO_WallUpper_NRM.png
-Ni 1.00
-Ks 0.20 0.20 0.20
-Ns 254.00
+Ni 0.00
+Ns 0.05
 
 newmtl PoO_WoodSupportsSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_WoodOld_02_Diff.png
 map_bump PoO_WoodOld_NRM.png
-Ni 1.00
-Ks 0.00 0.00 0.00
-Ns 254.00
+Ni 0.00
+Ns 0.05
 
 newmtl PoO_WoodenRoofSG
-illum 4
-Kd 0.00 0.00 0.00
-Ka 0.20 0.20 0.20
-Tf 1.00 1.00 1.00
 map_Kd PoO_WoodenRoof_Diff.png
 map_bump PoO_WoodenRoof_NRM.png
-Ni 1.00
-Ks 0.20 0.20 0.20
-Ns 18.00
+Ni 0.00
+Ns 0.05

@@ -9,7 +9,8 @@ layout(location = 0) out vec3 out_color;
 void main()
 {
 	vec3 color = texture(u_colorTex, v_texcoord).rgb;
-    // Check whether fragment output is higher than threshold, if so output as brightness color
-    float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
-	out_color = color * brightness;
-}
+	float luminance = (color.r + color.g + color.b) / 3.0;
+	vec3 L = color * (vec3(0.9) / log(luminance));
+	out_color = L / (1 + L);
+}   
+// float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));

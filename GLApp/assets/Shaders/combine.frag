@@ -18,7 +18,7 @@ void main()
 #else
 	float exposure = 2.0;
 	float brightMax = 1.0;
-	float bloomFactor = 0.5;
+	float bloomFactor = 1.00;
 	
 	color *= ao;
 	color += bloom * bloomFactor;

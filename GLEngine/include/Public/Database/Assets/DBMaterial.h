@@ -21,21 +21,22 @@ public:
 	virtual void write(AssetDatabaseEntry& entry) override;
 	virtual void read(AssetDatabaseEntry& entry) override;
 
-	const eastl::string& getDiffuseTexturePath() const;
-	const eastl::string& getNormalTexturePath() const;
+	void setDiffuseRegion(const DBAtlasRegion& region);
+	void setNormalRegion(const DBAtlasRegion& region);
+
+	void setSmoothness(float a_smoothness) { m_smoothness = a_smoothness; }
+	void setMetalness(float a_metalness)   { m_metalness = a_metalness; }
 	
 	const DBAtlasRegion& getDiffuseRegion() const { return m_diffuseRegion; }
-	const DBAtlasRegion& getNormalRegion() const { return m_normalRegion; }
-	float getRoughness() const { return m_roughness; }
-	float getMetalness() const { return m_metalness; }
-	const glm::vec4& getMaterialColor() const { return m_materialColor; }
-
-	float getOpacity() const { return m_opacity; }
-	float getShininess() const { return m_shininess; }
-	const glm::vec4& getSpecularColor() const { return m_specColor; }
-
-	void setDiffuseAtlasRegion(const DBAtlasRegion& region);
-	void setNormalAtlasRegion(const DBAtlasRegion& region);
+	const DBAtlasRegion& getNormalRegion() const  { return m_normalRegion; }
+	const glm::vec4& getMaterialColor() const     { return m_materialColor; }
+	const glm::vec4& getSpecularColor() const     { return m_specColor; }
+	float getSmoothness() const                   { return m_smoothness; }
+	float getMetalness() const                    { return m_metalness; }
+	float getOpacity() const                      { return m_opacity; }
+	const eastl::string& getName() const          { return m_name; }
+	const eastl::string& getDiffuseTexturePath() const;
+	const eastl::string& getNormalTexturePath() const;
 
 private:
 
@@ -56,15 +57,14 @@ private:
 
 private:
 
+	eastl::string m_name;
 	DBAtlasRegion m_diffuseRegion;
 	DBAtlasRegion m_normalRegion;
 	glm::vec4 m_materialColor;
-	float m_roughness;
-	float m_metalness;
-
-	float m_opacity;
-	float m_shininess;
 	glm::vec4 m_specColor;
+	float m_smoothness = -1.0f;
+	float m_metalness  = -1.0f;
+	float m_opacity    = 1.0f;
 
 	/*
 	EBlendMode m_blendmode;
