@@ -1,5 +1,7 @@
 # GLEngine
 
+* Before compiling extract GLEngine/libs.rar (github 50MB file size limit)
+
 A minimalistic C++11 framework to easily and efficiently render various 3D graphics.
 
 This project is split into 3 parts:
