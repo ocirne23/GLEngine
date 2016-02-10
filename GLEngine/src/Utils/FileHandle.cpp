@@ -1,13 +1,11 @@
 #include "Utils/FileHandle.h"
 
 #include "Core.h"
-#include "EASTL/vector.h"
 #include "EASTL/string.h"
+#include "gsl/gsl.h"
 
 #include <SDL/SDL_rwops.h>
-#include <conio.h>
 #include <stdlib.h>
-#include <direct.h>
 #include <assert.h>
 
 const eastl::string FileHandle::ASSETS_DIR("assets/");
@@ -51,7 +49,7 @@ void FileHandle::initialize(const char* a_filePath, EFileMode a_fileMode)
 		return;
 	}
 
-	m_size = (uint64) SDL_RWsize(m_rwops);
+	m_size = uint64(SDL_RWsize(m_rwops));
 }
 
 FileHandle::~FileHandle()
@@ -67,7 +65,7 @@ void FileHandle::readBytes(char* a_buffer, uint64 a_numBytes, uint a_offset) con
 	assert(m_fileMode == EFileMode::READ || m_fileMode == EFileMode::READWRITE);
 
 	SDL_RWseek(m_rwops, a_offset, RW_SEEK_SET);
-	uint64 read = SDL_RWread(m_rwops, a_buffer, (size_t) a_numBytes, 1);
+	SDL_RWread(m_rwops, a_buffer, size_t(a_numBytes), 1);
 }
 
 void FileHandle::writeBytes(const char* a_bytes, uint64 a_numBytes)
@@ -76,16 +74,16 @@ void FileHandle::writeBytes(const char* a_bytes, uint64 a_numBytes)
 	assert(m_fileMode == EFileMode::WRITE || m_fileMode == EFileMode::READWRITE);
 
 	SDL_RWseek(m_rwops, 0, RW_SEEK_END);
-	SDL_RWwrite(m_rwops, a_bytes, (size_t) a_numBytes, 1);
+	SDL_RWwrite(m_rwops, a_bytes, size_t(a_numBytes), 1);
 	m_size += a_numBytes;
 }
 
 eastl::string FileHandle::readString(uint64 a_numChars) const
 {
-	char* chars = new char[(size_t) a_numChars];
+	owner<char*> chars = new char[a_numChars];
 	readBytes(chars, a_numChars, 0);
-	eastl::string str(chars, (int)a_numChars);
-	delete [] chars;
+	eastl::string str(chars, int(a_numChars));
+	delete[] chars;
 	return str;
 }
 

@@ -1,14 +1,11 @@
 #include "Utils/FileUtils.h"
 
-#include "EASTL/heap.h"
 #include "EASTL/string.h"
 #include "Utils/StringUtils.h"
 
 #include <algorithm>
 #include <assert.h>
-#include <codecvt>
 #include <fstream>
-#include <stack>
 #define NOMINMAX
 #include <Windows.h>
 
@@ -51,13 +48,13 @@ eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 
 	eastl::string time;
 
-	time += StringUtils::to_string((int) sysWriteTime.wYear) + ":";
-	time += StringUtils::to_string((int) sysWriteTime.wMonth) + ":";
-	time += StringUtils::to_string((int) sysWriteTime.wDay) + ":";
-	time += StringUtils::to_string((int) sysWriteTime.wHour) + ":";
-	time += StringUtils::to_string((int) sysWriteTime.wMinute) + ":";
-	time += StringUtils::to_string((int) sysWriteTime.wSecond) + ":";
-	time += StringUtils::to_string((int) sysWriteTime.wMilliseconds);
+	time += StringUtils::to_string(int(sysWriteTime.wYear)) + ":";
+	time += StringUtils::to_string(int(sysWriteTime.wMonth)) + ":";
+	time += StringUtils::to_string(int(sysWriteTime.wDay)) + ":";
+	time += StringUtils::to_string(int(sysWriteTime.wHour)) + ":";
+	time += StringUtils::to_string(int(sysWriteTime.wMinute)) + ":";
+	time += StringUtils::to_string(int(sysWriteTime.wSecond)) + ":";
+	time += StringUtils::to_string(int(sysWriteTime.wMilliseconds));
 
 	assert(sysWriteTime.wYear != 1601);
 
@@ -66,7 +63,7 @@ eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 
 eastl::vector<eastl::string> FileUtils::listFiles(const eastl::string& a_path, const eastl::string& a_mask)
 {
-	HANDLE hFind = INVALID_HANDLE_VALUE;
+	HANDLE hFind;
 	WIN32_FIND_DATA ffd;
 
 	eastl::vector<eastl::string> files;
@@ -103,7 +100,6 @@ eastl::vector<eastl::string> FileUtils::listFiles(const eastl::string& a_path, c
 			return files;
 		}
 		FindClose(hFind);
-		hFind = INVALID_HANDLE_VALUE;
 	}
 
 	return files;
@@ -134,10 +130,9 @@ void FileUtils::createDirectoryForFile(const eastl::string& a_filePath)
 
 bool FileUtils::fileExists(const eastl::string& a_filePath)
 {
-	bool exists = false;
 	std::fstream file;
 	file.open(a_filePath.c_str(), std::fstream::in); // prolly not the right way to check for exists
-	exists = file.is_open();
+	bool exists = file.is_open();
 	if (exists)
 		file.close();
 	return exists;
@@ -148,7 +143,7 @@ FileTime FileUtils::getCurrentFileTime()
 	SYSTEMTIME st;
 	GetSystemTime(&st);
 	FileTime ft;
-	SystemTimeToFileTime(&st, (_FILETIME*)(&ft));
+	SystemTimeToFileTime(&st, rcast<_FILETIME*>(&ft));
 	return ft;
 }
 

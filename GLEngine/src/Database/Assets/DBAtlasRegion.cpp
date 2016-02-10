@@ -6,12 +6,12 @@ uint64 DBAtlasRegion::getByteSize() const
 {
 	uint64 totalSize = 0;
 	totalSize += AssetDatabaseEntry::getStringWriteSize(m_filePath);
-	totalSize += sizeof(m_texWidth);
-	totalSize += sizeof(m_texHeight);
-	totalSize += sizeof(m_numComp);
-	totalSize += sizeof(m_atlasPosition);
-	totalSize += sizeof(m_atlasMapping);
-	totalSize += sizeof(m_atlasIdx);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_texWidth);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_texHeight);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_numComp);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_atlasPosition);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_atlasMapping);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_atlasIdx);
 	return totalSize;
 }
 

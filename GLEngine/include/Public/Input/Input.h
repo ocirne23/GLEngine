@@ -16,7 +16,7 @@ if (GLEngine::input->isKeyPressed(EKey::ESCAPE)) {}
 Listening to input events:
 
 Input::KeyDownListener keyDownListener;
-keyDownListener.setFunc([this](EKey a_key) { onKeyDown(a_key); });
+keyDownListener.setFunc([this](EKey a_key, bool a_isRepeat) { onKeyDown(a_key); });
 
 **********************/
 
@@ -27,6 +27,7 @@ public:
 
 	bool isKeyPressed(EKey key);
 	bool isMousePressed(EMouseButton button);
+	void getMousePosition(int& xPos, int& yPos);
 	void setMouseCaptured(bool captured);
 	bool isMouseCaptured();
 
@@ -38,8 +39,9 @@ private:
 	void pollEvents();
 	void processEvents();
 
-	void keyDown(EKey key);
+	void keyDown(EKey key, bool isRepeat);
 	void keyUp(EKey key);
+	void textInput(const char* text);
 	void mouseDown(EMouseButton button, uint xPos, uint yPos);
 	void mouseUp(EMouseButton button, uint xPos, uint yPos);
 	void mouseMoved(uint xPos, uint yPos, int deltaX, int deltaY);
@@ -56,6 +58,7 @@ public:
 	// Listener stuff from here on //
 	struct KeyDownTag {};
 	struct KeyUpTag {};
+	struct TextInputTag {};
 	struct MouseDownTag {};
 	struct MouseUpTag {};
 	struct MouseMovedTag {};
@@ -64,8 +67,9 @@ public:
 	struct WindowQuitTag {};
 	
 	//                                      Ret   Args                      Name
-	typedef InputListener<KeyDownTag,       void, EKey>                     KeyDownListener;
+	typedef InputListener<KeyDownTag,       void, EKey, bool>               KeyDownListener;
 	typedef InputListener<KeyUpTag,         void, EKey>                     KeyUpListener;
+	typedef InputListener<TextInputTag,     void, const char*>              TextInputListener;
 	typedef InputListener<MouseDownTag,     void, EMouseButton, uint, uint> MouseDownListener;
 	typedef InputListener<MouseUpTag,       void, EMouseButton, uint, uint> MouseUpListener;
 	typedef InputListener<MouseMovedTag,    void, uint, uint, int, int>     MouseMovedListener;
@@ -82,6 +86,7 @@ private:
 
 	LISTENERS_GET(KeyDownListener, m_keyDownListeners);
 	LISTENERS_GET(KeyUpListener, m_keyUpListeners);
+	LISTENERS_GET(TextInputListener, m_textInputListeners);
 	LISTENERS_GET(MouseDownListener, m_mouseDownListeners);
 	LISTENERS_GET(MouseUpListener, m_mouseUpListeners);
 	LISTENERS_GET(MouseMovedListener, m_mouseMovedListeners);

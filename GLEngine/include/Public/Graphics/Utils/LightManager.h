@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "gsl/gsl.h"
 
 #include "Utils/VecForward.h"
 
@@ -46,9 +47,9 @@ public:
 
 private:
 
-	uint m_maxLights                   = 0;
-	uint m_numUsedLights               = 0;
-	ushort* m_lightHandles             = NULL;
-	glm::vec4* m_lightPositionRanges   = NULL;
-	glm::vec4* m_lightColorIntensities = NULL;
+	uint m_maxLights                          = 0;
+	uint m_numUsedLights                      = 0;
+	owner<ushort*> m_lightHandles             = NULL;
+	owner<glm::vec4*> m_lightPositionRanges   = NULL;
+	owner<glm::vec4*> m_lightColorIntensities = NULL;
 };

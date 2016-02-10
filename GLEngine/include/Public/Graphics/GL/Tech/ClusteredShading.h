@@ -55,7 +55,19 @@ private:
 	float m_recLogSD1         = 0.0f;
 	float m_recNear           = 0.0f;
 
-	eastl::vector<eastl::vector<ushort>> m_tileLightIndices;
+	enum { MAX_NUM_INDICES_PER_TILE = 10 };
+
+	struct TileIndiceList
+	{
+		ushort count;
+		ushort indices[MAX_NUM_INDICES_PER_TILE];
+		inline void push_back(ushort val)
+		{
+			if (count < MAX_NUM_INDICES_PER_TILE)
+				indices[count++] = val;
+		}
+	};
+	eastl::vector<TileIndiceList> m_tileLightIndices;
 
 	GLConstantBuffer m_lightPositionRangesUBO;
 	GLConstantBuffer m_lightColorIntensitiesUBO;

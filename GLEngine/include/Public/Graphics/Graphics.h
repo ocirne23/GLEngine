@@ -3,8 +3,6 @@
 #include "Core.h"
 #include "Utils/VecForward.h"
 
-#include <functional>
-
 typedef uint WindowFlags;
 
 struct SDL_Window;
@@ -22,11 +20,12 @@ public:
 	void swap();
 
 	void setWindowTitle(const char* title);
-	void setWindowSize(uint screenWidth, uint screenHeight);
-	void setWindowMaximumSize(uint maxWidth, uint maxHeight);
-	void setWindowPosition(uint xPos, uint yPos);
-	void setWindowResizeable(bool resizeable);
-	void setWindowFullscreen(bool fullscreen, bool borderless);
+	//TODO
+	//void setWindowSize(uint screenWidth, uint screenHeight);
+	//void setWindowMaximumSize(uint maxWidth, uint maxHeight);
+	//void setWindowPosition(uint xPos, uint yPos);
+	//void setWindowResizeable(bool resizeable);
+	//void setWindowFullscreen(bool fullscreen, bool borderless);
 	void setViewportSize(uint viewportWidth, uint viewportHeight);
 	void setViewportPosition(uint viewportXPos, uint viewportYPos);
 	void setVsync(bool enabled);

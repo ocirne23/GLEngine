@@ -21,7 +21,7 @@ void TextureAtlas::initialize(uint a_width, uint a_height, uint a_numComponents,
 	SAFE_DELETE(m_root.left);
 	SAFE_DELETE(m_root.right);
 
-	m_root.x = m_root.y = NULL;
+	m_root.x = m_root.y = 0;
 	m_root.width = a_width;
 	m_root.height = a_height;
 }

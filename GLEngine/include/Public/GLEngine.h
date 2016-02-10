@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "gsl/gsl.h"
 
 #include <functional>
 
@@ -62,6 +63,8 @@ public:
 	/** Clean up all engine resources and destroy the window, waits for all created threads to finish */
 	static void finish();
 
+	static void test();
+
 private:
 
 	GLEngine() {}
@@ -69,11 +72,11 @@ private:
 
 public:
 
-	static Input* input;
-	static Graphics* graphics;
+	static owner<Input*> input;
+	static owner<Graphics*> graphics;
 
 private:
 
 	static bool s_shutdown;
-	static ThreadManager* s_threadManager;
+	static owner<ThreadManager*> s_threadManager;
 };

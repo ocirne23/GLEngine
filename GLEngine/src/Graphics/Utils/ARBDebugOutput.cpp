@@ -4,7 +4,6 @@
 #include "Graphics/GL/GL.h"
 
 #include <SDL/SDL_syswm.h>
-#include <string>
 #include <assert.h>
 
 BEGIN_UNNAMED_NAMESPACE()

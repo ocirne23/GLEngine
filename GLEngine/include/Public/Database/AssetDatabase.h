@@ -5,6 +5,7 @@
 #include "Database/Assets/EAssetType.h"
 #include "Utils/FileUtils.h"
 #include "EASTL/hash_map.h"
+#include "EASTL/vector.h"
 #include "EASTL/string.h"
 
 #include <fstream>
@@ -24,7 +25,7 @@ public:
 	void writeAssetTableAndClose();
 
 	// READ api
-	void openExisting(const eastl::string& filePath);
+	bool openExisting(const eastl::string& filePath);
 	
 	//TODO: add some form of reference counter to unload assets
 	
@@ -34,6 +35,7 @@ public:
 
 	bool isOpen() const { return m_openMode != EOpenMode::UNOPENED; }
 	bool hasAsset(const eastl::string& databaseEntryName) const;
+	eastl::vector<eastl::string> listAssets() const;
 
 private:
 
@@ -49,6 +51,6 @@ private:
 	EOpenMode m_openMode = EOpenMode::UNOPENED;
 	std::fstream m_file;
 	uint64 m_assetWritePos = 0;
-	eastl::hash_map<uint64, IAsset*> m_loadedAssets;
-	eastl::hash_map<uint64, AssetDatabaseEntry> m_writtenAssets;
+	eastl::hash_map<eastl::string, IAsset*> m_loadedAssets;
+	eastl::hash_map<eastl::string, AssetDatabaseEntry> m_writtenAssets;
 };

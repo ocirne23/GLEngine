@@ -3,6 +3,7 @@
 *.d
 *.so
 *.tlog
+*.opendb
 *.pdb
 *.cache
 *.sdf

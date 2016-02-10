@@ -2,7 +2,6 @@
 
 #include "Graphics/GL/Wrappers/GLFramebuffer.h"
 #include "Graphics/GL/Wrappers/GLConstantBuffer.h"
-#include "Graphics/GL/Wrappers/GLTextureBuffer.h"
 #include "Graphics/GL/Wrappers/GLTexture.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
@@ -17,7 +16,7 @@
 #include <glm/glm.hpp>
 
 class LightManager;
-class GLScene;
+class GLRenderObject;
 
 class GLRenderer
 {
@@ -55,10 +54,11 @@ public:
 
 	void initialize(const PerspectiveCamera& camera);
 	void render(const PerspectiveCamera& camera, const LightManager& lightManager);
-	void addScene(GLScene* scene);
-	void removeScene(GLScene* scene);
-	void addSkybox(GLScene* scene);
-	void removeSkybox(GLScene* scene);
+
+	void addRenderObject(GLRenderObject* renderObject);
+	void removeRenderObject(GLRenderObject* renderObject);
+	void addSkybox(GLRenderObject* renderObject);
+	void removeSkybox(GLRenderObject* renderObject);
 
 	void reloadShaders();
 
@@ -76,8 +76,10 @@ public:
 	void setDepthPrepassEnabled(bool a_enabled);
 	bool isDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
 
-	void setShadowsEnabled(bool a_enabled) { m_shadowsEnabled = a_enabled; m_shadowsUpdated = false; }
+	void setShadowsEnabled(bool a_enabled) { m_shadowsEnabled = a_enabled; }
 	bool isShadowsEnabled() const { return m_shadowsEnabled; }
+
+	const PerspectiveCamera* getSceneCamera() const { return m_sceneCamera; }
 
 private:
 
@@ -86,8 +88,8 @@ private:
 
 private:
 
-	eastl::vector<GLScene*> m_scenes;
-	eastl::vector<GLScene*> m_skyboxScenes;
+	eastl::vector<GLRenderObject*> m_renderObjects;
+	eastl::vector<GLRenderObject*> m_skyboxObjects;
 
 	HBAO m_hbao;
 	bool m_hbaoEnabled = true;
@@ -112,6 +114,7 @@ private:
 	GLFramebuffer m_sceneFBO;
 	GLFramebuffer m_shadowFBO;
 	PerspectiveCamera m_shadowCamera;
+	const PerspectiveCamera* m_sceneCamera = NULL;
 
 	GLTexture m_whiteTexture;
 	GLTexture m_blackTexture;
@@ -123,7 +126,5 @@ private:
 
 	glm::vec3 m_sunDir;
 	glm::vec4 m_sunColorIntensity;
-	bool m_shadowsUpdated = false;
-
 	bool m_shadowsEnabled = true;
 };

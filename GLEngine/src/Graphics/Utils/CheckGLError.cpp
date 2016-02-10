@@ -22,8 +22,8 @@
 /****************************************************************************/
 #include "Graphics/Utils/CheckGLError.h"
 
+#include "Core.h"
 #include "Graphics/GL/GL.h"
-#include <iostream>
 
 bool checkGLError(const char *a_file, int a_line)
 {
@@ -32,12 +32,12 @@ bool checkGLError(const char *a_file, int a_line)
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError())
 	{
 		error = true;
-		const GLubyte* str;
-		str = gluErrorString(glErr);
+		const char* str;
+		str = rcast<const char*>(gluErrorString(glErr));
 		if (!str)
-			str = reinterpret_cast<const GLubyte *>("No Error message available.");
+			str = "No Error message available.";
 
-		printf("GL Error in file: %s at line %i Error %i: %s \n", a_file, a_line, glErr, str);
+		print("GL Error in file: %s at line %i Error %i: %s \n", a_file, a_line, glErr, str);
 	}
 
 	return error;

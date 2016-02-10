@@ -9,6 +9,9 @@ class PerspectiveCamera;
 
 struct IBounds2D
 {
+	IBounds2D() {}
+	IBounds2D(const glm::ivec2& min, const glm::ivec2& max) : min(min), max(max) {}
+
 	glm::ivec2 min;
 	glm::ivec2 max;
 
@@ -21,6 +24,9 @@ struct IBounds2D
 
 struct IBounds3D
 {
+	IBounds3D() {}
+	IBounds3D(const glm::ivec3& min, const glm::ivec3& max) : min(min), max(max) {}
+
 	glm::ivec3 min;
 	glm::ivec3 max;
 

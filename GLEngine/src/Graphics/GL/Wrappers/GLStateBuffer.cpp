@@ -1,9 +1,6 @@
 #include "Graphics/GL/Wrappers/GLStateBuffer.h"
 
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
-#include "Graphics/GL/Wrappers/GLTextureBuffer.h"
-#include "Graphics/GL/Wrappers/GLVertexBuffer.h"
 
 #include <assert.h>
 

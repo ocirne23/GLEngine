@@ -3,15 +3,12 @@
 #include "Graphics/Utils/PerspectiveCamera.h"
 #include "EASTL/algorithm.h"
 
-#include <glm/glm.hpp>
-
 LightHandle LightManager::INVALID_HANDLE = 0xFFFF;
 
 LightManager::LightManager(uint a_maxLights) : m_maxLights(a_maxLights)
 {
 	m_lightPositionRanges = new glm::vec4[m_maxLights];
 	m_lightColorIntensities = new glm::vec4[m_maxLights];
-
 	m_lightHandles = new ushort[m_maxLights];
 }
 
@@ -36,10 +33,7 @@ LightHandle LightManager::createLight(const glm::vec3& a_pos, float a_radius, co
 		m_lightColorIntensities[m_numUsedLights] = glm::vec4(glm::normalize(a_color), a_intensity);
 		return m_numUsedLights++;
 	}
-	else
-	{
-		return INVALID_HANDLE;
-	}
+	return INVALID_HANDLE;
 }
 
 void LightManager::deleteLight(LightHandle a_handle)
@@ -103,7 +97,7 @@ void LightManager::setLightIntensity(LightHandle a_light, float a_intensity)
 const glm::vec3& LightManager::getLightPosition(LightHandle a_light) const
 {
 	assert(a_light < m_numUsedLights);
-	return (glm::vec3&) m_lightPositionRanges[m_lightHandles[a_light]];
+	return rcast<glm::vec3&>(m_lightPositionRanges[m_lightHandles[a_light]]);
 }
 
 float LightManager::getLightRange(LightHandle a_light) const
@@ -115,7 +109,7 @@ float LightManager::getLightRange(LightHandle a_light) const
 const glm::vec3& LightManager::getLightColor(LightHandle a_light) const
 {
 	assert(a_light < m_numUsedLights);
-	return (glm::vec3&) m_lightColorIntensities[m_lightHandles[a_light]];
+	return rcast<glm::vec3&>(m_lightColorIntensities[m_lightHandles[a_light]]);
 }
 
 float LightManager::getLightIntensity(LightHandle a_light) const

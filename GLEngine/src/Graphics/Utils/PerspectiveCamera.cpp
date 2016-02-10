@@ -111,8 +111,8 @@ void PerspectiveCamera::setHorizontalFieldOfView(float a_fovh)
 
 void PerspectiveCamera::resize(int a_width, int a_height)
 {
-	m_viewportWidth = (float) a_width;
-	m_viewportHeight = (float) a_height;
+	m_viewportWidth = float(a_width);
+	m_viewportHeight = float(a_height);
 }
 
 void PerspectiveCamera::setNearFar(float a_near, float a_far)

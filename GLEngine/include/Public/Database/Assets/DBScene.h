@@ -27,7 +27,6 @@ public:
 	virtual ~DBScene() {}
 
 	void mergeMeshes();
-	void swapMaterial(const eastl::string& matName, const eastl::string& withMatName);
 
 	virtual uint64 getByteSize() const override;
 	virtual EAssetType getAssetType() const override { return EAssetType::SCENE; }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gsl/gsl.h"
 #include "EASTL/string.h"
 #include "EASTL/hash_map.h"
 
@@ -13,14 +14,12 @@ public:
 	friend class FileModificationListener;
 
 	static void update();
-	static void createModificationListener(void* ownerPtr, const eastl::string& filePath, std::function<void()> func);
-	static void removeModificationListener(void* ownerPtr, const eastl::string& filePath);
-	static void removeAllModificationListenersForOwner(void* ownerPtr);
+	static void createModificationListener(const eastl::string& filePath, std::weak_ptr<std::function<void()>> func);
 
 private:
 
 	FileModificationManager() {}
-	~FileModificationManager() {}
+	~FileModificationManager();
 
 	struct WriteTime
 	{
@@ -31,5 +30,6 @@ private:
 private:
 	
 	// Maps filepath to a map of owner pointers to the listeners.
-	static eastl::hash_map<eastl::string, eastl::hash_map<void*, FileModificationListener*>*> s_listeners;
+	
+	static eastl::hash_map<eastl::string, owner<FileModificationListener*>> s_listeners;
 };

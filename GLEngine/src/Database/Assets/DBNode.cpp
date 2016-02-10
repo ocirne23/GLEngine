@@ -23,8 +23,8 @@ uint64 DBNode::getByteSize() const
 {
 	uint64 totalSize = 0;
 	totalSize += AssetDatabaseEntry::getStringWriteSize(m_name);
-	totalSize += sizeof(m_transform);
-	totalSize += sizeof(m_parentIdx);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_transform);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_parentIdx);
 	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_childIndices);
 	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_meshIndices);
 	return totalSize;

@@ -33,6 +33,8 @@ public:
 	static const uint DFV_TEXTURE_BINDING_POINT;
 	static const uint LIGHT_GRID_TEXTURE_BINDING_POINT;
 	static const uint LIGHT_INDICE_TEXTURE_BINDING_POINT;
+	static const uint SHADOW_TEXTURE_BINDING_POINT;
+
 	static const uint DEPTH_TEXTURE_BINDING_POINT;
 	static const uint HBAO_NOISE_TEXTURE_BINDING_POINT;
 	static const uint BLUR_TEXTURE_BINDING_POINT;

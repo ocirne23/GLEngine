@@ -244,16 +244,19 @@ namespace eastl
         char           mEmpty8[1];
         unsigned char  mEmptyU8[1];
         signed char    mEmptyS8[1];
+		wchar_t        mEmptyWChar[1];
         char16_t       mEmpty16[1];
         char32_t       mEmpty32[1];
     };
     extern EASTL_API EmptyString gEmptyString;
 
-    inline const signed char*   GetEmptyString(signed char)   { return gEmptyString.mEmptyS8;  }
-    inline const unsigned char* GetEmptyString(unsigned char) { return gEmptyString.mEmptyU8;  }
+  //  inline const signed char*   GetEmptyString(signed char)   { return gEmptyString.mEmptyS8;  }
+  //  inline const unsigned char* GetEmptyString(unsigned char) { return gEmptyString.mEmptyU8;  }
     inline const char*          GetEmptyString(char)          { return gEmptyString.mEmpty8;  }
     inline const char16_t*      GetEmptyString(char16_t)      { return gEmptyString.mEmpty16; }
-    inline const char32_t*      GetEmptyString(char32_t)      { return gEmptyString.mEmpty32; }
+	inline const wchar_t*      GetEmptyString(wchar_t)        { return gEmptyString.mEmptyWChar; }
+
+  //  inline const char32_t*      GetEmptyString(char32_t)      { return gEmptyString.mEmpty32; }
 
 
     ///////////////////////////////////////////////////////////////////////////////

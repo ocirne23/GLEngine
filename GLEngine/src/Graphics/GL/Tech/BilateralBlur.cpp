@@ -15,7 +15,7 @@ END_UNNAMED_NAMESPACE()
 
 void BilateralBlur::initialize(EBlurValueType a_type, uint a_xRes, uint a_yRes)
 {
-	GLFramebuffer::ESizedFormat format;
+	GLFramebuffer::ESizedFormat format = GLFramebuffer::ESizedFormat::RGB8;
 	eastl::vector<eastl::string> blurDefines = GLConfig::getGlobalShaderDefines();
 	switch (a_type)
 	{

@@ -2,7 +2,6 @@
 
 #include "Core.h"
 
-#include "GLEngine.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/Utils/CheckGLError.h"
 #include "Utils/FileHandle.h"
@@ -23,7 +22,7 @@ eastl::string processIncludes(const eastl::string& a_str)
 {
 	eastl::string src = a_str;
 	static const char* INCLUDE_STR = "#include \"";
-	static const uint INCLUDE_STR_LEN = (uint) strlen(INCLUDE_STR);
+	static const uint INCLUDE_STR_LEN = uint(strlen(INCLUDE_STR));
 	auto includePos = src.find(INCLUDE_STR);
 	while (includePos != src.npos)
 	{

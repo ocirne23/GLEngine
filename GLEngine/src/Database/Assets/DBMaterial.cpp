@@ -67,12 +67,12 @@ uint64 DBMaterial::getByteSize() const
 	totalSize += AssetDatabaseEntry::getStringWriteSize(m_name);
 	totalSize += m_diffuseRegion.getByteSize();
 	totalSize += m_normalRegion.getByteSize();
-	totalSize += sizeof(m_materialColor);
-	totalSize += sizeof(m_specColor);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_materialColor);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_specColor);
 
-	totalSize += sizeof(m_smoothness);
-	totalSize += sizeof(m_metalness);
-	totalSize += sizeof(m_opacity);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_smoothness);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_metalness);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_opacity);
 	return totalSize;
 }
 

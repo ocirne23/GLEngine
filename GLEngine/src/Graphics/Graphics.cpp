@@ -2,14 +2,11 @@
 
 #include "GLEngine.h"
 #include "Graphics/GL/GL.h"
-#include "Graphics/GL/GLTypes.h"
 #include "Graphics/GL/GLContext.h"
 #include "Graphics/Utils/ARBDebugOutput.h"
 #include "Graphics/Utils/CheckGLError.h"
 
 #include <glm/glm.hpp>
-#include <SDL/SDL.h>
-#include <SDL/SDL_syswm.h>
 #include <SDL/SDL_video.h>
 #include <assert.h>
 
@@ -27,7 +24,7 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
-	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN;
+	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 	if (a_windowMode == EWindowMode::BORDERLESS)
 		flags |= SDL_WINDOW_BORDERLESS;
 	else if (a_windowMode == EWindowMode::FULLSCREEN)
@@ -52,7 +49,7 @@ void Graphics::createGLContext()
 		print("GLEW error: %s\n", glewGetErrorString(res));
 		return;
 	}
-	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError());
+	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError()) {};
 
 	ARBDebugOutput::tryEnable();
 
@@ -70,7 +67,6 @@ void Graphics::createGLContext()
 	glCullFace(GL_BACK);
 	// glEnable(GL_MULTISAMPLE);
 	glEnable(GL_DEPTH_TEST);
-
 	CHECK_GL_ERROR();
 }
 

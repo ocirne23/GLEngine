@@ -83,10 +83,10 @@ void DBTexture::loadImage(const eastl::string& a_filePath, EFormat a_format, uin
 uint64 DBTexture::getByteSize() const
 {
 	uint64 totalSize = 0;
-	totalSize += sizeof(m_width);
-	totalSize += sizeof(m_height);
-	totalSize += sizeof(m_numComp);
-	totalSize += sizeof(m_format);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_width);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_height);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_numComp);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_format);
 	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_data);
 	return totalSize;
 }

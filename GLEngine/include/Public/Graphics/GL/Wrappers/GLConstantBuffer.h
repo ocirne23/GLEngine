@@ -34,7 +34,7 @@ public:
 
 	void initialize(const Config& config);
 	void initialize(uint bindingPoint, const char* blockName, EDrawUsage drawUsage, uint dataSize);
-	void upload(uint numBytes, const void* data);
+	void upload(uint numBytes, const void* data, uint offset = 0);
 	byte* mapBuffer();
 	void unmapBuffer();
 

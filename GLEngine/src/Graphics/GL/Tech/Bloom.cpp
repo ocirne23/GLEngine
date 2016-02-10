@@ -3,8 +3,6 @@
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Graphics/GL/Tech/QuadDrawer.h"
 
-#include <assert.h>
-
 BEGIN_UNNAMED_NAMESPACE()
 
 const char* const QUAD_VERT_SHADER_PATH = "Shaders/quad.vert";

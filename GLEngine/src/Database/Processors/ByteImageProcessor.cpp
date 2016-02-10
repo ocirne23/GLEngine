@@ -2,10 +2,8 @@
 
 #include "Database/Assets/DBTexture.h"
 #include "Database/AssetDatabase.h"
-#include "Database/Utils/stb_image.h"
 
 #include <fstream>
-#include <assert.h>
 
 bool ByteImageProcessor::process(const eastl::string& a_resourcePath, AssetDatabase& a_assetDatabase)
 {

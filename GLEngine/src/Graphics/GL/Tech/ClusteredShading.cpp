@@ -1,6 +1,5 @@
 #include "Graphics/GL/Tech/ClusteredShading.h"
 
-#include "Graphics/GL/GL.h"
 #include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Graphics/Utils/ClusteredTiledShadingUtils.h"
@@ -8,13 +7,6 @@
 #include "Graphics/Utils/LightManager.h"
 
 #include <assert.h>
-#include <glm/glm.hpp>
-
-BEGIN_UNNAMED_NAMESPACE()
-
-const uint MAX_NUM_INDICES_PER_TILE = 10;
-
-END_UNNAMED_NAMESPACE()
 
 ClusteredShading::~ClusteredShading()
 {
@@ -64,13 +56,13 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const LightMana
 {
 	assert(m_initialized);
 
-	for (eastl::vector<ushort>& indiceList : m_tileLightIndices)
-		indiceList.clear();
+	for (TileIndiceList& indiceList : m_tileLightIndices)
+		indiceList.count = 0;
 
 	const glm::mat4& viewMatrix                  = a_camera.getViewMatrix();
-	uint numLights                               = a_lightManager.getNumLights();
+	const uint numLights                         = a_lightManager.getNumLights();
 	const glm::vec4* lightPositionRanges         = a_lightManager.getLightPositionRanges();
-	glm::vec4* lightPositionRangeViewspaceBuffer = (glm::vec4*) m_lightPositionRangesUBO.mapBuffer();
+	glm::vec4* lightPositionRangeViewspaceBuffer = rcast<glm::vec4*>(m_lightPositionRangesUBO.mapBuffer());
 
 	uint lightIndiceCtr = 0;
 	for (ushort i = 0; i < numLights; ++i)
@@ -80,8 +72,7 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const LightMana
 		const glm::vec3 lightPositionViewSpace(lightPositionRangeViewspaceBuffer[i]);
 		const float range = lightPositionRangeViewspaceBuffer[i].w;
 		IBounds3D bounds3D = ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(a_camera, lightPositionViewSpace, range, m_screenWidth, m_screenHeight, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
-		bounds3D.clamp(glm::ivec3(0), glm::ivec3(m_gridWidth, m_gridHeight, m_gridDepth));
-		
+		// bounds3D.clamp(glm::ivec3(0), glm::ivec3(m_gridWidth, m_gridHeight, m_gridDepth));
 		for (int x = bounds3D.min.x; x < bounds3D.max.x; ++x)
 		{
 			for (int y = bounds3D.min.y; y < bounds3D.max.y; ++y)
@@ -91,27 +82,30 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const LightMana
 					const uint gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
 					m_tileLightIndices[gridIdx].push_back(i);
 					if (lightIndiceCtr++ > m_maxNumLightIndices)
-						goto breakloop;
+						goto breakLoop;
 				}
 			}
 		}
 	}
-breakloop:
+breakLoop:
 
 	m_lightPositionRangesUBO.unmapBuffer();
 	m_lightColorIntensitiesUBO.upload(numLights * sizeof(glm::vec4), &a_lightManager.getLightColorIntensities()[0]);
 
-	glm::uvec2* gridBuffer = (glm::uvec2*) m_lightGridTextureBuffer.mapBuffer();
-	ushort* indiceBuffer = (ushort*) m_lightIndiceTextureBuffer.mapBuffer();
+	glm::uvec2* gridBuffer = rcast<glm::uvec2*>(m_lightGridTextureBuffer.mapBuffer());
+	ushort* indiceBuffer = rcast<ushort*>(m_lightIndiceTextureBuffer.mapBuffer());
 
 	uint indiceCtr = 0;
 	for (uint i = 0; i < m_gridSize; ++i)
 	{
-		ushort numIndicesForTile = m_tileLightIndices[i].size();
+		ushort numIndicesForTile = m_tileLightIndices[i].count;
 		gridBuffer[i].x = indiceCtr;                     // start idx
 		gridBuffer[i].y = indiceCtr + numIndicesForTile; // end idx
-		memcpy(&indiceBuffer[indiceCtr], &m_tileLightIndices[i][0], numIndicesForTile * sizeof(ushort));
-		indiceCtr += numIndicesForTile;
+		if (numIndicesForTile)
+		{
+			memcpy(&indiceBuffer[indiceCtr], &m_tileLightIndices[i].indices[0], numIndicesForTile * sizeof(ushort));
+			indiceCtr += numIndicesForTile;
+		}
 	}
 
 	m_lightIndiceTextureBuffer.unmapBuffer();

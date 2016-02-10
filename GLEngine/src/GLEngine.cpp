@@ -3,7 +3,7 @@
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include "Utils/ThreadManager.h"
-#include "Utils/FileModificationManager.h"
+// ReSharper disable once CppUnusedIncludeDirective
 #include "EASTL/custom_glengine_allocator.h"
 
 #include <SDL/SDL.h>
@@ -15,10 +15,10 @@ const uint INITIAL_WINDOW_OFFSET_Y = 30;
 
 END_UNNAMED_NAMESPACE()
 
-Input* GLEngine::input                   = NULL;
-Graphics* GLEngine::graphics             = NULL;
-bool GLEngine::s_shutdown                = false;
-ThreadManager* GLEngine::s_threadManager = NULL;
+owner<Input*> GLEngine::input                   = NULL;
+owner<Graphics*> GLEngine::graphics             = NULL;
+bool GLEngine::s_shutdown                       = false;
+owner<ThreadManager*> GLEngine::s_threadManager = NULL;
 
 void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height, EWindowMode a_windowMode)
 {
@@ -32,6 +32,8 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 		graphics = new Graphics(a_windowName, a_width, a_height, INITIAL_WINDOW_OFFSET_X, INITIAL_WINDOW_OFFSET_Y, a_windowMode);
 	input = new Input();
 	s_threadManager = new ThreadManager();
+
+	test();
 }
 
 void GLEngine::createThread(const char* a_threadName, std::function<void()> a_func)
@@ -47,7 +49,6 @@ void GLEngine::doMainThreadTick()
 void GLEngine::doEngineTick()
 {
 	input->processEvents();
-	FileModificationManager::update();
 }
 
 void GLEngine::sleep(uint a_timeMs)
@@ -77,4 +78,13 @@ void GLEngine::finish()
 	SAFE_DELETE(graphics);
 	SAFE_DELETE(s_threadManager);
 	SDL_Quit();
+}
+
+#include "Graphics/Mantle/GRApplication.h"
+
+void GLEngine::test()
+{
+	//testMantle();
+	GRApplication app;
+	app.initialize();
 }

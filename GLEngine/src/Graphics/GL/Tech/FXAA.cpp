@@ -13,10 +13,10 @@ END_UNNAMED_NAMESPACE()
 
 void FXAA::initialize(EQuality a_quality, uint a_screenWidth, uint a_screenheight)
 {
-	uint quality = (uint) a_quality;
+	uint quality = uint(a_quality);
 	m_fxaaShader.initialize(FXAA_VERT_SHADER_PATH, FXAA_FRAG_SHADER_PATHS[quality]);
 	m_fxaaShader.begin();
-	m_fxaaShader.setUniform2f("RCPFrame", glm::vec2(1.0f / (float) a_screenWidth, 1.0f / (float) a_screenheight));
+	m_fxaaShader.setUniform2f("RCPFrame", glm::vec2(1.0f / float(a_screenWidth), 1.0f / float(a_screenheight)));
 	m_fxaaShader.end();
 
 	m_fxaaFBO.initialize();

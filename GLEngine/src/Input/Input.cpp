@@ -1,8 +1,5 @@
 #include "Input/Input.h"
 
-#include "GLEngine.h"
-#include "Graphics/Graphics.h"
-
 #include "Input/EKey.h"
 #include "Input/EMouseButton.h"
 
@@ -14,7 +11,7 @@ void Input::pollEvents()
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
-		m_eventQueue.push_back(*((Event*) &event));
+		m_eventQueue.push_back(*reinterpret_cast<Input::Event*>(&event));
 }
 
 void Input::processEvents()
@@ -22,7 +19,7 @@ void Input::processEvents()
 	m_eventQueue.block();
 	for (Event& e : m_eventQueue.getBackingQueue())
 	{
-		SDL_Event& event = (SDL_Event&) e;
+		SDL_Event& event = rcast<SDL_Event&>(e);
 		switch (event.type)
 		{
 		case SDL_WINDOWEVENT:
@@ -31,11 +28,12 @@ void Input::processEvents()
 			case SDL_WINDOWEVENT_CLOSE:   windowQuit(); break;
 			} break;
 		case SDL_MOUSEMOTION:     mouseMoved(event.motion.x, event.motion.y, event.motion.xrel, event.motion.yrel); break;
-		case SDL_MOUSEBUTTONDOWN: mouseDown((EMouseButton) event.button.button, event.button.x, event.button.y); break;
-		case SDL_MOUSEBUTTONUP:   mouseUp((EMouseButton) event.button.button, event.button.x, event.button.y); break;
+		case SDL_MOUSEBUTTONDOWN: mouseDown(scast<EMouseButton>(event.button.button), event.button.x, event.button.y); break;
+		case SDL_MOUSEBUTTONUP:   mouseUp(scast<EMouseButton>(event.button.button), event.button.x, event.button.y); break;
 		case SDL_MOUSEWHEEL:      mouseScrolled(event.wheel.y); break;
-		case SDL_KEYDOWN:         if (!event.key.repeat) keyDown((EKey) event.key.keysym.scancode); break;
-		case SDL_KEYUP:           keyUp((EKey) event.key.keysym.scancode); break;
+		case SDL_KEYDOWN:         keyDown(scast<EKey>(event.key.keysym.scancode), event.key.repeat != 0); break;
+		case SDL_KEYUP:           keyUp(scast<EKey>(event.key.keysym.scancode)); break;
+		case SDL_TEXTINPUT:       textInput(event.text.text); break;
 		case SDL_QUIT:            windowQuit(); break;
 		}
 	}
@@ -45,7 +43,7 @@ void Input::processEvents()
 
 void Input::setMouseCaptured(bool a_captured)
 {
-	SDL_SetRelativeMouseMode((SDL_bool) a_captured);
+	SDL_SetRelativeMouseMode(scast<SDL_bool>(a_captured));
 }
 
 bool Input::isMouseCaptured()
@@ -53,20 +51,25 @@ bool Input::isMouseCaptured()
 	return SDL_GetRelativeMouseMode() == SDL_TRUE;
 }
 
+void Input::getMousePosition(int& a_xPos, int& a_yPos)
+{
+	SDL_GetMouseState(&a_xPos, &a_yPos);
+}
+
 bool Input::isKeyPressed(EKey a_key)
 {
-	return SDL_GetKeyboardState(NULL)[(int) a_key] == 1;
+	return SDL_GetKeyboardState(NULL)[int(a_key)] == 1;
 }
 
 bool Input::isMousePressed(EMouseButton a_button)
 {
-	return (SDL_BUTTON((int) a_button) & SDL_GetMouseState(NULL, NULL)) != 0;
+	return (SDL_BUTTON(int(a_button)) & SDL_GetMouseState(NULL, NULL)) != 0;
 }
 
-void Input::keyDown(EKey a_key)
+void Input::keyDown(EKey a_key, bool a_isRepeat)
 {
 	for (KeyDownListener* l : m_keyDownListeners)
-		l->call(a_key);
+		l->call(a_key, a_isRepeat);
 }
 
 void Input::keyUp(EKey a_key)
@@ -75,34 +78,40 @@ void Input::keyUp(EKey a_key)
 		l->call(a_key);
 }
 
-void Input::mouseDown(EMouseButton button, uint xPos, uint yPos)
+void Input::mouseDown(EMouseButton a_button, uint a_xPos, uint a_yPos)
 {
 	for (MouseDownListener* l : m_mouseDownListeners)
-		l->call(button, xPos, yPos);
+		l->call(a_button, a_xPos, a_yPos);
 }
 
-void Input::mouseUp(EMouseButton button, uint xPos, uint yPos)
+void Input::mouseUp(EMouseButton a_button, uint a_xPos, uint a_yPos)
 {
 	for (MouseUpListener* l : m_mouseUpListeners)
-		l->call(button, xPos, yPos);
+		l->call(a_button, a_xPos, a_yPos);
 }
 
-void Input::mouseMoved(uint xPos, uint yPos, int deltaX, int deltaY)
+void Input::mouseMoved(uint a_xPos, uint a_yPos, int a_deltaX, int a_deltaY)
 {
 	for (MouseMovedListener* l : m_mouseMovedListeners)
-		l->call(xPos, yPos, deltaX, deltaY);
+		l->call(a_xPos, a_yPos, a_deltaX, a_deltaY);
 }
 
-void Input::mouseScrolled(int amount)
+void Input::mouseScrolled(int a_amount)
 {
 	for (MouseScrolledListener* l : m_mouseScrolledListeners)
-		l->call(amount);
+		l->call(a_amount);
 }
 
-void Input::windowResized(uint width, uint height)
+void Input::windowResized(uint a_width, uint a_height)
 {
 	for (WindowResizedListener* l : m_windowResizedListeners)
-		l->call(width, height);
+		l->call(a_width, a_height);
+}
+
+void Input::textInput(const char* a_text)
+{
+	for (TextInputListener* l : m_textInputListeners)
+		l->call(a_text);
 }
 
 void Input::windowQuit()

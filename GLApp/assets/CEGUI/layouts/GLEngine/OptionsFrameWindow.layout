@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<GUILayout version="4">
+	<Window name="OptionsFrameWindow" type="TaharezLook/FrameWindow">
+		<Property name="MinSize" value="{{0.11,0},{0.1,0}}" />
+		<Property name="MaxSize" value="{{0.11,0},{0.8,0}}" />
+		<Property name="Position" value="{{0.0,0},{0.0,0}}" />
+		<Property name="Size" value="{{0.11,0},{0.2,0}}" />
+		<Property name="Text" value="Options" />
+		<Property name="CloseButtonEnabled" value="False" />
+
+		<Window name="HBAOCheckBox" type="TaharezLook/Checkbox">
+			<Property name="MaxSize" value="{{1.0,0},{1.0,0}}" />
+			<Property name="Position" value="{{0,4},{0,0}}" />
+			<Property name="Size" value="{{0,80},{0,30}}" />
+			<Property name="Text" value="HBAO" />
+		</Window>
+
+		<Window name="FXAACheckBox" type="TaharezLook/Checkbox">
+			<Property name="MaxSize" value="{{1.0,0},{1.0,0}}" />
+			<Property name="Position" value="{{0,4},{0,20}}" />
+			<Property name="Size" value="{{0,80},{0,30}}" />
+			<Property name="Text" value="FXAA" />
+		</Window>
+		
+		<Window name="BloomCheckBox" type="TaharezLook/Checkbox">
+			<Property name="MaxSize" value="{{1.0,0},{1.0,0}}" />
+			<Property name="Position" value="{{0,4},{0,40}}" />
+			<Property name="Size" value="{{0,80},{0,30}}" />
+			<Property name="Text" value="Bloom" />
+		</Window>
+		
+		<Window name="ShadowsCheckBox" type="TaharezLook/Checkbox">
+			<Property name="MaxSize" value="{{1.0,0},{1.0,0}}" />
+			<Property name="Position" value="{{0,4},{0,60}}" />
+			<Property name="Size" value="{{0,80},{0,30}}" />
+			<Property name="Text" value="Shadows" />
+		</Window>
+	</Window>
+</GUILayout>

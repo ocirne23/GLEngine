@@ -140,10 +140,10 @@ END_UNNAMED_NAMESPACE()
 uint64 CRC64::getHash(const char* a_str)
 {
 	uint64 crc = 0xffffffffffffffffULL;
-	const byte* s = (const byte*) a_str;
+	const byte* s = rcast<const byte*>(a_str);
 	while (*s)
 	{
-		crc = CRC64_Table[(byte) (crc >> 56) ^ *s++] ^ (crc << 8);
+		crc = CRC64_Table[byte((crc >> 56) ^ *s++)] ^ (crc << 8);
 	}
 	return crc;
 }

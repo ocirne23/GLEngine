@@ -24,5 +24,6 @@ int main()
 		GLEngine::doMainThreadTick();
 	
 	GLEngine::finish();
+
 	return 0;
 }

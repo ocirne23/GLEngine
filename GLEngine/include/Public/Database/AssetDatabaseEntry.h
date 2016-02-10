@@ -97,6 +97,12 @@ public:
 	}
 
 	template <typename T>
+	static uint64 getValWriteSize(const T& a_val)
+	{
+		return sizeof(T);
+	}
+
+	template <typename T>
 	static uint64 getArrayWriteSize(const T* a_array, uint a_arrayLength)
 	{
 		return sizeof(uint) + sizeof(T) * a_arrayLength;

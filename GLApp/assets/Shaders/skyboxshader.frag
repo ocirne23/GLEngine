@@ -5,9 +5,6 @@
 
 in vec3 v_position;
 in vec2 v_texcoord;
-in vec3 v_normal;
-in vec3 v_tangent;
-in vec3 v_bitangent;
 flat in uint v_materialID;
 
 layout (location = 0) out vec3 out_color;

@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Core.h"
 #include "EASTL/string.h"
+#include "EASTL/vector.h"
 
 #include <functional>
+#include <memory>
 
 class FileModificationListener
 {
@@ -12,10 +15,12 @@ public:
 
 private:
 
-	FileModificationListener(const eastl::string& filePath, std::function<void()> onFileModification)
-		: m_filePath(filePath), m_onFileModification(onFileModification)
-	{}
+	FileModificationListener(const eastl::string& filePath);
 	~FileModificationListener() {};
+
+	void update();
+	void addCallback(std::weak_ptr<std::function<void()>> onFileModification);
+	uint numCallbacks() const { return uint(m_callbackList.size()); }
 
 private:
 
@@ -27,7 +32,7 @@ private:
 
 private:
 
-	eastl::string m_filePath;
-	std::function<void()> m_onFileModification;
+	eastl::string m_fullFilePath;
+	eastl::vector<std::weak_ptr<std::function<void()>>> m_callbackList;
 	WriteTime m_lastWriteTime;
 };

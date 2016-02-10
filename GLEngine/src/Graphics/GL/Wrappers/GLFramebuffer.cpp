@@ -33,18 +33,18 @@ void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, u
 	{
 		textureType = GL_TEXTURE_2D;
 		glBindTexture(textureType, m_depthTexture);
-		glTexStorage2D(textureType, 1, (GLenum) a_format, a_width, a_height);
+		glTexStorage2D(textureType, 1, GLenum(a_format), a_width, a_height);
 	}
 	else
 	{
 		textureType = GL_TEXTURE_2D_MULTISAMPLE;
 		glBindTexture(textureType, m_depthTexture);
-		glTexStorage2DMultisample(textureType, (GLsizei) m_multiSampleType, (GLenum) a_format, a_width, a_height, GL_TRUE);
+		glTexStorage2DMultisample(textureType, GLsizei(m_multiSampleType), GLenum(a_format), a_width, a_height, GL_TRUE);
 	}
 	
 	// Filter depth texture as nearest because its only used by anti aliasing and ambient occlusion algorithms which all need nearest filtering.
-	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, (GLint) a_magFilter);
-	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, (GLint) a_minFilter);
+	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GLint(a_magFilter));
+	glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GLint(a_minFilter));
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(textureType, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
@@ -69,13 +69,13 @@ void GLFramebuffer::addFramebufferTexture(ESizedFormat a_format, EAttachment a_a
 	{
 		textureType = GL_TEXTURE_2D;
 		glBindTexture(textureType, textureID);
-		glTexStorage2D(textureType, 1, (GLenum) a_format, a_width, a_height);
+		glTexStorage2D(textureType, 1, GLenum(a_format), a_width, a_height);
 	}
 	else
 	{
 		textureType = GL_TEXTURE_2D_MULTISAMPLE;
 		glBindTexture(textureType, textureID);
-		glTexStorage2DMultisample(textureType, (GLsizei) m_multiSampleType, (GLenum) a_format, a_width, a_height, GL_TRUE);
+		glTexStorage2DMultisample(textureType, GLsizei(m_multiSampleType), GLenum(a_format), a_width, a_height, GL_TRUE);
 	}
 	
 	glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -84,12 +84,12 @@ void GLFramebuffer::addFramebufferTexture(ESizedFormat a_format, EAttachment a_a
 	glTexParameteri(textureType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-	glFramebufferTexture(GL_FRAMEBUFFER, (GLenum) a_attachment, textureID, 0);
+	glFramebufferTexture(GL_FRAMEBUFFER, GLenum(a_attachment), textureID, 0);
 
 	m_textures.push_back(textureID);
 	m_drawBuffers.push_back(a_attachment);
 
-	glDrawBuffers(m_drawBuffers.size(), (GLenum*) &m_drawBuffers[0]);
+	glDrawBuffers(m_drawBuffers.size(), rcast<GLenum*>(&m_drawBuffers[0]));
 	
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	assert(status == GL_FRAMEBUFFER_COMPLETE);
@@ -122,7 +122,7 @@ void GLFramebuffer::begin()
 void GLFramebuffer::bindTexture(uint a_textureIndex, uint a_textureUnit)
 {
 	assert(m_initialized);
-	assert(a_textureIndex < (uint) m_textures.size());
+	assert(a_textureIndex < uint(m_textures.size()));
 	assert(a_textureIndex >= 0);
 	assert(a_textureUnit >= 0);
 

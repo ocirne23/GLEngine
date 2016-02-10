@@ -39,14 +39,14 @@ GLContext::GLContext(SDL_Window* a_window)
 {
 	assert(!m_glContext);
 	m_glContext = createHighestGLContext(a_window, MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
-	m_glVendor = (const char*) glGetString(GL_VENDOR);
-	m_glRenderer = (const char*) glGetString(GL_RENDERER);
-	m_glDriverVersion = (const char*) glGetString(GL_VERSION);
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, (GLint*) &m_maxTextureUnits);
-	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, (GLint*) &m_uboMaxSize);
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, (GLint*) &m_maxTextureSize);
-	glGetIntegerv(GL_MAJOR_VERSION, (GLint*) &m_glMajorVersion);
-	glGetIntegerv(GL_MINOR_VERSION, (GLint*) &m_glMinorVersion);
+	m_glVendor = rcast<const char*>(glGetString(GL_VENDOR));
+	m_glRenderer = rcast<const char*>(glGetString(GL_RENDERER));
+	m_glDriverVersion = rcast<const char*>(glGetString(GL_VERSION));
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, rcast<GLint*>(&m_maxTextureUnits));
+	glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, rcast<GLint*>(&m_uboMaxSize));
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, rcast<GLint*>(&m_maxTextureSize));
+	glGetIntegerv(GL_MAJOR_VERSION, rcast<GLint*>(&m_glMajorVersion));
+	glGetIntegerv(GL_MINOR_VERSION, rcast<GLint*>(&m_glMinorVersion));
 	
 	print("Created GL Context: %i.%i\n", m_glMajorVersion, m_glMinorVersion);
 	print("Vendor: %s\n", m_glVendor.c_str());

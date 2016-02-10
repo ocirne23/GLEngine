@@ -1,6 +1,5 @@
 #include "Graphics/GL/Scene/GLMesh.h"
 
-#include "GLEngine.h"
 #include "Graphics/GL/GL.h"
 #include "Database/Assets/DBMesh.h"
 #include "Graphics/GL/Scene/GLConfig.h"

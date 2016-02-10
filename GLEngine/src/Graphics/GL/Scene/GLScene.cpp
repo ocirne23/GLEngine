@@ -1,18 +1,14 @@
 #include "Graphics/GL/Scene/GLScene.h"
 
 #include "Graphics/GL/Scene/GLMaterial.h"
-#include "Graphics/GL/Scene/GLRenderer.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 
 #include "Database/AssetDatabase.h"
 #include "Database/Assets/DBScene.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/random.hpp>
-
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
-	DBScene* scene = (DBScene*) a_database.loadAsset(a_assetName, EAssetType::SCENE);
+	DBScene* scene = dcast<DBScene*>(a_database.loadAsset(a_assetName, EAssetType::SCENE));
 	scene->mergeMeshes();
 	initialize(*scene);
 	a_database.unloadAsset(scene);
@@ -20,105 +16,79 @@ void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_data
 
 void GLScene::initialize(const DBScene& a_dbScene)
 {
-	m_nodes = a_dbScene.getNodes();
 	//print("numMeshes: %i\nnumMaterials: %i\nnumNodes: %i\n", scene->numMeshes(), scene->numMaterials(), scene->numNodes());
+	m_nodes = a_dbScene.getNodes();
+	m_materials = a_dbScene.getMaterials();
 	m_meshes.resize(a_dbScene.numMeshes());
 	for (uint i = 0; i < a_dbScene.numMeshes(); ++i)
 		m_meshes[i].initialize(a_dbScene.getMeshes()[i]);
-
 	m_materialBuffer.initialize(GLConfig::MATERIAL_PROPERTIES_UBO);
-
-	uint numMaterials = a_dbScene.numMaterials();
-	if (numMaterials > GLConfig::MAX_MATERIALS)
-	{
-		print("Scene has more than %i materials\n", GLConfig::MAX_MATERIALS);
-		assert(false);
-		numMaterials = GLConfig::MAX_MATERIALS;
-	}
-
-	GLMaterial* materialBuffer = (GLMaterial*) m_materialBuffer.mapBuffer();
-	for (uint i = 0; i < numMaterials; ++i)
-	{
-		materialBuffer->initialize(a_dbScene.getMaterials()[i]);
-		materialBuffer++;
-	}
-	m_materialBuffer.unmapBuffer();
-
-	eastl::vector<GLMaterial> materials;
-	materials.resize(a_dbScene.numMaterials());
-	for (uint i = 0; i < a_dbScene.numMaterials(); ++i)
-		materials[i].initialize(a_dbScene.getMaterials()[i]);
+	updateMaterialBuffer();
 
 	if (a_dbScene.numAtlasTextures())
 	{
 		const eastl::vector<DBAtlasTexture>& atlasTextures = a_dbScene.getAtlasTextures();
 		// Use info from the first texture since all textures use the same format.
-		const DBAtlasTexture& firstAtlasTex = atlasTextures[0];
-		uint width = firstAtlasTex.getTexture().getWidth();
-		uint height = firstAtlasTex.getTexture().getHeight();
-		uint depth = atlasTextures.size();
-		uint numComponents = firstAtlasTex.getTexture().getNumComponents();
-		bool isFloatTexture = (firstAtlasTex.getTexture().getFormat() == DBTexture::EFormat::FLOAT);
-		uint numMipmaps = firstAtlasTex.getNumMipmaps();
-
-		m_textureArray.startInit(width, height, depth, numComponents, isFloatTexture, numMipmaps);
+		const DBTexture& tex = atlasTextures[0].getTexture();
+		m_textureArray.startInit(tex.getWidth(), tex.getHeight(), atlasTextures.size(), tex.getNumComponents(), 
+			(tex.getFormat() == DBTexture::EFormat::FLOAT), atlasTextures[0].getNumMipmaps());
+		
 		for (const DBAtlasTexture& atlasTexture : atlasTextures)
 			m_textureArray.addTexture(atlasTexture.getTexture());
 		m_textureArray.finishInit();
 	}
 }
 
-void GLScene::render(GLConstantBuffer& a_modelMatrixUBO)
+void GLScene::render(const glm::mat4& a_transform, GLConstantBuffer& a_modelMatrixUBO, bool a_depthOnly)
 {
-	if (m_visible)
+	if (!a_depthOnly)
 	{
 		m_materialBuffer.bind();
 		if (m_textureArray.getNumTexturesAdded())
 			m_textureArray.bind(GLConfig::TEXTURE_ATLAS_ARRAY_BINDING_POINT);
 		else
 			m_textureArray.unbind(GLConfig::TEXTURE_ATLAS_ARRAY_BINDING_POINT);
-		renderNode(a_modelMatrixUBO, m_baseTransform, 0);
 	}
+	renderNode(m_nodes[0], a_transform, a_modelMatrixUBO);
 }
 
-void GLScene::renderNode(GLConstantBuffer& a_modelMatrixUBO, const glm::mat4& a_parentTransform, uint a_node)
+void GLScene::renderNode(const DBNode& a_node, const glm::mat4& a_parentTransform, GLConstantBuffer& a_modelMatrixUBO)
 {
-	const DBNode& node = m_nodes[a_node];
-	glm::mat4 transform = a_parentTransform * node.getTransform();
-
-	GLRenderer::ModelMatrixData* modelMatrix = (GLRenderer::ModelMatrixData*) a_modelMatrixUBO.mapBuffer();
-	modelMatrix->u_modelMatrix = transform;
-	a_modelMatrixUBO.unmapBuffer();
-
-	for (uint i : node.getMeshIndices())
+	const glm::mat4 transform = a_parentTransform * a_node.getTransform();
+	a_modelMatrixUBO.upload(sizeof(transform), &transform);
+	for (uint i : a_node.getMeshIndices())
 		m_meshes[i].render();
-
-	for (uint i : node.getChildIndices())
-		renderNode(a_modelMatrixUBO, transform, i);
+	for (uint i : a_node.getChildIndices())
+		renderNode(m_nodes[i], transform, a_modelMatrixUBO);
 }
 
-void GLScene::setScale(float a_scale)
+void GLScene::updateMaterialBuffer()
 {
-	m_scale = a_scale;
-	updateBaseTransform();
+	uint numMaterials = m_materials.size();
+	if (numMaterials > GLConfig::MAX_MATERIALS)
+	{
+		print("Scene has more than %i materials\n", GLConfig::MAX_MATERIALS);
+		numMaterials = GLConfig::MAX_MATERIALS;
+	}
+	GLMaterial* materialBuffer = rcast<GLMaterial*>(m_materialBuffer.mapBuffer());
+	for (uint i = 0; i < numMaterials; ++i)
+	{
+		materialBuffer->initialize(m_materials[i]);
+		materialBuffer++;
+	}
+	m_materialBuffer.unmapBuffer();
 }
 
-void GLScene::setTranslation(const glm::vec3& a_translation)
+void GLScene::updateMaterialBuffer(const DBMaterial& material, uint idx)
 {
-	m_translation = a_translation;
-	updateBaseTransform();
+	GLMaterial mat;
+	mat.initialize(material);
+	m_materialBuffer.upload(sizeof(mat), &mat, sizeof(mat) * idx);
 }
 
-void GLScene::setRotation(const glm::vec3& a_axis, float a_degrees)
-{
-	m_axisRotation = glm::vec4(a_axis, a_degrees);
-	updateBaseTransform();
-}
-
-void GLScene::updateBaseTransform()
-{
-	glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(m_scale));
-	glm::mat4 translation = glm::translate(glm::mat4(1), m_translation);
-	glm::mat4 rotation = glm::rotate(glm::mat4(1), m_axisRotation.w, glm::vec3(m_axisRotation.x, m_axisRotation.y, m_axisRotation.z));
-	m_baseTransform = translation * rotation * scale;
-}
+/*
+glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(m_scale));
+glm::mat4 rotation = glm::rotate(glm::mat4(1), m_axisRotation.w, glm::vec3(m_axisRotation));
+glm::mat4 translation = glm::translate(glm::mat4(1), m_translation);
+m_baseTransform = translation * rotation * scale;
+*/

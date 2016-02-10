@@ -47,7 +47,7 @@ void QuadDrawer::drawQuad(GLShader& a_shader)
 void QuadDrawer::initBuffers()
 {
 	float quad[] =
-	{ // Position				Texcoords
+	{// Position				Texcoords
 		-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,
 		1.0f, -1.0f, 0.0f,		1.0f, 0.0f,
 		1.0f, 1.0f, 0.0f,		1.0f, 1.0f,

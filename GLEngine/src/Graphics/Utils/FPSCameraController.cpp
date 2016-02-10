@@ -1,5 +1,6 @@
 #include "Graphics/Utils/FPSCameraController.h"
 
+#include "Input/Input.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
 
 #include <glm/gtx/rotate_vector.hpp>
@@ -10,63 +11,7 @@ BEGIN_UNNAMED_NAMESPACE()
 static const glm::vec3 UP(0, 1, 0);
 static const glm::vec3 FORWARD(0, 0, -1);
 
-END_UNNAMED_NAMESPACE()
-
-FPSCameraController::FPSCameraController()
-{
-	m_mouseMovedListener.setFunc([this](uint a_xPos, uint a_yPos, int a_deltaX, int a_deltaY)
-	{
-		if (GLEngine::input->isMousePressed(EMouseButton::LEFT))
-		{
-			m_mouseXMoveAmount += a_deltaX;
-			m_mouseYMoveAmount += a_deltaY;
-		}
-	});
-}
-
-void FPSCameraController::update(PerspectiveCamera& a_camera, float a_deltaSec)
-{
-	glm::vec3 movement = getLocalSpaceMovementVector();
-
-	float xLookRotation = -m_mouseXMoveAmount * m_mouseLookSensitivity;
-	float yLookRotation = -m_mouseYMoveAmount * m_mouseLookSensitivity;
-
-	glm::vec3 position = a_camera.getPosition();
-	glm::mat3 rotation(a_camera.getViewMatrix());
-	glm::vec3 direction(a_camera.getDirection());
-
-	// Rotate horizontally
-	direction = glm::rotate(direction, xLookRotation, UP);
-	float xzAngle = glm::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
-
-	// Rotate vertically
-	glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));
-	glm::vec3 tmp = direction;
-	direction = glm::rotate(direction, yLookRotation, yRotAxis);
-
-	// Limit vertical look movement
-	if (direction.y > 0.99f || direction.y < -0.99f)
-		direction = tmp;
-
-	// Rotate xz movement based on direction
-	float xTrans = movement.x * glm::cos(xzAngle) + movement.z * glm::sin(xzAngle);
-	float zTrans = movement.z * glm::cos(xzAngle) - movement.x * glm::sin(xzAngle);
-
-	float speed = m_cameraSpeed * a_deltaSec;
-	position.x += -xTrans * speed;
-	position.z += -zTrans * speed;
-	position.y += movement.y * speed;
-
-	a_camera.lookAtDir(direction);
-	a_camera.setPosition(position);
-	a_camera.updateMatrices();
-
-	m_mouseXMoveAmount = 0;
-	m_mouseYMoveAmount = 0;
-}
-
-
-glm::vec3 FPSCameraController::getLocalSpaceMovementVector()
+glm::vec3 getLocalSpaceMovementVector()
 {
 	static const float DIAGONAL_1F = glm::sqrt(0.5f);
 
@@ -86,4 +31,55 @@ glm::vec3 FPSCameraController::getLocalSpaceMovementVector()
 	if (input.isKeyPressed(EKey::LSHIFT))     movementVector.y -= 1.0f;
 
 	return movementVector;
+}
+
+END_UNNAMED_NAMESPACE()
+
+void FPSCameraController::update(PerspectiveCamera& a_camera, float a_deltaSec, bool a_focused)
+{
+	glm::ivec2 newMousePos;
+	GLEngine::input->getMousePosition(newMousePos.x, newMousePos.y);
+	if (m_mousePos.x == -1 && m_mousePos.y == -1) // First update, dont process movement
+		m_mousePos = newMousePos;
+	glm::ivec2 mouseMovement = m_mousePos - newMousePos;
+	m_mousePos = newMousePos;
+
+	if (!a_focused)
+		return;
+	if (!GLEngine::input->isMousePressed(EMouseButton::LEFT))
+		mouseMovement = glm::ivec2(0);
+
+	float xLookRotation = mouseMovement.x * m_mouseLookSensitivity;
+	float yLookRotation = mouseMovement.y * m_mouseLookSensitivity;
+
+	glm::vec3 position = a_camera.getPosition();
+	glm::vec3 direction(a_camera.getDirection());
+
+	// Rotate horizontally
+	direction = glm::rotate(direction, xLookRotation, UP);
+	float xzAngle = glm::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
+
+	// Rotate vertically
+	glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));
+	glm::vec3 tmp = direction;
+	direction = glm::rotate(direction, yLookRotation, yRotAxis);
+
+	// Limit vertical look movement
+	if (direction.y > 0.99f || direction.y < -0.99f)
+		direction = tmp;
+
+	glm::vec3 movement = getLocalSpaceMovementVector();
+
+	// Rotate xz movement based on direction
+	float xTrans = movement.x * glm::cos(xzAngle) + movement.z * glm::sin(xzAngle);
+	float zTrans = movement.z * glm::cos(xzAngle) - movement.x * glm::sin(xzAngle);
+
+	float speed = m_cameraSpeed * a_deltaSec;
+	position.x += -xTrans * speed;
+	position.z += -zTrans * speed;
+	position.y += movement.y * speed;
+
+	a_camera.lookAtDir(direction);
+	a_camera.setPosition(position);
+	a_camera.updateMatrices();
 }

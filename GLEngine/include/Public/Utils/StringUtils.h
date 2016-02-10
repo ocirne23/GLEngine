@@ -41,7 +41,7 @@ public:
 	static eastl::string to_string(uint64 i)
 	{
 		char buf[40];
-		sprintf_s(buf, "%i64u", i);
+		sprintf_s(buf, "%I64i", i);
 		return eastl::string(buf);
 	}
 };

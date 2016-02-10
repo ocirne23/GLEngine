@@ -3,7 +3,6 @@
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Graphics/GL/Tech/QuadDrawer.h"
 
-#include <assert.h>
 #include <glm/glm.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -15,7 +14,7 @@ END_UNNAMED_NAMESPACE()
 
 void GaussianBlur::initialize(EBlurValueType a_type, uint a_xRes, uint a_yRes)
 {
-	GLFramebuffer::ESizedFormat format;
+	GLFramebuffer::ESizedFormat format = GLFramebuffer::ESizedFormat::RGB8;
 	eastl::vector<eastl::string> blurDefines = GLConfig::getGlobalShaderDefines();
 	switch (a_type)
 	{
@@ -52,8 +51,8 @@ void GaussianBlur::initialize(EBlurValueType a_type, uint a_xRes, uint a_yRes)
 	m_blurXResultFBO.initialize();
 	m_blurXResultFBO.addFramebufferTexture(format, GLFramebuffer::EAttachment::COLOR0, a_xRes, a_yRes);
 
-	m_pixelXOffset = 1.0f / (float) a_xRes;
-	m_pixelYOffset = 1.0f / (float) a_yRes;
+	m_pixelXOffset = 1.0f / float(a_xRes);
+	m_pixelYOffset = 1.0f / float(a_yRes);
 
 	m_initialized = true;
 }

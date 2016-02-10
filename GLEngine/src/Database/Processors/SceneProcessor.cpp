@@ -1,6 +1,5 @@
 #include "Database/Processors/SceneProcessor.h"
 
-#include "Core.h"
 #include "Database/AssetDatabase.h"
 #include "Database/Assets/DBScene.h"
 #include "Utils/FileUtils.h"

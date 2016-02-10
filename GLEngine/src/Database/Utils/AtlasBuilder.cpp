@@ -5,13 +5,8 @@
 #include "Database/Assets/DBMaterial.h"
 #include "Database/Utils/AtlasPosition.h"
 #include "Database/Utils/TextureAtlas.h"
-#include "Database/Utils/stb_image.h"
 #include "EASTL/algorithm.h"
 #include "EASTL/hash_map.h"
-
-#include <glm/glm.hpp>
-
-#include <numeric>
 
 BEGIN_UNNAMED_NAMESPACE()
 

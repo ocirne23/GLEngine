@@ -1,5 +1,3 @@
-# Blender v2.76 (sub 0) OBJ File: 'sphere.blend'
-# www.blender.org
 mtllib sphere.mtl
 usemtl Placeholder
 o Sphere
@@ -3204,8 +3202,6 @@ vn 0.003800 0.999800 0.019000
 vn 0.019400 -0.999800 0.000000
 vn 0.019000 0.999800 -0.003800
 vn -0.016100 -0.999800 0.010700
-usemtl Sphere
-s 1
 f 18/1/1 17/2/2 48/3/3 49/4/4
 f 5/5/5 4/6/6 35/7/7 36/8/8
 f 19/9/9 18/1/1 49/4/4 50/10/10

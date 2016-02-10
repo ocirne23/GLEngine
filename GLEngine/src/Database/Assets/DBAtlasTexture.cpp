@@ -1,7 +1,6 @@
 #include "Database/Assets/DBAtlasTexture.h"
 
 #include "Database/Assets/DBAtlasRegion.h"
-#include "Database/Utils/stb_image.h"
 
 #include <assert.h>
 
@@ -129,7 +128,7 @@ void DBAtlasTexture::writeRegionTexture(const DBAtlasRegion& region)
 uint64 DBAtlasTexture::getByteSize() const
 {
 	uint64 totalSize = 0;
-	totalSize += sizeof(m_numMipMaps);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_numMipMaps);
 	totalSize += m_texture.getByteSize();
 	return totalSize;
 }

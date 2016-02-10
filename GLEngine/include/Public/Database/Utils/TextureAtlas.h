@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "gsl/gsl.h"
 #include "Database/Utils/AtlasPosition.h"
 
 class TextureAtlas
@@ -10,8 +11,8 @@ public:
 	struct Node
 	{
 		~Node() { SAFE_DELETE(left); SAFE_DELETE(right); }
-		Node* left = 0;
-		Node* right = 0;
+		owner<Node*> left = NULL;
+		owner<Node*> right = NULL;
 		uint x = 0;
 		uint y = 0;
 		uint width = 0;

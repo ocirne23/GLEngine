@@ -37,14 +37,14 @@ CubeMapGen::~CubeMapGen()
 PerspectiveCamera& CubeMapGen::beginRenderCubeMapFace(const glm::vec3& a_position, ECubeMapFace a_face)
 {
 	assert(!m_begun);
-	m_camera.initialize(m_cubeMap.getWidth(), m_cubeMap.getHeight(), CAMERA_ANGLE, CAMERA_NEAR, CAMERA_FAR);
+	m_camera.initialize(float(m_cubeMap.getWidth()), float(m_cubeMap.getHeight()), CAMERA_ANGLE, CAMERA_NEAR, CAMERA_FAR);
 	m_camera.setPosition(a_position);
-	m_camera.lookAtDir(DIRECTIONS[(uint)a_face]);
+	m_camera.lookAtDir(DIRECTIONS[uint(a_face)]);
 
 	glViewport(0, 0, m_cubeMap.getWidth(), m_cubeMap.getHeight());
 
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fboID);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + (uint) a_face, m_cubeMap.getTextureID(), 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + uint(a_face), m_cubeMap.getTextureID(), 0);
 	m_begun = true;
 
 	return m_camera;

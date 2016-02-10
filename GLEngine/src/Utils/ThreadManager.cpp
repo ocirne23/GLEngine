@@ -28,7 +28,7 @@ ThreadManager::~ThreadManager()
 
 int ThreadManager::threadFunc(void* a_ptr)
 {
-	((FuncWrapper*) a_ptr)->func();
+	scast<FuncWrapper*>(a_ptr)->func();
 	delete a_ptr;
 	return 0;
 }

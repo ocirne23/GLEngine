@@ -2,9 +2,12 @@
 
 #include <glm/glm.hpp>
 
+class PerspectiveCamera;
+
 class Frustum
 {
 public:
+
 	Frustum() {}
 	~Frustum() {}
 	Frustum(const Frustum& copy) = delete;
@@ -16,6 +19,13 @@ public:
 public:
 
 	static bool aabbInFrustum(const glm::vec3& point, const glm::vec3& extents, const glm::mat4& frustumMatrix);
+	
+	struct Corners
+	{
+		enum { NTL = 0, NTR, NBL, NBR, FTL, FTR, FBL, FBR, NUM_CORNERS };
+		glm::vec3 corners[NUM_CORNERS];
+	};
+	static Corners calculateCorners(const PerspectiveCamera& camera);
 
 public:
 

@@ -33,7 +33,6 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Written and maintained by Paul Pedriana.
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "EASTL/internal/config.h"
 #include "EASTL/allocator.h"
 

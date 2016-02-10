@@ -87,19 +87,19 @@ uint64 DBScene::getByteSize() const
 {
 	uint64 totalSize = 0;
 	
-	totalSize += sizeof(uint); // m_nodes.size();
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_nodes.size());
 	for (uint i = 0; i < m_nodes.size(); ++i)
 		totalSize += m_nodes[i].getByteSize();
 	
-	totalSize += sizeof(uint); // m_meshes.size();
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_meshes.size());
 	for (uint i = 0; i < m_meshes.size(); ++i)
 		totalSize += m_meshes[i].getByteSize();
 	
-	totalSize += sizeof(uint); // m_materials.size();
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_materials.size());
 	for (uint i = 0; i < m_materials.size(); ++i)
 		totalSize += m_materials[i].getByteSize();
 	
-	totalSize += sizeof(uint); // m_atlasTextures.size();
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_atlasTextures.size());
 	for (uint i = 0; i < m_atlasTextures.size(); ++i)
 		totalSize += m_atlasTextures[i].getByteSize();
 	
@@ -150,23 +150,4 @@ void DBScene::read(AssetDatabaseEntry& entry)
 	m_atlasTextures.resize(numAtlasTextures);
 	for (uint i = 0; i < numAtlasTextures; ++i)
 		m_atlasTextures[i].read(entry);
-}
-
-void DBScene::swapMaterial(const eastl::string& a_matName, const eastl::string& a_withMatName)
-{
-	for (uint i = 0; i < m_materials.size(); ++i)
-	{
-		if (m_materials[i].getName() == a_matName)
-		{
-			for (uint j = 0; j < m_materials.size(); ++j)
-			{
-				if (m_materials[j].getName() == a_withMatName)
-				{
-					eastl::swap(m_materials[i], m_materials[j]);
-					return;
-				}
-			}
-			return;
-		}
-	}
 }

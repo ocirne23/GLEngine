@@ -1,14 +1,11 @@
 #include "Graphics/GL/Tech/HBAO.h"
 
-#include "GLEngine.h"
-#include "Graphics/Graphics.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
 #include "Graphics/GL/Tech/QuadDrawer.h"
 #include "Graphics/Utils/CheckGLError.h"
 #include "Database/Assets/DBTexture.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 
-#include <glm/glm.hpp>
 #include <glm/gtx/random.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()

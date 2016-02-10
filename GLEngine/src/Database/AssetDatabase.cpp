@@ -23,7 +23,7 @@ void AssetDatabase::createNew(const eastl::string& a_filePath)
 	m_assetWritePos = sizeof(uint64) * 2;
 }
 
-void AssetDatabase::openExisting(const eastl::string& a_filePath)
+bool AssetDatabase::openExisting(const eastl::string& a_filePath)
 {
 	assert(m_openMode == EOpenMode::UNOPENED);
 	
@@ -35,11 +35,10 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 	else
 	{
 		print("Could not find AssetDatabase: %s, did you run the resource builder?\n", a_filePath.c_str());
-		return;
+		return false;
 	}
 
-
-	// Tell the file size
+	// Get the file size
 	m_file.seekg(0, std::ios::end);
 	uint64 fileSize = m_file.tellg();
 	
@@ -55,21 +54,23 @@ void AssetDatabase::openExisting(const eastl::string& a_filePath)
 	assetTableEntry.readVal(assetTableSize);
 	for (uint i = 0; i < assetTableSize; ++i)
 	{
-		uint64 filePathHash, filePos, byteSize;
-		assetTableEntry.readVal(filePathHash);
+		eastl::string filePath;
+		uint64 filePos, byteSize;
+		assetTableEntry.readString(filePath);
 		assetTableEntry.readVal(filePos);
 		assetTableEntry.readVal(byteSize);
 		AssetDatabaseEntry entry(m_file, filePos, byteSize);
-		m_writtenAssets.insert({filePathHash, entry});
+		m_writtenAssets.insert({filePath, entry });
 	}
 	print("Opened DB: %s, num assets: %i filesize: %iMB\n", a_filePath.c_str(), m_writtenAssets.size(), fileSize / 1024 / 1024);
+	return true;
 }
 
 void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, IAsset* a_asset)
 {
-	uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
-	const auto unwrittenIt = m_loadedAssets.find(hash);
-	const auto writtenIt = m_writtenAssets.find(hash);
+	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
+	const auto unwrittenIt = m_loadedAssets.find(a_databaseEntryName);
+	const auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
 	if (unwrittenIt != m_loadedAssets.end() || writtenIt != m_writtenAssets.end())
 	{
 		print("Asset with name: %s already exists\n", a_databaseEntryName.c_str());
@@ -77,27 +78,26 @@ void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, IAsset* a
 	}
 	else
 	{
-		m_loadedAssets.insert({hash, a_asset});
+		m_loadedAssets.insert({a_databaseEntryName, a_asset});
 	}
 }
 
 IAsset* AssetDatabase::loadAsset(const eastl::string& a_databaseEntryName, EAssetType a_type)
 {
 	assert(m_openMode == EOpenMode::READ);
-	uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
+	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	
 	// If asset has already been loaded, return existing instance
-	auto unwrittenIt = m_loadedAssets.find(hash);
+	auto unwrittenIt = m_loadedAssets.find(a_databaseEntryName);
 	if (unwrittenIt != m_loadedAssets.end())
 		return unwrittenIt->second;
 
-	auto writtenIt = m_writtenAssets.find(hash);
+	auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
 	if (writtenIt != m_writtenAssets.end())
 	{
 		IAsset* asset = IAsset::create(a_type);
 		asset->read(writtenIt->second);
-		m_loadedAssets.insert({hash, asset});
-		m_writtenAssets.erase(writtenIt);
+		m_loadedAssets.insert({a_databaseEntryName, asset});
 		return asset;
 	}
 
@@ -132,19 +132,22 @@ void AssetDatabase::writeAssetTableAndClose()
 	// Write asset table at the end of the file
 	m_file.seekg(0, std::ios::end);
 	uint64 assetTablePos = m_file.tellg();
-	uint64 assetTableByteSize = sizeof(uint) + sizeof(uint64) * 3 * m_writtenAssets.size();
-	AssetDatabaseEntry assetTableEntry(m_file, assetTablePos, assetTableByteSize);
+	uint64 assetTableByteSize = AssetDatabaseEntry::getValWriteSize((uint) m_writtenAssets.size());
+	for (const auto& pair : m_writtenAssets)
+	{
+		assetTableByteSize += AssetDatabaseEntry::getStringWriteSize(pair.first);
+		assetTableByteSize += AssetDatabaseEntry::getValWriteSize(pair.second.getFileStartPos());
+		assetTableByteSize += AssetDatabaseEntry::getValWriteSize(pair.second.getTotalSize());
+	}
 
+	AssetDatabaseEntry assetTableEntry(m_file, assetTablePos, assetTableByteSize);
 	// Write information about every file in the db
 	assetTableEntry.writeVal((uint) m_writtenAssets.size());
 	for (const auto& pair : m_writtenAssets)
 	{
-		uint64 filePathHash = pair.first;
-		uint64 filePos = pair.second.getFileStartPos();
-		uint64 byteSize = pair.second.getTotalSize();
-		assetTableEntry.writeVal(filePathHash);
-		assetTableEntry.writeVal(filePos);
-		assetTableEntry.writeVal(byteSize);
+		assetTableEntry.writeString(pair.first);
+		assetTableEntry.writeVal(pair.second.getFileStartPos());
+		assetTableEntry.writeVal(pair.second.getTotalSize());
 	}
 
 	// Write location and size of the asset table at the start of the database file
@@ -159,8 +162,8 @@ void AssetDatabase::writeAssetTableAndClose()
 
 void AssetDatabase::unloadAsset(const eastl::string& a_databaseEntryName)
 {
-	uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
-	auto it = m_loadedAssets.find(hash);
+	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
+	auto it = m_loadedAssets.find(a_databaseEntryName);
 	if (it != m_loadedAssets.end())
 	{
 		IAsset* asset = it->second;
@@ -171,7 +174,7 @@ void AssetDatabase::unloadAsset(const eastl::string& a_databaseEntryName)
 
 void AssetDatabase::unloadAsset(IAsset* a_asset)
 {
-	for (eastl::hash_map<uint64, IAsset*>::iterator it = m_loadedAssets.begin(); it != m_loadedAssets.end(); ++it)
+	for (auto it = m_loadedAssets.begin(); it != m_loadedAssets.end(); ++it)
 	{
 		IAsset* asset = it->second;
 		if (asset == a_asset)
@@ -185,10 +188,19 @@ void AssetDatabase::unloadAsset(IAsset* a_asset)
 
 bool AssetDatabase::hasAsset(const eastl::string& a_databaseEntryName) const
 {
-	uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
-	auto writtenIt = m_writtenAssets.find(hash);
-	auto loadedIt = m_loadedAssets.find(hash);
+	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
+	auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
+	auto loadedIt = m_loadedAssets.find(a_databaseEntryName);
 	bool found = (writtenIt != m_writtenAssets.end() || loadedIt != m_loadedAssets.end());
 	return found; 
+}
+
+eastl::vector<eastl::string> AssetDatabase::listAssets() const
+{
+	eastl::vector<eastl::string> ret;
+	ret.reserve(m_loadedAssets.size());
+	for (const auto& it : m_writtenAssets)
+		ret.push_back(it.first);
+	return ret;
 }
 

@@ -1,6 +1,19 @@
 #include "Graphics/Utils/Frustum.h"
 
+#include "Graphics/Utils/PerspectiveCamera.h"
+
 #include <glm/gtx/fast_square_root.hpp>
+
+BEGIN_UNNAMED_NAMESPACE()
+
+bool extentSignedTest(const glm::vec4& a_p, const glm::vec3& a_center, const glm::vec3& a_extent)
+{
+	const float pDoTCenter = glm::dot(glm::vec3(a_p), a_center);
+	const float absPdotExtent = glm::dot(glm::abs(glm::vec3(a_p)), a_extent);
+	return (pDoTCenter + absPdotExtent) < -a_p.z;
+}
+
+END_UNNAMED_NAMESPACE()
 
 void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 {
@@ -39,10 +52,7 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 
 	t = glm::fastInverseSqrt(m_planes[0].x * m_planes[0].x + m_planes[0].y * m_planes[0].y + m_planes[0].z * m_planes[0].z);
 
-	m_planes[0].x *= t;
-	m_planes[0].y *= t;
-	m_planes[0].z *= t;
-	m_planes[0].w *= t;
+	m_planes[0] *= t;
 
 	m_planes[1].x = m30 + m00;
 	m_planes[1].y = m31 + m01;
@@ -51,10 +61,7 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 
 	t = glm::fastInverseSqrt(m_planes[1].x * m_planes[1].x + m_planes[1].y * m_planes[1].y + m_planes[1].z * m_planes[1].z);
 
-	m_planes[1].x *= t;
-	m_planes[1].y *= t;
-	m_planes[1].z *= t;
-	m_planes[1].w *= t;
+	m_planes[1] *= t;
 
 	m_planes[2].x = m30 - m10;
 	m_planes[2].y = m31 - m11;
@@ -63,10 +70,7 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 
 	t = glm::fastInverseSqrt(m_planes[2].x * m_planes[2].x + m_planes[2].y * m_planes[2].y + m_planes[2].z * m_planes[2].z);
 
-	m_planes[2].x *= t;
-	m_planes[2].y *= t;
-	m_planes[2].z *= t;
-	m_planes[2].w *= t;
+	m_planes[2] *= t;
 
 	m_planes[3].x = m30 + m10;
 	m_planes[3].y = m31 + m11;
@@ -75,10 +79,7 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 
 	t = glm::fastInverseSqrt(m_planes[3].x * m_planes[3].x + m_planes[3].y * m_planes[3].y + m_planes[3].z * m_planes[3].z);
 
-	m_planes[3].x *= t;
-	m_planes[3].y *= t;
-	m_planes[3].z *= t;
-	m_planes[3].w *= t;
+	m_planes[3] *= t;
 
 	m_planes[4].x = m30 - m20;
 	m_planes[4].y = m31 - m21;
@@ -87,10 +88,7 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 
 	t = glm::fastInverseSqrt(m_planes[4].x * m_planes[4].x + m_planes[4].y * m_planes[4].y + m_planes[4].z * m_planes[4].z);
 
-	m_planes[4].x *= t;
-	m_planes[4].y *= t;
-	m_planes[4].z *= t;
-	m_planes[4].w *= t;
+	m_planes[4] *= t;
 
 	m_planes[5].x = m30 + m20;
 	m_planes[5].y = m31 + m21;
@@ -99,10 +97,7 @@ void Frustum::calculateFrustum(const glm::mat4& a_mvp)
 
 	t = glm::fastInverseSqrt(m_planes[5].x * m_planes[5].x + m_planes[5].y * m_planes[5].y + m_planes[5].z * m_planes[5].z);
 
-	m_planes[5].x *= t;
-	m_planes[5].y *= t;
-	m_planes[5].z *= t;
-	m_planes[5].w *= t;
+	m_planes[5] *= t;
 }
 
 bool Frustum::pointInFrustum(const glm::vec3& a_point) const
@@ -121,13 +116,6 @@ bool Frustum::sphereInFrustum(const glm::vec3& a_point, float a_radius) const
 			return false;
 
 	return true;
-}
-
-static inline bool extentSignedTest(const glm::vec4& a_p, const glm::vec3& a_center, const glm::vec3& a_extent)
-{
-	const float pDoTCenter = glm::dot(glm::vec3(a_p), a_center);
-	const float absPdotExtent = glm::dot(glm::abs(glm::vec3(a_p)), a_extent);
-	return (pDoTCenter + absPdotExtent) < -a_p.z;
 }
 
 bool Frustum::aabbInFrustum(const glm::vec3& a_center, const glm::vec3& a_extent, const glm::mat4& a_frustumMatrix)
@@ -159,4 +147,38 @@ bool Frustum::aabbInFrustum(const glm::vec3& a_center, const glm::vec3& a_extent
 		return false;
 
 	return true;
+}
+
+Frustum::Corners Frustum::calculateCorners(const PerspectiveCamera& a_camera)
+{
+	const float near = a_camera.getNear();
+	const float far = a_camera.getFar();
+	const float fovV = a_camera.getVFov();
+	const float ratio = a_camera.getHeight() / a_camera.getWidth();
+	const glm::vec3& pos = a_camera.getPosition();
+	const glm::vec3& front = a_camera.getDirection();
+	const glm::vec3& up = a_camera.getUp();
+
+	const float tang = glm::tan(fovV * 0.5f);
+	const float nh = near * tang;
+	const float nw = nh * ratio;
+	const float fh = far  * tang;
+	const float fw = fh * ratio;
+
+	const glm::vec3 right = glm::cross(up, front);
+	const glm::vec3 nc = pos + front * near;
+	const glm::vec3 fc = pos + front * far;
+
+	Corners corners;
+	corners.corners[Corners::NTL] = nc + up * nh - right * nw;
+	corners.corners[Corners::NTR] = nc + up * nh + right * nw;
+	corners.corners[Corners::NBL] = nc - up * nh - right * nw;
+	corners.corners[Corners::NBR] = nc - up * nh + right * nw;
+
+	corners.corners[Corners::FTL] = fc + up * fh - right * fw;
+	corners.corners[Corners::FTR] = fc + up * fh + right * fw;
+	corners.corners[Corners::FBL] = fc - up * fh - right * fw;
+	corners.corners[Corners::FBR] = fc - up * fh + right * fw;
+
+	return corners;
 }
