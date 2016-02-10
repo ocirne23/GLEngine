@@ -8,6 +8,8 @@
 *.cache
 *.sdf
 *.exe
+*.iobj
+*.ipdb
 *.suo
 *.log
 *.idb

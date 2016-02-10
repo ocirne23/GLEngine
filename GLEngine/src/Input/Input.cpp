@@ -11,7 +11,7 @@ void Input::pollEvents()
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
-		m_eventQueue.push_back(*reinterpret_cast<Input::Event*>(&event));
+		m_eventQueue.push_back(*rcast<Input::Event*>(&event));
 }
 
 void Input::processEvents()
