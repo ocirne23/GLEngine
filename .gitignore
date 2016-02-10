@@ -20,6 +20,7 @@ ipch/
 GLEngine/gen/
 GLEngine/bin/
 GLEngine/obj/
+GLEngine/libs/
 GLApp/obj/
 GLResourceBuilder/x64/
 GLResourceBuilder/Win32/
