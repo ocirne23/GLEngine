@@ -11,6 +11,7 @@ int main()
 	GLEngine::initialize("GLResourceBuilder", 0, 0, EWindowMode::NONE);
 
 	SceneProcessor sceneProcessor;
+	AssetDatabase objDB;
 	/*
 	ResourceBuilder::ResourceProcessorMap ifcProcessors;
 	ifcProcessors.insert({"ifc", &sceneProcessor});
@@ -21,7 +22,7 @@ int main()
 	*/
 	ResourceBuilder::ResourceProcessorMap objProcessors;
 	objProcessors.insert({"obj", &sceneProcessor});
-	AssetDatabase objDB;
+
 	objDB.createNew("..\\GLApp\\assets\\OBJ-DB.da");
 	ResourceBuilder::buildResourcesDB(objProcessors, "..\\GLApp\\assets-source\\Models", objDB);
 	objDB.writeAssetTableAndClose();

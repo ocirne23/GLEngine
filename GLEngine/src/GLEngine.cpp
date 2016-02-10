@@ -29,7 +29,14 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 		return;
 	}
 	if (a_windowMode != EWindowMode::NONE)
-		graphics = new Graphics(a_windowName, a_width, a_height, INITIAL_WINDOW_OFFSET_X, INITIAL_WINDOW_OFFSET_Y, a_windowMode);
+	{
+		graphics = new Graphics(a_windowName, 
+			                    a_width, 
+			                    a_height, 
+			                    INITIAL_WINDOW_OFFSET_X, 
+			                    INITIAL_WINDOW_OFFSET_Y, 
+			                    a_windowMode);
+	}
 	input = new Input();
 	s_threadManager = new ThreadManager();
 

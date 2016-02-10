@@ -7,22 +7,34 @@
 #include <fileapi.h>
 #include <assert.h>
 
-FileModificationListener::FileModificationListener(const eastl::string& a_filePath)
+BEGIN_UNNAMED_NAMESPACE()
+
+FileModificationListener::WriteTime getWriteTime(const eastl::string& a_filePath)
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
-	m_fullFilePath = eastl::string(FileHandle::ASSETS_DIR).append(a_filePath);
-	const BOOL result = GetFileAttributesEx(m_fullFilePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
+	const BOOL result = GetFileAttributesEx(a_filePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
 	assert(result);
 
-	m_lastWriteTime.dwLowDateTime = data.ftLastWriteTime.dwLowDateTime;
-	m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
+	FileModificationListener::WriteTime writeTime;
+	writeTime.dwLowDateTime = data.ftLastWriteTime.dwLowDateTime;
+	writeTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
+	return writeTime;
+}
+
+END_UNNAMED_NAMESPACE()
+
+FileModificationListener::FileModificationListener(const eastl::string& a_filePath)
+{
+	m_fullFilePath = eastl::string(FileHandle::ASSETS_DIR).append(a_filePath);
+	m_lastWriteTime = getWriteTime(m_fullFilePath);
 }
 
 void FileModificationListener::update()
 {
-	WIN32_FILE_ATTRIBUTE_DATA data;
-	const BOOL result = GetFileAttributesEx(m_fullFilePath.c_str(), GET_FILEEX_INFO_LEVELS::GetFileExInfoStandard, &data);
-	assert(result);
+	WriteTime currWriteTime = getWriteTime(m_fullFilePath);
+	bool changed = (m_lastWriteTime.dwLowDateTime != currWriteTime.dwLowDateTime || m_lastWriteTime.dwHighDateTime != currWriteTime.dwHighDateTime);
+	if (changed)
+		m_lastWriteTime = currWriteTime;
 
 	for (auto it = m_callbackList.begin(); it != m_callbackList.end(); )
 	{
@@ -31,14 +43,11 @@ void FileModificationListener::update()
 		{
 			it = m_callbackList.erase(it);
 		}
-		else if (m_lastWriteTime.dwLowDateTime != data.ftLastWriteTime.dwLowDateTime || m_lastWriteTime.dwHighDateTime != data.ftLastWriteTime.dwHighDateTime)
+		else if (changed)
 		{
 			auto func = callback.lock();
 			(*func.get())();
 			++it;
-
-			m_lastWriteTime.dwLowDateTime = data.ftLastWriteTime.dwLowDateTime;
-			m_lastWriteTime.dwHighDateTime = data.ftLastWriteTime.dwHighDateTime;
 		}
 	}
 }

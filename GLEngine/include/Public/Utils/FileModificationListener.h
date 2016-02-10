@@ -13,6 +13,12 @@ public:
 
 	friend class FileModificationManager;
 
+	struct WriteTime
+	{
+		unsigned long dwLowDateTime = 0;
+		unsigned long dwHighDateTime = 0;
+	};
+
 private:
 
 	FileModificationListener(const eastl::string& filePath);
@@ -21,14 +27,6 @@ private:
 	void update();
 	void addCallback(std::weak_ptr<std::function<void()>> onFileModification);
 	uint numCallbacks() const { return uint(m_callbackList.size()); }
-
-private:
-
-	struct WriteTime
-	{
-		unsigned long dwLowDateTime = 0;
-		unsigned long dwHighDateTime = 0;
-	};
 
 private:
 
