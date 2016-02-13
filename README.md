@@ -1,7 +1,7 @@
 # GLEngine
 
-A minimalistic C++11 framework to easily and efficiently render various 3D graphics.
-
+A minimalistic C++11/14 framework to easily and efficiently render various 3D graphics.
+* Requires Visual Studio 2015
 * Before compiling extract GLEngine/libs.rar (github 50MB file size limit)
 * Before running GLApp, run GLResourceBuilder
 
