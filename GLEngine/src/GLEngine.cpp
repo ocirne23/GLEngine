@@ -47,7 +47,7 @@ void GLEngine::createThread(const char* a_threadName, std::function<void()> a_fu
 
 void GLEngine::doMainThreadTick()
 {
-	FileModificationManager::update();
+	//FileModificationManager::update();
 	input->pollEvents();
 }
 

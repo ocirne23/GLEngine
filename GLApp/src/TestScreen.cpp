@@ -6,22 +6,24 @@
 #include "Utils/StringUtils.h"
 #include "Database/Assets/DBScene.h"
 
-#include <glm/gtc/random.hpp>
-#include <glm/gtx/rotate_vector.hpp>
+#include <CEGUI/EventArgs.h>
 #include <CEGUI/Window.h>
 #include <CEGUI/WindowManager.h>
 #include <CEGUI/widgets/All.h>
+
+#include <glm/gtc/random.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 {
 	uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	uint viewportHeight = GLEngine::graphics->getViewportHeight();
 	m_camera.initialize(float(viewportWidth), float(viewportHeight), 90.0f, 0.1f, 1000.0f);
-	//m_camera.setPosition(100.0f, 0.0f, 0.0f);
 	m_camera.lookAtPoint(glm::vec3(0.0f, 0.0f, 20.0f));
 	m_renderer.initialize(m_camera);
 	m_cameraController.setCameraSpeed(5.0f);
 
+	/*
 	if (m_ifcDB.openExisting("Assets/IFC-DB.da"))
 	{
 		if (m_ifcDB.hasAsset("ifc1.ifc"))
@@ -39,6 +41,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_IFC2]);
 		}
 	}
+	*/
 
 	if (m_objDB.openExisting("assets/OBJ-DB.da"))
 	{
@@ -57,11 +60,6 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 			m_renderer.addSkybox(&m_gameObjects[EGameObjects_SKYSPHERE]);
 		}
 	}
-
-	m_callback = FileModificationManager::createModificationCallback("Utils/test.txt", [this]()
-	{
-		print("Changed!\n");
-	});
 
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { 
 		GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); 
@@ -174,7 +172,7 @@ void TestScreen::initializeInputListeners()
 		switch (a_key)
 		{
 		case EKey::ESCAPE:   GLEngine::shutdown(); break;
-		case EKey::KP_6:     m_renderer.reloadShaders(); m_callback = NULL; break;
+		case EKey::KP_6:     m_renderer.reloadShaders(); break;
 		case EKey::KP_PLUS:  m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 1.2f); break;
 		case EKey::KP_MINUS: m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 0.8f); break;
 		case EKey::Y:        m_lightManager.deleteLights(); break;
@@ -187,8 +185,7 @@ void TestScreen::initializeInputListeners()
 			m_lightManager.createLight(position, radius, color, intensity);
 			break;
 		}
-		default:
-			break;
+		default: break;
 		}
 	});
 }

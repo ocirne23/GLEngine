@@ -24,7 +24,7 @@ int main()
 	objProcessors.insert({"obj", &sceneProcessor});
 
 	objDB.createNew("..\\GLApp\\assets\\OBJ-DB.da");
-	ResourceBuilder::buildResourcesDB(objProcessors, "..\\GLApp\\assets-source\\Models", objDB);
+	ResourceBuilder::buildResourcesDB(objProcessors, "..\\GLApp\\assets\\Models", objDB);
 	objDB.writeAssetTableAndClose();
 
 	print("Press enter to exit\n");

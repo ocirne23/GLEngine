@@ -42,17 +42,17 @@ bool AssetDatabase::openExisting(const eastl::string& a_filePath)
 	m_file.seekg(0, std::ios::end);
 	uint64 fileSize = m_file.tellg();
 	
-	// Load the asset table
+	// Read the position and size of the asset table
 	uint64 assetTablePos, assetTableByteSize;
 	m_file.seekg(0, std::ios::beg);
-	m_file.read(reinterpret_cast<char*>(&assetTablePos), sizeof(assetTablePos));
-	m_file.read(reinterpret_cast<char*>(&assetTableByteSize), sizeof(assetTableByteSize));
+	m_file.read(rcast<char*>(&assetTablePos), sizeof(assetTablePos));
+	m_file.read(rcast<char*>(&assetTableByteSize), sizeof(assetTableByteSize));
 
 	AssetDatabaseEntry assetTableEntry(m_file, assetTablePos, assetTableByteSize);
-
-	uint assetTableSize;
-	assetTableEntry.readVal(assetTableSize);
-	for (uint i = 0; i < assetTableSize; ++i)
+	uint assetTableNumElements;
+	assetTableEntry.readVal(assetTableNumElements);
+	print("Opening DB: %s, num assets: %i filesize: %i MB\n", a_filePath.c_str(), assetTableNumElements, fileSize / 1024 / 1024);
+	for (uint i = 0; i < assetTableNumElements; ++i)
 	{
 		eastl::string filePath;
 		uint64 filePos, byteSize;
@@ -60,9 +60,8 @@ bool AssetDatabase::openExisting(const eastl::string& a_filePath)
 		assetTableEntry.readVal(filePos);
 		assetTableEntry.readVal(byteSize);
 		AssetDatabaseEntry entry(m_file, filePos, byteSize);
-		m_writtenAssets.insert({filePath, entry });
+		m_writtenAssets.insert({filePath, entry});
 	}
-	print("Opened DB: %s, num assets: %i filesize: %iMB\n", a_filePath.c_str(), m_writtenAssets.size(), fileSize / 1024 / 1024);
 	return true;
 }
 
@@ -129,32 +128,32 @@ void AssetDatabase::writeAssetTableAndClose()
 	// Write any remaining unwritten assets
 	writeLoadedAssets();
 
-	// Write asset table at the end of the file
+	// Get the position and size of the asset table
 	m_file.seekg(0, std::ios::end);
 	uint64 assetTablePos = m_file.tellg();
-	uint64 assetTableByteSize = AssetDatabaseEntry::getValWriteSize((uint) m_writtenAssets.size());
+	uint64 assetTableByteSize = AssetDatabaseEntry::getValWriteSize(uint(m_writtenAssets.size()));
 	for (const auto& pair : m_writtenAssets)
 	{
 		assetTableByteSize += AssetDatabaseEntry::getStringWriteSize(pair.first);
 		assetTableByteSize += AssetDatabaseEntry::getValWriteSize(pair.second.getFileStartPos());
 		assetTableByteSize += AssetDatabaseEntry::getValWriteSize(pair.second.getTotalSize());
 	}
+	// Write the position and size of the asset table at the beginning of the asset file (overwriting placeholders)
+	m_file.seekp(0, std::ios::beg);
+	m_file.write(rcast<const char*>(&assetTablePos), sizeof(assetTablePos));
+	m_file.write(rcast<const char*>(&assetTableByteSize), sizeof(assetTableByteSize));
 
+	// Create an entry object to make it easy to write to the file.
 	AssetDatabaseEntry assetTableEntry(m_file, assetTablePos, assetTableByteSize);
-	// Write information about every file in the db
-	assetTableEntry.writeVal((uint) m_writtenAssets.size());
+	// Write the number of elements in the table
+	assetTableEntry.writeVal(uint(m_writtenAssets.size()));
+	// For ever asset, write the file path, start byte position in the file, and the size in bytes
 	for (const auto& pair : m_writtenAssets)
 	{
 		assetTableEntry.writeString(pair.first);
 		assetTableEntry.writeVal(pair.second.getFileStartPos());
 		assetTableEntry.writeVal(pair.second.getTotalSize());
 	}
-
-	// Write location and size of the asset table at the start of the database file
-	m_file.seekp(0, std::ios::beg);
-	m_file.write(reinterpret_cast<const char*>(&assetTablePos), sizeof(assetTablePos));
-	m_file.write(reinterpret_cast<const char*>(&assetTableByteSize), sizeof(assetTableByteSize));
-	
 	// Close the file since nothing should be written after the asset table
 	m_file.close();
 	m_openMode = EOpenMode::UNOPENED;
