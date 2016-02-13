@@ -87,19 +87,19 @@ uint64 DBScene::getByteSize() const
 {
 	uint64 totalSize = 0;
 	
-	totalSize += AssetDatabaseEntry::getValWriteSize(m_nodes.size());
+	totalSize += AssetDatabaseEntry::getValWriteSize(uint(m_nodes.size()));
 	for (uint i = 0; i < m_nodes.size(); ++i)
 		totalSize += m_nodes[i].getByteSize();
 	
-	totalSize += AssetDatabaseEntry::getValWriteSize(m_meshes.size());
+	totalSize += AssetDatabaseEntry::getValWriteSize(uint(m_meshes.size()));
 	for (uint i = 0; i < m_meshes.size(); ++i)
 		totalSize += m_meshes[i].getByteSize();
 	
-	totalSize += AssetDatabaseEntry::getValWriteSize(m_materials.size());
+	totalSize += AssetDatabaseEntry::getValWriteSize(uint(m_materials.size()));
 	for (uint i = 0; i < m_materials.size(); ++i)
 		totalSize += m_materials[i].getByteSize();
 	
-	totalSize += AssetDatabaseEntry::getValWriteSize(m_atlasTextures.size());
+	totalSize += AssetDatabaseEntry::getValWriteSize(uint(m_atlasTextures.size()));
 	for (uint i = 0; i < m_atlasTextures.size(); ++i)
 		totalSize += m_atlasTextures[i].getByteSize();
 	
@@ -108,19 +108,19 @@ uint64 DBScene::getByteSize() const
 
 void DBScene::write(AssetDatabaseEntry& entry)
 {
-	entry.writeVal((uint) m_nodes.size());
+	entry.writeVal(uint(m_nodes.size()));
 	for (uint i = 0; i < m_nodes.size(); ++i)
 		m_nodes[i].write(entry);
 	
-	entry.writeVal((uint) m_meshes.size());
+	entry.writeVal(uint(m_meshes.size()));
 	for (uint i = 0; i < m_meshes.size(); ++i)
 		m_meshes[i].write(entry);
 	
-	entry.writeVal((uint) m_materials.size());
+	entry.writeVal(uint(m_materials.size()));
 	for (uint i = 0; i < m_materials.size(); ++i)
 		m_materials[i].write(entry);
 	
-	entry.writeVal((uint) m_atlasTextures.size());
+	entry.writeVal(uint(m_atlasTextures.size()));
 	for (uint i = 0; i < m_atlasTextures.size(); ++i)
 		m_atlasTextures[i].write(entry);
 }

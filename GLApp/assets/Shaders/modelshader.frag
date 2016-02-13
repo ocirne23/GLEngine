@@ -91,13 +91,12 @@ void main()
 	vec3 diffuse = hasDiffuseTexture(material) ? getDiffuseSample(material, v_texcoord).rgb : material.color.rgb;
 	vec3 N       = hasNormalTexture(material) ?  rotateNormal(getNormalSample(material, v_texcoord).rgb) : v_normal;
 	vec3 V       = normalize(u_eyePos - v_position);
-	float NdotV = clamp(dot(N, V), 0.0, 1.0);
+	float NdotV  = clamp(dot(N, V), 0.0, 1.0);
 
 	float smoothness = material.smoothness;
-	float metalness = material.metalness;
-
-	float albedo = (diffuse.r + diffuse.g + diffuse.b) / 3.0;
-	float F0 = mix(0.035, albedo, metalness);
+	float metalness  = material.metalness;
+	float albedo     = (diffuse.r + diffuse.g + diffuse.b) / 3.0;
+	float F0         = mix(0.035, albedo, metalness);
 
 	vec3 lightAccum = vec3(0.0);
 	FOR_LIGHT_ITERATOR(light, v_position.z)
@@ -108,10 +107,9 @@ void main()
 		float attenuation = inverseSquareFalloff(lightDistance, light.positionRange.w);
 		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * PI * attenuation;
 		lightAccum += doLight(lightContrib, L, N, V, NdotV, F0, diffuse, smoothness, metalness);
-		//lightAccum += vec3(0.0, 0.01, 0.0);
 	}
 	float visibility = pcf(v_shadowCoord);
-	//if (visibility > 0.0)
+	if (visibility > 0.0)
 	{
 		vec3 sunContrib = u_sunColorIntensity.rgb * u_sunColorIntensity.a * PI * visibility;
 		lightAccum += visibility * doLight(sunContrib, u_sunDir, N, V, NdotV, F0, diffuse, smoothness, metalness);

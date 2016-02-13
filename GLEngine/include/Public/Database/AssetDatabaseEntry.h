@@ -64,7 +64,7 @@ public:
 		writeVal(numElements);
 		if (numElements)
 		{
-			uint64 byteSize = numElements * sizeof(T);
+			uint64 byteSize = a_vector.size_bytes();
 			if (m_numBytesWritten + byteSize <= m_totalSize)
 			{
 				m_file.write(rcast<const char*>(&a_vector[0]), byteSize);
