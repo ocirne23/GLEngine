@@ -28,7 +28,7 @@ eastl::string processIncludes(const eastl::string& a_str)
 	{
 		auto includeStartPos = includePos + INCLUDE_STR_LEN;
 		auto includeEndPos = src.find("\"", includeStartPos);
-		uint numChars = includeEndPos - includeStartPos;
+		uint numChars = uint(includeEndPos - includeStartPos);
 		const eastl::string path = src.substr(includeStartPos, numChars);
 		const eastl::string includedFileContents = FileHandle(path).readString();
 		const eastl::string toReplace = "#include \"" + path + "\"";

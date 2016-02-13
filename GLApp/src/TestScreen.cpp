@@ -58,6 +58,11 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		}
 	}
 
+	m_callback = FileModificationManager::createModificationCallback("Utils/test.txt", [this]()
+	{
+		print("Changed!\n");
+	});
+
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { 
 		GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); 
 	});
@@ -169,7 +174,7 @@ void TestScreen::initializeInputListeners()
 		switch (a_key)
 		{
 		case EKey::ESCAPE:   GLEngine::shutdown(); break;
-		case EKey::KP_6:     m_renderer.reloadShaders(); break;
+		case EKey::KP_6:     m_renderer.reloadShaders(); m_callback = NULL; break;
 		case EKey::KP_PLUS:  m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 1.2f); break;
 		case EKey::KP_MINUS: m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 0.8f); break;
 		case EKey::Y:        m_lightManager.deleteLights(); break;

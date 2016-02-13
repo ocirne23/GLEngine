@@ -39,10 +39,10 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 void DBMesh::merge(const DBMesh& a_mesh, const glm::mat4& a_transform)
 {
 	m_name += ":MERGED:" + a_mesh.getName();
-	uint numIndices = a_mesh.getIndices().size();
-	uint numVertices = a_mesh.getVertices().size();
-	uint baseIdx = m_indices.size();
-	uint baseVertex = m_vertices.size();
+	uint numIndices = uint(a_mesh.getIndices().size());
+	uint numVertices = uint(a_mesh.getVertices().size());
+	uint baseIdx = uint(m_indices.size());
+	uint baseVertex = uint(m_vertices.size());
 	m_indices.resize(m_indices.size() + numIndices);
 	m_vertices.resize(m_vertices.size() + numVertices);
 

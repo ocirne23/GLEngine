@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "EASTL/vector.h"
+#include "gsl/gsl.h"
 
 struct VertexAttribute
 {
@@ -59,9 +60,9 @@ public:
 
 	void initialize(const Config& config);
 	void initialize(EBufferType bufferType, EDrawUsage drawUsage);
-	void upload(uint numBytes, const void* data = 0);
+	void upload(span<const byte> data);
 	void bind();
-	void setVertexAttributes(uint numAttributes, const VertexAttribute* attributes);
+	void setVertexAttributes(span<const VertexAttribute> attributes);
 	bool isInitialized() const { return m_initialized; }
 
 private:

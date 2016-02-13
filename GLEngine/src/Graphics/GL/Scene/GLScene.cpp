@@ -30,7 +30,7 @@ void GLScene::initialize(const DBScene& a_dbScene)
 		const eastl::vector<DBAtlasTexture>& atlasTextures = a_dbScene.getAtlasTextures();
 		// Use info from the first texture since all textures use the same format.
 		const DBTexture& tex = atlasTextures[0].getTexture();
-		m_textureArray.startInit(tex.getWidth(), tex.getHeight(), atlasTextures.size(), tex.getNumComponents(), 
+		m_textureArray.startInit(tex.getWidth(), tex.getHeight(), uint(atlasTextures.size()), tex.getNumComponents(), 
 			(tex.getFormat() == DBTexture::EFormat::FLOAT), atlasTextures[0].getNumMipmaps());
 		
 		for (const DBAtlasTexture& atlasTexture : atlasTextures)
@@ -64,7 +64,7 @@ void GLScene::renderNode(const DBNode& a_node, const glm::mat4& a_parentTransfor
 
 void GLScene::updateMaterialBuffer()
 {
-	uint numMaterials = m_materials.size();
+	uint numMaterials = uint(m_materials.size());
 	if (numMaterials > GLConfig::MAX_MATERIALS)
 	{
 		print("Scene has more than %i materials\n", GLConfig::MAX_MATERIALS);

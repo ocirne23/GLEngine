@@ -70,11 +70,11 @@ void QuadDrawer::initBuffers()
 	s_stateBuffer.begin();
 
 	s_vertexBuffer.initialize(GLVertexBuffer::EBufferType::ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
-	s_vertexBuffer.setVertexAttributes(ARRAY_SIZE(attributes), attributes);
-	s_vertexBuffer.upload(sizeof(quad), quad);
+	s_vertexBuffer.setVertexAttributes(as_span(attributes, ARRAY_SIZE(attributes)));
+	s_vertexBuffer.upload(as_span(rcast<const byte*>(quad), sizeof(quad)));
 
 	s_indiceBuffer.initialize(GLVertexBuffer::EBufferType::ELEMENT_ARRAY, GLVertexBuffer::EDrawUsage::STATIC);
-	s_indiceBuffer.upload(sizeof(indices), indices);
+	s_indiceBuffer.upload(as_span(rcast<const byte*>(indices), sizeof(indices)));
 
 	s_stateBuffer.end();
 }

@@ -8,6 +8,7 @@
 #include "Graphics/Utils/LightManager.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
 #include "Utils/FPSMeasurer.h"
+#include "Utils/FileModificationManager.h"
 
 #include "Graphics/UI/CEGUIManager.h"
 #include <CEGUI/EventArgs.h>
@@ -42,6 +43,8 @@ private:
 	enum EGameObjects { EGameObjects_PALACE, EGameObjects_SKYSPHERE, EGameObjects_TESTSPHERE, EGameObjects_IFC1, EGameObjects_IFC2, EGameObjects_NUM_GAMEOBJECTS };
 	GameObject m_gameObjects[EGameObjects_NUM_GAMEOBJECTS];
 	GLScene m_scenes[EGameObjects_NUM_GAMEOBJECTS];
+
+	std::shared_ptr<std::function<void()>> m_callback;
 
 	FPSCameraController m_cameraController;
 	PerspectiveCamera m_camera;

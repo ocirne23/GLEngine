@@ -4,6 +4,7 @@
 #include "Graphics/Utils/CheckGLError.h"
 
 #include <assert.h>
+#include <CEGUI/RendererModules/OpenGL/GL3Renderer.h>
 
 bool GLFramebuffer::s_begun = false;
 
@@ -89,7 +90,7 @@ void GLFramebuffer::addFramebufferTexture(ESizedFormat a_format, EAttachment a_a
 	m_textures.push_back(textureID);
 	m_drawBuffers.push_back(a_attachment);
 
-	glDrawBuffers(m_drawBuffers.size(), rcast<GLenum*>(&m_drawBuffers[0]));
+	glDrawBuffers(uint(m_drawBuffers.size()), rcast<GLenum*>(&m_drawBuffers[0]));
 	
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 	assert(status == GL_FRAMEBUFFER_COMPLETE);
@@ -142,7 +143,7 @@ void GLFramebuffer::bindDepthTexture(uint a_textureUnit)
 void GLFramebuffer::deleteTextures()
 {
 	assert(m_initialized);
-	glDeleteTextures(m_textures.size(), &m_textures[0]);
+	glDeleteTextures(uint(m_textures.size()), &m_textures[0]);
 	m_textures.clear();
 	
 	if (m_depthTexture)

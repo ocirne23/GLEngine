@@ -35,7 +35,6 @@ void FileModificationListener::update()
 	bool changed = (m_lastWriteTime.dwLowDateTime != currWriteTime.dwLowDateTime || m_lastWriteTime.dwHighDateTime != currWriteTime.dwHighDateTime);
 	if (changed)
 		m_lastWriteTime = currWriteTime;
-
 	for (auto it = m_callbackList.begin(); it != m_callbackList.end(); )
 	{
 		std::weak_ptr<std::function<void()>> callback = *it;
@@ -43,11 +42,14 @@ void FileModificationListener::update()
 		{
 			it = m_callbackList.erase(it);
 		}
-		else if (changed)
+		else
 		{
-			auto func = callback.lock();
-			(*func.get())();
 			++it;
+			if (changed)
+			{
+				auto func = callback.lock();
+				func->operator()();
+			}
 		}
 	}
 }

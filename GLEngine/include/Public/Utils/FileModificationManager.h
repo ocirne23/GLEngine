@@ -11,15 +11,18 @@ class FileModificationListener;
 class FileModificationManager
 {
 public:
-	friend class FileModificationListener;
 
-	static void update();
-	static void createModificationListener(const eastl::string& filePath, std::weak_ptr<std::function<void()>> func);
+	friend class GLEngine;
+
+	/* The lambda will be notified of changes as long as the shared_ptr is alive */
+	static std::shared_ptr<std::function<void()>> createModificationCallback(const eastl::string& filePath, std::function<void()> func);
 
 private:
 
 	FileModificationManager() {}
 	~FileModificationManager();
+
+	static void update();
 
 	struct WriteTime
 	{

@@ -43,10 +43,10 @@ public:
 	eastl::vector<DBMaterial>& getMaterials()         { return m_materials; }
 	eastl::vector<DBAtlasTexture>& getAtlasTextures() { return m_atlasTextures; }
 
-	const uint numNodes() const         { return m_nodes.size(); }
-	const uint numMeshes() const        { return m_meshes.size(); }
-	const uint numMaterials() const     { return m_materials.size(); }
-	const uint numAtlasTextures() const { return m_atlasTextures.size(); }
+	uint numNodes() const         { return uint(m_nodes.size()); }
+	uint numMeshes() const        { return uint(m_meshes.size()); }
+	uint numMaterials() const     { return uint(m_materials.size()); }
+	uint numAtlasTextures() const { return uint(m_atlasTextures.size()); }
 
 private:
 

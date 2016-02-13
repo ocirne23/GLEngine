@@ -21,7 +21,7 @@ void GLVertexBuffer::initialize(const Config& a_config)
 {
 	initialize(a_config.bufferType, a_config.drawUsage);
 	if (a_config.vertexAttributes.size())
-		setVertexAttributes(a_config.vertexAttributes.size(), &a_config.vertexAttributes[0]);
+		setVertexAttributes(as_span(&a_config.vertexAttributes[0], a_config.vertexAttributes.size()));
 }
 
 void GLVertexBuffer::initialize(EBufferType a_bufferType, EDrawUsage a_drawUsage)
@@ -35,14 +35,14 @@ void GLVertexBuffer::initialize(EBufferType a_bufferType, EDrawUsage a_drawUsage
 	m_initialized = true;
 }
 
-void GLVertexBuffer::upload(uint a_numBytes, const void* a_data)
+void GLVertexBuffer::upload(span<const byte> a_data)
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);
-	if (a_numBytes)
+	if (!a_data.empty())
 	{
-		glBindBuffer((GLenum) m_bufferType, m_id);
-		glBufferData((GLenum) m_bufferType, a_numBytes, a_data, (GLenum) m_drawUsage);
+		glBindBuffer(GLenum(m_bufferType), m_id);
+		glBufferData(GLenum(m_bufferType), a_data.length_bytes(), a_data.data(), GLenum(m_drawUsage));
 	}
 }
 
@@ -50,41 +50,41 @@ void GLVertexBuffer::bind()
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);
-	glBindBuffer((GLenum) m_bufferType, m_id);
+	glBindBuffer(GLenum(m_bufferType), m_id);
 }
 
-void GLVertexBuffer::setVertexAttributes(uint a_numAttributes, const VertexAttribute* a_attributes)
+void GLVertexBuffer::setVertexAttributes(span<const VertexAttribute> a_attributes)
 {
 	assert(GLStateBuffer::isBegun());
 	assert(m_initialized);
-	assert(a_numAttributes);
+	assert(!a_attributes.empty());
 
 	uint64 offset = 0;
 	uint stride = 0;
 
-	if (a_numAttributes == 1)
+	if (a_attributes.size() == 1)
 		stride = 0;
 	else
 	{
-		for (uint i = 0; i < a_numAttributes; ++i)
+		for (uint i = 0; i < a_attributes.size(); ++i)
 		{
-			const VertexAttribute* attribute = a_attributes + i;
-			stride += attribute->numElements * (attribute->format == VertexAttribute::EFormat::UNSIGNED_BYTE ? 1 : 4);
+			const VertexAttribute& attribute = a_attributes[i];
+			stride += attribute.numElements * (attribute.format == VertexAttribute::EFormat::UNSIGNED_BYTE ? 1 : 4);
 		}
 	}
 
-	for (uint i = 0; i < a_numAttributes; ++i)
+	for (uint i = 0; i < a_attributes.size(); ++i)
 	{
-		const VertexAttribute& attribute = *(a_attributes + i);
+		const VertexAttribute& attribute = a_attributes[i];
 
 		bool isFloatType = (attribute.format == VertexAttribute::EFormat::FLOAT) || attribute.normalize;
 		uint dataSize = (attribute.format == VertexAttribute::EFormat::UNSIGNED_BYTE) ? 1 : 4;
 		dataSize *= attribute.numElements;
-		glBindBuffer((GLenum) m_bufferType, m_id);
+		glBindBuffer(GLenum(m_bufferType), m_id);
 		if (isFloatType)
-			glVertexAttribPointer(attribute.attributeIndex, attribute.numElements, (GLenum) attribute.format, attribute.normalize, stride, (GLvoid*) offset);
+			glVertexAttribPointer(attribute.attributeIndex, attribute.numElements, GLenum(attribute.format), attribute.normalize, stride, rcast<GLvoid*>(offset));
 		else
-			glVertexAttribIPointer(attribute.attributeIndex, attribute.numElements, (GLenum) attribute.format, stride, (GLvoid*) offset);
+			glVertexAttribIPointer(attribute.attributeIndex, attribute.numElements, GLenum(attribute.format), stride, rcast<GLvoid*>(offset));
 		glEnableVertexAttribArray(attribute.attributeIndex);
 		offset += dataSize;
 	}

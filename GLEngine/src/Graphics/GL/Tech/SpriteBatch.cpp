@@ -43,8 +43,8 @@ void SpriteBatch::initialize(uint a_size)
 	m_shader.end();
 
 	m_stateBuffer.begin();
-	m_vertexBuffer.setVertexAttributes(ARRAY_SIZE(attributes), attributes);
-	m_indiceBuffer.upload(indices.size() * sizeof(ushort), &indices[0]);
+	m_vertexBuffer.setVertexAttributes(as_span(attributes, ARRAY_SIZE(attributes)));
+	m_indiceBuffer.upload(as_span(rcast<const byte*>(&indices[0]), indices.size_bytes()));
 	m_stateBuffer.end();
 
 	m_initialzied = true;
@@ -68,7 +68,7 @@ void SpriteBatch::flush()
 		m_currentTexture->bind(0);
 
 		m_stateBuffer.begin();
-		m_vertexBuffer.upload(m_vertices.size() * sizeof(Vertex), &m_vertices[0]);
+		m_vertexBuffer.upload(as_span(rcast<const byte*>(&m_vertices[0]), m_vertices.size_bytes()));
 		glDrawElements(GL_TRIANGLES, m_drawCount * 6, GL_UNSIGNED_SHORT, NULL);
 		m_stateBuffer.end();
 		m_drawCount = 0;

@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "Utils/VecForward.h"
+#include "gsl/gsl.h"
 
 typedef uint WindowFlags;
 
@@ -61,5 +62,5 @@ private:
 	uint m_viewportYPos   = 0;
 	uint m_viewportWidth  = 0;
 	uint m_viewportHeight = 0;
-	GLContext* m_context  = NULL;
+	owner<GLContext*> m_context  = NULL;
 };

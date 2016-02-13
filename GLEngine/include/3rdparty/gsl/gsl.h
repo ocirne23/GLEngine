@@ -167,6 +167,7 @@ namespace std
 
 using gsl::owner;
 using gsl::not_null;
+using gsl::as_span;
 using gsl::span;
 using gsl::string_span;
 

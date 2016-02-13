@@ -3,8 +3,7 @@
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include "Utils/ThreadManager.h"
-// ReSharper disable once CppUnusedIncludeDirective
-#include "EASTL/custom_glengine_allocator.h"
+#include "Utils/FileModificationManager.h"
 
 #include <SDL/SDL.h>
 
@@ -50,6 +49,7 @@ void GLEngine::createThread(const char* a_threadName, std::function<void()> a_fu
 
 void GLEngine::doMainThreadTick()
 {
+	FileModificationManager::update();
 	input->pollEvents();
 }
 
