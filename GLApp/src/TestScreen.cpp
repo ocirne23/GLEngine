@@ -66,8 +66,6 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 	});
 	setSunRotation(m_sunRotation);
 
-	m_guiManager.initialize();
-
 	initializeGUI();
 	initializeInputListeners();
 }
@@ -115,6 +113,7 @@ void TestScreen::createTestSphere(DBScene& a_sphereDB, const eastl::string& a_ma
 
 void TestScreen::initializeGUI()
 {
+	m_guiManager.initialize();
 	{
 		CEGUI::FrameWindow* objectListFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/ObjectListFrameWindow.layout"));
 		CEGUI::Listbox* objectListBox = scast<CEGUI::Listbox*>(objectListFrameWindow->getChild("ObjectListBox"));

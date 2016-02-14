@@ -18,14 +18,14 @@ int main()
 	AssetDatabase ifcDB;
 	ifcDB.createNew("..\\GLApp\\assets\\IFC-DB.da");
 	ResourceBuilder::buildResourcesDB(ifcProcessors, "..\\GLApp\\assets-source\\Models", ifcDB);
-	ifcDB.writeAssetTableAndClose();
+	ifcDB.writeAndClose();
 	*/
 	ResourceBuilder::ResourceProcessorMap objProcessors;
 	objProcessors.insert({"obj", &sceneProcessor});
 
 	objDB.createNew("..\\GLApp\\assets\\OBJ-DB.da");
 	ResourceBuilder::buildResourcesDB(objProcessors, "..\\GLApp\\assets\\Models", objDB);
-	objDB.writeAssetTableAndClose();
+	objDB.writeAndClose();
 
 	print("Press enter to exit\n");
 	std::cin.ignore();

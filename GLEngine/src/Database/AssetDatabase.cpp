@@ -65,7 +65,7 @@ bool AssetDatabase::openExisting(const eastl::string& a_filePath)
 	return true;
 }
 
-void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, IAsset* a_asset)
+void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, owner<IAsset*> a_asset)
 {
 	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	const auto unwrittenIt = m_loadedAssets.find(a_databaseEntryName);
@@ -122,7 +122,7 @@ void AssetDatabase::writeLoadedAssets()
 	m_loadedAssets.clear();
 }
 
-void AssetDatabase::writeAssetTableAndClose()
+void AssetDatabase::writeAndClose()
 {
 	assert(m_openMode == EOpenMode::WRITE);
 	// Write any remaining unwritten assets
@@ -175,11 +175,11 @@ void AssetDatabase::unloadAsset(IAsset* a_asset)
 {
 	for (auto it = m_loadedAssets.begin(); it != m_loadedAssets.end(); ++it)
 	{
-		IAsset* asset = it->second;
+		owner<IAsset*> asset = it->second;
 		if (asset == a_asset)
 		{
 			m_loadedAssets.erase(it);
-			delete a_asset;
+			delete asset;
 			return;
 		}
 	}
@@ -187,7 +187,7 @@ void AssetDatabase::unloadAsset(IAsset* a_asset)
 
 bool AssetDatabase::hasAsset(const eastl::string& a_databaseEntryName) const
 {
-	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
+	// uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
 	auto loadedIt = m_loadedAssets.find(a_databaseEntryName);
 	bool found = (writtenIt != m_writtenAssets.end() || loadedIt != m_loadedAssets.end());
@@ -196,10 +196,10 @@ bool AssetDatabase::hasAsset(const eastl::string& a_databaseEntryName) const
 
 eastl::vector<eastl::string> AssetDatabase::listAssets() const
 {
-	eastl::vector<eastl::string> ret;
-	ret.reserve(m_loadedAssets.size());
+	eastl::vector<eastl::string> result;
+	result.reserve(m_loadedAssets.size());
 	for (const auto& it : m_writtenAssets)
-		ret.push_back(it.first);
-	return ret;
+		result.push_back(it.first);
+	return result;
 }
 

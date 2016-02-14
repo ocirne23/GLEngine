@@ -18,23 +18,28 @@ public:
 	AssetDatabase() {}
 	~AssetDatabase() {}
 
-	// WRITE api
+	/* Create an empty asset database with the specified name/path */
 	void createNew(const eastl::string& filePath);
-	void addAsset(const eastl::string& databaseEntryName, IAsset* asset);
-	void writeLoadedAssets();
-	void writeAssetTableAndClose();
-
-	// READ api
+	/* Open an existing asset database file with the specified name/path, returns if succeeded */
 	bool openExisting(const eastl::string& filePath);
-	
-	//TODO: add some form of reference counter to unload assets
-	
+	/* Add an asset to the database under the specified name, transfering ownership */
+	void addAsset(const eastl::string& databaseEntryName, owner<IAsset*> asset);
+	/* Write away currently loaded assets to so the memory can be freed */
+	void writeLoadedAssets();
+	/* Write assets and index table and close the file */
+	void writeAndClose();
+
+	//TODO: add some form of reference counter to unload assets?
+
+	/* Load an asset with the specified name and type, the result is cached */
 	IAsset* loadAsset(const eastl::string& databaseEntryName, EAssetType type);
+	/* Unload a loaded/cached asset with the specified name to free it's memory */
 	void unloadAsset(const eastl::string& databaseEntryName);
+	/* Unload a loaded/cached asset to free it's memory */
 	void unloadAsset(IAsset* asset);
 
-	bool isOpen() const { return m_openMode != EOpenMode::UNOPENED; }
 	bool hasAsset(const eastl::string& databaseEntryName) const;
+	bool isOpen() const { return m_openMode != EOpenMode::UNOPENED; }
 	eastl::vector<eastl::string> listAssets() const;
 
 private:
@@ -51,6 +56,6 @@ private:
 	EOpenMode m_openMode = EOpenMode::UNOPENED;
 	std::fstream m_file;
 	uint64 m_assetWritePos = 0;
-	eastl::hash_map<eastl::string, IAsset*> m_loadedAssets;
+	eastl::hash_map<eastl::string, owner<IAsset*>> m_loadedAssets;
 	eastl::hash_map<eastl::string, AssetDatabaseEntry> m_writtenAssets;
 };

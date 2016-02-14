@@ -37,10 +37,8 @@ bool isPowerOfTwo(uint x)
 // if i is already PoT, return the next higher PoT.
 uint getNextPOT(uint i)
 {
-	if (isPowerOfTwo(i))
-		i++;
-
-	i--;
+	if (!isPowerOfTwo(i))
+		i--;
 	i |= i >> 1;
 	i |= i >> 2;
 	i |= i >> 4;
@@ -74,7 +72,7 @@ bool getNextAtlasSize(uint& width, uint& height)
 	return true;
 }
 
-void increaseAtlasesSize(eastl::vector<TextureAtlas*>& a_atlases)
+void increaseAtlasesSize(eastl::vector<owner<TextureAtlas*>>& a_atlases)
 {
 	if (!a_atlases.size())
 	{
@@ -153,7 +151,7 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 	}
 	
 	// Then we fit these textures into atlases (not the image data, just fitting rectangles)
-	eastl::vector<TextureAtlas*> atlases;
+	eastl::vector<owner<TextureAtlas*>> atlases;
 	if (uniqueRegions.size() == 1)
 	{
 		auto& pair = *uniqueRegions.begin();
@@ -166,7 +164,7 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 	// Create AtlasTexture objects out of the TextureAtlases (which are IAssets)
 	eastl::vector<DBAtlasTexture> atlasTextures;
 	atlasTextures.reserve(atlases.size());
-	for (TextureAtlas* atlas : atlases)
+	for (owner<TextureAtlas*> atlas : atlases)
 	{
 		atlasTextures.push_back(DBAtlasTexture(atlas->getWidth(), atlas->getHeight(), atlas->getNumComponents(), atlas->getNumMipmaps()));
 		SAFE_DELETE(atlas);
