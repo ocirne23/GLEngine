@@ -23,39 +23,19 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 	m_renderer.initialize(m_camera);
 	m_cameraController.setCameraSpeed(5.0f);
 
-	/*
-	if (m_ifcDB.openExisting("Assets/IFC-DB.da"))
-	{
-		if (m_ifcDB.hasAsset("ifc1.ifc"))
-		{
-			m_scenes[EGameObjects_IFC1].initialize("ifc1.ifc", m_ifcDB);
-			m_gameObjects[EGameObjects_IFC1].initialize(&m_scenes[EGameObjects_IFC1]);
-			m_gameObjects[EGameObjects_IFC1].setPosition(glm::vec3(10, -0.1, -35));
-			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_IFC1]);
-		}
-		if (m_ifcDB.hasAsset("ifc2.ifc"))
-		{
-			m_scenes[EGameObjects_IFC2].initialize("ifc2.ifc", m_ifcDB);
-			m_gameObjects[EGameObjects_IFC2].initialize(&m_scenes[EGameObjects_IFC2]);
-			m_gameObjects[EGameObjects_IFC2].setPosition(glm::vec3(10, -0.1, -35));
-			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_IFC2]);
-		}
-	}
-	*/
-
 	if (m_objDB.openExisting("assets/OBJ-DB.da"))
 	{
-		if (m_objDB.hasAsset("palace.obj"))
+		if (m_objDB.hasAsset(m_objectNames[EGameObjects_PALACE]))
 		{
-			m_scenes[EGameObjects_PALACE].initialize("palace.obj", m_objDB);
+			m_scenes[EGameObjects_PALACE].initialize(m_objectNames[EGameObjects_PALACE], m_objDB);
 			m_gameObjects[EGameObjects_PALACE].initialize(&m_scenes[EGameObjects_PALACE]);
 			m_gameObjects[EGameObjects_PALACE].setPosition(glm::vec3(0.0f, -1.5f, 20.0f));
 			m_gameObjects[EGameObjects_PALACE].setScale(0.5f);
 			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_PALACE]);
 		}
-		if (m_objDB.hasAsset("skysphere.obj"))
+		if (m_objDB.hasAsset(m_objectNames[EGameObjects_SKYSPHERE]))
 		{
-			m_scenes[EGameObjects_SKYSPHERE].initialize("skysphere.obj", m_objDB);
+			m_scenes[EGameObjects_SKYSPHERE].initialize(m_objectNames[EGameObjects_SKYSPHERE], m_objDB);
 			m_gameObjects[EGameObjects_SKYSPHERE].initialize(&m_scenes[EGameObjects_SKYSPHERE]);
 			m_renderer.addSkybox(&m_gameObjects[EGameObjects_SKYSPHERE]);
 		}
@@ -68,6 +48,12 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 
 	initializeGUI();
 	initializeInputListeners();
+}
+
+TestScreen::~TestScreen()
+{
+	for (owner<CEGUI::ListboxItem*> item : m_objectListItems)
+		delete item;
 }
 
 void TestScreen::render(float a_deltaSec)
@@ -100,28 +86,18 @@ void TestScreen::setSunRotation(float a_angle)
 	m_gameObjects[EGameObjects_SKYSPHERE].setRotation(glm::vec3(0, 1, 0), a_angle - skyboxAngleOffset);
 }
 
-void TestScreen::createTestSphere(DBScene& a_sphereDB, const eastl::string& a_materialName, const glm::vec3& a_position)
-{
-	/*
-	GLScene* sphere = new GLScene();
-	sphere->initialize(a_sphereDB);
-	sphere->setScale(1.5f);
-	sphere->setTranslation(a_position);
-	m_renderer.addScene(sphere);
-	*/
-}
-
 void TestScreen::initializeGUI()
 {
 	m_guiManager.initialize();
 	{
 		CEGUI::FrameWindow* objectListFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/ObjectListFrameWindow.layout"));
 		CEGUI::Listbox* objectListBox = scast<CEGUI::Listbox*>(objectListFrameWindow->getChild("ObjectListBox"));
-		for (auto it : m_objDB.listAssets())
-			objectListBox->addItem(new CEGUI::ListboxTextItem(it.c_str()));
-		for (auto it : m_ifcDB.listAssets())
-			objectListBox->addItem(new CEGUI::ListboxTextItem(it.c_str()));
-
+		
+		for (uint i = 0; i < EGameObjects_NUM_GAMEOBJECTS; ++i)
+		{
+			m_objectListItems[i] = new CEGUI::ListboxTextItem(m_objectNames[i].c_str());
+			objectListBox->addItem(m_objectListItems[i]);
+		}
 		addWindow(objectListFrameWindow);
 	}
 	{
