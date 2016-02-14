@@ -9,7 +9,7 @@
 #include "Database/Assets/DBShader.h"
 #include "Database/Assets/DBTexture.h"
 
-IAsset* IAsset::create(EAssetType a_type)
+owner<IAsset*> IAsset::create(EAssetType a_type)
 {
 	switch (a_type)
 	{

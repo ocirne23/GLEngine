@@ -22,10 +22,10 @@ enum {
 
 glm::vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const AtlasPosition& a_atlasPos)
 {
-	const float xOffset = a_atlasPos.xPos / (float) a_atlasWidth;
-	const float yOffset = a_atlasPos.yPos / (float) a_atlasHeight;
-	const float width = a_atlasPos.width / (float) a_atlasWidth;
-	const float height = a_atlasPos.height / (float) a_atlasHeight;
+	const float xOffset = a_atlasPos.xPos / float(a_atlasWidth);
+	const float yOffset = a_atlasPos.yPos / float(a_atlasHeight);
+	const float width = a_atlasPos.width / float(a_atlasWidth);
+	const float height = a_atlasPos.height / float(a_atlasHeight);
 	return glm::vec4(xOffset, yOffset, width, height);
 }
 
@@ -66,8 +66,8 @@ bool getNextAtlasSize(uint& width, uint& height)
 		height += ATLAS_INCREMENT;
 #endif
 
-	width = eastl::min((int) width, (int) ATLAS_MAX_WIDTH);
-	height = eastl::min((int) height, (int) ATLAS_MAX_HEIGHT);
+	width = eastl::min(int(width), int(ATLAS_MAX_WIDTH));
+	height = eastl::min(int(height), int(ATLAS_MAX_HEIGHT));
 	
 	return true;
 }
@@ -166,7 +166,7 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 	atlasTextures.reserve(atlases.size());
 	for (owner<TextureAtlas*> atlas : atlases)
 	{
-		atlasTextures.push_back(DBAtlasTexture(atlas->getWidth(), atlas->getHeight(), atlas->getNumComponents(), atlas->getNumMipmaps()));
+		atlasTextures.emplace_back(atlas->getWidth(), atlas->getHeight(), atlas->getNumComponents(), atlas->getNumMipmaps());
 		SAFE_DELETE(atlas);
 	}
 	atlases.clear();

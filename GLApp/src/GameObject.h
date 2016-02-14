@@ -14,8 +14,8 @@ public:
 
 	virtual void render(const GLRenderer& renderer, GLConstantBuffer& modelMatrixUBO, bool depthOnly) override;
 
-	void setPosition(const glm::vec3& a_position) { m_position = a_position; m_dirty = true; }
-	void setScale(float a_scale) { m_scale = a_scale; m_dirty = true; }
+	void setPosition(const glm::vec3& a_position)              { m_position = a_position; m_dirty = true; }
+	void setScale(float a_scale)                               { m_scale = a_scale; m_dirty = true; }
 	void setRotation(const glm::vec3& a_axis, float a_degrees) { m_axisRotation = glm::vec4(a_axis, a_degrees); m_dirty = true; }
 	
 private:

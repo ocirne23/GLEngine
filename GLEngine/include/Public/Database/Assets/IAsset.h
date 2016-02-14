@@ -17,5 +17,5 @@ public:
 	
 public:
 
-	static IAsset* create(EAssetType type);
+	static owner<IAsset*> create(EAssetType type);
 };

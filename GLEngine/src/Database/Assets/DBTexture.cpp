@@ -43,7 +43,7 @@ void DBTexture::loadImage(const eastl::string& a_filePath, EFormat a_format, uin
 	if (a_format == EFormat::BYTE)
 		textureData = stbi_load(a_filePath.c_str(), &w, &h, &c, a_forcedNumComp);
 	else if (a_format == EFormat::FLOAT)
-		textureData = (byte*) stbi_loadf(a_filePath.c_str(), &w, &h, &c, a_forcedNumComp);
+		textureData = rcast<byte*>(stbi_loadf(a_filePath.c_str(), &w, &h, &c, a_forcedNumComp));
 	else
 	{
 		assert(false);
@@ -59,19 +59,19 @@ void DBTexture::loadImage(const eastl::string& a_filePath, EFormat a_format, uin
 	m_pixColSize = getPixColSize(m_format);
 
 	// If size was set before loading, ensure that the size of the loaded image is the same.
-	if (m_width != 0 || m_height != 0) 
+	if (m_width || m_height) 
 	{
-		assert((uint) w == m_width);
-		assert((uint) h == m_height);
+		assert(uint(w) == m_width);
+		assert(uint(h) == m_height);
 	}
-	m_width = (uint) w;
-	m_height = (uint) h;
+	m_width = uint(w);
+	m_height = uint(h);
 
 	// If a number of components was forced, use that, otherwise use the number of components in the image.
-	if (a_forcedNumComp != 0)
+	if (a_forcedNumComp)
 		m_numComp = a_forcedNumComp;
 	else
-		m_numComp = (uint) c;
+		m_numComp = uint(c);
 
 	uint dataSize = m_width * m_height * m_numComp * m_pixColSize;
 	m_data.resize(dataSize);
