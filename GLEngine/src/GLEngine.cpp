@@ -3,7 +3,6 @@
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
 #include "Utils/ThreadManager.h"
-#include "Utils/FileModificationManager.h"
 
 #include <SDL/SDL.h>
 
@@ -30,11 +29,11 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 	if (a_windowMode != EWindowMode::NONE)
 	{
 		graphics = new Graphics(a_windowName, 
-			                    a_width, 
-			                    a_height, 
-			                    INITIAL_WINDOW_OFFSET_X, 
-			                    INITIAL_WINDOW_OFFSET_Y, 
-			                    a_windowMode);
+		                        a_width, 
+		                        a_height, 
+		                        INITIAL_WINDOW_OFFSET_X, 
+		                        INITIAL_WINDOW_OFFSET_Y, 
+		                        a_windowMode);
 	}
 	input = new Input();
 	s_threadManager = new ThreadManager();
@@ -47,7 +46,6 @@ void GLEngine::createThread(const char* a_threadName, std::function<void()> a_fu
 
 void GLEngine::doMainThreadTick()
 {
-	//FileModificationManager::update();
 	input->pollEvents();
 }
 
@@ -83,13 +81,4 @@ void GLEngine::finish()
 	SAFE_DELETE(graphics);
 	SAFE_DELETE(s_threadManager);
 	SDL_Quit();
-}
-
-#include "Graphics/Mantle/GRApplication.h"
-
-void GLEngine::test()
-{
-	//testMantle();
-	GRApplication app;
-	app.initialize();
 }

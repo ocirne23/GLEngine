@@ -8,6 +8,11 @@
 
 #include <assert.h>
 
+BEGIN_UNNAMED_NAMESPACE()
+const uint CLUSTERED_SHADING_TILE_WIDTH = 64;
+const uint CLUSTERED_SHADING_TILE_HEIGHT = 64;
+END_UNNAMED_NAMESPACE()
+
 ClusteredShading::~ClusteredShading()
 {
 }
@@ -16,8 +21,8 @@ void ClusteredShading::initialize(const PerspectiveCamera& a_camera, uint a_scre
 {
 	m_screenWidth    = a_screenWidth;
 	m_screenHeight   = a_screenHeight;
-	m_pixelsPerTileW = GLConfig::CLUSTERED_SHADING_TILE_WIDTH;
-	m_pixelsPerTileH = GLConfig::CLUSTERED_SHADING_TILE_HEIGHT;
+	m_pixelsPerTileW = CLUSTERED_SHADING_TILE_WIDTH;
+	m_pixelsPerTileH = CLUSTERED_SHADING_TILE_HEIGHT;
 	m_gridWidth      = a_screenWidth / m_pixelsPerTileW + 1;
 	m_gridHeight     = a_screenHeight / m_pixelsPerTileH + 1;
 	m_recNear        = 1.0f / a_camera.getNear();
@@ -33,9 +38,9 @@ void ClusteredShading::initialize(const PerspectiveCamera& a_camera, uint a_scre
 
 	m_tileLightIndices.resize(m_gridSize);
 
-	m_lightPositionRangesUBO.initialize(GLConfig::LIGHT_POSITION_RANGES_UBO);
-	m_lightColorIntensitiesUBO.initialize(GLConfig::LIGHT_COLOR_INTENSITIES_UBO);
-	m_clusteredShadingGlobalsUBO.initialize(GLConfig::CLUSTERED_SHADING_GLOBALS_UBO);
+	m_lightPositionRangesUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::ClusteredLightPositionRange));
+	m_lightColorIntensitiesUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::ClusteredLightColorIntensities));
+	m_clusteredShadingGlobalsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::ClusteredGlobals));
 
 	m_lightGridTextureBuffer.initialize(m_gridSize * sizeof(glm::uvec2), GLTextureBuffer::ESizedFormat::RG32I, GLTextureBuffer::EDrawUsage::STREAM);
 	m_lightIndiceTextureBuffer.initialize(m_maxNumLightIndices * sizeof(ushort), GLTextureBuffer::ESizedFormat::R16I, GLTextureBuffer::EDrawUsage::STREAM);
@@ -71,8 +76,11 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const LightMana
 		lightPositionRangeViewspaceBuffer[i].w = lightPositionRanges[i].w;
 		const glm::vec3 lightPositionViewSpace(lightPositionRangeViewspaceBuffer[i]);
 		const float range = lightPositionRangeViewspaceBuffer[i].w;
-		IBounds3D bounds3D = ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(a_camera, lightPositionViewSpace, range, m_screenWidth, m_screenHeight, m_pixelsPerTileW, m_pixelsPerTileH, m_recLogSD1);
-		// bounds3D.clamp(glm::ivec3(0), glm::ivec3(m_gridWidth, m_gridHeight, m_gridDepth));
+		IBounds3D bounds3D = ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(a_camera, 
+		                                                                             lightPositionViewSpace, range, 
+		                                                                             m_screenWidth, m_screenHeight, 
+		                                                                             m_pixelsPerTileW, m_pixelsPerTileH, 
+		                                                                             m_recLogSD1);
 		for (int x = bounds3D.min.x; x < bounds3D.max.x; ++x)
 		{
 			for (int y = bounds3D.min.y; y < bounds3D.max.y; ++y)
@@ -114,7 +122,7 @@ breakLoop:
 
 void ClusteredShading::bindTextureBuffers()
 {
-	m_lightIndiceTextureBuffer.bind(GLConfig::LIGHT_INDICE_TEXTURE_BINDING_POINT);
-	m_lightGridTextureBuffer.bind(GLConfig::LIGHT_GRID_TEXTURE_BINDING_POINT);
+	m_lightIndiceTextureBuffer.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::ClusteredLightIndice));
+	m_lightGridTextureBuffer.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::ClusteredLightGrid));
 }
 

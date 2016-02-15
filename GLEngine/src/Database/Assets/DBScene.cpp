@@ -33,7 +33,7 @@ DBScene::DBScene(const eastl::string& a_sceneFilePath)
 	| aiPostProcessSteps::aiProcess_GenNormals
 	| aiPostProcessSteps::aiProcess_FlipUVs // Flip uv's because OpenGL
 	// Optimalizations
-	//| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials
+	//| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials // We might want to swap in unused materials at runtime
 	| aiPostProcessSteps::aiProcess_ImproveCacheLocality
 	| aiPostProcessSteps::aiProcess_OptimizeMeshes
 	| aiPostProcessSteps::aiProcess_OptimizeGraph

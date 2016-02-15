@@ -36,7 +36,7 @@ void ResourceBuilder::buildResourcesDB(const ResourceProcessorMap& a_processors,
 
 void ResourceBuilder::copyFiles(const eastl::vector<eastl::string>& a_extensions, const eastl::string& a_inDirectoryPath, const eastl::string& a_outDirectoryPath)
 {
-	printf("Copying files from %s to %s\n", a_inDirectoryPath.c_str(), a_outDirectoryPath.c_str());
+	print("Copying files from %s to %s\n", a_inDirectoryPath.c_str(), a_outDirectoryPath.c_str());
 	for (const eastl::string& filePath : FileUtils::listFiles(a_inDirectoryPath, "*"))
 	{
 		const eastl::string extension = FileUtils::getExtensionForFilePath(filePath);
@@ -48,5 +48,5 @@ void ResourceBuilder::copyFiles(const eastl::vector<eastl::string>& a_extensions
 			CopyFile(from.c_str(), to.c_str(), false);
 		}
 	}
-	printf("Finished copying files.\n");
+	print("Finished copying files.\n");
 }

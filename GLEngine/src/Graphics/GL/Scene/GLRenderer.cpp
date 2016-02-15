@@ -12,8 +12,6 @@
 BEGIN_UNNAMED_NAMESPACE()
 
 const char* const DFV_TEX_PATH = "Assets/Utils/ggx-helper-dfv.hdr";
-const char* const WHITE_TEX_PATH = "Assets/Utils/white.png";
-const char* const BLACK_TEX_PATH = "Assets/Utils/black.png";
 
 const char* const MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
 const char* const MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
@@ -43,7 +41,7 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	uint screenWidth = GLEngine::graphics->getViewportWidth();
 	uint screenHeight = GLEngine::graphics->getViewportHeight();
 
-	m_sceneFBO.initialize();
+	m_sceneFBO.initialize(GLConfig::getMultisampleType());
 	m_sceneFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB32F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 	m_sceneFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, screenWidth, screenHeight);
 
@@ -51,20 +49,21 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_shadowFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH32, SHADOW_MAP_RES.x, SHADOW_MAP_RES.y, GLFramebuffer::ETextureMagFilter::LINEAR, GLFramebuffer::ETextureMinFilter::LINEAR);
 	m_shadowCamera.initialize(SHADOW_VIEW_RANGE, SHADOW_VIEW_RANGE, 90.0f, 0.1f, SHADOW_VIEW_RANGE, PerspectiveCamera::EProjection::ORTHOGRAPHIC);
 
-	m_cubeMapGenerator.initialize(CUBE_MAP_RES.x, CUBE_MAP_RES.y);
+	//m_cubeMapGenerator.initialize(CUBE_MAP_RES.x, CUBE_MAP_RES.y);
 
 	m_clusteredShading.initialize(a_camera, screenWidth, screenHeight);
 	m_hbao.initialize(a_camera, screenWidth, screenHeight);
 	m_bloom.initialize(screenWidth, screenHeight);
 	m_fxaa.initialize(FXAA::EQuality::EXTREME, screenWidth, screenHeight);
 
-	m_modelMatrixUBO.initialize(GLConfig::MODEL_MATRIX_UBO);
-	m_cameraVarsUBO.initialize(GLConfig::CAMERA_VARS_UBO);
-	m_lightningGlobalsUBO.initialize(GLConfig::LIGHTING_GLOBALS_UBO);
+	m_modelMatrixUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::ModelMatrix));
+	m_cameraVarsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::CameraVars));
+	m_lightningGlobalsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::LightingGlobals));
+	m_settingsGlobalsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::SettingsGlobals));
 
-	m_whiteTexture.initialize(DBTexture(WHITE_TEX_PATH));
-	m_blackTexture.initialize(DBTexture(BLACK_TEX_PATH));
 	m_dfvTexture.initialize(DBTexture(DFV_TEX_PATH, DBTexture::EFormat::FLOAT), 0, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR);
+
+	updateSettingsGlobalsUBO();
 
 	reloadShaders();
 }
@@ -84,75 +83,71 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	uint screenWidth = GLEngine::graphics->getViewportWidth();
 	uint screenHeight = GLEngine::graphics->getViewportHeight();
 	
-	updateLightingGlobalsUBO(a_camera);
 	m_clusteredShading.update(a_camera, a_lightManager);
 	m_clusteredShading.bindTextureBuffers();
-	m_dfvTexture.bind(GLConfig::DFV_TEXTURE_BINDING_POINT);
+	m_dfvTexture.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::DFVTexture));
 
+	updateLightingGlobalsUBO(a_camera);
+	
+	// Shadows and depth prepass first
+	GLEngine::graphics->setDepthWrite(true);
+	GLEngine::graphics->setColorWrite(false); 
 	GLEngine::graphics->setDepthTest(true);
+	GLEngine::graphics->setDepthFunc(Graphics::EDepthFunc::LESS);
 
 	// SUN SHADOW MAP GENERATION //
 	if (m_shadowsEnabled)
 	{
-		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::FRONT);
-		updateCameraDataUBO(m_shadowCamera);
 		m_shadowFBO.begin();
+		updateCameraDataUBO(m_shadowCamera);
 		GLEngine::graphics->setViewportSize(SHADOW_MAP_RES.x, SHADOW_MAP_RES.y);
-		GLEngine::graphics->beginDepthPrepass();
+		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::FRONT);
 		GLEngine::graphics->clearDepthOnly();
 		m_depthPrepassShader.begin();
 		for (GLRenderObject* renderObject : m_renderObjects)
 			renderObject->render(*this, m_modelMatrixUBO, true);
 		m_depthPrepassShader.end();
-		GLEngine::graphics->endDepthPrepass();
-		m_shadowFBO.end();
 		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::BACK);
+		m_shadowFBO.end();
 	}
 	else
 	{
 		m_shadowFBO.begin();
-		GLEngine::graphics->beginDepthPrepass();
 		GLEngine::graphics->clearDepthOnly();
-		GLEngine::graphics->endDepthPrepass();
 		m_shadowFBO.end();
 	}
-
+	
 	// MAIN SCENE //
-	updateCameraDataUBO(a_camera);
 	m_sceneFBO.begin();
+	GLEngine::graphics->clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.0));
+	updateCameraDataUBO(a_camera);
 	GLEngine::graphics->setViewportSize(screenWidth, screenHeight);
-	GLEngine::graphics->clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.0f));
 
 	// DEPTH PREPASS //
 	if (m_depthPrepassEnabled)
 	{
-		GLEngine::graphics->beginDepthPrepass();
-		GLEngine::graphics->clearDepthOnly();
 		m_depthPrepassShader.begin();
 		for (GLRenderObject* renderObject : m_renderObjects)
 			renderObject->render(*this, m_modelMatrixUBO, true);
 		m_depthPrepassShader.end();
-		GLEngine::graphics->endDepthPrepass();
 	}
-	if (!m_depthPrepassEnabled)
-	{
-		GLEngine::graphics->setDepthTest(false);
-		GLEngine::graphics->setDepthWrite(false);
-	}
+
+	GLEngine::graphics->setDepthWrite(false);
+	GLEngine::graphics->setColorWrite(true);
+	GLEngine::graphics->setDepthFunc(Graphics::EDepthFunc::LEQUAL);
+
 	// RENDER SKYBOXES //
 	m_skyboxShader.begin();
 	for (GLRenderObject* renderObject : m_skyboxObjects)
 		renderObject->render(*this, m_modelMatrixUBO, false);
 	m_skyboxShader.end();
+
 	if (!m_depthPrepassEnabled)
-	{
-		GLEngine::graphics->setDepthTest(true);
 		GLEngine::graphics->setDepthWrite(true);
-	}
 	
 	// RENDER MODELS //
 	m_modelShader.begin();
-	m_shadowFBO.bindDepthTexture(GLConfig::SHADOW_TEXTURE_BINDING_POINT);
+	m_shadowFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::SunShadow));
 	for (GLRenderObject* renderObject : m_renderObjects)
 		renderObject->render(*this, m_modelMatrixUBO, false);
 	m_modelShader.end();
@@ -165,23 +160,18 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	GLFramebuffer* hbaoResult = NULL;
 	if (m_hbaoEnabled)
 		hbaoResult = &m_hbao.getHBAOResultFBO(m_sceneFBO);
-
 	// APPLY BLOOM // 
 	GLFramebuffer* bloomResult = NULL;
 	if (m_bloomEnabled)
 		bloomResult = &m_bloom.getBloomResultFBO(m_sceneFBO);
 
 	// BIND RESULT TEXTURES OF ALL PASSES // 
-	m_sceneFBO.bindTexture(0, GLConfig::COLOR_TEXTURE_BINDING_POINT);
+	m_sceneFBO.bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::Color));
 	if (m_hbaoEnabled)
-		hbaoResult->bindTexture(0, GLConfig::AO_RESULT_TEXTURE_BINDING_POINT);
-	else
-		m_whiteTexture.bind(GLConfig::AO_RESULT_TEXTURE_BINDING_POINT);
+		hbaoResult->bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::HBAOResult));
 
 	if (m_bloomEnabled)
-		bloomResult->bindTexture(0, GLConfig::BLOOM_RESULT_TEXTURE_BINDING_POINT);
-	else
-		m_blackTexture.bind(GLConfig::BLOOM_RESULT_TEXTURE_BINDING_POINT);
+		bloomResult->bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::BloomResult));
 
 	// APPLY FXAA AND RENDER COMBINED SCENE //
 	if (m_fxaaEnabled)
@@ -191,7 +181,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	m_combineShader.end();
 	if (m_fxaaEnabled)
 		m_fxaa.endAndRender();
-
+	
 	GLEngine::graphics->setDepthTest(true);
 }
 
@@ -219,11 +209,22 @@ void GLRenderer::removeSkybox(GLRenderObject* a_renderObject)
 		m_skyboxObjects.erase(it);
 }
 
-void GLRenderer::setDepthPrepassEnabled(bool a_enabled)
+void GLRenderer::setHBAOEnabled(bool a_enabled)
 {
-	if (m_depthPrepassEnabled && !a_enabled)
-		GLEngine::graphics->disableDepthPrepass();
-	m_depthPrepassEnabled = a_enabled;
+	m_hbaoEnabled = a_enabled;
+	updateSettingsGlobalsUBO();
+}
+
+void GLRenderer::setBloomEnabled(bool a_enabled)
+{
+	m_bloomEnabled = a_enabled;
+	updateSettingsGlobalsUBO();
+}
+
+void GLRenderer::setShadowsEnabled(bool a_enabled)
+{
+	m_shadowsEnabled = a_enabled;
+	updateSettingsGlobalsUBO();
 }
 
 void GLRenderer::setSun(const glm::vec3& a_direction, const glm::vec3& a_color, float a_intensity)
@@ -262,4 +263,13 @@ void GLRenderer::updateCameraDataUBO(const PerspectiveCamera& a_camera)
 	cameraVars->u_camNear      = a_camera.getNear();
 	cameraVars->u_camFar       = a_camera.getFar();
 	m_cameraVarsUBO.unmapBuffer();
+}
+
+void GLRenderer::updateSettingsGlobalsUBO()
+{
+	SettingsGlobalsData* settings = rcast<SettingsGlobalsData*>(m_settingsGlobalsUBO.mapBuffer());
+	settings->u_hbaoEnabled       = m_hbaoEnabled;
+	settings->u_bloomEnabled      = m_bloomEnabled;
+	settings->u_shadowsEnabled    = m_shadowsEnabled;
+	m_settingsGlobalsUBO.unmapBuffer();
 }

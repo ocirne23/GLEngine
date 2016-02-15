@@ -47,6 +47,13 @@ public:
 		glm::mat4 u_shadowMat;
 	};
 
+	struct SettingsGlobalsData
+	{
+		int u_hbaoEnabled;
+		int u_bloomEnabled;
+		int u_shadowsEnabled;
+	};
+
 public:
 
 	GLRenderer() {}
@@ -64,20 +71,20 @@ public:
 
 	void setSun(const glm::vec3& direction, const glm::vec3& color, float intensity);
 
-	void setHBAOEnabled(bool a_enabled) { m_hbaoEnabled = a_enabled; }
+	void setHBAOEnabled(bool a_enabled);
 	bool isHBAOEnabled() const { return m_hbaoEnabled; }
+
+	void setBloomEnabled(bool a_enabled);
+	bool isBloomEnabled() const { return m_bloomEnabled; }
+
+	void setShadowsEnabled(bool a_enabled);
+	bool isShadowsEnabled() const { return m_shadowsEnabled; }
+
+	void setDepthPrepassEnabled(bool a_enabled) { m_depthPrepassEnabled = a_enabled; }
+	bool isDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
 
 	void setFXAAEnabled(bool a_enabled) { m_fxaaEnabled = a_enabled; }
 	bool isFXAAEnabled() const { return m_fxaaEnabled; }
-
-	void setBloomEnabled(bool a_enabled) { m_bloomEnabled = a_enabled; }
-	bool isBloomEnabled() const { return m_bloomEnabled; }
-
-	void setDepthPrepassEnabled(bool a_enabled);
-	bool isDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
-
-	void setShadowsEnabled(bool a_enabled) { m_shadowsEnabled = a_enabled; }
-	bool isShadowsEnabled() const { return m_shadowsEnabled; }
 
 	const PerspectiveCamera* getSceneCamera() const { return m_sceneCamera; }
 
@@ -85,26 +92,25 @@ private:
 
 	void updateLightingGlobalsUBO(const PerspectiveCamera& camera);
 	void updateCameraDataUBO(const PerspectiveCamera& camera);
+	void updateSettingsGlobalsUBO();
 
 private:
 
 	eastl::vector<GLRenderObject*> m_renderObjects;
 	eastl::vector<GLRenderObject*> m_skyboxObjects;
 
+	bool m_hbaoEnabled         = true;
+	bool m_fxaaEnabled         = false;
+	bool m_bloomEnabled        = true;
+	bool m_shadowsEnabled      = true;
+	bool m_depthPrepassEnabled = false;
+	//bool m_cubeMapGenerated  = false;
+
 	HBAO m_hbao;
-	bool m_hbaoEnabled = true;
-
 	FXAA m_fxaa;
-	bool m_fxaaEnabled = true;
-
 	Bloom m_bloom;
-	bool m_bloomEnabled = true;
-
-	bool m_depthPrepassEnabled = true;
 	ClusteredShading m_clusteredShading;
-
-	bool m_cubeMapGenerated = false;
-	CubeMapGen m_cubeMapGenerator;
+	//CubeMapGen m_cubeMapGenerator;
 
 	GLShader m_depthPrepassShader;
 	GLShader m_skyboxShader;
@@ -116,15 +122,13 @@ private:
 	PerspectiveCamera m_shadowCamera;
 	const PerspectiveCamera* m_sceneCamera = NULL;
 
-	GLTexture m_whiteTexture;
-	GLTexture m_blackTexture;
 	GLTexture m_dfvTexture;
 
 	GLConstantBuffer m_modelMatrixUBO;
 	GLConstantBuffer m_cameraVarsUBO;
 	GLConstantBuffer m_lightningGlobalsUBO;
+	GLConstantBuffer m_settingsGlobalsUBO;
 
 	glm::vec3 m_sunDir;
 	glm::vec4 m_sunColorIntensity;
-	bool m_shadowsEnabled = true;
 };

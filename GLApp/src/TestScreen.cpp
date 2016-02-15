@@ -14,7 +14,7 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
+TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 {
 	uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	uint viewportHeight = GLEngine::graphics->getViewportHeight();
@@ -45,6 +45,8 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::MAX_LIGHTS)
 		GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); 
 	});
 	setSunRotation(m_sunRotation);
+
+	m_guiManager.initialize();
 
 	initializeGUI();
 	initializeInputListeners();
@@ -88,7 +90,6 @@ void TestScreen::setSunRotation(float a_angle)
 
 void TestScreen::initializeGUI()
 {
-	m_guiManager.initialize();
 	{
 		CEGUI::FrameWindow* objectListFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/ObjectListFrameWindow.layout"));
 		CEGUI::Listbox* objectListBox = scast<CEGUI::Listbox*>(objectListFrameWindow->getChild("ObjectListBox"));
@@ -98,30 +99,58 @@ void TestScreen::initializeGUI()
 			m_objectListItems[i] = new CEGUI::ListboxTextItem(m_objectNames[i].c_str());
 			objectListBox->addItem(m_objectListItems[i]);
 		}
+		objectListFrameWindow->setRolledup(true);
 		addWindow(objectListFrameWindow);
 	}
 	{
 		CEGUI::FrameWindow* optionsFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/OptionsFrameWindow.layout"));
 		{
 			CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("HBAOCheckBox"));
-			checkbox->setSelected(true);
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{
-			CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("FXAACheckBox"));
-			checkbox->setSelected(true);
+			checkbox->setSelected(m_renderer.isHBAOEnabled());
 			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
 		}
 		{
 			CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("BloomCheckBox"));
-			checkbox->setSelected(true);
+			checkbox->setSelected(m_renderer.isBloomEnabled());
 			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
 		}
 		{
 			CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("ShadowsCheckBox"));
-			checkbox->setSelected(true);
+			checkbox->setSelected(m_renderer.isShadowsEnabled());
 			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
 		}
+		// AA buttons
+		{
+			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("NoAARadioButton"));
+			checkbox->setGroupID(1);
+			checkbox->setSelected(!m_renderer.isFXAAEnabled() && GLConfig::getMultisampleType() == GLFramebuffer::EMultiSampleType::NONE);
+			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+		}
+		{
+			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("FXAARadioButton"));
+			checkbox->setGroupID(1);
+			checkbox->setSelected(m_renderer.isFXAAEnabled());
+			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+		}
+		{
+			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA2RadioButton"));
+			checkbox->setGroupID(1);
+			checkbox->setSelected(GLConfig::getMultisampleType() == GLFramebuffer::EMultiSampleType::MSAA_2X);
+			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+		}
+		{
+			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA4RadioButton"));
+			checkbox->setGroupID(1);
+			checkbox->setSelected(GLConfig::getMultisampleType() == GLFramebuffer::EMultiSampleType::MSAA_4X);
+			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+		}
+		{
+			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA8RadioButton"));
+			checkbox->setGroupID(1);
+			checkbox->setSelected(GLConfig::getMultisampleType() == GLFramebuffer::EMultiSampleType::MSAA_8X);
+			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+		}
+
 		optionsFrameWindow->setRolledup(true);
 		optionsFrameWindow->setDragMovingEnabled(false);
 		addWindow(optionsFrameWindow);
@@ -147,7 +176,9 @@ void TestScreen::initializeInputListeners()
 		switch (a_key)
 		{
 		case EKey::ESCAPE:   GLEngine::shutdown(); break;
+		case EKey::KP_5:     initializeGUI(); break;
 		case EKey::KP_6:     m_renderer.reloadShaders(); break;
+		case EKey::KP_7:     m_renderer.setDepthPrepassEnabled(!m_renderer.isDepthPrepassEnabled()); break;
 		case EKey::KP_PLUS:  m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 1.2f); break;
 		case EKey::KP_MINUS: m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 0.8f); break;
 		case EKey::Y:        m_lightManager.deleteLights(); break;
@@ -172,10 +203,25 @@ void TestScreen::checkboxSelectionChanged(const CEGUI::EventArgs& e)
 	const CEGUI::String name = checkbox->getName();
 	if (name == "HBAOCheckBox")
 		m_renderer.setHBAOEnabled(isSelected);
-	else if (name == "FXAACheckBox")
-		m_renderer.setFXAAEnabled(isSelected);
 	else if (name == "BloomCheckBox")
 		m_renderer.setBloomEnabled(isSelected);
 	else if (name == "ShadowsCheckBox")
 		m_renderer.setShadowsEnabled(isSelected);
+	else if (name == "FXAARadioButton")
+		m_renderer.setFXAAEnabled(isSelected);
+	else if (name == "MSAA2RadioButton") 
+	{
+		GLConfig::setMultisampleType(isSelected ? GLFramebuffer::EMultiSampleType::MSAA_2X : GLFramebuffer::EMultiSampleType::NONE);
+		m_renderer.initialize(m_camera);
+	} 
+	else if (name == "MSAA4RadioButton") 
+	{
+		GLConfig::setMultisampleType(isSelected ? GLFramebuffer::EMultiSampleType::MSAA_4X : GLFramebuffer::EMultiSampleType::NONE);
+		m_renderer.initialize(m_camera);
+	}
+	else if (name == "MSAA8RadioButton") 
+	{
+		GLConfig::setMultisampleType(isSelected ? GLFramebuffer::EMultiSampleType::MSAA_8X : GLFramebuffer::EMultiSampleType::NONE);
+		m_renderer.initialize(m_camera);
+	}
 }

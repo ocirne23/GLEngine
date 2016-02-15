@@ -10,12 +10,6 @@ void GLMaterial::initialize(const DBMaterial& a_material)
 	normalAtlasIdx = a_material.getNormalRegion().m_atlasIdx;
 	materialColor = a_material.getMaterialColor();
 	materialColor.a = a_material.getOpacity();
-
-	glm::vec4 specCol = a_material.getSpecularColor();
-	smoothness = (specCol.r + specCol.g + specCol.b) / 3.0f;
-	bool isMetal = glm::abs(materialColor.r - materialColor.g) < 0.05f && glm::abs(materialColor.g - materialColor.b) < 0.05f;
-	metalness = isMetal ? 1.0f : 0.0f;
-
 	smoothness = a_material.getSmoothness();
 	metalness = a_material.getMetalness();
 }

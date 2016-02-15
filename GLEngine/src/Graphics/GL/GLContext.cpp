@@ -47,11 +47,13 @@ GLContext::GLContext(SDL_Window* a_window)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, rcast<GLint*>(&m_maxTextureSize));
 	glGetIntegerv(GL_MAJOR_VERSION, rcast<GLint*>(&m_glMajorVersion));
 	glGetIntegerv(GL_MINOR_VERSION, rcast<GLint*>(&m_glMinorVersion));
-	
+	glGetIntegerv(GL_MAX_SAMPLES, rcast<GLint*>(&m_maxMSAASamples));
+
 	print("Created GL Context: %i.%i\n", m_glMajorVersion, m_glMinorVersion);
 	print("Vendor: %s\n", m_glVendor.c_str());
 	print("Renderer: %s\n", m_glRenderer.c_str());
 	print("DriverVersion: %s\n", m_glDriverVersion.c_str());
+	print("Max MSAA samples: %i\n", m_maxMSAASamples);
 }
 
 GLContext::~GLContext()

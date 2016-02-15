@@ -108,20 +108,30 @@ void checkShaderForErrors(const char* a_filePath, const GLuint a_shader, const G
 }
 
 eastl::string preprocessShaderFile(const char* a_shaderFilePath, const eastl::vector<eastl::string>* a_defines, 
-	                               const eastl::vector<eastl::string>* a_extensions)
+	                               const eastl::vector<eastl::string>* a_extensions, bool isFragmentShader)
 {
-	eastl::string contents = getVersionStr();					// #version xxx at top
-	if (a_defines)												// add user defines
+	// add #version xxx string
+	eastl::string contents = getVersionStr();
+	// add user defines
+	if (a_defines)
 		for (const eastl::string& str : *a_defines)
 			contents.append("#define ").append(str).append("\n");
-	if (a_extensions)											// add user extensions
+
+	// add vertex/fragment shader define
+	if (isFragmentShader)
+		contents.append("#define FRAGMENT_SHADER 1\n");
+	else
+		contents.append("#define VERTEX_SHADER 1\n");
+
+	// add extension defines
+	if (a_extensions)
 		for (const eastl::string& str : *a_extensions)
 			contents.append("#extension ").append(str).append(" : require\n");
 	
 	FileHandle shaderFile(a_shaderFilePath);
 	assert(shaderFile.exists());
-	contents.append(shaderFile.readString());					// add shader data from file
-	contents = processIncludes(contents);						// add all the included files
+	contents.append(shaderFile.readString());
+	contents = processIncludes(contents);
 	return contents;
 }
 
@@ -146,12 +156,10 @@ void GLShader::initialize(const char* a_vertexShaderFilePath, const char* a_frag
 	const GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	assert(vertexShader && fragmentShader);
 
-	const eastl::string vertexShaderStr = preprocessShaderFile(a_vertexShaderFilePath, a_defines, a_extensions);
-	const eastl::string fragmentShaderStr = preprocessShaderFile(a_fragmentShaderFilePath, a_defines, a_extensions);
+	const eastl::string vertexShaderStr = preprocessShaderFile(a_vertexShaderFilePath, a_defines, a_extensions, false);
+	const eastl::string fragmentShaderStr = preprocessShaderFile(a_fragmentShaderFilePath, a_defines, a_extensions, true);
 	const char* vertexShaderSource = vertexShaderStr.c_str();
 	const char* fragmentShaderSource = fragmentShaderStr.c_str();
-	//print("Vertex shader:\n%s", vertexShaderSource);
-	//print("Fragment shader:\n%s", fragmentShaderSource);
 
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
 	glCompileShader(vertexShader);
@@ -190,7 +198,6 @@ void GLShader::end()
 	glUseProgram(0);
 }
 
-//#define SHADER_STRICT_UNIFORM_LOC
 void GLShader::setUniform1i(const char* a_uniformName, int a_val)
 {
 	assert(m_begun);

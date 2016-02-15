@@ -1,34 +1,37 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-/* REQUIRED DEFINES /* // Defined in GLConfig.cpp
-PI
+#if NUM_MULTISAMPLES > 0
+	#if FRAGMENT_SHADER
+		vec4 textureMultisampleOnce(sampler2DMS sampler, vec2 pos)
+		{
+			ivec2 ipos = ivec2(pos * textureSize(sampler).xy);
+			return texelFetch(sampler, ipos, 0);
+		}
+		vec4 textureMultisample(sampler2DMS sampler, vec2 pos)
+		{
+			ivec2 ipos = ivec2(pos * textureSize(sampler).xy);
 
-MAX_MATERIALS
-MAX_LIGHTS
-USE_MS_FBO
-HBAO_BLUR_KERNEL_RADIUS
-HBAO_NUM_DIRECTIONS
-HBAO_NUM_STEPS
-HBAO_NOISE_TEXTURE_RES
-
-MODEL_MATRIX_BINDING_POINT
-CAMERA_VARS_BINDING_POINT
-LIGHTING_GLOBALS_BINDING_POINT
-MATERIAL_PROPERTIES_BINDING_POINT
-LIGHT_POSITION_RANGES_BINDING_POINT
-LIGHT_COLOR_INTENSITIES_BINDING_POINT
-CLUSTERED_SHADING_GLOBALS_BINDING_POINT
-HBAO_GLOBALS_BINDING_POINT
-
-TEXTURE_ATLAS_ARRAY_BINDING_POINT
-DFV_TEXTURE_BINDING_POINT
-LIGHT_GRID_TEXTURE_BINDING_POINT
-LIGHT_INDICE_TEXTURE_BINDING_POINT
-HBAO_DEPTH_TEXTURE_BINDING_POINT
-HBAO_COLOR_TEXTURE_BINDING_POINT
-HBAO_BLUR_TEXTURE_BINDING_POINT
-*/
+			vec4 color = vec4(0.0);
+			
+			for (int i = 0; i < NUM_MULTISAMPLES; i++)
+			{
+				color += texelFetch(sampler, ipos, i);
+			}
+			
+			color /= float(NUM_MULTISAMPLES);
+			
+			return color;
+		}
+	#endif // FRAGMENT_SHADER
+	#define FBOSampler sampler2DMS
+	#define sampleFBO textureMultisample
+	#define singleSampleFBO textureMultisampleOnce
+#else // ! NUM_MULTISAMPLES > 0
+	#define FBOSampler sampler2D
+	#define sampleFBO texture
+	#define singleSampleFBO texture
+#endif
 
 struct MaterialProperty
 {
@@ -76,6 +79,12 @@ layout (std140, binding = LIGHT_POSITION_RANGES_BINDING_POINT) uniform LightPosi
 layout (std140, binding = LIGHT_COLOR_INTENSITIES_BINDING_POINT) uniform LightColorsIntensities
 {
 	vec4 u_lightColorIntensities[MAX_LIGHTS];
+};
+layout (std140, binding = SETTINGS_GLOBALS_BINDING_POINT) uniform SettingsGlobals
+{
+	int u_hbaoEnabled;
+	int u_bloomEnabled;
+	int u_shadowsEnabled;
 };
 layout (std140, binding = CLUSTERED_SHADING_GLOBALS_BINDING_POINT) uniform ClusteredShadingGlobals
 {

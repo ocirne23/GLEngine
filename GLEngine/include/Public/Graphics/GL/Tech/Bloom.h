@@ -18,6 +18,8 @@ public:
 private:
 
 	bool m_initialized = false;
+	uint m_xRes = 0;
+	uint m_yRes = 0;
 
 	GLShader m_bloomShader;
 	GLFramebuffer m_bloomResultFBO;

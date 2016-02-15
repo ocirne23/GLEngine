@@ -16,6 +16,7 @@ public:
 	// Blurs the first texture in the blurredFBO, uses the depth texture of the depthFBO for the bilateral blur.
 	// blurredFBO and depthFBO can be identical
 	void blurFBO(GLFramebuffer& blurredFBO);
+	void reloadShader();
 
 private:
 
@@ -23,6 +24,8 @@ private:
 
 	float m_pixelXOffset = 0.0;
 	float m_pixelYOffset = 0.0;
+	EBlurValueType m_type = EBlurValueType::VEC3;
+	GLFramebuffer::ESizedFormat m_format = GLFramebuffer::ESizedFormat::RGB8;
 	GLShader m_blurShader;
 	GLFramebuffer m_blurXResultFBO;
 };

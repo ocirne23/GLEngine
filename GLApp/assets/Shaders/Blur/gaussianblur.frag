@@ -7,12 +7,11 @@ VALACCESSOR  (e.g: rg)
 
 in vec2 v_texcoord;
 
-layout(binding = BLUR_TEXTURE_BINDING_POINT) uniform sampler2D u_blurTex;
+layout(binding = BLUR_TEXTURE_BINDING_POINT) uniform FBOSampler u_blurTex;
 
 uniform vec2 u_pixelOffset;
 
 layout(location = 0) out vec3 out_val;   
-
 
 void main()
 {
@@ -50,8 +49,8 @@ void main()
     for( int i = 0; i < stepCount; i++ )                                                                            
     {                                                                                                               
         vec2 texCoordOffset = offsets[i] * u_pixelOffset;                                                            
-        VALTYPE val = texture(u_blurTex, v_texcoord + texCoordOffset).xyz + texture(u_blurTex, v_texcoord - texCoordOffset).VALACCESSOR; 
+        VALTYPE val = singleSampleFBO(u_blurTex, v_texcoord + texCoordOffset).VALACCESSOR + singleSampleFBO(u_blurTex, v_texcoord - texCoordOffset).VALACCESSOR; 
         blurredVal += weights[i] * val;                                                                                
-    }  
+    }
     out_val = blurredVal;
 }

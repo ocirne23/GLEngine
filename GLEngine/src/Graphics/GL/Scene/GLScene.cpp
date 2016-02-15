@@ -1,10 +1,9 @@
 #include "Graphics/GL/Scene/GLScene.h"
 
-#include "Graphics/GL/Scene/GLMaterial.h"
-#include "Graphics/GL/Scene/GLConfig.h"
-
 #include "Database/AssetDatabase.h"
 #include "Database/Assets/DBScene.h"
+#include "Graphics/GL/Scene/GLMaterial.h"
+#include "Graphics/GL/Scene/GLConfig.h"
 
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
@@ -22,7 +21,7 @@ void GLScene::initialize(const DBScene& a_dbScene)
 	m_meshes.resize(a_dbScene.numMeshes());
 	for (uint i = 0; i < a_dbScene.numMeshes(); ++i)
 		m_meshes[i].initialize(a_dbScene.getMeshes()[i]);
-	m_materialBuffer.initialize(GLConfig::MATERIAL_PROPERTIES_UBO);
+	m_materialBuffer.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::MaterialProperties));
 	updateMaterialBuffer();
 
 	if (a_dbScene.numAtlasTextures())
@@ -45,9 +44,9 @@ void GLScene::render(const glm::mat4& a_transform, GLConstantBuffer& a_modelMatr
 	{
 		m_materialBuffer.bind();
 		if (m_textureArray.getNumTexturesAdded())
-			m_textureArray.bind(GLConfig::TEXTURE_ATLAS_ARRAY_BINDING_POINT);
+			m_textureArray.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::TextureAtlasArray));
 		else
-			m_textureArray.unbind(GLConfig::TEXTURE_ATLAS_ARRAY_BINDING_POINT);
+			m_textureArray.unbind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::TextureAtlasArray));
 	}
 	renderNode(m_nodes[0], a_transform, a_modelMatrixUBO);
 }
@@ -65,10 +64,10 @@ void GLScene::renderNode(const DBNode& a_node, const glm::mat4& a_parentTransfor
 void GLScene::updateMaterialBuffer()
 {
 	uint numMaterials = uint(m_materials.size());
-	if (numMaterials > GLConfig::MAX_MATERIALS)
+	if (numMaterials > GLConfig::getMaxMaterials())
 	{
-		print("Scene has more than %i materials\n", GLConfig::MAX_MATERIALS);
-		numMaterials = GLConfig::MAX_MATERIALS;
+		print("Scene has more than %i materials\n", GLConfig::getMaxMaterials());
+		numMaterials = GLConfig::getMaxMaterials();
 	}
 	GLMaterial* materialBuffer = rcast<GLMaterial*>(m_materialBuffer.mapBuffer());
 	for (uint i = 0; i < numMaterials; ++i)

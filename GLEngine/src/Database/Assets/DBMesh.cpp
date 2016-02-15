@@ -27,11 +27,11 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 	for (uint i = 0; i < numVertices; ++i)
 	{
 		Vertex& v = m_vertices[i];
-		v.position =                               *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mVertices[i]);
-		v.texcoords =          (hasTextureCoords ? *reinterpret_cast<glm::vec2*>(&a_assimpMesh.mTextureCoords[0][i]) : glm::vec2(0));
-		v.normal =                                (*reinterpret_cast<glm::vec3*>(&a_assimpMesh.mNormals[i]));
-		//v.tangents =   (hasTangentsAndBitangents ? *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mTangents[i]) : glm::vec3(0));
-		//v.bitangents = (hasTangentsAndBitangents ? *reinterpret_cast<glm::vec3*>(&a_assimpMesh.mBitangents[i]) : glm::vec3(0));
+		v.position =                               *rcast<glm::vec3*>(&a_assimpMesh.mVertices[i]);
+		v.texcoords =          (hasTextureCoords ? *rcast<glm::vec2*>(&a_assimpMesh.mTextureCoords[0][i]) : glm::vec2(0));
+		v.normal =                                (*rcast<glm::vec3*>(&a_assimpMesh.mNormals[i]));
+		//v.tangents =   (hasTangentsAndBitangents ? *rcast<glm::vec3*>(&a_assimpMesh.mTangents[i]) : glm::vec3(0));
+		//v.bitangents = (hasTangentsAndBitangents ? *rcast<glm::vec3*>(&a_assimpMesh.mBitangents[i]) : glm::vec3(0));
 		v.materialID = a_assimpMesh.mMaterialIndex;
 	}
 }

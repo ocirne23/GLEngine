@@ -14,7 +14,7 @@ GLTextureArray::~GLTextureArray()
 }
 
 void GLTextureArray::startInit(uint a_width, uint a_height, uint a_depth, uint a_numComponents, bool a_isFloatTexture, uint a_numMipMaps, 
-								ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
+                               ETextureMinFilter a_minFilter, ETextureMagFilter a_magFilter, ETextureWrap a_textureWrapS, ETextureWrap a_textureWrapT)
 {
 	if (m_initialized)
 		glDeleteTextures(1, &m_textureID);

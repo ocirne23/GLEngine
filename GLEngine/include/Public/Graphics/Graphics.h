@@ -16,6 +16,7 @@ class Graphics
 public:
 	friend class GLEngine;
 	enum class EFaceCulling { FRONT, BACK, NONE };
+	enum class EDepthFunc { LESS, LEQUAL, EQUAL, GREATER };
 
 	void clear(const glm::vec4& color, bool clearColor = true, bool clearDepth = true);
 	void swap();
@@ -31,12 +32,12 @@ public:
 	void setViewportPosition(uint viewportXPos, uint viewportYPos);
 	void setVsync(bool enabled);
 	void setDepthTest(bool enabled);
+	void setDepthFunc(EDepthFunc depthFunc);
 	void setDepthWrite(bool enabled);
+	void setColorWrite(bool enabled);
 	void setFaceCulling(EFaceCulling face);
 	void setBlending(bool enabled); //TODO blend func vars
-	void beginDepthPrepass();
-	void endDepthPrepass();
-	void disableDepthPrepass();
+	void setMultisample(bool enabled);
 	void clearDepthOnly();
 
 	uint getViewportWidth() const  { return m_viewportWidth; }

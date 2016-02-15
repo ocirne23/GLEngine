@@ -78,7 +78,7 @@ public:
 		MSAA_2X = 2,
 		MSAA_4X = 4,
 		MSAA_8X = 8,
-		MSAA_16X = 16
+		// MSAA_16X = 16
 	};
 
 	enum class ETextureMinFilter

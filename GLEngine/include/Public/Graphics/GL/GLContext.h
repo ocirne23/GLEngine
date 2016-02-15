@@ -37,6 +37,7 @@ private:
 	uint m_maxTextureUnits = 0;
 	uint m_uboMaxSize      = 0;
 	uint m_maxTextureSize  = 0;
+	uint m_maxMSAASamples = 0;
 
 	eastl::string m_glVendor;
 	eastl::string m_glRenderer;

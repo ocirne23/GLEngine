@@ -3,7 +3,7 @@
 
 #include "Shaders/globals.glsl"
 
-layout (binding = DEPTH_TEXTURE_BINDING_POINT) uniform sampler2D u_linearDepthTex;
+layout (binding = DEPTH_TEXTURE_BINDING_POINT) uniform FBOSampler u_linearDepthTex;
 layout (binding = HBAO_NOISE_TEXTURE_BINDING_POINT) uniform sampler2D u_noiseTex;
 
 in vec2 v_position;
@@ -45,7 +45,7 @@ vec3 uvToEye(vec2 a_uv, float a_eyeZ)
 
 vec3 fetchEyePos(vec2 a_uv)
 {
-	float depth = texture(u_linearDepthTex, a_uv).r;
+	float depth = singleSampleFBO(u_linearDepthTex, a_uv).r;
 	float z = viewSpaceZFromDepth(depth);
 	return uvToEye(a_uv, z);
 }
@@ -90,7 +90,7 @@ vec2 rotateDirections(vec2 a_dir, vec2 a_cosSin)
 
 void computeSteps(inout vec2 a_stepSizeUV, inout float a_numSteps, float a_rayRadiusPx, float a_rand)
 {
-	a_numSteps = min(HBAO_NUM_STEPS, a_rayRadiusPx);
+	a_numSteps = min(NUM_STEPS, a_rayRadiusPx);
 	float stepSizePx = a_rayRadiusPx / (a_numSteps + 1);
 	float maxNumSteps = u_maxRadiusPixels / stepSizePx;
 
@@ -158,16 +158,16 @@ void main()
 		vec3 dPdu = minDiff(p, pr, pl);
 		vec3 dPdv = minDiff(p, pt, pb) * (u_aoResolution.y * u_invAOResolution.x);
 
-		float alpha = 2.0 * PI / HBAO_NUM_DIRECTIONS;
+		float alpha = 2.0 * PI / NUM_DIRECTIONS;
 
-		for (float d = 0.0; d < HBAO_NUM_DIRECTIONS; ++d)
+		for (float d = 0.0; d < NUM_DIRECTIONS; ++d)
 		{
 			float angle = alpha * d;
 			vec2 dir = rotateDirections(vec2(cos(angle), sin(angle)), rand.xy);
 			vec2 deltaUV = dir * stepSize;
 			ao += horizonOcclusion(deltaUV, p, numSteps, rand.z, dPdu, dPdv);
 		}
-		ao = 1.0 - ao / HBAO_NUM_DIRECTIONS * u_strength;
+		ao = 1.0 - ao / NUM_DIRECTIONS * u_strength;
 	}
 	out_ao = ao;
 }

@@ -5,6 +5,7 @@
 #include "Graphics/GL/GLContext.h"
 #include "Graphics/Utils/ARBDebugOutput.h"
 #include "Graphics/Utils/CheckGLError.h"
+#include "Graphics/GL/Scene/GLConfig.h"
 
 #include <glm/glm.hpp>
 #include <SDL/SDL_video.h>
@@ -16,7 +17,13 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
+	/* Does not seem to be required?
+	if (GLConfig::getMultisampleType() != GLFramebuffer::EMultiSampleType::NONE)
+	{
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+	}
+	*/
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
@@ -52,6 +59,7 @@ void Graphics::createGLContext()
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError()) {};
 
 	ARBDebugOutput::tryEnable();
+	GLConfig::initialize();
 
 	SDL_GL_SetSwapInterval(m_vsync);
 
@@ -63,10 +71,10 @@ void Graphics::createGLContext()
 		setViewportSize(screenWidth, screenHeight);
 	}
 	
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	// glEnable(GL_MULTISAMPLE);
-	glEnable(GL_DEPTH_TEST);
+	setFaceCulling(EFaceCulling::BACK);
+	setMultisample(GLConfig::getMultisampleType() != GLFramebuffer::EMultiSampleType::NONE);
+	setDepthTest(true);
+
 	CHECK_GL_ERROR();
 }
 
@@ -111,6 +119,11 @@ void Graphics::setDepthWrite(bool a_enabled)
 	glDepthMask(a_enabled);
 }
 
+void Graphics::setColorWrite(bool a_enabled)
+{
+	glColorMask(a_enabled, a_enabled, a_enabled, a_enabled);
+}
+
 void Graphics::setFaceCulling(EFaceCulling a_face)
 {
 	if (a_face != EFaceCulling::NONE)
@@ -134,6 +147,14 @@ void Graphics::setBlending(bool a_enabled)
 	}
 	else
 		glDisable(GL_BLEND);
+}
+
+void Graphics::setMultisample(bool a_enabled)
+{
+	if (a_enabled)
+		glEnable(GL_MULTISAMPLE);
+	else
+		glDisable(GL_MULTISAMPLE);
 }
 
 void Graphics::setWindowTitle(const char* a_title)
@@ -160,23 +181,16 @@ void Graphics::clearDepthOnly()
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void Graphics::beginDepthPrepass()
+void Graphics::setDepthFunc(EDepthFunc a_depthFunc)
 {
-	glDepthMask(true);
-	glColorMask(0, 0, 0, 0);
-	glDepthFunc(GL_LESS);
-}
-
-void Graphics::endDepthPrepass()
-{
-	glDepthMask(false);
-	glColorMask(1, 1, 1, 1);
-	glDepthFunc(GL_LEQUAL);
-}
-
-void Graphics::disableDepthPrepass()
-{
-	glDepthMask(true);
-	glColorMask(1, 1, 1, 1);
-	glDepthFunc(GL_LESS);
+	GLenum func;
+	switch (a_depthFunc)
+	{
+	case EDepthFunc::LESS: func = GL_LESS; break;
+	case EDepthFunc::LEQUAL: func = GL_LEQUAL; break;
+	case EDepthFunc::EQUAL: func = GL_EQUAL; break;
+	case EDepthFunc::GREATER: func = GL_GREATER; break;
+	default: assert(false);
+	}
+	glDepthFunc(func);
 }

@@ -1,11 +1,12 @@
 #include "Database/Processors/SceneProcessor.h"
 
-#include "Database/AssetDatabase.h"
 #include "Database/Assets/DBScene.h"
 #include "Utils/FileUtils.h"
 
 bool SceneProcessor::process(const eastl::string& a_inResourcePath, AssetDatabase& a_assetDatabase)
 {
-	a_assetDatabase.addAsset(FileUtils::getFileNameFromPath(a_inResourcePath), new DBScene(a_inResourcePath));
+	owner<DBScene*> scene = new DBScene(a_inResourcePath);
+	const eastl::string fileName = FileUtils::getFileNameFromPath(a_inResourcePath);
+	a_assetDatabase.addAsset(fileName, scene);
 	return true;
 }

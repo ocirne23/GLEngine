@@ -61,7 +61,7 @@ byte* GLConstantBuffer::mapBuffer()
 	assert(m_initialized);
 	assert(!m_isMapped);
 	glBindBuffer(GL_UNIFORM_BUFFER, m_ubo);
-	byte* buffer = scast<byte*>(glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY));
+	byte* buffer = scast<byte*>(glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY | GL_MAP_INVALIDATE_BUFFER_BIT));
 	assert(buffer);
 	m_isMapped = true;
 	return buffer;

@@ -1,6 +1,7 @@
 #include "Graphics/GL/Scene/GLMesh.h"
 
 #include "Graphics/GL/GL.h"
+#include "Graphics/GL/GLTypes.h"
 #include "Database/Assets/DBMesh.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 
@@ -13,10 +14,10 @@ void GLMesh::initialize(const DBMesh& a_mesh)
 	m_stateBuffer.initialize();
 	m_stateBuffer.begin();
 	
-	m_vertexBuffer.initialize(GLConfig::GLMESH_VERTEX_BUFFER);
+	m_vertexBuffer.initialize(GLConfig::getVBOConfig(GLConfig::EVBOs::GLMeshVertex));
 	m_vertexBuffer.upload(as_span(rcast<const byte*>(&vertices[0]), vertices.size_bytes()));
 
-	m_indiceBuffer.initialize(GLConfig::GLMESH_INDICE_BUFFER);
+	m_indiceBuffer.initialize(GLConfig::getVBOConfig(GLConfig::EVBOs::GLMeshIndice));
 	m_indiceBuffer.upload(as_span(rcast<const byte*>(&indices[0]), indices.size_bytes()));
 
 	m_stateBuffer.end();

@@ -36,3 +36,20 @@ typedef uint64_t GLuint64EXT;
 #endif
 typedef GLint64EXT  GLint64;
 typedef GLuint64EXT GLuint64;
+
+typedef struct
+{
+	GLuint vertexCount;
+	GLuint instanceCount;
+	GLuint firstVertex;
+	GLuint baseInstance;
+} DrawArraysIndirectCommand;
+
+typedef struct
+{
+	GLuint vertexCount;
+	GLuint instanceCount;
+	GLuint firstVertex;
+	GLuint baseVertex;
+	GLuint baseInstance;
+} DrawElementsIndirectCommand;

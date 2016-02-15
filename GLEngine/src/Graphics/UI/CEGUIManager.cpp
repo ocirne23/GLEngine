@@ -73,73 +73,73 @@ CEGUI::Key::Scan getCEScanCode(EKey a_key)
 	case EKey::N9: return CEGUI::Key::Nine;
 	case EKey::N0: return CEGUI::Key::Zero;
 
-	case EKey::RETURN: return CEGUI::Key::Return;
-	case EKey::ESCAPE: return CEGUI::Key::Escape;
+	case EKey::RETURN:    return CEGUI::Key::Return;
+	case EKey::ESCAPE:    return CEGUI::Key::Escape;
 	case EKey::BACKSPACE: return CEGUI::Key::Backspace;
-	case EKey::TAB: return CEGUI::Key::Tab;
-	case EKey::SPACE: return CEGUI::Key::Space;
+	case EKey::TAB:       return CEGUI::Key::Tab;
+	case EKey::SPACE:     return CEGUI::Key::Space;
 
-	case EKey::Minus: return CEGUI::Key::Minus;
-	case EKey::EQUALS: return CEGUI::Key::Equals;
-	case EKey::LEFTBRACKET: return CEGUI::Key::LeftBracket;
+	case EKey::Minus:        return CEGUI::Key::Minus;
+	case EKey::EQUALS:       return CEGUI::Key::Equals;
+	case EKey::LEFTBRACKET:  return CEGUI::Key::LeftBracket;
 	case EKey::RIGHTBRACKET: return CEGUI::Key::RightBracket;
-	case EKey::BACKSLASH: return CEGUI::Key::Backslash;
-	case EKey::NONUSHASH: return CEGUI::Key::Unknown; //?
+	case EKey::BACKSLASH:    return CEGUI::Key::Backslash;
+	case EKey::NONUSHASH:    return CEGUI::Key::Unknown; // what?
 
-	case EKey::SEMICOLON: return CEGUI::Key::Semicolon;
+	case EKey::SEMICOLON:  return CEGUI::Key::Semicolon;
 	case EKey::APOSTROPHE: return CEGUI::Key::Apostrophe;
-	case EKey::GRAVE: return CEGUI::Key::Grave;
-	case EKey::COMMA: return CEGUI::Key::Comma;
-	case EKey::PERIOD: return CEGUI::Key::Period;
-	case EKey::SLASH: return CEGUI::Key::Slash;
-	case EKey::CAPSLOCK: return CEGUI::Key::Capital;
+	case EKey::GRAVE:      return CEGUI::Key::Grave;
+	case EKey::COMMA:      return CEGUI::Key::Comma;
+	case EKey::PERIOD:     return CEGUI::Key::Period;
+	case EKey::SLASH:      return CEGUI::Key::Slash;
+	case EKey::CAPSLOCK:   return CEGUI::Key::Capital;
 
-	case EKey::F1: return CEGUI::Key::F1;
-	case EKey::F2: return CEGUI::Key::F2;
-	case EKey::F3: return CEGUI::Key::F3;
-	case EKey::F4: return CEGUI::Key::F4;
-	case EKey::F5: return CEGUI::Key::F5;
-	case EKey::F6: return CEGUI::Key::F6;
-	case EKey::F7: return CEGUI::Key::F7;
-	case EKey::F8: return CEGUI::Key::F8;
-	case EKey::F9: return CEGUI::Key::F9;
+	case EKey::F1:  return CEGUI::Key::F1;
+	case EKey::F2:  return CEGUI::Key::F2;
+	case EKey::F3:  return CEGUI::Key::F3;
+	case EKey::F4:  return CEGUI::Key::F4;
+	case EKey::F5:  return CEGUI::Key::F5;
+	case EKey::F6:  return CEGUI::Key::F6;
+	case EKey::F7:  return CEGUI::Key::F7;
+	case EKey::F8:  return CEGUI::Key::F8;
+	case EKey::F9:  return CEGUI::Key::F9;
 	case EKey::F10: return CEGUI::Key::F10;
 	case EKey::F11: return CEGUI::Key::F11;
 	case EKey::F12: return CEGUI::Key::F12;
 
-	case EKey::PRINTSCREEN: return CEGUI::Key::Unknown; //?
-	case EKey::SCROLLLOCK: return CEGUI::Key::ScrollLock;
-	case EKey::PAUSE: return CEGUI::Key::Pause;
-	case EKey::INSERT: return CEGUI::Key::Insert;
-	case EKey::HOME: return CEGUI::Key::Home;
-	case EKey::PAGEUP: return CEGUI::Key::PageUp;
-	case EKey(76): return CEGUI::Key::Delete; //EKey::DELETE (DELETE is defined somewhere xD)
-	case EKey::END: return CEGUI::Key::End;
-	case EKey::PAGEDOWN: return CEGUI::Key::PageDown;
-	case EKey::RIGHT: return CEGUI::Key::ArrowRight;
-	case EKey::LEFT: return CEGUI::Key::ArrowLeft;
-	case EKey::DOWN: return CEGUI::Key::ArrowDown;
-	case EKey::UP: return CEGUI::Key::ArrowUp;
+	case EKey::PRINTSCREEN: return CEGUI::Key::Unknown; // ?
+	case EKey::SCROLLLOCK:  return CEGUI::Key::ScrollLock;
+	case EKey::PAUSE:       return CEGUI::Key::Pause;
+	case EKey::INSERT:      return CEGUI::Key::Insert;
+	case EKey::HOME:        return CEGUI::Key::Home;
+	case EKey::PAGEUP:      return CEGUI::Key::PageUp;
+	case EKey(76):          return CEGUI::Key::Delete; //EKey::DELETE (DELETE is defined somewhere xD)
+	case EKey::END:         return CEGUI::Key::End;
+	case EKey::PAGEDOWN:    return CEGUI::Key::PageDown;
+	case EKey::RIGHT:       return CEGUI::Key::ArrowRight;
+	case EKey::LEFT:        return CEGUI::Key::ArrowLeft;
+	case EKey::DOWN:        return CEGUI::Key::ArrowDown;
+	case EKey::UP:          return CEGUI::Key::ArrowUp;
 
 	case EKey::NUMLOCKCLEAR: return CEGUI::Key::NumLock;
-	case EKey::KP_DIVIDE: return CEGUI::Key::Divide;
-	case EKey::KP_MULTIPLY: return CEGUI::Key::Multiply;
-	case EKey::KP_MINUS: return CEGUI::Key::Subtract;
-	case EKey::KP_PLUS: return CEGUI::Key::Add;
-	case EKey::KP_ENTER: return CEGUI::Key::NumpadEnter;
-	case EKey::KP_1: return CEGUI::Key::Numpad1;
-	case EKey::KP_2: return CEGUI::Key::Numpad2;
-	case EKey::KP_3: return CEGUI::Key::Numpad3;
-	case EKey::KP_4: return CEGUI::Key::Numpad4;
-	case EKey::KP_5: return CEGUI::Key::Numpad5;
-	case EKey::KP_6: return CEGUI::Key::Numpad6;
-	case EKey::KP_7: return CEGUI::Key::Numpad7;
-	case EKey::KP_8: return CEGUI::Key::Numpad8;
-	case EKey::KP_9: return CEGUI::Key::Numpad9;
-	case EKey::KP_0: return CEGUI::Key::Numpad0;
-	case EKey::KP_PERIOD: return CEGUI::Key::Decimal;
+	case EKey::KP_DIVIDE:    return CEGUI::Key::Divide;
+	case EKey::KP_MULTIPLY:  return CEGUI::Key::Multiply;
+	case EKey::KP_MINUS:     return CEGUI::Key::Subtract;
+	case EKey::KP_PLUS:      return CEGUI::Key::Add;
+	case EKey::KP_ENTER:     return CEGUI::Key::NumpadEnter;
+	case EKey::KP_1:         return CEGUI::Key::Numpad1;
+	case EKey::KP_2:         return CEGUI::Key::Numpad2;
+	case EKey::KP_3:         return CEGUI::Key::Numpad3;
+	case EKey::KP_4:         return CEGUI::Key::Numpad4;
+	case EKey::KP_5:         return CEGUI::Key::Numpad5;
+	case EKey::KP_6:         return CEGUI::Key::Numpad6;
+	case EKey::KP_7:         return CEGUI::Key::Numpad7;
+	case EKey::KP_8:         return CEGUI::Key::Numpad8;
+	case EKey::KP_9:         return CEGUI::Key::Numpad9;
+	case EKey::KP_0:         return CEGUI::Key::Numpad0;
+	case EKey::KP_PERIOD:    return CEGUI::Key::Decimal;
+	case EKey::KP_EQUALS:    return CEGUI::Key::NumpadEquals;
 
-	case EKey::KP_EQUALS: return CEGUI::Key::NumpadEquals;
 	case EKey::F13: return CEGUI::Key::F13;
 	case EKey::F14: return CEGUI::Key::F14;
 	case EKey::F15: return CEGUI::Key::F15;
@@ -153,14 +153,14 @@ CEGUI::Key::Scan getCEScanCode(EKey a_key)
 	case EKey::F23: return CEGUI::Key::Unknown;
 	case EKey::F24: return CEGUI::Key::Unknown;
 
-	case EKey::LCTRL: return CEGUI::Key::LeftControl;
+	case EKey::LCTRL:  return CEGUI::Key::LeftControl;
 	case EKey::LSHIFT: return CEGUI::Key::LeftShift;
-	case EKey::LALT: return CEGUI::Key::LeftAlt;
-	case EKey::LGUI: return CEGUI::Key::LeftWindows;
-	case EKey::RCTRL: return CEGUI::Key::RightControl;
+	case EKey::LALT:   return CEGUI::Key::LeftAlt;
+	case EKey::LGUI:   return CEGUI::Key::LeftWindows;
+	case EKey::RCTRL:  return CEGUI::Key::RightControl;
 	case EKey::RSHIFT: return CEGUI::Key::RightShift;
-	case EKey::RALT: return CEGUI::Key::RightAlt;
-	case EKey::RGUI: return CEGUI::Key::RightWindows;
+	case EKey::RALT:   return CEGUI::Key::RightAlt;
+	case EKey::RGUI:   return CEGUI::Key::RightWindows;
 
 	default: return CEGUI::Key::Unknown;
 	}

@@ -2,7 +2,6 @@
 
 #include "Database/AssetDatabaseEntry.h"
 #include "Database/Assets/IAsset.h"
-#include "Database/Utils/CRC64.h"
 #include "Utils/FileUtils.h"
 
 #include <assert.h>
@@ -67,7 +66,6 @@ bool AssetDatabase::openExisting(const eastl::string& a_filePath)
 
 void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, owner<IAsset*> a_asset)
 {
-	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	const auto unwrittenIt = m_loadedAssets.find(a_databaseEntryName);
 	const auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
 	if (unwrittenIt != m_loadedAssets.end() || writtenIt != m_writtenAssets.end())
@@ -84,7 +82,6 @@ void AssetDatabase::addAsset(const eastl::string& a_databaseEntryName, owner<IAs
 IAsset* AssetDatabase::loadAsset(const eastl::string& a_databaseEntryName, EAssetType a_type)
 {
 	assert(m_openMode == EOpenMode::READ);
-	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	
 	// If asset has already been loaded, return existing instance
 	auto unwrittenIt = m_loadedAssets.find(a_databaseEntryName);
@@ -161,7 +158,6 @@ void AssetDatabase::writeAndClose()
 
 void AssetDatabase::unloadAsset(const eastl::string& a_databaseEntryName)
 {
-	//uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	auto it = m_loadedAssets.find(a_databaseEntryName);
 	if (it != m_loadedAssets.end())
 	{
@@ -187,7 +183,6 @@ void AssetDatabase::unloadAsset(IAsset* a_asset)
 
 bool AssetDatabase::hasAsset(const eastl::string& a_databaseEntryName) const
 {
-	// uint64 hash = CRC64::getHash(a_databaseEntryName.c_str());
 	auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
 	auto loadedIt = m_loadedAssets.find(a_databaseEntryName);
 	bool found = (writtenIt != m_writtenAssets.end() || loadedIt != m_loadedAssets.end());

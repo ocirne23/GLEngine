@@ -1,16 +1,15 @@
 #include "Shaders/globals.glsl"
-// GLSL port of Nvidia's HBAO implementation from the DX11 samples
-// https://developer.nvidia.com/dx11-samples
 
 /* REQUIRED DEFINES /* !NOT IN GLOBAL DEFINES!
+BLUR_KERNEL_RADIUS (float)
 VALTYPE      (e.g: vec2)
 VALACCESSOR  (e.g: rg)
 */
 
 in vec2 v_texcoord;
 
-layout(binding = BLUR_TEXTURE_BINDING_POINT) uniform sampler2D u_blurTex;
-layout(binding = DEPTH_TEXTURE_BINDING_POINT) uniform sampler2D u_depthTex;
+layout(binding = BLUR_TEXTURE_BINDING_POINT) uniform FBOSampler u_blurTex;
+layout(binding = DEPTH_TEXTURE_BINDING_POINT) uniform FBOSampler u_depthTex;
 
 layout(location = 0) out VALTYPE out_val;
 
@@ -21,17 +20,17 @@ vec2 getSamplePos(vec2 a_pxOffset)
 
 float sampleDepth(vec2 a_texcoord)
 {
-	return texture(u_depthTex, a_texcoord).r;
+	return singleSampleFBO(u_depthTex, a_texcoord).r;
 }
 
 VALTYPE sampleVal(vec2 a_texcoord)
 {
-	return texture(u_blurTex, a_texcoord).VALACCESSOR;
+	return singleSampleFBO(u_blurTex, a_texcoord).VALACCESSOR;
 }
 
 float crossBilateralWeight(float a_r, float a_z, float a_z0)
 {
-	float blurSigma = (HBAO_BLUR_KERNEL_RADIUS + 1.0f) * 0.5f;
+	float blurSigma = (BLUR_KERNEL_RADIUS + 1.0f) * 0.5f;
 	float blurFalloff = 1.0f / (2.0f * blurSigma * blurSigma);
 	float dz = a_z0 - a_z;
 	return exp2(-a_r * a_r * blurFalloff - dz * dz);
@@ -45,7 +44,7 @@ void main()
 	float totalWeight = 1.0;
 	float i = 1.0;
 
-	for(; i <= HBAO_BLUR_KERNEL_RADIUS / 2; i += 1.0)
+	for(; i <= BLUR_KERNEL_RADIUS / 2; i += 1.0)
 	{
 		{
 			vec2 samplePos = getSamplePos(vec2(0, i));
@@ -65,7 +64,7 @@ void main()
 		}
 	}
 
-	for(; i <= HBAO_BLUR_KERNEL_RADIUS; i += 2.0)
+	for(; i <= BLUR_KERNEL_RADIUS; i += 2.0)
 	{
 		{
 			vec2 samplePos = getSamplePos(vec2(0, 0.5 + i));
