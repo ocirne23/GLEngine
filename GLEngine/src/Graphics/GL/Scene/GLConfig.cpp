@@ -103,8 +103,6 @@ void GLConfig::initializeDefines()
 {
 	defines.clear();
 
-	defines.push_back("PI 3.14159265");
-
 	defines.push_back("MAX_MATERIALS "    + StringUtils::to_string(GLConfig::maxMaterials));
 	defines.push_back("MAX_LIGHTS "       + StringUtils::to_string(GLConfig::maxLights));
 	defines.push_back("NUM_MULTISAMPLES " + StringUtils::to_string(uint(GLConfig::multisampleType)));

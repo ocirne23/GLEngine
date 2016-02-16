@@ -21,10 +21,10 @@ struct VertexAttribute
 		normalize(normalize)
 	{}
 
-	uint attributeIndex       = 0;
-	EFormat format            = EFormat::UNSIGNED_BYTE;
-	uint numElements          = 0;
-	bool normalize            = false;
+	uint attributeIndex = 0;
+	EFormat format      = EFormat::UNSIGNED_BYTE;
+	uint numElements    = 0;
+	bool normalize      = false;
 };
 
 class GLVertexBuffer
@@ -35,7 +35,7 @@ public:
 	enum class EBufferType
 	{
 		ARRAY         = 0x8892, // GL_ARRAY_BUFFER
-		ELEMENT_ARRAY = 0x8893  //GL_ELEMENT_ARRAY_BUFFER
+		ELEMENT_ARRAY = 0x8893  // GL_ELEMENT_ARRAY_BUFFER
 	};
 
 	enum class EDrawUsage

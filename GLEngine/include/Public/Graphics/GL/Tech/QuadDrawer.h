@@ -11,12 +11,13 @@ public:
 	static void drawQuad();
 	static void drawQuad(GLShader& shader);
 
+	static void reloadShader();
+
 private:
 
 	QuadDrawer() {}
 
 	static void initBuffers();
-	static void initQuadShader();
 
 private:
 

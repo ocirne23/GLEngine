@@ -17,8 +17,8 @@ void main()
 	out_color = vec3(bloom) + vec3(color * ao);
 #else
 
-	float exposure = 2.0;
-	float brightMax = 1.0;
+	float exposure = 2.2;
+	float brightMax = 1.2;
 	
 	if (u_hbaoEnabled)
 		color *= ao;

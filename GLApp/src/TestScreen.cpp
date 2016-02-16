@@ -39,6 +39,13 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 			m_gameObjects[EGameObjects_SKYSPHERE].initialize(&m_scenes[EGameObjects_SKYSPHERE]);
 			m_renderer.addSkybox(&m_gameObjects[EGameObjects_SKYSPHERE]);
 		}
+		if (m_objDB.hasAsset(m_objectNames[EGameObjects_ACT]))
+		{
+			m_scenes[EGameObjects_ACT].initialize(m_objectNames[EGameObjects_ACT], m_objDB);
+			m_gameObjects[EGameObjects_ACT].initialize(&m_scenes[EGameObjects_ACT]);
+			m_gameObjects[EGameObjects_ACT].setPosition(glm::vec3(0.0f, 0.0f, -5.0f));
+			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_ACT]);
+		}
 	}
 
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { 
@@ -64,7 +71,7 @@ void TestScreen::render(float a_deltaSec)
 	if (m_timeAccum > 1.0f)
 	{
 		m_timeAccum = 0.0f;
-		setSunRotation(m_sunRotation);
+	//	setSunRotation(m_sunRotation);
 		m_sunRotation += 1.0f;
 	}
 
@@ -165,6 +172,21 @@ void TestScreen::addWindow(CEGUI::Window* a_window)
 	root->addChild(a_window);
 }
 
+BEGIN_UNNAMED_NAMESPACE()
+
+const glm::vec3 DIRECTIONS[] = {
+	glm::vec3(1, 0, 0),
+	glm::vec3(-1, 0, 0),
+	glm::vec3(0.0000001, 1, 0),
+	glm::vec3(0.0000001, -1, 0),
+	glm::vec3(0, 0, 1),
+	glm::vec3(0, 0, -1)
+};
+
+END_UNNAMED_NAMESPACE()
+
+int da = 0;
+
 void TestScreen::initializeInputListeners()
 {
 	m_windowQuitListener.setFunc([]() { GLEngine::shutdown(); });
@@ -175,6 +197,13 @@ void TestScreen::initializeInputListeners()
 
 		switch (a_key)
 		{
+		case EKey::KP_1:
+		{
+			m_camera.lookAtDir(DIRECTIONS[da++]);
+			if (da > 5)
+				da = 0;
+			break;
+		}
 		case EKey::ESCAPE:   GLEngine::shutdown(); break;
 		case EKey::KP_5:     initializeGUI(); break;
 		case EKey::KP_6:     m_renderer.reloadShaders(); break;

@@ -1,6 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#define PI 3.14159265
 #if NUM_MULTISAMPLES > 0
 	#if FRAGMENT_SHADER
 		vec4 textureMultisampleOnce(sampler2DMS sampler, vec2 pos)
@@ -32,19 +33,6 @@
 	#define sampleFBO texture
 	#define singleSampleFBO texture
 #endif
-
-struct MaterialProperty
-{
-	vec4 diffuseTexMapping;
-	vec4 normalTexMapping;
-	int diffuseAtlasNr;
-	int normalAtlasNr;
-	float smoothness;
-	float metalness;
-	vec4 color;
-};
-
-/* ALL UBOS */
 layout (std140, binding = MODEL_MATRIX_BINDING_POINT) uniform ModelMatrix
 {
 	mat4 u_modelMatrix;
@@ -67,11 +55,20 @@ layout (std140, binding = LIGHTING_GLOBALS_BINDING_POINT) uniform LightingGlobal
 	vec4 u_sunColorIntensity;
 	mat4 u_shadowMat;
 };
+struct MaterialProperty
+{
+	vec4 diffuseTexMapping;
+	vec4 normalTexMapping;
+	int diffuseAtlasNr;
+	int normalAtlasNr;
+	float smoothness;
+	float metalness;
+	vec4 color;
+};
 layout (std140, binding = MATERIAL_PROPERTIES_BINDING_POINT) uniform MaterialProperties
 {
 	MaterialProperty u_materialProperties[MAX_MATERIALS];
 };
-
 layout (std140, binding = LIGHT_POSITION_RANGES_BINDING_POINT) uniform LightPositionRanges
 {
 	vec4 u_lightPositionRanges[MAX_LIGHTS];

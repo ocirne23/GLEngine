@@ -42,13 +42,15 @@ private:
 		EGameObjects_PALACE, 
 		EGameObjects_SKYSPHERE, 
 		EGameObjects_TESTSPHERE, 
+		EGameObjects_ACT,
 		EGameObjects_NUM_GAMEOBJECTS 
 	};
 
 	const eastl::string m_objectNames[EGameObjects_NUM_GAMEOBJECTS] = {
 		"palace.obj",
 		"skysphere.obj",
-		"sphere.obj"
+		"sphere.obj",
+		"act.ifc"
 	};
 
 	AssetDatabase m_objDB;

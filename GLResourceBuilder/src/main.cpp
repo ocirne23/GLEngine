@@ -22,6 +22,7 @@ int main()
 	*/
 	ResourceBuilder::ResourceProcessorMap objProcessors;
 	objProcessors.insert({"obj", &sceneProcessor});
+	objProcessors.insert({ "ifc", &sceneProcessor });
 
 	objDB.createNew("..\\GLApp\\assets\\OBJ-DB.da");
 	ResourceBuilder::buildResourcesDB(objProcessors, "..\\GLApp\\assets\\Models", objDB);

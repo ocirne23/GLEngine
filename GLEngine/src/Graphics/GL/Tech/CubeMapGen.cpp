@@ -11,8 +11,8 @@ const float CAMERA_FAR = 1000.0f;
 const glm::vec3 DIRECTIONS[] = {
 	glm::vec3(1, 0, 0),
 	glm::vec3(-1, 0, 0),
-	glm::vec3(0, 1, 0),
-	glm::vec3(0, -1, 0),
+	glm::vec3(0.0000001, 1, 0),
+	glm::vec3(0.0000001, -1, 0),
 	glm::vec3(0, 0, 1),
 	glm::vec3(0, 0, -1)
 };

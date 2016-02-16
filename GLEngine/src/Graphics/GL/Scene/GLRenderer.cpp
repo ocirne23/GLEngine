@@ -76,6 +76,7 @@ void GLRenderer::reloadShaders()
 	m_combineShader.initialize(COMBINE_VERT_SHADER_PATH, COMBINE_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_hbao.reloadShader();
 	m_bloom.reloadShader();
+	QuadDrawer::reloadShader();
 }
 
 void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a_lightManager)

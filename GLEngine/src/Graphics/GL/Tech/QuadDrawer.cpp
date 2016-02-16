@@ -15,7 +15,7 @@ void QuadDrawer::drawQuad()
 	if (!s_vertexBuffer.isInitialized())
 		initBuffers();
 	if (!s_quadShader.isInitialized())
-		initQuadShader();
+		reloadShader();
 
 	s_quadShader.begin();
 	s_stateBuffer.begin();
@@ -79,7 +79,7 @@ void QuadDrawer::initBuffers()
 	s_stateBuffer.end();
 }
 
-void QuadDrawer::initQuadShader()
+void QuadDrawer::reloadShader()
 {
 	s_quadShader.initialize("Shaders/quad.vert", "Shaders/quad.frag");
 	s_quadShader.begin();
