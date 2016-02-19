@@ -12,7 +12,6 @@
 #include <SDL/SDL_syswm.h>
 
 #include <Windows.h>
-
 #include <assert.h>
 
 Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, const EWindowMode& a_windowMode)
@@ -119,7 +118,7 @@ void Graphics::swap()
 
 void Graphics::setVsync(bool a_enabled)
 {
-	SDL_GL_SetSwapInterval(a_enabled);
+	wglSwapIntervalEXT(a_enabled);
 	m_vsync = a_enabled;
 }
 
