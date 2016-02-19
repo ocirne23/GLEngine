@@ -72,16 +72,16 @@ void Swapchain::initialize(vk::Instance a_instance, vk::PhysicalDevice a_physDev
 	// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
 	// the surface has no preferred format.  Otherwise, at least one
 	// supported format will be returned.
-	if (surfaceFormats.size() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
+	if (surfaceFormats.size() == 1 && surfaceFormats[0].format() == vk::Format::eUndefined)
 	{
 		m_colorFormat = vk::Format::eB8G8R8A8Unorm;;
 	}
 	else
 	{
 		assert(surfaceFormats.size() >= 1);
-		m_colorFormat = surfaceFormats[0].format;
+		m_colorFormat = surfaceFormats[0].format();
 	}
-	m_colorSpace = surfaceFormats[0].colorSpace;
+	m_colorSpace = surfaceFormats[0].colorSpace();
 }
 
 void Swapchain::setup(vk::CommandBuffer a_commandBuffer, uint& a_width, uint& a_height)
@@ -114,15 +114,15 @@ void Swapchain::setup(vk::CommandBuffer a_commandBuffer, uint& a_width, uint& a_
 			swapchainPresentMode = vk::PresentModeKHR::eVkPresentModeImmediateKhr;
 	}
 
-	uint desiredNumSwapchainImages = surfaceCapabilities.minImageCount + 1;
-	if ((surfaceCapabilities.maxImageCount > 0) && (desiredNumSwapchainImages > surfaceCapabilities.maxImageCount))
-		desiredNumSwapchainImages = surfaceCapabilities.maxImageCount;
+	uint desiredNumSwapchainImages = surfaceCapabilities.minImageCount() + 1;
+	if ((surfaceCapabilities.maxImageCount() > 0) && (desiredNumSwapchainImages > surfaceCapabilities.maxImageCount()))
+		desiredNumSwapchainImages = surfaceCapabilities.maxImageCount();
 
 	vk::SurfaceTransformFlagBitsKHR preTransform;
-	if (surfaceCapabilities.supportedTransforms & vk::SurfaceTransformFlagBitsKHR::eIdentity)
+	if (surfaceCapabilities.supportedTransforms() & vk::SurfaceTransformFlagBitsKHR::eIdentity)
 		preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
 	else
-		preTransform = surfaceCapabilities.currentTransform;
+		preTransform = surfaceCapabilities.currentTransform();
 
 	vk::SwapchainCreateInfoKHR swapchainCreateInfo = vk::SwapchainCreateInfoKHR()
 		.surface(m_surface)

@@ -38,4 +38,4 @@ float pcf(vec4 shadowCoord)
 	return totalShadow / PCF_NUM_SAMPLES;
 }
 
-#endif PCF_GLSL
+#endif // PCF_GLSL

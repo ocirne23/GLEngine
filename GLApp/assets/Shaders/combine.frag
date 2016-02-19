@@ -20,9 +20,9 @@ void main()
 	float exposure = 2.2;
 	float brightMax = 1.2;
 	
-	if (u_hbaoEnabled)
+	if (u_hbaoEnabled != 0)
 		color *= ao;
-	if (u_bloomEnabled)
+	if (u_bloomEnabled != 0)
 		color += bloom;
 	
 	float Y = dot(vec3(0.30, 0.59, 0.11), color);

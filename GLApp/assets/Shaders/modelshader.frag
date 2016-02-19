@@ -108,7 +108,7 @@ void main()
 		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * PI * attenuation;
 		lightAccum += doLight(lightContrib, L, N, V, NdotV, F0, diffuse, smoothness, metalness);
 	}
-	float visibility = (u_shadowsEnabled) ? 1.0 : pcf(v_shadowCoord);
+	float visibility = (u_shadowsEnabled != 0) ? 1.0 : pcf(v_shadowCoord);
 	if (visibility > 0.0)
 	{
 		vec3 sunContrib = u_sunColorIntensity.rgb * u_sunColorIntensity.a * PI * visibility;
