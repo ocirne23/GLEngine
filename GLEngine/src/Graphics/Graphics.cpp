@@ -31,10 +31,6 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-#ifdef ENABLE_ARB_DEBUG_OUTPUT
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-#endif
-
 	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 	if (a_windowMode == EWindowMode::BORDERLESS)
 		flags |= SDL_WINDOW_BORDERLESS;
@@ -42,9 +38,13 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 		flags |= SDL_WINDOW_FULLSCREEN;
 	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
 
-	m_winInfo = new SDL_SysWMinfo();
-	SDL_GetVersion(&m_winInfo->version);
-	SDL_GetWindowWMInfo(m_window, m_winInfo);
+	SDL_SysWMinfo winInfo;
+	SDL_GetVersion(&winInfo.version);
+	SDL_GetWindowWMInfo(m_window, &winInfo);
+
+	m_hwnd = winInfo.info.win.window;
+	m_hinstance = rcast<void*>(GetWindowLongPtr(scast<HWND>(m_hwnd), GWLP_HINSTANCE));
+	m_hdc = GetDC(scast<HWND>(m_hwnd));
 }
 
 Graphics::~Graphics()
@@ -52,26 +52,32 @@ Graphics::~Graphics()
 	assert(!m_context && "destroyGLContext() was not called");
 	SDL_DestroyWindow(m_window);
 
-	SAFE_DELETE(m_winInfo);
 	SAFE_DELETE(m_context);
 }
 
 void Graphics::createGLContext()
-{
-	m_context = new GLContext(m_window);
-
+{	
 	glewExperimental = GL_TRUE;
+	
+	// Create a temporary context for GLEW
+	SDL_GLContext context = SDL_GL_CreateContext(m_window);
 	const GLenum res = glewInit();
 	if (res != GLEW_OK)
 	{
 		print("GLEW error: %s\n", glewGetErrorString(res));
 		return;
 	}
-	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError()) {};
+	SDL_GL_DeleteContext(context);
+
+	m_context = new GLContext();
+	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError()) 
+	{
+		print("GLEW error: %s\n", glewGetErrorString(glErr));
+	};
 
 	ARBDebugOutput::tryEnable();
 	GLConfig::initialize();
-
+	
 	SDL_GL_SetSwapInterval(m_vsync);
 
 	if (!m_viewportWidth || !m_viewportHeight)
@@ -108,7 +114,7 @@ void Graphics::clear(const glm::vec4& a_color, bool a_clearColor, bool a_clearDe
 
 void Graphics::swap()
 {
-	SDL_GL_SwapWindow(m_window);
+	SwapBuffers(scast<HDC>(m_hdc));
 }
 
 void Graphics::setVsync(bool a_enabled)
@@ -190,17 +196,6 @@ void Graphics::setViewportSize(uint a_viewportWidth, uint a_viewportHeight)
 void Graphics::clearDepthOnly()
 {
 	glClear(GL_DEPTH_BUFFER_BIT);
-}
-
-void* Graphics::getHWND() const
-{
-	return m_winInfo->info.win.window;
-}
-
-void* Graphics::getHINSTANCE() const
-{
-	HINSTANCE hInstance = rcast<HINSTANCE>(GetWindowLongPtr((HWND) getHWND(), GWLP_HINSTANCE));
-	return hInstance;
 }
 
 void Graphics::setDepthFunc(EDepthFunc a_depthFunc)

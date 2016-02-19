@@ -4,7 +4,7 @@
 #include "EASTL/string.h"
 
 struct SDL_Window;
-typedef void* SDL_GLContext;
+typedef void* ContextHandle;
 
 class Graphics;
 
@@ -20,17 +20,17 @@ public:
 	const eastl::string& getVendorStr() const        { return m_glVendor; }
 	const eastl::string& getRendererStr() const      { return m_glRenderer; }
 	const eastl::string& getDriverVersionStr() const { return m_glDriverVersion; }
-	const SDL_GLContext getSDLContext() const        { return m_glContext; }
+	const ContextHandle getSDLContext() const        { return m_glContext; }
 
 private:
 
-	GLContext(SDL_Window* window);
+	GLContext();
 	~GLContext();
 	GLContext(const GLContext& copy) = delete;
 
 private:
 
-	SDL_GLContext m_glContext = NULL;
+	ContextHandle m_glContext = NULL;
 
 	uint m_glMajorVersion  = 0;
 	uint m_glMinorVersion  = 0;

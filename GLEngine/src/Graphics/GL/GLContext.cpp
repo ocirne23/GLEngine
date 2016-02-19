@@ -1,18 +1,27 @@
 #include "Graphics/GL/GLContext.h"
 
+#include "GLEngine.h"
+#include "Graphics/Graphics.h"
 #include "Graphics/GL/GL.h"
 
 #include <assert.h>
-#include <SDL/SDL.h>
+#include <Windows.h>
 
 BEGIN_UNNAMED_NAMESPACE()
 
 static const uint MAX_GL_MAJOR_VERSION = 4;
 static const uint MAX_GL_MINOR_VERSION = 5;
 
-SDL_GLContext createHighestGLContext(SDL_Window* a_window, uint a_maxMajorVersion, uint a_maxMinorVersion)
+HGLRC createHighestGLContext(HDC hdc, uint a_maxMajorVersion, uint a_maxMinorVersion)
 {
-	SDL_GLContext context = NULL;
+	int contextFlags = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
+#ifdef _DEBUG
+	contextFlags |= WGL_CONTEXT_DEBUG_BIT_ARB;
+#else
+	contextFlags |= GL_CONTEXT_FLAG_NO_ERROR_BIT_KHR;
+#endif
+
+	HGLRC context = NULL;
 	int major = a_maxMajorVersion;
 	int minor;
 	for (; major >= 0; --major)
@@ -20,9 +29,18 @@ SDL_GLContext createHighestGLContext(SDL_Window* a_window, uint a_maxMajorVersio
 		minor = a_maxMinorVersion;
 		for (; minor >= 0; --minor)
 		{
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
-			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
-			context = SDL_GL_CreateContext(a_window);
+			int attribs[] =
+			{
+				WGL_CONTEXT_MAJOR_VERSION_ARB, major,
+				WGL_CONTEXT_MINOR_VERSION_ARB, minor,
+				WGL_CONTEXT_FLAGS_ARB, contextFlags,
+				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+				0
+			};			
+			context = wglCreateContextAttribsARB(hdc, 0, attribs);
+			BOOL result = wglMakeCurrent(hdc, context);
+			assert(result);
+
 			if (context)
 				goto breakLoop;
 		}
@@ -35,10 +53,12 @@ breakLoop:
 
 END_UNNAMED_NAMESPACE()
 
-GLContext::GLContext(SDL_Window* a_window)
+GLContext::GLContext()
 {
+	HDC hdc = scast<HDC>(GLEngine::graphics->getHDC());
+
 	assert(!m_glContext);
-	m_glContext = createHighestGLContext(a_window, MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
+	m_glContext = createHighestGLContext(hdc, MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
 	m_glVendor = rcast<const char*>(glGetString(GL_VENDOR));
 	m_glRenderer = rcast<const char*>(glGetString(GL_RENDERER));
 	m_glDriverVersion = rcast<const char*>(glGetString(GL_VERSION));
@@ -59,5 +79,5 @@ GLContext::GLContext(SDL_Window* a_window)
 GLContext::~GLContext()
 {
 	assert(m_glContext);
-	SDL_GL_DeleteContext(m_glContext);
+	wglDeleteContext(scast<HGLRC>(m_glContext));
 }

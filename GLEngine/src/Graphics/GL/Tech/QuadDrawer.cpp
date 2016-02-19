@@ -19,7 +19,7 @@ void QuadDrawer::drawQuad()
 
 	s_quadShader.begin();
 	s_stateBuffer.begin();
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 	s_stateBuffer.end();
 	s_quadShader.end();
 }
@@ -34,12 +34,12 @@ void QuadDrawer::drawQuad(GLShader& a_shader)
 	if (!a_shader.isBegun())
 	{
 		a_shader.begin();
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 		a_shader.end();
 	}
 	else
 	{
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, NULL);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 	}
 	s_stateBuffer.end();
 }
@@ -54,7 +54,7 @@ void QuadDrawer::initBuffers()
 		-1.0f, 1.0f, 0.0f,		0.0f, 1.0f
 	};
 
-	byte indices[] =
+	short indices[] =
 	{
 		0, 1, 2,
 		0, 2, 3

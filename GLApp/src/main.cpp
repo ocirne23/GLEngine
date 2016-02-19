@@ -10,12 +10,14 @@ int main()
 	GLEngine::createThread("RenderThread", [&]()
 	{
 		GLEngine::createGLContext();
-		TestScreen testScreen;
-		DeltaTimeMeasurer deltaTimeMeasurer;
-		while (!GLEngine::isShutdown())
 		{
-			GLEngine::doEngineTick();
-			testScreen.render(deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs()));
+			TestScreen testScreen;
+			DeltaTimeMeasurer deltaTimeMeasurer;
+			while (!GLEngine::isShutdown())
+			{
+				GLEngine::doEngineTick();
+				testScreen.render(deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs()));
+			}
 		}
 		GLEngine::destroyGLContext();
 	});

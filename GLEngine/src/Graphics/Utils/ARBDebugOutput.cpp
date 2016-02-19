@@ -12,6 +12,8 @@ void APIENTRY debugOutput(GLenum a_source, GLenum a_type, GLuint a_id, GLenum a_
 {
 	if (a_id == 131218)	// gl state recompile mismatch 
 		return;
+	if (a_id == 3200) // glGetString(GL_EXTENSIONS) used in GLEW/CEGUI
+		return;
 
 	char debSource[32], debType[32], debSev[32];
 
