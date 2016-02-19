@@ -7,6 +7,7 @@
 typedef uint WindowFlags;
 
 struct SDL_Window;
+struct SDL_SysWMinfo;
 class WindowEventListener;
 class GLContext;
 enum class EWindowMode;
@@ -40,9 +41,11 @@ public:
 	void setMultisample(bool enabled);
 	void clearDepthOnly();
 
-	uint getViewportWidth() const  { return m_viewportWidth; }
-	uint getViewportHeight() const { return m_viewportHeight; }
-	bool getVsyncEnabled() const   { return m_vsync; }
+	uint getViewportWidth() const              { return m_viewportWidth; }
+	uint getViewportHeight() const             { return m_viewportHeight; }
+	bool getVsyncEnabled() const               { return m_vsync; }
+	void* getHWND() const;
+	void* getHINSTANCE() const;
 
 private:
 
@@ -54,14 +57,15 @@ private:
 	void destroyGLContext();
 
 private:
-
-	SDL_Window* m_window  = NULL;
-	bool m_fullscreen     = false;
-	bool m_bordered       = false;
-	bool m_vsync          = false;
-	uint m_viewportXPos   = 0;
-	uint m_viewportYPos   = 0;
-	uint m_viewportWidth  = 0;
-	uint m_viewportHeight = 0;
-	owner<GLContext*> m_context  = NULL;
+	
+	SDL_Window* m_window            = NULL;
+	owner<SDL_SysWMinfo*> m_winInfo = NULL;
+	bool m_fullscreen               = false;
+	bool m_bordered                 = false;
+	bool m_vsync                    = false;
+	uint m_viewportXPos             = 0;
+	uint m_viewportYPos             = 0;
+	uint m_viewportWidth            = 0;
+	uint m_viewportHeight           = 0;
+	owner<GLContext*> m_context     = NULL;
 };

@@ -9,6 +9,10 @@
 
 #include <glm/glm.hpp>
 #include <SDL/SDL_video.h>
+#include <SDL/SDL_syswm.h>
+
+#include <Windows.h>
+
 #include <assert.h>
 
 Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, const EWindowMode& a_windowMode)
@@ -37,12 +41,19 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	else if (a_windowMode == EWindowMode::FULLSCREEN)
 		flags |= SDL_WINDOW_FULLSCREEN;
 	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
+
+	m_winInfo = new SDL_SysWMinfo();
+	SDL_GetVersion(&m_winInfo->version);
+	SDL_GetWindowWMInfo(m_window, m_winInfo);
 }
 
 Graphics::~Graphics()
 {
 	assert(!m_context && "destroyGLContext() was not called");
 	SDL_DestroyWindow(m_window);
+
+	SAFE_DELETE(m_winInfo);
+	SAFE_DELETE(m_context);
 }
 
 void Graphics::createGLContext()
@@ -179,6 +190,17 @@ void Graphics::setViewportSize(uint a_viewportWidth, uint a_viewportHeight)
 void Graphics::clearDepthOnly()
 {
 	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void* Graphics::getHWND() const
+{
+	return m_winInfo->info.win.window;
+}
+
+void* Graphics::getHINSTANCE() const
+{
+	HINSTANCE hInstance = rcast<HINSTANCE>(GetWindowLongPtr((HWND) getHWND(), GWLP_HINSTANCE));
+	return hInstance;
 }
 
 void Graphics::setDepthFunc(EDepthFunc a_depthFunc)

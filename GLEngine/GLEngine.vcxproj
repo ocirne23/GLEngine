@@ -81,6 +81,11 @@
     <ClCompile Include="src\Graphics\Utils\LightManager.cpp" />
     <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\VKApplication.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\VKDemo.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\Swapchain.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
@@ -556,6 +561,9 @@
     <ClInclude Include="include\3rdparty\gsl\span.h" />
     <ClInclude Include="include\3rdparty\gsl\string_span.h" />
     <ClInclude Include="include\Private\Graphics\Mantle\mantle.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKDebug.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKUtils.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\vk_cpp.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\CubeMapGen.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLCubeMap.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLDrawCall.h" />
@@ -566,6 +574,10 @@
     <ClInclude Include="include\Public\Graphics\Mantle\Wrappers\GRDeviceQueue.h" />
     <ClInclude Include="include\Public\Graphics\Mantle\Wrappers\GRPhysicalGPU.h" />
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\VKApplication.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\VKDemo.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\Swapchain.h" />
     <ClInclude Include="include\Public\Utils\StringUtils.h" />
     <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
     <ClInclude Include="include\3rdparty\EASTL\utility.h" />
@@ -1115,7 +1127,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -1166,7 +1178,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />

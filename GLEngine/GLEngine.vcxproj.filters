@@ -87,6 +87,11 @@
     <ClCompile Include="src\3rdparty\EASTL\numeric_limits.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\intrusive_list.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\allocator_eastl.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\VKDemo.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\VKApplication.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\Swapchain.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -968,6 +973,13 @@
     <ClInclude Include="include\3rdparty\EASTL\bonus\intrusive_sdlist.h" />
     <ClInclude Include="include\3rdparty\EASTL\bonus\intrusive_slist.h" />
     <ClInclude Include="include\3rdparty\EASTL\bonus\list_map.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\VKDemo.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\VKApplication.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\vk_cpp.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\Swapchain.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKUtils.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKDebug.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

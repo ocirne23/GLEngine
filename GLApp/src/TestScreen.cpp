@@ -39,13 +39,6 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 			m_gameObjects[EGameObjects_SKYSPHERE].initialize(&m_scenes[EGameObjects_SKYSPHERE]);
 			m_renderer.addSkybox(&m_gameObjects[EGameObjects_SKYSPHERE]);
 		}
-		if (m_objDB.hasAsset(m_objectNames[EGameObjects_ACT]))
-		{
-			m_scenes[EGameObjects_ACT].initialize(m_objectNames[EGameObjects_ACT], m_objDB);
-			m_gameObjects[EGameObjects_ACT].initialize(&m_scenes[EGameObjects_ACT]);
-			m_gameObjects[EGameObjects_ACT].setPosition(glm::vec3(0.0f, 0.0f, -5.0f));
-			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_ACT]);
-		}
 	}
 
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { 
@@ -106,6 +99,7 @@ void TestScreen::initializeGUI()
 			m_objectListItems[i] = new CEGUI::ListboxTextItem(m_objectNames[i].c_str());
 			objectListBox->addItem(m_objectListItems[i]);
 		}
+		objectListFrameWindow->setDragMovingEnabled(false);
 		objectListFrameWindow->setRolledup(true);
 		addWindow(objectListFrameWindow);
 	}
