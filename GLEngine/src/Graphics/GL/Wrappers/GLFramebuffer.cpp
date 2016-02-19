@@ -43,12 +43,17 @@ void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, u
 
 		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GLint(a_magFilter));
 		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GLint(a_minFilter));
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
 	}
 	else
 	{
 		textureType = GL_TEXTURE_2D_MULTISAMPLE;
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindTexture(textureType, m_depthTexture);
+		// nvidia bug?
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
 		glTexImage2DMultisample(textureType, GLsizei(m_multiSampleType), GLenum(a_format), a_width, a_height, GL_TRUE);
 	}
 	CHECK_GL_ERROR();
