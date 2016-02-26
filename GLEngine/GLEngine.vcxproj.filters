@@ -99,9 +99,9 @@
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandPool.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandBuffer.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKFramebuffer.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKRenderPass.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKDepthStencil.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKFramebuffers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -997,9 +997,9 @@
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchain.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandPool.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKFramebuffer.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKRenderPass.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDepthStencil.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKFramebuffers.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />
