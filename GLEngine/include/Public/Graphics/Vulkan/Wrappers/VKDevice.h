@@ -12,6 +12,10 @@ public:
 
 	enum class EDeviceType { Graphics, Compute, Transfer, SparseBinding, NUM_TYPES, Uninitialized };
 
+public:
+
+	~VKDevice();
+
 	bool isInitialized() const { return m_initialized; }
 
 	vk::Device getVKDevice() 

@@ -1,6 +1,12 @@
 #include "Graphics/Vulkan/Wrappers/VKCommandPool.h"
 #include "Graphics/Vulkan/Utils/VKVerifier.h"
 
+VKCommandPool::~VKCommandPool()
+{
+	if (m_initialized)
+		cleanup();
+}
+
 void VKCommandPool::initialize(vk::Device a_device, uint a_queueNodeIndex)
 {
 	if (m_initialized)

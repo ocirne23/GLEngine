@@ -15,6 +15,7 @@
 	#ifndef WIN32_LEAN_AND_MEAN
 		#define WIN32_LEAN_AND_MEAN
 	#endif
+    #define NOMINMAX
 	#include <Windows.h>
 	#pragma warning(pop)
 #elif defined(EA_PLATFORM_ANDROID)

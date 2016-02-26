@@ -3,6 +3,12 @@
 #include "Graphics/Vulkan/Wrappers/VKDevice.h"
 #include "Graphics/Vulkan/Utils/VKVerifier.h"
 
+VKCommandBuffer::~VKCommandBuffer()
+{
+	if (m_initialized)
+		cleanup();
+}
+
 void VKCommandBuffer::initialize(VKDevice& a_device)
 {
 	if (m_initialized)

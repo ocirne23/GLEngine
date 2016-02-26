@@ -98,6 +98,10 @@
     <ClCompile Include="src\Graphics\Vulkan\VKApiTest.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandPool.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandBuffer.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKFramebuffer.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKRenderPass.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKDepthStencil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -989,11 +993,13 @@
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKInstance.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPhysicalDevice.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDevice.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchainTMP.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\VKApiTest.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchain.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandPool.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKFramebuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKRenderPass.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDepthStencil.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

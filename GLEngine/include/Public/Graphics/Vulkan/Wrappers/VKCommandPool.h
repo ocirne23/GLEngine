@@ -8,6 +8,8 @@ class VKCommandPool
 {
 public:
 
+	~VKCommandPool();
+
 	bool isInitialized() const { return m_initialized; }
 	vk::CommandPool getVKCommandPool() { return m_pool; }
 

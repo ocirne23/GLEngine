@@ -5,6 +5,7 @@
 #include "Graphics/GL/GL.h"
 
 #include <assert.h>
+#define NOMINMAX
 #include <Windows.h>
 
 BEGIN_UNNAMED_NAMESPACE()

@@ -2,6 +2,8 @@
 
 #include "Graphics/GL/GL.h"
 
+#define NOMINMAX
+
 #include <CEGUI/DefaultResourceProvider.h>
 #include <CEGUI/FontManager.h>
 #include <CEGUI/GUIContext.h>

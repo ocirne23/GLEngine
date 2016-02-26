@@ -61,6 +61,23 @@ uint VKPhysicalDevice::getQueueNodeIndex(VKDevice::EDeviceType a_deviceType)
 	return UINT32_MAX;
 }
 
+vk::Format VKPhysicalDevice::getDepthFormat()
+{
+	// Find supported depth format
+	// We prefer 24 bits of depth and 8 bits of stencil, but that may not be supported by all implementations
+	eastl::vector<vk::Format> depthFormats = { vk::Format::eD24UnormS8Uint, vk::Format::eD16UnormS8Uint, vk::Format::eD16Unorm };
+	for (auto& format : depthFormats)
+	{
+		vk::FormatProperties formatProperties;
+		vk::getPhysicalDeviceFormatProperties(m_physDevice, format, formatProperties);
+		// Format must support depth stencil attachment for optimal tiling
+		if (formatProperties.optimalTilingFeatures() & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
+			return format;
+	}
+	assert(false);
+	return vk::Format::eUndefined;
+}
+
 VKDevice& VKPhysicalDevice::getDevice(VKDevice::EDeviceType a_deviceType)
 {
 	assert(m_initialized);

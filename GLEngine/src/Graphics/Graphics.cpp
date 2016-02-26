@@ -11,6 +11,7 @@
 #include <SDL/SDL_video.h>
 #include <SDL/SDL_syswm.h>
 
+#define NOMINMAX
 #include <Windows.h>
 #include <assert.h>
 

@@ -22,7 +22,8 @@ public:
 	VKDevice& getDevice(VKDevice::EDeviceType deviceType = VKDevice::EDeviceType::Graphics);
 	VKSwapchain& getSwapchain();
 	uint getQueueNodeIndex(VKDevice::EDeviceType deviceType);
-	
+	vk::Format getDepthFormat();
+
 	VKInstance* getInstance() 
 	{ 
 		assert(m_initialized); 

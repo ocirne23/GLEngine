@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Graphics/Vulkan/vk_cpp.h"
-#include "Graphics/Vulkan/Wrappers/VKSwapchainTMP.h"
+#include "Graphics/Vulkan/Wrappers/VKSwapchain.h"
 
 #include <glm/glm.hpp>
 
@@ -59,7 +59,7 @@ private:
 	bool m_enableValidation = false;
 	vk::Instance m_instance = NULL;
 	vk::PhysicalDevice m_physDevice = NULL;
-	VKSwapchainTMP m_swapchain;
+	VKSwapchain m_swapchain;
 	vk::Device m_device = NULL;
 	vk::PhysicalDeviceMemoryProperties m_physDeviceMemoryProperties;
 	vk::CommandPool m_commandPool = NULL;

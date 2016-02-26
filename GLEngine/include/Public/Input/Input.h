@@ -17,7 +17,6 @@ Listening to input events:
 
 Input::KeyDownListener keyDownListener;
 keyDownListener.setFunc([this](EKey a_key, bool a_isRepeat) { onKeyDown(a_key); });
-
 **********************/
 
 class Input
@@ -51,11 +50,10 @@ private:
 
 private:
 
-	struct Event { byte data[56]; };
+	struct Event { byte data[56]; }; // Matches SDL_Event, to avoid exposing the SDL headers.
 	ConcurrentQueue<Event> m_eventQueue;
 
-public:
-	// Listener stuff from here on //
+public: // Listener definitions from here on
 	struct KeyDownTag {};
 	struct KeyUpTag {};
 	struct TextInputTag {};
@@ -81,7 +79,7 @@ private:
 
 #define LISTENERS_GET(TYPE, LISTNAME) \
 	friend class TYPE; \
-	eastl::vector<TYPE*>& getListeners(const TYPE& a_listener) { return LISTNAME;} \
+	eastl::vector<TYPE*>& getListeners(const TYPE& a_listener) { return LISTNAME; } \
 	eastl::vector<TYPE*> LISTNAME;
 
 	LISTENERS_GET(KeyDownListener, m_keyDownListeners);
@@ -93,6 +91,5 @@ private:
 	LISTENERS_GET(MouseScrolledListener, m_mouseScrolledListeners);
 	LISTENERS_GET(WindowResizedListener, m_windowResizedListeners);
 	LISTENERS_GET(WindowQuitListener, m_windowQuitListeners);
-
 #undef LISTENERS_GET
 };

@@ -9,11 +9,19 @@ class VKCommandBuffer
 {
 public:
 
+	~VKCommandBuffer();
+
 	void initialize(VKDevice& device);
 	void cleanup();
 
 	void begin();
 	void end();
+
+	vk::CommandBuffer getVKCommandBuffer()
+	{
+		assert(m_initialized);
+		return m_commandBuffer;
+	}
 
 private:
 

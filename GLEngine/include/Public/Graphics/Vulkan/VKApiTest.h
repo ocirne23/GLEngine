@@ -19,4 +19,6 @@ private:
 	VKDevice* m_device;
 
 	VKCommandBuffer m_setupCommandBuffer;
+	VKCommandBuffer m_drawCommandBuffer;
+	VKCommandBuffer m_postPresentCommandBuffer;
 };

@@ -50,13 +50,13 @@ vk::Instance createInstance(bool a_enableValidation)
 uint findGraphicsQueueIndex(vk::PhysicalDevice a_physDevice)
 {
 	eastl::vector<vk::QueueFamilyProperties> queueFamilyProperties = vk::getPhysicalDeviceQueueFamilyProperties(a_physDevice);
-	uint graphicsQueueIndex = 0;
-	for (; graphicsQueueIndex < queueFamilyProperties.size(); graphicsQueueIndex++)
+	for (uint graphicsQueueIndex = 0; graphicsQueueIndex < queueFamilyProperties.size(); graphicsQueueIndex++)
 	{
 		if (queueFamilyProperties[graphicsQueueIndex].queueFlags() & vk::QueueFlagBits::eGraphics)
-			break;
+			return graphicsQueueIndex;
 	}
-	return graphicsQueueIndex;
+	assert(false);
+	return UINT32_MAX;
 }
 
 vk::Device createDevice(vk::PhysicalDevice a_physDevice, uint a_graphicsQueueIndex, bool a_enableValidation)
@@ -181,7 +181,7 @@ DepthStencil createDepthStencil(vk::PhysicalDeviceMemoryProperties a_physDeviceM
 	return depthStencil;
 }
 
-eastl::vector<vk::Framebuffer> createFramebuffers(vk::Device a_device, VKSwapchainTMP& a_swapChain, DepthStencil a_depthStencil, vk::RenderPass a_renderPass, uint a_width, uint a_height)
+eastl::vector<vk::Framebuffer> createFramebuffers(vk::Device a_device, VKSwapchain& a_swapChain, DepthStencil a_depthStencil, vk::RenderPass a_renderPass, uint a_width, uint a_height)
 {
 	vk::ImageView attachments[2];
 	attachments[1] = a_depthStencil.view;
@@ -195,12 +195,12 @@ eastl::vector<vk::Framebuffer> createFramebuffers(vk::Device a_device, VKSwapcha
 		.layers(1);
 
 	eastl::vector<vk::Framebuffer> framebuffers;
-	framebuffers.resize(a_swapChain.getNumImages());
+	/*framebuffers.resize(a_swapChain.getNumImages());
 	for (uint i = 0; i < a_swapChain.getNumImages(); ++i)
 	{
 		attachments[0] = a_swapChain.getBuffer(i).view;
 		VKVerifier result = vk::createFramebuffer(a_device, &framebufferCreateInfo, NULL, &framebuffers[i]);
-	}
+	}*/
 	return framebuffers;
 }
 
@@ -446,11 +446,11 @@ void VKApplication::initialize()
 
 	m_instance = createInstance(enableValidation);
 	m_physDevice = findPhysicalDevice(m_instance);
-	m_swapchain.initialize(m_instance, m_physDevice);
-	const uint graphicsQueueIndex = m_swapchain.getGraphicsQueueIndex();
-	m_device = createDevice(m_physDevice, graphicsQueueIndex, enableValidation);
+	//m_swapchain.initialize(m_instance, m_physDevice);
+	//const uint graphicsQueueIndex = m_swapchain.getGraphicsQueueIndex();
+	//m_device = createDevice(m_physDevice, graphicsQueueIndex, enableValidation);
 	vk::getPhysicalDeviceMemoryProperties(m_physDevice, m_physDeviceMemoryProperties);
-	m_commandPool = createCommandPool(m_device, graphicsQueueIndex);
+	//m_commandPool = createCommandPool(m_device, graphicsQueueIndex);
 	if (m_setupCommandBuffer != VK_NULL_HANDLE) freeCommandBuffer(m_device, m_commandPool, m_setupCommandBuffer);
 	m_setupCommandBuffer = createCommandBuffers(m_device, m_commandPool, 1)[0];
 	vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo();
@@ -458,9 +458,9 @@ void VKApplication::initialize()
 
 	uint width = GLEngine::graphics->getWindowWidth();
 	uint height = GLEngine::graphics->getWindowHeight();
-	m_swapchain.setup(m_device, m_setupCommandBuffer, width, height);
+	//m_swapchain.setup(m_device, m_setupCommandBuffer, width, height);
 
-	m_drawCommandBuffers = createCommandBuffers(m_device, m_commandPool, m_swapchain.getNumImages());
+	//m_drawCommandBuffers = createCommandBuffers(m_device, m_commandPool, m_swapchain.getNumImages());
 	m_postPresentCommandBuffer = createCommandBuffers(m_device, m_commandPool, 1)[0];
 	m_depthFormat = getDepthFormat(m_physDevice);
 	m_depthStencil = createDepthStencil(m_physDeviceMemoryProperties, m_device, m_setupCommandBuffer, m_depthFormat, width, height);

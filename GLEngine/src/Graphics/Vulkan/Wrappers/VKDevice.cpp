@@ -5,6 +5,12 @@
 #include "Graphics/Vulkan/Utils/VKVerifier.h"
 #include "EASTL/array.h"
 
+VKDevice::~VKDevice()
+{
+	if (m_initialized)
+		cleanup();
+}
+
 VKCommandPool VKDevice::getCommandPool()
 {
 	if (!m_commandPool.isInitialized())
