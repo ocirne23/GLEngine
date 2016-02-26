@@ -89,9 +89,15 @@
     <ClCompile Include="src\3rdparty\EASTL\allocator_eastl.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\VKDemo.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\VKApplication.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\Swapchain.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKSwapchain.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKInstance.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKPhysicalDevice.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKDevice.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\VKApiTest.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandPool.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -977,9 +983,17 @@
     <ClInclude Include="include\Public\Graphics\Vulkan\VKApplication.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\vk_cpp.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\Swapchain.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKUtils.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKDebug.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKInstance.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPhysicalDevice.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDevice.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchainTMP.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\VKApiTest.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchain.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandPool.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

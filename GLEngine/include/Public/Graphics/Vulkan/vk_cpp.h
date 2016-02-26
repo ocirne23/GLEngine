@@ -2175,7 +2175,8 @@ namespace vk
 		eShaderReadOnlyOptimal = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 		eTransferSrcOptimal = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		eTransferDstOptimal = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-		ePreinitialized = VK_IMAGE_LAYOUT_PREINITIALIZED
+		ePreinitialized = VK_IMAGE_LAYOUT_PREINITIALIZED,
+		ePresentSrcKhr = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 	};
 
 	class DescriptorImageInfo

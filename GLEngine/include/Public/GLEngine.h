@@ -63,8 +63,6 @@ public:
 	/** Clean up all engine resources and destroy the window, waits for all created threads to finish */
 	static void finish();
 
-	static void test();
-
 private:
 
 	GLEngine() {}

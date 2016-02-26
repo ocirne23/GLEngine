@@ -4,7 +4,7 @@
 #include "Graphics/Vulkan/vk_cpp.h"
 #include "EASTL/vector.h"
 
-class Swapchain
+class VKSwapchainTMP
 {
 public:
 
@@ -15,10 +15,15 @@ public:
 
 public:
 
-	void initialize(vk::Instance instance, vk::PhysicalDevice physDevice, vk::Device device);
-	void setup(vk::CommandBuffer commandBuffer, uint& width, uint& height);
+	void initialize(vk::Instance instance, vk::PhysicalDevice physDevice);
+	void setup(vk::Device device, vk::CommandBuffer commandBuffer, uint& width, uint& height);
 
-	
+	uint getGraphicsQueueIndex() const { return m_graphicsQueueIndex; }
+	uint getNumImages() const          { return uint(m_images.size()); }
+
+	SwapChainBuffer& getBuffer(uint index) { return m_buffers[0]; }
+	vk::Image getImage(uint index) { return m_images[0]; }
+
 private:
 
 	vk::Instance m_instance = VK_NULL_HANDLE;;

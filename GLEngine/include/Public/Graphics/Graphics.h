@@ -43,6 +43,8 @@ public:
 
 	uint getViewportWidth() const  { return m_viewportWidth; }
 	uint getViewportHeight() const { return m_viewportHeight; }
+	uint getWindowWidth() const    { return m_windowWidth; }
+	uint getWindowHeight() const   { return m_windowHeight; }
 	bool getVsyncEnabled() const   { return m_vsync; }
 	void* getHWND() const          { return m_hwnd; }
 	void* getHINSTANCE() const     { return m_hinstance; }
@@ -71,4 +73,6 @@ private:
 	uint m_viewportYPos         = 0;
 	uint m_viewportWidth        = 0;
 	uint m_viewportHeight       = 0;
+	uint m_windowWidth          = 0;
+	uint m_windowHeight         = 0;
 };

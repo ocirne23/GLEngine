@@ -38,11 +38,12 @@ HGLRC createHighestGLContext(HDC hdc, uint a_maxMajorVersion, uint a_maxMinorVer
 				0
 			};			
 			context = wglCreateContextAttribsARB(hdc, 0, attribs);
-			BOOL result = wglMakeCurrent(hdc, context);
-			assert(result);
-
 			if (context)
+			{
+				BOOL result = wglMakeCurrent(hdc, context);
+				assert(result);
 				goto breakLoop;
+			}
 		}
 	}
 breakLoop:

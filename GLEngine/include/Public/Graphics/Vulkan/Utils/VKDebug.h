@@ -6,6 +6,9 @@
 class VKDebug
 {
 public:
+
+	static const bool VALIDATION_ENABLED = true;
+
 	static const uint VALIDATION_LAYER_COUNT = 9;
 	static const char* VALIDATION_LAYER_NAMES[9];
 

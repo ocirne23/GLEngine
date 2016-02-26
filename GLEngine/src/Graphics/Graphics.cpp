@@ -37,6 +37,9 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 		flags |= SDL_WINDOW_FULLSCREEN;
 	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
 
+	m_windowWidth = a_screenWidth;
+	m_windowHeight = a_screenHeight;
+
 	SDL_SysWMinfo winInfo;
 	SDL_GetVersion(&winInfo.version);
 	SDL_GetWindowWMInfo(m_window, &winInfo);
