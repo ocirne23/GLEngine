@@ -17,26 +17,36 @@ void VKApiTest::test()
 	m_instance.initialize();
 	m_physDevice = m_instance.getPhysicalDevice();
 	m_device = &m_physDevice.getDevice(VKDevice::EDeviceType::Graphics);
+	m_swapchain = &m_physDevice.getSwapchain();
+	
 	m_setupCommandBuffer.initialize(*m_device);
-
 	m_setupCommandBuffer.begin();
-	m_physDevice.getSwapchain().setup(m_setupCommandBuffer, width, height);
-	m_setupCommandBuffer.end();
-	m_setupCommandBuffer.submit();
-	m_setupCommandBuffer.initialize(*m_device);
+	{
+		m_physDevice.getSwapchain().setup(m_setupCommandBuffer, width, height);
+		m_depthStencil.initialize(*m_device, m_setupCommandBuffer, width, height);
+	}
 
-	m_postPresentCommandBuffer.initialize(*m_device);
 	m_renderPass.initialize(*m_device, m_physDevice.getSwapchain().getColorFormat(), m_physDevice.getDepthFormat());
 
 	uint numImages = m_physDevice.getSwapchain().getNumImages();
-	
 	m_drawCommandBuffers.resize(numImages);
 	for (uint i = 0; i < numImages; ++i)
 		m_drawCommandBuffers[i].initialize(*m_device);
 	
 	m_framebuffers.resize(numImages);
 	for (uint i = 0; i < numImages; ++i)
-		m_framebuffers[i].initialize(*m_device, m_renderPass, gsl::as_span(m_swapchain.getViews().data(), numImages), width, height);
+	{
+		vk::ImageView attachments[2] = {
+			m_depthStencil.getView(),
+			m_swapchain->getView(i)
+		};
+		m_framebuffers[i].initialize(*m_device, m_renderPass, { attachments, ARRAY_SIZE(attachments) }, width, height);
+	}
+
+	m_setupCommandBuffer.end();
+	m_setupCommandBuffer.submit();
+	m_setupCommandBuffer.waitIdle();
+	m_setupCommandBuffer.initialize(*m_device);
 	
 	UboData uboData;
 	uboData.projectionMatrix = glm::perspective(60.0f, float(width) / float(height), 0.1f, 256.0f);
@@ -108,7 +118,7 @@ void VKApiTest::test()
 	for (uint i = 0; i < numImages; ++i)
 	{
 		m_drawCommandBuffers[i].begin();
-		m_renderPass.beginCmd(m_drawCommandBuffers[i]);
+		m_renderPass.beginCmd(m_drawCommandBuffers[i], m_framebuffers[i]);
 		m_renderPass.bindPipelineDescriptorCmd(m_pipeline);
 		m_renderPass.bindVertexBufferCmd(m_vertexBuffer, 0);
 		m_renderPass.bindIndexBufferCmd(m_indiceBuffer, vk::IndexType::eUint32);
@@ -116,6 +126,8 @@ void VKApiTest::test()
 		m_renderPass.endCmd();
 		m_drawCommandBuffers[i].end();
 	}
+
+	m_postPresentCommandBuffer.initialize(*m_device);
 
 	while (!GLEngine::input->isKeyPressed(EKey::ESCAPE))
 	{
@@ -127,7 +139,7 @@ void VKApiTest::test()
 			.flags(uint(vk::FenceCreateFlagBits::eSignaled));
 
 		result = vk::createSemaphore(m_device->getVKDevice(), &presentCompleteSemaphoreCreateInfo, NULL, &presentCompleteSemaphore);
-		result = vk::acquireNextImageKHR(m_device->getVKDevice(), m_swapchain.getVKSwapchain(), UINT64_MAX, presentCompleteSemaphore, VK_NULL_HANDLE, &m_currentBufferIdx);
+		result = vk::acquireNextImageKHR(m_device->getVKDevice(), m_swapchain->getVKSwapchain(), UINT64_MAX, presentCompleteSemaphore, VK_NULL_HANDLE, &m_currentBufferIdx);
 		vk::CommandBuffer currentBuffer = m_drawCommandBuffers[m_currentBufferIdx].getVKCommandBuffer();
 		vk::SubmitInfo submitInfo = vk::SubmitInfo()
 			.waitSemaphoreCount(1)
@@ -136,7 +148,7 @@ void VKApiTest::test()
 			.pCommandBuffers(&currentBuffer);
 		result = vk::queueSubmit(m_device->getVKQueue(), 1, &submitInfo, VK_NULL_HANDLE);
 
-		vk::SwapchainKHR swapchain = m_swapchain.getVKSwapchain();
+		vk::SwapchainKHR swapchain = m_swapchain->getVKSwapchain();
 		vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
 			.swapchainCount(1)
 			.pSwapchains(&swapchain)
@@ -158,7 +170,7 @@ void VKApiTest::test()
 				.levelCount(1)
 				.baseArrayLayer(0)
 				.layerCount(1))
-			.image(m_swapchain.getImages()[m_currentBufferIdx]);
+			.image(m_swapchain->getImage(m_currentBufferIdx));
 
 		m_postPresentCommandBuffer.begin();
 		vk::cmdPipelineBarrier(

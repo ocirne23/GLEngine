@@ -69,7 +69,6 @@ void VKPipeline::initialize(VKDevice& a_device, VKRenderPass& a_renderPass, VKPi
 		.rasterizerDiscardEnable(VK_FALSE)
 		.depthBiasEnable(VK_FALSE);
 
-
 	vk::PipelineColorBlendAttachmentState blendAttachmentState[1] = {};
 	blendAttachmentState[0] = vk::PipelineColorBlendAttachmentState()
 		.colorWriteMask(
@@ -133,7 +132,7 @@ void VKPipeline::initialize(VKDevice& a_device, VKRenderPass& a_renderPass, VKPi
 		.pMultisampleState(&multisampleState)
 		.pViewportState(&viewportState)
 		.pDepthStencilState(&depthStencilState)
-		.stageCount(2)
+		.stageCount(ARRAY_SIZE(shaderStages))
 		.pStages(shaderStages)
 		.renderPass(a_renderPass.getVKRenderPass())
 		.pDynamicState(&dynamicState);

@@ -19,6 +19,8 @@ void VKUtils::setImageLayout(vk::CommandBuffer cmdbuffer, vk::Image image, vk::I
 {
 	// Create an image barrier object
 	vk::ImageMemoryBarrier imageMemoryBarrier = vk::ImageMemoryBarrier()
+		.srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+		.dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
 		.oldLayout(oldImageLayout)
 		.newLayout(newImageLayout)
 		.image(image)

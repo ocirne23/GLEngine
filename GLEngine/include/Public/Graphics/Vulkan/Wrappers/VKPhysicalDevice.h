@@ -64,5 +64,4 @@ private:
 	VKDevice m_devices[uint(VKDevice::EDeviceType::NUM_TYPES)];
 
 	VKSwapchain m_swapchain;
-	uint m_graphicsQueueNodeIndex = UINT32_MAX;
 };

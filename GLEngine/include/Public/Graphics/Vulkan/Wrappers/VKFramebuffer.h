@@ -20,6 +20,8 @@ public:
 
 	bool isInitialized() const { return m_initialized; }
 
+	vk::Framebuffer getVKFramebuffer() { return m_framebuffer; }
+
 private:
 	
 	bool m_initialized = false;

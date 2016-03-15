@@ -19,6 +19,7 @@ public:
 	void begin();
 	void end();
 	void submit();
+	void waitIdle();
 
 	vk::CommandBuffer getVKCommandBuffer()
 	{

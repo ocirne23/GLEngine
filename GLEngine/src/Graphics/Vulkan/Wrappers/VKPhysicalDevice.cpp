@@ -63,9 +63,15 @@ uint VKPhysicalDevice::getQueueNodeIndex(VKDevice::EDeviceType a_deviceType)
 
 vk::Format VKPhysicalDevice::getDepthFormat()
 {
-	// Find supported depth format
-	// We prefer 24 bits of depth and 8 bits of stencil, but that may not be supported by all implementations
-	eastl::vector<vk::Format> depthFormats = { vk::Format::eD24UnormS8Uint, vk::Format::eD16UnormS8Uint, vk::Format::eD16Unorm };
+	// Since all depth formats may be optional, we need to find a suitable depth format to use
+	// Start with the highest precision packed format
+	eastl::vector<vk::Format> depthFormats = {
+		vk::Format::eD32SfloatS8Uint,
+		vk::Format::eD32Sfloat,
+		vk::Format::eD24UnormS8Uint, 
+		vk::Format::eD16UnormS8Uint, 
+		vk::Format::eD16Unorm 
+	};
 	for (auto& format : depthFormats)
 	{
 		vk::FormatProperties formatProperties;

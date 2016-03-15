@@ -5,6 +5,7 @@
 
 class VKDevice;
 class VKCommandBuffer;
+class VKFramebuffer;
 class VKBuffer;
 class VKPipeline;
 
@@ -19,7 +20,7 @@ public:
 	void cleanup();
 
 
-	void beginCmd(VKCommandBuffer& commandBuffer);
+	void beginCmd(VKCommandBuffer& commandBuffer, VKFramebuffer& framebuffer);
 
 	void bindPipelineDescriptorCmd(VKPipeline& pipeline);
 	void bindVertexBufferCmd(VKBuffer& buffer, uint bindID);

@@ -69,3 +69,10 @@ void VKCommandBuffer::submit()
 
 	VKVerifier result = vk::queueSubmit(m_device->getVKQueue(), 1, &submitInfo, VK_NULL_HANDLE);
 }
+
+void VKCommandBuffer::waitIdle()
+{
+	assert(m_initialized);
+
+	vk::queueWaitIdle(m_device->getVKQueue());
+}

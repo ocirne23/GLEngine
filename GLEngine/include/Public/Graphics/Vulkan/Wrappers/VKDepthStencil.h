@@ -18,6 +18,9 @@ public:
 
 	bool isInitialized() const { return m_initialized; }
 
+	vk::ImageView getView() { assert(m_initialized); return m_view; }
+	vk::Image getImage() { assert(m_initialized); return m_image; }
+
 private:
 
 	bool m_initialized = false;

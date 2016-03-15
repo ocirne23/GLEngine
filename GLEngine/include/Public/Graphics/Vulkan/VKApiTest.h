@@ -11,6 +11,7 @@
 #include "Graphics/Vulkan/Wrappers/VKRenderPass.h"
 #include "Graphics/Vulkan/Wrappers/VKPipeline.h"
 #include "Graphics/Vulkan/Wrappers/VKFramebuffer.h"
+#include "Graphics/Vulkan/Wrappers/VKDepthStencil.h"
 
 #include <glm/glm.hpp>
 
@@ -39,12 +40,14 @@ private:
 
 	VKInstance m_instance;
 	VKPhysicalDevice m_physDevice;
-	VKDevice* m_device;
-	VKSwapchain m_swapchain;
+	VKDevice* m_device = NULL;
+	VKSwapchain* m_swapchain = NULL;
 	VKRenderPass m_renderPass;
 	VKPipeline m_pipeline;
+	VKDepthStencil m_depthStencil;
+	
 	uint m_currentBufferIdx = 0;
-
+	
 	eastl::vector<VKFramebuffer> m_framebuffers;
 
 	VKCommandBuffer m_setupCommandBuffer;

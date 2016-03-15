@@ -6,7 +6,7 @@
 #include "Graphics/Vulkan/Wrappers/VKCommandBuffer.h"
 #include "Graphics/Vulkan/Wrappers/VKDevice.h"
 #include "Graphics/Vulkan/Wrappers/VKPipeline.h"
-
+#include "Graphics/Vulkan/Wrappers/VKFramebuffer.h"
 #include "Graphics/Vulkan/Utils/VKVerifier.h"
 
 VKRenderPass::~VKRenderPass()
@@ -36,8 +36,8 @@ void VKRenderPass::initialize(VKDevice& a_device, vk::Format a_colorFormat, vk::
 	attachments[1].storeOp(vk::AttachmentStoreOp::eStore);
 	attachments[1].stencilLoadOp(vk::AttachmentLoadOp::eDontCare);
 	attachments[1].stencilStoreOp(vk::AttachmentStoreOp::eDontCare);
-	attachments[1].initialLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
-	attachments[1].finalLayout(vk::ImageLayout::eDepthStencilReadOnlyOptimal);
+	attachments[1].initialLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+	attachments[1].finalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
 	vk::AttachmentReference colorReference = vk::AttachmentReference()
 		.attachment(0)
@@ -79,7 +79,7 @@ void VKRenderPass::cleanup()
 	m_initialized = false;
 }
 
-void VKRenderPass::beginCmd(VKCommandBuffer& a_commandBuffer)
+void VKRenderPass::beginCmd(VKCommandBuffer& a_commandBuffer, VKFramebuffer& a_framebuffer)
 {
 	assert(m_initialized);
 	assert(!m_begun);
@@ -110,7 +110,7 @@ void VKRenderPass::beginCmd(VKCommandBuffer& a_commandBuffer)
 			.offset(vk::Offset2D(0, 0)))
 		.clearValueCount(2)
 		.pClearValues(clearValues)
-		.framebuffer();
+		.framebuffer(a_framebuffer.getVKFramebuffer());
 
 	vk::cmdBeginRenderPass(m_commandBuffer, renderpassBeginInfo, vk::SubpassContents::eInline);
 
@@ -140,7 +140,6 @@ void VKRenderPass::bindPipelineDescriptorCmd(VKPipeline& a_pipeline)
 
 	vk::DescriptorSet descriptorSet = a_pipeline.getVKDescriptorSet();
 	vk::cmdBindDescriptorSets(m_commandBuffer, vk::PipelineBindPoint::eGraphics, a_pipeline.getVKPipelineLayout(), 0, 1, &descriptorSet, 0, NULL);
-
 	vk::cmdBindPipeline(m_commandBuffer, vk::PipelineBindPoint::eGraphics, a_pipeline.getVKPipeline());
 }
 

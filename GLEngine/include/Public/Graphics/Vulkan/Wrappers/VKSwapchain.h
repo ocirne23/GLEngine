@@ -51,6 +51,16 @@ public:
 
 	const eastl::vector<vk::Image>& getImages() const { return m_images; }
 	const eastl::vector<vk::ImageView>& getViews() const { return m_views; }
+	vk::ImageView getView(uint a_index) 
+	{ 
+		assert(m_initialized && m_views.size() > a_index); 
+		return m_views[a_index];
+	}
+	vk::Image getImage(uint a_index)
+	{
+		assert(m_initialized && m_images.size() > a_index);
+		return m_images[a_index];
+	}
 
 private:
 
