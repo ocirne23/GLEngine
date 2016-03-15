@@ -9,6 +9,8 @@ class VKInstance
 {
 public:
 
+	VKInstance() {}
+	VKInstance(const VKInstance& copy) { assert(!m_initialized); }
 	~VKInstance();
 
 	void initialize();
@@ -25,7 +27,7 @@ public:
 		return m_instance; 
 	}
 
-	VKPhysicalDevice getPhysicalDevice(uint index = 0);
+	VKPhysicalDevice& getPhysicalDevice(uint index = 0);
 
 private:
 	

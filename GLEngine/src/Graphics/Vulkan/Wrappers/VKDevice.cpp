@@ -11,7 +11,7 @@ VKDevice::~VKDevice()
 		cleanup();
 }
 
-VKCommandPool VKDevice::getCommandPool()
+VKCommandPool& VKDevice::getCommandPool()
 {
 	if (!m_commandPool.isInitialized())
 		m_commandPool.initialize(m_device, m_physDevice->getQueueNodeIndex(m_type));
@@ -50,6 +50,7 @@ void VKDevice::initialize(VKPhysicalDevice& a_physDevice, EDeviceType a_type, ui
 	}
 
 	VKVerifier result = vk::createDevice(a_physDevice.getVKPhysicalDevice(), &deviceCreateInfo, nullptr, &m_device);
+	vk::getDeviceQueue(m_device, a_queueFamilyIndex, 0, m_queue);
 
 	m_initialized = true;
 }

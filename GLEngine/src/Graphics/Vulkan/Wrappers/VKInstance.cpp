@@ -52,15 +52,15 @@ void VKInstance::initialize()
 	m_initialized = true;
 }
 
-VKPhysicalDevice VKInstance::getPhysicalDevice(uint a_index)
+VKPhysicalDevice& VKInstance::getPhysicalDevice(uint a_index)
 {
 	assert(m_initialized);
 	if (m_physicalDevices.size() > a_index)
-		m_physicalDevices[a_index];
+		return m_physicalDevices[a_index];
 	else
 	{
 		assert(false);
-		return VKPhysicalDevice();
+		return m_physicalDevices[0];
 	}
 }
 

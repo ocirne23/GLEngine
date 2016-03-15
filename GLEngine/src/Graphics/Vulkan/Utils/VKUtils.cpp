@@ -1,5 +1,20 @@
 #include "Graphics\Vulkan\Utils\VKUtils.h"
 
+uint VKUtils::getMemoryType(vk::PhysicalDeviceMemoryProperties a_physDevMemProps, uint a_typeBits, vk::MemoryPropertyFlagBits a_properties)
+{
+	for (uint i = 0; i < 32; ++i)
+	{
+		if ((a_typeBits & 1) == 1)
+		{
+			if ((a_physDevMemProps.memoryTypes()[i].propertyFlags() & a_properties) == a_properties)
+				return i;
+		}
+		a_typeBits >>= 1;
+	}
+	assert(false);
+	return UINT32_MAX;
+}
+
 void VKUtils::setImageLayout(vk::CommandBuffer cmdbuffer, vk::Image image, vk::ImageAspectFlags aspectMask, vk::ImageLayout oldImageLayout, vk::ImageLayout newImageLayout)
 {
 	// Create an image barrier object

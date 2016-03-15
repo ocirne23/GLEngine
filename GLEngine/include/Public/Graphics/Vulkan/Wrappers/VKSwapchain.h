@@ -11,10 +11,14 @@ class VKSwapchain
 {
 public:
 
+	VKSwapchain() {}
+	VKSwapchain(const VKSwapchain& copy) { assert(!m_initialized); }
 	~VKSwapchain();
 	void initialize(VKInstance& instance, VKPhysicalDevice& physDevice);
 	void setup(VKCommandBuffer& setupCommandBuffer, uint width, uint height);
 	void cleanup();
+
+	vk::SwapchainKHR getVKSwapchain() { return m_swapchain; }
 
 	bool isInitialized() const { return m_initialized; }
 
@@ -41,6 +45,12 @@ public:
 		assert(m_initialized);
 		return m_colorSpace;
 	}
+
+	uint getNumImages() const { return uint(m_images.size()); }
+	uint getNumViews() const { return uint(m_views.size()); }
+
+	const eastl::vector<vk::Image>& getImages() const { return m_images; }
+	const eastl::vector<vk::ImageView>& getViews() const { return m_views; }
 
 private:
 

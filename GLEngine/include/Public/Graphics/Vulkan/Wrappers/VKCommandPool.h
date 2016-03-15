@@ -3,15 +3,16 @@
 #include "Core.h"
 #include "Graphics/Vulkan/vk_cpp.h"
 
-
 class VKCommandPool
 {
 public:
 
+	VKCommandPool() {}
+	VKCommandPool(const VKCommandPool& copy) { assert(!m_initialized); }
 	~VKCommandPool();
 
 	bool isInitialized() const { return m_initialized; }
-	vk::CommandPool getVKCommandPool() { return m_pool; }
+	vk::CommandPool getVKCommandPool() { assert(m_initialized); return m_pool; }
 
 private:
 	friend class VKDevice;

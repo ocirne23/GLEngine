@@ -52,6 +52,7 @@ class VKApplication
 {
 public:
 
+	VKApplication() {}
 	void initialize();
 
 private:

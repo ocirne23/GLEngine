@@ -15,6 +15,8 @@ class VKPhysicalDevice
 {
 public:
 
+	VKPhysicalDevice() {}
+	VKPhysicalDevice(const VKPhysicalDevice& copy) { assert(!m_initialized); }
 	~VKPhysicalDevice();
 
 	bool isInitialized() const { return m_initialized; }

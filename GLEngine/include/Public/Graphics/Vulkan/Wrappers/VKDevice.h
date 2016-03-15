@@ -14,6 +14,8 @@ public:
 
 public:
 
+	VKDevice() {}
+	VKDevice(const VKDevice& copy) { assert(!m_initialized); }
 	~VKDevice();
 
 	bool isInitialized() const { return m_initialized; }
@@ -24,14 +26,19 @@ public:
 		return m_device; 
 	}
 
+	vk::Queue getVKQueue()
+	{
+		assert(m_initialized);
+		return m_queue;
+	}
+
 	VKPhysicalDevice* getPhysDevice() 
 	{ 
 		assert(m_initialized); 
 		return m_physDevice; 
 	}
 
-	VKCommandPool getCommandPool();
-
+	VKCommandPool& getCommandPool();
 
 private:
 
@@ -46,6 +53,7 @@ private:
 	VKPhysicalDevice* m_physDevice;
 	EDeviceType m_type = EDeviceType::Uninitialized;
 	vk::Device m_device;
+	vk::Queue m_queue;
 
 	VKCommandPool m_commandPool;
 };

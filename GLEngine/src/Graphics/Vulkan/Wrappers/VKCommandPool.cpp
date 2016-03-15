@@ -11,6 +11,7 @@ void VKCommandPool::initialize(vk::Device a_device, uint a_queueNodeIndex)
 {
 	if (m_initialized)
 		cleanup();
+
 	vk::CommandPoolCreateInfo commandPoolCreateInfo = vk::CommandPoolCreateInfo()
 		.queueFamilyIndex(a_queueNodeIndex)
 		.flags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);

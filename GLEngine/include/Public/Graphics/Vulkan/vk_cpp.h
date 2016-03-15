@@ -38,6 +38,7 @@
 #ifdef VKCPP_ENHANCED_MODE
 # include "EASTL/vector.h"
 # include "EASTL/string.h"
+# include "EASTL/fixed_vector.h"
 #endif    // VKCPP_ENHANCED_MODE
 
 static_assert(VK_MAKE_VERSION(1, 0, 2) == VK_API_VERSION, "Wrong VK_API_VERSION!");
@@ -1099,7 +1100,7 @@ namespace vk
 	class ClearColorValue
 	{
 	public:
-		ClearColorValue(const std::array<float, 4>& float32 = { 0 })
+		ClearColorValue(const eastl::fixed_vector<float, 4>& float32 = { 0 })
 		{
 			memcpy(&m_clearColorValue.float32, float32.data(), 4 * sizeof(float));
 		}
@@ -1109,13 +1110,13 @@ namespace vk
 			return reinterpret_cast<const float*>(m_clearColorValue.float32);
 		}
 
-		ClearColorValue& float32(std::array<float, 4> float32)
+		ClearColorValue& float32(eastl::fixed_vector<float, 4> float32)
 		{
 			memcpy(&m_clearColorValue.float32, float32.data(), 4 * sizeof(float));
 			return *this;
 		}
 
-		ClearColorValue(const std::array<int32_t, 4>& int32)
+		ClearColorValue(const eastl::fixed_vector<int32_t, 4>& int32)
 		{
 			memcpy(&m_clearColorValue.int32, int32.data(), 4 * sizeof(int32_t));
 		}
@@ -1125,13 +1126,13 @@ namespace vk
 			return reinterpret_cast<const int32_t*>(m_clearColorValue.int32);
 		}
 
-		ClearColorValue& int32(std::array<int32_t, 4> int32)
+		ClearColorValue& int32(eastl::fixed_vector<int32_t, 4> int32)
 		{
 			memcpy(&m_clearColorValue.int32, int32.data(), 4 * sizeof(int32_t));
 			return *this;
 		}
 
-		ClearColorValue(const std::array<uint32_t, 4>& uint32)
+		ClearColorValue(const eastl::fixed_vector<uint32_t, 4>& uint32)
 		{
 			memcpy(&m_clearColorValue.uint32, uint32.data(), 4 * sizeof(uint32_t));
 		}
@@ -1141,7 +1142,7 @@ namespace vk
 			return reinterpret_cast<const uint32_t*>(m_clearColorValue.uint32);
 		}
 
-		ClearColorValue& uint32(std::array<uint32_t, 4> uint32)
+		ClearColorValue& uint32(eastl::fixed_vector<uint32_t, 4> uint32)
 		{
 			memcpy(&m_clearColorValue.uint32, uint32.data(), 4 * sizeof(uint32_t));
 			return *this;
@@ -7339,10 +7340,10 @@ namespace vk
 	{
 	public:
 		PipelineColorBlendStateCreateInfo()
-			: PipelineColorBlendStateCreateInfo(0, 0, LogicOp::eClear, 0, nullptr, { 0 })
+			: PipelineColorBlendStateCreateInfo(0, 0, LogicOp::eClear, 0, nullptr, { 0, 0, 0, 0 })
 		{}
 
-		PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags flags, Bool32 logicOpEnable, LogicOp logicOp, uint32_t attachmentCount, const PipelineColorBlendAttachmentState* pAttachments, std::array<float, 4> const& blendConstants)
+		PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags flags, Bool32 logicOpEnable, LogicOp logicOp, uint32_t attachmentCount, const PipelineColorBlendAttachmentState* pAttachments, eastl::fixed_vector<float, 4> const& blendConstants)
 		{
 			m_pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 			m_pipelineColorBlendStateCreateInfo.pNext = nullptr;
@@ -7436,7 +7437,7 @@ namespace vk
 			return reinterpret_cast<const float*>(m_pipelineColorBlendStateCreateInfo.blendConstants);
 		}
 
-		PipelineColorBlendStateCreateInfo& blendConstants(std::array<float, 4> blendConstants)
+		PipelineColorBlendStateCreateInfo& blendConstants(eastl::fixed_vector<float, 4> blendConstants)
 		{
 			memcpy(&m_pipelineColorBlendStateCreateInfo.blendConstants, blendConstants.data(), 4 * sizeof(float));
 			return *this;
@@ -8471,7 +8472,7 @@ namespace vk
 			: ImageBlit(ImageSubresourceLayers(), { Offset3D() }, ImageSubresourceLayers(), { Offset3D() })
 		{}
 
-		ImageBlit(ImageSubresourceLayers srcSubresource, std::array<Offset3D, 2> const& srcOffsets, ImageSubresourceLayers dstSubresource, std::array<Offset3D, 2> const& dstOffsets)
+		ImageBlit(ImageSubresourceLayers srcSubresource, eastl::fixed_vector<Offset3D, 2> const& srcOffsets, ImageSubresourceLayers dstSubresource, eastl::fixed_vector<Offset3D, 2> const& dstOffsets)
 		{
 			m_imageBlit.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
 			memcpy(&m_imageBlit.srcOffsets, srcOffsets.data(), 2 * sizeof(Offset3D));
@@ -8495,7 +8496,7 @@ namespace vk
 			return reinterpret_cast<const Offset3D*>(m_imageBlit.srcOffsets);
 		}
 
-		ImageBlit& srcOffsets(std::array<Offset3D, 2> srcOffsets)
+		ImageBlit& srcOffsets(eastl::fixed_vector<Offset3D, 2> srcOffsets)
 		{
 			memcpy(&m_imageBlit.srcOffsets, srcOffsets.data(), 2 * sizeof(Offset3D));
 			return *this;
@@ -8517,7 +8518,7 @@ namespace vk
 			return reinterpret_cast<const Offset3D*>(m_imageBlit.dstOffsets);
 		}
 
-		ImageBlit& dstOffsets(std::array<Offset3D, 2> dstOffsets)
+		ImageBlit& dstOffsets(eastl::fixed_vector<Offset3D, 2> dstOffsets)
 		{
 			memcpy(&m_imageBlit.dstOffsets, dstOffsets.data(), 2 * sizeof(Offset3D));
 			return *this;

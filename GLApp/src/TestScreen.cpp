@@ -5,12 +5,10 @@
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Utils/StringUtils.h"
 #include "Database/Assets/DBScene.h"
-
 #include <CEGUI/EventArgs.h>
 #include <CEGUI/Window.h>
 #include <CEGUI/WindowManager.h>
 #include <CEGUI/widgets/All.h>
-
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
@@ -120,8 +118,7 @@ void TestScreen::initializeGUI()
 			checkbox->setSelected(m_renderer.isShadowsEnabled());
 			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
 		}
-		// AA buttons
-		{
+		{// AA buttons
 			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("NoAARadioButton"));
 			checkbox->setGroupID(1);
 			checkbox->setSelected(!m_renderer.isFXAAEnabled() && GLConfig::getMultisampleType() == GLFramebuffer::EMultiSampleType::NONE);
@@ -166,21 +163,6 @@ void TestScreen::addWindow(CEGUI::Window* a_window)
 	root->addChild(a_window);
 }
 
-BEGIN_UNNAMED_NAMESPACE()
-
-const glm::vec3 DIRECTIONS[] = {
-	glm::vec3(1, 0, 0),
-	glm::vec3(-1, 0, 0),
-	glm::vec3(0.0000001, 1, 0),
-	glm::vec3(0.0000001, -1, 0),
-	glm::vec3(0, 0, 1),
-	glm::vec3(0, 0, -1)
-};
-
-END_UNNAMED_NAMESPACE()
-
-int da = 0;
-
 void TestScreen::initializeInputListeners()
 {
 	m_windowQuitListener.setFunc([]() { GLEngine::shutdown(); });
@@ -191,13 +173,6 @@ void TestScreen::initializeInputListeners()
 
 		switch (a_key)
 		{
-		case EKey::KP_1:
-		{
-			m_camera.lookAtDir(DIRECTIONS[da++]);
-			if (da > 5)
-				da = 0;
-			break;
-		}
 		case EKey::ESCAPE:   GLEngine::shutdown(); break;
 		case EKey::KP_5:     initializeGUI(); break;
 		case EKey::KP_6:     m_renderer.reloadShaders(); break;

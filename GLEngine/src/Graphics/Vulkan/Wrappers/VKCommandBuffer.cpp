@@ -11,11 +11,12 @@ VKCommandBuffer::~VKCommandBuffer()
 
 void VKCommandBuffer::initialize(VKDevice& a_device)
 {
+	assert(!m_begun);
+
 	if (m_initialized)
 		cleanup();
 
-	eastl::vector<vk::CommandBuffer> buffers;
-	buffers.resize(1);
+	m_device = &a_device;
 
 	vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
 		.commandPool(a_device.getCommandPool().getVKCommandPool())
@@ -30,14 +31,19 @@ void VKCommandBuffer::initialize(VKDevice& a_device)
 void VKCommandBuffer::cleanup()
 {
 	assert(m_initialized);
+	assert(!m_begun);
 
-	assert(false); //TODO
+	VKVerifier result = vk::queueWaitIdle(m_device->getVKQueue()); // Maybe seperate?
+
+	vk::freeCommandBuffers(m_device->getVKDevice(), m_device->getCommandPool().getVKCommandPool(), 1, &m_commandBuffer);
+	m_commandBuffer = VK_NULL_HANDLE;
 
 	m_initialized = false;
 }
 
 void VKCommandBuffer::begin()
 {
+	assert(m_initialized);
 	assert(!m_begun);
 	vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo();
 	vk::beginCommandBuffer(m_commandBuffer, commandBufferBeginInfo);
@@ -46,7 +52,20 @@ void VKCommandBuffer::begin()
 
 void VKCommandBuffer::end()
 {
+	assert(m_initialized);
 	assert(m_begun);
 	vk::endCommandBuffer(m_commandBuffer);
 	m_begun = false;
+}
+
+void VKCommandBuffer::submit()
+{
+	assert(m_initialized);
+	assert(!m_begun);
+
+	vk::SubmitInfo submitInfo = vk::SubmitInfo()
+		.commandBufferCount(1)
+		.pCommandBuffers(&m_commandBuffer);
+
+	VKVerifier result = vk::queueSubmit(m_device->getVKQueue(), 1, &submitInfo, VK_NULL_HANDLE);
 }
