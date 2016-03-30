@@ -18,7 +18,7 @@ owner<Graphics*> GLEngine::graphics             = NULL;
 bool GLEngine::s_shutdown                       = false;
 owner<ThreadManager*> GLEngine::s_threadManager = NULL;
 
-#include "Graphics/Vulkan/VKApiTest.h"
+#include "Graphics/Vulkan/Test/triangle.h"
 void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height, EWindowMode a_windowMode)
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
@@ -40,8 +40,7 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 	s_threadManager = new ThreadManager();
 
 	print("vktest..");
-	VKApiTest app;
-	app.test();
+	triangleTest();
 	print("done\n");
 }
 

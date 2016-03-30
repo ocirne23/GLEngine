@@ -10,13 +10,14 @@ VKDevice::~VKDevice()
 	if (m_initialized)
 		cleanup();
 }
-
+/*
 VKCommandPool& VKDevice::getCommandPool()
 {
 	if (!m_commandPool.isInitialized())
 		m_commandPool.initialize(m_device, m_physDevice->getQueueNodeIndex(m_type));
 	return m_commandPool;
 }
+*/
 
 void VKDevice::initialize(VKPhysicalDevice& a_physDevice, EDeviceType a_type, uint a_queueFamilyIndex)
 {
@@ -49,8 +50,8 @@ void VKDevice::initialize(VKPhysicalDevice& a_physDevice, EDeviceType a_type, ui
 		deviceCreateInfo.ppEnabledLayerNames(VKDebug::VALIDATION_LAYER_NAMES);
 	}
 
-	VKVerifier result = vk::createDevice(a_physDevice.getVKPhysicalDevice(), &deviceCreateInfo, nullptr, &m_device);
-	vk::getDeviceQueue(m_device, a_queueFamilyIndex, 0, m_queue);
+	m_device = a_physDevice.getVKPhysicalDevice().createDevice(deviceCreateInfo, NULL);
+	m_queue = m_device.getQueue(a_queueFamilyIndex, 0);
 
 	m_initialized = true;
 }

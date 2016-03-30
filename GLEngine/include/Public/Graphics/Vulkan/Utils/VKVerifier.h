@@ -13,7 +13,7 @@ struct VKVerifier
 	}
 	VKVerifier operator=(const vk::Result& a_result)
 	{
-		assert(a_result == vk::Result::eVkSuccess);
+		assert(a_result == vk::Result::eSuccess);
 		m_result = a_result;
 		return VKVerifier();
 	}

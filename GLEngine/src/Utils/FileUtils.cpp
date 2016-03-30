@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <assert.h>
 #include <fstream>
-#define NOMINMAX
 #include <Windows.h>
 
 eastl::string FileUtils::getFileExtension(const eastl::string& a_filePath)

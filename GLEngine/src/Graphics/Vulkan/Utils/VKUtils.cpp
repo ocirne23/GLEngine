@@ -105,9 +105,7 @@ void VKUtils::setImageLayout(vk::CommandBuffer cmdbuffer, vk::Image image, vk::I
 	vk::PipelineStageFlags srcStageFlags = vk::PipelineStageFlagBits::eTopOfPipe;
 	vk::PipelineStageFlags destStageFlags = vk::PipelineStageFlagBits::eTopOfPipe;
 
-	vk::cmdPipelineBarrier(
-		cmdbuffer,
-		srcStageFlags, 
+	cmdbuffer.pipelineBarrier(srcStageFlags,
 		destStageFlags,
 		vk::DependencyFlags(),
 		0, nullptr,

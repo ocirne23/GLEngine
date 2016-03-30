@@ -11,16 +11,20 @@
 #include <SDL/SDL_video.h>
 #include <SDL/SDL_syswm.h>
 
-#define NOMINMAX
 #include <Windows.h>
 #include <assert.h>
 
 Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, const EWindowMode& a_windowMode)
 {
+	uint flags = SDL_WINDOW_SHOWN;
+	/*
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	flags |= SDL_WINDOW_OPENGL;
 	/* Does not seem to be required?
 	if (GLConfig::getMultisampleType() != GLFramebuffer::EMultiSampleType::NONE)
 	{
@@ -28,14 +32,11 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
 	}
 	*/
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
-	uint flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 	if (a_windowMode == EWindowMode::BORDERLESS)
 		flags |= SDL_WINDOW_BORDERLESS;
 	else if (a_windowMode == EWindowMode::FULLSCREEN)
 		flags |= SDL_WINDOW_FULLSCREEN;
+
 	m_window = SDL_CreateWindow(a_windowName, a_screenXPos, a_screenYPos, a_screenWidth, a_screenHeight, flags);
 
 	m_windowWidth = a_screenWidth;
@@ -47,6 +48,7 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 
 	m_hwnd = winInfo.info.win.window;
 	m_hinstance = rcast<void*>(GetWindowLongPtr(scast<HWND>(m_hwnd), GWLP_HINSTANCE));
+	m_wndproc = rcast<void*>(GetWindowLongPtr(scast<HWND>(m_hwnd), GWLP_WNDPROC));
 	m_hdc = GetDC(scast<HWND>(m_hwnd));
 }
 

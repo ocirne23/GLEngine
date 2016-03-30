@@ -15,7 +15,7 @@ BEGIN_UNNAMED_NAMESPACE()
 
 vk::Instance createInstance(bool a_enableValidation)
 {
-	eastl::vector<const char*> enabledExtensions = { VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
+	eastl::vector<const char*> enabledExtensions = { VK_KHR_SURFACE_EXTENSION_NAME };
 
 	vk::ApplicationInfo appInfo = vk::ApplicationInfo()
 		.apiVersion(VK_API_VERSION)
@@ -49,7 +49,7 @@ vk::Instance createInstance(bool a_enableValidation)
 
 uint findGraphicsQueueIndex(vk::PhysicalDevice a_physDevice)
 {
-	eastl::vector<vk::QueueFamilyProperties> queueFamilyProperties = vk::getPhysicalDeviceQueueFamilyProperties(a_physDevice);
+	eastl::vector<vk::QueueFamilyProperties> queueFamilyProperties = a_physDevice.getQueueFamilyProperties();;
 	for (uint graphicsQueueIndex = 0; graphicsQueueIndex < queueFamilyProperties.size(); graphicsQueueIndex++)
 	{
 		if (queueFamilyProperties[graphicsQueueIndex].queueFlags() & vk::QueueFlagBits::eGraphics)
@@ -85,14 +85,14 @@ vk::Device createDevice(vk::PhysicalDevice a_physDevice, uint a_graphicsQueueInd
 	}
 
 	vk::Device device;
-	VKVerifier result = vk::createDevice(a_physDevice, &deviceCreateInfo, nullptr, &device);
+	VKVerifier result = a_physDevice.createDevice(&deviceCreateInfo, nullptr, &device);
 	return device;
 }
 
 vk::PhysicalDevice findPhysicalDevice(vk::Instance a_instance)
 {
 	eastl::vector<vk::PhysicalDevice> physDevices;
-	VKVerifier result = vk::enumeratePhysicalDevices(a_instance, physDevices);
+	VKVerifier result = a_instance.enumeratePhysicalDevices(physDevices);
 	if (physDevices.empty())
 	{
 		print("No Vulkan compatible devices found\n");
@@ -128,7 +128,7 @@ vk::Format getDepthFormat(vk::PhysicalDevice a_physDevice)
 	for (auto& format : depthFormats)
 	{
 		vk::FormatProperties formatProperties;
-		vk::getPhysicalDeviceFormatProperties(a_physDevice, format, formatProperties);
+		a_physDevice.getFormatProperties(format, &formatProperties);
 		// Format must support depth stencil attachment for optimal tiling
 		if (formatProperties.optimalTilingFeatures() & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
 			return format;
@@ -151,16 +151,17 @@ DepthStencil createDepthStencil(vk::PhysicalDeviceMemoryProperties a_physDeviceM
 		.tiling(vk::ImageTiling::eOptimal)
 		.usage(vk::ImageUsageFlagBits::eDepthStencilAttachment | vk::ImageUsageFlagBits::eTransferSrc);
 
-	VKVerifier result = vk::createImage(a_device, &imageCreateInfo, NULL, &depthStencil.image);
+	VKVerifier result = a_device.createImage(&imageCreateInfo, NULL, &depthStencil.image);
 
 	vk::MemoryRequirements memoryRequirements;
-	vk::getImageMemoryRequirements(a_device, depthStencil.image, memoryRequirements);
+	a_device.getImageMemoryRequirements(depthStencil.image, &memoryRequirements);
 	
 	uint memoryTypeIndex = getMemoryType(a_physDeviceMemoryProperties, memoryRequirements.memoryTypeBits(), vk::MemoryPropertyFlagBits::eDeviceLocal);
 	vk::MemoryAllocateInfo memoryAllocateInfo = vk::MemoryAllocateInfo()
 		.allocationSize(memoryRequirements.size())
 		.memoryTypeIndex(memoryTypeIndex);
 
+	depthStencil.mem = a_device.allocateMemory(memoryAllocateInfo, NULL);
 	result = vk::allocateMemory(a_device, &memoryAllocateInfo, NULL, &depthStencil.mem);
 	result = vk::bindImageMemory(a_device, depthStencil.image, depthStencil.mem, 0);
 	VKUtils::setImageLayout(a_setupCommandBuffer, depthStencil.image, vk::ImageAspectFlagBits::eDepth, vk::ImageLayout::eUndefined, vk::ImageLayout::eDepthStencilAttachmentOptimal);

@@ -43,6 +43,8 @@ void VKRenderPass::initialize(VKDevice& a_device, vk::Format a_colorFormat, vk::
 		.attachment(0)
 		.layout(vk::ImageLayout::eColorAttachmentOptimal);
 
+
+
 	vk::AttachmentReference depthReference = vk::AttachmentReference()
 		.attachment(1)
 		.layout(vk::ImageLayout::eDepthStencilAttachmentOptimal);

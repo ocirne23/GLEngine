@@ -24,6 +24,8 @@ class Input
 public:
 	friend class GLEngine;
 
+	~Input() {}
+
 	bool isKeyPressed(EKey key);
 	bool isMousePressed(EMouseButton button);
 	void getMousePosition(int& xPos, int& yPos);
@@ -33,7 +35,6 @@ public:
 private:
 
 	Input() {}
-	~Input() {}
 
 	void pollEvents();
 	void processEvents();

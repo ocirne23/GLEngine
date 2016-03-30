@@ -41,17 +41,17 @@ void PerspectiveCamera::translateRelative(const glm::vec3& a_trans)
 
 float PerspectiveCamera::getRotationRadXY()
 {
-	return glm::atan2(m_direction.x, m_direction.y);
+	return std::atan2(m_direction.x, m_direction.y);
 }
 
 float PerspectiveCamera::getRotationRadXZ()
 {
-	return glm::atan2(m_direction.x, m_direction.z);
+	return std::atan2(m_direction.x, m_direction.z);
 }
 
 float PerspectiveCamera::getRotationRadYZ()
 {
-	return glm::atan2(m_direction.y, m_direction.z);
+	return std::atan2(m_direction.y, m_direction.z);
 }
 
 void PerspectiveCamera::rotate(float a_angleRad, const glm::vec3& a_axis)

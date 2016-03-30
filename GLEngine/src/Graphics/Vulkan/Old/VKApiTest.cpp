@@ -50,7 +50,7 @@ void VKApiTest::test()
 	
 	UboData uboData;
 	uboData.projectionMatrix = glm::perspective(60.0f, float(width) / float(height), 0.1f, 256.0f);
-	uboData.viewMatrix = glm::mat4();
+	uboData.viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, -2.5f));
 	uboData.modelMatrix = glm::mat4();
 	Vertex vertexData[] = {
 		{ glm::vec3(1.0f,  1.0f, 0.0f),  glm::vec3(1.0f, 0.0f, 0.0f) },
@@ -122,7 +122,7 @@ void VKApiTest::test()
 		m_renderPass.bindPipelineDescriptorCmd(m_pipeline);
 		m_renderPass.bindVertexBufferCmd(m_vertexBuffer, 0);
 		m_renderPass.bindIndexBufferCmd(m_indiceBuffer, vk::IndexType::eUint32);
-		m_renderPass.drawIndexedCmd(ARRAY_SIZE(indices));
+		m_renderPass.drawIndexedCmd(ARRAY_SIZE(indiceData));
 		m_renderPass.endCmd();
 		m_drawCommandBuffers[i].end();
 	}
@@ -131,6 +131,9 @@ void VKApiTest::test()
 
 	while (!GLEngine::input->isKeyPressed(EKey::ESCAPE))
 	{
+		GLEngine::doMainThreadTick();
+		GLEngine::doEngineTick();
+
 		vk::deviceWaitIdle(m_device->getVKDevice());
 
 		VKVerifier result;

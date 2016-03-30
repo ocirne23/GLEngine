@@ -25,23 +25,53 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-#pragma once
+// Copyright (c) 2015-2016 The Khronos Group Inc.
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and/or associated documentation files (the
+// "Materials"), to deal in the Materials without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Materials, and to
+// permit persons to whom the Materials are furnished to do so, subject to
+// the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Materials.
+// 
+// THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 
-#define VK_USE_PLATFORM_WIN32_KHR
+// This header is generated from the Khronos Vulkan XML API Registry.
+
+
+#ifndef VK_CPP_H_
+#define VK_CPP_H_
+
 #define VKCPP_ENHANCED_MODE
 
-#include <assert.h>
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <EASTL/array.h>
+#include <EASTL/vector.h>
+#include <EASTL/string.h>
+#include <string>
+#include <system_error>
 #include <vulkan/vulkan.h>
-#ifdef VKCPP_ENHANCED_MODE
-# include "EASTL/vector.h"
-# include "EASTL/string.h"
-# include "EASTL/fixed_vector.h"
-#endif    // VKCPP_ENHANCED_MODE
 
-static_assert(VK_MAKE_VERSION(1, 0, 2) == VK_API_VERSION, "Wrong VK_API_VERSION!");
+static_assert(VK_MAKE_VERSION(1, 0, 5) == VK_API_VERSION, "Wrong VK_API_VERSION!");
+
+// 32-bit vulkan is not typesafe for handles, so don't allow copy constructors on this platform by default.
+// To enable this feature on 32-bit platforms please define VK_CPP_TYPESAFE_CONVERSION
+#if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
+#define VK_CPP_TYPESAFE_CONVERSION 1
+#endif
 
 namespace vk
 {
@@ -156,70 +186,1607 @@ namespace vk
 		return flags ^ bit;
 	}
 
+	template <typename RefType>
+	class Optional
+	{
+	public:
+		Optional(RefType & reference) { m_ptr = &reference; }
+		Optional(std::nullptr_t) { m_ptr = nullptr; }
+
+		operator RefType*() const { return m_ptr; }
+		RefType const* operator->() const { return m_ptr; }
+		explicit operator bool() const { return !!m_ptr; }
+
+	private:
+		RefType *m_ptr;
+	};
+
+	enum class Result
+	{
+		eSuccess = VK_SUCCESS,
+		eNotReady = VK_NOT_READY,
+		eTimeout = VK_TIMEOUT,
+		eEventSet = VK_EVENT_SET,
+		eEventReset = VK_EVENT_RESET,
+		eIncomplete = VK_INCOMPLETE,
+		eErrorOutOfHostMemory = VK_ERROR_OUT_OF_HOST_MEMORY,
+		eErrorOutOfDeviceMemory = VK_ERROR_OUT_OF_DEVICE_MEMORY,
+		eErrorInitializationFailed = VK_ERROR_INITIALIZATION_FAILED,
+		eErrorDeviceLost = VK_ERROR_DEVICE_LOST,
+		eErrorMemoryMapFailed = VK_ERROR_MEMORY_MAP_FAILED,
+		eErrorLayerNotPresent = VK_ERROR_LAYER_NOT_PRESENT,
+		eErrorExtensionNotPresent = VK_ERROR_EXTENSION_NOT_PRESENT,
+		eErrorFeatureNotPresent = VK_ERROR_FEATURE_NOT_PRESENT,
+		eErrorIncompatibleDriver = VK_ERROR_INCOMPATIBLE_DRIVER,
+		eErrorTooManyObjects = VK_ERROR_TOO_MANY_OBJECTS,
+		eErrorFormatNotSupported = VK_ERROR_FORMAT_NOT_SUPPORTED,
+		eErrorSurfaceLostKHR = VK_ERROR_SURFACE_LOST_KHR,
+		eErrorNativeWindowInUseKHR = VK_ERROR_NATIVE_WINDOW_IN_USE_KHR,
+		eSuboptimalKHR = VK_SUBOPTIMAL_KHR,
+		eErrorOutOfDateKHR = VK_ERROR_OUT_OF_DATE_KHR,
+		eErrorIncompatibleDisplayKHR = VK_ERROR_INCOMPATIBLE_DISPLAY_KHR,
+		eErrorValidationFailedEXT = VK_ERROR_VALIDATION_FAILED_EXT,
+		eErrorInvalidShaderNV = VK_ERROR_INVALID_SHADER_NV
+	};
+
+	inline eastl::string to_string(Result value)
+	{
+		switch (value)
+		{
+		case Result::eSuccess: return "Success";
+		case Result::eNotReady: return "NotReady";
+		case Result::eTimeout: return "Timeout";
+		case Result::eEventSet: return "EventSet";
+		case Result::eEventReset: return "EventReset";
+		case Result::eIncomplete: return "Incomplete";
+		case Result::eErrorOutOfHostMemory: return "ErrorOutOfHostMemory";
+		case Result::eErrorOutOfDeviceMemory: return "ErrorOutOfDeviceMemory";
+		case Result::eErrorInitializationFailed: return "ErrorInitializationFailed";
+		case Result::eErrorDeviceLost: return "ErrorDeviceLost";
+		case Result::eErrorMemoryMapFailed: return "ErrorMemoryMapFailed";
+		case Result::eErrorLayerNotPresent: return "ErrorLayerNotPresent";
+		case Result::eErrorExtensionNotPresent: return "ErrorExtensionNotPresent";
+		case Result::eErrorFeatureNotPresent: return "ErrorFeatureNotPresent";
+		case Result::eErrorIncompatibleDriver: return "ErrorIncompatibleDriver";
+		case Result::eErrorTooManyObjects: return "ErrorTooManyObjects";
+		case Result::eErrorFormatNotSupported: return "ErrorFormatNotSupported";
+		case Result::eErrorSurfaceLostKHR: return "ErrorSurfaceLostKHR";
+		case Result::eErrorNativeWindowInUseKHR: return "ErrorNativeWindowInUseKHR";
+		case Result::eSuboptimalKHR: return "SuboptimalKHR";
+		case Result::eErrorOutOfDateKHR: return "ErrorOutOfDateKHR";
+		case Result::eErrorIncompatibleDisplayKHR: return "ErrorIncompatibleDisplayKHR";
+		case Result::eErrorValidationFailedEXT: return "ErrorValidationFailedEXT";
+		case Result::eErrorInvalidShaderNV: return "ErrorInvalidShaderNV";
+		default: return "unknown";
+		}
+	}
+
+#if defined(_MSC_VER) && (_MSC_VER == 1800)
+# define noexcept _NOEXCEPT
+#endif
+
+	class ErrorCategoryImpl : public std::error_category
+	{
+	public:
+		virtual const char* name() const noexcept override { return "vk::Result"; }
+		virtual std::string message(int ev) const override { return std::string(to_string(static_cast<vk::Result>(ev)).c_str()); }
+	};
+
+#if defined(_MSC_VER) && (_MSC_VER == 1800)
+# undef noexcept
+#endif
+
+	inline const std::error_category& errorCategory()
+	{
+		static ErrorCategoryImpl instance;
+		return instance;
+	}
+
+	inline std::error_code make_error_code(Result e)
+	{
+		return std::error_code(static_cast<int>(e), errorCategory());
+	}
+
+	inline std::error_condition make_error_condition(Result e)
+	{
+		return std::error_condition(static_cast<int>(e), errorCategory());
+	}
+
+} // namespace vk
+
+namespace std
+{
+	template <>
+	struct is_error_code_enum<vk::Result> : public true_type
+	{};
+}
+
+namespace vk
+{
 	typedef uint32_t SampleMask;
 	typedef uint32_t Bool32;
 	typedef uint64_t DeviceSize;
-	typedef VkFlags FramebufferCreateFlags;
-	typedef VkFlags QueryPoolCreateFlags;
-	typedef VkFlags RenderPassCreateFlags;
-	typedef VkFlags SamplerCreateFlags;
-	typedef VkFlags PipelineLayoutCreateFlags;
-	typedef VkFlags PipelineCacheCreateFlags;
-	typedef VkFlags PipelineDepthStencilStateCreateFlags;
-	typedef VkFlags PipelineDynamicStateCreateFlags;
-	typedef VkFlags PipelineColorBlendStateCreateFlags;
-	typedef VkFlags PipelineMultisampleStateCreateFlags;
-	typedef VkFlags PipelineRasterizationStateCreateFlags;
-	typedef VkFlags PipelineViewportStateCreateFlags;
-	typedef VkFlags PipelineTessellationStateCreateFlags;
-	typedef VkFlags PipelineInputAssemblyStateCreateFlags;
-	typedef VkFlags PipelineVertexInputStateCreateFlags;
-	typedef VkFlags PipelineShaderStageCreateFlags;
-	typedef VkFlags DescriptorSetLayoutCreateFlags;
-	typedef VkFlags BufferViewCreateFlags;
-	typedef VkFlags InstanceCreateFlags;
-	typedef VkFlags DeviceCreateFlags;
-	typedef VkFlags DeviceQueueCreateFlags;
-	typedef VkFlags ImageViewCreateFlags;
-	typedef VkFlags SemaphoreCreateFlags;
-	typedef VkFlags ShaderModuleCreateFlags;
-	typedef VkFlags EventCreateFlags;
-	typedef VkFlags MemoryMapFlags;
-	typedef VkFlags SubpassDescriptionFlags;
-	typedef VkFlags DescriptorPoolResetFlags;
-	typedef VkFlags SwapchainCreateFlagsKHR;
-	typedef VkFlags DisplayModeCreateFlagsKHR;
-	typedef VkFlags DisplaySurfaceCreateFlagsKHR;
-	typedef VkInstance Instance;
-	typedef VkPhysicalDevice PhysicalDevice;
-	typedef VkDevice Device;
-	typedef VkQueue Queue;
-	typedef VkCommandBuffer CommandBuffer;
-	typedef VkDeviceMemory DeviceMemory;
-	typedef VkCommandPool CommandPool;
-	typedef VkBuffer Buffer;
-	typedef VkBufferView BufferView;
-	typedef VkImage Image;
-	typedef VkImageView ImageView;
-	typedef VkShaderModule ShaderModule;
-	typedef VkPipeline Pipeline;
-	typedef VkPipelineLayout PipelineLayout;
-	typedef VkSampler Sampler;
-	typedef VkDescriptorSet DescriptorSet;
-	typedef VkDescriptorSetLayout DescriptorSetLayout;
-	typedef VkDescriptorPool DescriptorPool;
-	typedef VkFence Fence;
-	typedef VkSemaphore Semaphore;
-	typedef VkEvent Event;
-	typedef VkQueryPool QueryPool;
-	typedef VkFramebuffer Framebuffer;
-	typedef VkRenderPass RenderPass;
-	typedef VkPipelineCache PipelineCache;
-	typedef VkDisplayKHR DisplayKHR;
-	typedef VkDisplayModeKHR DisplayModeKHR;
-	typedef VkSurfaceKHR SurfaceKHR;
-	typedef VkSwapchainKHR SwapchainKHR;
-	typedef VkDebugReportCallbackEXT DebugReportCallbackEXT;
+	enum class FramebufferCreateFlagBits
+	{
+	};
+
+	typedef Flags<FramebufferCreateFlagBits, VkFramebufferCreateFlags> FramebufferCreateFlags;
+
+	inline FramebufferCreateFlags operator|(FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1)
+	{
+		return FramebufferCreateFlags(bit0) | bit1;
+	}
+
+	enum class QueryPoolCreateFlagBits
+	{
+	};
+
+	typedef Flags<QueryPoolCreateFlagBits, VkQueryPoolCreateFlags> QueryPoolCreateFlags;
+
+	inline QueryPoolCreateFlags operator|(QueryPoolCreateFlagBits bit0, QueryPoolCreateFlagBits bit1)
+	{
+		return QueryPoolCreateFlags(bit0) | bit1;
+	}
+
+	enum class RenderPassCreateFlagBits
+	{
+	};
+
+	typedef Flags<RenderPassCreateFlagBits, VkRenderPassCreateFlags> RenderPassCreateFlags;
+
+	inline RenderPassCreateFlags operator|(RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1)
+	{
+		return RenderPassCreateFlags(bit0) | bit1;
+	}
+
+	enum class SamplerCreateFlagBits
+	{
+	};
+
+	typedef Flags<SamplerCreateFlagBits, VkSamplerCreateFlags> SamplerCreateFlags;
+
+	inline SamplerCreateFlags operator|(SamplerCreateFlagBits bit0, SamplerCreateFlagBits bit1)
+	{
+		return SamplerCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineLayoutCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineLayoutCreateFlagBits, VkPipelineLayoutCreateFlags> PipelineLayoutCreateFlags;
+
+	inline PipelineLayoutCreateFlags operator|(PipelineLayoutCreateFlagBits bit0, PipelineLayoutCreateFlagBits bit1)
+	{
+		return PipelineLayoutCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineCacheCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineCacheCreateFlagBits, VkPipelineCacheCreateFlags> PipelineCacheCreateFlags;
+
+	inline PipelineCacheCreateFlags operator|(PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1)
+	{
+		return PipelineCacheCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineDepthStencilStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineDepthStencilStateCreateFlagBits, VkPipelineDepthStencilStateCreateFlags> PipelineDepthStencilStateCreateFlags;
+
+	inline PipelineDepthStencilStateCreateFlags operator|(PipelineDepthStencilStateCreateFlagBits bit0, PipelineDepthStencilStateCreateFlagBits bit1)
+	{
+		return PipelineDepthStencilStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineDynamicStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineDynamicStateCreateFlagBits, VkPipelineDynamicStateCreateFlags> PipelineDynamicStateCreateFlags;
+
+	inline PipelineDynamicStateCreateFlags operator|(PipelineDynamicStateCreateFlagBits bit0, PipelineDynamicStateCreateFlagBits bit1)
+	{
+		return PipelineDynamicStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineColorBlendStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineColorBlendStateCreateFlagBits, VkPipelineColorBlendStateCreateFlags> PipelineColorBlendStateCreateFlags;
+
+	inline PipelineColorBlendStateCreateFlags operator|(PipelineColorBlendStateCreateFlagBits bit0, PipelineColorBlendStateCreateFlagBits bit1)
+	{
+		return PipelineColorBlendStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineMultisampleStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineMultisampleStateCreateFlagBits, VkPipelineMultisampleStateCreateFlags> PipelineMultisampleStateCreateFlags;
+
+	inline PipelineMultisampleStateCreateFlags operator|(PipelineMultisampleStateCreateFlagBits bit0, PipelineMultisampleStateCreateFlagBits bit1)
+	{
+		return PipelineMultisampleStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineRasterizationStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineRasterizationStateCreateFlagBits, VkPipelineRasterizationStateCreateFlags> PipelineRasterizationStateCreateFlags;
+
+	inline PipelineRasterizationStateCreateFlags operator|(PipelineRasterizationStateCreateFlagBits bit0, PipelineRasterizationStateCreateFlagBits bit1)
+	{
+		return PipelineRasterizationStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineViewportStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineViewportStateCreateFlagBits, VkPipelineViewportStateCreateFlags> PipelineViewportStateCreateFlags;
+
+	inline PipelineViewportStateCreateFlags operator|(PipelineViewportStateCreateFlagBits bit0, PipelineViewportStateCreateFlagBits bit1)
+	{
+		return PipelineViewportStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineTessellationStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineTessellationStateCreateFlagBits, VkPipelineTessellationStateCreateFlags> PipelineTessellationStateCreateFlags;
+
+	inline PipelineTessellationStateCreateFlags operator|(PipelineTessellationStateCreateFlagBits bit0, PipelineTessellationStateCreateFlagBits bit1)
+	{
+		return PipelineTessellationStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineInputAssemblyStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineInputAssemblyStateCreateFlagBits, VkPipelineInputAssemblyStateCreateFlags> PipelineInputAssemblyStateCreateFlags;
+
+	inline PipelineInputAssemblyStateCreateFlags operator|(PipelineInputAssemblyStateCreateFlagBits bit0, PipelineInputAssemblyStateCreateFlagBits bit1)
+	{
+		return PipelineInputAssemblyStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineVertexInputStateCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineVertexInputStateCreateFlagBits, VkPipelineVertexInputStateCreateFlags> PipelineVertexInputStateCreateFlags;
+
+	inline PipelineVertexInputStateCreateFlags operator|(PipelineVertexInputStateCreateFlagBits bit0, PipelineVertexInputStateCreateFlagBits bit1)
+	{
+		return PipelineVertexInputStateCreateFlags(bit0) | bit1;
+	}
+
+	enum class PipelineShaderStageCreateFlagBits
+	{
+	};
+
+	typedef Flags<PipelineShaderStageCreateFlagBits, VkPipelineShaderStageCreateFlags> PipelineShaderStageCreateFlags;
+
+	inline PipelineShaderStageCreateFlags operator|(PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1)
+	{
+		return PipelineShaderStageCreateFlags(bit0) | bit1;
+	}
+
+	enum class DescriptorSetLayoutCreateFlagBits
+	{
+	};
+
+	typedef Flags<DescriptorSetLayoutCreateFlagBits, VkDescriptorSetLayoutCreateFlags> DescriptorSetLayoutCreateFlags;
+
+	inline DescriptorSetLayoutCreateFlags operator|(DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1)
+	{
+		return DescriptorSetLayoutCreateFlags(bit0) | bit1;
+	}
+
+	enum class BufferViewCreateFlagBits
+	{
+	};
+
+	typedef Flags<BufferViewCreateFlagBits, VkBufferViewCreateFlags> BufferViewCreateFlags;
+
+	inline BufferViewCreateFlags operator|(BufferViewCreateFlagBits bit0, BufferViewCreateFlagBits bit1)
+	{
+		return BufferViewCreateFlags(bit0) | bit1;
+	}
+
+	enum class InstanceCreateFlagBits
+	{
+	};
+
+	typedef Flags<InstanceCreateFlagBits, VkInstanceCreateFlags> InstanceCreateFlags;
+
+	inline InstanceCreateFlags operator|(InstanceCreateFlagBits bit0, InstanceCreateFlagBits bit1)
+	{
+		return InstanceCreateFlags(bit0) | bit1;
+	}
+
+	enum class DeviceCreateFlagBits
+	{
+	};
+
+	typedef Flags<DeviceCreateFlagBits, VkDeviceCreateFlags> DeviceCreateFlags;
+
+	inline DeviceCreateFlags operator|(DeviceCreateFlagBits bit0, DeviceCreateFlagBits bit1)
+	{
+		return DeviceCreateFlags(bit0) | bit1;
+	}
+
+	enum class DeviceQueueCreateFlagBits
+	{
+	};
+
+	typedef Flags<DeviceQueueCreateFlagBits, VkDeviceQueueCreateFlags> DeviceQueueCreateFlags;
+
+	inline DeviceQueueCreateFlags operator|(DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1)
+	{
+		return DeviceQueueCreateFlags(bit0) | bit1;
+	}
+
+	enum class ImageViewCreateFlagBits
+	{
+	};
+
+	typedef Flags<ImageViewCreateFlagBits, VkImageViewCreateFlags> ImageViewCreateFlags;
+
+	inline ImageViewCreateFlags operator|(ImageViewCreateFlagBits bit0, ImageViewCreateFlagBits bit1)
+	{
+		return ImageViewCreateFlags(bit0) | bit1;
+	}
+
+	enum class SemaphoreCreateFlagBits
+	{
+	};
+
+	typedef Flags<SemaphoreCreateFlagBits, VkSemaphoreCreateFlags> SemaphoreCreateFlags;
+
+	inline SemaphoreCreateFlags operator|(SemaphoreCreateFlagBits bit0, SemaphoreCreateFlagBits bit1)
+	{
+		return SemaphoreCreateFlags(bit0) | bit1;
+	}
+
+	enum class ShaderModuleCreateFlagBits
+	{
+	};
+
+	typedef Flags<ShaderModuleCreateFlagBits, VkShaderModuleCreateFlags> ShaderModuleCreateFlags;
+
+	inline ShaderModuleCreateFlags operator|(ShaderModuleCreateFlagBits bit0, ShaderModuleCreateFlagBits bit1)
+	{
+		return ShaderModuleCreateFlags(bit0) | bit1;
+	}
+
+	enum class EventCreateFlagBits
+	{
+	};
+
+	typedef Flags<EventCreateFlagBits, VkEventCreateFlags> EventCreateFlags;
+
+	inline EventCreateFlags operator|(EventCreateFlagBits bit0, EventCreateFlagBits bit1)
+	{
+		return EventCreateFlags(bit0) | bit1;
+	}
+
+	enum class MemoryMapFlagBits
+	{
+	};
+
+	typedef Flags<MemoryMapFlagBits, VkMemoryMapFlags> MemoryMapFlags;
+
+	inline MemoryMapFlags operator|(MemoryMapFlagBits bit0, MemoryMapFlagBits bit1)
+	{
+		return MemoryMapFlags(bit0) | bit1;
+	}
+
+	enum class SubpassDescriptionFlagBits
+	{
+	};
+
+	typedef Flags<SubpassDescriptionFlagBits, VkSubpassDescriptionFlags> SubpassDescriptionFlags;
+
+	inline SubpassDescriptionFlags operator|(SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1)
+	{
+		return SubpassDescriptionFlags(bit0) | bit1;
+	}
+
+	enum class DescriptorPoolResetFlagBits
+	{
+	};
+
+	typedef Flags<DescriptorPoolResetFlagBits, VkDescriptorPoolResetFlags> DescriptorPoolResetFlags;
+
+	inline DescriptorPoolResetFlags operator|(DescriptorPoolResetFlagBits bit0, DescriptorPoolResetFlagBits bit1)
+	{
+		return DescriptorPoolResetFlags(bit0) | bit1;
+	}
+
+	enum class SwapchainCreateFlagBitsKHR
+	{
+	};
+
+	typedef Flags<SwapchainCreateFlagBitsKHR, VkSwapchainCreateFlagsKHR> SwapchainCreateFlagsKHR;
+
+	inline SwapchainCreateFlagsKHR operator|(SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1)
+	{
+		return SwapchainCreateFlagsKHR(bit0) | bit1;
+	}
+
+	enum class DisplayModeCreateFlagBitsKHR
+	{
+	};
+
+	typedef Flags<DisplayModeCreateFlagBitsKHR, VkDisplayModeCreateFlagsKHR> DisplayModeCreateFlagsKHR;
+
+	inline DisplayModeCreateFlagsKHR operator|(DisplayModeCreateFlagBitsKHR bit0, DisplayModeCreateFlagBitsKHR bit1)
+	{
+		return DisplayModeCreateFlagsKHR(bit0) | bit1;
+	}
+
+	enum class DisplaySurfaceCreateFlagBitsKHR
+	{
+	};
+
+	typedef Flags<DisplaySurfaceCreateFlagBitsKHR, VkDisplaySurfaceCreateFlagsKHR> DisplaySurfaceCreateFlagsKHR;
+
+	inline DisplaySurfaceCreateFlagsKHR operator|(DisplaySurfaceCreateFlagBitsKHR bit0, DisplaySurfaceCreateFlagBitsKHR bit1)
+	{
+		return DisplaySurfaceCreateFlagsKHR(bit0) | bit1;
+	}
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+	enum class AndroidSurfaceCreateFlagBitsKHR
+	{
+	};
+#endif /*VK_USE_PLATFORM_ANDROID_KHR*/
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+	typedef Flags<AndroidSurfaceCreateFlagBitsKHR, VkAndroidSurfaceCreateFlagsKHR> AndroidSurfaceCreateFlagsKHR;
+
+	inline AndroidSurfaceCreateFlagsKHR operator|(AndroidSurfaceCreateFlagBitsKHR bit0, AndroidSurfaceCreateFlagBitsKHR bit1)
+	{
+		return AndroidSurfaceCreateFlagsKHR(bit0) | bit1;
+	}
+#endif /*VK_USE_PLATFORM_ANDROID_KHR*/
+
+#ifdef VK_USE_PLATFORM_MIR_KHR
+	enum class MirSurfaceCreateFlagBitsKHR
+	{
+	};
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+
+#ifdef VK_USE_PLATFORM_MIR_KHR
+	typedef Flags<MirSurfaceCreateFlagBitsKHR, VkMirSurfaceCreateFlagsKHR> MirSurfaceCreateFlagsKHR;
+
+	inline MirSurfaceCreateFlagsKHR operator|(MirSurfaceCreateFlagBitsKHR bit0, MirSurfaceCreateFlagBitsKHR bit1)
+	{
+		return MirSurfaceCreateFlagsKHR(bit0) | bit1;
+	}
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+	enum class WaylandSurfaceCreateFlagBitsKHR
+	{
+	};
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+	typedef Flags<WaylandSurfaceCreateFlagBitsKHR, VkWaylandSurfaceCreateFlagsKHR> WaylandSurfaceCreateFlagsKHR;
+
+	inline WaylandSurfaceCreateFlagsKHR operator|(WaylandSurfaceCreateFlagBitsKHR bit0, WaylandSurfaceCreateFlagBitsKHR bit1)
+	{
+		return WaylandSurfaceCreateFlagsKHR(bit0) | bit1;
+	}
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	enum class Win32SurfaceCreateFlagBitsKHR
+	{
+	};
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	typedef Flags<Win32SurfaceCreateFlagBitsKHR, VkWin32SurfaceCreateFlagsKHR> Win32SurfaceCreateFlagsKHR;
+
+	inline Win32SurfaceCreateFlagsKHR operator|(Win32SurfaceCreateFlagBitsKHR bit0, Win32SurfaceCreateFlagBitsKHR bit1)
+	{
+		return Win32SurfaceCreateFlagsKHR(bit0) | bit1;
+	}
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+	enum class XlibSurfaceCreateFlagBitsKHR
+	{
+	};
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+	typedef Flags<XlibSurfaceCreateFlagBitsKHR, VkXlibSurfaceCreateFlagsKHR> XlibSurfaceCreateFlagsKHR;
+
+	inline XlibSurfaceCreateFlagsKHR operator|(XlibSurfaceCreateFlagBitsKHR bit0, XlibSurfaceCreateFlagBitsKHR bit1)
+	{
+		return XlibSurfaceCreateFlagsKHR(bit0) | bit1;
+	}
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+	enum class XcbSurfaceCreateFlagBitsKHR
+	{
+	};
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+	typedef Flags<XcbSurfaceCreateFlagBitsKHR, VkXcbSurfaceCreateFlagsKHR> XcbSurfaceCreateFlagsKHR;
+
+	inline XcbSurfaceCreateFlagsKHR operator|(XcbSurfaceCreateFlagBitsKHR bit0, XcbSurfaceCreateFlagBitsKHR bit1)
+	{
+		return XcbSurfaceCreateFlagsKHR(bit0) | bit1;
+	}
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+
+	class DeviceMemory
+	{
+	public:
+		DeviceMemory()
+			: m_deviceMemory(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		DeviceMemory(VkDeviceMemory deviceMemory)
+			: m_deviceMemory(deviceMemory)
+		{}
+
+		DeviceMemory& operator=(VkDeviceMemory deviceMemory)
+		{
+			m_deviceMemory = deviceMemory;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDeviceMemory() const
+		{
+			return m_deviceMemory;
+		}
+
+		explicit operator bool() const
+		{
+			return m_deviceMemory != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_deviceMemory == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkDeviceMemory m_deviceMemory;
+	};
+	static_assert(sizeof(DeviceMemory) == sizeof(VkDeviceMemory), "handle and wrapper have different size!");
+
+	class CommandPool
+	{
+	public:
+		CommandPool()
+			: m_commandPool(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		CommandPool(VkCommandPool commandPool)
+			: m_commandPool(commandPool)
+		{}
+
+		CommandPool& operator=(VkCommandPool commandPool)
+		{
+			m_commandPool = commandPool;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkCommandPool() const
+		{
+			return m_commandPool;
+		}
+
+		explicit operator bool() const
+		{
+			return m_commandPool != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_commandPool == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkCommandPool m_commandPool;
+	};
+	static_assert(sizeof(CommandPool) == sizeof(VkCommandPool), "handle and wrapper have different size!");
+
+	class Buffer
+	{
+	public:
+		Buffer()
+			: m_buffer(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Buffer(VkBuffer buffer)
+			: m_buffer(buffer)
+		{}
+
+		Buffer& operator=(VkBuffer buffer)
+		{
+			m_buffer = buffer;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkBuffer() const
+		{
+			return m_buffer;
+		}
+
+		explicit operator bool() const
+		{
+			return m_buffer != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_buffer == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkBuffer m_buffer;
+	};
+	static_assert(sizeof(Buffer) == sizeof(VkBuffer), "handle and wrapper have different size!");
+
+	class BufferView
+	{
+	public:
+		BufferView()
+			: m_bufferView(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		BufferView(VkBufferView bufferView)
+			: m_bufferView(bufferView)
+		{}
+
+		BufferView& operator=(VkBufferView bufferView)
+		{
+			m_bufferView = bufferView;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkBufferView() const
+		{
+			return m_bufferView;
+		}
+
+		explicit operator bool() const
+		{
+			return m_bufferView != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_bufferView == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkBufferView m_bufferView;
+	};
+	static_assert(sizeof(BufferView) == sizeof(VkBufferView), "handle and wrapper have different size!");
+
+	class Image
+	{
+	public:
+		Image()
+			: m_image(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Image(VkImage image)
+			: m_image(image)
+		{}
+
+		Image& operator=(VkImage image)
+		{
+			m_image = image;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkImage() const
+		{
+			return m_image;
+		}
+
+		explicit operator bool() const
+		{
+			return m_image != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_image == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkImage m_image;
+	};
+	static_assert(sizeof(Image) == sizeof(VkImage), "handle and wrapper have different size!");
+
+	class ImageView
+	{
+	public:
+		ImageView()
+			: m_imageView(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		ImageView(VkImageView imageView)
+			: m_imageView(imageView)
+		{}
+
+		ImageView& operator=(VkImageView imageView)
+		{
+			m_imageView = imageView;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkImageView() const
+		{
+			return m_imageView;
+		}
+
+		explicit operator bool() const
+		{
+			return m_imageView != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_imageView == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkImageView m_imageView;
+	};
+	static_assert(sizeof(ImageView) == sizeof(VkImageView), "handle and wrapper have different size!");
+
+	class ShaderModule
+	{
+	public:
+		ShaderModule()
+			: m_shaderModule(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		ShaderModule(VkShaderModule shaderModule)
+			: m_shaderModule(shaderModule)
+		{}
+
+		ShaderModule& operator=(VkShaderModule shaderModule)
+		{
+			m_shaderModule = shaderModule;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkShaderModule() const
+		{
+			return m_shaderModule;
+		}
+
+		explicit operator bool() const
+		{
+			return m_shaderModule != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_shaderModule == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkShaderModule m_shaderModule;
+	};
+	static_assert(sizeof(ShaderModule) == sizeof(VkShaderModule), "handle and wrapper have different size!");
+
+	class Pipeline
+	{
+	public:
+		Pipeline()
+			: m_pipeline(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Pipeline(VkPipeline pipeline)
+			: m_pipeline(pipeline)
+		{}
+
+		Pipeline& operator=(VkPipeline pipeline)
+		{
+			m_pipeline = pipeline;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkPipeline() const
+		{
+			return m_pipeline;
+		}
+
+		explicit operator bool() const
+		{
+			return m_pipeline != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_pipeline == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkPipeline m_pipeline;
+	};
+	static_assert(sizeof(Pipeline) == sizeof(VkPipeline), "handle and wrapper have different size!");
+
+	class PipelineLayout
+	{
+	public:
+		PipelineLayout()
+			: m_pipelineLayout(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		PipelineLayout(VkPipelineLayout pipelineLayout)
+			: m_pipelineLayout(pipelineLayout)
+		{}
+
+		PipelineLayout& operator=(VkPipelineLayout pipelineLayout)
+		{
+			m_pipelineLayout = pipelineLayout;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkPipelineLayout() const
+		{
+			return m_pipelineLayout;
+		}
+
+		explicit operator bool() const
+		{
+			return m_pipelineLayout != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_pipelineLayout == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkPipelineLayout m_pipelineLayout;
+	};
+	static_assert(sizeof(PipelineLayout) == sizeof(VkPipelineLayout), "handle and wrapper have different size!");
+
+	class Sampler
+	{
+	public:
+		Sampler()
+			: m_sampler(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Sampler(VkSampler sampler)
+			: m_sampler(sampler)
+		{}
+
+		Sampler& operator=(VkSampler sampler)
+		{
+			m_sampler = sampler;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkSampler() const
+		{
+			return m_sampler;
+		}
+
+		explicit operator bool() const
+		{
+			return m_sampler != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_sampler == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkSampler m_sampler;
+	};
+	static_assert(sizeof(Sampler) == sizeof(VkSampler), "handle and wrapper have different size!");
+
+	class DescriptorSet
+	{
+	public:
+		DescriptorSet()
+			: m_descriptorSet(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		DescriptorSet(VkDescriptorSet descriptorSet)
+			: m_descriptorSet(descriptorSet)
+		{}
+
+		DescriptorSet& operator=(VkDescriptorSet descriptorSet)
+		{
+			m_descriptorSet = descriptorSet;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDescriptorSet() const
+		{
+			return m_descriptorSet;
+		}
+
+		explicit operator bool() const
+		{
+			return m_descriptorSet != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_descriptorSet == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkDescriptorSet m_descriptorSet;
+	};
+	static_assert(sizeof(DescriptorSet) == sizeof(VkDescriptorSet), "handle and wrapper have different size!");
+
+	class DescriptorSetLayout
+	{
+	public:
+		DescriptorSetLayout()
+			: m_descriptorSetLayout(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		DescriptorSetLayout(VkDescriptorSetLayout descriptorSetLayout)
+			: m_descriptorSetLayout(descriptorSetLayout)
+		{}
+
+		DescriptorSetLayout& operator=(VkDescriptorSetLayout descriptorSetLayout)
+		{
+			m_descriptorSetLayout = descriptorSetLayout;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDescriptorSetLayout() const
+		{
+			return m_descriptorSetLayout;
+		}
+
+		explicit operator bool() const
+		{
+			return m_descriptorSetLayout != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_descriptorSetLayout == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkDescriptorSetLayout m_descriptorSetLayout;
+	};
+	static_assert(sizeof(DescriptorSetLayout) == sizeof(VkDescriptorSetLayout), "handle and wrapper have different size!");
+
+	class DescriptorPool
+	{
+	public:
+		DescriptorPool()
+			: m_descriptorPool(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		DescriptorPool(VkDescriptorPool descriptorPool)
+			: m_descriptorPool(descriptorPool)
+		{}
+
+		DescriptorPool& operator=(VkDescriptorPool descriptorPool)
+		{
+			m_descriptorPool = descriptorPool;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDescriptorPool() const
+		{
+			return m_descriptorPool;
+		}
+
+		explicit operator bool() const
+		{
+			return m_descriptorPool != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_descriptorPool == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkDescriptorPool m_descriptorPool;
+	};
+	static_assert(sizeof(DescriptorPool) == sizeof(VkDescriptorPool), "handle and wrapper have different size!");
+
+	class Fence
+	{
+	public:
+		Fence()
+			: m_fence(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Fence(VkFence fence)
+			: m_fence(fence)
+		{}
+
+		Fence& operator=(VkFence fence)
+		{
+			m_fence = fence;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkFence() const
+		{
+			return m_fence;
+		}
+
+		explicit operator bool() const
+		{
+			return m_fence != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_fence == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkFence m_fence;
+	};
+	static_assert(sizeof(Fence) == sizeof(VkFence), "handle and wrapper have different size!");
+
+	class Semaphore
+	{
+	public:
+		Semaphore()
+			: m_semaphore(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Semaphore(VkSemaphore semaphore)
+			: m_semaphore(semaphore)
+		{}
+
+		Semaphore& operator=(VkSemaphore semaphore)
+		{
+			m_semaphore = semaphore;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkSemaphore() const
+		{
+			return m_semaphore;
+		}
+
+		explicit operator bool() const
+		{
+			return m_semaphore != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_semaphore == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkSemaphore m_semaphore;
+	};
+	static_assert(sizeof(Semaphore) == sizeof(VkSemaphore), "handle and wrapper have different size!");
+
+	class Event
+	{
+	public:
+		Event()
+			: m_event(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Event(VkEvent event)
+			: m_event(event)
+		{}
+
+		Event& operator=(VkEvent event)
+		{
+			m_event = event;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkEvent() const
+		{
+			return m_event;
+		}
+
+		explicit operator bool() const
+		{
+			return m_event != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_event == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkEvent m_event;
+	};
+	static_assert(sizeof(Event) == sizeof(VkEvent), "handle and wrapper have different size!");
+
+	class QueryPool
+	{
+	public:
+		QueryPool()
+			: m_queryPool(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		QueryPool(VkQueryPool queryPool)
+			: m_queryPool(queryPool)
+		{}
+
+		QueryPool& operator=(VkQueryPool queryPool)
+		{
+			m_queryPool = queryPool;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkQueryPool() const
+		{
+			return m_queryPool;
+		}
+
+		explicit operator bool() const
+		{
+			return m_queryPool != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_queryPool == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkQueryPool m_queryPool;
+	};
+	static_assert(sizeof(QueryPool) == sizeof(VkQueryPool), "handle and wrapper have different size!");
+
+	class Framebuffer
+	{
+	public:
+		Framebuffer()
+			: m_framebuffer(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Framebuffer(VkFramebuffer framebuffer)
+			: m_framebuffer(framebuffer)
+		{}
+
+		Framebuffer& operator=(VkFramebuffer framebuffer)
+		{
+			m_framebuffer = framebuffer;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkFramebuffer() const
+		{
+			return m_framebuffer;
+		}
+
+		explicit operator bool() const
+		{
+			return m_framebuffer != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_framebuffer == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkFramebuffer m_framebuffer;
+	};
+	static_assert(sizeof(Framebuffer) == sizeof(VkFramebuffer), "handle and wrapper have different size!");
+
+	class RenderPass
+	{
+	public:
+		RenderPass()
+			: m_renderPass(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		RenderPass(VkRenderPass renderPass)
+			: m_renderPass(renderPass)
+		{}
+
+		RenderPass& operator=(VkRenderPass renderPass)
+		{
+			m_renderPass = renderPass;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkRenderPass() const
+		{
+			return m_renderPass;
+		}
+
+		explicit operator bool() const
+		{
+			return m_renderPass != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_renderPass == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkRenderPass m_renderPass;
+	};
+	static_assert(sizeof(RenderPass) == sizeof(VkRenderPass), "handle and wrapper have different size!");
+
+	class PipelineCache
+	{
+	public:
+		PipelineCache()
+			: m_pipelineCache(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		PipelineCache(VkPipelineCache pipelineCache)
+			: m_pipelineCache(pipelineCache)
+		{}
+
+		PipelineCache& operator=(VkPipelineCache pipelineCache)
+		{
+			m_pipelineCache = pipelineCache;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkPipelineCache() const
+		{
+			return m_pipelineCache;
+		}
+
+		explicit operator bool() const
+		{
+			return m_pipelineCache != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_pipelineCache == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkPipelineCache m_pipelineCache;
+	};
+	static_assert(sizeof(PipelineCache) == sizeof(VkPipelineCache), "handle and wrapper have different size!");
+
+	class DisplayKHR
+	{
+	public:
+		DisplayKHR()
+			: m_displayKHR(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		DisplayKHR(VkDisplayKHR displayKHR)
+			: m_displayKHR(displayKHR)
+		{}
+
+		DisplayKHR& operator=(VkDisplayKHR displayKHR)
+		{
+			m_displayKHR = displayKHR;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDisplayKHR() const
+		{
+			return m_displayKHR;
+		}
+
+		explicit operator bool() const
+		{
+			return m_displayKHR != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_displayKHR == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkDisplayKHR m_displayKHR;
+	};
+	static_assert(sizeof(DisplayKHR) == sizeof(VkDisplayKHR), "handle and wrapper have different size!");
+
+	class DisplayModeKHR
+	{
+	public:
+		DisplayModeKHR()
+			: m_displayModeKHR(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		DisplayModeKHR(VkDisplayModeKHR displayModeKHR)
+			: m_displayModeKHR(displayModeKHR)
+		{}
+
+		DisplayModeKHR& operator=(VkDisplayModeKHR displayModeKHR)
+		{
+			m_displayModeKHR = displayModeKHR;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDisplayModeKHR() const
+		{
+			return m_displayModeKHR;
+		}
+
+		explicit operator bool() const
+		{
+			return m_displayModeKHR != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_displayModeKHR == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkDisplayModeKHR m_displayModeKHR;
+	};
+	static_assert(sizeof(DisplayModeKHR) == sizeof(VkDisplayModeKHR), "handle and wrapper have different size!");
+
+	class SurfaceKHR
+	{
+	public:
+		SurfaceKHR()
+			: m_surfaceKHR(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		SurfaceKHR(VkSurfaceKHR surfaceKHR)
+			: m_surfaceKHR(surfaceKHR)
+		{}
+
+		SurfaceKHR& operator=(VkSurfaceKHR surfaceKHR)
+		{
+			m_surfaceKHR = surfaceKHR;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkSurfaceKHR() const
+		{
+			return m_surfaceKHR;
+		}
+
+		explicit operator bool() const
+		{
+			return m_surfaceKHR != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_surfaceKHR == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkSurfaceKHR m_surfaceKHR;
+	};
+	static_assert(sizeof(SurfaceKHR) == sizeof(VkSurfaceKHR), "handle and wrapper have different size!");
+
+	class SwapchainKHR
+	{
+	public:
+		SwapchainKHR()
+			: m_swapchainKHR(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		SwapchainKHR(VkSwapchainKHR swapchainKHR)
+			: m_swapchainKHR(swapchainKHR)
+		{}
+
+		SwapchainKHR& operator=(VkSwapchainKHR swapchainKHR)
+		{
+			m_swapchainKHR = swapchainKHR;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkSwapchainKHR() const
+		{
+			return m_swapchainKHR;
+		}
+
+		explicit operator bool() const
+		{
+			return m_swapchainKHR != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_swapchainKHR == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkSwapchainKHR m_swapchainKHR;
+	};
+	static_assert(sizeof(SwapchainKHR) == sizeof(VkSwapchainKHR), "handle and wrapper have different size!");
+
+	class DebugReportCallbackEXT
+	{
+	public:
+		DebugReportCallbackEXT()
+			: m_debugReportCallbackEXT(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		DebugReportCallbackEXT(VkDebugReportCallbackEXT debugReportCallbackEXT)
+			: m_debugReportCallbackEXT(debugReportCallbackEXT)
+		{}
+
+		DebugReportCallbackEXT& operator=(VkDebugReportCallbackEXT debugReportCallbackEXT)
+		{
+			m_debugReportCallbackEXT = debugReportCallbackEXT;
+			return *this;
+		}
+#endif
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDebugReportCallbackEXT() const
+		{
+			return m_debugReportCallbackEXT;
+		}
+
+		explicit operator bool() const
+		{
+			return m_debugReportCallbackEXT != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_debugReportCallbackEXT == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkDebugReportCallbackEXT m_debugReportCallbackEXT;
+	};
+	static_assert(sizeof(DebugReportCallbackEXT) == sizeof(VkDebugReportCallbackEXT), "handle and wrapper have different size!");
+
 	class Offset2D
 	{
 	public:
@@ -233,7 +1800,23 @@ namespace vk
 			m_offset2D.y = y;
 		}
 
+		Offset2D(VkOffset2D const & rhs)
+			: m_offset2D(rhs)
+		{
+		}
+
+		Offset2D& operator=(VkOffset2D const & rhs)
+		{
+			m_offset2D = rhs;
+			return *this;
+		}
+
 		const int32_t& x() const
+		{
+			return m_offset2D.x;
+		}
+
+		int32_t& x()
 		{
 			return m_offset2D.x;
 		}
@@ -245,6 +1828,11 @@ namespace vk
 		}
 
 		const int32_t& y() const
+		{
+			return m_offset2D.y;
+		}
+
+		int32_t& y()
 		{
 			return m_offset2D.y;
 		}
@@ -263,6 +1851,7 @@ namespace vk
 	private:
 		VkOffset2D m_offset2D;
 	};
+	static_assert(sizeof(Offset2D) == sizeof(VkOffset2D), "struct and wrapper have different size!");
 
 	class Offset3D
 	{
@@ -278,7 +1867,23 @@ namespace vk
 			m_offset3D.z = z;
 		}
 
+		Offset3D(VkOffset3D const & rhs)
+			: m_offset3D(rhs)
+		{
+		}
+
+		Offset3D& operator=(VkOffset3D const & rhs)
+		{
+			m_offset3D = rhs;
+			return *this;
+		}
+
 		const int32_t& x() const
+		{
+			return m_offset3D.x;
+		}
+
+		int32_t& x()
 		{
 			return m_offset3D.x;
 		}
@@ -294,6 +1899,11 @@ namespace vk
 			return m_offset3D.y;
 		}
 
+		int32_t& y()
+		{
+			return m_offset3D.y;
+		}
+
 		Offset3D& y(int32_t y)
 		{
 			m_offset3D.y = y;
@@ -301,6 +1911,11 @@ namespace vk
 		}
 
 		const int32_t& z() const
+		{
+			return m_offset3D.z;
+		}
+
+		int32_t& z()
 		{
 			return m_offset3D.z;
 		}
@@ -319,6 +1934,7 @@ namespace vk
 	private:
 		VkOffset3D m_offset3D;
 	};
+	static_assert(sizeof(Offset3D) == sizeof(VkOffset3D), "struct and wrapper have different size!");
 
 	class Extent2D
 	{
@@ -333,7 +1949,23 @@ namespace vk
 			m_extent2D.height = height;
 		}
 
+		Extent2D(VkExtent2D const & rhs)
+			: m_extent2D(rhs)
+		{
+		}
+
+		Extent2D& operator=(VkExtent2D const & rhs)
+		{
+			m_extent2D = rhs;
+			return *this;
+		}
+
 		const uint32_t& width() const
+		{
+			return m_extent2D.width;
+		}
+
+		uint32_t& width()
 		{
 			return m_extent2D.width;
 		}
@@ -345,6 +1977,11 @@ namespace vk
 		}
 
 		const uint32_t& height() const
+		{
+			return m_extent2D.height;
+		}
+
+		uint32_t& height()
 		{
 			return m_extent2D.height;
 		}
@@ -363,6 +2000,7 @@ namespace vk
 	private:
 		VkExtent2D m_extent2D;
 	};
+	static_assert(sizeof(Extent2D) == sizeof(VkExtent2D), "struct and wrapper have different size!");
 
 	class Extent3D
 	{
@@ -378,7 +2016,23 @@ namespace vk
 			m_extent3D.depth = depth;
 		}
 
+		Extent3D(VkExtent3D const & rhs)
+			: m_extent3D(rhs)
+		{
+		}
+
+		Extent3D& operator=(VkExtent3D const & rhs)
+		{
+			m_extent3D = rhs;
+			return *this;
+		}
+
 		const uint32_t& width() const
+		{
+			return m_extent3D.width;
+		}
+
+		uint32_t& width()
 		{
 			return m_extent3D.width;
 		}
@@ -394,6 +2048,11 @@ namespace vk
 			return m_extent3D.height;
 		}
 
+		uint32_t& height()
+		{
+			return m_extent3D.height;
+		}
+
 		Extent3D& height(uint32_t height)
 		{
 			m_extent3D.height = height;
@@ -401,6 +2060,11 @@ namespace vk
 		}
 
 		const uint32_t& depth() const
+		{
+			return m_extent3D.depth;
+		}
+
+		uint32_t& depth()
 		{
 			return m_extent3D.depth;
 		}
@@ -419,6 +2083,7 @@ namespace vk
 	private:
 		VkExtent3D m_extent3D;
 	};
+	static_assert(sizeof(Extent3D) == sizeof(VkExtent3D), "struct and wrapper have different size!");
 
 	class Viewport
 	{
@@ -437,7 +2102,23 @@ namespace vk
 			m_viewport.maxDepth = maxDepth;
 		}
 
+		Viewport(VkViewport const & rhs)
+			: m_viewport(rhs)
+		{
+		}
+
+		Viewport& operator=(VkViewport const & rhs)
+		{
+			m_viewport = rhs;
+			return *this;
+		}
+
 		const float& x() const
+		{
+			return m_viewport.x;
+		}
+
+		float& x()
 		{
 			return m_viewport.x;
 		}
@@ -453,6 +2134,11 @@ namespace vk
 			return m_viewport.y;
 		}
 
+		float& y()
+		{
+			return m_viewport.y;
+		}
+
 		Viewport& y(float y)
 		{
 			m_viewport.y = y;
@@ -460,6 +2146,11 @@ namespace vk
 		}
 
 		const float& width() const
+		{
+			return m_viewport.width;
+		}
+
+		float& width()
 		{
 			return m_viewport.width;
 		}
@@ -475,6 +2166,11 @@ namespace vk
 			return m_viewport.height;
 		}
 
+		float& height()
+		{
+			return m_viewport.height;
+		}
+
 		Viewport& height(float height)
 		{
 			m_viewport.height = height;
@@ -486,6 +2182,11 @@ namespace vk
 			return m_viewport.minDepth;
 		}
 
+		float& minDepth()
+		{
+			return m_viewport.minDepth;
+		}
+
 		Viewport& minDepth(float minDepth)
 		{
 			m_viewport.minDepth = minDepth;
@@ -493,6 +2194,11 @@ namespace vk
 		}
 
 		const float& maxDepth() const
+		{
+			return m_viewport.maxDepth;
+		}
+
+		float& maxDepth()
 		{
 			return m_viewport.maxDepth;
 		}
@@ -511,6 +2217,7 @@ namespace vk
 	private:
 		VkViewport m_viewport;
 	};
+	static_assert(sizeof(Viewport) == sizeof(VkViewport), "struct and wrapper have different size!");
 
 	class Rect2D
 	{
@@ -525,9 +2232,25 @@ namespace vk
 			m_rect2D.extent = static_cast<VkExtent2D>(extent);
 		}
 
+		Rect2D(VkRect2D const & rhs)
+			: m_rect2D(rhs)
+		{
+		}
+
+		Rect2D& operator=(VkRect2D const & rhs)
+		{
+			m_rect2D = rhs;
+			return *this;
+		}
+
 		const Offset2D& offset() const
 		{
 			return reinterpret_cast<const Offset2D&>(m_rect2D.offset);
+		}
+
+		Offset2D& offset()
+		{
+			return reinterpret_cast<Offset2D&>(m_rect2D.offset);
 		}
 
 		Rect2D& offset(Offset2D offset)
@@ -539,6 +2262,11 @@ namespace vk
 		const Extent2D& extent() const
 		{
 			return reinterpret_cast<const Extent2D&>(m_rect2D.extent);
+		}
+
+		Extent2D& extent()
+		{
+			return reinterpret_cast<Extent2D&>(m_rect2D.extent);
 		}
 
 		Rect2D& extent(Extent2D extent)
@@ -555,6 +2283,7 @@ namespace vk
 	private:
 		VkRect2D m_rect2D;
 	};
+	static_assert(sizeof(Rect2D) == sizeof(VkRect2D), "struct and wrapper have different size!");
 
 	class ClearRect
 	{
@@ -570,9 +2299,25 @@ namespace vk
 			m_clearRect.layerCount = layerCount;
 		}
 
+		ClearRect(VkClearRect const & rhs)
+			: m_clearRect(rhs)
+		{
+		}
+
+		ClearRect& operator=(VkClearRect const & rhs)
+		{
+			m_clearRect = rhs;
+			return *this;
+		}
+
 		const Rect2D& rect() const
 		{
 			return reinterpret_cast<const Rect2D&>(m_clearRect.rect);
+		}
+
+		Rect2D& rect()
+		{
+			return reinterpret_cast<Rect2D&>(m_clearRect.rect);
 		}
 
 		ClearRect& rect(Rect2D rect)
@@ -586,6 +2331,11 @@ namespace vk
 			return m_clearRect.baseArrayLayer;
 		}
 
+		uint32_t& baseArrayLayer()
+		{
+			return m_clearRect.baseArrayLayer;
+		}
+
 		ClearRect& baseArrayLayer(uint32_t baseArrayLayer)
 		{
 			m_clearRect.baseArrayLayer = baseArrayLayer;
@@ -593,6 +2343,11 @@ namespace vk
 		}
 
 		const uint32_t& layerCount() const
+		{
+			return m_clearRect.layerCount;
+		}
+
+		uint32_t& layerCount()
 		{
 			return m_clearRect.layerCount;
 		}
@@ -611,6 +2366,7 @@ namespace vk
 	private:
 		VkClearRect m_clearRect;
 	};
+	static_assert(sizeof(ClearRect) == sizeof(VkClearRect), "struct and wrapper have different size!");
 
 	class ExtensionProperties
 	{
@@ -633,6 +2389,7 @@ namespace vk
 	private:
 		VkExtensionProperties m_extensionProperties;
 	};
+	static_assert(sizeof(ExtensionProperties) == sizeof(VkExtensionProperties), "struct and wrapper have different size!");
 
 	class LayerProperties
 	{
@@ -665,6 +2422,7 @@ namespace vk
 	private:
 		VkLayerProperties m_layerProperties;
 	};
+	static_assert(sizeof(LayerProperties) == sizeof(VkLayerProperties), "struct and wrapper have different size!");
 
 	class AllocationCallbacks
 	{
@@ -679,7 +2437,23 @@ namespace vk
 			m_allocationCallbacks.pfnInternalFree = pfnInternalFree;
 		}
 
+		AllocationCallbacks(VkAllocationCallbacks const & rhs)
+			: m_allocationCallbacks(rhs)
+		{
+		}
+
+		AllocationCallbacks& operator=(VkAllocationCallbacks const & rhs)
+		{
+			m_allocationCallbacks = rhs;
+			return *this;
+		}
+
 		const void* pUserData() const
+		{
+			return reinterpret_cast<const void*>(m_allocationCallbacks.pUserData);
+		}
+
+		void* pUserData()
 		{
 			return reinterpret_cast<void*>(m_allocationCallbacks.pUserData);
 		}
@@ -695,6 +2469,11 @@ namespace vk
 			return m_allocationCallbacks.pfnAllocation;
 		}
 
+		PFN_vkAllocationFunction& pfnAllocation()
+		{
+			return m_allocationCallbacks.pfnAllocation;
+		}
+
 		AllocationCallbacks& pfnAllocation(PFN_vkAllocationFunction pfnAllocation)
 		{
 			m_allocationCallbacks.pfnAllocation = pfnAllocation;
@@ -702,6 +2481,11 @@ namespace vk
 		}
 
 		const PFN_vkReallocationFunction& pfnReallocation() const
+		{
+			return m_allocationCallbacks.pfnReallocation;
+		}
+
+		PFN_vkReallocationFunction& pfnReallocation()
 		{
 			return m_allocationCallbacks.pfnReallocation;
 		}
@@ -717,6 +2501,11 @@ namespace vk
 			return m_allocationCallbacks.pfnFree;
 		}
 
+		PFN_vkFreeFunction& pfnFree()
+		{
+			return m_allocationCallbacks.pfnFree;
+		}
+
 		AllocationCallbacks& pfnFree(PFN_vkFreeFunction pfnFree)
 		{
 			m_allocationCallbacks.pfnFree = pfnFree;
@@ -728,6 +2517,11 @@ namespace vk
 			return m_allocationCallbacks.pfnInternalAllocation;
 		}
 
+		PFN_vkInternalAllocationNotification& pfnInternalAllocation()
+		{
+			return m_allocationCallbacks.pfnInternalAllocation;
+		}
+
 		AllocationCallbacks& pfnInternalAllocation(PFN_vkInternalAllocationNotification pfnInternalAllocation)
 		{
 			m_allocationCallbacks.pfnInternalAllocation = pfnInternalAllocation;
@@ -735,6 +2529,11 @@ namespace vk
 		}
 
 		const PFN_vkInternalFreeNotification& pfnInternalFree() const
+		{
+			return m_allocationCallbacks.pfnInternalFree;
+		}
+
+		PFN_vkInternalFreeNotification& pfnInternalFree()
 		{
 			return m_allocationCallbacks.pfnInternalFree;
 		}
@@ -753,6 +2552,7 @@ namespace vk
 	private:
 		VkAllocationCallbacks m_allocationCallbacks;
 	};
+	static_assert(sizeof(AllocationCallbacks) == sizeof(VkAllocationCallbacks), "struct and wrapper have different size!");
 
 	class MemoryRequirements
 	{
@@ -780,6 +2580,7 @@ namespace vk
 	private:
 		VkMemoryRequirements m_memoryRequirements;
 	};
+	static_assert(sizeof(MemoryRequirements) == sizeof(VkMemoryRequirements), "struct and wrapper have different size!");
 
 	class DescriptorBufferInfo
 	{
@@ -790,23 +2591,44 @@ namespace vk
 
 		DescriptorBufferInfo(Buffer buffer, DeviceSize offset, DeviceSize range)
 		{
-			m_descriptorBufferInfo.buffer = buffer;
+			m_descriptorBufferInfo.buffer = static_cast<VkBuffer>(buffer);
 			m_descriptorBufferInfo.offset = offset;
 			m_descriptorBufferInfo.range = range;
 		}
 
+		DescriptorBufferInfo(VkDescriptorBufferInfo const & rhs)
+			: m_descriptorBufferInfo(rhs)
+		{
+		}
+
+		DescriptorBufferInfo& operator=(VkDescriptorBufferInfo const & rhs)
+		{
+			m_descriptorBufferInfo = rhs;
+			return *this;
+		}
+
 		const Buffer& buffer() const
 		{
-			return m_descriptorBufferInfo.buffer;
+			return reinterpret_cast<const Buffer&>(m_descriptorBufferInfo.buffer);
+		}
+
+		Buffer& buffer()
+		{
+			return reinterpret_cast<Buffer&>(m_descriptorBufferInfo.buffer);
 		}
 
 		DescriptorBufferInfo& buffer(Buffer buffer)
 		{
-			m_descriptorBufferInfo.buffer = buffer;
+			m_descriptorBufferInfo.buffer = static_cast<VkBuffer>(buffer);
 			return *this;
 		}
 
 		const DeviceSize& offset() const
+		{
+			return m_descriptorBufferInfo.offset;
+		}
+
+		DeviceSize& offset()
 		{
 			return m_descriptorBufferInfo.offset;
 		}
@@ -818,6 +2640,11 @@ namespace vk
 		}
 
 		const DeviceSize& range() const
+		{
+			return m_descriptorBufferInfo.range;
+		}
+
+		DeviceSize& range()
 		{
 			return m_descriptorBufferInfo.range;
 		}
@@ -836,32 +2663,14 @@ namespace vk
 	private:
 		VkDescriptorBufferInfo m_descriptorBufferInfo;
 	};
+	static_assert(sizeof(DescriptorBufferInfo) == sizeof(VkDescriptorBufferInfo), "struct and wrapper have different size!");
 
 	class SubresourceLayout
 	{
 	public:
-		SubresourceLayout()
-			: SubresourceLayout(0, 0, 0, 0, 0)
-		{}
-
-		SubresourceLayout(DeviceSize offset, DeviceSize size, DeviceSize rowPitch, DeviceSize arrayPitch, DeviceSize depthPitch)
-		{
-			m_subresourceLayout.offset = offset;
-			m_subresourceLayout.size = size;
-			m_subresourceLayout.rowPitch = rowPitch;
-			m_subresourceLayout.arrayPitch = arrayPitch;
-			m_subresourceLayout.depthPitch = depthPitch;
-		}
-
 		const DeviceSize& offset() const
 		{
 			return m_subresourceLayout.offset;
-		}
-
-		SubresourceLayout& offset(DeviceSize offset)
-		{
-			m_subresourceLayout.offset = offset;
-			return *this;
 		}
 
 		const DeviceSize& size() const
@@ -869,21 +2678,9 @@ namespace vk
 			return m_subresourceLayout.size;
 		}
 
-		SubresourceLayout& size(DeviceSize size)
-		{
-			m_subresourceLayout.size = size;
-			return *this;
-		}
-
 		const DeviceSize& rowPitch() const
 		{
 			return m_subresourceLayout.rowPitch;
-		}
-
-		SubresourceLayout& rowPitch(DeviceSize rowPitch)
-		{
-			m_subresourceLayout.rowPitch = rowPitch;
-			return *this;
 		}
 
 		const DeviceSize& arrayPitch() const
@@ -891,21 +2688,9 @@ namespace vk
 			return m_subresourceLayout.arrayPitch;
 		}
 
-		SubresourceLayout& arrayPitch(DeviceSize arrayPitch)
-		{
-			m_subresourceLayout.arrayPitch = arrayPitch;
-			return *this;
-		}
-
 		const DeviceSize& depthPitch() const
 		{
 			return m_subresourceLayout.depthPitch;
-		}
-
-		SubresourceLayout& depthPitch(DeviceSize depthPitch)
-		{
-			m_subresourceLayout.depthPitch = depthPitch;
-			return *this;
 		}
 
 		operator const VkSubresourceLayout&() const
@@ -916,6 +2701,7 @@ namespace vk
 	private:
 		VkSubresourceLayout m_subresourceLayout;
 	};
+	static_assert(sizeof(SubresourceLayout) == sizeof(VkSubresourceLayout), "struct and wrapper have different size!");
 
 	class BufferCopy
 	{
@@ -931,7 +2717,23 @@ namespace vk
 			m_bufferCopy.size = size;
 		}
 
+		BufferCopy(VkBufferCopy const & rhs)
+			: m_bufferCopy(rhs)
+		{
+		}
+
+		BufferCopy& operator=(VkBufferCopy const & rhs)
+		{
+			m_bufferCopy = rhs;
+			return *this;
+		}
+
 		const DeviceSize& srcOffset() const
+		{
+			return m_bufferCopy.srcOffset;
+		}
+
+		DeviceSize& srcOffset()
 		{
 			return m_bufferCopy.srcOffset;
 		}
@@ -947,6 +2749,11 @@ namespace vk
 			return m_bufferCopy.dstOffset;
 		}
 
+		DeviceSize& dstOffset()
+		{
+			return m_bufferCopy.dstOffset;
+		}
+
 		BufferCopy& dstOffset(DeviceSize dstOffset)
 		{
 			m_bufferCopy.dstOffset = dstOffset;
@@ -954,6 +2761,11 @@ namespace vk
 		}
 
 		const DeviceSize& size() const
+		{
+			return m_bufferCopy.size;
+		}
+
+		DeviceSize& size()
 		{
 			return m_bufferCopy.size;
 		}
@@ -972,6 +2784,7 @@ namespace vk
 	private:
 		VkBufferCopy m_bufferCopy;
 	};
+	static_assert(sizeof(BufferCopy) == sizeof(VkBufferCopy), "struct and wrapper have different size!");
 
 	class SpecializationMapEntry
 	{
@@ -987,7 +2800,23 @@ namespace vk
 			m_specializationMapEntry.size = size;
 		}
 
+		SpecializationMapEntry(VkSpecializationMapEntry const & rhs)
+			: m_specializationMapEntry(rhs)
+		{
+		}
+
+		SpecializationMapEntry& operator=(VkSpecializationMapEntry const & rhs)
+		{
+			m_specializationMapEntry = rhs;
+			return *this;
+		}
+
 		const uint32_t& constantID() const
+		{
+			return m_specializationMapEntry.constantID;
+		}
+
+		uint32_t& constantID()
 		{
 			return m_specializationMapEntry.constantID;
 		}
@@ -1003,6 +2832,11 @@ namespace vk
 			return m_specializationMapEntry.offset;
 		}
 
+		uint32_t& offset()
+		{
+			return m_specializationMapEntry.offset;
+		}
+
 		SpecializationMapEntry& offset(uint32_t offset)
 		{
 			m_specializationMapEntry.offset = offset;
@@ -1010,6 +2844,11 @@ namespace vk
 		}
 
 		const size_t& size() const
+		{
+			return m_specializationMapEntry.size;
+		}
+
+		size_t& size()
 		{
 			return m_specializationMapEntry.size;
 		}
@@ -1028,6 +2867,7 @@ namespace vk
 	private:
 		VkSpecializationMapEntry m_specializationMapEntry;
 	};
+	static_assert(sizeof(SpecializationMapEntry) == sizeof(VkSpecializationMapEntry), "struct and wrapper have different size!");
 
 	class SpecializationInfo
 	{
@@ -1044,7 +2884,23 @@ namespace vk
 			m_specializationInfo.pData = pData;
 		}
 
+		SpecializationInfo(VkSpecializationInfo const & rhs)
+			: m_specializationInfo(rhs)
+		{
+		}
+
+		SpecializationInfo& operator=(VkSpecializationInfo const & rhs)
+		{
+			m_specializationInfo = rhs;
+			return *this;
+		}
+
 		const uint32_t& mapEntryCount() const
+		{
+			return m_specializationInfo.mapEntryCount;
+		}
+
+		uint32_t& mapEntryCount()
 		{
 			return m_specializationInfo.mapEntryCount;
 		}
@@ -1060,6 +2916,11 @@ namespace vk
 			return reinterpret_cast<const SpecializationMapEntry*>(m_specializationInfo.pMapEntries);
 		}
 
+		const SpecializationMapEntry* pMapEntries()
+		{
+			return reinterpret_cast<const SpecializationMapEntry*>(m_specializationInfo.pMapEntries);
+		}
+
 		SpecializationInfo& pMapEntries(const SpecializationMapEntry* pMapEntries)
 		{
 			m_specializationInfo.pMapEntries = reinterpret_cast<const VkSpecializationMapEntry*>(pMapEntries);
@@ -1071,6 +2932,11 @@ namespace vk
 			return m_specializationInfo.dataSize;
 		}
 
+		size_t& dataSize()
+		{
+			return m_specializationInfo.dataSize;
+		}
+
 		SpecializationInfo& dataSize(size_t dataSize)
 		{
 			m_specializationInfo.dataSize = dataSize;
@@ -1078,6 +2944,11 @@ namespace vk
 		}
 
 		const void* pData() const
+		{
+			return reinterpret_cast<const void*>(m_specializationInfo.pData);
+		}
+
+		const void* pData()
 		{
 			return reinterpret_cast<const void*>(m_specializationInfo.pData);
 		}
@@ -1096,11 +2967,12 @@ namespace vk
 	private:
 		VkSpecializationInfo m_specializationInfo;
 	};
+	static_assert(sizeof(SpecializationInfo) == sizeof(VkSpecializationInfo), "struct and wrapper have different size!");
 
 	class ClearColorValue
 	{
 	public:
-		ClearColorValue(const eastl::fixed_vector<float, 4>& float32 = { 0 })
+		ClearColorValue(const eastl::array<float, 4>& float32 = { 0 })
 		{
 			memcpy(&m_clearColorValue.float32, float32.data(), 4 * sizeof(float));
 		}
@@ -1110,13 +2982,18 @@ namespace vk
 			return reinterpret_cast<const float*>(m_clearColorValue.float32);
 		}
 
-		ClearColorValue& float32(eastl::fixed_vector<float, 4> float32)
+		float* float32()
+		{
+			return reinterpret_cast<float*>(m_clearColorValue.float32);
+		}
+
+		ClearColorValue& float32(eastl::array<float, 4> float32)
 		{
 			memcpy(&m_clearColorValue.float32, float32.data(), 4 * sizeof(float));
 			return *this;
 		}
 
-		ClearColorValue(const eastl::fixed_vector<int32_t, 4>& int32)
+		ClearColorValue(const eastl::array<int32_t, 4>& int32)
 		{
 			memcpy(&m_clearColorValue.int32, int32.data(), 4 * sizeof(int32_t));
 		}
@@ -1126,13 +3003,18 @@ namespace vk
 			return reinterpret_cast<const int32_t*>(m_clearColorValue.int32);
 		}
 
-		ClearColorValue& int32(eastl::fixed_vector<int32_t, 4> int32)
+		int32_t* int32()
+		{
+			return reinterpret_cast<int32_t*>(m_clearColorValue.int32);
+		}
+
+		ClearColorValue& int32(eastl::array<int32_t, 4> int32)
 		{
 			memcpy(&m_clearColorValue.int32, int32.data(), 4 * sizeof(int32_t));
 			return *this;
 		}
 
-		ClearColorValue(const eastl::fixed_vector<uint32_t, 4>& uint32)
+		ClearColorValue(const eastl::array<uint32_t, 4>& uint32)
 		{
 			memcpy(&m_clearColorValue.uint32, uint32.data(), 4 * sizeof(uint32_t));
 		}
@@ -1142,7 +3024,12 @@ namespace vk
 			return reinterpret_cast<const uint32_t*>(m_clearColorValue.uint32);
 		}
 
-		ClearColorValue& uint32(eastl::fixed_vector<uint32_t, 4> uint32)
+		uint32_t* uint32()
+		{
+			return reinterpret_cast<uint32_t*>(m_clearColorValue.uint32);
+		}
+
+		ClearColorValue& uint32(eastl::array<uint32_t, 4> uint32)
 		{
 			memcpy(&m_clearColorValue.uint32, uint32.data(), 4 * sizeof(uint32_t));
 			return *this;
@@ -1170,7 +3057,23 @@ namespace vk
 			m_clearDepthStencilValue.stencil = stencil;
 		}
 
+		ClearDepthStencilValue(VkClearDepthStencilValue const & rhs)
+			: m_clearDepthStencilValue(rhs)
+		{
+		}
+
+		ClearDepthStencilValue& operator=(VkClearDepthStencilValue const & rhs)
+		{
+			m_clearDepthStencilValue = rhs;
+			return *this;
+		}
+
 		const float& depth() const
+		{
+			return m_clearDepthStencilValue.depth;
+		}
+
+		float& depth()
 		{
 			return m_clearDepthStencilValue.depth;
 		}
@@ -1182,6 +3085,11 @@ namespace vk
 		}
 
 		const uint32_t& stencil() const
+		{
+			return m_clearDepthStencilValue.stencil;
+		}
+
+		uint32_t& stencil()
 		{
 			return m_clearDepthStencilValue.stencil;
 		}
@@ -1200,6 +3108,7 @@ namespace vk
 	private:
 		VkClearDepthStencilValue m_clearDepthStencilValue;
 	};
+	static_assert(sizeof(ClearDepthStencilValue) == sizeof(VkClearDepthStencilValue), "struct and wrapper have different size!");
 
 	class ClearValue
 	{
@@ -1212,6 +3121,11 @@ namespace vk
 		const ClearColorValue& color() const
 		{
 			return reinterpret_cast<const ClearColorValue&>(m_clearValue.color);
+		}
+
+		ClearColorValue& color()
+		{
+			return reinterpret_cast<ClearColorValue&>(m_clearValue.color);
 		}
 
 		ClearValue& color(ClearColorValue color)
@@ -1228,6 +3142,11 @@ namespace vk
 		const ClearDepthStencilValue& depthStencil() const
 		{
 			return reinterpret_cast<const ClearDepthStencilValue&>(m_clearValue.depthStencil);
+		}
+
+		ClearDepthStencilValue& depthStencil()
+		{
+			return reinterpret_cast<ClearDepthStencilValue&>(m_clearValue.depthStencil);
 		}
 
 		ClearValue& depthStencil(ClearDepthStencilValue depthStencil)
@@ -1311,7 +3230,23 @@ namespace vk
 			m_physicalDeviceFeatures.inheritedQueries = inheritedQueries;
 		}
 
+		PhysicalDeviceFeatures(VkPhysicalDeviceFeatures const & rhs)
+			: m_physicalDeviceFeatures(rhs)
+		{
+		}
+
+		PhysicalDeviceFeatures& operator=(VkPhysicalDeviceFeatures const & rhs)
+		{
+			m_physicalDeviceFeatures = rhs;
+			return *this;
+		}
+
 		const Bool32& robustBufferAccess() const
+		{
+			return m_physicalDeviceFeatures.robustBufferAccess;
+		}
+
+		Bool32& robustBufferAccess()
 		{
 			return m_physicalDeviceFeatures.robustBufferAccess;
 		}
@@ -1327,6 +3262,11 @@ namespace vk
 			return m_physicalDeviceFeatures.fullDrawIndexUint32;
 		}
 
+		Bool32& fullDrawIndexUint32()
+		{
+			return m_physicalDeviceFeatures.fullDrawIndexUint32;
+		}
+
 		PhysicalDeviceFeatures& fullDrawIndexUint32(Bool32 fullDrawIndexUint32)
 		{
 			m_physicalDeviceFeatures.fullDrawIndexUint32 = fullDrawIndexUint32;
@@ -1334,6 +3274,11 @@ namespace vk
 		}
 
 		const Bool32& imageCubeArray() const
+		{
+			return m_physicalDeviceFeatures.imageCubeArray;
+		}
+
+		Bool32& imageCubeArray()
 		{
 			return m_physicalDeviceFeatures.imageCubeArray;
 		}
@@ -1349,6 +3294,11 @@ namespace vk
 			return m_physicalDeviceFeatures.independentBlend;
 		}
 
+		Bool32& independentBlend()
+		{
+			return m_physicalDeviceFeatures.independentBlend;
+		}
+
 		PhysicalDeviceFeatures& independentBlend(Bool32 independentBlend)
 		{
 			m_physicalDeviceFeatures.independentBlend = independentBlend;
@@ -1356,6 +3306,11 @@ namespace vk
 		}
 
 		const Bool32& geometryShader() const
+		{
+			return m_physicalDeviceFeatures.geometryShader;
+		}
+
+		Bool32& geometryShader()
 		{
 			return m_physicalDeviceFeatures.geometryShader;
 		}
@@ -1371,6 +3326,11 @@ namespace vk
 			return m_physicalDeviceFeatures.tessellationShader;
 		}
 
+		Bool32& tessellationShader()
+		{
+			return m_physicalDeviceFeatures.tessellationShader;
+		}
+
 		PhysicalDeviceFeatures& tessellationShader(Bool32 tessellationShader)
 		{
 			m_physicalDeviceFeatures.tessellationShader = tessellationShader;
@@ -1378,6 +3338,11 @@ namespace vk
 		}
 
 		const Bool32& sampleRateShading() const
+		{
+			return m_physicalDeviceFeatures.sampleRateShading;
+		}
+
+		Bool32& sampleRateShading()
 		{
 			return m_physicalDeviceFeatures.sampleRateShading;
 		}
@@ -1393,6 +3358,11 @@ namespace vk
 			return m_physicalDeviceFeatures.dualSrcBlend;
 		}
 
+		Bool32& dualSrcBlend()
+		{
+			return m_physicalDeviceFeatures.dualSrcBlend;
+		}
+
 		PhysicalDeviceFeatures& dualSrcBlend(Bool32 dualSrcBlend)
 		{
 			m_physicalDeviceFeatures.dualSrcBlend = dualSrcBlend;
@@ -1400,6 +3370,11 @@ namespace vk
 		}
 
 		const Bool32& logicOp() const
+		{
+			return m_physicalDeviceFeatures.logicOp;
+		}
+
+		Bool32& logicOp()
 		{
 			return m_physicalDeviceFeatures.logicOp;
 		}
@@ -1415,6 +3390,11 @@ namespace vk
 			return m_physicalDeviceFeatures.multiDrawIndirect;
 		}
 
+		Bool32& multiDrawIndirect()
+		{
+			return m_physicalDeviceFeatures.multiDrawIndirect;
+		}
+
 		PhysicalDeviceFeatures& multiDrawIndirect(Bool32 multiDrawIndirect)
 		{
 			m_physicalDeviceFeatures.multiDrawIndirect = multiDrawIndirect;
@@ -1422,6 +3402,11 @@ namespace vk
 		}
 
 		const Bool32& drawIndirectFirstInstance() const
+		{
+			return m_physicalDeviceFeatures.drawIndirectFirstInstance;
+		}
+
+		Bool32& drawIndirectFirstInstance()
 		{
 			return m_physicalDeviceFeatures.drawIndirectFirstInstance;
 		}
@@ -1437,6 +3422,11 @@ namespace vk
 			return m_physicalDeviceFeatures.depthClamp;
 		}
 
+		Bool32& depthClamp()
+		{
+			return m_physicalDeviceFeatures.depthClamp;
+		}
+
 		PhysicalDeviceFeatures& depthClamp(Bool32 depthClamp)
 		{
 			m_physicalDeviceFeatures.depthClamp = depthClamp;
@@ -1444,6 +3434,11 @@ namespace vk
 		}
 
 		const Bool32& depthBiasClamp() const
+		{
+			return m_physicalDeviceFeatures.depthBiasClamp;
+		}
+
+		Bool32& depthBiasClamp()
 		{
 			return m_physicalDeviceFeatures.depthBiasClamp;
 		}
@@ -1459,6 +3454,11 @@ namespace vk
 			return m_physicalDeviceFeatures.fillModeNonSolid;
 		}
 
+		Bool32& fillModeNonSolid()
+		{
+			return m_physicalDeviceFeatures.fillModeNonSolid;
+		}
+
 		PhysicalDeviceFeatures& fillModeNonSolid(Bool32 fillModeNonSolid)
 		{
 			m_physicalDeviceFeatures.fillModeNonSolid = fillModeNonSolid;
@@ -1466,6 +3466,11 @@ namespace vk
 		}
 
 		const Bool32& depthBounds() const
+		{
+			return m_physicalDeviceFeatures.depthBounds;
+		}
+
+		Bool32& depthBounds()
 		{
 			return m_physicalDeviceFeatures.depthBounds;
 		}
@@ -1481,6 +3486,11 @@ namespace vk
 			return m_physicalDeviceFeatures.wideLines;
 		}
 
+		Bool32& wideLines()
+		{
+			return m_physicalDeviceFeatures.wideLines;
+		}
+
 		PhysicalDeviceFeatures& wideLines(Bool32 wideLines)
 		{
 			m_physicalDeviceFeatures.wideLines = wideLines;
@@ -1488,6 +3498,11 @@ namespace vk
 		}
 
 		const Bool32& largePoints() const
+		{
+			return m_physicalDeviceFeatures.largePoints;
+		}
+
+		Bool32& largePoints()
 		{
 			return m_physicalDeviceFeatures.largePoints;
 		}
@@ -1503,6 +3518,11 @@ namespace vk
 			return m_physicalDeviceFeatures.alphaToOne;
 		}
 
+		Bool32& alphaToOne()
+		{
+			return m_physicalDeviceFeatures.alphaToOne;
+		}
+
 		PhysicalDeviceFeatures& alphaToOne(Bool32 alphaToOne)
 		{
 			m_physicalDeviceFeatures.alphaToOne = alphaToOne;
@@ -1510,6 +3530,11 @@ namespace vk
 		}
 
 		const Bool32& multiViewport() const
+		{
+			return m_physicalDeviceFeatures.multiViewport;
+		}
+
+		Bool32& multiViewport()
 		{
 			return m_physicalDeviceFeatures.multiViewport;
 		}
@@ -1525,6 +3550,11 @@ namespace vk
 			return m_physicalDeviceFeatures.samplerAnisotropy;
 		}
 
+		Bool32& samplerAnisotropy()
+		{
+			return m_physicalDeviceFeatures.samplerAnisotropy;
+		}
+
 		PhysicalDeviceFeatures& samplerAnisotropy(Bool32 samplerAnisotropy)
 		{
 			m_physicalDeviceFeatures.samplerAnisotropy = samplerAnisotropy;
@@ -1532,6 +3562,11 @@ namespace vk
 		}
 
 		const Bool32& textureCompressionETC2() const
+		{
+			return m_physicalDeviceFeatures.textureCompressionETC2;
+		}
+
+		Bool32& textureCompressionETC2()
 		{
 			return m_physicalDeviceFeatures.textureCompressionETC2;
 		}
@@ -1547,6 +3582,11 @@ namespace vk
 			return m_physicalDeviceFeatures.textureCompressionASTC_LDR;
 		}
 
+		Bool32& textureCompressionASTC_LDR()
+		{
+			return m_physicalDeviceFeatures.textureCompressionASTC_LDR;
+		}
+
 		PhysicalDeviceFeatures& textureCompressionASTC_LDR(Bool32 textureCompressionASTC_LDR)
 		{
 			m_physicalDeviceFeatures.textureCompressionASTC_LDR = textureCompressionASTC_LDR;
@@ -1554,6 +3594,11 @@ namespace vk
 		}
 
 		const Bool32& textureCompressionBC() const
+		{
+			return m_physicalDeviceFeatures.textureCompressionBC;
+		}
+
+		Bool32& textureCompressionBC()
 		{
 			return m_physicalDeviceFeatures.textureCompressionBC;
 		}
@@ -1569,6 +3614,11 @@ namespace vk
 			return m_physicalDeviceFeatures.occlusionQueryPrecise;
 		}
 
+		Bool32& occlusionQueryPrecise()
+		{
+			return m_physicalDeviceFeatures.occlusionQueryPrecise;
+		}
+
 		PhysicalDeviceFeatures& occlusionQueryPrecise(Bool32 occlusionQueryPrecise)
 		{
 			m_physicalDeviceFeatures.occlusionQueryPrecise = occlusionQueryPrecise;
@@ -1576,6 +3626,11 @@ namespace vk
 		}
 
 		const Bool32& pipelineStatisticsQuery() const
+		{
+			return m_physicalDeviceFeatures.pipelineStatisticsQuery;
+		}
+
+		Bool32& pipelineStatisticsQuery()
 		{
 			return m_physicalDeviceFeatures.pipelineStatisticsQuery;
 		}
@@ -1591,6 +3646,11 @@ namespace vk
 			return m_physicalDeviceFeatures.vertexPipelineStoresAndAtomics;
 		}
 
+		Bool32& vertexPipelineStoresAndAtomics()
+		{
+			return m_physicalDeviceFeatures.vertexPipelineStoresAndAtomics;
+		}
+
 		PhysicalDeviceFeatures& vertexPipelineStoresAndAtomics(Bool32 vertexPipelineStoresAndAtomics)
 		{
 			m_physicalDeviceFeatures.vertexPipelineStoresAndAtomics = vertexPipelineStoresAndAtomics;
@@ -1598,6 +3658,11 @@ namespace vk
 		}
 
 		const Bool32& fragmentStoresAndAtomics() const
+		{
+			return m_physicalDeviceFeatures.fragmentStoresAndAtomics;
+		}
+
+		Bool32& fragmentStoresAndAtomics()
 		{
 			return m_physicalDeviceFeatures.fragmentStoresAndAtomics;
 		}
@@ -1613,6 +3678,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderTessellationAndGeometryPointSize;
 		}
 
+		Bool32& shaderTessellationAndGeometryPointSize()
+		{
+			return m_physicalDeviceFeatures.shaderTessellationAndGeometryPointSize;
+		}
+
 		PhysicalDeviceFeatures& shaderTessellationAndGeometryPointSize(Bool32 shaderTessellationAndGeometryPointSize)
 		{
 			m_physicalDeviceFeatures.shaderTessellationAndGeometryPointSize = shaderTessellationAndGeometryPointSize;
@@ -1620,6 +3690,11 @@ namespace vk
 		}
 
 		const Bool32& shaderImageGatherExtended() const
+		{
+			return m_physicalDeviceFeatures.shaderImageGatherExtended;
+		}
+
+		Bool32& shaderImageGatherExtended()
 		{
 			return m_physicalDeviceFeatures.shaderImageGatherExtended;
 		}
@@ -1635,6 +3710,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderStorageImageExtendedFormats;
 		}
 
+		Bool32& shaderStorageImageExtendedFormats()
+		{
+			return m_physicalDeviceFeatures.shaderStorageImageExtendedFormats;
+		}
+
 		PhysicalDeviceFeatures& shaderStorageImageExtendedFormats(Bool32 shaderStorageImageExtendedFormats)
 		{
 			m_physicalDeviceFeatures.shaderStorageImageExtendedFormats = shaderStorageImageExtendedFormats;
@@ -1642,6 +3722,11 @@ namespace vk
 		}
 
 		const Bool32& shaderStorageImageMultisample() const
+		{
+			return m_physicalDeviceFeatures.shaderStorageImageMultisample;
+		}
+
+		Bool32& shaderStorageImageMultisample()
 		{
 			return m_physicalDeviceFeatures.shaderStorageImageMultisample;
 		}
@@ -1657,6 +3742,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderStorageImageReadWithoutFormat;
 		}
 
+		Bool32& shaderStorageImageReadWithoutFormat()
+		{
+			return m_physicalDeviceFeatures.shaderStorageImageReadWithoutFormat;
+		}
+
 		PhysicalDeviceFeatures& shaderStorageImageReadWithoutFormat(Bool32 shaderStorageImageReadWithoutFormat)
 		{
 			m_physicalDeviceFeatures.shaderStorageImageReadWithoutFormat = shaderStorageImageReadWithoutFormat;
@@ -1664,6 +3754,11 @@ namespace vk
 		}
 
 		const Bool32& shaderStorageImageWriteWithoutFormat() const
+		{
+			return m_physicalDeviceFeatures.shaderStorageImageWriteWithoutFormat;
+		}
+
+		Bool32& shaderStorageImageWriteWithoutFormat()
 		{
 			return m_physicalDeviceFeatures.shaderStorageImageWriteWithoutFormat;
 		}
@@ -1679,6 +3774,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderUniformBufferArrayDynamicIndexing;
 		}
 
+		Bool32& shaderUniformBufferArrayDynamicIndexing()
+		{
+			return m_physicalDeviceFeatures.shaderUniformBufferArrayDynamicIndexing;
+		}
+
 		PhysicalDeviceFeatures& shaderUniformBufferArrayDynamicIndexing(Bool32 shaderUniformBufferArrayDynamicIndexing)
 		{
 			m_physicalDeviceFeatures.shaderUniformBufferArrayDynamicIndexing = shaderUniformBufferArrayDynamicIndexing;
@@ -1686,6 +3786,11 @@ namespace vk
 		}
 
 		const Bool32& shaderSampledImageArrayDynamicIndexing() const
+		{
+			return m_physicalDeviceFeatures.shaderSampledImageArrayDynamicIndexing;
+		}
+
+		Bool32& shaderSampledImageArrayDynamicIndexing()
 		{
 			return m_physicalDeviceFeatures.shaderSampledImageArrayDynamicIndexing;
 		}
@@ -1701,6 +3806,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderStorageBufferArrayDynamicIndexing;
 		}
 
+		Bool32& shaderStorageBufferArrayDynamicIndexing()
+		{
+			return m_physicalDeviceFeatures.shaderStorageBufferArrayDynamicIndexing;
+		}
+
 		PhysicalDeviceFeatures& shaderStorageBufferArrayDynamicIndexing(Bool32 shaderStorageBufferArrayDynamicIndexing)
 		{
 			m_physicalDeviceFeatures.shaderStorageBufferArrayDynamicIndexing = shaderStorageBufferArrayDynamicIndexing;
@@ -1708,6 +3818,11 @@ namespace vk
 		}
 
 		const Bool32& shaderStorageImageArrayDynamicIndexing() const
+		{
+			return m_physicalDeviceFeatures.shaderStorageImageArrayDynamicIndexing;
+		}
+
+		Bool32& shaderStorageImageArrayDynamicIndexing()
 		{
 			return m_physicalDeviceFeatures.shaderStorageImageArrayDynamicIndexing;
 		}
@@ -1723,6 +3838,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderClipDistance;
 		}
 
+		Bool32& shaderClipDistance()
+		{
+			return m_physicalDeviceFeatures.shaderClipDistance;
+		}
+
 		PhysicalDeviceFeatures& shaderClipDistance(Bool32 shaderClipDistance)
 		{
 			m_physicalDeviceFeatures.shaderClipDistance = shaderClipDistance;
@@ -1730,6 +3850,11 @@ namespace vk
 		}
 
 		const Bool32& shaderCullDistance() const
+		{
+			return m_physicalDeviceFeatures.shaderCullDistance;
+		}
+
+		Bool32& shaderCullDistance()
 		{
 			return m_physicalDeviceFeatures.shaderCullDistance;
 		}
@@ -1745,6 +3870,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderFloat64;
 		}
 
+		Bool32& shaderFloat64()
+		{
+			return m_physicalDeviceFeatures.shaderFloat64;
+		}
+
 		PhysicalDeviceFeatures& shaderFloat64(Bool32 shaderFloat64)
 		{
 			m_physicalDeviceFeatures.shaderFloat64 = shaderFloat64;
@@ -1752,6 +3882,11 @@ namespace vk
 		}
 
 		const Bool32& shaderInt64() const
+		{
+			return m_physicalDeviceFeatures.shaderInt64;
+		}
+
+		Bool32& shaderInt64()
 		{
 			return m_physicalDeviceFeatures.shaderInt64;
 		}
@@ -1767,6 +3902,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderInt16;
 		}
 
+		Bool32& shaderInt16()
+		{
+			return m_physicalDeviceFeatures.shaderInt16;
+		}
+
 		PhysicalDeviceFeatures& shaderInt16(Bool32 shaderInt16)
 		{
 			m_physicalDeviceFeatures.shaderInt16 = shaderInt16;
@@ -1774,6 +3914,11 @@ namespace vk
 		}
 
 		const Bool32& shaderResourceResidency() const
+		{
+			return m_physicalDeviceFeatures.shaderResourceResidency;
+		}
+
+		Bool32& shaderResourceResidency()
 		{
 			return m_physicalDeviceFeatures.shaderResourceResidency;
 		}
@@ -1789,6 +3934,11 @@ namespace vk
 			return m_physicalDeviceFeatures.shaderResourceMinLod;
 		}
 
+		Bool32& shaderResourceMinLod()
+		{
+			return m_physicalDeviceFeatures.shaderResourceMinLod;
+		}
+
 		PhysicalDeviceFeatures& shaderResourceMinLod(Bool32 shaderResourceMinLod)
 		{
 			m_physicalDeviceFeatures.shaderResourceMinLod = shaderResourceMinLod;
@@ -1796,6 +3946,11 @@ namespace vk
 		}
 
 		const Bool32& sparseBinding() const
+		{
+			return m_physicalDeviceFeatures.sparseBinding;
+		}
+
+		Bool32& sparseBinding()
 		{
 			return m_physicalDeviceFeatures.sparseBinding;
 		}
@@ -1811,6 +3966,11 @@ namespace vk
 			return m_physicalDeviceFeatures.sparseResidencyBuffer;
 		}
 
+		Bool32& sparseResidencyBuffer()
+		{
+			return m_physicalDeviceFeatures.sparseResidencyBuffer;
+		}
+
 		PhysicalDeviceFeatures& sparseResidencyBuffer(Bool32 sparseResidencyBuffer)
 		{
 			m_physicalDeviceFeatures.sparseResidencyBuffer = sparseResidencyBuffer;
@@ -1818,6 +3978,11 @@ namespace vk
 		}
 
 		const Bool32& sparseResidencyImage2D() const
+		{
+			return m_physicalDeviceFeatures.sparseResidencyImage2D;
+		}
+
+		Bool32& sparseResidencyImage2D()
 		{
 			return m_physicalDeviceFeatures.sparseResidencyImage2D;
 		}
@@ -1833,6 +3998,11 @@ namespace vk
 			return m_physicalDeviceFeatures.sparseResidencyImage3D;
 		}
 
+		Bool32& sparseResidencyImage3D()
+		{
+			return m_physicalDeviceFeatures.sparseResidencyImage3D;
+		}
+
 		PhysicalDeviceFeatures& sparseResidencyImage3D(Bool32 sparseResidencyImage3D)
 		{
 			m_physicalDeviceFeatures.sparseResidencyImage3D = sparseResidencyImage3D;
@@ -1840,6 +4010,11 @@ namespace vk
 		}
 
 		const Bool32& sparseResidency2Samples() const
+		{
+			return m_physicalDeviceFeatures.sparseResidency2Samples;
+		}
+
+		Bool32& sparseResidency2Samples()
 		{
 			return m_physicalDeviceFeatures.sparseResidency2Samples;
 		}
@@ -1855,6 +4030,11 @@ namespace vk
 			return m_physicalDeviceFeatures.sparseResidency4Samples;
 		}
 
+		Bool32& sparseResidency4Samples()
+		{
+			return m_physicalDeviceFeatures.sparseResidency4Samples;
+		}
+
 		PhysicalDeviceFeatures& sparseResidency4Samples(Bool32 sparseResidency4Samples)
 		{
 			m_physicalDeviceFeatures.sparseResidency4Samples = sparseResidency4Samples;
@@ -1862,6 +4042,11 @@ namespace vk
 		}
 
 		const Bool32& sparseResidency8Samples() const
+		{
+			return m_physicalDeviceFeatures.sparseResidency8Samples;
+		}
+
+		Bool32& sparseResidency8Samples()
 		{
 			return m_physicalDeviceFeatures.sparseResidency8Samples;
 		}
@@ -1877,6 +4062,11 @@ namespace vk
 			return m_physicalDeviceFeatures.sparseResidency16Samples;
 		}
 
+		Bool32& sparseResidency16Samples()
+		{
+			return m_physicalDeviceFeatures.sparseResidency16Samples;
+		}
+
 		PhysicalDeviceFeatures& sparseResidency16Samples(Bool32 sparseResidency16Samples)
 		{
 			m_physicalDeviceFeatures.sparseResidency16Samples = sparseResidency16Samples;
@@ -1884,6 +4074,11 @@ namespace vk
 		}
 
 		const Bool32& sparseResidencyAliased() const
+		{
+			return m_physicalDeviceFeatures.sparseResidencyAliased;
+		}
+
+		Bool32& sparseResidencyAliased()
 		{
 			return m_physicalDeviceFeatures.sparseResidencyAliased;
 		}
@@ -1899,6 +4094,11 @@ namespace vk
 			return m_physicalDeviceFeatures.variableMultisampleRate;
 		}
 
+		Bool32& variableMultisampleRate()
+		{
+			return m_physicalDeviceFeatures.variableMultisampleRate;
+		}
+
 		PhysicalDeviceFeatures& variableMultisampleRate(Bool32 variableMultisampleRate)
 		{
 			m_physicalDeviceFeatures.variableMultisampleRate = variableMultisampleRate;
@@ -1906,6 +4106,11 @@ namespace vk
 		}
 
 		const Bool32& inheritedQueries() const
+		{
+			return m_physicalDeviceFeatures.inheritedQueries;
+		}
+
+		Bool32& inheritedQueries()
 		{
 			return m_physicalDeviceFeatures.inheritedQueries;
 		}
@@ -1924,6 +4129,7 @@ namespace vk
 	private:
 		VkPhysicalDeviceFeatures m_physicalDeviceFeatures;
 	};
+	static_assert(sizeof(PhysicalDeviceFeatures) == sizeof(VkPhysicalDeviceFeatures), "struct and wrapper have different size!");
 
 	class PhysicalDeviceSparseProperties
 	{
@@ -1961,6 +4167,7 @@ namespace vk
 	private:
 		VkPhysicalDeviceSparseProperties m_physicalDeviceSparseProperties;
 	};
+	static_assert(sizeof(PhysicalDeviceSparseProperties) == sizeof(VkPhysicalDeviceSparseProperties), "struct and wrapper have different size!");
 
 	class DrawIndirectCommand
 	{
@@ -1977,7 +4184,23 @@ namespace vk
 			m_drawIndirectCommand.firstInstance = firstInstance;
 		}
 
+		DrawIndirectCommand(VkDrawIndirectCommand const & rhs)
+			: m_drawIndirectCommand(rhs)
+		{
+		}
+
+		DrawIndirectCommand& operator=(VkDrawIndirectCommand const & rhs)
+		{
+			m_drawIndirectCommand = rhs;
+			return *this;
+		}
+
 		const uint32_t& vertexCount() const
+		{
+			return m_drawIndirectCommand.vertexCount;
+		}
+
+		uint32_t& vertexCount()
 		{
 			return m_drawIndirectCommand.vertexCount;
 		}
@@ -1993,6 +4216,11 @@ namespace vk
 			return m_drawIndirectCommand.instanceCount;
 		}
 
+		uint32_t& instanceCount()
+		{
+			return m_drawIndirectCommand.instanceCount;
+		}
+
 		DrawIndirectCommand& instanceCount(uint32_t instanceCount)
 		{
 			m_drawIndirectCommand.instanceCount = instanceCount;
@@ -2004,6 +4232,11 @@ namespace vk
 			return m_drawIndirectCommand.firstVertex;
 		}
 
+		uint32_t& firstVertex()
+		{
+			return m_drawIndirectCommand.firstVertex;
+		}
+
 		DrawIndirectCommand& firstVertex(uint32_t firstVertex)
 		{
 			m_drawIndirectCommand.firstVertex = firstVertex;
@@ -2011,6 +4244,11 @@ namespace vk
 		}
 
 		const uint32_t& firstInstance() const
+		{
+			return m_drawIndirectCommand.firstInstance;
+		}
+
+		uint32_t& firstInstance()
 		{
 			return m_drawIndirectCommand.firstInstance;
 		}
@@ -2029,6 +4267,7 @@ namespace vk
 	private:
 		VkDrawIndirectCommand m_drawIndirectCommand;
 	};
+	static_assert(sizeof(DrawIndirectCommand) == sizeof(VkDrawIndirectCommand), "struct and wrapper have different size!");
 
 	class DrawIndexedIndirectCommand
 	{
@@ -2046,7 +4285,23 @@ namespace vk
 			m_drawIndexedIndirectCommand.firstInstance = firstInstance;
 		}
 
+		DrawIndexedIndirectCommand(VkDrawIndexedIndirectCommand const & rhs)
+			: m_drawIndexedIndirectCommand(rhs)
+		{
+		}
+
+		DrawIndexedIndirectCommand& operator=(VkDrawIndexedIndirectCommand const & rhs)
+		{
+			m_drawIndexedIndirectCommand = rhs;
+			return *this;
+		}
+
 		const uint32_t& indexCount() const
+		{
+			return m_drawIndexedIndirectCommand.indexCount;
+		}
+
+		uint32_t& indexCount()
 		{
 			return m_drawIndexedIndirectCommand.indexCount;
 		}
@@ -2062,6 +4317,11 @@ namespace vk
 			return m_drawIndexedIndirectCommand.instanceCount;
 		}
 
+		uint32_t& instanceCount()
+		{
+			return m_drawIndexedIndirectCommand.instanceCount;
+		}
+
 		DrawIndexedIndirectCommand& instanceCount(uint32_t instanceCount)
 		{
 			m_drawIndexedIndirectCommand.instanceCount = instanceCount;
@@ -2069,6 +4329,11 @@ namespace vk
 		}
 
 		const uint32_t& firstIndex() const
+		{
+			return m_drawIndexedIndirectCommand.firstIndex;
+		}
+
+		uint32_t& firstIndex()
 		{
 			return m_drawIndexedIndirectCommand.firstIndex;
 		}
@@ -2084,6 +4349,11 @@ namespace vk
 			return m_drawIndexedIndirectCommand.vertexOffset;
 		}
 
+		int32_t& vertexOffset()
+		{
+			return m_drawIndexedIndirectCommand.vertexOffset;
+		}
+
 		DrawIndexedIndirectCommand& vertexOffset(int32_t vertexOffset)
 		{
 			m_drawIndexedIndirectCommand.vertexOffset = vertexOffset;
@@ -2091,6 +4361,11 @@ namespace vk
 		}
 
 		const uint32_t& firstInstance() const
+		{
+			return m_drawIndexedIndirectCommand.firstInstance;
+		}
+
+		uint32_t& firstInstance()
 		{
 			return m_drawIndexedIndirectCommand.firstInstance;
 		}
@@ -2109,6 +4384,7 @@ namespace vk
 	private:
 		VkDrawIndexedIndirectCommand m_drawIndexedIndirectCommand;
 	};
+	static_assert(sizeof(DrawIndexedIndirectCommand) == sizeof(VkDrawIndexedIndirectCommand), "struct and wrapper have different size!");
 
 	class DispatchIndirectCommand
 	{
@@ -2124,7 +4400,23 @@ namespace vk
 			m_dispatchIndirectCommand.z = z;
 		}
 
+		DispatchIndirectCommand(VkDispatchIndirectCommand const & rhs)
+			: m_dispatchIndirectCommand(rhs)
+		{
+		}
+
+		DispatchIndirectCommand& operator=(VkDispatchIndirectCommand const & rhs)
+		{
+			m_dispatchIndirectCommand = rhs;
+			return *this;
+		}
+
 		const uint32_t& x() const
+		{
+			return m_dispatchIndirectCommand.x;
+		}
+
+		uint32_t& x()
 		{
 			return m_dispatchIndirectCommand.x;
 		}
@@ -2140,6 +4432,11 @@ namespace vk
 			return m_dispatchIndirectCommand.y;
 		}
 
+		uint32_t& y()
+		{
+			return m_dispatchIndirectCommand.y;
+		}
+
 		DispatchIndirectCommand& y(uint32_t y)
 		{
 			m_dispatchIndirectCommand.y = y;
@@ -2147,6 +4444,11 @@ namespace vk
 		}
 
 		const uint32_t& z() const
+		{
+			return m_dispatchIndirectCommand.z;
+		}
+
+		uint32_t& z()
 		{
 			return m_dispatchIndirectCommand.z;
 		}
@@ -2165,6 +4467,205 @@ namespace vk
 	private:
 		VkDispatchIndirectCommand m_dispatchIndirectCommand;
 	};
+	static_assert(sizeof(DispatchIndirectCommand) == sizeof(VkDispatchIndirectCommand), "struct and wrapper have different size!");
+
+	class DisplayPlanePropertiesKHR
+	{
+	public:
+		DisplayPlanePropertiesKHR()
+			: DisplayPlanePropertiesKHR(DisplayKHR(), 0)
+		{}
+
+		DisplayPlanePropertiesKHR(DisplayKHR currentDisplay, uint32_t currentStackIndex)
+		{
+			m_displayPlanePropertiesKHR.currentDisplay = static_cast<VkDisplayKHR>(currentDisplay);
+			m_displayPlanePropertiesKHR.currentStackIndex = currentStackIndex;
+		}
+
+		DisplayPlanePropertiesKHR(VkDisplayPlanePropertiesKHR const & rhs)
+			: m_displayPlanePropertiesKHR(rhs)
+		{
+		}
+
+		DisplayPlanePropertiesKHR& operator=(VkDisplayPlanePropertiesKHR const & rhs)
+		{
+			m_displayPlanePropertiesKHR = rhs;
+			return *this;
+		}
+
+		const DisplayKHR& currentDisplay() const
+		{
+			return reinterpret_cast<const DisplayKHR&>(m_displayPlanePropertiesKHR.currentDisplay);
+		}
+
+		DisplayKHR& currentDisplay()
+		{
+			return reinterpret_cast<DisplayKHR&>(m_displayPlanePropertiesKHR.currentDisplay);
+		}
+
+		DisplayPlanePropertiesKHR& currentDisplay(DisplayKHR currentDisplay)
+		{
+			m_displayPlanePropertiesKHR.currentDisplay = static_cast<VkDisplayKHR>(currentDisplay);
+			return *this;
+		}
+
+		const uint32_t& currentStackIndex() const
+		{
+			return m_displayPlanePropertiesKHR.currentStackIndex;
+		}
+
+		uint32_t& currentStackIndex()
+		{
+			return m_displayPlanePropertiesKHR.currentStackIndex;
+		}
+
+		DisplayPlanePropertiesKHR& currentStackIndex(uint32_t currentStackIndex)
+		{
+			m_displayPlanePropertiesKHR.currentStackIndex = currentStackIndex;
+			return *this;
+		}
+
+		operator const VkDisplayPlanePropertiesKHR&() const
+		{
+			return m_displayPlanePropertiesKHR;
+		}
+
+	private:
+		VkDisplayPlanePropertiesKHR m_displayPlanePropertiesKHR;
+	};
+	static_assert(sizeof(DisplayPlanePropertiesKHR) == sizeof(VkDisplayPlanePropertiesKHR), "struct and wrapper have different size!");
+
+	class DisplayModeParametersKHR
+	{
+	public:
+		DisplayModeParametersKHR()
+			: DisplayModeParametersKHR(Extent2D(), 0)
+		{}
+
+		DisplayModeParametersKHR(Extent2D visibleRegion, uint32_t refreshRate)
+		{
+			m_displayModeParametersKHR.visibleRegion = static_cast<VkExtent2D>(visibleRegion);
+			m_displayModeParametersKHR.refreshRate = refreshRate;
+		}
+
+		DisplayModeParametersKHR(VkDisplayModeParametersKHR const & rhs)
+			: m_displayModeParametersKHR(rhs)
+		{
+		}
+
+		DisplayModeParametersKHR& operator=(VkDisplayModeParametersKHR const & rhs)
+		{
+			m_displayModeParametersKHR = rhs;
+			return *this;
+		}
+
+		const Extent2D& visibleRegion() const
+		{
+			return reinterpret_cast<const Extent2D&>(m_displayModeParametersKHR.visibleRegion);
+		}
+
+		Extent2D& visibleRegion()
+		{
+			return reinterpret_cast<Extent2D&>(m_displayModeParametersKHR.visibleRegion);
+		}
+
+		DisplayModeParametersKHR& visibleRegion(Extent2D visibleRegion)
+		{
+			m_displayModeParametersKHR.visibleRegion = static_cast<VkExtent2D>(visibleRegion);
+			return *this;
+		}
+
+		const uint32_t& refreshRate() const
+		{
+			return m_displayModeParametersKHR.refreshRate;
+		}
+
+		uint32_t& refreshRate()
+		{
+			return m_displayModeParametersKHR.refreshRate;
+		}
+
+		DisplayModeParametersKHR& refreshRate(uint32_t refreshRate)
+		{
+			m_displayModeParametersKHR.refreshRate = refreshRate;
+			return *this;
+		}
+
+		operator const VkDisplayModeParametersKHR&() const
+		{
+			return m_displayModeParametersKHR;
+		}
+
+	private:
+		VkDisplayModeParametersKHR m_displayModeParametersKHR;
+	};
+	static_assert(sizeof(DisplayModeParametersKHR) == sizeof(VkDisplayModeParametersKHR), "struct and wrapper have different size!");
+
+	class DisplayModePropertiesKHR
+	{
+	public:
+		DisplayModePropertiesKHR()
+			: DisplayModePropertiesKHR(DisplayModeKHR(), DisplayModeParametersKHR())
+		{}
+
+		DisplayModePropertiesKHR(DisplayModeKHR displayMode, DisplayModeParametersKHR parameters)
+		{
+			m_displayModePropertiesKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
+			m_displayModePropertiesKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+		}
+
+		DisplayModePropertiesKHR(VkDisplayModePropertiesKHR const & rhs)
+			: m_displayModePropertiesKHR(rhs)
+		{
+		}
+
+		DisplayModePropertiesKHR& operator=(VkDisplayModePropertiesKHR const & rhs)
+		{
+			m_displayModePropertiesKHR = rhs;
+			return *this;
+		}
+
+		const DisplayModeKHR& displayMode() const
+		{
+			return reinterpret_cast<const DisplayModeKHR&>(m_displayModePropertiesKHR.displayMode);
+		}
+
+		DisplayModeKHR& displayMode()
+		{
+			return reinterpret_cast<DisplayModeKHR&>(m_displayModePropertiesKHR.displayMode);
+		}
+
+		DisplayModePropertiesKHR& displayMode(DisplayModeKHR displayMode)
+		{
+			m_displayModePropertiesKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
+			return *this;
+		}
+
+		const DisplayModeParametersKHR& parameters() const
+		{
+			return reinterpret_cast<const DisplayModeParametersKHR&>(m_displayModePropertiesKHR.parameters);
+		}
+
+		DisplayModeParametersKHR& parameters()
+		{
+			return reinterpret_cast<DisplayModeParametersKHR&>(m_displayModePropertiesKHR.parameters);
+		}
+
+		DisplayModePropertiesKHR& parameters(DisplayModeParametersKHR parameters)
+		{
+			m_displayModePropertiesKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+			return *this;
+		}
+
+		operator const VkDisplayModePropertiesKHR&() const
+		{
+			return m_displayModePropertiesKHR;
+		}
+
+	private:
+		VkDisplayModePropertiesKHR m_displayModePropertiesKHR;
+	};
+	static_assert(sizeof(DisplayModePropertiesKHR) == sizeof(VkDisplayModePropertiesKHR), "struct and wrapper have different size!");
 
 	enum class ImageLayout
 	{
@@ -2177,7 +4678,7 @@ namespace vk
 		eTransferSrcOptimal = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 		eTransferDstOptimal = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 		ePreinitialized = VK_IMAGE_LAYOUT_PREINITIALIZED,
-		ePresentSrcKhr = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		ePresentSrcKHR = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 	};
 
 	class DescriptorImageInfo
@@ -2189,36 +4690,62 @@ namespace vk
 
 		DescriptorImageInfo(Sampler sampler, ImageView imageView, ImageLayout imageLayout)
 		{
-			m_descriptorImageInfo.sampler = sampler;
-			m_descriptorImageInfo.imageView = imageView;
+			m_descriptorImageInfo.sampler = static_cast<VkSampler>(sampler);
+			m_descriptorImageInfo.imageView = static_cast<VkImageView>(imageView);
 			m_descriptorImageInfo.imageLayout = static_cast<VkImageLayout>(imageLayout);
+		}
+
+		DescriptorImageInfo(VkDescriptorImageInfo const & rhs)
+			: m_descriptorImageInfo(rhs)
+		{
+		}
+
+		DescriptorImageInfo& operator=(VkDescriptorImageInfo const & rhs)
+		{
+			m_descriptorImageInfo = rhs;
+			return *this;
 		}
 
 		const Sampler& sampler() const
 		{
-			return m_descriptorImageInfo.sampler;
+			return reinterpret_cast<const Sampler&>(m_descriptorImageInfo.sampler);
+		}
+
+		Sampler& sampler()
+		{
+			return reinterpret_cast<Sampler&>(m_descriptorImageInfo.sampler);
 		}
 
 		DescriptorImageInfo& sampler(Sampler sampler)
 		{
-			m_descriptorImageInfo.sampler = sampler;
+			m_descriptorImageInfo.sampler = static_cast<VkSampler>(sampler);
 			return *this;
 		}
 
 		const ImageView& imageView() const
 		{
-			return m_descriptorImageInfo.imageView;
+			return reinterpret_cast<const ImageView&>(m_descriptorImageInfo.imageView);
+		}
+
+		ImageView& imageView()
+		{
+			return reinterpret_cast<ImageView&>(m_descriptorImageInfo.imageView);
 		}
 
 		DescriptorImageInfo& imageView(ImageView imageView)
 		{
-			m_descriptorImageInfo.imageView = imageView;
+			m_descriptorImageInfo.imageView = static_cast<VkImageView>(imageView);
 			return *this;
 		}
 
 		const ImageLayout& imageLayout() const
 		{
 			return reinterpret_cast<const ImageLayout&>(m_descriptorImageInfo.imageLayout);
+		}
+
+		ImageLayout& imageLayout()
+		{
+			return reinterpret_cast<ImageLayout&>(m_descriptorImageInfo.imageLayout);
 		}
 
 		DescriptorImageInfo& imageLayout(ImageLayout imageLayout)
@@ -2235,6 +4762,7 @@ namespace vk
 	private:
 		VkDescriptorImageInfo m_descriptorImageInfo;
 	};
+	static_assert(sizeof(DescriptorImageInfo) == sizeof(VkDescriptorImageInfo), "struct and wrapper have different size!");
 
 	class AttachmentReference
 	{
@@ -2249,7 +4777,23 @@ namespace vk
 			m_attachmentReference.layout = static_cast<VkImageLayout>(layout);
 		}
 
+		AttachmentReference(VkAttachmentReference const & rhs)
+			: m_attachmentReference(rhs)
+		{
+		}
+
+		AttachmentReference& operator=(VkAttachmentReference const & rhs)
+		{
+			m_attachmentReference = rhs;
+			return *this;
+		}
+
 		const uint32_t& attachment() const
+		{
+			return m_attachmentReference.attachment;
+		}
+
+		uint32_t& attachment()
 		{
 			return m_attachmentReference.attachment;
 		}
@@ -2263,6 +4807,11 @@ namespace vk
 		const ImageLayout& layout() const
 		{
 			return reinterpret_cast<const ImageLayout&>(m_attachmentReference.layout);
+		}
+
+		ImageLayout& layout()
+		{
+			return reinterpret_cast<ImageLayout&>(m_attachmentReference.layout);
 		}
 
 		AttachmentReference& layout(ImageLayout layout)
@@ -2279,6 +4828,7 @@ namespace vk
 	private:
 		VkAttachmentReference m_attachmentReference;
 	};
+	static_assert(sizeof(AttachmentReference) == sizeof(VkAttachmentReference), "struct and wrapper have different size!");
 
 	enum class AttachmentLoadOp
 	{
@@ -2349,9 +4899,25 @@ namespace vk
 			m_componentMapping.a = static_cast<VkComponentSwizzle>(a);
 		}
 
+		ComponentMapping(VkComponentMapping const & rhs)
+			: m_componentMapping(rhs)
+		{
+		}
+
+		ComponentMapping& operator=(VkComponentMapping const & rhs)
+		{
+			m_componentMapping = rhs;
+			return *this;
+		}
+
 		const ComponentSwizzle& r() const
 		{
 			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.r);
+		}
+
+		ComponentSwizzle& r()
+		{
+			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.r);
 		}
 
 		ComponentMapping& r(ComponentSwizzle r)
@@ -2365,6 +4931,11 @@ namespace vk
 			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.g);
 		}
 
+		ComponentSwizzle& g()
+		{
+			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.g);
+		}
+
 		ComponentMapping& g(ComponentSwizzle g)
 		{
 			m_componentMapping.g = static_cast<VkComponentSwizzle>(g);
@@ -2376,6 +4947,11 @@ namespace vk
 			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.b);
 		}
 
+		ComponentSwizzle& b()
+		{
+			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.b);
+		}
+
 		ComponentMapping& b(ComponentSwizzle b)
 		{
 			m_componentMapping.b = static_cast<VkComponentSwizzle>(b);
@@ -2385,6 +4961,11 @@ namespace vk
 		const ComponentSwizzle& a() const
 		{
 			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.a);
+		}
+
+		ComponentSwizzle& a()
+		{
+			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.a);
 		}
 
 		ComponentMapping& a(ComponentSwizzle a)
@@ -2401,6 +4982,7 @@ namespace vk
 	private:
 		VkComponentMapping m_componentMapping;
 	};
+	static_assert(sizeof(ComponentMapping) == sizeof(VkComponentMapping), "struct and wrapper have different size!");
 
 	enum class DescriptorType
 	{
@@ -2430,9 +5012,25 @@ namespace vk
 			m_descriptorPoolSize.descriptorCount = descriptorCount;
 		}
 
+		DescriptorPoolSize(VkDescriptorPoolSize const & rhs)
+			: m_descriptorPoolSize(rhs)
+		{
+		}
+
+		DescriptorPoolSize& operator=(VkDescriptorPoolSize const & rhs)
+		{
+			m_descriptorPoolSize = rhs;
+			return *this;
+		}
+
 		const DescriptorType& type() const
 		{
 			return reinterpret_cast<const DescriptorType&>(m_descriptorPoolSize.type);
+		}
+
+		DescriptorType& type()
+		{
+			return reinterpret_cast<DescriptorType&>(m_descriptorPoolSize.type);
 		}
 
 		DescriptorPoolSize& type(DescriptorType type)
@@ -2442,6 +5040,11 @@ namespace vk
 		}
 
 		const uint32_t& descriptorCount() const
+		{
+			return m_descriptorPoolSize.descriptorCount;
+		}
+
+		uint32_t& descriptorCount()
 		{
 			return m_descriptorPoolSize.descriptorCount;
 		}
@@ -2460,6 +5063,7 @@ namespace vk
 	private:
 		VkDescriptorPoolSize m_descriptorPoolSize;
 	};
+	static_assert(sizeof(DescriptorPoolSize) == sizeof(VkDescriptorPoolSize), "struct and wrapper have different size!");
 
 	enum class QueryType
 	{
@@ -2488,12 +5092,12 @@ namespace vk
 	{
 	public:
 		SubpassDescription()
-			: SubpassDescription(0, PipelineBindPoint::eGraphics, 0, nullptr, 0, nullptr, nullptr, nullptr, 0, nullptr)
+			: SubpassDescription(SubpassDescriptionFlags(), PipelineBindPoint::eGraphics, 0, nullptr, 0, nullptr, nullptr, nullptr, 0, nullptr)
 		{}
 
 		SubpassDescription(SubpassDescriptionFlags flags, PipelineBindPoint pipelineBindPoint, uint32_t inputAttachmentCount, const AttachmentReference* pInputAttachments, uint32_t colorAttachmentCount, const AttachmentReference* pColorAttachments, const AttachmentReference* pResolveAttachments, const AttachmentReference* pDepthStencilAttachment, uint32_t preserveAttachmentCount, const uint32_t* pPreserveAttachments)
 		{
-			m_subpassDescription.flags = flags;
+			m_subpassDescription.flags = static_cast<VkSubpassDescriptionFlags>(flags);
 			m_subpassDescription.pipelineBindPoint = static_cast<VkPipelineBindPoint>(pipelineBindPoint);
 			m_subpassDescription.inputAttachmentCount = inputAttachmentCount;
 			m_subpassDescription.pInputAttachments = reinterpret_cast<const VkAttachmentReference*>(pInputAttachments);
@@ -2505,20 +5109,41 @@ namespace vk
 			m_subpassDescription.pPreserveAttachments = pPreserveAttachments;
 		}
 
+		SubpassDescription(VkSubpassDescription const & rhs)
+			: m_subpassDescription(rhs)
+		{
+		}
+
+		SubpassDescription& operator=(VkSubpassDescription const & rhs)
+		{
+			m_subpassDescription = rhs;
+			return *this;
+		}
+
 		const SubpassDescriptionFlags& flags() const
 		{
-			return m_subpassDescription.flags;
+			return reinterpret_cast<const SubpassDescriptionFlags&>(m_subpassDescription.flags);
+		}
+
+		SubpassDescriptionFlags& flags()
+		{
+			return reinterpret_cast<SubpassDescriptionFlags&>(m_subpassDescription.flags);
 		}
 
 		SubpassDescription& flags(SubpassDescriptionFlags flags)
 		{
-			m_subpassDescription.flags = flags;
+			m_subpassDescription.flags = static_cast<VkSubpassDescriptionFlags>(flags);
 			return *this;
 		}
 
 		const PipelineBindPoint& pipelineBindPoint() const
 		{
 			return reinterpret_cast<const PipelineBindPoint&>(m_subpassDescription.pipelineBindPoint);
+		}
+
+		PipelineBindPoint& pipelineBindPoint()
+		{
+			return reinterpret_cast<PipelineBindPoint&>(m_subpassDescription.pipelineBindPoint);
 		}
 
 		SubpassDescription& pipelineBindPoint(PipelineBindPoint pipelineBindPoint)
@@ -2528,6 +5153,11 @@ namespace vk
 		}
 
 		const uint32_t& inputAttachmentCount() const
+		{
+			return m_subpassDescription.inputAttachmentCount;
+		}
+
+		uint32_t& inputAttachmentCount()
 		{
 			return m_subpassDescription.inputAttachmentCount;
 		}
@@ -2543,6 +5173,11 @@ namespace vk
 			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pInputAttachments);
 		}
 
+		const AttachmentReference* pInputAttachments()
+		{
+			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pInputAttachments);
+		}
+
 		SubpassDescription& pInputAttachments(const AttachmentReference* pInputAttachments)
 		{
 			m_subpassDescription.pInputAttachments = reinterpret_cast<const VkAttachmentReference*>(pInputAttachments);
@@ -2550,6 +5185,11 @@ namespace vk
 		}
 
 		const uint32_t& colorAttachmentCount() const
+		{
+			return m_subpassDescription.colorAttachmentCount;
+		}
+
+		uint32_t& colorAttachmentCount()
 		{
 			return m_subpassDescription.colorAttachmentCount;
 		}
@@ -2565,6 +5205,11 @@ namespace vk
 			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pColorAttachments);
 		}
 
+		const AttachmentReference* pColorAttachments()
+		{
+			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pColorAttachments);
+		}
+
 		SubpassDescription& pColorAttachments(const AttachmentReference* pColorAttachments)
 		{
 			m_subpassDescription.pColorAttachments = reinterpret_cast<const VkAttachmentReference*>(pColorAttachments);
@@ -2572,6 +5217,11 @@ namespace vk
 		}
 
 		const AttachmentReference* pResolveAttachments() const
+		{
+			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pResolveAttachments);
+		}
+
+		const AttachmentReference* pResolveAttachments()
 		{
 			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pResolveAttachments);
 		}
@@ -2587,6 +5237,11 @@ namespace vk
 			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pDepthStencilAttachment);
 		}
 
+		const AttachmentReference* pDepthStencilAttachment()
+		{
+			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pDepthStencilAttachment);
+		}
+
 		SubpassDescription& pDepthStencilAttachment(const AttachmentReference* pDepthStencilAttachment)
 		{
 			m_subpassDescription.pDepthStencilAttachment = reinterpret_cast<const VkAttachmentReference*>(pDepthStencilAttachment);
@@ -2598,6 +5253,11 @@ namespace vk
 			return m_subpassDescription.preserveAttachmentCount;
 		}
 
+		uint32_t& preserveAttachmentCount()
+		{
+			return m_subpassDescription.preserveAttachmentCount;
+		}
+
 		SubpassDescription& preserveAttachmentCount(uint32_t preserveAttachmentCount)
 		{
 			m_subpassDescription.preserveAttachmentCount = preserveAttachmentCount;
@@ -2605,6 +5265,11 @@ namespace vk
 		}
 
 		const uint32_t* pPreserveAttachments() const
+		{
+			return reinterpret_cast<const uint32_t*>(m_subpassDescription.pPreserveAttachments);
+		}
+
+		const uint32_t* pPreserveAttachments()
 		{
 			return reinterpret_cast<const uint32_t*>(m_subpassDescription.pPreserveAttachments);
 		}
@@ -2623,6 +5288,7 @@ namespace vk
 	private:
 		VkSubpassDescription m_subpassDescription;
 	};
+	static_assert(sizeof(SubpassDescription) == sizeof(VkSubpassDescription), "struct and wrapper have different size!");
 
 	enum class PipelineCacheHeaderVersion
 	{
@@ -2779,9 +5445,25 @@ namespace vk
 			m_stencilOpState.reference = reference;
 		}
 
+		StencilOpState(VkStencilOpState const & rhs)
+			: m_stencilOpState(rhs)
+		{
+		}
+
+		StencilOpState& operator=(VkStencilOpState const & rhs)
+		{
+			m_stencilOpState = rhs;
+			return *this;
+		}
+
 		const StencilOp& failOp() const
 		{
 			return reinterpret_cast<const StencilOp&>(m_stencilOpState.failOp);
+		}
+
+		StencilOp& failOp()
+		{
+			return reinterpret_cast<StencilOp&>(m_stencilOpState.failOp);
 		}
 
 		StencilOpState& failOp(StencilOp failOp)
@@ -2795,6 +5477,11 @@ namespace vk
 			return reinterpret_cast<const StencilOp&>(m_stencilOpState.passOp);
 		}
 
+		StencilOp& passOp()
+		{
+			return reinterpret_cast<StencilOp&>(m_stencilOpState.passOp);
+		}
+
 		StencilOpState& passOp(StencilOp passOp)
 		{
 			m_stencilOpState.passOp = static_cast<VkStencilOp>(passOp);
@@ -2804,6 +5491,11 @@ namespace vk
 		const StencilOp& depthFailOp() const
 		{
 			return reinterpret_cast<const StencilOp&>(m_stencilOpState.depthFailOp);
+		}
+
+		StencilOp& depthFailOp()
+		{
+			return reinterpret_cast<StencilOp&>(m_stencilOpState.depthFailOp);
 		}
 
 		StencilOpState& depthFailOp(StencilOp depthFailOp)
@@ -2817,6 +5509,11 @@ namespace vk
 			return reinterpret_cast<const CompareOp&>(m_stencilOpState.compareOp);
 		}
 
+		CompareOp& compareOp()
+		{
+			return reinterpret_cast<CompareOp&>(m_stencilOpState.compareOp);
+		}
+
 		StencilOpState& compareOp(CompareOp compareOp)
 		{
 			m_stencilOpState.compareOp = static_cast<VkCompareOp>(compareOp);
@@ -2824,6 +5521,11 @@ namespace vk
 		}
 
 		const uint32_t& compareMask() const
+		{
+			return m_stencilOpState.compareMask;
+		}
+
+		uint32_t& compareMask()
 		{
 			return m_stencilOpState.compareMask;
 		}
@@ -2839,6 +5541,11 @@ namespace vk
 			return m_stencilOpState.writeMask;
 		}
 
+		uint32_t& writeMask()
+		{
+			return m_stencilOpState.writeMask;
+		}
+
 		StencilOpState& writeMask(uint32_t writeMask)
 		{
 			m_stencilOpState.writeMask = writeMask;
@@ -2846,6 +5553,11 @@ namespace vk
 		}
 
 		const uint32_t& reference() const
+		{
+			return m_stencilOpState.reference;
+		}
+
+		uint32_t& reference()
 		{
 			return m_stencilOpState.reference;
 		}
@@ -2864,6 +5576,7 @@ namespace vk
 	private:
 		VkStencilOpState m_stencilOpState;
 	};
+	static_assert(sizeof(StencilOpState) == sizeof(VkStencilOpState), "struct and wrapper have different size!");
 
 	enum class LogicOp
 	{
@@ -2928,7 +5641,23 @@ namespace vk
 			m_vertexInputBindingDescription.inputRate = static_cast<VkVertexInputRate>(inputRate);
 		}
 
+		VertexInputBindingDescription(VkVertexInputBindingDescription const & rhs)
+			: m_vertexInputBindingDescription(rhs)
+		{
+		}
+
+		VertexInputBindingDescription& operator=(VkVertexInputBindingDescription const & rhs)
+		{
+			m_vertexInputBindingDescription = rhs;
+			return *this;
+		}
+
 		const uint32_t& binding() const
+		{
+			return m_vertexInputBindingDescription.binding;
+		}
+
+		uint32_t& binding()
 		{
 			return m_vertexInputBindingDescription.binding;
 		}
@@ -2944,6 +5673,11 @@ namespace vk
 			return m_vertexInputBindingDescription.stride;
 		}
 
+		uint32_t& stride()
+		{
+			return m_vertexInputBindingDescription.stride;
+		}
+
 		VertexInputBindingDescription& stride(uint32_t stride)
 		{
 			m_vertexInputBindingDescription.stride = stride;
@@ -2953,6 +5687,11 @@ namespace vk
 		const VertexInputRate& inputRate() const
 		{
 			return reinterpret_cast<const VertexInputRate&>(m_vertexInputBindingDescription.inputRate);
+		}
+
+		VertexInputRate& inputRate()
+		{
+			return reinterpret_cast<VertexInputRate&>(m_vertexInputBindingDescription.inputRate);
 		}
 
 		VertexInputBindingDescription& inputRate(VertexInputRate inputRate)
@@ -2969,6 +5708,7 @@ namespace vk
 	private:
 		VkVertexInputBindingDescription m_vertexInputBindingDescription;
 	};
+	static_assert(sizeof(VertexInputBindingDescription) == sizeof(VkVertexInputBindingDescription), "struct and wrapper have different size!");
 
 	enum class Format
 	{
@@ -3174,7 +5914,23 @@ namespace vk
 			m_vertexInputAttributeDescription.offset = offset;
 		}
 
+		VertexInputAttributeDescription(VkVertexInputAttributeDescription const & rhs)
+			: m_vertexInputAttributeDescription(rhs)
+		{
+		}
+
+		VertexInputAttributeDescription& operator=(VkVertexInputAttributeDescription const & rhs)
+		{
+			m_vertexInputAttributeDescription = rhs;
+			return *this;
+		}
+
 		const uint32_t& location() const
+		{
+			return m_vertexInputAttributeDescription.location;
+		}
+
+		uint32_t& location()
 		{
 			return m_vertexInputAttributeDescription.location;
 		}
@@ -3190,6 +5946,11 @@ namespace vk
 			return m_vertexInputAttributeDescription.binding;
 		}
 
+		uint32_t& binding()
+		{
+			return m_vertexInputAttributeDescription.binding;
+		}
+
 		VertexInputAttributeDescription& binding(uint32_t binding)
 		{
 			m_vertexInputAttributeDescription.binding = binding;
@@ -3201,6 +5962,11 @@ namespace vk
 			return reinterpret_cast<const Format&>(m_vertexInputAttributeDescription.format);
 		}
 
+		Format& format()
+		{
+			return reinterpret_cast<Format&>(m_vertexInputAttributeDescription.format);
+		}
+
 		VertexInputAttributeDescription& format(Format format)
 		{
 			m_vertexInputAttributeDescription.format = static_cast<VkFormat>(format);
@@ -3208,6 +5974,11 @@ namespace vk
 		}
 
 		const uint32_t& offset() const
+		{
+			return m_vertexInputAttributeDescription.offset;
+		}
+
+		uint32_t& offset()
 		{
 			return m_vertexInputAttributeDescription.offset;
 		}
@@ -3226,6 +5997,7 @@ namespace vk
 	private:
 		VkVertexInputAttributeDescription m_vertexInputAttributeDescription;
 	};
+	static_assert(sizeof(VertexInputAttributeDescription) == sizeof(VkVertexInputAttributeDescription), "struct and wrapper have different size!");
 
 	enum class StructureType
 	{
@@ -3277,7 +6049,19 @@ namespace vk
 		eImageMemoryBarrier = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
 		eMemoryBarrier = VK_STRUCTURE_TYPE_MEMORY_BARRIER,
 		eLoaderInstanceCreateInfo = VK_STRUCTURE_TYPE_LOADER_INSTANCE_CREATE_INFO,
-		eLoaderDeviceCreateInfo = VK_STRUCTURE_TYPE_LOADER_DEVICE_CREATE_INFO
+		eLoaderDeviceCreateInfo = VK_STRUCTURE_TYPE_LOADER_DEVICE_CREATE_INFO,
+		eSwapchainCreateInfoKHR = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+		ePresentInfoKHR = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+		eDisplayModeCreateInfoKHR = VK_STRUCTURE_TYPE_DISPLAY_MODE_CREATE_INFO_KHR,
+		eDisplaySurfaceCreateInfoKHR = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR,
+		eDisplayPresentInfoKHR = VK_STRUCTURE_TYPE_DISPLAY_PRESENT_INFO_KHR,
+		eXlibSurfaceCreateInfoKHR = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
+		eXcbSurfaceCreateInfoKHR = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR,
+		eWaylandSurfaceCreateInfoKHR = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR,
+		eMirSurfaceCreateInfoKHR = VK_STRUCTURE_TYPE_MIR_SURFACE_CREATE_INFO_KHR,
+		eAndroidSurfaceCreateInfoKHR = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
+		eWin32SurfaceCreateInfoKHR = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+		eDebugReportCallbackCreateInfoEXT = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
 	};
 
 	class ApplicationInfo
@@ -3298,9 +6082,25 @@ namespace vk
 			m_applicationInfo.apiVersion = apiVersion;
 		}
 
+		ApplicationInfo(VkApplicationInfo const & rhs)
+			: m_applicationInfo(rhs)
+		{
+		}
+
+		ApplicationInfo& operator=(VkApplicationInfo const & rhs)
+		{
+			m_applicationInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_applicationInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_applicationInfo.sType);
 		}
 
 		ApplicationInfo& sType(StructureType sType)
@@ -3310,6 +6110,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_applicationInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_applicationInfo.pNext);
 		}
@@ -3325,6 +6130,11 @@ namespace vk
 			return reinterpret_cast<const char*>(m_applicationInfo.pApplicationName);
 		}
 
+		const char* pApplicationName()
+		{
+			return reinterpret_cast<const char*>(m_applicationInfo.pApplicationName);
+		}
+
 		ApplicationInfo& pApplicationName(const char* pApplicationName)
 		{
 			m_applicationInfo.pApplicationName = pApplicationName;
@@ -3332,6 +6142,11 @@ namespace vk
 		}
 
 		const uint32_t& applicationVersion() const
+		{
+			return m_applicationInfo.applicationVersion;
+		}
+
+		uint32_t& applicationVersion()
 		{
 			return m_applicationInfo.applicationVersion;
 		}
@@ -3347,6 +6162,11 @@ namespace vk
 			return reinterpret_cast<const char*>(m_applicationInfo.pEngineName);
 		}
 
+		const char* pEngineName()
+		{
+			return reinterpret_cast<const char*>(m_applicationInfo.pEngineName);
+		}
+
 		ApplicationInfo& pEngineName(const char* pEngineName)
 		{
 			m_applicationInfo.pEngineName = pEngineName;
@@ -3358,6 +6178,11 @@ namespace vk
 			return m_applicationInfo.engineVersion;
 		}
 
+		uint32_t& engineVersion()
+		{
+			return m_applicationInfo.engineVersion;
+		}
+
 		ApplicationInfo& engineVersion(uint32_t engineVersion)
 		{
 			m_applicationInfo.engineVersion = engineVersion;
@@ -3365,6 +6190,11 @@ namespace vk
 		}
 
 		const uint32_t& apiVersion() const
+		{
+			return m_applicationInfo.apiVersion;
+		}
+
+		uint32_t& apiVersion()
 		{
 			return m_applicationInfo.apiVersion;
 		}
@@ -3383,27 +6213,44 @@ namespace vk
 	private:
 		VkApplicationInfo m_applicationInfo;
 	};
+	static_assert(sizeof(ApplicationInfo) == sizeof(VkApplicationInfo), "struct and wrapper have different size!");
 
 	class DeviceQueueCreateInfo
 	{
 	public:
 		DeviceQueueCreateInfo()
-			: DeviceQueueCreateInfo(0, 0, 0, nullptr)
+			: DeviceQueueCreateInfo(DeviceQueueCreateFlags(), 0, 0, nullptr)
 		{}
 
 		DeviceQueueCreateInfo(DeviceQueueCreateFlags flags, uint32_t queueFamilyIndex, uint32_t queueCount, const float* pQueuePriorities)
 		{
 			m_deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 			m_deviceQueueCreateInfo.pNext = nullptr;
-			m_deviceQueueCreateInfo.flags = flags;
+			m_deviceQueueCreateInfo.flags = static_cast<VkDeviceQueueCreateFlags>(flags);
 			m_deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndex;
 			m_deviceQueueCreateInfo.queueCount = queueCount;
 			m_deviceQueueCreateInfo.pQueuePriorities = pQueuePriorities;
 		}
 
+		DeviceQueueCreateInfo(VkDeviceQueueCreateInfo const & rhs)
+			: m_deviceQueueCreateInfo(rhs)
+		{
+		}
+
+		DeviceQueueCreateInfo& operator=(VkDeviceQueueCreateInfo const & rhs)
+		{
+			m_deviceQueueCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_deviceQueueCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_deviceQueueCreateInfo.sType);
 		}
 
 		DeviceQueueCreateInfo& sType(StructureType sType)
@@ -3417,6 +6264,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_deviceQueueCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_deviceQueueCreateInfo.pNext);
+		}
+
 		DeviceQueueCreateInfo& pNext(const void* pNext)
 		{
 			m_deviceQueueCreateInfo.pNext = pNext;
@@ -3425,16 +6277,26 @@ namespace vk
 
 		const DeviceQueueCreateFlags& flags() const
 		{
-			return m_deviceQueueCreateInfo.flags;
+			return reinterpret_cast<const DeviceQueueCreateFlags&>(m_deviceQueueCreateInfo.flags);
+		}
+
+		DeviceQueueCreateFlags& flags()
+		{
+			return reinterpret_cast<DeviceQueueCreateFlags&>(m_deviceQueueCreateInfo.flags);
 		}
 
 		DeviceQueueCreateInfo& flags(DeviceQueueCreateFlags flags)
 		{
-			m_deviceQueueCreateInfo.flags = flags;
+			m_deviceQueueCreateInfo.flags = static_cast<VkDeviceQueueCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& queueFamilyIndex() const
+		{
+			return m_deviceQueueCreateInfo.queueFamilyIndex;
+		}
+
+		uint32_t& queueFamilyIndex()
 		{
 			return m_deviceQueueCreateInfo.queueFamilyIndex;
 		}
@@ -3450,6 +6312,11 @@ namespace vk
 			return m_deviceQueueCreateInfo.queueCount;
 		}
 
+		uint32_t& queueCount()
+		{
+			return m_deviceQueueCreateInfo.queueCount;
+		}
+
 		DeviceQueueCreateInfo& queueCount(uint32_t queueCount)
 		{
 			m_deviceQueueCreateInfo.queueCount = queueCount;
@@ -3457,6 +6324,11 @@ namespace vk
 		}
 
 		const float* pQueuePriorities() const
+		{
+			return reinterpret_cast<const float*>(m_deviceQueueCreateInfo.pQueuePriorities);
+		}
+
+		const float* pQueuePriorities()
 		{
 			return reinterpret_cast<const float*>(m_deviceQueueCreateInfo.pQueuePriorities);
 		}
@@ -3475,19 +6347,20 @@ namespace vk
 	private:
 		VkDeviceQueueCreateInfo m_deviceQueueCreateInfo;
 	};
+	static_assert(sizeof(DeviceQueueCreateInfo) == sizeof(VkDeviceQueueCreateInfo), "struct and wrapper have different size!");
 
 	class DeviceCreateInfo
 	{
 	public:
 		DeviceCreateInfo()
-			: DeviceCreateInfo(0, 0, nullptr, 0, nullptr, 0, nullptr, nullptr)
+			: DeviceCreateInfo(DeviceCreateFlags(), 0, nullptr, 0, nullptr, 0, nullptr, nullptr)
 		{}
 
 		DeviceCreateInfo(DeviceCreateFlags flags, uint32_t queueCreateInfoCount, const DeviceQueueCreateInfo* pQueueCreateInfos, uint32_t enabledLayerCount, const char* const* ppEnabledLayerNames, uint32_t enabledExtensionCount, const char* const* ppEnabledExtensionNames, const PhysicalDeviceFeatures* pEnabledFeatures)
 		{
 			m_deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 			m_deviceCreateInfo.pNext = nullptr;
-			m_deviceCreateInfo.flags = flags;
+			m_deviceCreateInfo.flags = static_cast<VkDeviceCreateFlags>(flags);
 			m_deviceCreateInfo.queueCreateInfoCount = queueCreateInfoCount;
 			m_deviceCreateInfo.pQueueCreateInfos = reinterpret_cast<const VkDeviceQueueCreateInfo*>(pQueueCreateInfos);
 			m_deviceCreateInfo.enabledLayerCount = enabledLayerCount;
@@ -3497,9 +6370,25 @@ namespace vk
 			m_deviceCreateInfo.pEnabledFeatures = reinterpret_cast<const VkPhysicalDeviceFeatures*>(pEnabledFeatures);
 		}
 
+		DeviceCreateInfo(VkDeviceCreateInfo const & rhs)
+			: m_deviceCreateInfo(rhs)
+		{
+		}
+
+		DeviceCreateInfo& operator=(VkDeviceCreateInfo const & rhs)
+		{
+			m_deviceCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_deviceCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_deviceCreateInfo.sType);
 		}
 
 		DeviceCreateInfo& sType(StructureType sType)
@@ -3513,6 +6402,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_deviceCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_deviceCreateInfo.pNext);
+		}
+
 		DeviceCreateInfo& pNext(const void* pNext)
 		{
 			m_deviceCreateInfo.pNext = pNext;
@@ -3521,16 +6415,26 @@ namespace vk
 
 		const DeviceCreateFlags& flags() const
 		{
-			return m_deviceCreateInfo.flags;
+			return reinterpret_cast<const DeviceCreateFlags&>(m_deviceCreateInfo.flags);
+		}
+
+		DeviceCreateFlags& flags()
+		{
+			return reinterpret_cast<DeviceCreateFlags&>(m_deviceCreateInfo.flags);
 		}
 
 		DeviceCreateInfo& flags(DeviceCreateFlags flags)
 		{
-			m_deviceCreateInfo.flags = flags;
+			m_deviceCreateInfo.flags = static_cast<VkDeviceCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& queueCreateInfoCount() const
+		{
+			return m_deviceCreateInfo.queueCreateInfoCount;
+		}
+
+		uint32_t& queueCreateInfoCount()
 		{
 			return m_deviceCreateInfo.queueCreateInfoCount;
 		}
@@ -3546,6 +6450,11 @@ namespace vk
 			return reinterpret_cast<const DeviceQueueCreateInfo*>(m_deviceCreateInfo.pQueueCreateInfos);
 		}
 
+		const DeviceQueueCreateInfo* pQueueCreateInfos()
+		{
+			return reinterpret_cast<const DeviceQueueCreateInfo*>(m_deviceCreateInfo.pQueueCreateInfos);
+		}
+
 		DeviceCreateInfo& pQueueCreateInfos(const DeviceQueueCreateInfo* pQueueCreateInfos)
 		{
 			m_deviceCreateInfo.pQueueCreateInfos = reinterpret_cast<const VkDeviceQueueCreateInfo*>(pQueueCreateInfos);
@@ -3553,6 +6462,11 @@ namespace vk
 		}
 
 		const uint32_t& enabledLayerCount() const
+		{
+			return m_deviceCreateInfo.enabledLayerCount;
+		}
+
+		uint32_t& enabledLayerCount()
 		{
 			return m_deviceCreateInfo.enabledLayerCount;
 		}
@@ -3568,6 +6482,11 @@ namespace vk
 			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledLayerNames);
 		}
 
+		const char* const* ppEnabledLayerNames()
+		{
+			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledLayerNames);
+		}
+
 		DeviceCreateInfo& ppEnabledLayerNames(const char* const* ppEnabledLayerNames)
 		{
 			m_deviceCreateInfo.ppEnabledLayerNames = ppEnabledLayerNames;
@@ -3575,6 +6494,11 @@ namespace vk
 		}
 
 		const uint32_t& enabledExtensionCount() const
+		{
+			return m_deviceCreateInfo.enabledExtensionCount;
+		}
+
+		uint32_t& enabledExtensionCount()
 		{
 			return m_deviceCreateInfo.enabledExtensionCount;
 		}
@@ -3590,6 +6514,11 @@ namespace vk
 			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledExtensionNames);
 		}
 
+		const char* const* ppEnabledExtensionNames()
+		{
+			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledExtensionNames);
+		}
+
 		DeviceCreateInfo& ppEnabledExtensionNames(const char* const* ppEnabledExtensionNames)
 		{
 			m_deviceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
@@ -3597,6 +6526,11 @@ namespace vk
 		}
 
 		const PhysicalDeviceFeatures* pEnabledFeatures() const
+		{
+			return reinterpret_cast<const PhysicalDeviceFeatures*>(m_deviceCreateInfo.pEnabledFeatures);
+		}
+
+		const PhysicalDeviceFeatures* pEnabledFeatures()
 		{
 			return reinterpret_cast<const PhysicalDeviceFeatures*>(m_deviceCreateInfo.pEnabledFeatures);
 		}
@@ -3615,19 +6549,20 @@ namespace vk
 	private:
 		VkDeviceCreateInfo m_deviceCreateInfo;
 	};
+	static_assert(sizeof(DeviceCreateInfo) == sizeof(VkDeviceCreateInfo), "struct and wrapper have different size!");
 
 	class InstanceCreateInfo
 	{
 	public:
 		InstanceCreateInfo()
-			: InstanceCreateInfo(0, nullptr, 0, nullptr, 0, nullptr)
+			: InstanceCreateInfo(InstanceCreateFlags(), nullptr, 0, nullptr, 0, nullptr)
 		{}
 
 		InstanceCreateInfo(InstanceCreateFlags flags, const ApplicationInfo* pApplicationInfo, uint32_t enabledLayerCount, const char* const* ppEnabledLayerNames, uint32_t enabledExtensionCount, const char* const* ppEnabledExtensionNames)
 		{
 			m_instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 			m_instanceCreateInfo.pNext = nullptr;
-			m_instanceCreateInfo.flags = flags;
+			m_instanceCreateInfo.flags = static_cast<VkInstanceCreateFlags>(flags);
 			m_instanceCreateInfo.pApplicationInfo = reinterpret_cast<const VkApplicationInfo*>(pApplicationInfo);
 			m_instanceCreateInfo.enabledLayerCount = enabledLayerCount;
 			m_instanceCreateInfo.ppEnabledLayerNames = ppEnabledLayerNames;
@@ -3635,9 +6570,25 @@ namespace vk
 			m_instanceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
 		}
 
+		InstanceCreateInfo(VkInstanceCreateInfo const & rhs)
+			: m_instanceCreateInfo(rhs)
+		{
+		}
+
+		InstanceCreateInfo& operator=(VkInstanceCreateInfo const & rhs)
+		{
+			m_instanceCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_instanceCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_instanceCreateInfo.sType);
 		}
 
 		InstanceCreateInfo& sType(StructureType sType)
@@ -3651,6 +6602,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_instanceCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_instanceCreateInfo.pNext);
+		}
+
 		InstanceCreateInfo& pNext(const void* pNext)
 		{
 			m_instanceCreateInfo.pNext = pNext;
@@ -3659,16 +6615,26 @@ namespace vk
 
 		const InstanceCreateFlags& flags() const
 		{
-			return m_instanceCreateInfo.flags;
+			return reinterpret_cast<const InstanceCreateFlags&>(m_instanceCreateInfo.flags);
+		}
+
+		InstanceCreateFlags& flags()
+		{
+			return reinterpret_cast<InstanceCreateFlags&>(m_instanceCreateInfo.flags);
 		}
 
 		InstanceCreateInfo& flags(InstanceCreateFlags flags)
 		{
-			m_instanceCreateInfo.flags = flags;
+			m_instanceCreateInfo.flags = static_cast<VkInstanceCreateFlags>(flags);
 			return *this;
 		}
 
 		const ApplicationInfo* pApplicationInfo() const
+		{
+			return reinterpret_cast<const ApplicationInfo*>(m_instanceCreateInfo.pApplicationInfo);
+		}
+
+		const ApplicationInfo* pApplicationInfo()
 		{
 			return reinterpret_cast<const ApplicationInfo*>(m_instanceCreateInfo.pApplicationInfo);
 		}
@@ -3684,6 +6650,11 @@ namespace vk
 			return m_instanceCreateInfo.enabledLayerCount;
 		}
 
+		uint32_t& enabledLayerCount()
+		{
+			return m_instanceCreateInfo.enabledLayerCount;
+		}
+
 		InstanceCreateInfo& enabledLayerCount(uint32_t enabledLayerCount)
 		{
 			m_instanceCreateInfo.enabledLayerCount = enabledLayerCount;
@@ -3691,6 +6662,11 @@ namespace vk
 		}
 
 		const char* const* ppEnabledLayerNames() const
+		{
+			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledLayerNames);
+		}
+
+		const char* const* ppEnabledLayerNames()
 		{
 			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledLayerNames);
 		}
@@ -3706,6 +6682,11 @@ namespace vk
 			return m_instanceCreateInfo.enabledExtensionCount;
 		}
 
+		uint32_t& enabledExtensionCount()
+		{
+			return m_instanceCreateInfo.enabledExtensionCount;
+		}
+
 		InstanceCreateInfo& enabledExtensionCount(uint32_t enabledExtensionCount)
 		{
 			m_instanceCreateInfo.enabledExtensionCount = enabledExtensionCount;
@@ -3713,6 +6694,11 @@ namespace vk
 		}
 
 		const char* const* ppEnabledExtensionNames() const
+		{
+			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledExtensionNames);
+		}
+
+		const char* const* ppEnabledExtensionNames()
 		{
 			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledExtensionNames);
 		}
@@ -3731,6 +6717,7 @@ namespace vk
 	private:
 		VkInstanceCreateInfo m_instanceCreateInfo;
 	};
+	static_assert(sizeof(InstanceCreateInfo) == sizeof(VkInstanceCreateInfo), "struct and wrapper have different size!");
 
 	class MemoryAllocateInfo
 	{
@@ -3747,9 +6734,25 @@ namespace vk
 			m_memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
 		}
 
+		MemoryAllocateInfo(VkMemoryAllocateInfo const & rhs)
+			: m_memoryAllocateInfo(rhs)
+		{
+		}
+
+		MemoryAllocateInfo& operator=(VkMemoryAllocateInfo const & rhs)
+		{
+			m_memoryAllocateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_memoryAllocateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_memoryAllocateInfo.sType);
 		}
 
 		MemoryAllocateInfo& sType(StructureType sType)
@@ -3759,6 +6762,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_memoryAllocateInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_memoryAllocateInfo.pNext);
 		}
@@ -3774,6 +6782,11 @@ namespace vk
 			return m_memoryAllocateInfo.allocationSize;
 		}
 
+		DeviceSize& allocationSize()
+		{
+			return m_memoryAllocateInfo.allocationSize;
+		}
+
 		MemoryAllocateInfo& allocationSize(DeviceSize allocationSize)
 		{
 			m_memoryAllocateInfo.allocationSize = allocationSize;
@@ -3781,6 +6794,11 @@ namespace vk
 		}
 
 		const uint32_t& memoryTypeIndex() const
+		{
+			return m_memoryAllocateInfo.memoryTypeIndex;
+		}
+
+		uint32_t& memoryTypeIndex()
 		{
 			return m_memoryAllocateInfo.memoryTypeIndex;
 		}
@@ -3799,6 +6817,7 @@ namespace vk
 	private:
 		VkMemoryAllocateInfo m_memoryAllocateInfo;
 	};
+	static_assert(sizeof(MemoryAllocateInfo) == sizeof(VkMemoryAllocateInfo), "struct and wrapper have different size!");
 
 	class MappedMemoryRange
 	{
@@ -3811,14 +6830,30 @@ namespace vk
 		{
 			m_mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
 			m_mappedMemoryRange.pNext = nullptr;
-			m_mappedMemoryRange.memory = memory;
+			m_mappedMemoryRange.memory = static_cast<VkDeviceMemory>(memory);
 			m_mappedMemoryRange.offset = offset;
 			m_mappedMemoryRange.size = size;
+		}
+
+		MappedMemoryRange(VkMappedMemoryRange const & rhs)
+			: m_mappedMemoryRange(rhs)
+		{
+		}
+
+		MappedMemoryRange& operator=(VkMappedMemoryRange const & rhs)
+		{
+			m_mappedMemoryRange = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_mappedMemoryRange.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_mappedMemoryRange.sType);
 		}
 
 		MappedMemoryRange& sType(StructureType sType)
@@ -3832,6 +6867,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_mappedMemoryRange.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_mappedMemoryRange.pNext);
+		}
+
 		MappedMemoryRange& pNext(const void* pNext)
 		{
 			m_mappedMemoryRange.pNext = pNext;
@@ -3840,16 +6880,26 @@ namespace vk
 
 		const DeviceMemory& memory() const
 		{
-			return m_mappedMemoryRange.memory;
+			return reinterpret_cast<const DeviceMemory&>(m_mappedMemoryRange.memory);
+		}
+
+		DeviceMemory& memory()
+		{
+			return reinterpret_cast<DeviceMemory&>(m_mappedMemoryRange.memory);
 		}
 
 		MappedMemoryRange& memory(DeviceMemory memory)
 		{
-			m_mappedMemoryRange.memory = memory;
+			m_mappedMemoryRange.memory = static_cast<VkDeviceMemory>(memory);
 			return *this;
 		}
 
 		const DeviceSize& offset() const
+		{
+			return m_mappedMemoryRange.offset;
+		}
+
+		DeviceSize& offset()
 		{
 			return m_mappedMemoryRange.offset;
 		}
@@ -3861,6 +6911,11 @@ namespace vk
 		}
 
 		const DeviceSize& size() const
+		{
+			return m_mappedMemoryRange.size;
+		}
+
+		DeviceSize& size()
 		{
 			return m_mappedMemoryRange.size;
 		}
@@ -3879,6 +6934,7 @@ namespace vk
 	private:
 		VkMappedMemoryRange m_mappedMemoryRange;
 	};
+	static_assert(sizeof(MappedMemoryRange) == sizeof(VkMappedMemoryRange), "struct and wrapper have different size!");
 
 	class WriteDescriptorSet
 	{
@@ -3891,19 +6947,35 @@ namespace vk
 		{
 			m_writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			m_writeDescriptorSet.pNext = nullptr;
-			m_writeDescriptorSet.dstSet = dstSet;
+			m_writeDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
 			m_writeDescriptorSet.dstBinding = dstBinding;
 			m_writeDescriptorSet.dstArrayElement = dstArrayElement;
 			m_writeDescriptorSet.descriptorCount = descriptorCount;
 			m_writeDescriptorSet.descriptorType = static_cast<VkDescriptorType>(descriptorType);
 			m_writeDescriptorSet.pImageInfo = reinterpret_cast<const VkDescriptorImageInfo*>(pImageInfo);
 			m_writeDescriptorSet.pBufferInfo = reinterpret_cast<const VkDescriptorBufferInfo*>(pBufferInfo);
-			m_writeDescriptorSet.pTexelBufferView = pTexelBufferView;
+			m_writeDescriptorSet.pTexelBufferView = reinterpret_cast<const VkBufferView*>(pTexelBufferView);
+		}
+
+		WriteDescriptorSet(VkWriteDescriptorSet const & rhs)
+			: m_writeDescriptorSet(rhs)
+		{
+		}
+
+		WriteDescriptorSet& operator=(VkWriteDescriptorSet const & rhs)
+		{
+			m_writeDescriptorSet = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_writeDescriptorSet.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_writeDescriptorSet.sType);
 		}
 
 		WriteDescriptorSet& sType(StructureType sType)
@@ -3917,6 +6989,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_writeDescriptorSet.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_writeDescriptorSet.pNext);
+		}
+
 		WriteDescriptorSet& pNext(const void* pNext)
 		{
 			m_writeDescriptorSet.pNext = pNext;
@@ -3925,16 +7002,26 @@ namespace vk
 
 		const DescriptorSet& dstSet() const
 		{
-			return m_writeDescriptorSet.dstSet;
+			return reinterpret_cast<const DescriptorSet&>(m_writeDescriptorSet.dstSet);
+		}
+
+		DescriptorSet& dstSet()
+		{
+			return reinterpret_cast<DescriptorSet&>(m_writeDescriptorSet.dstSet);
 		}
 
 		WriteDescriptorSet& dstSet(DescriptorSet dstSet)
 		{
-			m_writeDescriptorSet.dstSet = dstSet;
+			m_writeDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
 			return *this;
 		}
 
 		const uint32_t& dstBinding() const
+		{
+			return m_writeDescriptorSet.dstBinding;
+		}
+
+		uint32_t& dstBinding()
 		{
 			return m_writeDescriptorSet.dstBinding;
 		}
@@ -3950,6 +7037,11 @@ namespace vk
 			return m_writeDescriptorSet.dstArrayElement;
 		}
 
+		uint32_t& dstArrayElement()
+		{
+			return m_writeDescriptorSet.dstArrayElement;
+		}
+
 		WriteDescriptorSet& dstArrayElement(uint32_t dstArrayElement)
 		{
 			m_writeDescriptorSet.dstArrayElement = dstArrayElement;
@@ -3957,6 +7049,11 @@ namespace vk
 		}
 
 		const uint32_t& descriptorCount() const
+		{
+			return m_writeDescriptorSet.descriptorCount;
+		}
+
+		uint32_t& descriptorCount()
 		{
 			return m_writeDescriptorSet.descriptorCount;
 		}
@@ -3972,6 +7069,11 @@ namespace vk
 			return reinterpret_cast<const DescriptorType&>(m_writeDescriptorSet.descriptorType);
 		}
 
+		DescriptorType& descriptorType()
+		{
+			return reinterpret_cast<DescriptorType&>(m_writeDescriptorSet.descriptorType);
+		}
+
 		WriteDescriptorSet& descriptorType(DescriptorType descriptorType)
 		{
 			m_writeDescriptorSet.descriptorType = static_cast<VkDescriptorType>(descriptorType);
@@ -3979,6 +7081,11 @@ namespace vk
 		}
 
 		const DescriptorImageInfo* pImageInfo() const
+		{
+			return reinterpret_cast<const DescriptorImageInfo*>(m_writeDescriptorSet.pImageInfo);
+		}
+
+		const DescriptorImageInfo* pImageInfo()
 		{
 			return reinterpret_cast<const DescriptorImageInfo*>(m_writeDescriptorSet.pImageInfo);
 		}
@@ -3994,6 +7101,11 @@ namespace vk
 			return reinterpret_cast<const DescriptorBufferInfo*>(m_writeDescriptorSet.pBufferInfo);
 		}
 
+		const DescriptorBufferInfo* pBufferInfo()
+		{
+			return reinterpret_cast<const DescriptorBufferInfo*>(m_writeDescriptorSet.pBufferInfo);
+		}
+
 		WriteDescriptorSet& pBufferInfo(const DescriptorBufferInfo* pBufferInfo)
 		{
 			m_writeDescriptorSet.pBufferInfo = reinterpret_cast<const VkDescriptorBufferInfo*>(pBufferInfo);
@@ -4005,9 +7117,14 @@ namespace vk
 			return reinterpret_cast<const BufferView*>(m_writeDescriptorSet.pTexelBufferView);
 		}
 
+		const BufferView* pTexelBufferView()
+		{
+			return reinterpret_cast<const BufferView*>(m_writeDescriptorSet.pTexelBufferView);
+		}
+
 		WriteDescriptorSet& pTexelBufferView(const BufferView* pTexelBufferView)
 		{
-			m_writeDescriptorSet.pTexelBufferView = pTexelBufferView;
+			m_writeDescriptorSet.pTexelBufferView = reinterpret_cast<const VkBufferView*>(pTexelBufferView);
 			return *this;
 		}
 
@@ -4019,6 +7136,7 @@ namespace vk
 	private:
 		VkWriteDescriptorSet m_writeDescriptorSet;
 	};
+	static_assert(sizeof(WriteDescriptorSet) == sizeof(VkWriteDescriptorSet), "struct and wrapper have different size!");
 
 	class CopyDescriptorSet
 	{
@@ -4031,18 +7149,34 @@ namespace vk
 		{
 			m_copyDescriptorSet.sType = VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET;
 			m_copyDescriptorSet.pNext = nullptr;
-			m_copyDescriptorSet.srcSet = srcSet;
+			m_copyDescriptorSet.srcSet = static_cast<VkDescriptorSet>(srcSet);
 			m_copyDescriptorSet.srcBinding = srcBinding;
 			m_copyDescriptorSet.srcArrayElement = srcArrayElement;
-			m_copyDescriptorSet.dstSet = dstSet;
+			m_copyDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
 			m_copyDescriptorSet.dstBinding = dstBinding;
 			m_copyDescriptorSet.dstArrayElement = dstArrayElement;
 			m_copyDescriptorSet.descriptorCount = descriptorCount;
 		}
 
+		CopyDescriptorSet(VkCopyDescriptorSet const & rhs)
+			: m_copyDescriptorSet(rhs)
+		{
+		}
+
+		CopyDescriptorSet& operator=(VkCopyDescriptorSet const & rhs)
+		{
+			m_copyDescriptorSet = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_copyDescriptorSet.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_copyDescriptorSet.sType);
 		}
 
 		CopyDescriptorSet& sType(StructureType sType)
@@ -4056,6 +7190,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_copyDescriptorSet.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_copyDescriptorSet.pNext);
+		}
+
 		CopyDescriptorSet& pNext(const void* pNext)
 		{
 			m_copyDescriptorSet.pNext = pNext;
@@ -4064,16 +7203,26 @@ namespace vk
 
 		const DescriptorSet& srcSet() const
 		{
-			return m_copyDescriptorSet.srcSet;
+			return reinterpret_cast<const DescriptorSet&>(m_copyDescriptorSet.srcSet);
+		}
+
+		DescriptorSet& srcSet()
+		{
+			return reinterpret_cast<DescriptorSet&>(m_copyDescriptorSet.srcSet);
 		}
 
 		CopyDescriptorSet& srcSet(DescriptorSet srcSet)
 		{
-			m_copyDescriptorSet.srcSet = srcSet;
+			m_copyDescriptorSet.srcSet = static_cast<VkDescriptorSet>(srcSet);
 			return *this;
 		}
 
 		const uint32_t& srcBinding() const
+		{
+			return m_copyDescriptorSet.srcBinding;
+		}
+
+		uint32_t& srcBinding()
 		{
 			return m_copyDescriptorSet.srcBinding;
 		}
@@ -4089,6 +7238,11 @@ namespace vk
 			return m_copyDescriptorSet.srcArrayElement;
 		}
 
+		uint32_t& srcArrayElement()
+		{
+			return m_copyDescriptorSet.srcArrayElement;
+		}
+
 		CopyDescriptorSet& srcArrayElement(uint32_t srcArrayElement)
 		{
 			m_copyDescriptorSet.srcArrayElement = srcArrayElement;
@@ -4097,16 +7251,26 @@ namespace vk
 
 		const DescriptorSet& dstSet() const
 		{
-			return m_copyDescriptorSet.dstSet;
+			return reinterpret_cast<const DescriptorSet&>(m_copyDescriptorSet.dstSet);
+		}
+
+		DescriptorSet& dstSet()
+		{
+			return reinterpret_cast<DescriptorSet&>(m_copyDescriptorSet.dstSet);
 		}
 
 		CopyDescriptorSet& dstSet(DescriptorSet dstSet)
 		{
-			m_copyDescriptorSet.dstSet = dstSet;
+			m_copyDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
 			return *this;
 		}
 
 		const uint32_t& dstBinding() const
+		{
+			return m_copyDescriptorSet.dstBinding;
+		}
+
+		uint32_t& dstBinding()
 		{
 			return m_copyDescriptorSet.dstBinding;
 		}
@@ -4122,6 +7286,11 @@ namespace vk
 			return m_copyDescriptorSet.dstArrayElement;
 		}
 
+		uint32_t& dstArrayElement()
+		{
+			return m_copyDescriptorSet.dstArrayElement;
+		}
+
 		CopyDescriptorSet& dstArrayElement(uint32_t dstArrayElement)
 		{
 			m_copyDescriptorSet.dstArrayElement = dstArrayElement;
@@ -4129,6 +7298,11 @@ namespace vk
 		}
 
 		const uint32_t& descriptorCount() const
+		{
+			return m_copyDescriptorSet.descriptorCount;
+		}
+
+		uint32_t& descriptorCount()
 		{
 			return m_copyDescriptorSet.descriptorCount;
 		}
@@ -4147,28 +7321,45 @@ namespace vk
 	private:
 		VkCopyDescriptorSet m_copyDescriptorSet;
 	};
+	static_assert(sizeof(CopyDescriptorSet) == sizeof(VkCopyDescriptorSet), "struct and wrapper have different size!");
 
 	class BufferViewCreateInfo
 	{
 	public:
 		BufferViewCreateInfo()
-			: BufferViewCreateInfo(0, Buffer(), Format::eUndefined, 0, 0)
+			: BufferViewCreateInfo(BufferViewCreateFlags(), Buffer(), Format::eUndefined, 0, 0)
 		{}
 
 		BufferViewCreateInfo(BufferViewCreateFlags flags, Buffer buffer, Format format, DeviceSize offset, DeviceSize range)
 		{
 			m_bufferViewCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
 			m_bufferViewCreateInfo.pNext = nullptr;
-			m_bufferViewCreateInfo.flags = flags;
-			m_bufferViewCreateInfo.buffer = buffer;
+			m_bufferViewCreateInfo.flags = static_cast<VkBufferViewCreateFlags>(flags);
+			m_bufferViewCreateInfo.buffer = static_cast<VkBuffer>(buffer);
 			m_bufferViewCreateInfo.format = static_cast<VkFormat>(format);
 			m_bufferViewCreateInfo.offset = offset;
 			m_bufferViewCreateInfo.range = range;
 		}
 
+		BufferViewCreateInfo(VkBufferViewCreateInfo const & rhs)
+			: m_bufferViewCreateInfo(rhs)
+		{
+		}
+
+		BufferViewCreateInfo& operator=(VkBufferViewCreateInfo const & rhs)
+		{
+			m_bufferViewCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_bufferViewCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_bufferViewCreateInfo.sType);
 		}
 
 		BufferViewCreateInfo& sType(StructureType sType)
@@ -4182,6 +7373,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_bufferViewCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_bufferViewCreateInfo.pNext);
+		}
+
 		BufferViewCreateInfo& pNext(const void* pNext)
 		{
 			m_bufferViewCreateInfo.pNext = pNext;
@@ -4190,29 +7386,44 @@ namespace vk
 
 		const BufferViewCreateFlags& flags() const
 		{
-			return m_bufferViewCreateInfo.flags;
+			return reinterpret_cast<const BufferViewCreateFlags&>(m_bufferViewCreateInfo.flags);
+		}
+
+		BufferViewCreateFlags& flags()
+		{
+			return reinterpret_cast<BufferViewCreateFlags&>(m_bufferViewCreateInfo.flags);
 		}
 
 		BufferViewCreateInfo& flags(BufferViewCreateFlags flags)
 		{
-			m_bufferViewCreateInfo.flags = flags;
+			m_bufferViewCreateInfo.flags = static_cast<VkBufferViewCreateFlags>(flags);
 			return *this;
 		}
 
 		const Buffer& buffer() const
 		{
-			return m_bufferViewCreateInfo.buffer;
+			return reinterpret_cast<const Buffer&>(m_bufferViewCreateInfo.buffer);
+		}
+
+		Buffer& buffer()
+		{
+			return reinterpret_cast<Buffer&>(m_bufferViewCreateInfo.buffer);
 		}
 
 		BufferViewCreateInfo& buffer(Buffer buffer)
 		{
-			m_bufferViewCreateInfo.buffer = buffer;
+			m_bufferViewCreateInfo.buffer = static_cast<VkBuffer>(buffer);
 			return *this;
 		}
 
 		const Format& format() const
 		{
 			return reinterpret_cast<const Format&>(m_bufferViewCreateInfo.format);
+		}
+
+		Format& format()
+		{
+			return reinterpret_cast<Format&>(m_bufferViewCreateInfo.format);
 		}
 
 		BufferViewCreateInfo& format(Format format)
@@ -4226,6 +7437,11 @@ namespace vk
 			return m_bufferViewCreateInfo.offset;
 		}
 
+		DeviceSize& offset()
+		{
+			return m_bufferViewCreateInfo.offset;
+		}
+
 		BufferViewCreateInfo& offset(DeviceSize offset)
 		{
 			m_bufferViewCreateInfo.offset = offset;
@@ -4233,6 +7449,11 @@ namespace vk
 		}
 
 		const DeviceSize& range() const
+		{
+			return m_bufferViewCreateInfo.range;
+		}
+
+		DeviceSize& range()
 		{
 			return m_bufferViewCreateInfo.range;
 		}
@@ -4251,26 +7472,43 @@ namespace vk
 	private:
 		VkBufferViewCreateInfo m_bufferViewCreateInfo;
 	};
+	static_assert(sizeof(BufferViewCreateInfo) == sizeof(VkBufferViewCreateInfo), "struct and wrapper have different size!");
 
 	class ShaderModuleCreateInfo
 	{
 	public:
 		ShaderModuleCreateInfo()
-			: ShaderModuleCreateInfo(0, 0, nullptr)
+			: ShaderModuleCreateInfo(ShaderModuleCreateFlags(), 0, nullptr)
 		{}
 
 		ShaderModuleCreateInfo(ShaderModuleCreateFlags flags, size_t codeSize, const uint32_t* pCode)
 		{
 			m_shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 			m_shaderModuleCreateInfo.pNext = nullptr;
-			m_shaderModuleCreateInfo.flags = flags;
+			m_shaderModuleCreateInfo.flags = static_cast<VkShaderModuleCreateFlags>(flags);
 			m_shaderModuleCreateInfo.codeSize = codeSize;
 			m_shaderModuleCreateInfo.pCode = pCode;
+		}
+
+		ShaderModuleCreateInfo(VkShaderModuleCreateInfo const & rhs)
+			: m_shaderModuleCreateInfo(rhs)
+		{
+		}
+
+		ShaderModuleCreateInfo& operator=(VkShaderModuleCreateInfo const & rhs)
+		{
+			m_shaderModuleCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_shaderModuleCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_shaderModuleCreateInfo.sType);
 		}
 
 		ShaderModuleCreateInfo& sType(StructureType sType)
@@ -4284,6 +7522,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_shaderModuleCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_shaderModuleCreateInfo.pNext);
+		}
+
 		ShaderModuleCreateInfo& pNext(const void* pNext)
 		{
 			m_shaderModuleCreateInfo.pNext = pNext;
@@ -4292,16 +7535,26 @@ namespace vk
 
 		const ShaderModuleCreateFlags& flags() const
 		{
-			return m_shaderModuleCreateInfo.flags;
+			return reinterpret_cast<const ShaderModuleCreateFlags&>(m_shaderModuleCreateInfo.flags);
+		}
+
+		ShaderModuleCreateFlags& flags()
+		{
+			return reinterpret_cast<ShaderModuleCreateFlags&>(m_shaderModuleCreateInfo.flags);
 		}
 
 		ShaderModuleCreateInfo& flags(ShaderModuleCreateFlags flags)
 		{
-			m_shaderModuleCreateInfo.flags = flags;
+			m_shaderModuleCreateInfo.flags = static_cast<VkShaderModuleCreateFlags>(flags);
 			return *this;
 		}
 
 		const size_t& codeSize() const
+		{
+			return m_shaderModuleCreateInfo.codeSize;
+		}
+
+		size_t& codeSize()
 		{
 			return m_shaderModuleCreateInfo.codeSize;
 		}
@@ -4313,6 +7566,11 @@ namespace vk
 		}
 
 		const uint32_t* pCode() const
+		{
+			return reinterpret_cast<const uint32_t*>(m_shaderModuleCreateInfo.pCode);
+		}
+
+		const uint32_t* pCode()
 		{
 			return reinterpret_cast<const uint32_t*>(m_shaderModuleCreateInfo.pCode);
 		}
@@ -4331,6 +7589,7 @@ namespace vk
 	private:
 		VkShaderModuleCreateInfo m_shaderModuleCreateInfo;
 	};
+	static_assert(sizeof(ShaderModuleCreateInfo) == sizeof(VkShaderModuleCreateInfo), "struct and wrapper have different size!");
 
 	class DescriptorSetAllocateInfo
 	{
@@ -4343,14 +7602,30 @@ namespace vk
 		{
 			m_descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 			m_descriptorSetAllocateInfo.pNext = nullptr;
-			m_descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+			m_descriptorSetAllocateInfo.descriptorPool = static_cast<VkDescriptorPool>(descriptorPool);
 			m_descriptorSetAllocateInfo.descriptorSetCount = descriptorSetCount;
-			m_descriptorSetAllocateInfo.pSetLayouts = pSetLayouts;
+			m_descriptorSetAllocateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
+		}
+
+		DescriptorSetAllocateInfo(VkDescriptorSetAllocateInfo const & rhs)
+			: m_descriptorSetAllocateInfo(rhs)
+		{
+		}
+
+		DescriptorSetAllocateInfo& operator=(VkDescriptorSetAllocateInfo const & rhs)
+		{
+			m_descriptorSetAllocateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_descriptorSetAllocateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_descriptorSetAllocateInfo.sType);
 		}
 
 		DescriptorSetAllocateInfo& sType(StructureType sType)
@@ -4364,6 +7639,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_descriptorSetAllocateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_descriptorSetAllocateInfo.pNext);
+		}
+
 		DescriptorSetAllocateInfo& pNext(const void* pNext)
 		{
 			m_descriptorSetAllocateInfo.pNext = pNext;
@@ -4372,16 +7652,26 @@ namespace vk
 
 		const DescriptorPool& descriptorPool() const
 		{
-			return m_descriptorSetAllocateInfo.descriptorPool;
+			return reinterpret_cast<const DescriptorPool&>(m_descriptorSetAllocateInfo.descriptorPool);
+		}
+
+		DescriptorPool& descriptorPool()
+		{
+			return reinterpret_cast<DescriptorPool&>(m_descriptorSetAllocateInfo.descriptorPool);
 		}
 
 		DescriptorSetAllocateInfo& descriptorPool(DescriptorPool descriptorPool)
 		{
-			m_descriptorSetAllocateInfo.descriptorPool = descriptorPool;
+			m_descriptorSetAllocateInfo.descriptorPool = static_cast<VkDescriptorPool>(descriptorPool);
 			return *this;
 		}
 
 		const uint32_t& descriptorSetCount() const
+		{
+			return m_descriptorSetAllocateInfo.descriptorSetCount;
+		}
+
+		uint32_t& descriptorSetCount()
 		{
 			return m_descriptorSetAllocateInfo.descriptorSetCount;
 		}
@@ -4397,9 +7687,14 @@ namespace vk
 			return reinterpret_cast<const DescriptorSetLayout*>(m_descriptorSetAllocateInfo.pSetLayouts);
 		}
 
+		const DescriptorSetLayout* pSetLayouts()
+		{
+			return reinterpret_cast<const DescriptorSetLayout*>(m_descriptorSetAllocateInfo.pSetLayouts);
+		}
+
 		DescriptorSetAllocateInfo& pSetLayouts(const DescriptorSetLayout* pSetLayouts)
 		{
-			m_descriptorSetAllocateInfo.pSetLayouts = pSetLayouts;
+			m_descriptorSetAllocateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
 			return *this;
 		}
 
@@ -4411,28 +7706,45 @@ namespace vk
 	private:
 		VkDescriptorSetAllocateInfo m_descriptorSetAllocateInfo;
 	};
+	static_assert(sizeof(DescriptorSetAllocateInfo) == sizeof(VkDescriptorSetAllocateInfo), "struct and wrapper have different size!");
 
 	class PipelineVertexInputStateCreateInfo
 	{
 	public:
 		PipelineVertexInputStateCreateInfo()
-			: PipelineVertexInputStateCreateInfo(0, 0, nullptr, 0, nullptr)
+			: PipelineVertexInputStateCreateInfo(PipelineVertexInputStateCreateFlags(), 0, nullptr, 0, nullptr)
 		{}
 
 		PipelineVertexInputStateCreateInfo(PipelineVertexInputStateCreateFlags flags, uint32_t vertexBindingDescriptionCount, const VertexInputBindingDescription* pVertexBindingDescriptions, uint32_t vertexAttributeDescriptionCount, const VertexInputAttributeDescription* pVertexAttributeDescriptions)
 		{
 			m_pipelineVertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 			m_pipelineVertexInputStateCreateInfo.pNext = nullptr;
-			m_pipelineVertexInputStateCreateInfo.flags = flags;
+			m_pipelineVertexInputStateCreateInfo.flags = static_cast<VkPipelineVertexInputStateCreateFlags>(flags);
 			m_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = vertexBindingDescriptionCount;
 			m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = reinterpret_cast<const VkVertexInputBindingDescription*>(pVertexBindingDescriptions);
 			m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = vertexAttributeDescriptionCount;
 			m_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = reinterpret_cast<const VkVertexInputAttributeDescription*>(pVertexAttributeDescriptions);
 		}
 
+		PipelineVertexInputStateCreateInfo(VkPipelineVertexInputStateCreateInfo const & rhs)
+			: m_pipelineVertexInputStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineVertexInputStateCreateInfo& operator=(VkPipelineVertexInputStateCreateInfo const & rhs)
+		{
+			m_pipelineVertexInputStateCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineVertexInputStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineVertexInputStateCreateInfo.sType);
 		}
 
 		PipelineVertexInputStateCreateInfo& sType(StructureType sType)
@@ -4446,6 +7758,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineVertexInputStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineVertexInputStateCreateInfo.pNext);
+		}
+
 		PipelineVertexInputStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineVertexInputStateCreateInfo.pNext = pNext;
@@ -4454,16 +7771,26 @@ namespace vk
 
 		const PipelineVertexInputStateCreateFlags& flags() const
 		{
-			return m_pipelineVertexInputStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineVertexInputStateCreateFlags&>(m_pipelineVertexInputStateCreateInfo.flags);
+		}
+
+		PipelineVertexInputStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineVertexInputStateCreateFlags&>(m_pipelineVertexInputStateCreateInfo.flags);
 		}
 
 		PipelineVertexInputStateCreateInfo& flags(PipelineVertexInputStateCreateFlags flags)
 		{
-			m_pipelineVertexInputStateCreateInfo.flags = flags;
+			m_pipelineVertexInputStateCreateInfo.flags = static_cast<VkPipelineVertexInputStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& vertexBindingDescriptionCount() const
+		{
+			return m_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount;
+		}
+
+		uint32_t& vertexBindingDescriptionCount()
 		{
 			return m_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount;
 		}
@@ -4479,6 +7806,11 @@ namespace vk
 			return reinterpret_cast<const VertexInputBindingDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions);
 		}
 
+		const VertexInputBindingDescription* pVertexBindingDescriptions()
+		{
+			return reinterpret_cast<const VertexInputBindingDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions);
+		}
+
 		PipelineVertexInputStateCreateInfo& pVertexBindingDescriptions(const VertexInputBindingDescription* pVertexBindingDescriptions)
 		{
 			m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = reinterpret_cast<const VkVertexInputBindingDescription*>(pVertexBindingDescriptions);
@@ -4490,6 +7822,11 @@ namespace vk
 			return m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount;
 		}
 
+		uint32_t& vertexAttributeDescriptionCount()
+		{
+			return m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount;
+		}
+
 		PipelineVertexInputStateCreateInfo& vertexAttributeDescriptionCount(uint32_t vertexAttributeDescriptionCount)
 		{
 			m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = vertexAttributeDescriptionCount;
@@ -4497,6 +7834,11 @@ namespace vk
 		}
 
 		const VertexInputAttributeDescription* pVertexAttributeDescriptions() const
+		{
+			return reinterpret_cast<const VertexInputAttributeDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions);
+		}
+
+		const VertexInputAttributeDescription* pVertexAttributeDescriptions()
 		{
 			return reinterpret_cast<const VertexInputAttributeDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions);
 		}
@@ -4515,26 +7857,43 @@ namespace vk
 	private:
 		VkPipelineVertexInputStateCreateInfo m_pipelineVertexInputStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineVertexInputStateCreateInfo) == sizeof(VkPipelineVertexInputStateCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineInputAssemblyStateCreateInfo
 	{
 	public:
 		PipelineInputAssemblyStateCreateInfo()
-			: PipelineInputAssemblyStateCreateInfo(0, PrimitiveTopology::ePointList, 0)
+			: PipelineInputAssemblyStateCreateInfo(PipelineInputAssemblyStateCreateFlags(), PrimitiveTopology::ePointList, 0)
 		{}
 
 		PipelineInputAssemblyStateCreateInfo(PipelineInputAssemblyStateCreateFlags flags, PrimitiveTopology topology, Bool32 primitiveRestartEnable)
 		{
 			m_pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 			m_pipelineInputAssemblyStateCreateInfo.pNext = nullptr;
-			m_pipelineInputAssemblyStateCreateInfo.flags = flags;
+			m_pipelineInputAssemblyStateCreateInfo.flags = static_cast<VkPipelineInputAssemblyStateCreateFlags>(flags);
 			m_pipelineInputAssemblyStateCreateInfo.topology = static_cast<VkPrimitiveTopology>(topology);
 			m_pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = primitiveRestartEnable;
+		}
+
+		PipelineInputAssemblyStateCreateInfo(VkPipelineInputAssemblyStateCreateInfo const & rhs)
+			: m_pipelineInputAssemblyStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineInputAssemblyStateCreateInfo& operator=(VkPipelineInputAssemblyStateCreateInfo const & rhs)
+		{
+			m_pipelineInputAssemblyStateCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineInputAssemblyStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineInputAssemblyStateCreateInfo.sType);
 		}
 
 		PipelineInputAssemblyStateCreateInfo& sType(StructureType sType)
@@ -4548,6 +7907,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineInputAssemblyStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineInputAssemblyStateCreateInfo.pNext);
+		}
+
 		PipelineInputAssemblyStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineInputAssemblyStateCreateInfo.pNext = pNext;
@@ -4556,18 +7920,28 @@ namespace vk
 
 		const PipelineInputAssemblyStateCreateFlags& flags() const
 		{
-			return m_pipelineInputAssemblyStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineInputAssemblyStateCreateFlags&>(m_pipelineInputAssemblyStateCreateInfo.flags);
+		}
+
+		PipelineInputAssemblyStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineInputAssemblyStateCreateFlags&>(m_pipelineInputAssemblyStateCreateInfo.flags);
 		}
 
 		PipelineInputAssemblyStateCreateInfo& flags(PipelineInputAssemblyStateCreateFlags flags)
 		{
-			m_pipelineInputAssemblyStateCreateInfo.flags = flags;
+			m_pipelineInputAssemblyStateCreateInfo.flags = static_cast<VkPipelineInputAssemblyStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const PrimitiveTopology& topology() const
 		{
 			return reinterpret_cast<const PrimitiveTopology&>(m_pipelineInputAssemblyStateCreateInfo.topology);
+		}
+
+		PrimitiveTopology& topology()
+		{
+			return reinterpret_cast<PrimitiveTopology&>(m_pipelineInputAssemblyStateCreateInfo.topology);
 		}
 
 		PipelineInputAssemblyStateCreateInfo& topology(PrimitiveTopology topology)
@@ -4577,6 +7951,11 @@ namespace vk
 		}
 
 		const Bool32& primitiveRestartEnable() const
+		{
+			return m_pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable;
+		}
+
+		Bool32& primitiveRestartEnable()
 		{
 			return m_pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable;
 		}
@@ -4595,25 +7974,42 @@ namespace vk
 	private:
 		VkPipelineInputAssemblyStateCreateInfo m_pipelineInputAssemblyStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineInputAssemblyStateCreateInfo) == sizeof(VkPipelineInputAssemblyStateCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineTessellationStateCreateInfo
 	{
 	public:
 		PipelineTessellationStateCreateInfo()
-			: PipelineTessellationStateCreateInfo(0, 0)
+			: PipelineTessellationStateCreateInfo(PipelineTessellationStateCreateFlags(), 0)
 		{}
 
 		PipelineTessellationStateCreateInfo(PipelineTessellationStateCreateFlags flags, uint32_t patchControlPoints)
 		{
 			m_pipelineTessellationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
 			m_pipelineTessellationStateCreateInfo.pNext = nullptr;
-			m_pipelineTessellationStateCreateInfo.flags = flags;
+			m_pipelineTessellationStateCreateInfo.flags = static_cast<VkPipelineTessellationStateCreateFlags>(flags);
 			m_pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
+		}
+
+		PipelineTessellationStateCreateInfo(VkPipelineTessellationStateCreateInfo const & rhs)
+			: m_pipelineTessellationStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineTessellationStateCreateInfo& operator=(VkPipelineTessellationStateCreateInfo const & rhs)
+		{
+			m_pipelineTessellationStateCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineTessellationStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineTessellationStateCreateInfo.sType);
 		}
 
 		PipelineTessellationStateCreateInfo& sType(StructureType sType)
@@ -4627,6 +8023,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineTessellationStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineTessellationStateCreateInfo.pNext);
+		}
+
 		PipelineTessellationStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineTessellationStateCreateInfo.pNext = pNext;
@@ -4635,16 +8036,26 @@ namespace vk
 
 		const PipelineTessellationStateCreateFlags& flags() const
 		{
-			return m_pipelineTessellationStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineTessellationStateCreateFlags&>(m_pipelineTessellationStateCreateInfo.flags);
+		}
+
+		PipelineTessellationStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineTessellationStateCreateFlags&>(m_pipelineTessellationStateCreateInfo.flags);
 		}
 
 		PipelineTessellationStateCreateInfo& flags(PipelineTessellationStateCreateFlags flags)
 		{
-			m_pipelineTessellationStateCreateInfo.flags = flags;
+			m_pipelineTessellationStateCreateInfo.flags = static_cast<VkPipelineTessellationStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& patchControlPoints() const
+		{
+			return m_pipelineTessellationStateCreateInfo.patchControlPoints;
+		}
+
+		uint32_t& patchControlPoints()
 		{
 			return m_pipelineTessellationStateCreateInfo.patchControlPoints;
 		}
@@ -4663,28 +8074,45 @@ namespace vk
 	private:
 		VkPipelineTessellationStateCreateInfo m_pipelineTessellationStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineTessellationStateCreateInfo) == sizeof(VkPipelineTessellationStateCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineViewportStateCreateInfo
 	{
 	public:
 		PipelineViewportStateCreateInfo()
-			: PipelineViewportStateCreateInfo(0, 0, nullptr, 0, nullptr)
+			: PipelineViewportStateCreateInfo(PipelineViewportStateCreateFlags(), 0, nullptr, 0, nullptr)
 		{}
 
 		PipelineViewportStateCreateInfo(PipelineViewportStateCreateFlags flags, uint32_t viewportCount, const Viewport* pViewports, uint32_t scissorCount, const Rect2D* pScissors)
 		{
 			m_pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
 			m_pipelineViewportStateCreateInfo.pNext = nullptr;
-			m_pipelineViewportStateCreateInfo.flags = flags;
+			m_pipelineViewportStateCreateInfo.flags = static_cast<VkPipelineViewportStateCreateFlags>(flags);
 			m_pipelineViewportStateCreateInfo.viewportCount = viewportCount;
 			m_pipelineViewportStateCreateInfo.pViewports = reinterpret_cast<const VkViewport*>(pViewports);
 			m_pipelineViewportStateCreateInfo.scissorCount = scissorCount;
 			m_pipelineViewportStateCreateInfo.pScissors = reinterpret_cast<const VkRect2D*>(pScissors);
 		}
 
+		PipelineViewportStateCreateInfo(VkPipelineViewportStateCreateInfo const & rhs)
+			: m_pipelineViewportStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineViewportStateCreateInfo& operator=(VkPipelineViewportStateCreateInfo const & rhs)
+		{
+			m_pipelineViewportStateCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineViewportStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineViewportStateCreateInfo.sType);
 		}
 
 		PipelineViewportStateCreateInfo& sType(StructureType sType)
@@ -4698,6 +8126,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineViewportStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineViewportStateCreateInfo.pNext);
+		}
+
 		PipelineViewportStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineViewportStateCreateInfo.pNext = pNext;
@@ -4706,16 +8139,26 @@ namespace vk
 
 		const PipelineViewportStateCreateFlags& flags() const
 		{
-			return m_pipelineViewportStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineViewportStateCreateFlags&>(m_pipelineViewportStateCreateInfo.flags);
+		}
+
+		PipelineViewportStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineViewportStateCreateFlags&>(m_pipelineViewportStateCreateInfo.flags);
 		}
 
 		PipelineViewportStateCreateInfo& flags(PipelineViewportStateCreateFlags flags)
 		{
-			m_pipelineViewportStateCreateInfo.flags = flags;
+			m_pipelineViewportStateCreateInfo.flags = static_cast<VkPipelineViewportStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& viewportCount() const
+		{
+			return m_pipelineViewportStateCreateInfo.viewportCount;
+		}
+
+		uint32_t& viewportCount()
 		{
 			return m_pipelineViewportStateCreateInfo.viewportCount;
 		}
@@ -4731,6 +8174,11 @@ namespace vk
 			return reinterpret_cast<const Viewport*>(m_pipelineViewportStateCreateInfo.pViewports);
 		}
 
+		const Viewport* pViewports()
+		{
+			return reinterpret_cast<const Viewport*>(m_pipelineViewportStateCreateInfo.pViewports);
+		}
+
 		PipelineViewportStateCreateInfo& pViewports(const Viewport* pViewports)
 		{
 			m_pipelineViewportStateCreateInfo.pViewports = reinterpret_cast<const VkViewport*>(pViewports);
@@ -4742,6 +8190,11 @@ namespace vk
 			return m_pipelineViewportStateCreateInfo.scissorCount;
 		}
 
+		uint32_t& scissorCount()
+		{
+			return m_pipelineViewportStateCreateInfo.scissorCount;
+		}
+
 		PipelineViewportStateCreateInfo& scissorCount(uint32_t scissorCount)
 		{
 			m_pipelineViewportStateCreateInfo.scissorCount = scissorCount;
@@ -4749,6 +8202,11 @@ namespace vk
 		}
 
 		const Rect2D* pScissors() const
+		{
+			return reinterpret_cast<const Rect2D*>(m_pipelineViewportStateCreateInfo.pScissors);
+		}
+
+		const Rect2D* pScissors()
 		{
 			return reinterpret_cast<const Rect2D*>(m_pipelineViewportStateCreateInfo.pScissors);
 		}
@@ -4767,19 +8225,20 @@ namespace vk
 	private:
 		VkPipelineViewportStateCreateInfo m_pipelineViewportStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineViewportStateCreateInfo) == sizeof(VkPipelineViewportStateCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineRasterizationStateCreateInfo
 	{
 	public:
 		PipelineRasterizationStateCreateInfo()
-			: PipelineRasterizationStateCreateInfo(0, 0, 0, PolygonMode::eFill, CullModeFlags(), FrontFace::eCounterClockwise, 0, 0, 0, 0, 0)
+			: PipelineRasterizationStateCreateInfo(PipelineRasterizationStateCreateFlags(), 0, 0, PolygonMode::eFill, CullModeFlags(), FrontFace::eCounterClockwise, 0, 0, 0, 0, 0)
 		{}
 
 		PipelineRasterizationStateCreateInfo(PipelineRasterizationStateCreateFlags flags, Bool32 depthClampEnable, Bool32 rasterizerDiscardEnable, PolygonMode polygonMode, CullModeFlags cullMode, FrontFace frontFace, Bool32 depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth)
 		{
 			m_pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 			m_pipelineRasterizationStateCreateInfo.pNext = nullptr;
-			m_pipelineRasterizationStateCreateInfo.flags = flags;
+			m_pipelineRasterizationStateCreateInfo.flags = static_cast<VkPipelineRasterizationStateCreateFlags>(flags);
 			m_pipelineRasterizationStateCreateInfo.depthClampEnable = depthClampEnable;
 			m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = rasterizerDiscardEnable;
 			m_pipelineRasterizationStateCreateInfo.polygonMode = static_cast<VkPolygonMode>(polygonMode);
@@ -4792,9 +8251,25 @@ namespace vk
 			m_pipelineRasterizationStateCreateInfo.lineWidth = lineWidth;
 		}
 
+		PipelineRasterizationStateCreateInfo(VkPipelineRasterizationStateCreateInfo const & rhs)
+			: m_pipelineRasterizationStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineRasterizationStateCreateInfo& operator=(VkPipelineRasterizationStateCreateInfo const & rhs)
+		{
+			m_pipelineRasterizationStateCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineRasterizationStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineRasterizationStateCreateInfo.sType);
 		}
 
 		PipelineRasterizationStateCreateInfo& sType(StructureType sType)
@@ -4808,6 +8283,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineRasterizationStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineRasterizationStateCreateInfo.pNext);
+		}
+
 		PipelineRasterizationStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineRasterizationStateCreateInfo.pNext = pNext;
@@ -4816,16 +8296,26 @@ namespace vk
 
 		const PipelineRasterizationStateCreateFlags& flags() const
 		{
-			return m_pipelineRasterizationStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineRasterizationStateCreateFlags&>(m_pipelineRasterizationStateCreateInfo.flags);
+		}
+
+		PipelineRasterizationStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineRasterizationStateCreateFlags&>(m_pipelineRasterizationStateCreateInfo.flags);
 		}
 
 		PipelineRasterizationStateCreateInfo& flags(PipelineRasterizationStateCreateFlags flags)
 		{
-			m_pipelineRasterizationStateCreateInfo.flags = flags;
+			m_pipelineRasterizationStateCreateInfo.flags = static_cast<VkPipelineRasterizationStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const Bool32& depthClampEnable() const
+		{
+			return m_pipelineRasterizationStateCreateInfo.depthClampEnable;
+		}
+
+		Bool32& depthClampEnable()
 		{
 			return m_pipelineRasterizationStateCreateInfo.depthClampEnable;
 		}
@@ -4841,6 +8331,11 @@ namespace vk
 			return m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable;
 		}
 
+		Bool32& rasterizerDiscardEnable()
+		{
+			return m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable;
+		}
+
 		PipelineRasterizationStateCreateInfo& rasterizerDiscardEnable(Bool32 rasterizerDiscardEnable)
 		{
 			m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = rasterizerDiscardEnable;
@@ -4850,6 +8345,11 @@ namespace vk
 		const PolygonMode& polygonMode() const
 		{
 			return reinterpret_cast<const PolygonMode&>(m_pipelineRasterizationStateCreateInfo.polygonMode);
+		}
+
+		PolygonMode& polygonMode()
+		{
+			return reinterpret_cast<PolygonMode&>(m_pipelineRasterizationStateCreateInfo.polygonMode);
 		}
 
 		PipelineRasterizationStateCreateInfo& polygonMode(PolygonMode polygonMode)
@@ -4863,6 +8363,11 @@ namespace vk
 			return reinterpret_cast<const CullModeFlags&>(m_pipelineRasterizationStateCreateInfo.cullMode);
 		}
 
+		CullModeFlags& cullMode()
+		{
+			return reinterpret_cast<CullModeFlags&>(m_pipelineRasterizationStateCreateInfo.cullMode);
+		}
+
 		PipelineRasterizationStateCreateInfo& cullMode(CullModeFlags cullMode)
 		{
 			m_pipelineRasterizationStateCreateInfo.cullMode = static_cast<VkCullModeFlags>(cullMode);
@@ -4874,6 +8379,11 @@ namespace vk
 			return reinterpret_cast<const FrontFace&>(m_pipelineRasterizationStateCreateInfo.frontFace);
 		}
 
+		FrontFace& frontFace()
+		{
+			return reinterpret_cast<FrontFace&>(m_pipelineRasterizationStateCreateInfo.frontFace);
+		}
+
 		PipelineRasterizationStateCreateInfo& frontFace(FrontFace frontFace)
 		{
 			m_pipelineRasterizationStateCreateInfo.frontFace = static_cast<VkFrontFace>(frontFace);
@@ -4881,6 +8391,11 @@ namespace vk
 		}
 
 		const Bool32& depthBiasEnable() const
+		{
+			return m_pipelineRasterizationStateCreateInfo.depthBiasEnable;
+		}
+
+		Bool32& depthBiasEnable()
 		{
 			return m_pipelineRasterizationStateCreateInfo.depthBiasEnable;
 		}
@@ -4896,6 +8411,11 @@ namespace vk
 			return m_pipelineRasterizationStateCreateInfo.depthBiasConstantFactor;
 		}
 
+		float& depthBiasConstantFactor()
+		{
+			return m_pipelineRasterizationStateCreateInfo.depthBiasConstantFactor;
+		}
+
 		PipelineRasterizationStateCreateInfo& depthBiasConstantFactor(float depthBiasConstantFactor)
 		{
 			m_pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = depthBiasConstantFactor;
@@ -4903,6 +8423,11 @@ namespace vk
 		}
 
 		const float& depthBiasClamp() const
+		{
+			return m_pipelineRasterizationStateCreateInfo.depthBiasClamp;
+		}
+
+		float& depthBiasClamp()
 		{
 			return m_pipelineRasterizationStateCreateInfo.depthBiasClamp;
 		}
@@ -4918,6 +8443,11 @@ namespace vk
 			return m_pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor;
 		}
 
+		float& depthBiasSlopeFactor()
+		{
+			return m_pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor;
+		}
+
 		PipelineRasterizationStateCreateInfo& depthBiasSlopeFactor(float depthBiasSlopeFactor)
 		{
 			m_pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = depthBiasSlopeFactor;
@@ -4925,6 +8455,11 @@ namespace vk
 		}
 
 		const float& lineWidth() const
+		{
+			return m_pipelineRasterizationStateCreateInfo.lineWidth;
+		}
+
+		float& lineWidth()
 		{
 			return m_pipelineRasterizationStateCreateInfo.lineWidth;
 		}
@@ -4943,19 +8478,20 @@ namespace vk
 	private:
 		VkPipelineRasterizationStateCreateInfo m_pipelineRasterizationStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineRasterizationStateCreateInfo) == sizeof(VkPipelineRasterizationStateCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineDepthStencilStateCreateInfo
 	{
 	public:
 		PipelineDepthStencilStateCreateInfo()
-			: PipelineDepthStencilStateCreateInfo(0, 0, 0, CompareOp::eNever, 0, 0, StencilOpState(), StencilOpState(), 0, 0)
+			: PipelineDepthStencilStateCreateInfo(PipelineDepthStencilStateCreateFlags(), 0, 0, CompareOp::eNever, 0, 0, StencilOpState(), StencilOpState(), 0, 0)
 		{}
 
 		PipelineDepthStencilStateCreateInfo(PipelineDepthStencilStateCreateFlags flags, Bool32 depthTestEnable, Bool32 depthWriteEnable, CompareOp depthCompareOp, Bool32 depthBoundsTestEnable, Bool32 stencilTestEnable, StencilOpState front, StencilOpState back, float minDepthBounds, float maxDepthBounds)
 		{
 			m_pipelineDepthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 			m_pipelineDepthStencilStateCreateInfo.pNext = nullptr;
-			m_pipelineDepthStencilStateCreateInfo.flags = flags;
+			m_pipelineDepthStencilStateCreateInfo.flags = static_cast<VkPipelineDepthStencilStateCreateFlags>(flags);
 			m_pipelineDepthStencilStateCreateInfo.depthTestEnable = depthTestEnable;
 			m_pipelineDepthStencilStateCreateInfo.depthWriteEnable = depthWriteEnable;
 			m_pipelineDepthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(depthCompareOp);
@@ -4967,9 +8503,25 @@ namespace vk
 			m_pipelineDepthStencilStateCreateInfo.maxDepthBounds = maxDepthBounds;
 		}
 
+		PipelineDepthStencilStateCreateInfo(VkPipelineDepthStencilStateCreateInfo const & rhs)
+			: m_pipelineDepthStencilStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineDepthStencilStateCreateInfo& operator=(VkPipelineDepthStencilStateCreateInfo const & rhs)
+		{
+			m_pipelineDepthStencilStateCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineDepthStencilStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineDepthStencilStateCreateInfo.sType);
 		}
 
 		PipelineDepthStencilStateCreateInfo& sType(StructureType sType)
@@ -4983,6 +8535,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineDepthStencilStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineDepthStencilStateCreateInfo.pNext);
+		}
+
 		PipelineDepthStencilStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineDepthStencilStateCreateInfo.pNext = pNext;
@@ -4991,16 +8548,26 @@ namespace vk
 
 		const PipelineDepthStencilStateCreateFlags& flags() const
 		{
-			return m_pipelineDepthStencilStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineDepthStencilStateCreateFlags&>(m_pipelineDepthStencilStateCreateInfo.flags);
+		}
+
+		PipelineDepthStencilStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineDepthStencilStateCreateFlags&>(m_pipelineDepthStencilStateCreateInfo.flags);
 		}
 
 		PipelineDepthStencilStateCreateInfo& flags(PipelineDepthStencilStateCreateFlags flags)
 		{
-			m_pipelineDepthStencilStateCreateInfo.flags = flags;
+			m_pipelineDepthStencilStateCreateInfo.flags = static_cast<VkPipelineDepthStencilStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const Bool32& depthTestEnable() const
+		{
+			return m_pipelineDepthStencilStateCreateInfo.depthTestEnable;
+		}
+
+		Bool32& depthTestEnable()
 		{
 			return m_pipelineDepthStencilStateCreateInfo.depthTestEnable;
 		}
@@ -5016,6 +8583,11 @@ namespace vk
 			return m_pipelineDepthStencilStateCreateInfo.depthWriteEnable;
 		}
 
+		Bool32& depthWriteEnable()
+		{
+			return m_pipelineDepthStencilStateCreateInfo.depthWriteEnable;
+		}
+
 		PipelineDepthStencilStateCreateInfo& depthWriteEnable(Bool32 depthWriteEnable)
 		{
 			m_pipelineDepthStencilStateCreateInfo.depthWriteEnable = depthWriteEnable;
@@ -5027,6 +8599,11 @@ namespace vk
 			return reinterpret_cast<const CompareOp&>(m_pipelineDepthStencilStateCreateInfo.depthCompareOp);
 		}
 
+		CompareOp& depthCompareOp()
+		{
+			return reinterpret_cast<CompareOp&>(m_pipelineDepthStencilStateCreateInfo.depthCompareOp);
+		}
+
 		PipelineDepthStencilStateCreateInfo& depthCompareOp(CompareOp depthCompareOp)
 		{
 			m_pipelineDepthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(depthCompareOp);
@@ -5034,6 +8611,11 @@ namespace vk
 		}
 
 		const Bool32& depthBoundsTestEnable() const
+		{
+			return m_pipelineDepthStencilStateCreateInfo.depthBoundsTestEnable;
+		}
+
+		Bool32& depthBoundsTestEnable()
 		{
 			return m_pipelineDepthStencilStateCreateInfo.depthBoundsTestEnable;
 		}
@@ -5049,6 +8631,11 @@ namespace vk
 			return m_pipelineDepthStencilStateCreateInfo.stencilTestEnable;
 		}
 
+		Bool32& stencilTestEnable()
+		{
+			return m_pipelineDepthStencilStateCreateInfo.stencilTestEnable;
+		}
+
 		PipelineDepthStencilStateCreateInfo& stencilTestEnable(Bool32 stencilTestEnable)
 		{
 			m_pipelineDepthStencilStateCreateInfo.stencilTestEnable = stencilTestEnable;
@@ -5058,6 +8645,11 @@ namespace vk
 		const StencilOpState& front() const
 		{
 			return reinterpret_cast<const StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.front);
+		}
+
+		StencilOpState& front()
+		{
+			return reinterpret_cast<StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.front);
 		}
 
 		PipelineDepthStencilStateCreateInfo& front(StencilOpState front)
@@ -5071,6 +8663,11 @@ namespace vk
 			return reinterpret_cast<const StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.back);
 		}
 
+		StencilOpState& back()
+		{
+			return reinterpret_cast<StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.back);
+		}
+
 		PipelineDepthStencilStateCreateInfo& back(StencilOpState back)
 		{
 			m_pipelineDepthStencilStateCreateInfo.back = static_cast<VkStencilOpState>(back);
@@ -5082,6 +8679,11 @@ namespace vk
 			return m_pipelineDepthStencilStateCreateInfo.minDepthBounds;
 		}
 
+		float& minDepthBounds()
+		{
+			return m_pipelineDepthStencilStateCreateInfo.minDepthBounds;
+		}
+
 		PipelineDepthStencilStateCreateInfo& minDepthBounds(float minDepthBounds)
 		{
 			m_pipelineDepthStencilStateCreateInfo.minDepthBounds = minDepthBounds;
@@ -5089,6 +8691,11 @@ namespace vk
 		}
 
 		const float& maxDepthBounds() const
+		{
+			return m_pipelineDepthStencilStateCreateInfo.maxDepthBounds;
+		}
+
+		float& maxDepthBounds()
 		{
 			return m_pipelineDepthStencilStateCreateInfo.maxDepthBounds;
 		}
@@ -5107,26 +8714,43 @@ namespace vk
 	private:
 		VkPipelineDepthStencilStateCreateInfo m_pipelineDepthStencilStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineDepthStencilStateCreateInfo) == sizeof(VkPipelineDepthStencilStateCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineCacheCreateInfo
 	{
 	public:
 		PipelineCacheCreateInfo()
-			: PipelineCacheCreateInfo(0, 0, nullptr)
+			: PipelineCacheCreateInfo(PipelineCacheCreateFlags(), 0, nullptr)
 		{}
 
 		PipelineCacheCreateInfo(PipelineCacheCreateFlags flags, size_t initialDataSize, const void* pInitialData)
 		{
 			m_pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 			m_pipelineCacheCreateInfo.pNext = nullptr;
-			m_pipelineCacheCreateInfo.flags = flags;
+			m_pipelineCacheCreateInfo.flags = static_cast<VkPipelineCacheCreateFlags>(flags);
 			m_pipelineCacheCreateInfo.initialDataSize = initialDataSize;
 			m_pipelineCacheCreateInfo.pInitialData = pInitialData;
+		}
+
+		PipelineCacheCreateInfo(VkPipelineCacheCreateInfo const & rhs)
+			: m_pipelineCacheCreateInfo(rhs)
+		{
+		}
+
+		PipelineCacheCreateInfo& operator=(VkPipelineCacheCreateInfo const & rhs)
+		{
+			m_pipelineCacheCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineCacheCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineCacheCreateInfo.sType);
 		}
 
 		PipelineCacheCreateInfo& sType(StructureType sType)
@@ -5140,6 +8764,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pNext);
+		}
+
 		PipelineCacheCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineCacheCreateInfo.pNext = pNext;
@@ -5148,16 +8777,26 @@ namespace vk
 
 		const PipelineCacheCreateFlags& flags() const
 		{
-			return m_pipelineCacheCreateInfo.flags;
+			return reinterpret_cast<const PipelineCacheCreateFlags&>(m_pipelineCacheCreateInfo.flags);
+		}
+
+		PipelineCacheCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineCacheCreateFlags&>(m_pipelineCacheCreateInfo.flags);
 		}
 
 		PipelineCacheCreateInfo& flags(PipelineCacheCreateFlags flags)
 		{
-			m_pipelineCacheCreateInfo.flags = flags;
+			m_pipelineCacheCreateInfo.flags = static_cast<VkPipelineCacheCreateFlags>(flags);
 			return *this;
 		}
 
 		const size_t& initialDataSize() const
+		{
+			return m_pipelineCacheCreateInfo.initialDataSize;
+		}
+
+		size_t& initialDataSize()
 		{
 			return m_pipelineCacheCreateInfo.initialDataSize;
 		}
@@ -5169,6 +8808,11 @@ namespace vk
 		}
 
 		const void* pInitialData() const
+		{
+			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pInitialData);
+		}
+
+		const void* pInitialData()
 		{
 			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pInitialData);
 		}
@@ -5187,19 +8831,20 @@ namespace vk
 	private:
 		VkPipelineCacheCreateInfo m_pipelineCacheCreateInfo;
 	};
+	static_assert(sizeof(PipelineCacheCreateInfo) == sizeof(VkPipelineCacheCreateInfo), "struct and wrapper have different size!");
 
 	class SamplerCreateInfo
 	{
 	public:
 		SamplerCreateInfo()
-			: SamplerCreateInfo(0, Filter::eNearest, Filter::eNearest, SamplerMipmapMode::eNearest, SamplerAddressMode::eRepeat, SamplerAddressMode::eRepeat, SamplerAddressMode::eRepeat, 0, 0, 0, 0, CompareOp::eNever, 0, 0, BorderColor::eFloatTransparentBlack, 0)
+			: SamplerCreateInfo(SamplerCreateFlags(), Filter::eNearest, Filter::eNearest, SamplerMipmapMode::eNearest, SamplerAddressMode::eRepeat, SamplerAddressMode::eRepeat, SamplerAddressMode::eRepeat, 0, 0, 0, 0, CompareOp::eNever, 0, 0, BorderColor::eFloatTransparentBlack, 0)
 		{}
 
 		SamplerCreateInfo(SamplerCreateFlags flags, Filter magFilter, Filter minFilter, SamplerMipmapMode mipmapMode, SamplerAddressMode addressModeU, SamplerAddressMode addressModeV, SamplerAddressMode addressModeW, float mipLodBias, Bool32 anisotropyEnable, float maxAnisotropy, Bool32 compareEnable, CompareOp compareOp, float minLod, float maxLod, BorderColor borderColor, Bool32 unnormalizedCoordinates)
 		{
 			m_samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 			m_samplerCreateInfo.pNext = nullptr;
-			m_samplerCreateInfo.flags = flags;
+			m_samplerCreateInfo.flags = static_cast<VkSamplerCreateFlags>(flags);
 			m_samplerCreateInfo.magFilter = static_cast<VkFilter>(magFilter);
 			m_samplerCreateInfo.minFilter = static_cast<VkFilter>(minFilter);
 			m_samplerCreateInfo.mipmapMode = static_cast<VkSamplerMipmapMode>(mipmapMode);
@@ -5217,9 +8862,25 @@ namespace vk
 			m_samplerCreateInfo.unnormalizedCoordinates = unnormalizedCoordinates;
 		}
 
+		SamplerCreateInfo(VkSamplerCreateInfo const & rhs)
+			: m_samplerCreateInfo(rhs)
+		{
+		}
+
+		SamplerCreateInfo& operator=(VkSamplerCreateInfo const & rhs)
+		{
+			m_samplerCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_samplerCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_samplerCreateInfo.sType);
 		}
 
 		SamplerCreateInfo& sType(StructureType sType)
@@ -5233,6 +8894,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_samplerCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_samplerCreateInfo.pNext);
+		}
+
 		SamplerCreateInfo& pNext(const void* pNext)
 		{
 			m_samplerCreateInfo.pNext = pNext;
@@ -5241,18 +8907,28 @@ namespace vk
 
 		const SamplerCreateFlags& flags() const
 		{
-			return m_samplerCreateInfo.flags;
+			return reinterpret_cast<const SamplerCreateFlags&>(m_samplerCreateInfo.flags);
+		}
+
+		SamplerCreateFlags& flags()
+		{
+			return reinterpret_cast<SamplerCreateFlags&>(m_samplerCreateInfo.flags);
 		}
 
 		SamplerCreateInfo& flags(SamplerCreateFlags flags)
 		{
-			m_samplerCreateInfo.flags = flags;
+			m_samplerCreateInfo.flags = static_cast<VkSamplerCreateFlags>(flags);
 			return *this;
 		}
 
 		const Filter& magFilter() const
 		{
 			return reinterpret_cast<const Filter&>(m_samplerCreateInfo.magFilter);
+		}
+
+		Filter& magFilter()
+		{
+			return reinterpret_cast<Filter&>(m_samplerCreateInfo.magFilter);
 		}
 
 		SamplerCreateInfo& magFilter(Filter magFilter)
@@ -5266,6 +8942,11 @@ namespace vk
 			return reinterpret_cast<const Filter&>(m_samplerCreateInfo.minFilter);
 		}
 
+		Filter& minFilter()
+		{
+			return reinterpret_cast<Filter&>(m_samplerCreateInfo.minFilter);
+		}
+
 		SamplerCreateInfo& minFilter(Filter minFilter)
 		{
 			m_samplerCreateInfo.minFilter = static_cast<VkFilter>(minFilter);
@@ -5275,6 +8956,11 @@ namespace vk
 		const SamplerMipmapMode& mipmapMode() const
 		{
 			return reinterpret_cast<const SamplerMipmapMode&>(m_samplerCreateInfo.mipmapMode);
+		}
+
+		SamplerMipmapMode& mipmapMode()
+		{
+			return reinterpret_cast<SamplerMipmapMode&>(m_samplerCreateInfo.mipmapMode);
 		}
 
 		SamplerCreateInfo& mipmapMode(SamplerMipmapMode mipmapMode)
@@ -5288,6 +8974,11 @@ namespace vk
 			return reinterpret_cast<const SamplerAddressMode&>(m_samplerCreateInfo.addressModeU);
 		}
 
+		SamplerAddressMode& addressModeU()
+		{
+			return reinterpret_cast<SamplerAddressMode&>(m_samplerCreateInfo.addressModeU);
+		}
+
 		SamplerCreateInfo& addressModeU(SamplerAddressMode addressModeU)
 		{
 			m_samplerCreateInfo.addressModeU = static_cast<VkSamplerAddressMode>(addressModeU);
@@ -5297,6 +8988,11 @@ namespace vk
 		const SamplerAddressMode& addressModeV() const
 		{
 			return reinterpret_cast<const SamplerAddressMode&>(m_samplerCreateInfo.addressModeV);
+		}
+
+		SamplerAddressMode& addressModeV()
+		{
+			return reinterpret_cast<SamplerAddressMode&>(m_samplerCreateInfo.addressModeV);
 		}
 
 		SamplerCreateInfo& addressModeV(SamplerAddressMode addressModeV)
@@ -5310,6 +9006,11 @@ namespace vk
 			return reinterpret_cast<const SamplerAddressMode&>(m_samplerCreateInfo.addressModeW);
 		}
 
+		SamplerAddressMode& addressModeW()
+		{
+			return reinterpret_cast<SamplerAddressMode&>(m_samplerCreateInfo.addressModeW);
+		}
+
 		SamplerCreateInfo& addressModeW(SamplerAddressMode addressModeW)
 		{
 			m_samplerCreateInfo.addressModeW = static_cast<VkSamplerAddressMode>(addressModeW);
@@ -5317,6 +9018,11 @@ namespace vk
 		}
 
 		const float& mipLodBias() const
+		{
+			return m_samplerCreateInfo.mipLodBias;
+		}
+
+		float& mipLodBias()
 		{
 			return m_samplerCreateInfo.mipLodBias;
 		}
@@ -5332,6 +9038,11 @@ namespace vk
 			return m_samplerCreateInfo.anisotropyEnable;
 		}
 
+		Bool32& anisotropyEnable()
+		{
+			return m_samplerCreateInfo.anisotropyEnable;
+		}
+
 		SamplerCreateInfo& anisotropyEnable(Bool32 anisotropyEnable)
 		{
 			m_samplerCreateInfo.anisotropyEnable = anisotropyEnable;
@@ -5339,6 +9050,11 @@ namespace vk
 		}
 
 		const float& maxAnisotropy() const
+		{
+			return m_samplerCreateInfo.maxAnisotropy;
+		}
+
+		float& maxAnisotropy()
 		{
 			return m_samplerCreateInfo.maxAnisotropy;
 		}
@@ -5354,6 +9070,11 @@ namespace vk
 			return m_samplerCreateInfo.compareEnable;
 		}
 
+		Bool32& compareEnable()
+		{
+			return m_samplerCreateInfo.compareEnable;
+		}
+
 		SamplerCreateInfo& compareEnable(Bool32 compareEnable)
 		{
 			m_samplerCreateInfo.compareEnable = compareEnable;
@@ -5365,6 +9086,11 @@ namespace vk
 			return reinterpret_cast<const CompareOp&>(m_samplerCreateInfo.compareOp);
 		}
 
+		CompareOp& compareOp()
+		{
+			return reinterpret_cast<CompareOp&>(m_samplerCreateInfo.compareOp);
+		}
+
 		SamplerCreateInfo& compareOp(CompareOp compareOp)
 		{
 			m_samplerCreateInfo.compareOp = static_cast<VkCompareOp>(compareOp);
@@ -5372,6 +9098,11 @@ namespace vk
 		}
 
 		const float& minLod() const
+		{
+			return m_samplerCreateInfo.minLod;
+		}
+
+		float& minLod()
 		{
 			return m_samplerCreateInfo.minLod;
 		}
@@ -5387,6 +9118,11 @@ namespace vk
 			return m_samplerCreateInfo.maxLod;
 		}
 
+		float& maxLod()
+		{
+			return m_samplerCreateInfo.maxLod;
+		}
+
 		SamplerCreateInfo& maxLod(float maxLod)
 		{
 			m_samplerCreateInfo.maxLod = maxLod;
@@ -5398,6 +9134,11 @@ namespace vk
 			return reinterpret_cast<const BorderColor&>(m_samplerCreateInfo.borderColor);
 		}
 
+		BorderColor& borderColor()
+		{
+			return reinterpret_cast<BorderColor&>(m_samplerCreateInfo.borderColor);
+		}
+
 		SamplerCreateInfo& borderColor(BorderColor borderColor)
 		{
 			m_samplerCreateInfo.borderColor = static_cast<VkBorderColor>(borderColor);
@@ -5405,6 +9146,11 @@ namespace vk
 		}
 
 		const Bool32& unnormalizedCoordinates() const
+		{
+			return m_samplerCreateInfo.unnormalizedCoordinates;
+		}
+
+		Bool32& unnormalizedCoordinates()
 		{
 			return m_samplerCreateInfo.unnormalizedCoordinates;
 		}
@@ -5423,6 +9169,7 @@ namespace vk
 	private:
 		VkSamplerCreateInfo m_samplerCreateInfo;
 	};
+	static_assert(sizeof(SamplerCreateInfo) == sizeof(VkSamplerCreateInfo), "struct and wrapper have different size!");
 
 	class CommandBufferAllocateInfo
 	{
@@ -5435,14 +9182,30 @@ namespace vk
 		{
 			m_commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 			m_commandBufferAllocateInfo.pNext = nullptr;
-			m_commandBufferAllocateInfo.commandPool = commandPool;
+			m_commandBufferAllocateInfo.commandPool = static_cast<VkCommandPool>(commandPool);
 			m_commandBufferAllocateInfo.level = static_cast<VkCommandBufferLevel>(level);
 			m_commandBufferAllocateInfo.commandBufferCount = commandBufferCount;
+		}
+
+		CommandBufferAllocateInfo(VkCommandBufferAllocateInfo const & rhs)
+			: m_commandBufferAllocateInfo(rhs)
+		{
+		}
+
+		CommandBufferAllocateInfo& operator=(VkCommandBufferAllocateInfo const & rhs)
+		{
+			m_commandBufferAllocateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_commandBufferAllocateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_commandBufferAllocateInfo.sType);
 		}
 
 		CommandBufferAllocateInfo& sType(StructureType sType)
@@ -5456,6 +9219,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_commandBufferAllocateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_commandBufferAllocateInfo.pNext);
+		}
+
 		CommandBufferAllocateInfo& pNext(const void* pNext)
 		{
 			m_commandBufferAllocateInfo.pNext = pNext;
@@ -5464,18 +9232,28 @@ namespace vk
 
 		const CommandPool& commandPool() const
 		{
-			return m_commandBufferAllocateInfo.commandPool;
+			return reinterpret_cast<const CommandPool&>(m_commandBufferAllocateInfo.commandPool);
+		}
+
+		CommandPool& commandPool()
+		{
+			return reinterpret_cast<CommandPool&>(m_commandBufferAllocateInfo.commandPool);
 		}
 
 		CommandBufferAllocateInfo& commandPool(CommandPool commandPool)
 		{
-			m_commandBufferAllocateInfo.commandPool = commandPool;
+			m_commandBufferAllocateInfo.commandPool = static_cast<VkCommandPool>(commandPool);
 			return *this;
 		}
 
 		const CommandBufferLevel& level() const
 		{
 			return reinterpret_cast<const CommandBufferLevel&>(m_commandBufferAllocateInfo.level);
+		}
+
+		CommandBufferLevel& level()
+		{
+			return reinterpret_cast<CommandBufferLevel&>(m_commandBufferAllocateInfo.level);
 		}
 
 		CommandBufferAllocateInfo& level(CommandBufferLevel level)
@@ -5485,6 +9263,11 @@ namespace vk
 		}
 
 		const uint32_t& commandBufferCount() const
+		{
+			return m_commandBufferAllocateInfo.commandBufferCount;
+		}
+
+		uint32_t& commandBufferCount()
 		{
 			return m_commandBufferAllocateInfo.commandBufferCount;
 		}
@@ -5503,6 +9286,7 @@ namespace vk
 	private:
 		VkCommandBufferAllocateInfo m_commandBufferAllocateInfo;
 	};
+	static_assert(sizeof(CommandBufferAllocateInfo) == sizeof(VkCommandBufferAllocateInfo), "struct and wrapper have different size!");
 
 	class RenderPassBeginInfo
 	{
@@ -5515,16 +9299,32 @@ namespace vk
 		{
 			m_renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 			m_renderPassBeginInfo.pNext = nullptr;
-			m_renderPassBeginInfo.renderPass = renderPass;
-			m_renderPassBeginInfo.framebuffer = framebuffer;
+			m_renderPassBeginInfo.renderPass = static_cast<VkRenderPass>(renderPass);
+			m_renderPassBeginInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
 			m_renderPassBeginInfo.renderArea = static_cast<VkRect2D>(renderArea);
 			m_renderPassBeginInfo.clearValueCount = clearValueCount;
 			m_renderPassBeginInfo.pClearValues = reinterpret_cast<const VkClearValue*>(pClearValues);
 		}
 
+		RenderPassBeginInfo(VkRenderPassBeginInfo const & rhs)
+			: m_renderPassBeginInfo(rhs)
+		{
+		}
+
+		RenderPassBeginInfo& operator=(VkRenderPassBeginInfo const & rhs)
+		{
+			m_renderPassBeginInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_renderPassBeginInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_renderPassBeginInfo.sType);
 		}
 
 		RenderPassBeginInfo& sType(StructureType sType)
@@ -5538,6 +9338,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_renderPassBeginInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_renderPassBeginInfo.pNext);
+		}
+
 		RenderPassBeginInfo& pNext(const void* pNext)
 		{
 			m_renderPassBeginInfo.pNext = pNext;
@@ -5546,29 +9351,44 @@ namespace vk
 
 		const RenderPass& renderPass() const
 		{
-			return m_renderPassBeginInfo.renderPass;
+			return reinterpret_cast<const RenderPass&>(m_renderPassBeginInfo.renderPass);
+		}
+
+		RenderPass& renderPass()
+		{
+			return reinterpret_cast<RenderPass&>(m_renderPassBeginInfo.renderPass);
 		}
 
 		RenderPassBeginInfo& renderPass(RenderPass renderPass)
 		{
-			m_renderPassBeginInfo.renderPass = renderPass;
+			m_renderPassBeginInfo.renderPass = static_cast<VkRenderPass>(renderPass);
 			return *this;
 		}
 
 		const Framebuffer& framebuffer() const
 		{
-			return m_renderPassBeginInfo.framebuffer;
+			return reinterpret_cast<const Framebuffer&>(m_renderPassBeginInfo.framebuffer);
+		}
+
+		Framebuffer& framebuffer()
+		{
+			return reinterpret_cast<Framebuffer&>(m_renderPassBeginInfo.framebuffer);
 		}
 
 		RenderPassBeginInfo& framebuffer(Framebuffer framebuffer)
 		{
-			m_renderPassBeginInfo.framebuffer = framebuffer;
+			m_renderPassBeginInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
 			return *this;
 		}
 
 		const Rect2D& renderArea() const
 		{
 			return reinterpret_cast<const Rect2D&>(m_renderPassBeginInfo.renderArea);
+		}
+
+		Rect2D& renderArea()
+		{
+			return reinterpret_cast<Rect2D&>(m_renderPassBeginInfo.renderArea);
 		}
 
 		RenderPassBeginInfo& renderArea(Rect2D renderArea)
@@ -5582,6 +9402,11 @@ namespace vk
 			return m_renderPassBeginInfo.clearValueCount;
 		}
 
+		uint32_t& clearValueCount()
+		{
+			return m_renderPassBeginInfo.clearValueCount;
+		}
+
 		RenderPassBeginInfo& clearValueCount(uint32_t clearValueCount)
 		{
 			m_renderPassBeginInfo.clearValueCount = clearValueCount;
@@ -5589,6 +9414,11 @@ namespace vk
 		}
 
 		const ClearValue* pClearValues() const
+		{
+			return reinterpret_cast<const ClearValue*>(m_renderPassBeginInfo.pClearValues);
+		}
+
+		const ClearValue* pClearValues()
 		{
 			return reinterpret_cast<const ClearValue*>(m_renderPassBeginInfo.pClearValues);
 		}
@@ -5607,24 +9437,41 @@ namespace vk
 	private:
 		VkRenderPassBeginInfo m_renderPassBeginInfo;
 	};
+	static_assert(sizeof(RenderPassBeginInfo) == sizeof(VkRenderPassBeginInfo), "struct and wrapper have different size!");
 
 	class EventCreateInfo
 	{
 	public:
 		EventCreateInfo()
-			: EventCreateInfo(0)
+			: EventCreateInfo(EventCreateFlags())
 		{}
 
 		EventCreateInfo(EventCreateFlags flags)
 		{
 			m_eventCreateInfo.sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
 			m_eventCreateInfo.pNext = nullptr;
-			m_eventCreateInfo.flags = flags;
+			m_eventCreateInfo.flags = static_cast<VkEventCreateFlags>(flags);
+		}
+
+		EventCreateInfo(VkEventCreateInfo const & rhs)
+			: m_eventCreateInfo(rhs)
+		{
+		}
+
+		EventCreateInfo& operator=(VkEventCreateInfo const & rhs)
+		{
+			m_eventCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_eventCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_eventCreateInfo.sType);
 		}
 
 		EventCreateInfo& sType(StructureType sType)
@@ -5638,6 +9485,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_eventCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_eventCreateInfo.pNext);
+		}
+
 		EventCreateInfo& pNext(const void* pNext)
 		{
 			m_eventCreateInfo.pNext = pNext;
@@ -5646,12 +9498,17 @@ namespace vk
 
 		const EventCreateFlags& flags() const
 		{
-			return m_eventCreateInfo.flags;
+			return reinterpret_cast<const EventCreateFlags&>(m_eventCreateInfo.flags);
+		}
+
+		EventCreateFlags& flags()
+		{
+			return reinterpret_cast<EventCreateFlags&>(m_eventCreateInfo.flags);
 		}
 
 		EventCreateInfo& flags(EventCreateFlags flags)
 		{
-			m_eventCreateInfo.flags = flags;
+			m_eventCreateInfo.flags = static_cast<VkEventCreateFlags>(flags);
 			return *this;
 		}
 
@@ -5663,24 +9520,41 @@ namespace vk
 	private:
 		VkEventCreateInfo m_eventCreateInfo;
 	};
+	static_assert(sizeof(EventCreateInfo) == sizeof(VkEventCreateInfo), "struct and wrapper have different size!");
 
 	class SemaphoreCreateInfo
 	{
 	public:
 		SemaphoreCreateInfo()
-			: SemaphoreCreateInfo(0)
+			: SemaphoreCreateInfo(SemaphoreCreateFlags())
 		{}
 
 		SemaphoreCreateInfo(SemaphoreCreateFlags flags)
 		{
 			m_semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 			m_semaphoreCreateInfo.pNext = nullptr;
-			m_semaphoreCreateInfo.flags = flags;
+			m_semaphoreCreateInfo.flags = static_cast<VkSemaphoreCreateFlags>(flags);
+		}
+
+		SemaphoreCreateInfo(VkSemaphoreCreateInfo const & rhs)
+			: m_semaphoreCreateInfo(rhs)
+		{
+		}
+
+		SemaphoreCreateInfo& operator=(VkSemaphoreCreateInfo const & rhs)
+		{
+			m_semaphoreCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_semaphoreCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_semaphoreCreateInfo.sType);
 		}
 
 		SemaphoreCreateInfo& sType(StructureType sType)
@@ -5694,6 +9568,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_semaphoreCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_semaphoreCreateInfo.pNext);
+		}
+
 		SemaphoreCreateInfo& pNext(const void* pNext)
 		{
 			m_semaphoreCreateInfo.pNext = pNext;
@@ -5702,12 +9581,17 @@ namespace vk
 
 		const SemaphoreCreateFlags& flags() const
 		{
-			return m_semaphoreCreateInfo.flags;
+			return reinterpret_cast<const SemaphoreCreateFlags&>(m_semaphoreCreateInfo.flags);
+		}
+
+		SemaphoreCreateFlags& flags()
+		{
+			return reinterpret_cast<SemaphoreCreateFlags&>(m_semaphoreCreateInfo.flags);
 		}
 
 		SemaphoreCreateInfo& flags(SemaphoreCreateFlags flags)
 		{
-			m_semaphoreCreateInfo.flags = flags;
+			m_semaphoreCreateInfo.flags = static_cast<VkSemaphoreCreateFlags>(flags);
 			return *this;
 		}
 
@@ -5719,30 +9603,47 @@ namespace vk
 	private:
 		VkSemaphoreCreateInfo m_semaphoreCreateInfo;
 	};
+	static_assert(sizeof(SemaphoreCreateInfo) == sizeof(VkSemaphoreCreateInfo), "struct and wrapper have different size!");
 
 	class FramebufferCreateInfo
 	{
 	public:
 		FramebufferCreateInfo()
-			: FramebufferCreateInfo(0, RenderPass(), 0, nullptr, 0, 0, 0)
+			: FramebufferCreateInfo(FramebufferCreateFlags(), RenderPass(), 0, nullptr, 0, 0, 0)
 		{}
 
 		FramebufferCreateInfo(FramebufferCreateFlags flags, RenderPass renderPass, uint32_t attachmentCount, const ImageView* pAttachments, uint32_t width, uint32_t height, uint32_t layers)
 		{
 			m_framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			m_framebufferCreateInfo.pNext = nullptr;
-			m_framebufferCreateInfo.flags = flags;
-			m_framebufferCreateInfo.renderPass = renderPass;
+			m_framebufferCreateInfo.flags = static_cast<VkFramebufferCreateFlags>(flags);
+			m_framebufferCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
 			m_framebufferCreateInfo.attachmentCount = attachmentCount;
-			m_framebufferCreateInfo.pAttachments = pAttachments;
+			m_framebufferCreateInfo.pAttachments = reinterpret_cast<const VkImageView*>(pAttachments);
 			m_framebufferCreateInfo.width = width;
 			m_framebufferCreateInfo.height = height;
 			m_framebufferCreateInfo.layers = layers;
 		}
 
+		FramebufferCreateInfo(VkFramebufferCreateInfo const & rhs)
+			: m_framebufferCreateInfo(rhs)
+		{
+		}
+
+		FramebufferCreateInfo& operator=(VkFramebufferCreateInfo const & rhs)
+		{
+			m_framebufferCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_framebufferCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_framebufferCreateInfo.sType);
 		}
 
 		FramebufferCreateInfo& sType(StructureType sType)
@@ -5756,6 +9657,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_framebufferCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_framebufferCreateInfo.pNext);
+		}
+
 		FramebufferCreateInfo& pNext(const void* pNext)
 		{
 			m_framebufferCreateInfo.pNext = pNext;
@@ -5764,27 +9670,42 @@ namespace vk
 
 		const FramebufferCreateFlags& flags() const
 		{
-			return m_framebufferCreateInfo.flags;
+			return reinterpret_cast<const FramebufferCreateFlags&>(m_framebufferCreateInfo.flags);
+		}
+
+		FramebufferCreateFlags& flags()
+		{
+			return reinterpret_cast<FramebufferCreateFlags&>(m_framebufferCreateInfo.flags);
 		}
 
 		FramebufferCreateInfo& flags(FramebufferCreateFlags flags)
 		{
-			m_framebufferCreateInfo.flags = flags;
+			m_framebufferCreateInfo.flags = static_cast<VkFramebufferCreateFlags>(flags);
 			return *this;
 		}
 
 		const RenderPass& renderPass() const
 		{
-			return m_framebufferCreateInfo.renderPass;
+			return reinterpret_cast<const RenderPass&>(m_framebufferCreateInfo.renderPass);
+		}
+
+		RenderPass& renderPass()
+		{
+			return reinterpret_cast<RenderPass&>(m_framebufferCreateInfo.renderPass);
 		}
 
 		FramebufferCreateInfo& renderPass(RenderPass renderPass)
 		{
-			m_framebufferCreateInfo.renderPass = renderPass;
+			m_framebufferCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
 			return *this;
 		}
 
 		const uint32_t& attachmentCount() const
+		{
+			return m_framebufferCreateInfo.attachmentCount;
+		}
+
+		uint32_t& attachmentCount()
 		{
 			return m_framebufferCreateInfo.attachmentCount;
 		}
@@ -5800,13 +9721,23 @@ namespace vk
 			return reinterpret_cast<const ImageView*>(m_framebufferCreateInfo.pAttachments);
 		}
 
+		const ImageView* pAttachments()
+		{
+			return reinterpret_cast<const ImageView*>(m_framebufferCreateInfo.pAttachments);
+		}
+
 		FramebufferCreateInfo& pAttachments(const ImageView* pAttachments)
 		{
-			m_framebufferCreateInfo.pAttachments = pAttachments;
+			m_framebufferCreateInfo.pAttachments = reinterpret_cast<const VkImageView*>(pAttachments);
 			return *this;
 		}
 
 		const uint32_t& width() const
+		{
+			return m_framebufferCreateInfo.width;
+		}
+
+		uint32_t& width()
 		{
 			return m_framebufferCreateInfo.width;
 		}
@@ -5822,6 +9753,11 @@ namespace vk
 			return m_framebufferCreateInfo.height;
 		}
 
+		uint32_t& height()
+		{
+			return m_framebufferCreateInfo.height;
+		}
+
 		FramebufferCreateInfo& height(uint32_t height)
 		{
 			m_framebufferCreateInfo.height = height;
@@ -5829,6 +9765,11 @@ namespace vk
 		}
 
 		const uint32_t& layers() const
+		{
+			return m_framebufferCreateInfo.layers;
+		}
+
+		uint32_t& layers()
 		{
 			return m_framebufferCreateInfo.layers;
 		}
@@ -5847,32 +9788,926 @@ namespace vk
 	private:
 		VkFramebufferCreateInfo m_framebufferCreateInfo;
 	};
+	static_assert(sizeof(FramebufferCreateInfo) == sizeof(VkFramebufferCreateInfo), "struct and wrapper have different size!");
+
+	class DisplayModeCreateInfoKHR
+	{
+	public:
+		DisplayModeCreateInfoKHR()
+			: DisplayModeCreateInfoKHR(DisplayModeCreateFlagsKHR(), DisplayModeParametersKHR())
+		{}
+
+		DisplayModeCreateInfoKHR(DisplayModeCreateFlagsKHR flags, DisplayModeParametersKHR parameters)
+		{
+			m_displayModeCreateInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_MODE_CREATE_INFO_KHR;
+			m_displayModeCreateInfoKHR.pNext = nullptr;
+			m_displayModeCreateInfoKHR.flags = static_cast<VkDisplayModeCreateFlagsKHR>(flags);
+			m_displayModeCreateInfoKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+		}
+
+		DisplayModeCreateInfoKHR(VkDisplayModeCreateInfoKHR const & rhs)
+			: m_displayModeCreateInfoKHR(rhs)
+		{
+		}
+
+		DisplayModeCreateInfoKHR& operator=(VkDisplayModeCreateInfoKHR const & rhs)
+		{
+			m_displayModeCreateInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_displayModeCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_displayModeCreateInfoKHR.sType);
+		}
+
+		DisplayModeCreateInfoKHR& sType(StructureType sType)
+		{
+			m_displayModeCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_displayModeCreateInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_displayModeCreateInfoKHR.pNext);
+		}
+
+		DisplayModeCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_displayModeCreateInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const DisplayModeCreateFlagsKHR& flags() const
+		{
+			return reinterpret_cast<const DisplayModeCreateFlagsKHR&>(m_displayModeCreateInfoKHR.flags);
+		}
+
+		DisplayModeCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<DisplayModeCreateFlagsKHR&>(m_displayModeCreateInfoKHR.flags);
+		}
+
+		DisplayModeCreateInfoKHR& flags(DisplayModeCreateFlagsKHR flags)
+		{
+			m_displayModeCreateInfoKHR.flags = static_cast<VkDisplayModeCreateFlagsKHR>(flags);
+			return *this;
+		}
+
+		const DisplayModeParametersKHR& parameters() const
+		{
+			return reinterpret_cast<const DisplayModeParametersKHR&>(m_displayModeCreateInfoKHR.parameters);
+		}
+
+		DisplayModeParametersKHR& parameters()
+		{
+			return reinterpret_cast<DisplayModeParametersKHR&>(m_displayModeCreateInfoKHR.parameters);
+		}
+
+		DisplayModeCreateInfoKHR& parameters(DisplayModeParametersKHR parameters)
+		{
+			m_displayModeCreateInfoKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+			return *this;
+		}
+
+		operator const VkDisplayModeCreateInfoKHR&() const
+		{
+			return m_displayModeCreateInfoKHR;
+		}
+
+	private:
+		VkDisplayModeCreateInfoKHR m_displayModeCreateInfoKHR;
+	};
+	static_assert(sizeof(DisplayModeCreateInfoKHR) == sizeof(VkDisplayModeCreateInfoKHR), "struct and wrapper have different size!");
+
+	class DisplayPresentInfoKHR
+	{
+	public:
+		DisplayPresentInfoKHR()
+			: DisplayPresentInfoKHR(Rect2D(), Rect2D(), 0)
+		{}
+
+		DisplayPresentInfoKHR(Rect2D srcRect, Rect2D dstRect, Bool32 persistent)
+		{
+			m_displayPresentInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_PRESENT_INFO_KHR;
+			m_displayPresentInfoKHR.pNext = nullptr;
+			m_displayPresentInfoKHR.srcRect = static_cast<VkRect2D>(srcRect);
+			m_displayPresentInfoKHR.dstRect = static_cast<VkRect2D>(dstRect);
+			m_displayPresentInfoKHR.persistent = persistent;
+		}
+
+		DisplayPresentInfoKHR(VkDisplayPresentInfoKHR const & rhs)
+			: m_displayPresentInfoKHR(rhs)
+		{
+		}
+
+		DisplayPresentInfoKHR& operator=(VkDisplayPresentInfoKHR const & rhs)
+		{
+			m_displayPresentInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_displayPresentInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_displayPresentInfoKHR.sType);
+		}
+
+		DisplayPresentInfoKHR& sType(StructureType sType)
+		{
+			m_displayPresentInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_displayPresentInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_displayPresentInfoKHR.pNext);
+		}
+
+		DisplayPresentInfoKHR& pNext(const void* pNext)
+		{
+			m_displayPresentInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const Rect2D& srcRect() const
+		{
+			return reinterpret_cast<const Rect2D&>(m_displayPresentInfoKHR.srcRect);
+		}
+
+		Rect2D& srcRect()
+		{
+			return reinterpret_cast<Rect2D&>(m_displayPresentInfoKHR.srcRect);
+		}
+
+		DisplayPresentInfoKHR& srcRect(Rect2D srcRect)
+		{
+			m_displayPresentInfoKHR.srcRect = static_cast<VkRect2D>(srcRect);
+			return *this;
+		}
+
+		const Rect2D& dstRect() const
+		{
+			return reinterpret_cast<const Rect2D&>(m_displayPresentInfoKHR.dstRect);
+		}
+
+		Rect2D& dstRect()
+		{
+			return reinterpret_cast<Rect2D&>(m_displayPresentInfoKHR.dstRect);
+		}
+
+		DisplayPresentInfoKHR& dstRect(Rect2D dstRect)
+		{
+			m_displayPresentInfoKHR.dstRect = static_cast<VkRect2D>(dstRect);
+			return *this;
+		}
+
+		const Bool32& persistent() const
+		{
+			return m_displayPresentInfoKHR.persistent;
+		}
+
+		Bool32& persistent()
+		{
+			return m_displayPresentInfoKHR.persistent;
+		}
+
+		DisplayPresentInfoKHR& persistent(Bool32 persistent)
+		{
+			m_displayPresentInfoKHR.persistent = persistent;
+			return *this;
+		}
+
+		operator const VkDisplayPresentInfoKHR&() const
+		{
+			return m_displayPresentInfoKHR;
+		}
+
+	private:
+		VkDisplayPresentInfoKHR m_displayPresentInfoKHR;
+	};
+	static_assert(sizeof(DisplayPresentInfoKHR) == sizeof(VkDisplayPresentInfoKHR), "struct and wrapper have different size!");
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+	class AndroidSurfaceCreateInfoKHR
+	{
+	public:
+		AndroidSurfaceCreateInfoKHR()
+			: AndroidSurfaceCreateInfoKHR(AndroidSurfaceCreateFlagsKHR(), nullptr)
+		{}
+
+		AndroidSurfaceCreateInfoKHR(AndroidSurfaceCreateFlagsKHR flags, ANativeWindow* window)
+		{
+			m_androidSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+			m_androidSurfaceCreateInfoKHR.pNext = nullptr;
+			m_androidSurfaceCreateInfoKHR.flags = static_cast<VkAndroidSurfaceCreateFlagsKHR>(flags);
+			m_androidSurfaceCreateInfoKHR.window = window;
+		}
+
+		AndroidSurfaceCreateInfoKHR(VkAndroidSurfaceCreateInfoKHR const & rhs)
+			: m_androidSurfaceCreateInfoKHR(rhs)
+		{
+		}
+
+		AndroidSurfaceCreateInfoKHR& operator=(VkAndroidSurfaceCreateInfoKHR const & rhs)
+		{
+			m_androidSurfaceCreateInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_androidSurfaceCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_androidSurfaceCreateInfoKHR.sType);
+		}
+
+		AndroidSurfaceCreateInfoKHR& sType(StructureType sType)
+		{
+			m_androidSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_androidSurfaceCreateInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_androidSurfaceCreateInfoKHR.pNext);
+		}
+
+		AndroidSurfaceCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_androidSurfaceCreateInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const AndroidSurfaceCreateFlagsKHR& flags() const
+		{
+			return reinterpret_cast<const AndroidSurfaceCreateFlagsKHR&>(m_androidSurfaceCreateInfoKHR.flags);
+		}
+
+		AndroidSurfaceCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<AndroidSurfaceCreateFlagsKHR&>(m_androidSurfaceCreateInfoKHR.flags);
+		}
+
+		AndroidSurfaceCreateInfoKHR& flags(AndroidSurfaceCreateFlagsKHR flags)
+		{
+			m_androidSurfaceCreateInfoKHR.flags = static_cast<VkAndroidSurfaceCreateFlagsKHR>(flags);
+			return *this;
+		}
+
+		const ANativeWindow* window() const
+		{
+			return reinterpret_cast<const ANativeWindow*>(m_androidSurfaceCreateInfoKHR.window);
+		}
+
+		ANativeWindow* window()
+		{
+			return reinterpret_cast<ANativeWindow*>(m_androidSurfaceCreateInfoKHR.window);
+		}
+
+		AndroidSurfaceCreateInfoKHR& window(ANativeWindow* window)
+		{
+			m_androidSurfaceCreateInfoKHR.window = window;
+			return *this;
+		}
+
+		operator const VkAndroidSurfaceCreateInfoKHR&() const
+		{
+			return m_androidSurfaceCreateInfoKHR;
+		}
+
+	private:
+		VkAndroidSurfaceCreateInfoKHR m_androidSurfaceCreateInfoKHR;
+	};
+	static_assert(sizeof(AndroidSurfaceCreateInfoKHR) == sizeof(VkAndroidSurfaceCreateInfoKHR), "struct and wrapper have different size!");
+#endif /*VK_USE_PLATFORM_ANDROID_KHR*/
+
+#ifdef VK_USE_PLATFORM_MIR_KHR
+	class MirSurfaceCreateInfoKHR
+	{
+	public:
+		MirSurfaceCreateInfoKHR()
+			: MirSurfaceCreateInfoKHR(MirSurfaceCreateFlagsKHR(), nullptr, nullptr)
+		{}
+
+		MirSurfaceCreateInfoKHR(MirSurfaceCreateFlagsKHR flags, MirConnection* connection, MirSurface* mirSurface)
+		{
+			m_mirSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_MIR_SURFACE_CREATE_INFO_KHR;
+			m_mirSurfaceCreateInfoKHR.pNext = nullptr;
+			m_mirSurfaceCreateInfoKHR.flags = static_cast<VkMirSurfaceCreateFlagsKHR>(flags);
+			m_mirSurfaceCreateInfoKHR.connection = connection;
+			m_mirSurfaceCreateInfoKHR.mirSurface = mirSurface;
+		}
+
+		MirSurfaceCreateInfoKHR(VkMirSurfaceCreateInfoKHR const & rhs)
+			: m_mirSurfaceCreateInfoKHR(rhs)
+		{
+		}
+
+		MirSurfaceCreateInfoKHR& operator=(VkMirSurfaceCreateInfoKHR const & rhs)
+		{
+			m_mirSurfaceCreateInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_mirSurfaceCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_mirSurfaceCreateInfoKHR.sType);
+		}
+
+		MirSurfaceCreateInfoKHR& sType(StructureType sType)
+		{
+			m_mirSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_mirSurfaceCreateInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_mirSurfaceCreateInfoKHR.pNext);
+		}
+
+		MirSurfaceCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_mirSurfaceCreateInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const MirSurfaceCreateFlagsKHR& flags() const
+		{
+			return reinterpret_cast<const MirSurfaceCreateFlagsKHR&>(m_mirSurfaceCreateInfoKHR.flags);
+		}
+
+		MirSurfaceCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<MirSurfaceCreateFlagsKHR&>(m_mirSurfaceCreateInfoKHR.flags);
+		}
+
+		MirSurfaceCreateInfoKHR& flags(MirSurfaceCreateFlagsKHR flags)
+		{
+			m_mirSurfaceCreateInfoKHR.flags = static_cast<VkMirSurfaceCreateFlagsKHR>(flags);
+			return *this;
+		}
+
+		const MirConnection* connection() const
+		{
+			return reinterpret_cast<const MirConnection*>(m_mirSurfaceCreateInfoKHR.connection);
+		}
+
+		MirConnection* connection()
+		{
+			return reinterpret_cast<MirConnection*>(m_mirSurfaceCreateInfoKHR.connection);
+		}
+
+		MirSurfaceCreateInfoKHR& connection(MirConnection* connection)
+		{
+			m_mirSurfaceCreateInfoKHR.connection = connection;
+			return *this;
+		}
+
+		const MirSurface* mirSurface() const
+		{
+			return reinterpret_cast<const MirSurface*>(m_mirSurfaceCreateInfoKHR.mirSurface);
+		}
+
+		MirSurface* mirSurface()
+		{
+			return reinterpret_cast<MirSurface*>(m_mirSurfaceCreateInfoKHR.mirSurface);
+		}
+
+		MirSurfaceCreateInfoKHR& mirSurface(MirSurface* mirSurface)
+		{
+			m_mirSurfaceCreateInfoKHR.mirSurface = mirSurface;
+			return *this;
+		}
+
+		operator const VkMirSurfaceCreateInfoKHR&() const
+		{
+			return m_mirSurfaceCreateInfoKHR;
+		}
+
+	private:
+		VkMirSurfaceCreateInfoKHR m_mirSurfaceCreateInfoKHR;
+	};
+	static_assert(sizeof(MirSurfaceCreateInfoKHR) == sizeof(VkMirSurfaceCreateInfoKHR), "struct and wrapper have different size!");
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+	class WaylandSurfaceCreateInfoKHR
+	{
+	public:
+		WaylandSurfaceCreateInfoKHR()
+			: WaylandSurfaceCreateInfoKHR(WaylandSurfaceCreateFlagsKHR(), nullptr, nullptr)
+		{}
+
+		WaylandSurfaceCreateInfoKHR(WaylandSurfaceCreateFlagsKHR flags, struct wl_display* display, struct wl_surface* surface)
+		{
+			m_waylandSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
+			m_waylandSurfaceCreateInfoKHR.pNext = nullptr;
+			m_waylandSurfaceCreateInfoKHR.flags = static_cast<VkWaylandSurfaceCreateFlagsKHR>(flags);
+			m_waylandSurfaceCreateInfoKHR.display = display;
+			m_waylandSurfaceCreateInfoKHR.surface = surface;
+		}
+
+		WaylandSurfaceCreateInfoKHR(VkWaylandSurfaceCreateInfoKHR const & rhs)
+			: m_waylandSurfaceCreateInfoKHR(rhs)
+		{
+		}
+
+		WaylandSurfaceCreateInfoKHR& operator=(VkWaylandSurfaceCreateInfoKHR const & rhs)
+		{
+			m_waylandSurfaceCreateInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_waylandSurfaceCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_waylandSurfaceCreateInfoKHR.sType);
+		}
+
+		WaylandSurfaceCreateInfoKHR& sType(StructureType sType)
+		{
+			m_waylandSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_waylandSurfaceCreateInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_waylandSurfaceCreateInfoKHR.pNext);
+		}
+
+		WaylandSurfaceCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_waylandSurfaceCreateInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const WaylandSurfaceCreateFlagsKHR& flags() const
+		{
+			return reinterpret_cast<const WaylandSurfaceCreateFlagsKHR&>(m_waylandSurfaceCreateInfoKHR.flags);
+		}
+
+		WaylandSurfaceCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<WaylandSurfaceCreateFlagsKHR&>(m_waylandSurfaceCreateInfoKHR.flags);
+		}
+
+		WaylandSurfaceCreateInfoKHR& flags(WaylandSurfaceCreateFlagsKHR flags)
+		{
+			m_waylandSurfaceCreateInfoKHR.flags = static_cast<VkWaylandSurfaceCreateFlagsKHR>(flags);
+			return *this;
+		}
+
+		const struct wl_display* display() const
+		{
+			return reinterpret_cast<const struct wl_display*>(m_waylandSurfaceCreateInfoKHR.display);
+		}
+
+		struct wl_display* display()
+		{
+			return reinterpret_cast<struct wl_display*>(m_waylandSurfaceCreateInfoKHR.display);
+		}
+
+		WaylandSurfaceCreateInfoKHR& display(struct wl_display* display)
+		{
+			m_waylandSurfaceCreateInfoKHR.display = display;
+			return *this;
+		}
+
+		const struct wl_surface* surface() const
+		{
+			return reinterpret_cast<const struct wl_surface*>(m_waylandSurfaceCreateInfoKHR.surface);
+		}
+
+		struct wl_surface* surface()
+		{
+			return reinterpret_cast<struct wl_surface*>(m_waylandSurfaceCreateInfoKHR.surface);
+		}
+
+		WaylandSurfaceCreateInfoKHR& surface(struct wl_surface* surface)
+		{
+			m_waylandSurfaceCreateInfoKHR.surface = surface;
+			return *this;
+		}
+
+		operator const VkWaylandSurfaceCreateInfoKHR&() const
+		{
+			return m_waylandSurfaceCreateInfoKHR;
+		}
+
+	private:
+		VkWaylandSurfaceCreateInfoKHR m_waylandSurfaceCreateInfoKHR;
+	};
+	static_assert(sizeof(WaylandSurfaceCreateInfoKHR) == sizeof(VkWaylandSurfaceCreateInfoKHR), "struct and wrapper have different size!");
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	class Win32SurfaceCreateInfoKHR
+	{
+	public:
+		Win32SurfaceCreateInfoKHR()
+			: Win32SurfaceCreateInfoKHR(Win32SurfaceCreateFlagsKHR(), 0, 0)
+		{}
+
+		Win32SurfaceCreateInfoKHR(Win32SurfaceCreateFlagsKHR flags, HINSTANCE hinstance, HWND hwnd)
+		{
+			m_win32SurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+			m_win32SurfaceCreateInfoKHR.pNext = nullptr;
+			m_win32SurfaceCreateInfoKHR.flags = static_cast<VkWin32SurfaceCreateFlagsKHR>(flags);
+			m_win32SurfaceCreateInfoKHR.hinstance = hinstance;
+			m_win32SurfaceCreateInfoKHR.hwnd = hwnd;
+		}
+
+		Win32SurfaceCreateInfoKHR(VkWin32SurfaceCreateInfoKHR const & rhs)
+			: m_win32SurfaceCreateInfoKHR(rhs)
+		{
+		}
+
+		Win32SurfaceCreateInfoKHR& operator=(VkWin32SurfaceCreateInfoKHR const & rhs)
+		{
+			m_win32SurfaceCreateInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_win32SurfaceCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_win32SurfaceCreateInfoKHR.sType);
+		}
+
+		Win32SurfaceCreateInfoKHR& sType(StructureType sType)
+		{
+			m_win32SurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_win32SurfaceCreateInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_win32SurfaceCreateInfoKHR.pNext);
+		}
+
+		Win32SurfaceCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_win32SurfaceCreateInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const Win32SurfaceCreateFlagsKHR& flags() const
+		{
+			return reinterpret_cast<const Win32SurfaceCreateFlagsKHR&>(m_win32SurfaceCreateInfoKHR.flags);
+		}
+
+		Win32SurfaceCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<Win32SurfaceCreateFlagsKHR&>(m_win32SurfaceCreateInfoKHR.flags);
+		}
+
+		Win32SurfaceCreateInfoKHR& flags(Win32SurfaceCreateFlagsKHR flags)
+		{
+			m_win32SurfaceCreateInfoKHR.flags = static_cast<VkWin32SurfaceCreateFlagsKHR>(flags);
+			return *this;
+		}
+
+		const HINSTANCE& hinstance() const
+		{
+			return m_win32SurfaceCreateInfoKHR.hinstance;
+		}
+
+		HINSTANCE& hinstance()
+		{
+			return m_win32SurfaceCreateInfoKHR.hinstance;
+		}
+
+		Win32SurfaceCreateInfoKHR& hinstance(HINSTANCE hinstance)
+		{
+			m_win32SurfaceCreateInfoKHR.hinstance = hinstance;
+			return *this;
+		}
+
+		const HWND& hwnd() const
+		{
+			return m_win32SurfaceCreateInfoKHR.hwnd;
+		}
+
+		HWND& hwnd()
+		{
+			return m_win32SurfaceCreateInfoKHR.hwnd;
+		}
+
+		Win32SurfaceCreateInfoKHR& hwnd(HWND hwnd)
+		{
+			m_win32SurfaceCreateInfoKHR.hwnd = hwnd;
+			return *this;
+		}
+
+		operator const VkWin32SurfaceCreateInfoKHR&() const
+		{
+			return m_win32SurfaceCreateInfoKHR;
+		}
+
+	private:
+		VkWin32SurfaceCreateInfoKHR m_win32SurfaceCreateInfoKHR;
+	};
+	static_assert(sizeof(Win32SurfaceCreateInfoKHR) == sizeof(VkWin32SurfaceCreateInfoKHR), "struct and wrapper have different size!");
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+	class XlibSurfaceCreateInfoKHR
+	{
+	public:
+		XlibSurfaceCreateInfoKHR()
+			: XlibSurfaceCreateInfoKHR(XlibSurfaceCreateFlagsKHR(), nullptr, 0)
+		{}
+
+		XlibSurfaceCreateInfoKHR(XlibSurfaceCreateFlagsKHR flags, Display* dpy, Window window)
+		{
+			m_xlibSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
+			m_xlibSurfaceCreateInfoKHR.pNext = nullptr;
+			m_xlibSurfaceCreateInfoKHR.flags = static_cast<VkXlibSurfaceCreateFlagsKHR>(flags);
+			m_xlibSurfaceCreateInfoKHR.dpy = dpy;
+			m_xlibSurfaceCreateInfoKHR.window = window;
+		}
+
+		XlibSurfaceCreateInfoKHR(VkXlibSurfaceCreateInfoKHR const & rhs)
+			: m_xlibSurfaceCreateInfoKHR(rhs)
+		{
+		}
+
+		XlibSurfaceCreateInfoKHR& operator=(VkXlibSurfaceCreateInfoKHR const & rhs)
+		{
+			m_xlibSurfaceCreateInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_xlibSurfaceCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_xlibSurfaceCreateInfoKHR.sType);
+		}
+
+		XlibSurfaceCreateInfoKHR& sType(StructureType sType)
+		{
+			m_xlibSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_xlibSurfaceCreateInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_xlibSurfaceCreateInfoKHR.pNext);
+		}
+
+		XlibSurfaceCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_xlibSurfaceCreateInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const XlibSurfaceCreateFlagsKHR& flags() const
+		{
+			return reinterpret_cast<const XlibSurfaceCreateFlagsKHR&>(m_xlibSurfaceCreateInfoKHR.flags);
+		}
+
+		XlibSurfaceCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<XlibSurfaceCreateFlagsKHR&>(m_xlibSurfaceCreateInfoKHR.flags);
+		}
+
+		XlibSurfaceCreateInfoKHR& flags(XlibSurfaceCreateFlagsKHR flags)
+		{
+			m_xlibSurfaceCreateInfoKHR.flags = static_cast<VkXlibSurfaceCreateFlagsKHR>(flags);
+			return *this;
+		}
+
+		const Display* dpy() const
+		{
+			return reinterpret_cast<const Display*>(m_xlibSurfaceCreateInfoKHR.dpy);
+		}
+
+		Display* dpy()
+		{
+			return reinterpret_cast<Display*>(m_xlibSurfaceCreateInfoKHR.dpy);
+		}
+
+		XlibSurfaceCreateInfoKHR& dpy(Display* dpy)
+		{
+			m_xlibSurfaceCreateInfoKHR.dpy = dpy;
+			return *this;
+		}
+
+		const Window& window() const
+		{
+			return m_xlibSurfaceCreateInfoKHR.window;
+		}
+
+		Window& window()
+		{
+			return m_xlibSurfaceCreateInfoKHR.window;
+		}
+
+		XlibSurfaceCreateInfoKHR& window(Window window)
+		{
+			m_xlibSurfaceCreateInfoKHR.window = window;
+			return *this;
+		}
+
+		operator const VkXlibSurfaceCreateInfoKHR&() const
+		{
+			return m_xlibSurfaceCreateInfoKHR;
+		}
+
+	private:
+		VkXlibSurfaceCreateInfoKHR m_xlibSurfaceCreateInfoKHR;
+	};
+	static_assert(sizeof(XlibSurfaceCreateInfoKHR) == sizeof(VkXlibSurfaceCreateInfoKHR), "struct and wrapper have different size!");
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+	class XcbSurfaceCreateInfoKHR
+	{
+	public:
+		XcbSurfaceCreateInfoKHR()
+			: XcbSurfaceCreateInfoKHR(XcbSurfaceCreateFlagsKHR(), nullptr, 0)
+		{}
+
+		XcbSurfaceCreateInfoKHR(XcbSurfaceCreateFlagsKHR flags, xcb_connection_t* connection, xcb_window_t window)
+		{
+			m_xcbSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+			m_xcbSurfaceCreateInfoKHR.pNext = nullptr;
+			m_xcbSurfaceCreateInfoKHR.flags = static_cast<VkXcbSurfaceCreateFlagsKHR>(flags);
+			m_xcbSurfaceCreateInfoKHR.connection = connection;
+			m_xcbSurfaceCreateInfoKHR.window = window;
+		}
+
+		XcbSurfaceCreateInfoKHR(VkXcbSurfaceCreateInfoKHR const & rhs)
+			: m_xcbSurfaceCreateInfoKHR(rhs)
+		{
+		}
+
+		XcbSurfaceCreateInfoKHR& operator=(VkXcbSurfaceCreateInfoKHR const & rhs)
+		{
+			m_xcbSurfaceCreateInfoKHR = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_xcbSurfaceCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_xcbSurfaceCreateInfoKHR.sType);
+		}
+
+		XcbSurfaceCreateInfoKHR& sType(StructureType sType)
+		{
+			m_xcbSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_xcbSurfaceCreateInfoKHR.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_xcbSurfaceCreateInfoKHR.pNext);
+		}
+
+		XcbSurfaceCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_xcbSurfaceCreateInfoKHR.pNext = pNext;
+			return *this;
+		}
+
+		const XcbSurfaceCreateFlagsKHR& flags() const
+		{
+			return reinterpret_cast<const XcbSurfaceCreateFlagsKHR&>(m_xcbSurfaceCreateInfoKHR.flags);
+		}
+
+		XcbSurfaceCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<XcbSurfaceCreateFlagsKHR&>(m_xcbSurfaceCreateInfoKHR.flags);
+		}
+
+		XcbSurfaceCreateInfoKHR& flags(XcbSurfaceCreateFlagsKHR flags)
+		{
+			m_xcbSurfaceCreateInfoKHR.flags = static_cast<VkXcbSurfaceCreateFlagsKHR>(flags);
+			return *this;
+		}
+
+		const xcb_connection_t* connection() const
+		{
+			return reinterpret_cast<const xcb_connection_t*>(m_xcbSurfaceCreateInfoKHR.connection);
+		}
+
+		xcb_connection_t* connection()
+		{
+			return reinterpret_cast<xcb_connection_t*>(m_xcbSurfaceCreateInfoKHR.connection);
+		}
+
+		XcbSurfaceCreateInfoKHR& connection(xcb_connection_t* connection)
+		{
+			m_xcbSurfaceCreateInfoKHR.connection = connection;
+			return *this;
+		}
+
+		const xcb_window_t& window() const
+		{
+			return m_xcbSurfaceCreateInfoKHR.window;
+		}
+
+		xcb_window_t& window()
+		{
+			return m_xcbSurfaceCreateInfoKHR.window;
+		}
+
+		XcbSurfaceCreateInfoKHR& window(xcb_window_t window)
+		{
+			m_xcbSurfaceCreateInfoKHR.window = window;
+			return *this;
+		}
+
+		operator const VkXcbSurfaceCreateInfoKHR&() const
+		{
+			return m_xcbSurfaceCreateInfoKHR;
+		}
+
+	private:
+		VkXcbSurfaceCreateInfoKHR m_xcbSurfaceCreateInfoKHR;
+	};
+	static_assert(sizeof(XcbSurfaceCreateInfoKHR) == sizeof(VkXcbSurfaceCreateInfoKHR), "struct and wrapper have different size!");
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
 
 	enum class SubpassContents
 	{
 		eInline = VK_SUBPASS_CONTENTS_INLINE,
 		eSecondaryCommandBuffers = VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS
-	};
-
-	enum class Result
-	{
-		eVkSuccess = VK_SUCCESS,
-		eVkNotReady = VK_NOT_READY,
-		eVkTimeout = VK_TIMEOUT,
-		eVkEventSet = VK_EVENT_SET,
-		eVkEventReset = VK_EVENT_RESET,
-		eVkIncomplete = VK_INCOMPLETE,
-		eVkErrorOutOfHostMemory = VK_ERROR_OUT_OF_HOST_MEMORY,
-		eVkErrorOutOfDeviceMemory = VK_ERROR_OUT_OF_DEVICE_MEMORY,
-		eVkErrorInitializationFailed = VK_ERROR_INITIALIZATION_FAILED,
-		eVkErrorDeviceLost = VK_ERROR_DEVICE_LOST,
-		eVkErrorMemoryMapFailed = VK_ERROR_MEMORY_MAP_FAILED,
-		eVkErrorLayerNotPresent = VK_ERROR_LAYER_NOT_PRESENT,
-		eVkErrorExtensionNotPresent = VK_ERROR_EXTENSION_NOT_PRESENT,
-		eVkErrorFeatureNotPresent = VK_ERROR_FEATURE_NOT_PRESENT,
-		eVkErrorIncompatibleDriver = VK_ERROR_INCOMPATIBLE_DRIVER,
-		eVkErrorTooManyObjects = VK_ERROR_TOO_MANY_OBJECTS,
-		eVkErrorFormatNotSupported = VK_ERROR_FORMAT_NOT_SUPPORTED
 	};
 
 	class PresentInfoKHR
@@ -5887,16 +10722,32 @@ namespace vk
 			m_presentInfoKHR.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 			m_presentInfoKHR.pNext = nullptr;
 			m_presentInfoKHR.waitSemaphoreCount = waitSemaphoreCount;
-			m_presentInfoKHR.pWaitSemaphores = pWaitSemaphores;
+			m_presentInfoKHR.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
 			m_presentInfoKHR.swapchainCount = swapchainCount;
-			m_presentInfoKHR.pSwapchains = pSwapchains;
+			m_presentInfoKHR.pSwapchains = reinterpret_cast<const VkSwapchainKHR*>(pSwapchains);
 			m_presentInfoKHR.pImageIndices = pImageIndices;
 			m_presentInfoKHR.pResults = reinterpret_cast<VkResult*>(pResults);
+		}
+
+		PresentInfoKHR(VkPresentInfoKHR const & rhs)
+			: m_presentInfoKHR(rhs)
+		{
+		}
+
+		PresentInfoKHR& operator=(VkPresentInfoKHR const & rhs)
+		{
+			m_presentInfoKHR = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_presentInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_presentInfoKHR.sType);
 		}
 
 		PresentInfoKHR& sType(StructureType sType)
@@ -5906,6 +10757,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_presentInfoKHR.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_presentInfoKHR.pNext);
 		}
@@ -5921,6 +10777,11 @@ namespace vk
 			return m_presentInfoKHR.waitSemaphoreCount;
 		}
 
+		uint32_t& waitSemaphoreCount()
+		{
+			return m_presentInfoKHR.waitSemaphoreCount;
+		}
+
 		PresentInfoKHR& waitSemaphoreCount(uint32_t waitSemaphoreCount)
 		{
 			m_presentInfoKHR.waitSemaphoreCount = waitSemaphoreCount;
@@ -5932,13 +10793,23 @@ namespace vk
 			return reinterpret_cast<const Semaphore*>(m_presentInfoKHR.pWaitSemaphores);
 		}
 
+		const Semaphore* pWaitSemaphores()
+		{
+			return reinterpret_cast<const Semaphore*>(m_presentInfoKHR.pWaitSemaphores);
+		}
+
 		PresentInfoKHR& pWaitSemaphores(const Semaphore* pWaitSemaphores)
 		{
-			m_presentInfoKHR.pWaitSemaphores = pWaitSemaphores;
+			m_presentInfoKHR.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
 			return *this;
 		}
 
 		const uint32_t& swapchainCount() const
+		{
+			return m_presentInfoKHR.swapchainCount;
+		}
+
+		uint32_t& swapchainCount()
 		{
 			return m_presentInfoKHR.swapchainCount;
 		}
@@ -5954,13 +10825,23 @@ namespace vk
 			return reinterpret_cast<const SwapchainKHR*>(m_presentInfoKHR.pSwapchains);
 		}
 
+		const SwapchainKHR* pSwapchains()
+		{
+			return reinterpret_cast<const SwapchainKHR*>(m_presentInfoKHR.pSwapchains);
+		}
+
 		PresentInfoKHR& pSwapchains(const SwapchainKHR* pSwapchains)
 		{
-			m_presentInfoKHR.pSwapchains = pSwapchains;
+			m_presentInfoKHR.pSwapchains = reinterpret_cast<const VkSwapchainKHR*>(pSwapchains);
 			return *this;
 		}
 
 		const uint32_t* pImageIndices() const
+		{
+			return reinterpret_cast<const uint32_t*>(m_presentInfoKHR.pImageIndices);
+		}
+
+		const uint32_t* pImageIndices()
 		{
 			return reinterpret_cast<const uint32_t*>(m_presentInfoKHR.pImageIndices);
 		}
@@ -5972,6 +10853,11 @@ namespace vk
 		}
 
 		const Result* pResults() const
+		{
+			return reinterpret_cast<const Result*>(m_presentInfoKHR.pResults);
+		}
+
+		Result* pResults()
 		{
 			return reinterpret_cast<Result*>(m_presentInfoKHR.pResults);
 		}
@@ -5990,6 +10876,7 @@ namespace vk
 	private:
 		VkPresentInfoKHR m_presentInfoKHR;
 	};
+	static_assert(sizeof(PresentInfoKHR) == sizeof(VkPresentInfoKHR), "struct and wrapper have different size!");
 
 	enum class DynamicState
 	{
@@ -6008,21 +10895,37 @@ namespace vk
 	{
 	public:
 		PipelineDynamicStateCreateInfo()
-			: PipelineDynamicStateCreateInfo(0, 0, nullptr)
+			: PipelineDynamicStateCreateInfo(PipelineDynamicStateCreateFlags(), 0, nullptr)
 		{}
 
 		PipelineDynamicStateCreateInfo(PipelineDynamicStateCreateFlags flags, uint32_t dynamicStateCount, const DynamicState* pDynamicStates)
 		{
 			m_pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 			m_pipelineDynamicStateCreateInfo.pNext = nullptr;
-			m_pipelineDynamicStateCreateInfo.flags = flags;
+			m_pipelineDynamicStateCreateInfo.flags = static_cast<VkPipelineDynamicStateCreateFlags>(flags);
 			m_pipelineDynamicStateCreateInfo.dynamicStateCount = dynamicStateCount;
 			m_pipelineDynamicStateCreateInfo.pDynamicStates = reinterpret_cast<const VkDynamicState*>(pDynamicStates);
+		}
+
+		PipelineDynamicStateCreateInfo(VkPipelineDynamicStateCreateInfo const & rhs)
+			: m_pipelineDynamicStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineDynamicStateCreateInfo& operator=(VkPipelineDynamicStateCreateInfo const & rhs)
+		{
+			m_pipelineDynamicStateCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineDynamicStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineDynamicStateCreateInfo.sType);
 		}
 
 		PipelineDynamicStateCreateInfo& sType(StructureType sType)
@@ -6036,6 +10939,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineDynamicStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineDynamicStateCreateInfo.pNext);
+		}
+
 		PipelineDynamicStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineDynamicStateCreateInfo.pNext = pNext;
@@ -6044,16 +10952,26 @@ namespace vk
 
 		const PipelineDynamicStateCreateFlags& flags() const
 		{
-			return m_pipelineDynamicStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineDynamicStateCreateFlags&>(m_pipelineDynamicStateCreateInfo.flags);
+		}
+
+		PipelineDynamicStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineDynamicStateCreateFlags&>(m_pipelineDynamicStateCreateInfo.flags);
 		}
 
 		PipelineDynamicStateCreateInfo& flags(PipelineDynamicStateCreateFlags flags)
 		{
-			m_pipelineDynamicStateCreateInfo.flags = flags;
+			m_pipelineDynamicStateCreateInfo.flags = static_cast<VkPipelineDynamicStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& dynamicStateCount() const
+		{
+			return m_pipelineDynamicStateCreateInfo.dynamicStateCount;
+		}
+
+		uint32_t& dynamicStateCount()
 		{
 			return m_pipelineDynamicStateCreateInfo.dynamicStateCount;
 		}
@@ -6065,6 +10983,11 @@ namespace vk
 		}
 
 		const DynamicState* pDynamicStates() const
+		{
+			return reinterpret_cast<const DynamicState*>(m_pipelineDynamicStateCreateInfo.pDynamicStates);
+		}
+
+		const DynamicState* pDynamicStates()
 		{
 			return reinterpret_cast<const DynamicState*>(m_pipelineDynamicStateCreateInfo.pDynamicStates);
 		}
@@ -6083,6 +11006,7 @@ namespace vk
 	private:
 		VkPipelineDynamicStateCreateInfo m_pipelineDynamicStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineDynamicStateCreateInfo) == sizeof(VkPipelineDynamicStateCreateInfo), "struct and wrapper have different size!");
 
 	enum class QueueFlagBits
 	{
@@ -6130,6 +11054,7 @@ namespace vk
 	private:
 		VkQueueFamilyProperties m_queueFamilyProperties;
 	};
+	static_assert(sizeof(QueueFamilyProperties) == sizeof(VkQueueFamilyProperties), "struct and wrapper have different size!");
 
 	enum class MemoryPropertyFlagBits
 	{
@@ -6168,6 +11093,7 @@ namespace vk
 	private:
 		VkMemoryType m_memoryType;
 	};
+	static_assert(sizeof(MemoryType) == sizeof(VkMemoryType), "struct and wrapper have different size!");
 
 	enum class MemoryHeapFlagBits
 	{
@@ -6202,6 +11128,7 @@ namespace vk
 	private:
 		VkMemoryHeap m_memoryHeap;
 	};
+	static_assert(sizeof(MemoryHeap) == sizeof(VkMemoryHeap), "struct and wrapper have different size!");
 
 	class PhysicalDeviceMemoryProperties
 	{
@@ -6234,6 +11161,7 @@ namespace vk
 	private:
 		VkPhysicalDeviceMemoryProperties m_physicalDeviceMemoryProperties;
 	};
+	static_assert(sizeof(PhysicalDeviceMemoryProperties) == sizeof(VkPhysicalDeviceMemoryProperties), "struct and wrapper have different size!");
 
 	enum class AccessFlagBits
 	{
@@ -6278,9 +11206,25 @@ namespace vk
 			m_memoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
 		}
 
+		MemoryBarrier(VkMemoryBarrier const & rhs)
+			: m_memoryBarrier(rhs)
+		{
+		}
+
+		MemoryBarrier& operator=(VkMemoryBarrier const & rhs)
+		{
+			m_memoryBarrier = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_memoryBarrier.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_memoryBarrier.sType);
 		}
 
 		MemoryBarrier& sType(StructureType sType)
@@ -6290,6 +11234,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_memoryBarrier.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_memoryBarrier.pNext);
 		}
@@ -6305,6 +11254,11 @@ namespace vk
 			return reinterpret_cast<const AccessFlags&>(m_memoryBarrier.srcAccessMask);
 		}
 
+		AccessFlags& srcAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_memoryBarrier.srcAccessMask);
+		}
+
 		MemoryBarrier& srcAccessMask(AccessFlags srcAccessMask)
 		{
 			m_memoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
@@ -6314,6 +11268,11 @@ namespace vk
 		const AccessFlags& dstAccessMask() const
 		{
 			return reinterpret_cast<const AccessFlags&>(m_memoryBarrier.dstAccessMask);
+		}
+
+		AccessFlags& dstAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_memoryBarrier.dstAccessMask);
 		}
 
 		MemoryBarrier& dstAccessMask(AccessFlags dstAccessMask)
@@ -6330,6 +11289,7 @@ namespace vk
 	private:
 		VkMemoryBarrier m_memoryBarrier;
 	};
+	static_assert(sizeof(MemoryBarrier) == sizeof(VkMemoryBarrier), "struct and wrapper have different size!");
 
 	class BufferMemoryBarrier
 	{
@@ -6346,14 +11306,30 @@ namespace vk
 			m_bufferMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
 			m_bufferMemoryBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex;
 			m_bufferMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
-			m_bufferMemoryBarrier.buffer = buffer;
+			m_bufferMemoryBarrier.buffer = static_cast<VkBuffer>(buffer);
 			m_bufferMemoryBarrier.offset = offset;
 			m_bufferMemoryBarrier.size = size;
+		}
+
+		BufferMemoryBarrier(VkBufferMemoryBarrier const & rhs)
+			: m_bufferMemoryBarrier(rhs)
+		{
+		}
+
+		BufferMemoryBarrier& operator=(VkBufferMemoryBarrier const & rhs)
+		{
+			m_bufferMemoryBarrier = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_bufferMemoryBarrier.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_bufferMemoryBarrier.sType);
 		}
 
 		BufferMemoryBarrier& sType(StructureType sType)
@@ -6363,6 +11339,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_bufferMemoryBarrier.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_bufferMemoryBarrier.pNext);
 		}
@@ -6378,6 +11359,11 @@ namespace vk
 			return reinterpret_cast<const AccessFlags&>(m_bufferMemoryBarrier.srcAccessMask);
 		}
 
+		AccessFlags& srcAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_bufferMemoryBarrier.srcAccessMask);
+		}
+
 		BufferMemoryBarrier& srcAccessMask(AccessFlags srcAccessMask)
 		{
 			m_bufferMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
@@ -6389,6 +11375,11 @@ namespace vk
 			return reinterpret_cast<const AccessFlags&>(m_bufferMemoryBarrier.dstAccessMask);
 		}
 
+		AccessFlags& dstAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_bufferMemoryBarrier.dstAccessMask);
+		}
+
 		BufferMemoryBarrier& dstAccessMask(AccessFlags dstAccessMask)
 		{
 			m_bufferMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
@@ -6396,6 +11387,11 @@ namespace vk
 		}
 
 		const uint32_t& srcQueueFamilyIndex() const
+		{
+			return m_bufferMemoryBarrier.srcQueueFamilyIndex;
+		}
+
+		uint32_t& srcQueueFamilyIndex()
 		{
 			return m_bufferMemoryBarrier.srcQueueFamilyIndex;
 		}
@@ -6411,6 +11407,11 @@ namespace vk
 			return m_bufferMemoryBarrier.dstQueueFamilyIndex;
 		}
 
+		uint32_t& dstQueueFamilyIndex()
+		{
+			return m_bufferMemoryBarrier.dstQueueFamilyIndex;
+		}
+
 		BufferMemoryBarrier& dstQueueFamilyIndex(uint32_t dstQueueFamilyIndex)
 		{
 			m_bufferMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
@@ -6419,16 +11420,26 @@ namespace vk
 
 		const Buffer& buffer() const
 		{
-			return m_bufferMemoryBarrier.buffer;
+			return reinterpret_cast<const Buffer&>(m_bufferMemoryBarrier.buffer);
+		}
+
+		Buffer& buffer()
+		{
+			return reinterpret_cast<Buffer&>(m_bufferMemoryBarrier.buffer);
 		}
 
 		BufferMemoryBarrier& buffer(Buffer buffer)
 		{
-			m_bufferMemoryBarrier.buffer = buffer;
+			m_bufferMemoryBarrier.buffer = static_cast<VkBuffer>(buffer);
 			return *this;
 		}
 
 		const DeviceSize& offset() const
+		{
+			return m_bufferMemoryBarrier.offset;
+		}
+
+		DeviceSize& offset()
 		{
 			return m_bufferMemoryBarrier.offset;
 		}
@@ -6440,6 +11451,11 @@ namespace vk
 		}
 
 		const DeviceSize& size() const
+		{
+			return m_bufferMemoryBarrier.size;
+		}
+
+		DeviceSize& size()
 		{
 			return m_bufferMemoryBarrier.size;
 		}
@@ -6458,6 +11474,7 @@ namespace vk
 	private:
 		VkBufferMemoryBarrier m_bufferMemoryBarrier;
 	};
+	static_assert(sizeof(BufferMemoryBarrier) == sizeof(VkBufferMemoryBarrier), "struct and wrapper have different size!");
 
 	enum class BufferUsageFlagBits
 	{
@@ -6512,9 +11529,25 @@ namespace vk
 			m_bufferCreateInfo.pQueueFamilyIndices = pQueueFamilyIndices;
 		}
 
+		BufferCreateInfo(VkBufferCreateInfo const & rhs)
+			: m_bufferCreateInfo(rhs)
+		{
+		}
+
+		BufferCreateInfo& operator=(VkBufferCreateInfo const & rhs)
+		{
+			m_bufferCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_bufferCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_bufferCreateInfo.sType);
 		}
 
 		BufferCreateInfo& sType(StructureType sType)
@@ -6524,6 +11557,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_bufferCreateInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_bufferCreateInfo.pNext);
 		}
@@ -6539,6 +11577,11 @@ namespace vk
 			return reinterpret_cast<const BufferCreateFlags&>(m_bufferCreateInfo.flags);
 		}
 
+		BufferCreateFlags& flags()
+		{
+			return reinterpret_cast<BufferCreateFlags&>(m_bufferCreateInfo.flags);
+		}
+
 		BufferCreateInfo& flags(BufferCreateFlags flags)
 		{
 			m_bufferCreateInfo.flags = static_cast<VkBufferCreateFlags>(flags);
@@ -6546,6 +11589,11 @@ namespace vk
 		}
 
 		const DeviceSize& size() const
+		{
+			return m_bufferCreateInfo.size;
+		}
+
+		DeviceSize& size()
 		{
 			return m_bufferCreateInfo.size;
 		}
@@ -6561,6 +11609,11 @@ namespace vk
 			return reinterpret_cast<const BufferUsageFlags&>(m_bufferCreateInfo.usage);
 		}
 
+		BufferUsageFlags& usage()
+		{
+			return reinterpret_cast<BufferUsageFlags&>(m_bufferCreateInfo.usage);
+		}
+
 		BufferCreateInfo& usage(BufferUsageFlags usage)
 		{
 			m_bufferCreateInfo.usage = static_cast<VkBufferUsageFlags>(usage);
@@ -6570,6 +11623,11 @@ namespace vk
 		const SharingMode& sharingMode() const
 		{
 			return reinterpret_cast<const SharingMode&>(m_bufferCreateInfo.sharingMode);
+		}
+
+		SharingMode& sharingMode()
+		{
+			return reinterpret_cast<SharingMode&>(m_bufferCreateInfo.sharingMode);
 		}
 
 		BufferCreateInfo& sharingMode(SharingMode sharingMode)
@@ -6583,6 +11641,11 @@ namespace vk
 			return m_bufferCreateInfo.queueFamilyIndexCount;
 		}
 
+		uint32_t& queueFamilyIndexCount()
+		{
+			return m_bufferCreateInfo.queueFamilyIndexCount;
+		}
+
 		BufferCreateInfo& queueFamilyIndexCount(uint32_t queueFamilyIndexCount)
 		{
 			m_bufferCreateInfo.queueFamilyIndexCount = queueFamilyIndexCount;
@@ -6590,6 +11653,11 @@ namespace vk
 		}
 
 		const uint32_t* pQueueFamilyIndices() const
+		{
+			return reinterpret_cast<const uint32_t*>(m_bufferCreateInfo.pQueueFamilyIndices);
+		}
+
+		const uint32_t* pQueueFamilyIndices()
 		{
 			return reinterpret_cast<const uint32_t*>(m_bufferCreateInfo.pQueueFamilyIndices);
 		}
@@ -6608,6 +11676,7 @@ namespace vk
 	private:
 		VkBufferCreateInfo m_bufferCreateInfo;
 	};
+	static_assert(sizeof(BufferCreateInfo) == sizeof(VkBufferCreateInfo), "struct and wrapper have different size!");
 
 	enum class ShaderStageFlagBits
 	{
@@ -6641,10 +11710,26 @@ namespace vk
 			m_descriptorSetLayoutBinding.descriptorType = static_cast<VkDescriptorType>(descriptorType);
 			m_descriptorSetLayoutBinding.descriptorCount = descriptorCount;
 			m_descriptorSetLayoutBinding.stageFlags = static_cast<VkShaderStageFlags>(stageFlags);
-			m_descriptorSetLayoutBinding.pImmutableSamplers = pImmutableSamplers;
+			m_descriptorSetLayoutBinding.pImmutableSamplers = reinterpret_cast<const VkSampler*>(pImmutableSamplers);
+		}
+
+		DescriptorSetLayoutBinding(VkDescriptorSetLayoutBinding const & rhs)
+			: m_descriptorSetLayoutBinding(rhs)
+		{
+		}
+
+		DescriptorSetLayoutBinding& operator=(VkDescriptorSetLayoutBinding const & rhs)
+		{
+			m_descriptorSetLayoutBinding = rhs;
+			return *this;
 		}
 
 		const uint32_t& binding() const
+		{
+			return m_descriptorSetLayoutBinding.binding;
+		}
+
+		uint32_t& binding()
 		{
 			return m_descriptorSetLayoutBinding.binding;
 		}
@@ -6660,6 +11745,11 @@ namespace vk
 			return reinterpret_cast<const DescriptorType&>(m_descriptorSetLayoutBinding.descriptorType);
 		}
 
+		DescriptorType& descriptorType()
+		{
+			return reinterpret_cast<DescriptorType&>(m_descriptorSetLayoutBinding.descriptorType);
+		}
+
 		DescriptorSetLayoutBinding& descriptorType(DescriptorType descriptorType)
 		{
 			m_descriptorSetLayoutBinding.descriptorType = static_cast<VkDescriptorType>(descriptorType);
@@ -6667,6 +11757,11 @@ namespace vk
 		}
 
 		const uint32_t& descriptorCount() const
+		{
+			return m_descriptorSetLayoutBinding.descriptorCount;
+		}
+
+		uint32_t& descriptorCount()
 		{
 			return m_descriptorSetLayoutBinding.descriptorCount;
 		}
@@ -6682,6 +11777,11 @@ namespace vk
 			return reinterpret_cast<const ShaderStageFlags&>(m_descriptorSetLayoutBinding.stageFlags);
 		}
 
+		ShaderStageFlags& stageFlags()
+		{
+			return reinterpret_cast<ShaderStageFlags&>(m_descriptorSetLayoutBinding.stageFlags);
+		}
+
 		DescriptorSetLayoutBinding& stageFlags(ShaderStageFlags stageFlags)
 		{
 			m_descriptorSetLayoutBinding.stageFlags = static_cast<VkShaderStageFlags>(stageFlags);
@@ -6693,9 +11793,14 @@ namespace vk
 			return reinterpret_cast<const Sampler*>(m_descriptorSetLayoutBinding.pImmutableSamplers);
 		}
 
+		const Sampler* pImmutableSamplers()
+		{
+			return reinterpret_cast<const Sampler*>(m_descriptorSetLayoutBinding.pImmutableSamplers);
+		}
+
 		DescriptorSetLayoutBinding& pImmutableSamplers(const Sampler* pImmutableSamplers)
 		{
-			m_descriptorSetLayoutBinding.pImmutableSamplers = pImmutableSamplers;
+			m_descriptorSetLayoutBinding.pImmutableSamplers = reinterpret_cast<const VkSampler*>(pImmutableSamplers);
 			return *this;
 		}
 
@@ -6707,26 +11812,43 @@ namespace vk
 	private:
 		VkDescriptorSetLayoutBinding m_descriptorSetLayoutBinding;
 	};
+	static_assert(sizeof(DescriptorSetLayoutBinding) == sizeof(VkDescriptorSetLayoutBinding), "struct and wrapper have different size!");
 
 	class DescriptorSetLayoutCreateInfo
 	{
 	public:
 		DescriptorSetLayoutCreateInfo()
-			: DescriptorSetLayoutCreateInfo(0, 0, nullptr)
+			: DescriptorSetLayoutCreateInfo(DescriptorSetLayoutCreateFlags(), 0, nullptr)
 		{}
 
 		DescriptorSetLayoutCreateInfo(DescriptorSetLayoutCreateFlags flags, uint32_t bindingCount, const DescriptorSetLayoutBinding* pBindings)
 		{
 			m_descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 			m_descriptorSetLayoutCreateInfo.pNext = nullptr;
-			m_descriptorSetLayoutCreateInfo.flags = flags;
+			m_descriptorSetLayoutCreateInfo.flags = static_cast<VkDescriptorSetLayoutCreateFlags>(flags);
 			m_descriptorSetLayoutCreateInfo.bindingCount = bindingCount;
 			m_descriptorSetLayoutCreateInfo.pBindings = reinterpret_cast<const VkDescriptorSetLayoutBinding*>(pBindings);
+		}
+
+		DescriptorSetLayoutCreateInfo(VkDescriptorSetLayoutCreateInfo const & rhs)
+			: m_descriptorSetLayoutCreateInfo(rhs)
+		{
+		}
+
+		DescriptorSetLayoutCreateInfo& operator=(VkDescriptorSetLayoutCreateInfo const & rhs)
+		{
+			m_descriptorSetLayoutCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_descriptorSetLayoutCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_descriptorSetLayoutCreateInfo.sType);
 		}
 
 		DescriptorSetLayoutCreateInfo& sType(StructureType sType)
@@ -6740,6 +11862,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_descriptorSetLayoutCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_descriptorSetLayoutCreateInfo.pNext);
+		}
+
 		DescriptorSetLayoutCreateInfo& pNext(const void* pNext)
 		{
 			m_descriptorSetLayoutCreateInfo.pNext = pNext;
@@ -6748,16 +11875,26 @@ namespace vk
 
 		const DescriptorSetLayoutCreateFlags& flags() const
 		{
-			return m_descriptorSetLayoutCreateInfo.flags;
+			return reinterpret_cast<const DescriptorSetLayoutCreateFlags&>(m_descriptorSetLayoutCreateInfo.flags);
+		}
+
+		DescriptorSetLayoutCreateFlags& flags()
+		{
+			return reinterpret_cast<DescriptorSetLayoutCreateFlags&>(m_descriptorSetLayoutCreateInfo.flags);
 		}
 
 		DescriptorSetLayoutCreateInfo& flags(DescriptorSetLayoutCreateFlags flags)
 		{
-			m_descriptorSetLayoutCreateInfo.flags = flags;
+			m_descriptorSetLayoutCreateInfo.flags = static_cast<VkDescriptorSetLayoutCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& bindingCount() const
+		{
+			return m_descriptorSetLayoutCreateInfo.bindingCount;
+		}
+
+		uint32_t& bindingCount()
 		{
 			return m_descriptorSetLayoutCreateInfo.bindingCount;
 		}
@@ -6769,6 +11906,11 @@ namespace vk
 		}
 
 		const DescriptorSetLayoutBinding* pBindings() const
+		{
+			return reinterpret_cast<const DescriptorSetLayoutBinding*>(m_descriptorSetLayoutCreateInfo.pBindings);
+		}
+
+		const DescriptorSetLayoutBinding* pBindings()
 		{
 			return reinterpret_cast<const DescriptorSetLayoutBinding*>(m_descriptorSetLayoutCreateInfo.pBindings);
 		}
@@ -6787,28 +11929,45 @@ namespace vk
 	private:
 		VkDescriptorSetLayoutCreateInfo m_descriptorSetLayoutCreateInfo;
 	};
+	static_assert(sizeof(DescriptorSetLayoutCreateInfo) == sizeof(VkDescriptorSetLayoutCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineShaderStageCreateInfo
 	{
 	public:
 		PipelineShaderStageCreateInfo()
-			: PipelineShaderStageCreateInfo(0, ShaderStageFlagBits::eVertex, ShaderModule(), nullptr, nullptr)
+			: PipelineShaderStageCreateInfo(PipelineShaderStageCreateFlags(), ShaderStageFlagBits::eVertex, ShaderModule(), nullptr, nullptr)
 		{}
 
 		PipelineShaderStageCreateInfo(PipelineShaderStageCreateFlags flags, ShaderStageFlagBits stage, ShaderModule module, const char* pName, const SpecializationInfo* pSpecializationInfo)
 		{
 			m_pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			m_pipelineShaderStageCreateInfo.pNext = nullptr;
-			m_pipelineShaderStageCreateInfo.flags = flags;
+			m_pipelineShaderStageCreateInfo.flags = static_cast<VkPipelineShaderStageCreateFlags>(flags);
 			m_pipelineShaderStageCreateInfo.stage = static_cast<VkShaderStageFlagBits>(stage);
-			m_pipelineShaderStageCreateInfo.module = module;
+			m_pipelineShaderStageCreateInfo.module = static_cast<VkShaderModule>(module);
 			m_pipelineShaderStageCreateInfo.pName = pName;
 			m_pipelineShaderStageCreateInfo.pSpecializationInfo = reinterpret_cast<const VkSpecializationInfo*>(pSpecializationInfo);
+		}
+
+		PipelineShaderStageCreateInfo(VkPipelineShaderStageCreateInfo const & rhs)
+			: m_pipelineShaderStageCreateInfo(rhs)
+		{
+		}
+
+		PipelineShaderStageCreateInfo& operator=(VkPipelineShaderStageCreateInfo const & rhs)
+		{
+			m_pipelineShaderStageCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineShaderStageCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineShaderStageCreateInfo.sType);
 		}
 
 		PipelineShaderStageCreateInfo& sType(StructureType sType)
@@ -6822,6 +11981,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineShaderStageCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineShaderStageCreateInfo.pNext);
+		}
+
 		PipelineShaderStageCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineShaderStageCreateInfo.pNext = pNext;
@@ -6830,18 +11994,28 @@ namespace vk
 
 		const PipelineShaderStageCreateFlags& flags() const
 		{
-			return m_pipelineShaderStageCreateInfo.flags;
+			return reinterpret_cast<const PipelineShaderStageCreateFlags&>(m_pipelineShaderStageCreateInfo.flags);
+		}
+
+		PipelineShaderStageCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineShaderStageCreateFlags&>(m_pipelineShaderStageCreateInfo.flags);
 		}
 
 		PipelineShaderStageCreateInfo& flags(PipelineShaderStageCreateFlags flags)
 		{
-			m_pipelineShaderStageCreateInfo.flags = flags;
+			m_pipelineShaderStageCreateInfo.flags = static_cast<VkPipelineShaderStageCreateFlags>(flags);
 			return *this;
 		}
 
 		const ShaderStageFlagBits& stage() const
 		{
 			return reinterpret_cast<const ShaderStageFlagBits&>(m_pipelineShaderStageCreateInfo.stage);
+		}
+
+		ShaderStageFlagBits& stage()
+		{
+			return reinterpret_cast<ShaderStageFlagBits&>(m_pipelineShaderStageCreateInfo.stage);
 		}
 
 		PipelineShaderStageCreateInfo& stage(ShaderStageFlagBits stage)
@@ -6852,16 +12026,26 @@ namespace vk
 
 		const ShaderModule& module() const
 		{
-			return m_pipelineShaderStageCreateInfo.module;
+			return reinterpret_cast<const ShaderModule&>(m_pipelineShaderStageCreateInfo.module);
+		}
+
+		ShaderModule& module()
+		{
+			return reinterpret_cast<ShaderModule&>(m_pipelineShaderStageCreateInfo.module);
 		}
 
 		PipelineShaderStageCreateInfo& module(ShaderModule module)
 		{
-			m_pipelineShaderStageCreateInfo.module = module;
+			m_pipelineShaderStageCreateInfo.module = static_cast<VkShaderModule>(module);
 			return *this;
 		}
 
 		const char* pName() const
+		{
+			return reinterpret_cast<const char*>(m_pipelineShaderStageCreateInfo.pName);
+		}
+
+		const char* pName()
 		{
 			return reinterpret_cast<const char*>(m_pipelineShaderStageCreateInfo.pName);
 		}
@@ -6873,6 +12057,11 @@ namespace vk
 		}
 
 		const SpecializationInfo* pSpecializationInfo() const
+		{
+			return reinterpret_cast<const SpecializationInfo*>(m_pipelineShaderStageCreateInfo.pSpecializationInfo);
+		}
+
+		const SpecializationInfo* pSpecializationInfo()
 		{
 			return reinterpret_cast<const SpecializationInfo*>(m_pipelineShaderStageCreateInfo.pSpecializationInfo);
 		}
@@ -6891,6 +12080,7 @@ namespace vk
 	private:
 		VkPipelineShaderStageCreateInfo m_pipelineShaderStageCreateInfo;
 	};
+	static_assert(sizeof(PipelineShaderStageCreateInfo) == sizeof(VkPipelineShaderStageCreateInfo), "struct and wrapper have different size!");
 
 	class PushConstantRange
 	{
@@ -6906,9 +12096,25 @@ namespace vk
 			m_pushConstantRange.size = size;
 		}
 
+		PushConstantRange(VkPushConstantRange const & rhs)
+			: m_pushConstantRange(rhs)
+		{
+		}
+
+		PushConstantRange& operator=(VkPushConstantRange const & rhs)
+		{
+			m_pushConstantRange = rhs;
+			return *this;
+		}
+
 		const ShaderStageFlags& stageFlags() const
 		{
 			return reinterpret_cast<const ShaderStageFlags&>(m_pushConstantRange.stageFlags);
+		}
+
+		ShaderStageFlags& stageFlags()
+		{
+			return reinterpret_cast<ShaderStageFlags&>(m_pushConstantRange.stageFlags);
 		}
 
 		PushConstantRange& stageFlags(ShaderStageFlags stageFlags)
@@ -6922,6 +12128,11 @@ namespace vk
 			return m_pushConstantRange.offset;
 		}
 
+		uint32_t& offset()
+		{
+			return m_pushConstantRange.offset;
+		}
+
 		PushConstantRange& offset(uint32_t offset)
 		{
 			m_pushConstantRange.offset = offset;
@@ -6929,6 +12140,11 @@ namespace vk
 		}
 
 		const uint32_t& size() const
+		{
+			return m_pushConstantRange.size;
+		}
+
+		uint32_t& size()
 		{
 			return m_pushConstantRange.size;
 		}
@@ -6947,28 +12163,45 @@ namespace vk
 	private:
 		VkPushConstantRange m_pushConstantRange;
 	};
+	static_assert(sizeof(PushConstantRange) == sizeof(VkPushConstantRange), "struct and wrapper have different size!");
 
 	class PipelineLayoutCreateInfo
 	{
 	public:
 		PipelineLayoutCreateInfo()
-			: PipelineLayoutCreateInfo(0, 0, nullptr, 0, nullptr)
+			: PipelineLayoutCreateInfo(PipelineLayoutCreateFlags(), 0, nullptr, 0, nullptr)
 		{}
 
 		PipelineLayoutCreateInfo(PipelineLayoutCreateFlags flags, uint32_t setLayoutCount, const DescriptorSetLayout* pSetLayouts, uint32_t pushConstantRangeCount, const PushConstantRange* pPushConstantRanges)
 		{
 			m_pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 			m_pipelineLayoutCreateInfo.pNext = nullptr;
-			m_pipelineLayoutCreateInfo.flags = flags;
+			m_pipelineLayoutCreateInfo.flags = static_cast<VkPipelineLayoutCreateFlags>(flags);
 			m_pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
-			m_pipelineLayoutCreateInfo.pSetLayouts = pSetLayouts;
+			m_pipelineLayoutCreateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
 			m_pipelineLayoutCreateInfo.pushConstantRangeCount = pushConstantRangeCount;
 			m_pipelineLayoutCreateInfo.pPushConstantRanges = reinterpret_cast<const VkPushConstantRange*>(pPushConstantRanges);
+		}
+
+		PipelineLayoutCreateInfo(VkPipelineLayoutCreateInfo const & rhs)
+			: m_pipelineLayoutCreateInfo(rhs)
+		{
+		}
+
+		PipelineLayoutCreateInfo& operator=(VkPipelineLayoutCreateInfo const & rhs)
+		{
+			m_pipelineLayoutCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineLayoutCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineLayoutCreateInfo.sType);
 		}
 
 		PipelineLayoutCreateInfo& sType(StructureType sType)
@@ -6982,6 +12215,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineLayoutCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineLayoutCreateInfo.pNext);
+		}
+
 		PipelineLayoutCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineLayoutCreateInfo.pNext = pNext;
@@ -6990,16 +12228,26 @@ namespace vk
 
 		const PipelineLayoutCreateFlags& flags() const
 		{
-			return m_pipelineLayoutCreateInfo.flags;
+			return reinterpret_cast<const PipelineLayoutCreateFlags&>(m_pipelineLayoutCreateInfo.flags);
+		}
+
+		PipelineLayoutCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineLayoutCreateFlags&>(m_pipelineLayoutCreateInfo.flags);
 		}
 
 		PipelineLayoutCreateInfo& flags(PipelineLayoutCreateFlags flags)
 		{
-			m_pipelineLayoutCreateInfo.flags = flags;
+			m_pipelineLayoutCreateInfo.flags = static_cast<VkPipelineLayoutCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& setLayoutCount() const
+		{
+			return m_pipelineLayoutCreateInfo.setLayoutCount;
+		}
+
+		uint32_t& setLayoutCount()
 		{
 			return m_pipelineLayoutCreateInfo.setLayoutCount;
 		}
@@ -7015,13 +12263,23 @@ namespace vk
 			return reinterpret_cast<const DescriptorSetLayout*>(m_pipelineLayoutCreateInfo.pSetLayouts);
 		}
 
+		const DescriptorSetLayout* pSetLayouts()
+		{
+			return reinterpret_cast<const DescriptorSetLayout*>(m_pipelineLayoutCreateInfo.pSetLayouts);
+		}
+
 		PipelineLayoutCreateInfo& pSetLayouts(const DescriptorSetLayout* pSetLayouts)
 		{
-			m_pipelineLayoutCreateInfo.pSetLayouts = pSetLayouts;
+			m_pipelineLayoutCreateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
 			return *this;
 		}
 
 		const uint32_t& pushConstantRangeCount() const
+		{
+			return m_pipelineLayoutCreateInfo.pushConstantRangeCount;
+		}
+
+		uint32_t& pushConstantRangeCount()
 		{
 			return m_pipelineLayoutCreateInfo.pushConstantRangeCount;
 		}
@@ -7033,6 +12291,11 @@ namespace vk
 		}
 
 		const PushConstantRange* pPushConstantRanges() const
+		{
+			return reinterpret_cast<const PushConstantRange*>(m_pipelineLayoutCreateInfo.pPushConstantRanges);
+		}
+
+		const PushConstantRange* pPushConstantRanges()
 		{
 			return reinterpret_cast<const PushConstantRange*>(m_pipelineLayoutCreateInfo.pPushConstantRanges);
 		}
@@ -7051,6 +12314,7 @@ namespace vk
 	private:
 		VkPipelineLayoutCreateInfo m_pipelineLayoutCreateInfo;
 	};
+	static_assert(sizeof(PipelineLayoutCreateInfo) == sizeof(VkPipelineLayoutCreateInfo), "struct and wrapper have different size!");
 
 	enum class ImageUsageFlagBits
 	{
@@ -7114,14 +12378,30 @@ namespace vk
 			m_computePipelineCreateInfo.pNext = nullptr;
 			m_computePipelineCreateInfo.flags = static_cast<VkPipelineCreateFlags>(flags);
 			m_computePipelineCreateInfo.stage = static_cast<VkPipelineShaderStageCreateInfo>(stage);
-			m_computePipelineCreateInfo.layout = layout;
-			m_computePipelineCreateInfo.basePipelineHandle = basePipelineHandle;
+			m_computePipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
+			m_computePipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
 			m_computePipelineCreateInfo.basePipelineIndex = basePipelineIndex;
+		}
+
+		ComputePipelineCreateInfo(VkComputePipelineCreateInfo const & rhs)
+			: m_computePipelineCreateInfo(rhs)
+		{
+		}
+
+		ComputePipelineCreateInfo& operator=(VkComputePipelineCreateInfo const & rhs)
+		{
+			m_computePipelineCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_computePipelineCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_computePipelineCreateInfo.sType);
 		}
 
 		ComputePipelineCreateInfo& sType(StructureType sType)
@@ -7131,6 +12411,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_computePipelineCreateInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_computePipelineCreateInfo.pNext);
 		}
@@ -7146,6 +12431,11 @@ namespace vk
 			return reinterpret_cast<const PipelineCreateFlags&>(m_computePipelineCreateInfo.flags);
 		}
 
+		PipelineCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineCreateFlags&>(m_computePipelineCreateInfo.flags);
+		}
+
 		ComputePipelineCreateInfo& flags(PipelineCreateFlags flags)
 		{
 			m_computePipelineCreateInfo.flags = static_cast<VkPipelineCreateFlags>(flags);
@@ -7157,6 +12447,11 @@ namespace vk
 			return reinterpret_cast<const PipelineShaderStageCreateInfo&>(m_computePipelineCreateInfo.stage);
 		}
 
+		PipelineShaderStageCreateInfo& stage()
+		{
+			return reinterpret_cast<PipelineShaderStageCreateInfo&>(m_computePipelineCreateInfo.stage);
+		}
+
 		ComputePipelineCreateInfo& stage(PipelineShaderStageCreateInfo stage)
 		{
 			m_computePipelineCreateInfo.stage = static_cast<VkPipelineShaderStageCreateInfo>(stage);
@@ -7165,27 +12460,42 @@ namespace vk
 
 		const PipelineLayout& layout() const
 		{
-			return m_computePipelineCreateInfo.layout;
+			return reinterpret_cast<const PipelineLayout&>(m_computePipelineCreateInfo.layout);
+		}
+
+		PipelineLayout& layout()
+		{
+			return reinterpret_cast<PipelineLayout&>(m_computePipelineCreateInfo.layout);
 		}
 
 		ComputePipelineCreateInfo& layout(PipelineLayout layout)
 		{
-			m_computePipelineCreateInfo.layout = layout;
+			m_computePipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
 			return *this;
 		}
 
 		const Pipeline& basePipelineHandle() const
 		{
-			return m_computePipelineCreateInfo.basePipelineHandle;
+			return reinterpret_cast<const Pipeline&>(m_computePipelineCreateInfo.basePipelineHandle);
+		}
+
+		Pipeline& basePipelineHandle()
+		{
+			return reinterpret_cast<Pipeline&>(m_computePipelineCreateInfo.basePipelineHandle);
 		}
 
 		ComputePipelineCreateInfo& basePipelineHandle(Pipeline basePipelineHandle)
 		{
-			m_computePipelineCreateInfo.basePipelineHandle = basePipelineHandle;
+			m_computePipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
 			return *this;
 		}
 
 		const int32_t& basePipelineIndex() const
+		{
+			return m_computePipelineCreateInfo.basePipelineIndex;
+		}
+
+		int32_t& basePipelineIndex()
 		{
 			return m_computePipelineCreateInfo.basePipelineIndex;
 		}
@@ -7204,6 +12514,7 @@ namespace vk
 	private:
 		VkComputePipelineCreateInfo m_computePipelineCreateInfo;
 	};
+	static_assert(sizeof(ComputePipelineCreateInfo) == sizeof(VkComputePipelineCreateInfo), "struct and wrapper have different size!");
 
 	enum class ColorComponentFlagBits
 	{
@@ -7239,7 +12550,23 @@ namespace vk
 			m_pipelineColorBlendAttachmentState.colorWriteMask = static_cast<VkColorComponentFlags>(colorWriteMask);
 		}
 
+		PipelineColorBlendAttachmentState(VkPipelineColorBlendAttachmentState const & rhs)
+			: m_pipelineColorBlendAttachmentState(rhs)
+		{
+		}
+
+		PipelineColorBlendAttachmentState& operator=(VkPipelineColorBlendAttachmentState const & rhs)
+		{
+			m_pipelineColorBlendAttachmentState = rhs;
+			return *this;
+		}
+
 		const Bool32& blendEnable() const
+		{
+			return m_pipelineColorBlendAttachmentState.blendEnable;
+		}
+
+		Bool32& blendEnable()
 		{
 			return m_pipelineColorBlendAttachmentState.blendEnable;
 		}
@@ -7255,6 +12582,11 @@ namespace vk
 			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.srcColorBlendFactor);
 		}
 
+		BlendFactor& srcColorBlendFactor()
+		{
+			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.srcColorBlendFactor);
+		}
+
 		PipelineColorBlendAttachmentState& srcColorBlendFactor(BlendFactor srcColorBlendFactor)
 		{
 			m_pipelineColorBlendAttachmentState.srcColorBlendFactor = static_cast<VkBlendFactor>(srcColorBlendFactor);
@@ -7264,6 +12596,11 @@ namespace vk
 		const BlendFactor& dstColorBlendFactor() const
 		{
 			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.dstColorBlendFactor);
+		}
+
+		BlendFactor& dstColorBlendFactor()
+		{
+			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.dstColorBlendFactor);
 		}
 
 		PipelineColorBlendAttachmentState& dstColorBlendFactor(BlendFactor dstColorBlendFactor)
@@ -7277,6 +12614,11 @@ namespace vk
 			return reinterpret_cast<const BlendOp&>(m_pipelineColorBlendAttachmentState.colorBlendOp);
 		}
 
+		BlendOp& colorBlendOp()
+		{
+			return reinterpret_cast<BlendOp&>(m_pipelineColorBlendAttachmentState.colorBlendOp);
+		}
+
 		PipelineColorBlendAttachmentState& colorBlendOp(BlendOp colorBlendOp)
 		{
 			m_pipelineColorBlendAttachmentState.colorBlendOp = static_cast<VkBlendOp>(colorBlendOp);
@@ -7286,6 +12628,11 @@ namespace vk
 		const BlendFactor& srcAlphaBlendFactor() const
 		{
 			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.srcAlphaBlendFactor);
+		}
+
+		BlendFactor& srcAlphaBlendFactor()
+		{
+			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.srcAlphaBlendFactor);
 		}
 
 		PipelineColorBlendAttachmentState& srcAlphaBlendFactor(BlendFactor srcAlphaBlendFactor)
@@ -7299,6 +12646,11 @@ namespace vk
 			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.dstAlphaBlendFactor);
 		}
 
+		BlendFactor& dstAlphaBlendFactor()
+		{
+			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.dstAlphaBlendFactor);
+		}
+
 		PipelineColorBlendAttachmentState& dstAlphaBlendFactor(BlendFactor dstAlphaBlendFactor)
 		{
 			m_pipelineColorBlendAttachmentState.dstAlphaBlendFactor = static_cast<VkBlendFactor>(dstAlphaBlendFactor);
@@ -7310,6 +12662,11 @@ namespace vk
 			return reinterpret_cast<const BlendOp&>(m_pipelineColorBlendAttachmentState.alphaBlendOp);
 		}
 
+		BlendOp& alphaBlendOp()
+		{
+			return reinterpret_cast<BlendOp&>(m_pipelineColorBlendAttachmentState.alphaBlendOp);
+		}
+
 		PipelineColorBlendAttachmentState& alphaBlendOp(BlendOp alphaBlendOp)
 		{
 			m_pipelineColorBlendAttachmentState.alphaBlendOp = static_cast<VkBlendOp>(alphaBlendOp);
@@ -7319,6 +12676,11 @@ namespace vk
 		const ColorComponentFlags& colorWriteMask() const
 		{
 			return reinterpret_cast<const ColorComponentFlags&>(m_pipelineColorBlendAttachmentState.colorWriteMask);
+		}
+
+		ColorComponentFlags& colorWriteMask()
+		{
+			return reinterpret_cast<ColorComponentFlags&>(m_pipelineColorBlendAttachmentState.colorWriteMask);
 		}
 
 		PipelineColorBlendAttachmentState& colorWriteMask(ColorComponentFlags colorWriteMask)
@@ -7335,19 +12697,20 @@ namespace vk
 	private:
 		VkPipelineColorBlendAttachmentState m_pipelineColorBlendAttachmentState;
 	};
+	static_assert(sizeof(PipelineColorBlendAttachmentState) == sizeof(VkPipelineColorBlendAttachmentState), "struct and wrapper have different size!");
 
 	class PipelineColorBlendStateCreateInfo
 	{
 	public:
 		PipelineColorBlendStateCreateInfo()
-			: PipelineColorBlendStateCreateInfo(0, 0, LogicOp::eClear, 0, nullptr, { 0, 0, 0, 0 })
+			: PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags(), 0, LogicOp::eClear, 0, nullptr, { 0 })
 		{}
 
-		PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags flags, Bool32 logicOpEnable, LogicOp logicOp, uint32_t attachmentCount, const PipelineColorBlendAttachmentState* pAttachments, eastl::fixed_vector<float, 4> const& blendConstants)
+		PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags flags, Bool32 logicOpEnable, LogicOp logicOp, uint32_t attachmentCount, const PipelineColorBlendAttachmentState* pAttachments, eastl::array<float, 4> const& blendConstants)
 		{
 			m_pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 			m_pipelineColorBlendStateCreateInfo.pNext = nullptr;
-			m_pipelineColorBlendStateCreateInfo.flags = flags;
+			m_pipelineColorBlendStateCreateInfo.flags = static_cast<VkPipelineColorBlendStateCreateFlags>(flags);
 			m_pipelineColorBlendStateCreateInfo.logicOpEnable = logicOpEnable;
 			m_pipelineColorBlendStateCreateInfo.logicOp = static_cast<VkLogicOp>(logicOp);
 			m_pipelineColorBlendStateCreateInfo.attachmentCount = attachmentCount;
@@ -7355,9 +12718,25 @@ namespace vk
 			memcpy(&m_pipelineColorBlendStateCreateInfo.blendConstants, blendConstants.data(), 4 * sizeof(float));
 		}
 
+		PipelineColorBlendStateCreateInfo(VkPipelineColorBlendStateCreateInfo const & rhs)
+			: m_pipelineColorBlendStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineColorBlendStateCreateInfo& operator=(VkPipelineColorBlendStateCreateInfo const & rhs)
+		{
+			m_pipelineColorBlendStateCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineColorBlendStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineColorBlendStateCreateInfo.sType);
 		}
 
 		PipelineColorBlendStateCreateInfo& sType(StructureType sType)
@@ -7371,6 +12750,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineColorBlendStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineColorBlendStateCreateInfo.pNext);
+		}
+
 		PipelineColorBlendStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineColorBlendStateCreateInfo.pNext = pNext;
@@ -7379,16 +12763,26 @@ namespace vk
 
 		const PipelineColorBlendStateCreateFlags& flags() const
 		{
-			return m_pipelineColorBlendStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineColorBlendStateCreateFlags&>(m_pipelineColorBlendStateCreateInfo.flags);
+		}
+
+		PipelineColorBlendStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineColorBlendStateCreateFlags&>(m_pipelineColorBlendStateCreateInfo.flags);
 		}
 
 		PipelineColorBlendStateCreateInfo& flags(PipelineColorBlendStateCreateFlags flags)
 		{
-			m_pipelineColorBlendStateCreateInfo.flags = flags;
+			m_pipelineColorBlendStateCreateInfo.flags = static_cast<VkPipelineColorBlendStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const Bool32& logicOpEnable() const
+		{
+			return m_pipelineColorBlendStateCreateInfo.logicOpEnable;
+		}
+
+		Bool32& logicOpEnable()
 		{
 			return m_pipelineColorBlendStateCreateInfo.logicOpEnable;
 		}
@@ -7404,6 +12798,11 @@ namespace vk
 			return reinterpret_cast<const LogicOp&>(m_pipelineColorBlendStateCreateInfo.logicOp);
 		}
 
+		LogicOp& logicOp()
+		{
+			return reinterpret_cast<LogicOp&>(m_pipelineColorBlendStateCreateInfo.logicOp);
+		}
+
 		PipelineColorBlendStateCreateInfo& logicOp(LogicOp logicOp)
 		{
 			m_pipelineColorBlendStateCreateInfo.logicOp = static_cast<VkLogicOp>(logicOp);
@@ -7411,6 +12810,11 @@ namespace vk
 		}
 
 		const uint32_t& attachmentCount() const
+		{
+			return m_pipelineColorBlendStateCreateInfo.attachmentCount;
+		}
+
+		uint32_t& attachmentCount()
 		{
 			return m_pipelineColorBlendStateCreateInfo.attachmentCount;
 		}
@@ -7426,6 +12830,11 @@ namespace vk
 			return reinterpret_cast<const PipelineColorBlendAttachmentState*>(m_pipelineColorBlendStateCreateInfo.pAttachments);
 		}
 
+		const PipelineColorBlendAttachmentState* pAttachments()
+		{
+			return reinterpret_cast<const PipelineColorBlendAttachmentState*>(m_pipelineColorBlendStateCreateInfo.pAttachments);
+		}
+
 		PipelineColorBlendStateCreateInfo& pAttachments(const PipelineColorBlendAttachmentState* pAttachments)
 		{
 			m_pipelineColorBlendStateCreateInfo.pAttachments = reinterpret_cast<const VkPipelineColorBlendAttachmentState*>(pAttachments);
@@ -7437,7 +12846,12 @@ namespace vk
 			return reinterpret_cast<const float*>(m_pipelineColorBlendStateCreateInfo.blendConstants);
 		}
 
-		PipelineColorBlendStateCreateInfo& blendConstants(eastl::fixed_vector<float, 4> blendConstants)
+		float* blendConstants()
+		{
+			return reinterpret_cast<float*>(m_pipelineColorBlendStateCreateInfo.blendConstants);
+		}
+
+		PipelineColorBlendStateCreateInfo& blendConstants(eastl::array<float, 4> blendConstants)
 		{
 			memcpy(&m_pipelineColorBlendStateCreateInfo.blendConstants, blendConstants.data(), 4 * sizeof(float));
 			return *this;
@@ -7451,6 +12865,7 @@ namespace vk
 	private:
 		VkPipelineColorBlendStateCreateInfo m_pipelineColorBlendStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineColorBlendStateCreateInfo) == sizeof(VkPipelineColorBlendStateCreateInfo), "struct and wrapper have different size!");
 
 	enum class FenceCreateFlagBits
 	{
@@ -7478,9 +12893,25 @@ namespace vk
 			m_fenceCreateInfo.flags = static_cast<VkFenceCreateFlags>(flags);
 		}
 
+		FenceCreateInfo(VkFenceCreateInfo const & rhs)
+			: m_fenceCreateInfo(rhs)
+		{
+		}
+
+		FenceCreateInfo& operator=(VkFenceCreateInfo const & rhs)
+		{
+			m_fenceCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_fenceCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_fenceCreateInfo.sType);
 		}
 
 		FenceCreateInfo& sType(StructureType sType)
@@ -7494,6 +12925,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_fenceCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_fenceCreateInfo.pNext);
+		}
+
 		FenceCreateInfo& pNext(const void* pNext)
 		{
 			m_fenceCreateInfo.pNext = pNext;
@@ -7503,6 +12939,11 @@ namespace vk
 		const FenceCreateFlags& flags() const
 		{
 			return reinterpret_cast<const FenceCreateFlags&>(m_fenceCreateInfo.flags);
+		}
+
+		FenceCreateFlags& flags()
+		{
+			return reinterpret_cast<FenceCreateFlags&>(m_fenceCreateInfo.flags);
 		}
 
 		FenceCreateInfo& flags(FenceCreateFlags flags)
@@ -7519,6 +12960,7 @@ namespace vk
 	private:
 		VkFenceCreateInfo m_fenceCreateInfo;
 	};
+	static_assert(sizeof(FenceCreateInfo) == sizeof(VkFenceCreateInfo), "struct and wrapper have different size!");
 
 	enum class FormatFeatureFlagBits
 	{
@@ -7570,6 +13012,7 @@ namespace vk
 	private:
 		VkFormatProperties m_formatProperties;
 	};
+	static_assert(sizeof(FormatProperties) == sizeof(VkFormatProperties), "struct and wrapper have different size!");
 
 	enum class QueryControlFlagBits
 	{
@@ -7645,17 +13088,33 @@ namespace vk
 		{
 			m_commandBufferInheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
 			m_commandBufferInheritanceInfo.pNext = nullptr;
-			m_commandBufferInheritanceInfo.renderPass = renderPass;
+			m_commandBufferInheritanceInfo.renderPass = static_cast<VkRenderPass>(renderPass);
 			m_commandBufferInheritanceInfo.subpass = subpass;
-			m_commandBufferInheritanceInfo.framebuffer = framebuffer;
+			m_commandBufferInheritanceInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
 			m_commandBufferInheritanceInfo.occlusionQueryEnable = occlusionQueryEnable;
 			m_commandBufferInheritanceInfo.queryFlags = static_cast<VkQueryControlFlags>(queryFlags);
 			m_commandBufferInheritanceInfo.pipelineStatistics = static_cast<VkQueryPipelineStatisticFlags>(pipelineStatistics);
 		}
 
+		CommandBufferInheritanceInfo(VkCommandBufferInheritanceInfo const & rhs)
+			: m_commandBufferInheritanceInfo(rhs)
+		{
+		}
+
+		CommandBufferInheritanceInfo& operator=(VkCommandBufferInheritanceInfo const & rhs)
+		{
+			m_commandBufferInheritanceInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_commandBufferInheritanceInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_commandBufferInheritanceInfo.sType);
 		}
 
 		CommandBufferInheritanceInfo& sType(StructureType sType)
@@ -7669,6 +13128,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_commandBufferInheritanceInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_commandBufferInheritanceInfo.pNext);
+		}
+
 		CommandBufferInheritanceInfo& pNext(const void* pNext)
 		{
 			m_commandBufferInheritanceInfo.pNext = pNext;
@@ -7677,16 +13141,26 @@ namespace vk
 
 		const RenderPass& renderPass() const
 		{
-			return m_commandBufferInheritanceInfo.renderPass;
+			return reinterpret_cast<const RenderPass&>(m_commandBufferInheritanceInfo.renderPass);
+		}
+
+		RenderPass& renderPass()
+		{
+			return reinterpret_cast<RenderPass&>(m_commandBufferInheritanceInfo.renderPass);
 		}
 
 		CommandBufferInheritanceInfo& renderPass(RenderPass renderPass)
 		{
-			m_commandBufferInheritanceInfo.renderPass = renderPass;
+			m_commandBufferInheritanceInfo.renderPass = static_cast<VkRenderPass>(renderPass);
 			return *this;
 		}
 
 		const uint32_t& subpass() const
+		{
+			return m_commandBufferInheritanceInfo.subpass;
+		}
+
+		uint32_t& subpass()
 		{
 			return m_commandBufferInheritanceInfo.subpass;
 		}
@@ -7699,16 +13173,26 @@ namespace vk
 
 		const Framebuffer& framebuffer() const
 		{
-			return m_commandBufferInheritanceInfo.framebuffer;
+			return reinterpret_cast<const Framebuffer&>(m_commandBufferInheritanceInfo.framebuffer);
+		}
+
+		Framebuffer& framebuffer()
+		{
+			return reinterpret_cast<Framebuffer&>(m_commandBufferInheritanceInfo.framebuffer);
 		}
 
 		CommandBufferInheritanceInfo& framebuffer(Framebuffer framebuffer)
 		{
-			m_commandBufferInheritanceInfo.framebuffer = framebuffer;
+			m_commandBufferInheritanceInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
 			return *this;
 		}
 
 		const Bool32& occlusionQueryEnable() const
+		{
+			return m_commandBufferInheritanceInfo.occlusionQueryEnable;
+		}
+
+		Bool32& occlusionQueryEnable()
 		{
 			return m_commandBufferInheritanceInfo.occlusionQueryEnable;
 		}
@@ -7724,6 +13208,11 @@ namespace vk
 			return reinterpret_cast<const QueryControlFlags&>(m_commandBufferInheritanceInfo.queryFlags);
 		}
 
+		QueryControlFlags& queryFlags()
+		{
+			return reinterpret_cast<QueryControlFlags&>(m_commandBufferInheritanceInfo.queryFlags);
+		}
+
 		CommandBufferInheritanceInfo& queryFlags(QueryControlFlags queryFlags)
 		{
 			m_commandBufferInheritanceInfo.queryFlags = static_cast<VkQueryControlFlags>(queryFlags);
@@ -7733,6 +13222,11 @@ namespace vk
 		const QueryPipelineStatisticFlags& pipelineStatistics() const
 		{
 			return reinterpret_cast<const QueryPipelineStatisticFlags&>(m_commandBufferInheritanceInfo.pipelineStatistics);
+		}
+
+		QueryPipelineStatisticFlags& pipelineStatistics()
+		{
+			return reinterpret_cast<QueryPipelineStatisticFlags&>(m_commandBufferInheritanceInfo.pipelineStatistics);
 		}
 
 		CommandBufferInheritanceInfo& pipelineStatistics(QueryPipelineStatisticFlags pipelineStatistics)
@@ -7749,6 +13243,7 @@ namespace vk
 	private:
 		VkCommandBufferInheritanceInfo m_commandBufferInheritanceInfo;
 	};
+	static_assert(sizeof(CommandBufferInheritanceInfo) == sizeof(VkCommandBufferInheritanceInfo), "struct and wrapper have different size!");
 
 	class CommandBufferBeginInfo
 	{
@@ -7765,9 +13260,25 @@ namespace vk
 			m_commandBufferBeginInfo.pInheritanceInfo = reinterpret_cast<const VkCommandBufferInheritanceInfo*>(pInheritanceInfo);
 		}
 
+		CommandBufferBeginInfo(VkCommandBufferBeginInfo const & rhs)
+			: m_commandBufferBeginInfo(rhs)
+		{
+		}
+
+		CommandBufferBeginInfo& operator=(VkCommandBufferBeginInfo const & rhs)
+		{
+			m_commandBufferBeginInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_commandBufferBeginInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_commandBufferBeginInfo.sType);
 		}
 
 		CommandBufferBeginInfo& sType(StructureType sType)
@@ -7777,6 +13288,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_commandBufferBeginInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_commandBufferBeginInfo.pNext);
 		}
@@ -7792,6 +13308,11 @@ namespace vk
 			return reinterpret_cast<const CommandBufferUsageFlags&>(m_commandBufferBeginInfo.flags);
 		}
 
+		CommandBufferUsageFlags& flags()
+		{
+			return reinterpret_cast<CommandBufferUsageFlags&>(m_commandBufferBeginInfo.flags);
+		}
+
 		CommandBufferBeginInfo& flags(CommandBufferUsageFlags flags)
 		{
 			m_commandBufferBeginInfo.flags = static_cast<VkCommandBufferUsageFlags>(flags);
@@ -7799,6 +13320,11 @@ namespace vk
 		}
 
 		const CommandBufferInheritanceInfo* pInheritanceInfo() const
+		{
+			return reinterpret_cast<const CommandBufferInheritanceInfo*>(m_commandBufferBeginInfo.pInheritanceInfo);
+		}
+
+		const CommandBufferInheritanceInfo* pInheritanceInfo()
 		{
 			return reinterpret_cast<const CommandBufferInheritanceInfo*>(m_commandBufferBeginInfo.pInheritanceInfo);
 		}
@@ -7817,27 +13343,44 @@ namespace vk
 	private:
 		VkCommandBufferBeginInfo m_commandBufferBeginInfo;
 	};
+	static_assert(sizeof(CommandBufferBeginInfo) == sizeof(VkCommandBufferBeginInfo), "struct and wrapper have different size!");
 
 	class QueryPoolCreateInfo
 	{
 	public:
 		QueryPoolCreateInfo()
-			: QueryPoolCreateInfo(0, QueryType::eOcclusion, 0, QueryPipelineStatisticFlags())
+			: QueryPoolCreateInfo(QueryPoolCreateFlags(), QueryType::eOcclusion, 0, QueryPipelineStatisticFlags())
 		{}
 
 		QueryPoolCreateInfo(QueryPoolCreateFlags flags, QueryType queryType, uint32_t queryCount, QueryPipelineStatisticFlags pipelineStatistics)
 		{
 			m_queryPoolCreateInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
 			m_queryPoolCreateInfo.pNext = nullptr;
-			m_queryPoolCreateInfo.flags = flags;
+			m_queryPoolCreateInfo.flags = static_cast<VkQueryPoolCreateFlags>(flags);
 			m_queryPoolCreateInfo.queryType = static_cast<VkQueryType>(queryType);
 			m_queryPoolCreateInfo.queryCount = queryCount;
 			m_queryPoolCreateInfo.pipelineStatistics = static_cast<VkQueryPipelineStatisticFlags>(pipelineStatistics);
 		}
 
+		QueryPoolCreateInfo(VkQueryPoolCreateInfo const & rhs)
+			: m_queryPoolCreateInfo(rhs)
+		{
+		}
+
+		QueryPoolCreateInfo& operator=(VkQueryPoolCreateInfo const & rhs)
+		{
+			m_queryPoolCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_queryPoolCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_queryPoolCreateInfo.sType);
 		}
 
 		QueryPoolCreateInfo& sType(StructureType sType)
@@ -7851,6 +13394,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_queryPoolCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_queryPoolCreateInfo.pNext);
+		}
+
 		QueryPoolCreateInfo& pNext(const void* pNext)
 		{
 			m_queryPoolCreateInfo.pNext = pNext;
@@ -7859,18 +13407,28 @@ namespace vk
 
 		const QueryPoolCreateFlags& flags() const
 		{
-			return m_queryPoolCreateInfo.flags;
+			return reinterpret_cast<const QueryPoolCreateFlags&>(m_queryPoolCreateInfo.flags);
+		}
+
+		QueryPoolCreateFlags& flags()
+		{
+			return reinterpret_cast<QueryPoolCreateFlags&>(m_queryPoolCreateInfo.flags);
 		}
 
 		QueryPoolCreateInfo& flags(QueryPoolCreateFlags flags)
 		{
-			m_queryPoolCreateInfo.flags = flags;
+			m_queryPoolCreateInfo.flags = static_cast<VkQueryPoolCreateFlags>(flags);
 			return *this;
 		}
 
 		const QueryType& queryType() const
 		{
 			return reinterpret_cast<const QueryType&>(m_queryPoolCreateInfo.queryType);
+		}
+
+		QueryType& queryType()
+		{
+			return reinterpret_cast<QueryType&>(m_queryPoolCreateInfo.queryType);
 		}
 
 		QueryPoolCreateInfo& queryType(QueryType queryType)
@@ -7884,6 +13442,11 @@ namespace vk
 			return m_queryPoolCreateInfo.queryCount;
 		}
 
+		uint32_t& queryCount()
+		{
+			return m_queryPoolCreateInfo.queryCount;
+		}
+
 		QueryPoolCreateInfo& queryCount(uint32_t queryCount)
 		{
 			m_queryPoolCreateInfo.queryCount = queryCount;
@@ -7893,6 +13456,11 @@ namespace vk
 		const QueryPipelineStatisticFlags& pipelineStatistics() const
 		{
 			return reinterpret_cast<const QueryPipelineStatisticFlags&>(m_queryPoolCreateInfo.pipelineStatistics);
+		}
+
+		QueryPipelineStatisticFlags& pipelineStatistics()
+		{
+			return reinterpret_cast<QueryPipelineStatisticFlags&>(m_queryPoolCreateInfo.pipelineStatistics);
 		}
 
 		QueryPoolCreateInfo& pipelineStatistics(QueryPipelineStatisticFlags pipelineStatistics)
@@ -7909,6 +13477,7 @@ namespace vk
 	private:
 		VkQueryPoolCreateInfo m_queryPoolCreateInfo;
 	};
+	static_assert(sizeof(QueryPoolCreateInfo) == sizeof(VkQueryPoolCreateInfo), "struct and wrapper have different size!");
 
 	enum class ImageAspectFlagBits
 	{
@@ -7939,9 +13508,25 @@ namespace vk
 			m_imageSubresource.arrayLayer = arrayLayer;
 		}
 
+		ImageSubresource(VkImageSubresource const & rhs)
+			: m_imageSubresource(rhs)
+		{
+		}
+
+		ImageSubresource& operator=(VkImageSubresource const & rhs)
+		{
+			m_imageSubresource = rhs;
+			return *this;
+		}
+
 		const ImageAspectFlags& aspectMask() const
 		{
 			return reinterpret_cast<const ImageAspectFlags&>(m_imageSubresource.aspectMask);
+		}
+
+		ImageAspectFlags& aspectMask()
+		{
+			return reinterpret_cast<ImageAspectFlags&>(m_imageSubresource.aspectMask);
 		}
 
 		ImageSubresource& aspectMask(ImageAspectFlags aspectMask)
@@ -7955,6 +13540,11 @@ namespace vk
 			return m_imageSubresource.mipLevel;
 		}
 
+		uint32_t& mipLevel()
+		{
+			return m_imageSubresource.mipLevel;
+		}
+
 		ImageSubresource& mipLevel(uint32_t mipLevel)
 		{
 			m_imageSubresource.mipLevel = mipLevel;
@@ -7962,6 +13552,11 @@ namespace vk
 		}
 
 		const uint32_t& arrayLayer() const
+		{
+			return m_imageSubresource.arrayLayer;
+		}
+
+		uint32_t& arrayLayer()
 		{
 			return m_imageSubresource.arrayLayer;
 		}
@@ -7980,6 +13575,7 @@ namespace vk
 	private:
 		VkImageSubresource m_imageSubresource;
 	};
+	static_assert(sizeof(ImageSubresource) == sizeof(VkImageSubresource), "struct and wrapper have different size!");
 
 	class ImageSubresourceLayers
 	{
@@ -7996,9 +13592,25 @@ namespace vk
 			m_imageSubresourceLayers.layerCount = layerCount;
 		}
 
+		ImageSubresourceLayers(VkImageSubresourceLayers const & rhs)
+			: m_imageSubresourceLayers(rhs)
+		{
+		}
+
+		ImageSubresourceLayers& operator=(VkImageSubresourceLayers const & rhs)
+		{
+			m_imageSubresourceLayers = rhs;
+			return *this;
+		}
+
 		const ImageAspectFlags& aspectMask() const
 		{
 			return reinterpret_cast<const ImageAspectFlags&>(m_imageSubresourceLayers.aspectMask);
+		}
+
+		ImageAspectFlags& aspectMask()
+		{
+			return reinterpret_cast<ImageAspectFlags&>(m_imageSubresourceLayers.aspectMask);
 		}
 
 		ImageSubresourceLayers& aspectMask(ImageAspectFlags aspectMask)
@@ -8008,6 +13620,11 @@ namespace vk
 		}
 
 		const uint32_t& mipLevel() const
+		{
+			return m_imageSubresourceLayers.mipLevel;
+		}
+
+		uint32_t& mipLevel()
 		{
 			return m_imageSubresourceLayers.mipLevel;
 		}
@@ -8023,6 +13640,11 @@ namespace vk
 			return m_imageSubresourceLayers.baseArrayLayer;
 		}
 
+		uint32_t& baseArrayLayer()
+		{
+			return m_imageSubresourceLayers.baseArrayLayer;
+		}
+
 		ImageSubresourceLayers& baseArrayLayer(uint32_t baseArrayLayer)
 		{
 			m_imageSubresourceLayers.baseArrayLayer = baseArrayLayer;
@@ -8030,6 +13652,11 @@ namespace vk
 		}
 
 		const uint32_t& layerCount() const
+		{
+			return m_imageSubresourceLayers.layerCount;
+		}
+
+		uint32_t& layerCount()
 		{
 			return m_imageSubresourceLayers.layerCount;
 		}
@@ -8048,6 +13675,7 @@ namespace vk
 	private:
 		VkImageSubresourceLayers m_imageSubresourceLayers;
 	};
+	static_assert(sizeof(ImageSubresourceLayers) == sizeof(VkImageSubresourceLayers), "struct and wrapper have different size!");
 
 	class ImageSubresourceRange
 	{
@@ -8065,9 +13693,25 @@ namespace vk
 			m_imageSubresourceRange.layerCount = layerCount;
 		}
 
+		ImageSubresourceRange(VkImageSubresourceRange const & rhs)
+			: m_imageSubresourceRange(rhs)
+		{
+		}
+
+		ImageSubresourceRange& operator=(VkImageSubresourceRange const & rhs)
+		{
+			m_imageSubresourceRange = rhs;
+			return *this;
+		}
+
 		const ImageAspectFlags& aspectMask() const
 		{
 			return reinterpret_cast<const ImageAspectFlags&>(m_imageSubresourceRange.aspectMask);
+		}
+
+		ImageAspectFlags& aspectMask()
+		{
+			return reinterpret_cast<ImageAspectFlags&>(m_imageSubresourceRange.aspectMask);
 		}
 
 		ImageSubresourceRange& aspectMask(ImageAspectFlags aspectMask)
@@ -8077,6 +13721,11 @@ namespace vk
 		}
 
 		const uint32_t& baseMipLevel() const
+		{
+			return m_imageSubresourceRange.baseMipLevel;
+		}
+
+		uint32_t& baseMipLevel()
 		{
 			return m_imageSubresourceRange.baseMipLevel;
 		}
@@ -8092,6 +13741,11 @@ namespace vk
 			return m_imageSubresourceRange.levelCount;
 		}
 
+		uint32_t& levelCount()
+		{
+			return m_imageSubresourceRange.levelCount;
+		}
+
 		ImageSubresourceRange& levelCount(uint32_t levelCount)
 		{
 			m_imageSubresourceRange.levelCount = levelCount;
@@ -8103,6 +13757,11 @@ namespace vk
 			return m_imageSubresourceRange.baseArrayLayer;
 		}
 
+		uint32_t& baseArrayLayer()
+		{
+			return m_imageSubresourceRange.baseArrayLayer;
+		}
+
 		ImageSubresourceRange& baseArrayLayer(uint32_t baseArrayLayer)
 		{
 			m_imageSubresourceRange.baseArrayLayer = baseArrayLayer;
@@ -8110,6 +13769,11 @@ namespace vk
 		}
 
 		const uint32_t& layerCount() const
+		{
+			return m_imageSubresourceRange.layerCount;
+		}
+
+		uint32_t& layerCount()
 		{
 			return m_imageSubresourceRange.layerCount;
 		}
@@ -8128,6 +13792,7 @@ namespace vk
 	private:
 		VkImageSubresourceRange m_imageSubresourceRange;
 	};
+	static_assert(sizeof(ImageSubresourceRange) == sizeof(VkImageSubresourceRange), "struct and wrapper have different size!");
 
 	class ImageMemoryBarrier
 	{
@@ -8146,13 +13811,29 @@ namespace vk
 			m_imageMemoryBarrier.newLayout = static_cast<VkImageLayout>(newLayout);
 			m_imageMemoryBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex;
 			m_imageMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
-			m_imageMemoryBarrier.image = image;
+			m_imageMemoryBarrier.image = static_cast<VkImage>(image);
 			m_imageMemoryBarrier.subresourceRange = static_cast<VkImageSubresourceRange>(subresourceRange);
+		}
+
+		ImageMemoryBarrier(VkImageMemoryBarrier const & rhs)
+			: m_imageMemoryBarrier(rhs)
+		{
+		}
+
+		ImageMemoryBarrier& operator=(VkImageMemoryBarrier const & rhs)
+		{
+			m_imageMemoryBarrier = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_imageMemoryBarrier.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_imageMemoryBarrier.sType);
 		}
 
 		ImageMemoryBarrier& sType(StructureType sType)
@@ -8162,6 +13843,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_imageMemoryBarrier.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_imageMemoryBarrier.pNext);
 		}
@@ -8177,6 +13863,11 @@ namespace vk
 			return reinterpret_cast<const AccessFlags&>(m_imageMemoryBarrier.srcAccessMask);
 		}
 
+		AccessFlags& srcAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_imageMemoryBarrier.srcAccessMask);
+		}
+
 		ImageMemoryBarrier& srcAccessMask(AccessFlags srcAccessMask)
 		{
 			m_imageMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
@@ -8186,6 +13877,11 @@ namespace vk
 		const AccessFlags& dstAccessMask() const
 		{
 			return reinterpret_cast<const AccessFlags&>(m_imageMemoryBarrier.dstAccessMask);
+		}
+
+		AccessFlags& dstAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_imageMemoryBarrier.dstAccessMask);
 		}
 
 		ImageMemoryBarrier& dstAccessMask(AccessFlags dstAccessMask)
@@ -8199,6 +13895,11 @@ namespace vk
 			return reinterpret_cast<const ImageLayout&>(m_imageMemoryBarrier.oldLayout);
 		}
 
+		ImageLayout& oldLayout()
+		{
+			return reinterpret_cast<ImageLayout&>(m_imageMemoryBarrier.oldLayout);
+		}
+
 		ImageMemoryBarrier& oldLayout(ImageLayout oldLayout)
 		{
 			m_imageMemoryBarrier.oldLayout = static_cast<VkImageLayout>(oldLayout);
@@ -8210,6 +13911,11 @@ namespace vk
 			return reinterpret_cast<const ImageLayout&>(m_imageMemoryBarrier.newLayout);
 		}
 
+		ImageLayout& newLayout()
+		{
+			return reinterpret_cast<ImageLayout&>(m_imageMemoryBarrier.newLayout);
+		}
+
 		ImageMemoryBarrier& newLayout(ImageLayout newLayout)
 		{
 			m_imageMemoryBarrier.newLayout = static_cast<VkImageLayout>(newLayout);
@@ -8217,6 +13923,11 @@ namespace vk
 		}
 
 		const uint32_t& srcQueueFamilyIndex() const
+		{
+			return m_imageMemoryBarrier.srcQueueFamilyIndex;
+		}
+
+		uint32_t& srcQueueFamilyIndex()
 		{
 			return m_imageMemoryBarrier.srcQueueFamilyIndex;
 		}
@@ -8232,6 +13943,11 @@ namespace vk
 			return m_imageMemoryBarrier.dstQueueFamilyIndex;
 		}
 
+		uint32_t& dstQueueFamilyIndex()
+		{
+			return m_imageMemoryBarrier.dstQueueFamilyIndex;
+		}
+
 		ImageMemoryBarrier& dstQueueFamilyIndex(uint32_t dstQueueFamilyIndex)
 		{
 			m_imageMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
@@ -8240,18 +13956,28 @@ namespace vk
 
 		const Image& image() const
 		{
-			return m_imageMemoryBarrier.image;
+			return reinterpret_cast<const Image&>(m_imageMemoryBarrier.image);
+		}
+
+		Image& image()
+		{
+			return reinterpret_cast<Image&>(m_imageMemoryBarrier.image);
 		}
 
 		ImageMemoryBarrier& image(Image image)
 		{
-			m_imageMemoryBarrier.image = image;
+			m_imageMemoryBarrier.image = static_cast<VkImage>(image);
 			return *this;
 		}
 
 		const ImageSubresourceRange& subresourceRange() const
 		{
 			return reinterpret_cast<const ImageSubresourceRange&>(m_imageMemoryBarrier.subresourceRange);
+		}
+
+		ImageSubresourceRange& subresourceRange()
+		{
+			return reinterpret_cast<ImageSubresourceRange&>(m_imageMemoryBarrier.subresourceRange);
 		}
 
 		ImageMemoryBarrier& subresourceRange(ImageSubresourceRange subresourceRange)
@@ -8268,29 +13994,46 @@ namespace vk
 	private:
 		VkImageMemoryBarrier m_imageMemoryBarrier;
 	};
+	static_assert(sizeof(ImageMemoryBarrier) == sizeof(VkImageMemoryBarrier), "struct and wrapper have different size!");
 
 	class ImageViewCreateInfo
 	{
 	public:
 		ImageViewCreateInfo()
-			: ImageViewCreateInfo(0, Image(), ImageViewType::e1D, Format::eUndefined, ComponentMapping(), ImageSubresourceRange())
+			: ImageViewCreateInfo(ImageViewCreateFlags(), Image(), ImageViewType::e1D, Format::eUndefined, ComponentMapping(), ImageSubresourceRange())
 		{}
 
 		ImageViewCreateInfo(ImageViewCreateFlags flags, Image image, ImageViewType viewType, Format format, ComponentMapping components, ImageSubresourceRange subresourceRange)
 		{
 			m_imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			m_imageViewCreateInfo.pNext = nullptr;
-			m_imageViewCreateInfo.flags = flags;
-			m_imageViewCreateInfo.image = image;
+			m_imageViewCreateInfo.flags = static_cast<VkImageViewCreateFlags>(flags);
+			m_imageViewCreateInfo.image = static_cast<VkImage>(image);
 			m_imageViewCreateInfo.viewType = static_cast<VkImageViewType>(viewType);
 			m_imageViewCreateInfo.format = static_cast<VkFormat>(format);
 			m_imageViewCreateInfo.components = static_cast<VkComponentMapping>(components);
 			m_imageViewCreateInfo.subresourceRange = static_cast<VkImageSubresourceRange>(subresourceRange);
 		}
 
+		ImageViewCreateInfo(VkImageViewCreateInfo const & rhs)
+			: m_imageViewCreateInfo(rhs)
+		{
+		}
+
+		ImageViewCreateInfo& operator=(VkImageViewCreateInfo const & rhs)
+		{
+			m_imageViewCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_imageViewCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_imageViewCreateInfo.sType);
 		}
 
 		ImageViewCreateInfo& sType(StructureType sType)
@@ -8304,6 +14047,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_imageViewCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_imageViewCreateInfo.pNext);
+		}
+
 		ImageViewCreateInfo& pNext(const void* pNext)
 		{
 			m_imageViewCreateInfo.pNext = pNext;
@@ -8312,29 +14060,44 @@ namespace vk
 
 		const ImageViewCreateFlags& flags() const
 		{
-			return m_imageViewCreateInfo.flags;
+			return reinterpret_cast<const ImageViewCreateFlags&>(m_imageViewCreateInfo.flags);
+		}
+
+		ImageViewCreateFlags& flags()
+		{
+			return reinterpret_cast<ImageViewCreateFlags&>(m_imageViewCreateInfo.flags);
 		}
 
 		ImageViewCreateInfo& flags(ImageViewCreateFlags flags)
 		{
-			m_imageViewCreateInfo.flags = flags;
+			m_imageViewCreateInfo.flags = static_cast<VkImageViewCreateFlags>(flags);
 			return *this;
 		}
 
 		const Image& image() const
 		{
-			return m_imageViewCreateInfo.image;
+			return reinterpret_cast<const Image&>(m_imageViewCreateInfo.image);
+		}
+
+		Image& image()
+		{
+			return reinterpret_cast<Image&>(m_imageViewCreateInfo.image);
 		}
 
 		ImageViewCreateInfo& image(Image image)
 		{
-			m_imageViewCreateInfo.image = image;
+			m_imageViewCreateInfo.image = static_cast<VkImage>(image);
 			return *this;
 		}
 
 		const ImageViewType& viewType() const
 		{
 			return reinterpret_cast<const ImageViewType&>(m_imageViewCreateInfo.viewType);
+		}
+
+		ImageViewType& viewType()
+		{
+			return reinterpret_cast<ImageViewType&>(m_imageViewCreateInfo.viewType);
 		}
 
 		ImageViewCreateInfo& viewType(ImageViewType viewType)
@@ -8348,6 +14111,11 @@ namespace vk
 			return reinterpret_cast<const Format&>(m_imageViewCreateInfo.format);
 		}
 
+		Format& format()
+		{
+			return reinterpret_cast<Format&>(m_imageViewCreateInfo.format);
+		}
+
 		ImageViewCreateInfo& format(Format format)
 		{
 			m_imageViewCreateInfo.format = static_cast<VkFormat>(format);
@@ -8359,6 +14127,11 @@ namespace vk
 			return reinterpret_cast<const ComponentMapping&>(m_imageViewCreateInfo.components);
 		}
 
+		ComponentMapping& components()
+		{
+			return reinterpret_cast<ComponentMapping&>(m_imageViewCreateInfo.components);
+		}
+
 		ImageViewCreateInfo& components(ComponentMapping components)
 		{
 			m_imageViewCreateInfo.components = static_cast<VkComponentMapping>(components);
@@ -8368,6 +14141,11 @@ namespace vk
 		const ImageSubresourceRange& subresourceRange() const
 		{
 			return reinterpret_cast<const ImageSubresourceRange&>(m_imageViewCreateInfo.subresourceRange);
+		}
+
+		ImageSubresourceRange& subresourceRange()
+		{
+			return reinterpret_cast<ImageSubresourceRange&>(m_imageViewCreateInfo.subresourceRange);
 		}
 
 		ImageViewCreateInfo& subresourceRange(ImageSubresourceRange subresourceRange)
@@ -8384,6 +14162,7 @@ namespace vk
 	private:
 		VkImageViewCreateInfo m_imageViewCreateInfo;
 	};
+	static_assert(sizeof(ImageViewCreateInfo) == sizeof(VkImageViewCreateInfo), "struct and wrapper have different size!");
 
 	class ImageCopy
 	{
@@ -8401,9 +14180,25 @@ namespace vk
 			m_imageCopy.extent = static_cast<VkExtent3D>(extent);
 		}
 
+		ImageCopy(VkImageCopy const & rhs)
+			: m_imageCopy(rhs)
+		{
+		}
+
+		ImageCopy& operator=(VkImageCopy const & rhs)
+		{
+			m_imageCopy = rhs;
+			return *this;
+		}
+
 		const ImageSubresourceLayers& srcSubresource() const
 		{
 			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageCopy.srcSubresource);
+		}
+
+		ImageSubresourceLayers& srcSubresource()
+		{
+			return reinterpret_cast<ImageSubresourceLayers&>(m_imageCopy.srcSubresource);
 		}
 
 		ImageCopy& srcSubresource(ImageSubresourceLayers srcSubresource)
@@ -8417,6 +14212,11 @@ namespace vk
 			return reinterpret_cast<const Offset3D&>(m_imageCopy.srcOffset);
 		}
 
+		Offset3D& srcOffset()
+		{
+			return reinterpret_cast<Offset3D&>(m_imageCopy.srcOffset);
+		}
+
 		ImageCopy& srcOffset(Offset3D srcOffset)
 		{
 			m_imageCopy.srcOffset = static_cast<VkOffset3D>(srcOffset);
@@ -8426,6 +14226,11 @@ namespace vk
 		const ImageSubresourceLayers& dstSubresource() const
 		{
 			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageCopy.dstSubresource);
+		}
+
+		ImageSubresourceLayers& dstSubresource()
+		{
+			return reinterpret_cast<ImageSubresourceLayers&>(m_imageCopy.dstSubresource);
 		}
 
 		ImageCopy& dstSubresource(ImageSubresourceLayers dstSubresource)
@@ -8439,6 +14244,11 @@ namespace vk
 			return reinterpret_cast<const Offset3D&>(m_imageCopy.dstOffset);
 		}
 
+		Offset3D& dstOffset()
+		{
+			return reinterpret_cast<Offset3D&>(m_imageCopy.dstOffset);
+		}
+
 		ImageCopy& dstOffset(Offset3D dstOffset)
 		{
 			m_imageCopy.dstOffset = static_cast<VkOffset3D>(dstOffset);
@@ -8448,6 +14258,11 @@ namespace vk
 		const Extent3D& extent() const
 		{
 			return reinterpret_cast<const Extent3D&>(m_imageCopy.extent);
+		}
+
+		Extent3D& extent()
+		{
+			return reinterpret_cast<Extent3D&>(m_imageCopy.extent);
 		}
 
 		ImageCopy& extent(Extent3D extent)
@@ -8464,6 +14279,7 @@ namespace vk
 	private:
 		VkImageCopy m_imageCopy;
 	};
+	static_assert(sizeof(ImageCopy) == sizeof(VkImageCopy), "struct and wrapper have different size!");
 
 	class ImageBlit
 	{
@@ -8472,7 +14288,7 @@ namespace vk
 			: ImageBlit(ImageSubresourceLayers(), { Offset3D() }, ImageSubresourceLayers(), { Offset3D() })
 		{}
 
-		ImageBlit(ImageSubresourceLayers srcSubresource, eastl::fixed_vector<Offset3D, 2> const& srcOffsets, ImageSubresourceLayers dstSubresource, eastl::fixed_vector<Offset3D, 2> const& dstOffsets)
+		ImageBlit(ImageSubresourceLayers srcSubresource, eastl::array<Offset3D, 2> const& srcOffsets, ImageSubresourceLayers dstSubresource, eastl::array<Offset3D, 2> const& dstOffsets)
 		{
 			m_imageBlit.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
 			memcpy(&m_imageBlit.srcOffsets, srcOffsets.data(), 2 * sizeof(Offset3D));
@@ -8480,9 +14296,25 @@ namespace vk
 			memcpy(&m_imageBlit.dstOffsets, dstOffsets.data(), 2 * sizeof(Offset3D));
 		}
 
+		ImageBlit(VkImageBlit const & rhs)
+			: m_imageBlit(rhs)
+		{
+		}
+
+		ImageBlit& operator=(VkImageBlit const & rhs)
+		{
+			m_imageBlit = rhs;
+			return *this;
+		}
+
 		const ImageSubresourceLayers& srcSubresource() const
 		{
 			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageBlit.srcSubresource);
+		}
+
+		ImageSubresourceLayers& srcSubresource()
+		{
+			return reinterpret_cast<ImageSubresourceLayers&>(m_imageBlit.srcSubresource);
 		}
 
 		ImageBlit& srcSubresource(ImageSubresourceLayers srcSubresource)
@@ -8496,7 +14328,12 @@ namespace vk
 			return reinterpret_cast<const Offset3D*>(m_imageBlit.srcOffsets);
 		}
 
-		ImageBlit& srcOffsets(eastl::fixed_vector<Offset3D, 2> srcOffsets)
+		Offset3D* srcOffsets()
+		{
+			return reinterpret_cast<Offset3D*>(m_imageBlit.srcOffsets);
+		}
+
+		ImageBlit& srcOffsets(eastl::array<Offset3D, 2> srcOffsets)
 		{
 			memcpy(&m_imageBlit.srcOffsets, srcOffsets.data(), 2 * sizeof(Offset3D));
 			return *this;
@@ -8505,6 +14342,11 @@ namespace vk
 		const ImageSubresourceLayers& dstSubresource() const
 		{
 			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageBlit.dstSubresource);
+		}
+
+		ImageSubresourceLayers& dstSubresource()
+		{
+			return reinterpret_cast<ImageSubresourceLayers&>(m_imageBlit.dstSubresource);
 		}
 
 		ImageBlit& dstSubresource(ImageSubresourceLayers dstSubresource)
@@ -8518,7 +14360,12 @@ namespace vk
 			return reinterpret_cast<const Offset3D*>(m_imageBlit.dstOffsets);
 		}
 
-		ImageBlit& dstOffsets(eastl::fixed_vector<Offset3D, 2> dstOffsets)
+		Offset3D* dstOffsets()
+		{
+			return reinterpret_cast<Offset3D*>(m_imageBlit.dstOffsets);
+		}
+
+		ImageBlit& dstOffsets(eastl::array<Offset3D, 2> dstOffsets)
 		{
 			memcpy(&m_imageBlit.dstOffsets, dstOffsets.data(), 2 * sizeof(Offset3D));
 			return *this;
@@ -8532,6 +14379,7 @@ namespace vk
 	private:
 		VkImageBlit m_imageBlit;
 	};
+	static_assert(sizeof(ImageBlit) == sizeof(VkImageBlit), "struct and wrapper have different size!");
 
 	class BufferImageCopy
 	{
@@ -8550,7 +14398,23 @@ namespace vk
 			m_bufferImageCopy.imageExtent = static_cast<VkExtent3D>(imageExtent);
 		}
 
+		BufferImageCopy(VkBufferImageCopy const & rhs)
+			: m_bufferImageCopy(rhs)
+		{
+		}
+
+		BufferImageCopy& operator=(VkBufferImageCopy const & rhs)
+		{
+			m_bufferImageCopy = rhs;
+			return *this;
+		}
+
 		const DeviceSize& bufferOffset() const
+		{
+			return m_bufferImageCopy.bufferOffset;
+		}
+
+		DeviceSize& bufferOffset()
 		{
 			return m_bufferImageCopy.bufferOffset;
 		}
@@ -8566,6 +14430,11 @@ namespace vk
 			return m_bufferImageCopy.bufferRowLength;
 		}
 
+		uint32_t& bufferRowLength()
+		{
+			return m_bufferImageCopy.bufferRowLength;
+		}
+
 		BufferImageCopy& bufferRowLength(uint32_t bufferRowLength)
 		{
 			m_bufferImageCopy.bufferRowLength = bufferRowLength;
@@ -8573,6 +14442,11 @@ namespace vk
 		}
 
 		const uint32_t& bufferImageHeight() const
+		{
+			return m_bufferImageCopy.bufferImageHeight;
+		}
+
+		uint32_t& bufferImageHeight()
 		{
 			return m_bufferImageCopy.bufferImageHeight;
 		}
@@ -8588,6 +14462,11 @@ namespace vk
 			return reinterpret_cast<const ImageSubresourceLayers&>(m_bufferImageCopy.imageSubresource);
 		}
 
+		ImageSubresourceLayers& imageSubresource()
+		{
+			return reinterpret_cast<ImageSubresourceLayers&>(m_bufferImageCopy.imageSubresource);
+		}
+
 		BufferImageCopy& imageSubresource(ImageSubresourceLayers imageSubresource)
 		{
 			m_bufferImageCopy.imageSubresource = static_cast<VkImageSubresourceLayers>(imageSubresource);
@@ -8599,6 +14478,11 @@ namespace vk
 			return reinterpret_cast<const Offset3D&>(m_bufferImageCopy.imageOffset);
 		}
 
+		Offset3D& imageOffset()
+		{
+			return reinterpret_cast<Offset3D&>(m_bufferImageCopy.imageOffset);
+		}
+
 		BufferImageCopy& imageOffset(Offset3D imageOffset)
 		{
 			m_bufferImageCopy.imageOffset = static_cast<VkOffset3D>(imageOffset);
@@ -8608,6 +14492,11 @@ namespace vk
 		const Extent3D& imageExtent() const
 		{
 			return reinterpret_cast<const Extent3D&>(m_bufferImageCopy.imageExtent);
+		}
+
+		Extent3D& imageExtent()
+		{
+			return reinterpret_cast<Extent3D&>(m_bufferImageCopy.imageExtent);
 		}
 
 		BufferImageCopy& imageExtent(Extent3D imageExtent)
@@ -8624,6 +14513,7 @@ namespace vk
 	private:
 		VkBufferImageCopy m_bufferImageCopy;
 	};
+	static_assert(sizeof(BufferImageCopy) == sizeof(VkBufferImageCopy), "struct and wrapper have different size!");
 
 	class ImageResolve
 	{
@@ -8641,9 +14531,25 @@ namespace vk
 			m_imageResolve.extent = static_cast<VkExtent3D>(extent);
 		}
 
+		ImageResolve(VkImageResolve const & rhs)
+			: m_imageResolve(rhs)
+		{
+		}
+
+		ImageResolve& operator=(VkImageResolve const & rhs)
+		{
+			m_imageResolve = rhs;
+			return *this;
+		}
+
 		const ImageSubresourceLayers& srcSubresource() const
 		{
 			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageResolve.srcSubresource);
+		}
+
+		ImageSubresourceLayers& srcSubresource()
+		{
+			return reinterpret_cast<ImageSubresourceLayers&>(m_imageResolve.srcSubresource);
 		}
 
 		ImageResolve& srcSubresource(ImageSubresourceLayers srcSubresource)
@@ -8657,6 +14563,11 @@ namespace vk
 			return reinterpret_cast<const Offset3D&>(m_imageResolve.srcOffset);
 		}
 
+		Offset3D& srcOffset()
+		{
+			return reinterpret_cast<Offset3D&>(m_imageResolve.srcOffset);
+		}
+
 		ImageResolve& srcOffset(Offset3D srcOffset)
 		{
 			m_imageResolve.srcOffset = static_cast<VkOffset3D>(srcOffset);
@@ -8666,6 +14577,11 @@ namespace vk
 		const ImageSubresourceLayers& dstSubresource() const
 		{
 			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageResolve.dstSubresource);
+		}
+
+		ImageSubresourceLayers& dstSubresource()
+		{
+			return reinterpret_cast<ImageSubresourceLayers&>(m_imageResolve.dstSubresource);
 		}
 
 		ImageResolve& dstSubresource(ImageSubresourceLayers dstSubresource)
@@ -8679,6 +14595,11 @@ namespace vk
 			return reinterpret_cast<const Offset3D&>(m_imageResolve.dstOffset);
 		}
 
+		Offset3D& dstOffset()
+		{
+			return reinterpret_cast<Offset3D&>(m_imageResolve.dstOffset);
+		}
+
 		ImageResolve& dstOffset(Offset3D dstOffset)
 		{
 			m_imageResolve.dstOffset = static_cast<VkOffset3D>(dstOffset);
@@ -8688,6 +14609,11 @@ namespace vk
 		const Extent3D& extent() const
 		{
 			return reinterpret_cast<const Extent3D&>(m_imageResolve.extent);
+		}
+
+		Extent3D& extent()
+		{
+			return reinterpret_cast<Extent3D&>(m_imageResolve.extent);
 		}
 
 		ImageResolve& extent(Extent3D extent)
@@ -8704,6 +14630,7 @@ namespace vk
 	private:
 		VkImageResolve m_imageResolve;
 	};
+	static_assert(sizeof(ImageResolve) == sizeof(VkImageResolve), "struct and wrapper have different size!");
 
 	class ClearAttachment
 	{
@@ -8719,9 +14646,25 @@ namespace vk
 			m_clearAttachment.clearValue = static_cast<VkClearValue>(clearValue);
 		}
 
+		ClearAttachment(VkClearAttachment const & rhs)
+			: m_clearAttachment(rhs)
+		{
+		}
+
+		ClearAttachment& operator=(VkClearAttachment const & rhs)
+		{
+			m_clearAttachment = rhs;
+			return *this;
+		}
+
 		const ImageAspectFlags& aspectMask() const
 		{
 			return reinterpret_cast<const ImageAspectFlags&>(m_clearAttachment.aspectMask);
+		}
+
+		ImageAspectFlags& aspectMask()
+		{
+			return reinterpret_cast<ImageAspectFlags&>(m_clearAttachment.aspectMask);
 		}
 
 		ClearAttachment& aspectMask(ImageAspectFlags aspectMask)
@@ -8735,6 +14678,11 @@ namespace vk
 			return m_clearAttachment.colorAttachment;
 		}
 
+		uint32_t& colorAttachment()
+		{
+			return m_clearAttachment.colorAttachment;
+		}
+
 		ClearAttachment& colorAttachment(uint32_t colorAttachment)
 		{
 			m_clearAttachment.colorAttachment = colorAttachment;
@@ -8744,6 +14692,11 @@ namespace vk
 		const ClearValue& clearValue() const
 		{
 			return reinterpret_cast<const ClearValue&>(m_clearAttachment.clearValue);
+		}
+
+		ClearValue& clearValue()
+		{
+			return reinterpret_cast<ClearValue&>(m_clearAttachment.clearValue);
 		}
 
 		ClearAttachment& clearValue(ClearValue clearValue)
@@ -8760,6 +14713,7 @@ namespace vk
 	private:
 		VkClearAttachment m_clearAttachment;
 	};
+	static_assert(sizeof(ClearAttachment) == sizeof(VkClearAttachment), "struct and wrapper have different size!");
 
 	enum class SparseImageFormatFlagBits
 	{
@@ -8801,6 +14755,7 @@ namespace vk
 	private:
 		VkSparseImageFormatProperties m_sparseImageFormatProperties;
 	};
+	static_assert(sizeof(SparseImageFormatProperties) == sizeof(VkSparseImageFormatProperties), "struct and wrapper have different size!");
 
 	class SparseImageMemoryRequirements
 	{
@@ -8838,6 +14793,7 @@ namespace vk
 	private:
 		VkSparseImageMemoryRequirements m_sparseImageMemoryRequirements;
 	};
+	static_assert(sizeof(SparseImageMemoryRequirements) == sizeof(VkSparseImageMemoryRequirements), "struct and wrapper have different size!");
 
 	enum class SparseMemoryBindFlagBits
 	{
@@ -8862,12 +14818,28 @@ namespace vk
 		{
 			m_sparseMemoryBind.resourceOffset = resourceOffset;
 			m_sparseMemoryBind.size = size;
-			m_sparseMemoryBind.memory = memory;
+			m_sparseMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
 			m_sparseMemoryBind.memoryOffset = memoryOffset;
 			m_sparseMemoryBind.flags = static_cast<VkSparseMemoryBindFlags>(flags);
 		}
 
+		SparseMemoryBind(VkSparseMemoryBind const & rhs)
+			: m_sparseMemoryBind(rhs)
+		{
+		}
+
+		SparseMemoryBind& operator=(VkSparseMemoryBind const & rhs)
+		{
+			m_sparseMemoryBind = rhs;
+			return *this;
+		}
+
 		const DeviceSize& resourceOffset() const
+		{
+			return m_sparseMemoryBind.resourceOffset;
+		}
+
+		DeviceSize& resourceOffset()
 		{
 			return m_sparseMemoryBind.resourceOffset;
 		}
@@ -8883,6 +14855,11 @@ namespace vk
 			return m_sparseMemoryBind.size;
 		}
 
+		DeviceSize& size()
+		{
+			return m_sparseMemoryBind.size;
+		}
+
 		SparseMemoryBind& size(DeviceSize size)
 		{
 			m_sparseMemoryBind.size = size;
@@ -8891,16 +14868,26 @@ namespace vk
 
 		const DeviceMemory& memory() const
 		{
-			return m_sparseMemoryBind.memory;
+			return reinterpret_cast<const DeviceMemory&>(m_sparseMemoryBind.memory);
+		}
+
+		DeviceMemory& memory()
+		{
+			return reinterpret_cast<DeviceMemory&>(m_sparseMemoryBind.memory);
 		}
 
 		SparseMemoryBind& memory(DeviceMemory memory)
 		{
-			m_sparseMemoryBind.memory = memory;
+			m_sparseMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
 			return *this;
 		}
 
 		const DeviceSize& memoryOffset() const
+		{
+			return m_sparseMemoryBind.memoryOffset;
+		}
+
+		DeviceSize& memoryOffset()
 		{
 			return m_sparseMemoryBind.memoryOffset;
 		}
@@ -8914,6 +14901,11 @@ namespace vk
 		const SparseMemoryBindFlags& flags() const
 		{
 			return reinterpret_cast<const SparseMemoryBindFlags&>(m_sparseMemoryBind.flags);
+		}
+
+		SparseMemoryBindFlags& flags()
+		{
+			return reinterpret_cast<SparseMemoryBindFlags&>(m_sparseMemoryBind.flags);
 		}
 
 		SparseMemoryBind& flags(SparseMemoryBindFlags flags)
@@ -8930,6 +14922,7 @@ namespace vk
 	private:
 		VkSparseMemoryBind m_sparseMemoryBind;
 	};
+	static_assert(sizeof(SparseMemoryBind) == sizeof(VkSparseMemoryBind), "struct and wrapper have different size!");
 
 	class SparseImageMemoryBind
 	{
@@ -8943,14 +14936,30 @@ namespace vk
 			m_sparseImageMemoryBind.subresource = static_cast<VkImageSubresource>(subresource);
 			m_sparseImageMemoryBind.offset = static_cast<VkOffset3D>(offset);
 			m_sparseImageMemoryBind.extent = static_cast<VkExtent3D>(extent);
-			m_sparseImageMemoryBind.memory = memory;
+			m_sparseImageMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
 			m_sparseImageMemoryBind.memoryOffset = memoryOffset;
 			m_sparseImageMemoryBind.flags = static_cast<VkSparseMemoryBindFlags>(flags);
+		}
+
+		SparseImageMemoryBind(VkSparseImageMemoryBind const & rhs)
+			: m_sparseImageMemoryBind(rhs)
+		{
+		}
+
+		SparseImageMemoryBind& operator=(VkSparseImageMemoryBind const & rhs)
+		{
+			m_sparseImageMemoryBind = rhs;
+			return *this;
 		}
 
 		const ImageSubresource& subresource() const
 		{
 			return reinterpret_cast<const ImageSubresource&>(m_sparseImageMemoryBind.subresource);
+		}
+
+		ImageSubresource& subresource()
+		{
+			return reinterpret_cast<ImageSubresource&>(m_sparseImageMemoryBind.subresource);
 		}
 
 		SparseImageMemoryBind& subresource(ImageSubresource subresource)
@@ -8964,6 +14973,11 @@ namespace vk
 			return reinterpret_cast<const Offset3D&>(m_sparseImageMemoryBind.offset);
 		}
 
+		Offset3D& offset()
+		{
+			return reinterpret_cast<Offset3D&>(m_sparseImageMemoryBind.offset);
+		}
+
 		SparseImageMemoryBind& offset(Offset3D offset)
 		{
 			m_sparseImageMemoryBind.offset = static_cast<VkOffset3D>(offset);
@@ -8975,6 +14989,11 @@ namespace vk
 			return reinterpret_cast<const Extent3D&>(m_sparseImageMemoryBind.extent);
 		}
 
+		Extent3D& extent()
+		{
+			return reinterpret_cast<Extent3D&>(m_sparseImageMemoryBind.extent);
+		}
+
 		SparseImageMemoryBind& extent(Extent3D extent)
 		{
 			m_sparseImageMemoryBind.extent = static_cast<VkExtent3D>(extent);
@@ -8983,16 +15002,26 @@ namespace vk
 
 		const DeviceMemory& memory() const
 		{
-			return m_sparseImageMemoryBind.memory;
+			return reinterpret_cast<const DeviceMemory&>(m_sparseImageMemoryBind.memory);
+		}
+
+		DeviceMemory& memory()
+		{
+			return reinterpret_cast<DeviceMemory&>(m_sparseImageMemoryBind.memory);
 		}
 
 		SparseImageMemoryBind& memory(DeviceMemory memory)
 		{
-			m_sparseImageMemoryBind.memory = memory;
+			m_sparseImageMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
 			return *this;
 		}
 
 		const DeviceSize& memoryOffset() const
+		{
+			return m_sparseImageMemoryBind.memoryOffset;
+		}
+
+		DeviceSize& memoryOffset()
 		{
 			return m_sparseImageMemoryBind.memoryOffset;
 		}
@@ -9006,6 +15035,11 @@ namespace vk
 		const SparseMemoryBindFlags& flags() const
 		{
 			return reinterpret_cast<const SparseMemoryBindFlags&>(m_sparseImageMemoryBind.flags);
+		}
+
+		SparseMemoryBindFlags& flags()
+		{
+			return reinterpret_cast<SparseMemoryBindFlags&>(m_sparseImageMemoryBind.flags);
 		}
 
 		SparseImageMemoryBind& flags(SparseMemoryBindFlags flags)
@@ -9022,6 +15056,7 @@ namespace vk
 	private:
 		VkSparseImageMemoryBind m_sparseImageMemoryBind;
 	};
+	static_assert(sizeof(SparseImageMemoryBind) == sizeof(VkSparseImageMemoryBind), "struct and wrapper have different size!");
 
 	class SparseBufferMemoryBindInfo
 	{
@@ -9032,23 +15067,44 @@ namespace vk
 
 		SparseBufferMemoryBindInfo(Buffer buffer, uint32_t bindCount, const SparseMemoryBind* pBinds)
 		{
-			m_sparseBufferMemoryBindInfo.buffer = buffer;
+			m_sparseBufferMemoryBindInfo.buffer = static_cast<VkBuffer>(buffer);
 			m_sparseBufferMemoryBindInfo.bindCount = bindCount;
 			m_sparseBufferMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseMemoryBind*>(pBinds);
 		}
 
+		SparseBufferMemoryBindInfo(VkSparseBufferMemoryBindInfo const & rhs)
+			: m_sparseBufferMemoryBindInfo(rhs)
+		{
+		}
+
+		SparseBufferMemoryBindInfo& operator=(VkSparseBufferMemoryBindInfo const & rhs)
+		{
+			m_sparseBufferMemoryBindInfo = rhs;
+			return *this;
+		}
+
 		const Buffer& buffer() const
 		{
-			return m_sparseBufferMemoryBindInfo.buffer;
+			return reinterpret_cast<const Buffer&>(m_sparseBufferMemoryBindInfo.buffer);
+		}
+
+		Buffer& buffer()
+		{
+			return reinterpret_cast<Buffer&>(m_sparseBufferMemoryBindInfo.buffer);
 		}
 
 		SparseBufferMemoryBindInfo& buffer(Buffer buffer)
 		{
-			m_sparseBufferMemoryBindInfo.buffer = buffer;
+			m_sparseBufferMemoryBindInfo.buffer = static_cast<VkBuffer>(buffer);
 			return *this;
 		}
 
 		const uint32_t& bindCount() const
+		{
+			return m_sparseBufferMemoryBindInfo.bindCount;
+		}
+
+		uint32_t& bindCount()
 		{
 			return m_sparseBufferMemoryBindInfo.bindCount;
 		}
@@ -9060,6 +15116,11 @@ namespace vk
 		}
 
 		const SparseMemoryBind* pBinds() const
+		{
+			return reinterpret_cast<const SparseMemoryBind*>(m_sparseBufferMemoryBindInfo.pBinds);
+		}
+
+		const SparseMemoryBind* pBinds()
 		{
 			return reinterpret_cast<const SparseMemoryBind*>(m_sparseBufferMemoryBindInfo.pBinds);
 		}
@@ -9078,6 +15139,7 @@ namespace vk
 	private:
 		VkSparseBufferMemoryBindInfo m_sparseBufferMemoryBindInfo;
 	};
+	static_assert(sizeof(SparseBufferMemoryBindInfo) == sizeof(VkSparseBufferMemoryBindInfo), "struct and wrapper have different size!");
 
 	class SparseImageOpaqueMemoryBindInfo
 	{
@@ -9088,23 +15150,44 @@ namespace vk
 
 		SparseImageOpaqueMemoryBindInfo(Image image, uint32_t bindCount, const SparseMemoryBind* pBinds)
 		{
-			m_sparseImageOpaqueMemoryBindInfo.image = image;
+			m_sparseImageOpaqueMemoryBindInfo.image = static_cast<VkImage>(image);
 			m_sparseImageOpaqueMemoryBindInfo.bindCount = bindCount;
 			m_sparseImageOpaqueMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseMemoryBind*>(pBinds);
 		}
 
+		SparseImageOpaqueMemoryBindInfo(VkSparseImageOpaqueMemoryBindInfo const & rhs)
+			: m_sparseImageOpaqueMemoryBindInfo(rhs)
+		{
+		}
+
+		SparseImageOpaqueMemoryBindInfo& operator=(VkSparseImageOpaqueMemoryBindInfo const & rhs)
+		{
+			m_sparseImageOpaqueMemoryBindInfo = rhs;
+			return *this;
+		}
+
 		const Image& image() const
 		{
-			return m_sparseImageOpaqueMemoryBindInfo.image;
+			return reinterpret_cast<const Image&>(m_sparseImageOpaqueMemoryBindInfo.image);
+		}
+
+		Image& image()
+		{
+			return reinterpret_cast<Image&>(m_sparseImageOpaqueMemoryBindInfo.image);
 		}
 
 		SparseImageOpaqueMemoryBindInfo& image(Image image)
 		{
-			m_sparseImageOpaqueMemoryBindInfo.image = image;
+			m_sparseImageOpaqueMemoryBindInfo.image = static_cast<VkImage>(image);
 			return *this;
 		}
 
 		const uint32_t& bindCount() const
+		{
+			return m_sparseImageOpaqueMemoryBindInfo.bindCount;
+		}
+
+		uint32_t& bindCount()
 		{
 			return m_sparseImageOpaqueMemoryBindInfo.bindCount;
 		}
@@ -9116,6 +15199,11 @@ namespace vk
 		}
 
 		const SparseMemoryBind* pBinds() const
+		{
+			return reinterpret_cast<const SparseMemoryBind*>(m_sparseImageOpaqueMemoryBindInfo.pBinds);
+		}
+
+		const SparseMemoryBind* pBinds()
 		{
 			return reinterpret_cast<const SparseMemoryBind*>(m_sparseImageOpaqueMemoryBindInfo.pBinds);
 		}
@@ -9134,6 +15222,7 @@ namespace vk
 	private:
 		VkSparseImageOpaqueMemoryBindInfo m_sparseImageOpaqueMemoryBindInfo;
 	};
+	static_assert(sizeof(SparseImageOpaqueMemoryBindInfo) == sizeof(VkSparseImageOpaqueMemoryBindInfo), "struct and wrapper have different size!");
 
 	class SparseImageMemoryBindInfo
 	{
@@ -9144,23 +15233,44 @@ namespace vk
 
 		SparseImageMemoryBindInfo(Image image, uint32_t bindCount, const SparseImageMemoryBind* pBinds)
 		{
-			m_sparseImageMemoryBindInfo.image = image;
+			m_sparseImageMemoryBindInfo.image = static_cast<VkImage>(image);
 			m_sparseImageMemoryBindInfo.bindCount = bindCount;
 			m_sparseImageMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseImageMemoryBind*>(pBinds);
 		}
 
+		SparseImageMemoryBindInfo(VkSparseImageMemoryBindInfo const & rhs)
+			: m_sparseImageMemoryBindInfo(rhs)
+		{
+		}
+
+		SparseImageMemoryBindInfo& operator=(VkSparseImageMemoryBindInfo const & rhs)
+		{
+			m_sparseImageMemoryBindInfo = rhs;
+			return *this;
+		}
+
 		const Image& image() const
 		{
-			return m_sparseImageMemoryBindInfo.image;
+			return reinterpret_cast<const Image&>(m_sparseImageMemoryBindInfo.image);
+		}
+
+		Image& image()
+		{
+			return reinterpret_cast<Image&>(m_sparseImageMemoryBindInfo.image);
 		}
 
 		SparseImageMemoryBindInfo& image(Image image)
 		{
-			m_sparseImageMemoryBindInfo.image = image;
+			m_sparseImageMemoryBindInfo.image = static_cast<VkImage>(image);
 			return *this;
 		}
 
 		const uint32_t& bindCount() const
+		{
+			return m_sparseImageMemoryBindInfo.bindCount;
+		}
+
+		uint32_t& bindCount()
 		{
 			return m_sparseImageMemoryBindInfo.bindCount;
 		}
@@ -9172,6 +15282,11 @@ namespace vk
 		}
 
 		const SparseImageMemoryBind* pBinds() const
+		{
+			return reinterpret_cast<const SparseImageMemoryBind*>(m_sparseImageMemoryBindInfo.pBinds);
+		}
+
+		const SparseImageMemoryBind* pBinds()
 		{
 			return reinterpret_cast<const SparseImageMemoryBind*>(m_sparseImageMemoryBindInfo.pBinds);
 		}
@@ -9190,6 +15305,7 @@ namespace vk
 	private:
 		VkSparseImageMemoryBindInfo m_sparseImageMemoryBindInfo;
 	};
+	static_assert(sizeof(SparseImageMemoryBindInfo) == sizeof(VkSparseImageMemoryBindInfo), "struct and wrapper have different size!");
 
 	class BindSparseInfo
 	{
@@ -9203,7 +15319,7 @@ namespace vk
 			m_bindSparseInfo.sType = VK_STRUCTURE_TYPE_BIND_SPARSE_INFO;
 			m_bindSparseInfo.pNext = nullptr;
 			m_bindSparseInfo.waitSemaphoreCount = waitSemaphoreCount;
-			m_bindSparseInfo.pWaitSemaphores = pWaitSemaphores;
+			m_bindSparseInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
 			m_bindSparseInfo.bufferBindCount = bufferBindCount;
 			m_bindSparseInfo.pBufferBinds = reinterpret_cast<const VkSparseBufferMemoryBindInfo*>(pBufferBinds);
 			m_bindSparseInfo.imageOpaqueBindCount = imageOpaqueBindCount;
@@ -9211,12 +15327,28 @@ namespace vk
 			m_bindSparseInfo.imageBindCount = imageBindCount;
 			m_bindSparseInfo.pImageBinds = reinterpret_cast<const VkSparseImageMemoryBindInfo*>(pImageBinds);
 			m_bindSparseInfo.signalSemaphoreCount = signalSemaphoreCount;
-			m_bindSparseInfo.pSignalSemaphores = pSignalSemaphores;
+			m_bindSparseInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
+		}
+
+		BindSparseInfo(VkBindSparseInfo const & rhs)
+			: m_bindSparseInfo(rhs)
+		{
+		}
+
+		BindSparseInfo& operator=(VkBindSparseInfo const & rhs)
+		{
+			m_bindSparseInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_bindSparseInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_bindSparseInfo.sType);
 		}
 
 		BindSparseInfo& sType(StructureType sType)
@@ -9226,6 +15358,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_bindSparseInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_bindSparseInfo.pNext);
 		}
@@ -9241,6 +15378,11 @@ namespace vk
 			return m_bindSparseInfo.waitSemaphoreCount;
 		}
 
+		uint32_t& waitSemaphoreCount()
+		{
+			return m_bindSparseInfo.waitSemaphoreCount;
+		}
+
 		BindSparseInfo& waitSemaphoreCount(uint32_t waitSemaphoreCount)
 		{
 			m_bindSparseInfo.waitSemaphoreCount = waitSemaphoreCount;
@@ -9252,13 +15394,23 @@ namespace vk
 			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pWaitSemaphores);
 		}
 
+		const Semaphore* pWaitSemaphores()
+		{
+			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pWaitSemaphores);
+		}
+
 		BindSparseInfo& pWaitSemaphores(const Semaphore* pWaitSemaphores)
 		{
-			m_bindSparseInfo.pWaitSemaphores = pWaitSemaphores;
+			m_bindSparseInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
 			return *this;
 		}
 
 		const uint32_t& bufferBindCount() const
+		{
+			return m_bindSparseInfo.bufferBindCount;
+		}
+
+		uint32_t& bufferBindCount()
 		{
 			return m_bindSparseInfo.bufferBindCount;
 		}
@@ -9274,6 +15426,11 @@ namespace vk
 			return reinterpret_cast<const SparseBufferMemoryBindInfo*>(m_bindSparseInfo.pBufferBinds);
 		}
 
+		const SparseBufferMemoryBindInfo* pBufferBinds()
+		{
+			return reinterpret_cast<const SparseBufferMemoryBindInfo*>(m_bindSparseInfo.pBufferBinds);
+		}
+
 		BindSparseInfo& pBufferBinds(const SparseBufferMemoryBindInfo* pBufferBinds)
 		{
 			m_bindSparseInfo.pBufferBinds = reinterpret_cast<const VkSparseBufferMemoryBindInfo*>(pBufferBinds);
@@ -9281,6 +15438,11 @@ namespace vk
 		}
 
 		const uint32_t& imageOpaqueBindCount() const
+		{
+			return m_bindSparseInfo.imageOpaqueBindCount;
+		}
+
+		uint32_t& imageOpaqueBindCount()
 		{
 			return m_bindSparseInfo.imageOpaqueBindCount;
 		}
@@ -9296,6 +15458,11 @@ namespace vk
 			return reinterpret_cast<const SparseImageOpaqueMemoryBindInfo*>(m_bindSparseInfo.pImageOpaqueBinds);
 		}
 
+		const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds()
+		{
+			return reinterpret_cast<const SparseImageOpaqueMemoryBindInfo*>(m_bindSparseInfo.pImageOpaqueBinds);
+		}
+
 		BindSparseInfo& pImageOpaqueBinds(const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds)
 		{
 			m_bindSparseInfo.pImageOpaqueBinds = reinterpret_cast<const VkSparseImageOpaqueMemoryBindInfo*>(pImageOpaqueBinds);
@@ -9303,6 +15470,11 @@ namespace vk
 		}
 
 		const uint32_t& imageBindCount() const
+		{
+			return m_bindSparseInfo.imageBindCount;
+		}
+
+		uint32_t& imageBindCount()
 		{
 			return m_bindSparseInfo.imageBindCount;
 		}
@@ -9318,6 +15490,11 @@ namespace vk
 			return reinterpret_cast<const SparseImageMemoryBindInfo*>(m_bindSparseInfo.pImageBinds);
 		}
 
+		const SparseImageMemoryBindInfo* pImageBinds()
+		{
+			return reinterpret_cast<const SparseImageMemoryBindInfo*>(m_bindSparseInfo.pImageBinds);
+		}
+
 		BindSparseInfo& pImageBinds(const SparseImageMemoryBindInfo* pImageBinds)
 		{
 			m_bindSparseInfo.pImageBinds = reinterpret_cast<const VkSparseImageMemoryBindInfo*>(pImageBinds);
@@ -9325,6 +15502,11 @@ namespace vk
 		}
 
 		const uint32_t& signalSemaphoreCount() const
+		{
+			return m_bindSparseInfo.signalSemaphoreCount;
+		}
+
+		uint32_t& signalSemaphoreCount()
 		{
 			return m_bindSparseInfo.signalSemaphoreCount;
 		}
@@ -9340,9 +15522,14 @@ namespace vk
 			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pSignalSemaphores);
 		}
 
+		const Semaphore* pSignalSemaphores()
+		{
+			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pSignalSemaphores);
+		}
+
 		BindSparseInfo& pSignalSemaphores(const Semaphore* pSignalSemaphores)
 		{
-			m_bindSparseInfo.pSignalSemaphores = pSignalSemaphores;
+			m_bindSparseInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
 			return *this;
 		}
 
@@ -9354,6 +15541,7 @@ namespace vk
 	private:
 		VkBindSparseInfo m_bindSparseInfo;
 	};
+	static_assert(sizeof(BindSparseInfo) == sizeof(VkBindSparseInfo), "struct and wrapper have different size!");
 
 	enum class PipelineStageFlagBits
 	{
@@ -9383,134 +15571,6 @@ namespace vk
 		return PipelineStageFlags(bit0) | bit1;
 	}
 
-	class SubmitInfo
-	{
-	public:
-		SubmitInfo()
-			: SubmitInfo(0, nullptr, nullptr, 0, nullptr, 0, nullptr)
-		{}
-
-		SubmitInfo(uint32_t waitSemaphoreCount, const Semaphore* pWaitSemaphores, const PipelineStageFlags* pWaitDstStageMask, uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const Semaphore* pSignalSemaphores)
-		{
-			m_submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			m_submitInfo.pNext = nullptr;
-			m_submitInfo.waitSemaphoreCount = waitSemaphoreCount;
-			m_submitInfo.pWaitSemaphores = pWaitSemaphores;
-			m_submitInfo.pWaitDstStageMask = reinterpret_cast<const VkPipelineStageFlags*>(pWaitDstStageMask);
-			m_submitInfo.commandBufferCount = commandBufferCount;
-			m_submitInfo.pCommandBuffers = pCommandBuffers;
-			m_submitInfo.signalSemaphoreCount = signalSemaphoreCount;
-			m_submitInfo.pSignalSemaphores = pSignalSemaphores;
-		}
-
-		const StructureType& sType() const
-		{
-			return reinterpret_cast<const StructureType&>(m_submitInfo.sType);
-		}
-
-		SubmitInfo& sType(StructureType sType)
-		{
-			m_submitInfo.sType = static_cast<VkStructureType>(sType);
-			return *this;
-		}
-
-		const void* pNext() const
-		{
-			return reinterpret_cast<const void*>(m_submitInfo.pNext);
-		}
-
-		SubmitInfo& pNext(const void* pNext)
-		{
-			m_submitInfo.pNext = pNext;
-			return *this;
-		}
-
-		const uint32_t& waitSemaphoreCount() const
-		{
-			return m_submitInfo.waitSemaphoreCount;
-		}
-
-		SubmitInfo& waitSemaphoreCount(uint32_t waitSemaphoreCount)
-		{
-			m_submitInfo.waitSemaphoreCount = waitSemaphoreCount;
-			return *this;
-		}
-
-		const Semaphore* pWaitSemaphores() const
-		{
-			return reinterpret_cast<const Semaphore*>(m_submitInfo.pWaitSemaphores);
-		}
-
-		SubmitInfo& pWaitSemaphores(const Semaphore* pWaitSemaphores)
-		{
-			m_submitInfo.pWaitSemaphores = pWaitSemaphores;
-			return *this;
-		}
-
-		const PipelineStageFlags* pWaitDstStageMask() const
-		{
-			return reinterpret_cast<const PipelineStageFlags*>(m_submitInfo.pWaitDstStageMask);
-		}
-
-		SubmitInfo& pWaitDstStageMask(const PipelineStageFlags* pWaitDstStageMask)
-		{
-			m_submitInfo.pWaitDstStageMask = reinterpret_cast<const VkPipelineStageFlags*>(pWaitDstStageMask);
-			return *this;
-		}
-
-		const uint32_t& commandBufferCount() const
-		{
-			return m_submitInfo.commandBufferCount;
-		}
-
-		SubmitInfo& commandBufferCount(uint32_t commandBufferCount)
-		{
-			m_submitInfo.commandBufferCount = commandBufferCount;
-			return *this;
-		}
-
-		const CommandBuffer* pCommandBuffers() const
-		{
-			return reinterpret_cast<const CommandBuffer*>(m_submitInfo.pCommandBuffers);
-		}
-
-		SubmitInfo& pCommandBuffers(const CommandBuffer* pCommandBuffers)
-		{
-			m_submitInfo.pCommandBuffers = pCommandBuffers;
-			return *this;
-		}
-
-		const uint32_t& signalSemaphoreCount() const
-		{
-			return m_submitInfo.signalSemaphoreCount;
-		}
-
-		SubmitInfo& signalSemaphoreCount(uint32_t signalSemaphoreCount)
-		{
-			m_submitInfo.signalSemaphoreCount = signalSemaphoreCount;
-			return *this;
-		}
-
-		const Semaphore* pSignalSemaphores() const
-		{
-			return reinterpret_cast<const Semaphore*>(m_submitInfo.pSignalSemaphores);
-		}
-
-		SubmitInfo& pSignalSemaphores(const Semaphore* pSignalSemaphores)
-		{
-			m_submitInfo.pSignalSemaphores = pSignalSemaphores;
-			return *this;
-		}
-
-		operator const VkSubmitInfo&() const
-		{
-			return m_submitInfo;
-		}
-
-	private:
-		VkSubmitInfo m_submitInfo;
-	};
-
 	enum class CommandPoolCreateFlagBits
 	{
 		eTransient = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT,
@@ -9539,9 +15599,25 @@ namespace vk
 			m_commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndex;
 		}
 
+		CommandPoolCreateInfo(VkCommandPoolCreateInfo const & rhs)
+			: m_commandPoolCreateInfo(rhs)
+		{
+		}
+
+		CommandPoolCreateInfo& operator=(VkCommandPoolCreateInfo const & rhs)
+		{
+			m_commandPoolCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_commandPoolCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_commandPoolCreateInfo.sType);
 		}
 
 		CommandPoolCreateInfo& sType(StructureType sType)
@@ -9551,6 +15627,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_commandPoolCreateInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_commandPoolCreateInfo.pNext);
 		}
@@ -9566,6 +15647,11 @@ namespace vk
 			return reinterpret_cast<const CommandPoolCreateFlags&>(m_commandPoolCreateInfo.flags);
 		}
 
+		CommandPoolCreateFlags& flags()
+		{
+			return reinterpret_cast<CommandPoolCreateFlags&>(m_commandPoolCreateInfo.flags);
+		}
+
 		CommandPoolCreateInfo& flags(CommandPoolCreateFlags flags)
 		{
 			m_commandPoolCreateInfo.flags = static_cast<VkCommandPoolCreateFlags>(flags);
@@ -9573,6 +15659,11 @@ namespace vk
 		}
 
 		const uint32_t& queueFamilyIndex() const
+		{
+			return m_commandPoolCreateInfo.queueFamilyIndex;
+		}
+
+		uint32_t& queueFamilyIndex()
 		{
 			return m_commandPoolCreateInfo.queueFamilyIndex;
 		}
@@ -9591,6 +15682,7 @@ namespace vk
 	private:
 		VkCommandPoolCreateInfo m_commandPoolCreateInfo;
 	};
+	static_assert(sizeof(CommandPoolCreateInfo) == sizeof(VkCommandPoolCreateInfo), "struct and wrapper have different size!");
 
 	enum class CommandPoolResetFlagBits
 	{
@@ -9670,6 +15762,7 @@ namespace vk
 	private:
 		VkImageFormatProperties m_imageFormatProperties;
 	};
+	static_assert(sizeof(ImageFormatProperties) == sizeof(VkImageFormatProperties), "struct and wrapper have different size!");
 
 	class ImageCreateInfo
 	{
@@ -9697,9 +15790,25 @@ namespace vk
 			m_imageCreateInfo.initialLayout = static_cast<VkImageLayout>(initialLayout);
 		}
 
+		ImageCreateInfo(VkImageCreateInfo const & rhs)
+			: m_imageCreateInfo(rhs)
+		{
+		}
+
+		ImageCreateInfo& operator=(VkImageCreateInfo const & rhs)
+		{
+			m_imageCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_imageCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_imageCreateInfo.sType);
 		}
 
 		ImageCreateInfo& sType(StructureType sType)
@@ -9709,6 +15818,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_imageCreateInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_imageCreateInfo.pNext);
 		}
@@ -9724,6 +15838,11 @@ namespace vk
 			return reinterpret_cast<const ImageCreateFlags&>(m_imageCreateInfo.flags);
 		}
 
+		ImageCreateFlags& flags()
+		{
+			return reinterpret_cast<ImageCreateFlags&>(m_imageCreateInfo.flags);
+		}
+
 		ImageCreateInfo& flags(ImageCreateFlags flags)
 		{
 			m_imageCreateInfo.flags = static_cast<VkImageCreateFlags>(flags);
@@ -9733,6 +15852,11 @@ namespace vk
 		const ImageType& imageType() const
 		{
 			return reinterpret_cast<const ImageType&>(m_imageCreateInfo.imageType);
+		}
+
+		ImageType& imageType()
+		{
+			return reinterpret_cast<ImageType&>(m_imageCreateInfo.imageType);
 		}
 
 		ImageCreateInfo& imageType(ImageType imageType)
@@ -9746,6 +15870,11 @@ namespace vk
 			return reinterpret_cast<const Format&>(m_imageCreateInfo.format);
 		}
 
+		Format& format()
+		{
+			return reinterpret_cast<Format&>(m_imageCreateInfo.format);
+		}
+
 		ImageCreateInfo& format(Format format)
 		{
 			m_imageCreateInfo.format = static_cast<VkFormat>(format);
@@ -9757,6 +15886,11 @@ namespace vk
 			return reinterpret_cast<const Extent3D&>(m_imageCreateInfo.extent);
 		}
 
+		Extent3D& extent()
+		{
+			return reinterpret_cast<Extent3D&>(m_imageCreateInfo.extent);
+		}
+
 		ImageCreateInfo& extent(Extent3D extent)
 		{
 			m_imageCreateInfo.extent = static_cast<VkExtent3D>(extent);
@@ -9764,6 +15898,11 @@ namespace vk
 		}
 
 		const uint32_t& mipLevels() const
+		{
+			return m_imageCreateInfo.mipLevels;
+		}
+
+		uint32_t& mipLevels()
 		{
 			return m_imageCreateInfo.mipLevels;
 		}
@@ -9779,6 +15918,11 @@ namespace vk
 			return m_imageCreateInfo.arrayLayers;
 		}
 
+		uint32_t& arrayLayers()
+		{
+			return m_imageCreateInfo.arrayLayers;
+		}
+
 		ImageCreateInfo& arrayLayers(uint32_t arrayLayers)
 		{
 			m_imageCreateInfo.arrayLayers = arrayLayers;
@@ -9788,6 +15932,11 @@ namespace vk
 		const SampleCountFlagBits& samples() const
 		{
 			return reinterpret_cast<const SampleCountFlagBits&>(m_imageCreateInfo.samples);
+		}
+
+		SampleCountFlagBits& samples()
+		{
+			return reinterpret_cast<SampleCountFlagBits&>(m_imageCreateInfo.samples);
 		}
 
 		ImageCreateInfo& samples(SampleCountFlagBits samples)
@@ -9801,6 +15950,11 @@ namespace vk
 			return reinterpret_cast<const ImageTiling&>(m_imageCreateInfo.tiling);
 		}
 
+		ImageTiling& tiling()
+		{
+			return reinterpret_cast<ImageTiling&>(m_imageCreateInfo.tiling);
+		}
+
 		ImageCreateInfo& tiling(ImageTiling tiling)
 		{
 			m_imageCreateInfo.tiling = static_cast<VkImageTiling>(tiling);
@@ -9810,6 +15964,11 @@ namespace vk
 		const ImageUsageFlags& usage() const
 		{
 			return reinterpret_cast<const ImageUsageFlags&>(m_imageCreateInfo.usage);
+		}
+
+		ImageUsageFlags& usage()
+		{
+			return reinterpret_cast<ImageUsageFlags&>(m_imageCreateInfo.usage);
 		}
 
 		ImageCreateInfo& usage(ImageUsageFlags usage)
@@ -9823,6 +15982,11 @@ namespace vk
 			return reinterpret_cast<const SharingMode&>(m_imageCreateInfo.sharingMode);
 		}
 
+		SharingMode& sharingMode()
+		{
+			return reinterpret_cast<SharingMode&>(m_imageCreateInfo.sharingMode);
+		}
+
 		ImageCreateInfo& sharingMode(SharingMode sharingMode)
 		{
 			m_imageCreateInfo.sharingMode = static_cast<VkSharingMode>(sharingMode);
@@ -9830,6 +15994,11 @@ namespace vk
 		}
 
 		const uint32_t& queueFamilyIndexCount() const
+		{
+			return m_imageCreateInfo.queueFamilyIndexCount;
+		}
+
+		uint32_t& queueFamilyIndexCount()
 		{
 			return m_imageCreateInfo.queueFamilyIndexCount;
 		}
@@ -9845,6 +16014,11 @@ namespace vk
 			return reinterpret_cast<const uint32_t*>(m_imageCreateInfo.pQueueFamilyIndices);
 		}
 
+		const uint32_t* pQueueFamilyIndices()
+		{
+			return reinterpret_cast<const uint32_t*>(m_imageCreateInfo.pQueueFamilyIndices);
+		}
+
 		ImageCreateInfo& pQueueFamilyIndices(const uint32_t* pQueueFamilyIndices)
 		{
 			m_imageCreateInfo.pQueueFamilyIndices = pQueueFamilyIndices;
@@ -9854,6 +16028,11 @@ namespace vk
 		const ImageLayout& initialLayout() const
 		{
 			return reinterpret_cast<const ImageLayout&>(m_imageCreateInfo.initialLayout);
+		}
+
+		ImageLayout& initialLayout()
+		{
+			return reinterpret_cast<ImageLayout&>(m_imageCreateInfo.initialLayout);
 		}
 
 		ImageCreateInfo& initialLayout(ImageLayout initialLayout)
@@ -9870,19 +16049,20 @@ namespace vk
 	private:
 		VkImageCreateInfo m_imageCreateInfo;
 	};
+	static_assert(sizeof(ImageCreateInfo) == sizeof(VkImageCreateInfo), "struct and wrapper have different size!");
 
 	class PipelineMultisampleStateCreateInfo
 	{
 	public:
 		PipelineMultisampleStateCreateInfo()
-			: PipelineMultisampleStateCreateInfo(0, SampleCountFlagBits::e1, 0, 0, nullptr, 0, 0)
+			: PipelineMultisampleStateCreateInfo(PipelineMultisampleStateCreateFlags(), SampleCountFlagBits::e1, 0, 0, nullptr, 0, 0)
 		{}
 
 		PipelineMultisampleStateCreateInfo(PipelineMultisampleStateCreateFlags flags, SampleCountFlagBits rasterizationSamples, Bool32 sampleShadingEnable, float minSampleShading, const SampleMask* pSampleMask, Bool32 alphaToCoverageEnable, Bool32 alphaToOneEnable)
 		{
 			m_pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 			m_pipelineMultisampleStateCreateInfo.pNext = nullptr;
-			m_pipelineMultisampleStateCreateInfo.flags = flags;
+			m_pipelineMultisampleStateCreateInfo.flags = static_cast<VkPipelineMultisampleStateCreateFlags>(flags);
 			m_pipelineMultisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(rasterizationSamples);
 			m_pipelineMultisampleStateCreateInfo.sampleShadingEnable = sampleShadingEnable;
 			m_pipelineMultisampleStateCreateInfo.minSampleShading = minSampleShading;
@@ -9891,9 +16071,25 @@ namespace vk
 			m_pipelineMultisampleStateCreateInfo.alphaToOneEnable = alphaToOneEnable;
 		}
 
+		PipelineMultisampleStateCreateInfo(VkPipelineMultisampleStateCreateInfo const & rhs)
+			: m_pipelineMultisampleStateCreateInfo(rhs)
+		{
+		}
+
+		PipelineMultisampleStateCreateInfo& operator=(VkPipelineMultisampleStateCreateInfo const & rhs)
+		{
+			m_pipelineMultisampleStateCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_pipelineMultisampleStateCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_pipelineMultisampleStateCreateInfo.sType);
 		}
 
 		PipelineMultisampleStateCreateInfo& sType(StructureType sType)
@@ -9907,6 +16103,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_pipelineMultisampleStateCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_pipelineMultisampleStateCreateInfo.pNext);
+		}
+
 		PipelineMultisampleStateCreateInfo& pNext(const void* pNext)
 		{
 			m_pipelineMultisampleStateCreateInfo.pNext = pNext;
@@ -9915,18 +16116,28 @@ namespace vk
 
 		const PipelineMultisampleStateCreateFlags& flags() const
 		{
-			return m_pipelineMultisampleStateCreateInfo.flags;
+			return reinterpret_cast<const PipelineMultisampleStateCreateFlags&>(m_pipelineMultisampleStateCreateInfo.flags);
+		}
+
+		PipelineMultisampleStateCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineMultisampleStateCreateFlags&>(m_pipelineMultisampleStateCreateInfo.flags);
 		}
 
 		PipelineMultisampleStateCreateInfo& flags(PipelineMultisampleStateCreateFlags flags)
 		{
-			m_pipelineMultisampleStateCreateInfo.flags = flags;
+			m_pipelineMultisampleStateCreateInfo.flags = static_cast<VkPipelineMultisampleStateCreateFlags>(flags);
 			return *this;
 		}
 
 		const SampleCountFlagBits& rasterizationSamples() const
 		{
 			return reinterpret_cast<const SampleCountFlagBits&>(m_pipelineMultisampleStateCreateInfo.rasterizationSamples);
+		}
+
+		SampleCountFlagBits& rasterizationSamples()
+		{
+			return reinterpret_cast<SampleCountFlagBits&>(m_pipelineMultisampleStateCreateInfo.rasterizationSamples);
 		}
 
 		PipelineMultisampleStateCreateInfo& rasterizationSamples(SampleCountFlagBits rasterizationSamples)
@@ -9936,6 +16147,11 @@ namespace vk
 		}
 
 		const Bool32& sampleShadingEnable() const
+		{
+			return m_pipelineMultisampleStateCreateInfo.sampleShadingEnable;
+		}
+
+		Bool32& sampleShadingEnable()
 		{
 			return m_pipelineMultisampleStateCreateInfo.sampleShadingEnable;
 		}
@@ -9951,6 +16167,11 @@ namespace vk
 			return m_pipelineMultisampleStateCreateInfo.minSampleShading;
 		}
 
+		float& minSampleShading()
+		{
+			return m_pipelineMultisampleStateCreateInfo.minSampleShading;
+		}
+
 		PipelineMultisampleStateCreateInfo& minSampleShading(float minSampleShading)
 		{
 			m_pipelineMultisampleStateCreateInfo.minSampleShading = minSampleShading;
@@ -9958,6 +16179,11 @@ namespace vk
 		}
 
 		const SampleMask* pSampleMask() const
+		{
+			return reinterpret_cast<const SampleMask*>(m_pipelineMultisampleStateCreateInfo.pSampleMask);
+		}
+
+		const SampleMask* pSampleMask()
 		{
 			return reinterpret_cast<const SampleMask*>(m_pipelineMultisampleStateCreateInfo.pSampleMask);
 		}
@@ -9973,6 +16199,11 @@ namespace vk
 			return m_pipelineMultisampleStateCreateInfo.alphaToCoverageEnable;
 		}
 
+		Bool32& alphaToCoverageEnable()
+		{
+			return m_pipelineMultisampleStateCreateInfo.alphaToCoverageEnable;
+		}
+
 		PipelineMultisampleStateCreateInfo& alphaToCoverageEnable(Bool32 alphaToCoverageEnable)
 		{
 			m_pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = alphaToCoverageEnable;
@@ -9980,6 +16211,11 @@ namespace vk
 		}
 
 		const Bool32& alphaToOneEnable() const
+		{
+			return m_pipelineMultisampleStateCreateInfo.alphaToOneEnable;
+		}
+
+		Bool32& alphaToOneEnable()
 		{
 			return m_pipelineMultisampleStateCreateInfo.alphaToOneEnable;
 		}
@@ -9998,6 +16234,7 @@ namespace vk
 	private:
 		VkPipelineMultisampleStateCreateInfo m_pipelineMultisampleStateCreateInfo;
 	};
+	static_assert(sizeof(PipelineMultisampleStateCreateInfo) == sizeof(VkPipelineMultisampleStateCreateInfo), "struct and wrapper have different size!");
 
 	class GraphicsPipelineCreateInfo
 	{
@@ -10022,16 +16259,32 @@ namespace vk
 			m_graphicsPipelineCreateInfo.pDepthStencilState = reinterpret_cast<const VkPipelineDepthStencilStateCreateInfo*>(pDepthStencilState);
 			m_graphicsPipelineCreateInfo.pColorBlendState = reinterpret_cast<const VkPipelineColorBlendStateCreateInfo*>(pColorBlendState);
 			m_graphicsPipelineCreateInfo.pDynamicState = reinterpret_cast<const VkPipelineDynamicStateCreateInfo*>(pDynamicState);
-			m_graphicsPipelineCreateInfo.layout = layout;
-			m_graphicsPipelineCreateInfo.renderPass = renderPass;
+			m_graphicsPipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
+			m_graphicsPipelineCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
 			m_graphicsPipelineCreateInfo.subpass = subpass;
-			m_graphicsPipelineCreateInfo.basePipelineHandle = basePipelineHandle;
+			m_graphicsPipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
 			m_graphicsPipelineCreateInfo.basePipelineIndex = basePipelineIndex;
+		}
+
+		GraphicsPipelineCreateInfo(VkGraphicsPipelineCreateInfo const & rhs)
+			: m_graphicsPipelineCreateInfo(rhs)
+		{
+		}
+
+		GraphicsPipelineCreateInfo& operator=(VkGraphicsPipelineCreateInfo const & rhs)
+		{
+			m_graphicsPipelineCreateInfo = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_graphicsPipelineCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_graphicsPipelineCreateInfo.sType);
 		}
 
 		GraphicsPipelineCreateInfo& sType(StructureType sType)
@@ -10041,6 +16294,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_graphicsPipelineCreateInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_graphicsPipelineCreateInfo.pNext);
 		}
@@ -10056,6 +16314,11 @@ namespace vk
 			return reinterpret_cast<const PipelineCreateFlags&>(m_graphicsPipelineCreateInfo.flags);
 		}
 
+		PipelineCreateFlags& flags()
+		{
+			return reinterpret_cast<PipelineCreateFlags&>(m_graphicsPipelineCreateInfo.flags);
+		}
+
 		GraphicsPipelineCreateInfo& flags(PipelineCreateFlags flags)
 		{
 			m_graphicsPipelineCreateInfo.flags = static_cast<VkPipelineCreateFlags>(flags);
@@ -10063,6 +16326,11 @@ namespace vk
 		}
 
 		const uint32_t& stageCount() const
+		{
+			return m_graphicsPipelineCreateInfo.stageCount;
+		}
+
+		uint32_t& stageCount()
 		{
 			return m_graphicsPipelineCreateInfo.stageCount;
 		}
@@ -10078,6 +16346,11 @@ namespace vk
 			return reinterpret_cast<const PipelineShaderStageCreateInfo*>(m_graphicsPipelineCreateInfo.pStages);
 		}
 
+		const PipelineShaderStageCreateInfo* pStages()
+		{
+			return reinterpret_cast<const PipelineShaderStageCreateInfo*>(m_graphicsPipelineCreateInfo.pStages);
+		}
+
 		GraphicsPipelineCreateInfo& pStages(const PipelineShaderStageCreateInfo* pStages)
 		{
 			m_graphicsPipelineCreateInfo.pStages = reinterpret_cast<const VkPipelineShaderStageCreateInfo*>(pStages);
@@ -10085,6 +16358,11 @@ namespace vk
 		}
 
 		const PipelineVertexInputStateCreateInfo* pVertexInputState() const
+		{
+			return reinterpret_cast<const PipelineVertexInputStateCreateInfo*>(m_graphicsPipelineCreateInfo.pVertexInputState);
+		}
+
+		const PipelineVertexInputStateCreateInfo* pVertexInputState()
 		{
 			return reinterpret_cast<const PipelineVertexInputStateCreateInfo*>(m_graphicsPipelineCreateInfo.pVertexInputState);
 		}
@@ -10100,6 +16378,11 @@ namespace vk
 			return reinterpret_cast<const PipelineInputAssemblyStateCreateInfo*>(m_graphicsPipelineCreateInfo.pInputAssemblyState);
 		}
 
+		const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState()
+		{
+			return reinterpret_cast<const PipelineInputAssemblyStateCreateInfo*>(m_graphicsPipelineCreateInfo.pInputAssemblyState);
+		}
+
 		GraphicsPipelineCreateInfo& pInputAssemblyState(const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState)
 		{
 			m_graphicsPipelineCreateInfo.pInputAssemblyState = reinterpret_cast<const VkPipelineInputAssemblyStateCreateInfo*>(pInputAssemblyState);
@@ -10107,6 +16390,11 @@ namespace vk
 		}
 
 		const PipelineTessellationStateCreateInfo* pTessellationState() const
+		{
+			return reinterpret_cast<const PipelineTessellationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pTessellationState);
+		}
+
+		const PipelineTessellationStateCreateInfo* pTessellationState()
 		{
 			return reinterpret_cast<const PipelineTessellationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pTessellationState);
 		}
@@ -10122,6 +16410,11 @@ namespace vk
 			return reinterpret_cast<const PipelineViewportStateCreateInfo*>(m_graphicsPipelineCreateInfo.pViewportState);
 		}
 
+		const PipelineViewportStateCreateInfo* pViewportState()
+		{
+			return reinterpret_cast<const PipelineViewportStateCreateInfo*>(m_graphicsPipelineCreateInfo.pViewportState);
+		}
+
 		GraphicsPipelineCreateInfo& pViewportState(const PipelineViewportStateCreateInfo* pViewportState)
 		{
 			m_graphicsPipelineCreateInfo.pViewportState = reinterpret_cast<const VkPipelineViewportStateCreateInfo*>(pViewportState);
@@ -10129,6 +16422,11 @@ namespace vk
 		}
 
 		const PipelineRasterizationStateCreateInfo* pRasterizationState() const
+		{
+			return reinterpret_cast<const PipelineRasterizationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pRasterizationState);
+		}
+
+		const PipelineRasterizationStateCreateInfo* pRasterizationState()
 		{
 			return reinterpret_cast<const PipelineRasterizationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pRasterizationState);
 		}
@@ -10144,6 +16442,11 @@ namespace vk
 			return reinterpret_cast<const PipelineMultisampleStateCreateInfo*>(m_graphicsPipelineCreateInfo.pMultisampleState);
 		}
 
+		const PipelineMultisampleStateCreateInfo* pMultisampleState()
+		{
+			return reinterpret_cast<const PipelineMultisampleStateCreateInfo*>(m_graphicsPipelineCreateInfo.pMultisampleState);
+		}
+
 		GraphicsPipelineCreateInfo& pMultisampleState(const PipelineMultisampleStateCreateInfo* pMultisampleState)
 		{
 			m_graphicsPipelineCreateInfo.pMultisampleState = reinterpret_cast<const VkPipelineMultisampleStateCreateInfo*>(pMultisampleState);
@@ -10151,6 +16454,11 @@ namespace vk
 		}
 
 		const PipelineDepthStencilStateCreateInfo* pDepthStencilState() const
+		{
+			return reinterpret_cast<const PipelineDepthStencilStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDepthStencilState);
+		}
+
+		const PipelineDepthStencilStateCreateInfo* pDepthStencilState()
 		{
 			return reinterpret_cast<const PipelineDepthStencilStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDepthStencilState);
 		}
@@ -10166,6 +16474,11 @@ namespace vk
 			return reinterpret_cast<const PipelineColorBlendStateCreateInfo*>(m_graphicsPipelineCreateInfo.pColorBlendState);
 		}
 
+		const PipelineColorBlendStateCreateInfo* pColorBlendState()
+		{
+			return reinterpret_cast<const PipelineColorBlendStateCreateInfo*>(m_graphicsPipelineCreateInfo.pColorBlendState);
+		}
+
 		GraphicsPipelineCreateInfo& pColorBlendState(const PipelineColorBlendStateCreateInfo* pColorBlendState)
 		{
 			m_graphicsPipelineCreateInfo.pColorBlendState = reinterpret_cast<const VkPipelineColorBlendStateCreateInfo*>(pColorBlendState);
@@ -10173,6 +16486,11 @@ namespace vk
 		}
 
 		const PipelineDynamicStateCreateInfo* pDynamicState() const
+		{
+			return reinterpret_cast<const PipelineDynamicStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDynamicState);
+		}
+
+		const PipelineDynamicStateCreateInfo* pDynamicState()
 		{
 			return reinterpret_cast<const PipelineDynamicStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDynamicState);
 		}
@@ -10185,27 +16503,42 @@ namespace vk
 
 		const PipelineLayout& layout() const
 		{
-			return m_graphicsPipelineCreateInfo.layout;
+			return reinterpret_cast<const PipelineLayout&>(m_graphicsPipelineCreateInfo.layout);
+		}
+
+		PipelineLayout& layout()
+		{
+			return reinterpret_cast<PipelineLayout&>(m_graphicsPipelineCreateInfo.layout);
 		}
 
 		GraphicsPipelineCreateInfo& layout(PipelineLayout layout)
 		{
-			m_graphicsPipelineCreateInfo.layout = layout;
+			m_graphicsPipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
 			return *this;
 		}
 
 		const RenderPass& renderPass() const
 		{
-			return m_graphicsPipelineCreateInfo.renderPass;
+			return reinterpret_cast<const RenderPass&>(m_graphicsPipelineCreateInfo.renderPass);
+		}
+
+		RenderPass& renderPass()
+		{
+			return reinterpret_cast<RenderPass&>(m_graphicsPipelineCreateInfo.renderPass);
 		}
 
 		GraphicsPipelineCreateInfo& renderPass(RenderPass renderPass)
 		{
-			m_graphicsPipelineCreateInfo.renderPass = renderPass;
+			m_graphicsPipelineCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
 			return *this;
 		}
 
 		const uint32_t& subpass() const
+		{
+			return m_graphicsPipelineCreateInfo.subpass;
+		}
+
+		uint32_t& subpass()
 		{
 			return m_graphicsPipelineCreateInfo.subpass;
 		}
@@ -10218,16 +16551,26 @@ namespace vk
 
 		const Pipeline& basePipelineHandle() const
 		{
-			return m_graphicsPipelineCreateInfo.basePipelineHandle;
+			return reinterpret_cast<const Pipeline&>(m_graphicsPipelineCreateInfo.basePipelineHandle);
+		}
+
+		Pipeline& basePipelineHandle()
+		{
+			return reinterpret_cast<Pipeline&>(m_graphicsPipelineCreateInfo.basePipelineHandle);
 		}
 
 		GraphicsPipelineCreateInfo& basePipelineHandle(Pipeline basePipelineHandle)
 		{
-			m_graphicsPipelineCreateInfo.basePipelineHandle = basePipelineHandle;
+			m_graphicsPipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
 			return *this;
 		}
 
 		const int32_t& basePipelineIndex() const
+		{
+			return m_graphicsPipelineCreateInfo.basePipelineIndex;
+		}
+
+		int32_t& basePipelineIndex()
 		{
 			return m_graphicsPipelineCreateInfo.basePipelineIndex;
 		}
@@ -10246,6 +16589,7 @@ namespace vk
 	private:
 		VkGraphicsPipelineCreateInfo m_graphicsPipelineCreateInfo;
 	};
+	static_assert(sizeof(GraphicsPipelineCreateInfo) == sizeof(VkGraphicsPipelineCreateInfo), "struct and wrapper have different size!");
 
 	class PhysicalDeviceLimits
 	{
@@ -10788,6 +17132,7 @@ namespace vk
 	private:
 		VkPhysicalDeviceLimits m_physicalDeviceLimits;
 	};
+	static_assert(sizeof(PhysicalDeviceLimits) == sizeof(VkPhysicalDeviceLimits), "struct and wrapper have different size!");
 
 	class PhysicalDeviceProperties
 	{
@@ -10845,6 +17190,7 @@ namespace vk
 	private:
 		VkPhysicalDeviceProperties m_physicalDeviceProperties;
 	};
+	static_assert(sizeof(PhysicalDeviceProperties) == sizeof(VkPhysicalDeviceProperties), "struct and wrapper have different size!");
 
 	enum class AttachmentDescriptionFlagBits
 	{
@@ -10878,9 +17224,25 @@ namespace vk
 			m_attachmentDescription.finalLayout = static_cast<VkImageLayout>(finalLayout);
 		}
 
+		AttachmentDescription(VkAttachmentDescription const & rhs)
+			: m_attachmentDescription(rhs)
+		{
+		}
+
+		AttachmentDescription& operator=(VkAttachmentDescription const & rhs)
+		{
+			m_attachmentDescription = rhs;
+			return *this;
+		}
+
 		const AttachmentDescriptionFlags& flags() const
 		{
 			return reinterpret_cast<const AttachmentDescriptionFlags&>(m_attachmentDescription.flags);
+		}
+
+		AttachmentDescriptionFlags& flags()
+		{
+			return reinterpret_cast<AttachmentDescriptionFlags&>(m_attachmentDescription.flags);
 		}
 
 		AttachmentDescription& flags(AttachmentDescriptionFlags flags)
@@ -10894,6 +17256,11 @@ namespace vk
 			return reinterpret_cast<const Format&>(m_attachmentDescription.format);
 		}
 
+		Format& format()
+		{
+			return reinterpret_cast<Format&>(m_attachmentDescription.format);
+		}
+
 		AttachmentDescription& format(Format format)
 		{
 			m_attachmentDescription.format = static_cast<VkFormat>(format);
@@ -10903,6 +17270,11 @@ namespace vk
 		const SampleCountFlagBits& samples() const
 		{
 			return reinterpret_cast<const SampleCountFlagBits&>(m_attachmentDescription.samples);
+		}
+
+		SampleCountFlagBits& samples()
+		{
+			return reinterpret_cast<SampleCountFlagBits&>(m_attachmentDescription.samples);
 		}
 
 		AttachmentDescription& samples(SampleCountFlagBits samples)
@@ -10916,6 +17288,11 @@ namespace vk
 			return reinterpret_cast<const AttachmentLoadOp&>(m_attachmentDescription.loadOp);
 		}
 
+		AttachmentLoadOp& loadOp()
+		{
+			return reinterpret_cast<AttachmentLoadOp&>(m_attachmentDescription.loadOp);
+		}
+
 		AttachmentDescription& loadOp(AttachmentLoadOp loadOp)
 		{
 			m_attachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(loadOp);
@@ -10925,6 +17302,11 @@ namespace vk
 		const AttachmentStoreOp& storeOp() const
 		{
 			return reinterpret_cast<const AttachmentStoreOp&>(m_attachmentDescription.storeOp);
+		}
+
+		AttachmentStoreOp& storeOp()
+		{
+			return reinterpret_cast<AttachmentStoreOp&>(m_attachmentDescription.storeOp);
 		}
 
 		AttachmentDescription& storeOp(AttachmentStoreOp storeOp)
@@ -10938,6 +17320,11 @@ namespace vk
 			return reinterpret_cast<const AttachmentLoadOp&>(m_attachmentDescription.stencilLoadOp);
 		}
 
+		AttachmentLoadOp& stencilLoadOp()
+		{
+			return reinterpret_cast<AttachmentLoadOp&>(m_attachmentDescription.stencilLoadOp);
+		}
+
 		AttachmentDescription& stencilLoadOp(AttachmentLoadOp stencilLoadOp)
 		{
 			m_attachmentDescription.stencilLoadOp = static_cast<VkAttachmentLoadOp>(stencilLoadOp);
@@ -10947,6 +17334,11 @@ namespace vk
 		const AttachmentStoreOp& stencilStoreOp() const
 		{
 			return reinterpret_cast<const AttachmentStoreOp&>(m_attachmentDescription.stencilStoreOp);
+		}
+
+		AttachmentStoreOp& stencilStoreOp()
+		{
+			return reinterpret_cast<AttachmentStoreOp&>(m_attachmentDescription.stencilStoreOp);
 		}
 
 		AttachmentDescription& stencilStoreOp(AttachmentStoreOp stencilStoreOp)
@@ -10960,6 +17352,11 @@ namespace vk
 			return reinterpret_cast<const ImageLayout&>(m_attachmentDescription.initialLayout);
 		}
 
+		ImageLayout& initialLayout()
+		{
+			return reinterpret_cast<ImageLayout&>(m_attachmentDescription.initialLayout);
+		}
+
 		AttachmentDescription& initialLayout(ImageLayout initialLayout)
 		{
 			m_attachmentDescription.initialLayout = static_cast<VkImageLayout>(initialLayout);
@@ -10969,6 +17366,11 @@ namespace vk
 		const ImageLayout& finalLayout() const
 		{
 			return reinterpret_cast<const ImageLayout&>(m_attachmentDescription.finalLayout);
+		}
+
+		ImageLayout& finalLayout()
+		{
+			return reinterpret_cast<ImageLayout&>(m_attachmentDescription.finalLayout);
 		}
 
 		AttachmentDescription& finalLayout(ImageLayout finalLayout)
@@ -10985,6 +17387,7 @@ namespace vk
 	private:
 		VkAttachmentDescription m_attachmentDescription;
 	};
+	static_assert(sizeof(AttachmentDescription) == sizeof(VkAttachmentDescription), "struct and wrapper have different size!");
 
 	enum class StencilFaceFlagBits
 	{
@@ -11029,9 +17432,25 @@ namespace vk
 			m_descriptorPoolCreateInfo.pPoolSizes = reinterpret_cast<const VkDescriptorPoolSize*>(pPoolSizes);
 		}
 
+		DescriptorPoolCreateInfo(VkDescriptorPoolCreateInfo const & rhs)
+			: m_descriptorPoolCreateInfo(rhs)
+		{
+		}
+
+		DescriptorPoolCreateInfo& operator=(VkDescriptorPoolCreateInfo const & rhs)
+		{
+			m_descriptorPoolCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_descriptorPoolCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_descriptorPoolCreateInfo.sType);
 		}
 
 		DescriptorPoolCreateInfo& sType(StructureType sType)
@@ -11041,6 +17460,11 @@ namespace vk
 		}
 
 		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_descriptorPoolCreateInfo.pNext);
+		}
+
+		const void* pNext()
 		{
 			return reinterpret_cast<const void*>(m_descriptorPoolCreateInfo.pNext);
 		}
@@ -11056,6 +17480,11 @@ namespace vk
 			return reinterpret_cast<const DescriptorPoolCreateFlags&>(m_descriptorPoolCreateInfo.flags);
 		}
 
+		DescriptorPoolCreateFlags& flags()
+		{
+			return reinterpret_cast<DescriptorPoolCreateFlags&>(m_descriptorPoolCreateInfo.flags);
+		}
+
 		DescriptorPoolCreateInfo& flags(DescriptorPoolCreateFlags flags)
 		{
 			m_descriptorPoolCreateInfo.flags = static_cast<VkDescriptorPoolCreateFlags>(flags);
@@ -11063,6 +17492,11 @@ namespace vk
 		}
 
 		const uint32_t& maxSets() const
+		{
+			return m_descriptorPoolCreateInfo.maxSets;
+		}
+
+		uint32_t& maxSets()
 		{
 			return m_descriptorPoolCreateInfo.maxSets;
 		}
@@ -11078,6 +17512,11 @@ namespace vk
 			return m_descriptorPoolCreateInfo.poolSizeCount;
 		}
 
+		uint32_t& poolSizeCount()
+		{
+			return m_descriptorPoolCreateInfo.poolSizeCount;
+		}
+
 		DescriptorPoolCreateInfo& poolSizeCount(uint32_t poolSizeCount)
 		{
 			m_descriptorPoolCreateInfo.poolSizeCount = poolSizeCount;
@@ -11085,6 +17524,11 @@ namespace vk
 		}
 
 		const DescriptorPoolSize* pPoolSizes() const
+		{
+			return reinterpret_cast<const DescriptorPoolSize*>(m_descriptorPoolCreateInfo.pPoolSizes);
+		}
+
+		const DescriptorPoolSize* pPoolSizes()
 		{
 			return reinterpret_cast<const DescriptorPoolSize*>(m_descriptorPoolCreateInfo.pPoolSizes);
 		}
@@ -11103,6 +17547,7 @@ namespace vk
 	private:
 		VkDescriptorPoolCreateInfo m_descriptorPoolCreateInfo;
 	};
+	static_assert(sizeof(DescriptorPoolCreateInfo) == sizeof(VkDescriptorPoolCreateInfo), "struct and wrapper have different size!");
 
 	enum class DependencyFlagBits
 	{
@@ -11115,6 +17560,684 @@ namespace vk
 	{
 		return DependencyFlags(bit0) | bit1;
 	}
+
+	class CommandBuffer
+	{
+	public:
+		CommandBuffer()
+			: m_commandBuffer(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		CommandBuffer(VkCommandBuffer commandBuffer)
+			: m_commandBuffer(commandBuffer)
+		{}
+
+		CommandBuffer& operator=(VkCommandBuffer commandBuffer)
+		{
+			m_commandBuffer = commandBuffer;
+			return *this;
+		}
+#endif
+
+		Result begin(const CommandBufferBeginInfo* pBeginInfo) const
+		{
+			return static_cast<Result>(vkBeginCommandBuffer(m_commandBuffer, reinterpret_cast<const VkCommandBufferBeginInfo*>(pBeginInfo)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void begin(const CommandBufferBeginInfo & beginInfo) const
+		{
+			Result result = static_cast<Result>(vkBeginCommandBuffer(m_commandBuffer, reinterpret_cast<const VkCommandBufferBeginInfo*>(&beginInfo)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::CommandBuffer::begin");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result end() const
+		{
+			return static_cast<Result>(vkEndCommandBuffer(m_commandBuffer));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void end() const
+		{
+			Result result = static_cast<Result>(vkEndCommandBuffer(m_commandBuffer));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::CommandBuffer::end");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result reset(CommandBufferResetFlags flags) const
+		{
+			return static_cast<Result>(vkResetCommandBuffer(m_commandBuffer, static_cast<VkCommandBufferResetFlags>(flags)));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void reset(CommandBufferResetFlags flags) const
+		{
+			Result result = static_cast<Result>(vkResetCommandBuffer(m_commandBuffer, static_cast<VkCommandBufferResetFlags>(flags)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::CommandBuffer::reset");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void bindPipeline(PipelineBindPoint pipelineBindPoint, Pipeline pipeline) const
+		{
+			vkCmdBindPipeline(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipeline>(pipeline));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void bindPipeline(PipelineBindPoint pipelineBindPoint, Pipeline pipeline) const
+		{
+			vkCmdBindPipeline(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipeline>(pipeline));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void setViewport(uint32_t firstViewport, uint32_t viewportCount, const Viewport* pViewports) const
+		{
+			vkCmdSetViewport(m_commandBuffer, firstViewport, viewportCount, reinterpret_cast<const VkViewport*>(pViewports));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setViewport(uint32_t firstViewport, eastl::vector<Viewport> const & viewports) const
+		{
+			vkCmdSetViewport(m_commandBuffer, firstViewport, static_cast<uint32_t>(viewports.size()), reinterpret_cast<const VkViewport*>(viewports.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void setScissor(uint32_t firstScissor, uint32_t scissorCount, const Rect2D* pScissors) const
+		{
+			vkCmdSetScissor(m_commandBuffer, firstScissor, scissorCount, reinterpret_cast<const VkRect2D*>(pScissors));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setScissor(uint32_t firstScissor, eastl::vector<Rect2D> const & scissors) const
+		{
+			vkCmdSetScissor(m_commandBuffer, firstScissor, static_cast<uint32_t>(scissors.size()), reinterpret_cast<const VkRect2D*>(scissors.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setLineWidth(float lineWidth) const
+		{
+			vkCmdSetLineWidth(m_commandBuffer, lineWidth);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setLineWidth(float lineWidth) const
+		{
+			vkCmdSetLineWidth(m_commandBuffer, lineWidth);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) const
+		{
+			vkCmdSetDepthBias(m_commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) const
+		{
+			vkCmdSetDepthBias(m_commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setBlendConstants(const float blendConstants[4]) const
+		{
+			vkCmdSetBlendConstants(m_commandBuffer, blendConstants);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setBlendConstants(const float blendConstants[4]) const
+		{
+			vkCmdSetBlendConstants(m_commandBuffer, blendConstants);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setDepthBounds(float minDepthBounds, float maxDepthBounds) const
+		{
+			vkCmdSetDepthBounds(m_commandBuffer, minDepthBounds, maxDepthBounds);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setDepthBounds(float minDepthBounds, float maxDepthBounds) const
+		{
+			vkCmdSetDepthBounds(m_commandBuffer, minDepthBounds, maxDepthBounds);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setStencilCompareMask(StencilFaceFlags faceMask, uint32_t compareMask) const
+		{
+			vkCmdSetStencilCompareMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), compareMask);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setStencilCompareMask(StencilFaceFlags faceMask, uint32_t compareMask) const
+		{
+			vkCmdSetStencilCompareMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), compareMask);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setStencilWriteMask(StencilFaceFlags faceMask, uint32_t writeMask) const
+		{
+			vkCmdSetStencilWriteMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), writeMask);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setStencilWriteMask(StencilFaceFlags faceMask, uint32_t writeMask) const
+		{
+			vkCmdSetStencilWriteMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), writeMask);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setStencilReference(StencilFaceFlags faceMask, uint32_t reference) const
+		{
+			vkCmdSetStencilReference(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), reference);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setStencilReference(StencilFaceFlags faceMask, uint32_t reference) const
+		{
+			vkCmdSetStencilReference(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), reference);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void bindDescriptorSets(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, uint32_t firstSet, uint32_t descriptorSetCount, const DescriptorSet* pDescriptorSets, uint32_t dynamicOffsetCount, const uint32_t* pDynamicOffsets) const
+		{
+			vkCmdBindDescriptorSets(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipelineLayout>(layout), firstSet, descriptorSetCount, reinterpret_cast<const VkDescriptorSet*>(pDescriptorSets), dynamicOffsetCount, pDynamicOffsets);
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void bindDescriptorSets(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, uint32_t firstSet, eastl::vector<DescriptorSet> const & descriptorSets, eastl::vector<uint32_t> const & dynamicOffsets) const
+		{
+			vkCmdBindDescriptorSets(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipelineLayout>(layout), firstSet, static_cast<uint32_t>(descriptorSets.size()), reinterpret_cast<const VkDescriptorSet*>(descriptorSets.data()), static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void bindIndexBuffer(Buffer buffer, DeviceSize offset, IndexType indexType) const
+		{
+			vkCmdBindIndexBuffer(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, static_cast<VkIndexType>(indexType));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void bindIndexBuffer(Buffer buffer, DeviceSize offset, IndexType indexType) const
+		{
+			vkCmdBindIndexBuffer(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, static_cast<VkIndexType>(indexType));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void bindVertexBuffers(uint32_t firstBinding, uint32_t bindingCount, const Buffer* pBuffers, const DeviceSize* pOffsets) const
+		{
+			vkCmdBindVertexBuffers(m_commandBuffer, firstBinding, bindingCount, reinterpret_cast<const VkBuffer*>(pBuffers), pOffsets);
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void bindVertexBuffers(uint32_t firstBinding, eastl::vector<Buffer> const & buffers, eastl::vector<DeviceSize> const & offsets) const
+		{
+			if (buffers.size() != offsets.size())
+			{
+				throw std::logic_error("vk::CommandBuffer::bindVertexBuffers: buffers.size() != offsets.size()");
+			}
+			vkCmdBindVertexBuffers(m_commandBuffer, firstBinding, static_cast<uint32_t>(buffers.size()), reinterpret_cast<const VkBuffer*>(buffers.data()), offsets.data());
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
+		{
+			vkCmdDraw(m_commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
+		{
+			vkCmdDraw(m_commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) const
+		{
+			vkCmdDrawIndexed(m_commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) const
+		{
+			vkCmdDrawIndexed(m_commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void drawIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
+		{
+			vkCmdDrawIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void drawIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
+		{
+			vkCmdDrawIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void drawIndexedIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
+		{
+			vkCmdDrawIndexedIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void drawIndexedIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
+		{
+			vkCmdDrawIndexedIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void dispatch(uint32_t x, uint32_t y, uint32_t z) const
+		{
+			vkCmdDispatch(m_commandBuffer, x, y, z);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void dispatch(uint32_t x, uint32_t y, uint32_t z) const
+		{
+			vkCmdDispatch(m_commandBuffer, x, y, z);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void dispatchIndirect(Buffer buffer, DeviceSize offset) const
+		{
+			vkCmdDispatchIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void dispatchIndirect(Buffer buffer, DeviceSize offset) const
+		{
+			vkCmdDispatchIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void copyBuffer(Buffer srcBuffer, Buffer dstBuffer, uint32_t regionCount, const BufferCopy* pRegions) const
+		{
+			vkCmdCopyBuffer(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkBuffer>(dstBuffer), regionCount, reinterpret_cast<const VkBufferCopy*>(pRegions));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void copyBuffer(Buffer srcBuffer, Buffer dstBuffer, eastl::vector<BufferCopy> const & regions) const
+		{
+			vkCmdCopyBuffer(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkBuffer>(dstBuffer), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkBufferCopy*>(regions.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void copyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageCopy* pRegions) const
+		{
+			vkCmdCopyImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageCopy*>(pRegions));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void copyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageCopy> const & regions) const
+		{
+			vkCmdCopyImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkImageCopy*>(regions.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void blitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageBlit* pRegions, Filter filter) const
+		{
+			vkCmdBlitImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageBlit*>(pRegions), static_cast<VkFilter>(filter));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void blitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageBlit> const & regions, Filter filter) const
+		{
+			vkCmdBlitImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkImageBlit*>(regions.data()), static_cast<VkFilter>(filter));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void copyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const BufferImageCopy* pRegions) const
+		{
+			vkCmdCopyBufferToImage(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkBufferImageCopy*>(pRegions));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void copyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, eastl::vector<BufferImageCopy> const & regions) const
+		{
+			vkCmdCopyBufferToImage(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkBufferImageCopy*>(regions.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void copyImageToBuffer(Image srcImage, ImageLayout srcImageLayout, Buffer dstBuffer, uint32_t regionCount, const BufferImageCopy* pRegions) const
+		{
+			vkCmdCopyImageToBuffer(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkBuffer>(dstBuffer), regionCount, reinterpret_cast<const VkBufferImageCopy*>(pRegions));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void copyImageToBuffer(Image srcImage, ImageLayout srcImageLayout, Buffer dstBuffer, eastl::vector<BufferImageCopy> const & regions) const
+		{
+			vkCmdCopyImageToBuffer(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkBuffer>(dstBuffer), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkBufferImageCopy*>(regions.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void updateBuffer(Buffer dstBuffer, DeviceSize dstOffset, DeviceSize dataSize, const uint32_t* pData) const
+		{
+			vkCmdUpdateBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, dataSize, pData);
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		template <typename T>
+		void updateBuffer(Buffer dstBuffer, DeviceSize dstOffset, eastl::vector<T> const & data) const
+		{
+			static_assert(sizeof(T) % sizeof(uint32_t) == 0, "wrong size of template type T");
+			vkCmdUpdateBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, static_cast<DeviceSize>(data.size() * sizeof(T)), reinterpret_cast<const uint32_t*>(data.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void fillBuffer(Buffer dstBuffer, DeviceSize dstOffset, DeviceSize size, uint32_t data) const
+		{
+			vkCmdFillBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, size, data);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void fillBuffer(Buffer dstBuffer, DeviceSize dstOffset, DeviceSize size, uint32_t data) const
+		{
+			vkCmdFillBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, size, data);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void clearColorImage(Image image, ImageLayout imageLayout, const ClearColorValue* pColor, uint32_t rangeCount, const ImageSubresourceRange* pRanges) const
+		{
+			vkCmdClearColorImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearColorValue*>(pColor), rangeCount, reinterpret_cast<const VkImageSubresourceRange*>(pRanges));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void clearColorImage(Image image, ImageLayout imageLayout, const ClearColorValue & color, eastl::vector<ImageSubresourceRange> const & ranges) const
+		{
+			vkCmdClearColorImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearColorValue*>(&color), static_cast<uint32_t>(ranges.size()), reinterpret_cast<const VkImageSubresourceRange*>(ranges.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void clearDepthStencilImage(Image image, ImageLayout imageLayout, const ClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const ImageSubresourceRange* pRanges) const
+		{
+			vkCmdClearDepthStencilImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearDepthStencilValue*>(pDepthStencil), rangeCount, reinterpret_cast<const VkImageSubresourceRange*>(pRanges));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void clearDepthStencilImage(Image image, ImageLayout imageLayout, const ClearDepthStencilValue & depthStencil, eastl::vector<ImageSubresourceRange> const & ranges) const
+		{
+			vkCmdClearDepthStencilImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearDepthStencilValue*>(&depthStencil), static_cast<uint32_t>(ranges.size()), reinterpret_cast<const VkImageSubresourceRange*>(ranges.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void clearAttachments(uint32_t attachmentCount, const ClearAttachment* pAttachments, uint32_t rectCount, const ClearRect* pRects) const
+		{
+			vkCmdClearAttachments(m_commandBuffer, attachmentCount, reinterpret_cast<const VkClearAttachment*>(pAttachments), rectCount, reinterpret_cast<const VkClearRect*>(pRects));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void clearAttachments(eastl::vector<ClearAttachment> const & attachments, eastl::vector<ClearRect> const & rects) const
+		{
+			vkCmdClearAttachments(m_commandBuffer, static_cast<uint32_t>(attachments.size()), reinterpret_cast<const VkClearAttachment*>(attachments.data()), static_cast<uint32_t>(rects.size()), reinterpret_cast<const VkClearRect*>(rects.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void resolveImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageResolve* pRegions) const
+		{
+			vkCmdResolveImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageResolve*>(pRegions));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void resolveImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageResolve> const & regions) const
+		{
+			vkCmdResolveImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkImageResolve*>(regions.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void setEvent(Event event, PipelineStageFlags stageMask) const
+		{
+			vkCmdSetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setEvent(Event event, PipelineStageFlags stageMask) const
+		{
+			vkCmdSetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void resetEvent(Event event, PipelineStageFlags stageMask) const
+		{
+			vkCmdResetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void resetEvent(Event event, PipelineStageFlags stageMask) const
+		{
+			vkCmdResetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void waitEvents(uint32_t eventCount, const Event* pEvents, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, uint32_t memoryBarrierCount, const MemoryBarrier* pMemoryBarriers, uint32_t bufferMemoryBarrierCount, const BufferMemoryBarrier* pBufferMemoryBarriers, uint32_t imageMemoryBarrierCount, const ImageMemoryBarrier* pImageMemoryBarriers) const
+		{
+			vkCmdWaitEvents(m_commandBuffer, eventCount, reinterpret_cast<const VkEvent*>(pEvents), static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), memoryBarrierCount, reinterpret_cast<const VkMemoryBarrier*>(pMemoryBarriers), bufferMemoryBarrierCount, reinterpret_cast<const VkBufferMemoryBarrier*>(pBufferMemoryBarriers), imageMemoryBarrierCount, reinterpret_cast<const VkImageMemoryBarrier*>(pImageMemoryBarriers));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void waitEvents(eastl::vector<Event> const & events, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, eastl::vector<MemoryBarrier> const & memoryBarriers, eastl::vector<BufferMemoryBarrier> const & bufferMemoryBarriers, eastl::vector<ImageMemoryBarrier> const & imageMemoryBarriers) const
+		{
+			vkCmdWaitEvents(m_commandBuffer, static_cast<uint32_t>(events.size()), reinterpret_cast<const VkEvent*>(events.data()), static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<uint32_t>(memoryBarriers.size()), reinterpret_cast<const VkMemoryBarrier*>(memoryBarriers.data()), static_cast<uint32_t>(bufferMemoryBarriers.size()), reinterpret_cast<const VkBufferMemoryBarrier*>(bufferMemoryBarriers.data()), static_cast<uint32_t>(imageMemoryBarriers.size()), reinterpret_cast<const VkImageMemoryBarrier*>(imageMemoryBarriers.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void pipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags, uint32_t memoryBarrierCount, const MemoryBarrier* pMemoryBarriers, uint32_t bufferMemoryBarrierCount, const BufferMemoryBarrier* pBufferMemoryBarriers, uint32_t imageMemoryBarrierCount, const ImageMemoryBarrier* pImageMemoryBarriers) const
+		{
+			vkCmdPipelineBarrier(m_commandBuffer, static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<VkDependencyFlags>(dependencyFlags), memoryBarrierCount, reinterpret_cast<const VkMemoryBarrier*>(pMemoryBarriers), bufferMemoryBarrierCount, reinterpret_cast<const VkBufferMemoryBarrier*>(pBufferMemoryBarriers), imageMemoryBarrierCount, reinterpret_cast<const VkImageMemoryBarrier*>(pImageMemoryBarriers));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void pipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags, eastl::vector<MemoryBarrier> const & memoryBarriers, eastl::vector<BufferMemoryBarrier> const & bufferMemoryBarriers, eastl::vector<ImageMemoryBarrier> const & imageMemoryBarriers) const
+		{
+			vkCmdPipelineBarrier(m_commandBuffer, static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<VkDependencyFlags>(dependencyFlags), static_cast<uint32_t>(memoryBarriers.size()), reinterpret_cast<const VkMemoryBarrier*>(memoryBarriers.data()), static_cast<uint32_t>(bufferMemoryBarriers.size()), reinterpret_cast<const VkBufferMemoryBarrier*>(bufferMemoryBarriers.data()), static_cast<uint32_t>(imageMemoryBarriers.size()), reinterpret_cast<const VkImageMemoryBarrier*>(imageMemoryBarriers.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void beginQuery(QueryPool queryPool, uint32_t query, QueryControlFlags flags) const
+		{
+			vkCmdBeginQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query, static_cast<VkQueryControlFlags>(flags));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void beginQuery(QueryPool queryPool, uint32_t query, QueryControlFlags flags) const
+		{
+			vkCmdBeginQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query, static_cast<VkQueryControlFlags>(flags));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void endQuery(QueryPool queryPool, uint32_t query) const
+		{
+			vkCmdEndQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void endQuery(QueryPool queryPool, uint32_t query) const
+		{
+			vkCmdEndQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void resetQueryPool(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount) const
+		{
+			vkCmdResetQueryPool(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void resetQueryPool(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount) const
+		{
+			vkCmdResetQueryPool(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void writeTimestamp(PipelineStageFlagBits pipelineStage, QueryPool queryPool, uint32_t query) const
+		{
+			vkCmdWriteTimestamp(m_commandBuffer, static_cast<VkPipelineStageFlagBits>(pipelineStage), static_cast<VkQueryPool>(queryPool), query);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void writeTimestamp(PipelineStageFlagBits pipelineStage, QueryPool queryPool, uint32_t query) const
+		{
+			vkCmdWriteTimestamp(m_commandBuffer, static_cast<VkPipelineStageFlagBits>(pipelineStage), static_cast<VkQueryPool>(queryPool), query);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void copyQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize stride, QueryResultFlags flags) const
+		{
+			vkCmdCopyQueryPoolResults(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, static_cast<VkBuffer>(dstBuffer), dstOffset, stride, static_cast<VkQueryResultFlags>(flags));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void copyQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize stride, QueryResultFlags flags) const
+		{
+			vkCmdCopyQueryPoolResults(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, static_cast<VkBuffer>(dstBuffer), dstOffset, stride, static_cast<VkQueryResultFlags>(flags));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void pushConstants(PipelineLayout layout, ShaderStageFlags stageFlags, uint32_t offset, uint32_t size, const void* pValues) const
+		{
+			vkCmdPushConstants(m_commandBuffer, static_cast<VkPipelineLayout>(layout), static_cast<VkShaderStageFlags>(stageFlags), offset, size, pValues);
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void pushConstants(PipelineLayout layout, ShaderStageFlags stageFlags, uint32_t offset, eastl::vector<uint8_t> const & values) const
+		{
+			vkCmdPushConstants(m_commandBuffer, static_cast<VkPipelineLayout>(layout), static_cast<VkShaderStageFlags>(stageFlags), offset, static_cast<uint32_t>(values.size()), values.data());
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void beginRenderPass(const RenderPassBeginInfo* pRenderPassBegin, SubpassContents contents) const
+		{
+			vkCmdBeginRenderPass(m_commandBuffer, reinterpret_cast<const VkRenderPassBeginInfo*>(pRenderPassBegin), static_cast<VkSubpassContents>(contents));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void beginRenderPass(const RenderPassBeginInfo & renderPassBegin, SubpassContents contents) const
+		{
+			vkCmdBeginRenderPass(m_commandBuffer, reinterpret_cast<const VkRenderPassBeginInfo*>(&renderPassBegin), static_cast<VkSubpassContents>(contents));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void nextSubpass(SubpassContents contents) const
+		{
+			vkCmdNextSubpass(m_commandBuffer, static_cast<VkSubpassContents>(contents));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void nextSubpass(SubpassContents contents) const
+		{
+			vkCmdNextSubpass(m_commandBuffer, static_cast<VkSubpassContents>(contents));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void endRenderPass() const
+		{
+			vkCmdEndRenderPass(m_commandBuffer);
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void endRenderPass() const
+		{
+			vkCmdEndRenderPass(m_commandBuffer);
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void executeCommands(uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers) const
+		{
+			vkCmdExecuteCommands(m_commandBuffer, commandBufferCount, reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void executeCommands(eastl::vector<CommandBuffer> const & commandBuffers) const
+		{
+			vkCmdExecuteCommands(m_commandBuffer, static_cast<uint32_t>(commandBuffers.size()), reinterpret_cast<const VkCommandBuffer*>(commandBuffers.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkCommandBuffer() const
+		{
+			return m_commandBuffer;
+		}
+
+		explicit operator bool() const
+		{
+			return m_commandBuffer != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_commandBuffer == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkCommandBuffer m_commandBuffer;
+	};
+	static_assert(sizeof(CommandBuffer) == sizeof(VkCommandBuffer), "handle and wrapper have different size!");
 
 	class SubpassDependency
 	{
@@ -11134,7 +18257,23 @@ namespace vk
 			m_subpassDependency.dependencyFlags = static_cast<VkDependencyFlags>(dependencyFlags);
 		}
 
+		SubpassDependency(VkSubpassDependency const & rhs)
+			: m_subpassDependency(rhs)
+		{
+		}
+
+		SubpassDependency& operator=(VkSubpassDependency const & rhs)
+		{
+			m_subpassDependency = rhs;
+			return *this;
+		}
+
 		const uint32_t& srcSubpass() const
+		{
+			return m_subpassDependency.srcSubpass;
+		}
+
+		uint32_t& srcSubpass()
 		{
 			return m_subpassDependency.srcSubpass;
 		}
@@ -11150,6 +18289,11 @@ namespace vk
 			return m_subpassDependency.dstSubpass;
 		}
 
+		uint32_t& dstSubpass()
+		{
+			return m_subpassDependency.dstSubpass;
+		}
+
 		SubpassDependency& dstSubpass(uint32_t dstSubpass)
 		{
 			m_subpassDependency.dstSubpass = dstSubpass;
@@ -11159,6 +18303,11 @@ namespace vk
 		const PipelineStageFlags& srcStageMask() const
 		{
 			return reinterpret_cast<const PipelineStageFlags&>(m_subpassDependency.srcStageMask);
+		}
+
+		PipelineStageFlags& srcStageMask()
+		{
+			return reinterpret_cast<PipelineStageFlags&>(m_subpassDependency.srcStageMask);
 		}
 
 		SubpassDependency& srcStageMask(PipelineStageFlags srcStageMask)
@@ -11172,6 +18321,11 @@ namespace vk
 			return reinterpret_cast<const PipelineStageFlags&>(m_subpassDependency.dstStageMask);
 		}
 
+		PipelineStageFlags& dstStageMask()
+		{
+			return reinterpret_cast<PipelineStageFlags&>(m_subpassDependency.dstStageMask);
+		}
+
 		SubpassDependency& dstStageMask(PipelineStageFlags dstStageMask)
 		{
 			m_subpassDependency.dstStageMask = static_cast<VkPipelineStageFlags>(dstStageMask);
@@ -11181,6 +18335,11 @@ namespace vk
 		const AccessFlags& srcAccessMask() const
 		{
 			return reinterpret_cast<const AccessFlags&>(m_subpassDependency.srcAccessMask);
+		}
+
+		AccessFlags& srcAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_subpassDependency.srcAccessMask);
 		}
 
 		SubpassDependency& srcAccessMask(AccessFlags srcAccessMask)
@@ -11194,6 +18353,11 @@ namespace vk
 			return reinterpret_cast<const AccessFlags&>(m_subpassDependency.dstAccessMask);
 		}
 
+		AccessFlags& dstAccessMask()
+		{
+			return reinterpret_cast<AccessFlags&>(m_subpassDependency.dstAccessMask);
+		}
+
 		SubpassDependency& dstAccessMask(AccessFlags dstAccessMask)
 		{
 			m_subpassDependency.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
@@ -11203,6 +18367,11 @@ namespace vk
 		const DependencyFlags& dependencyFlags() const
 		{
 			return reinterpret_cast<const DependencyFlags&>(m_subpassDependency.dependencyFlags);
+		}
+
+		DependencyFlags& dependencyFlags()
+		{
+			return reinterpret_cast<DependencyFlags&>(m_subpassDependency.dependencyFlags);
 		}
 
 		SubpassDependency& dependencyFlags(DependencyFlags dependencyFlags)
@@ -11219,19 +18388,20 @@ namespace vk
 	private:
 		VkSubpassDependency m_subpassDependency;
 	};
+	static_assert(sizeof(SubpassDependency) == sizeof(VkSubpassDependency), "struct and wrapper have different size!");
 
 	class RenderPassCreateInfo
 	{
 	public:
 		RenderPassCreateInfo()
-			: RenderPassCreateInfo(0, 0, nullptr, 0, nullptr, 0, nullptr)
+			: RenderPassCreateInfo(RenderPassCreateFlags(), 0, nullptr, 0, nullptr, 0, nullptr)
 		{}
 
 		RenderPassCreateInfo(RenderPassCreateFlags flags, uint32_t attachmentCount, const AttachmentDescription* pAttachments, uint32_t subpassCount, const SubpassDescription* pSubpasses, uint32_t dependencyCount, const SubpassDependency* pDependencies)
 		{
 			m_renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			m_renderPassCreateInfo.pNext = nullptr;
-			m_renderPassCreateInfo.flags = flags;
+			m_renderPassCreateInfo.flags = static_cast<VkRenderPassCreateFlags>(flags);
 			m_renderPassCreateInfo.attachmentCount = attachmentCount;
 			m_renderPassCreateInfo.pAttachments = reinterpret_cast<const VkAttachmentDescription*>(pAttachments);
 			m_renderPassCreateInfo.subpassCount = subpassCount;
@@ -11240,9 +18410,25 @@ namespace vk
 			m_renderPassCreateInfo.pDependencies = reinterpret_cast<const VkSubpassDependency*>(pDependencies);
 		}
 
+		RenderPassCreateInfo(VkRenderPassCreateInfo const & rhs)
+			: m_renderPassCreateInfo(rhs)
+		{
+		}
+
+		RenderPassCreateInfo& operator=(VkRenderPassCreateInfo const & rhs)
+		{
+			m_renderPassCreateInfo = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_renderPassCreateInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_renderPassCreateInfo.sType);
 		}
 
 		RenderPassCreateInfo& sType(StructureType sType)
@@ -11256,6 +18442,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_renderPassCreateInfo.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_renderPassCreateInfo.pNext);
+		}
+
 		RenderPassCreateInfo& pNext(const void* pNext)
 		{
 			m_renderPassCreateInfo.pNext = pNext;
@@ -11264,16 +18455,26 @@ namespace vk
 
 		const RenderPassCreateFlags& flags() const
 		{
-			return m_renderPassCreateInfo.flags;
+			return reinterpret_cast<const RenderPassCreateFlags&>(m_renderPassCreateInfo.flags);
+		}
+
+		RenderPassCreateFlags& flags()
+		{
+			return reinterpret_cast<RenderPassCreateFlags&>(m_renderPassCreateInfo.flags);
 		}
 
 		RenderPassCreateInfo& flags(RenderPassCreateFlags flags)
 		{
-			m_renderPassCreateInfo.flags = flags;
+			m_renderPassCreateInfo.flags = static_cast<VkRenderPassCreateFlags>(flags);
 			return *this;
 		}
 
 		const uint32_t& attachmentCount() const
+		{
+			return m_renderPassCreateInfo.attachmentCount;
+		}
+
+		uint32_t& attachmentCount()
 		{
 			return m_renderPassCreateInfo.attachmentCount;
 		}
@@ -11289,6 +18490,11 @@ namespace vk
 			return reinterpret_cast<const AttachmentDescription*>(m_renderPassCreateInfo.pAttachments);
 		}
 
+		const AttachmentDescription* pAttachments()
+		{
+			return reinterpret_cast<const AttachmentDescription*>(m_renderPassCreateInfo.pAttachments);
+		}
+
 		RenderPassCreateInfo& pAttachments(const AttachmentDescription* pAttachments)
 		{
 			m_renderPassCreateInfo.pAttachments = reinterpret_cast<const VkAttachmentDescription*>(pAttachments);
@@ -11296,6 +18502,11 @@ namespace vk
 		}
 
 		const uint32_t& subpassCount() const
+		{
+			return m_renderPassCreateInfo.subpassCount;
+		}
+
+		uint32_t& subpassCount()
 		{
 			return m_renderPassCreateInfo.subpassCount;
 		}
@@ -11311,6 +18522,11 @@ namespace vk
 			return reinterpret_cast<const SubpassDescription*>(m_renderPassCreateInfo.pSubpasses);
 		}
 
+		const SubpassDescription* pSubpasses()
+		{
+			return reinterpret_cast<const SubpassDescription*>(m_renderPassCreateInfo.pSubpasses);
+		}
+
 		RenderPassCreateInfo& pSubpasses(const SubpassDescription* pSubpasses)
 		{
 			m_renderPassCreateInfo.pSubpasses = reinterpret_cast<const VkSubpassDescription*>(pSubpasses);
@@ -11322,6 +18538,11 @@ namespace vk
 			return m_renderPassCreateInfo.dependencyCount;
 		}
 
+		uint32_t& dependencyCount()
+		{
+			return m_renderPassCreateInfo.dependencyCount;
+		}
+
 		RenderPassCreateInfo& dependencyCount(uint32_t dependencyCount)
 		{
 			m_renderPassCreateInfo.dependencyCount = dependencyCount;
@@ -11329,6 +18550,11 @@ namespace vk
 		}
 
 		const SubpassDependency* pDependencies() const
+		{
+			return reinterpret_cast<const SubpassDependency*>(m_renderPassCreateInfo.pDependencies);
+		}
+
+		const SubpassDependency* pDependencies()
 		{
 			return reinterpret_cast<const SubpassDependency*>(m_renderPassCreateInfo.pDependencies);
 		}
@@ -11347,25 +18573,320 @@ namespace vk
 	private:
 		VkRenderPassCreateInfo m_renderPassCreateInfo;
 	};
+	static_assert(sizeof(RenderPassCreateInfo) == sizeof(VkRenderPassCreateInfo), "struct and wrapper have different size!");
+
+	class SubmitInfo
+	{
+	public:
+		SubmitInfo()
+			: SubmitInfo(0, nullptr, nullptr, 0, nullptr, 0, nullptr)
+		{}
+
+		SubmitInfo(uint32_t waitSemaphoreCount, const Semaphore* pWaitSemaphores, const PipelineStageFlags* pWaitDstStageMask, uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const Semaphore* pSignalSemaphores)
+		{
+			m_submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			m_submitInfo.pNext = nullptr;
+			m_submitInfo.waitSemaphoreCount = waitSemaphoreCount;
+			m_submitInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
+			m_submitInfo.pWaitDstStageMask = reinterpret_cast<const VkPipelineStageFlags*>(pWaitDstStageMask);
+			m_submitInfo.commandBufferCount = commandBufferCount;
+			m_submitInfo.pCommandBuffers = reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers);
+			m_submitInfo.signalSemaphoreCount = signalSemaphoreCount;
+			m_submitInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
+		}
+
+		SubmitInfo(VkSubmitInfo const & rhs)
+			: m_submitInfo(rhs)
+		{
+		}
+
+		SubmitInfo& operator=(VkSubmitInfo const & rhs)
+		{
+			m_submitInfo = rhs;
+			return *this;
+		}
+
+		const StructureType& sType() const
+		{
+			return reinterpret_cast<const StructureType&>(m_submitInfo.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_submitInfo.sType);
+		}
+
+		SubmitInfo& sType(StructureType sType)
+		{
+			m_submitInfo.sType = static_cast<VkStructureType>(sType);
+			return *this;
+		}
+
+		const void* pNext() const
+		{
+			return reinterpret_cast<const void*>(m_submitInfo.pNext);
+		}
+
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_submitInfo.pNext);
+		}
+
+		SubmitInfo& pNext(const void* pNext)
+		{
+			m_submitInfo.pNext = pNext;
+			return *this;
+		}
+
+		const uint32_t& waitSemaphoreCount() const
+		{
+			return m_submitInfo.waitSemaphoreCount;
+		}
+
+		uint32_t& waitSemaphoreCount()
+		{
+			return m_submitInfo.waitSemaphoreCount;
+		}
+
+		SubmitInfo& waitSemaphoreCount(uint32_t waitSemaphoreCount)
+		{
+			m_submitInfo.waitSemaphoreCount = waitSemaphoreCount;
+			return *this;
+		}
+
+		const Semaphore* pWaitSemaphores() const
+		{
+			return reinterpret_cast<const Semaphore*>(m_submitInfo.pWaitSemaphores);
+		}
+
+		const Semaphore* pWaitSemaphores()
+		{
+			return reinterpret_cast<const Semaphore*>(m_submitInfo.pWaitSemaphores);
+		}
+
+		SubmitInfo& pWaitSemaphores(const Semaphore* pWaitSemaphores)
+		{
+			m_submitInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
+			return *this;
+		}
+
+		const PipelineStageFlags* pWaitDstStageMask() const
+		{
+			return reinterpret_cast<const PipelineStageFlags*>(m_submitInfo.pWaitDstStageMask);
+		}
+
+		const PipelineStageFlags* pWaitDstStageMask()
+		{
+			return reinterpret_cast<const PipelineStageFlags*>(m_submitInfo.pWaitDstStageMask);
+		}
+
+		SubmitInfo& pWaitDstStageMask(const PipelineStageFlags* pWaitDstStageMask)
+		{
+			m_submitInfo.pWaitDstStageMask = reinterpret_cast<const VkPipelineStageFlags*>(pWaitDstStageMask);
+			return *this;
+		}
+
+		const uint32_t& commandBufferCount() const
+		{
+			return m_submitInfo.commandBufferCount;
+		}
+
+		uint32_t& commandBufferCount()
+		{
+			return m_submitInfo.commandBufferCount;
+		}
+
+		SubmitInfo& commandBufferCount(uint32_t commandBufferCount)
+		{
+			m_submitInfo.commandBufferCount = commandBufferCount;
+			return *this;
+		}
+
+		const CommandBuffer* pCommandBuffers() const
+		{
+			return reinterpret_cast<const CommandBuffer*>(m_submitInfo.pCommandBuffers);
+		}
+
+		const CommandBuffer* pCommandBuffers()
+		{
+			return reinterpret_cast<const CommandBuffer*>(m_submitInfo.pCommandBuffers);
+		}
+
+		SubmitInfo& pCommandBuffers(const CommandBuffer* pCommandBuffers)
+		{
+			m_submitInfo.pCommandBuffers = reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers);
+			return *this;
+		}
+
+		const uint32_t& signalSemaphoreCount() const
+		{
+			return m_submitInfo.signalSemaphoreCount;
+		}
+
+		uint32_t& signalSemaphoreCount()
+		{
+			return m_submitInfo.signalSemaphoreCount;
+		}
+
+		SubmitInfo& signalSemaphoreCount(uint32_t signalSemaphoreCount)
+		{
+			m_submitInfo.signalSemaphoreCount = signalSemaphoreCount;
+			return *this;
+		}
+
+		const Semaphore* pSignalSemaphores() const
+		{
+			return reinterpret_cast<const Semaphore*>(m_submitInfo.pSignalSemaphores);
+		}
+
+		const Semaphore* pSignalSemaphores()
+		{
+			return reinterpret_cast<const Semaphore*>(m_submitInfo.pSignalSemaphores);
+		}
+
+		SubmitInfo& pSignalSemaphores(const Semaphore* pSignalSemaphores)
+		{
+			m_submitInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
+			return *this;
+		}
+
+		operator const VkSubmitInfo&() const
+		{
+			return m_submitInfo;
+		}
+
+	private:
+		VkSubmitInfo m_submitInfo;
+	};
+	static_assert(sizeof(SubmitInfo) == sizeof(VkSubmitInfo), "struct and wrapper have different size!");
+
+	class Queue
+	{
+	public:
+		Queue()
+			: m_queue(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Queue(VkQueue queue)
+			: m_queue(queue)
+		{}
+
+		Queue& operator=(VkQueue queue)
+		{
+			m_queue = queue;
+			return *this;
+		}
+#endif
+
+		Result submit(uint32_t submitCount, const SubmitInfo* pSubmits, Fence fence) const
+		{
+			return static_cast<Result>(vkQueueSubmit(m_queue, submitCount, reinterpret_cast<const VkSubmitInfo*>(pSubmits), static_cast<VkFence>(fence)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void submit(eastl::vector<SubmitInfo> const & submits, Fence fence) const
+		{
+			Result result = static_cast<Result>(vkQueueSubmit(m_queue, static_cast<uint32_t>(submits.size()), reinterpret_cast<const VkSubmitInfo*>(submits.data()), static_cast<VkFence>(fence)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Queue::submit");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result waitIdle() const
+		{
+			return static_cast<Result>(vkQueueWaitIdle(m_queue));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void waitIdle() const
+		{
+			Result result = static_cast<Result>(vkQueueWaitIdle(m_queue));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Queue::waitIdle");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result bindSparse(uint32_t bindInfoCount, const BindSparseInfo* pBindInfo, Fence fence) const
+		{
+			return static_cast<Result>(vkQueueBindSparse(m_queue, bindInfoCount, reinterpret_cast<const VkBindSparseInfo*>(pBindInfo), static_cast<VkFence>(fence)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void bindSparse(eastl::vector<BindSparseInfo> const & bindInfo, Fence fence) const
+		{
+			Result result = static_cast<Result>(vkQueueBindSparse(m_queue, static_cast<uint32_t>(bindInfo.size()), reinterpret_cast<const VkBindSparseInfo*>(bindInfo.data()), static_cast<VkFence>(fence)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Queue::bindSparse");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result presentKHR(const PresentInfoKHR* pPresentInfo) const
+		{
+			return static_cast<Result>(vkQueuePresentKHR(m_queue, reinterpret_cast<const VkPresentInfoKHR*>(pPresentInfo)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result presentKHR(const PresentInfoKHR & presentInfo) const
+		{
+			Result result = static_cast<Result>(vkQueuePresentKHR(m_queue, reinterpret_cast<const VkPresentInfoKHR*>(&presentInfo)));
+			if ((result != Result::eSuccess) && (result != Result::eSuboptimalKHR))
+			{
+				throw std::system_error(result, "vk::Queue::presentKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkQueue() const
+		{
+			return m_queue;
+		}
+
+		explicit operator bool() const
+		{
+			return m_queue != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_queue == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkQueue m_queue;
+	};
+	static_assert(sizeof(Queue) == sizeof(VkQueue), "handle and wrapper have different size!");
 
 	enum class PresentModeKHR
 	{
-		eVkPresentModeImmediateKhr = VK_PRESENT_MODE_IMMEDIATE_KHR,
-		eVkPresentModeMailboxKhr = VK_PRESENT_MODE_MAILBOX_KHR,
-		eVkPresentModeFifoKhr = VK_PRESENT_MODE_FIFO_KHR,
-		eVkPresentModeFifoRelaxedKhr = VK_PRESENT_MODE_FIFO_RELAXED_KHR
+		eImmediateKHR = VK_PRESENT_MODE_IMMEDIATE_KHR,
+		eMailboxKHR = VK_PRESENT_MODE_MAILBOX_KHR,
+		eFifoKHR = VK_PRESENT_MODE_FIFO_KHR,
+		eFifoRelaxedKHR = VK_PRESENT_MODE_FIFO_RELAXED_KHR
 	};
 
 	enum class ColorSpaceKHR
 	{
-		eVkColorspaceSrgbNonlinearKhr = VK_COLORSPACE_SRGB_NONLINEAR_KHR
+		eVkColorspaceSrgbNonlinearKHR = VK_COLORSPACE_SRGB_NONLINEAR_KHR
 	};
 
 	class SurfaceFormatKHR
 	{
 	public:
 		SurfaceFormatKHR()
-			: SurfaceFormatKHR(Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinearKhr)
+			: SurfaceFormatKHR(Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinearKHR)
 		{}
 
 		SurfaceFormatKHR(Format format, ColorSpaceKHR colorSpace)
@@ -11374,9 +18895,25 @@ namespace vk
 			m_surfaceFormatKHR.colorSpace = static_cast<VkColorSpaceKHR>(colorSpace);
 		}
 
+		SurfaceFormatKHR(VkSurfaceFormatKHR const & rhs)
+			: m_surfaceFormatKHR(rhs)
+		{
+		}
+
+		SurfaceFormatKHR& operator=(VkSurfaceFormatKHR const & rhs)
+		{
+			m_surfaceFormatKHR = rhs;
+			return *this;
+		}
+
 		const Format& format() const
 		{
 			return reinterpret_cast<const Format&>(m_surfaceFormatKHR.format);
+		}
+
+		Format& format()
+		{
+			return reinterpret_cast<Format&>(m_surfaceFormatKHR.format);
 		}
 
 		SurfaceFormatKHR& format(Format format)
@@ -11388,6 +18925,11 @@ namespace vk
 		const ColorSpaceKHR& colorSpace() const
 		{
 			return reinterpret_cast<const ColorSpaceKHR&>(m_surfaceFormatKHR.colorSpace);
+		}
+
+		ColorSpaceKHR& colorSpace()
+		{
+			return reinterpret_cast<ColorSpaceKHR&>(m_surfaceFormatKHR.colorSpace);
 		}
 
 		SurfaceFormatKHR& colorSpace(ColorSpaceKHR colorSpace)
@@ -11404,2278 +18946,7 @@ namespace vk
 	private:
 		VkSurfaceFormatKHR m_surfaceFormatKHR;
 	};
-
-	enum class CompositeAlphaFlagBitsKHR
-	{
-		eOpaque = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
-		ePreMultiplied = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
-		ePostMultiplied = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
-		eInherit = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
-	};
-
-	typedef Flags<CompositeAlphaFlagBitsKHR, VkCompositeAlphaFlagsKHR> CompositeAlphaFlagsKHR;
-
-	inline CompositeAlphaFlagsKHR operator|(CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1)
-	{
-		return CompositeAlphaFlagsKHR(bit0) | bit1;
-	}
-
-	enum class SurfaceTransformFlagBitsKHR
-	{
-		eIdentity = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
-		eRotate90 = VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR,
-		eRotate180 = VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR,
-		eRotate270 = VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR,
-		eHorizontalMirror = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR,
-		eHorizontalMirrorRotate90 = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR,
-		eHorizontalMirrorRotate180 = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR,
-		eHorizontalMirrorRotate270 = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR,
-		eInherit = VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR
-	};
-
-	typedef Flags<SurfaceTransformFlagBitsKHR, VkSurfaceTransformFlagsKHR> SurfaceTransformFlagsKHR;
-
-	inline SurfaceTransformFlagsKHR operator|(SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1)
-	{
-		return SurfaceTransformFlagsKHR(bit0) | bit1;
-	}
-
-	class SurfaceCapabilitiesKHR
-	{
-	public:
-		SurfaceCapabilitiesKHR()
-			: SurfaceCapabilitiesKHR(0, 0, Extent2D(), Extent2D(), Extent2D(), 0, SurfaceTransformFlagsKHR(), SurfaceTransformFlagBitsKHR::eIdentity, CompositeAlphaFlagsKHR(), ImageUsageFlags())
-		{}
-
-		SurfaceCapabilitiesKHR(uint32_t minImageCount, uint32_t maxImageCount, Extent2D currentExtent, Extent2D minImageExtent, Extent2D maxImageExtent, uint32_t maxImageArrayLayers, SurfaceTransformFlagsKHR supportedTransforms, SurfaceTransformFlagBitsKHR currentTransform, CompositeAlphaFlagsKHR supportedCompositeAlpha, ImageUsageFlags supportedUsageFlags)
-		{
-			m_surfaceCapabilitiesKHR.minImageCount = minImageCount;
-			m_surfaceCapabilitiesKHR.maxImageCount = maxImageCount;
-			m_surfaceCapabilitiesKHR.currentExtent = static_cast<VkExtent2D>(currentExtent);
-			m_surfaceCapabilitiesKHR.minImageExtent = static_cast<VkExtent2D>(minImageExtent);
-			m_surfaceCapabilitiesKHR.maxImageExtent = static_cast<VkExtent2D>(maxImageExtent);
-			m_surfaceCapabilitiesKHR.maxImageArrayLayers = maxImageArrayLayers;
-			m_surfaceCapabilitiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
-			m_surfaceCapabilitiesKHR.currentTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(currentTransform);
-			m_surfaceCapabilitiesKHR.supportedCompositeAlpha = static_cast<VkCompositeAlphaFlagsKHR>(supportedCompositeAlpha);
-			m_surfaceCapabilitiesKHR.supportedUsageFlags = static_cast<VkImageUsageFlags>(supportedUsageFlags);
-		}
-
-		const uint32_t& minImageCount() const
-		{
-			return m_surfaceCapabilitiesKHR.minImageCount;
-		}
-
-		SurfaceCapabilitiesKHR& minImageCount(uint32_t minImageCount)
-		{
-			m_surfaceCapabilitiesKHR.minImageCount = minImageCount;
-			return *this;
-		}
-
-		const uint32_t& maxImageCount() const
-		{
-			return m_surfaceCapabilitiesKHR.maxImageCount;
-		}
-
-		SurfaceCapabilitiesKHR& maxImageCount(uint32_t maxImageCount)
-		{
-			m_surfaceCapabilitiesKHR.maxImageCount = maxImageCount;
-			return *this;
-		}
-
-		const Extent2D& currentExtent() const
-		{
-			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.currentExtent);
-		}
-
-		SurfaceCapabilitiesKHR& currentExtent(Extent2D currentExtent)
-		{
-			m_surfaceCapabilitiesKHR.currentExtent = static_cast<VkExtent2D>(currentExtent);
-			return *this;
-		}
-
-		const Extent2D& minImageExtent() const
-		{
-			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.minImageExtent);
-		}
-
-		SurfaceCapabilitiesKHR& minImageExtent(Extent2D minImageExtent)
-		{
-			m_surfaceCapabilitiesKHR.minImageExtent = static_cast<VkExtent2D>(minImageExtent);
-			return *this;
-		}
-
-		const Extent2D& maxImageExtent() const
-		{
-			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.maxImageExtent);
-		}
-
-		SurfaceCapabilitiesKHR& maxImageExtent(Extent2D maxImageExtent)
-		{
-			m_surfaceCapabilitiesKHR.maxImageExtent = static_cast<VkExtent2D>(maxImageExtent);
-			return *this;
-		}
-
-		const uint32_t& maxImageArrayLayers() const
-		{
-			return m_surfaceCapabilitiesKHR.maxImageArrayLayers;
-		}
-
-		SurfaceCapabilitiesKHR& maxImageArrayLayers(uint32_t maxImageArrayLayers)
-		{
-			m_surfaceCapabilitiesKHR.maxImageArrayLayers = maxImageArrayLayers;
-			return *this;
-		}
-
-		const SurfaceTransformFlagsKHR& supportedTransforms() const
-		{
-			return reinterpret_cast<const SurfaceTransformFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedTransforms);
-		}
-
-		SurfaceCapabilitiesKHR& supportedTransforms(SurfaceTransformFlagsKHR supportedTransforms)
-		{
-			m_surfaceCapabilitiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
-			return *this;
-		}
-
-		const SurfaceTransformFlagBitsKHR& currentTransform() const
-		{
-			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_surfaceCapabilitiesKHR.currentTransform);
-		}
-
-		SurfaceCapabilitiesKHR& currentTransform(SurfaceTransformFlagBitsKHR currentTransform)
-		{
-			m_surfaceCapabilitiesKHR.currentTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(currentTransform);
-			return *this;
-		}
-
-		const CompositeAlphaFlagsKHR& supportedCompositeAlpha() const
-		{
-			return reinterpret_cast<const CompositeAlphaFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedCompositeAlpha);
-		}
-
-		SurfaceCapabilitiesKHR& supportedCompositeAlpha(CompositeAlphaFlagsKHR supportedCompositeAlpha)
-		{
-			m_surfaceCapabilitiesKHR.supportedCompositeAlpha = static_cast<VkCompositeAlphaFlagsKHR>(supportedCompositeAlpha);
-			return *this;
-		}
-
-		const ImageUsageFlags& supportedUsageFlags() const
-		{
-			return reinterpret_cast<const ImageUsageFlags&>(m_surfaceCapabilitiesKHR.supportedUsageFlags);
-		}
-
-		SurfaceCapabilitiesKHR& supportedUsageFlags(ImageUsageFlags supportedUsageFlags)
-		{
-			m_surfaceCapabilitiesKHR.supportedUsageFlags = static_cast<VkImageUsageFlags>(supportedUsageFlags);
-			return *this;
-		}
-
-		operator const VkSurfaceCapabilitiesKHR&() const
-		{
-			return m_surfaceCapabilitiesKHR;
-		}
-
-	private:
-		VkSurfaceCapabilitiesKHR m_surfaceCapabilitiesKHR;
-	};
-
-	class SwapchainCreateInfoKHR
-	{
-	public:
-		SwapchainCreateInfoKHR()
-			: SwapchainCreateInfoKHR(0, SurfaceKHR(), 0, Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinearKhr, Extent2D(), 0, ImageUsageFlags(), SharingMode::eExclusive, 0, nullptr, SurfaceTransformFlagBitsKHR::eIdentity, CompositeAlphaFlagBitsKHR::eOpaque, PresentModeKHR::eVkPresentModeImmediateKhr, 0, SwapchainKHR())
-		{}
-
-		SwapchainCreateInfoKHR(SwapchainCreateFlagsKHR flags, SurfaceKHR surface, uint32_t minImageCount, Format imageFormat, ColorSpaceKHR imageColorSpace, Extent2D imageExtent, uint32_t imageArrayLayers, ImageUsageFlags imageUsage, SharingMode imageSharingMode, uint32_t queueFamilyIndexCount, const uint32_t* pQueueFamilyIndices, SurfaceTransformFlagBitsKHR preTransform, CompositeAlphaFlagBitsKHR compositeAlpha, PresentModeKHR presentMode, Bool32 clipped, SwapchainKHR oldSwapchain)
-		{
-			m_swapchainCreateInfoKHR.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-			m_swapchainCreateInfoKHR.pNext = nullptr;
-			m_swapchainCreateInfoKHR.flags = flags;
-			m_swapchainCreateInfoKHR.surface = surface;
-			m_swapchainCreateInfoKHR.minImageCount = minImageCount;
-			m_swapchainCreateInfoKHR.imageFormat = static_cast<VkFormat>(imageFormat);
-			m_swapchainCreateInfoKHR.imageColorSpace = static_cast<VkColorSpaceKHR>(imageColorSpace);
-			m_swapchainCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
-			m_swapchainCreateInfoKHR.imageArrayLayers = imageArrayLayers;
-			m_swapchainCreateInfoKHR.imageUsage = static_cast<VkImageUsageFlags>(imageUsage);
-			m_swapchainCreateInfoKHR.imageSharingMode = static_cast<VkSharingMode>(imageSharingMode);
-			m_swapchainCreateInfoKHR.queueFamilyIndexCount = queueFamilyIndexCount;
-			m_swapchainCreateInfoKHR.pQueueFamilyIndices = pQueueFamilyIndices;
-			m_swapchainCreateInfoKHR.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
-			m_swapchainCreateInfoKHR.compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(compositeAlpha);
-			m_swapchainCreateInfoKHR.presentMode = static_cast<VkPresentModeKHR>(presentMode);
-			m_swapchainCreateInfoKHR.clipped = clipped;
-			m_swapchainCreateInfoKHR.oldSwapchain = oldSwapchain;
-		}
-
-		const StructureType& sType() const
-		{
-			return reinterpret_cast<const StructureType&>(m_swapchainCreateInfoKHR.sType);
-		}
-
-		SwapchainCreateInfoKHR& sType(StructureType sType)
-		{
-			m_swapchainCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
-			return *this;
-		}
-
-		const void* pNext() const
-		{
-			return reinterpret_cast<const void*>(m_swapchainCreateInfoKHR.pNext);
-		}
-
-		SwapchainCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_swapchainCreateInfoKHR.pNext = pNext;
-			return *this;
-		}
-
-		const SwapchainCreateFlagsKHR& flags() const
-		{
-			return m_swapchainCreateInfoKHR.flags;
-		}
-
-		SwapchainCreateInfoKHR& flags(SwapchainCreateFlagsKHR flags)
-		{
-			m_swapchainCreateInfoKHR.flags = flags;
-			return *this;
-		}
-
-		const SurfaceKHR& surface() const
-		{
-			return m_swapchainCreateInfoKHR.surface;
-		}
-
-		SwapchainCreateInfoKHR& surface(SurfaceKHR surface)
-		{
-			m_swapchainCreateInfoKHR.surface = surface;
-			return *this;
-		}
-
-		const uint32_t& minImageCount() const
-		{
-			return m_swapchainCreateInfoKHR.minImageCount;
-		}
-
-		SwapchainCreateInfoKHR& minImageCount(uint32_t minImageCount)
-		{
-			m_swapchainCreateInfoKHR.minImageCount = minImageCount;
-			return *this;
-		}
-
-		const Format& imageFormat() const
-		{
-			return reinterpret_cast<const Format&>(m_swapchainCreateInfoKHR.imageFormat);
-		}
-
-		SwapchainCreateInfoKHR& imageFormat(Format imageFormat)
-		{
-			m_swapchainCreateInfoKHR.imageFormat = static_cast<VkFormat>(imageFormat);
-			return *this;
-		}
-
-		const ColorSpaceKHR& imageColorSpace() const
-		{
-			return reinterpret_cast<const ColorSpaceKHR&>(m_swapchainCreateInfoKHR.imageColorSpace);
-		}
-
-		SwapchainCreateInfoKHR& imageColorSpace(ColorSpaceKHR imageColorSpace)
-		{
-			m_swapchainCreateInfoKHR.imageColorSpace = static_cast<VkColorSpaceKHR>(imageColorSpace);
-			return *this;
-		}
-
-		const Extent2D& imageExtent() const
-		{
-			return reinterpret_cast<const Extent2D&>(m_swapchainCreateInfoKHR.imageExtent);
-		}
-
-		SwapchainCreateInfoKHR& imageExtent(Extent2D imageExtent)
-		{
-			m_swapchainCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
-			return *this;
-		}
-
-		const uint32_t& imageArrayLayers() const
-		{
-			return m_swapchainCreateInfoKHR.imageArrayLayers;
-		}
-
-		SwapchainCreateInfoKHR& imageArrayLayers(uint32_t imageArrayLayers)
-		{
-			m_swapchainCreateInfoKHR.imageArrayLayers = imageArrayLayers;
-			return *this;
-		}
-
-		const ImageUsageFlags& imageUsage() const
-		{
-			return reinterpret_cast<const ImageUsageFlags&>(m_swapchainCreateInfoKHR.imageUsage);
-		}
-
-		SwapchainCreateInfoKHR& imageUsage(ImageUsageFlags imageUsage)
-		{
-			m_swapchainCreateInfoKHR.imageUsage = static_cast<VkImageUsageFlags>(imageUsage);
-			return *this;
-		}
-
-		const SharingMode& imageSharingMode() const
-		{
-			return reinterpret_cast<const SharingMode&>(m_swapchainCreateInfoKHR.imageSharingMode);
-		}
-
-		SwapchainCreateInfoKHR& imageSharingMode(SharingMode imageSharingMode)
-		{
-			m_swapchainCreateInfoKHR.imageSharingMode = static_cast<VkSharingMode>(imageSharingMode);
-			return *this;
-		}
-
-		const uint32_t& queueFamilyIndexCount() const
-		{
-			return m_swapchainCreateInfoKHR.queueFamilyIndexCount;
-		}
-
-		SwapchainCreateInfoKHR& queueFamilyIndexCount(uint32_t queueFamilyIndexCount)
-		{
-			m_swapchainCreateInfoKHR.queueFamilyIndexCount = queueFamilyIndexCount;
-			return *this;
-		}
-
-		const uint32_t* pQueueFamilyIndices() const
-		{
-			return reinterpret_cast<const uint32_t*>(m_swapchainCreateInfoKHR.pQueueFamilyIndices);
-		}
-
-		SwapchainCreateInfoKHR& pQueueFamilyIndices(const uint32_t* pQueueFamilyIndices)
-		{
-			m_swapchainCreateInfoKHR.pQueueFamilyIndices = pQueueFamilyIndices;
-			return *this;
-		}
-
-		const SurfaceTransformFlagBitsKHR& preTransform() const
-		{
-			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_swapchainCreateInfoKHR.preTransform);
-		}
-
-		SwapchainCreateInfoKHR& preTransform(SurfaceTransformFlagBitsKHR preTransform)
-		{
-			m_swapchainCreateInfoKHR.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
-			return *this;
-		}
-
-		const CompositeAlphaFlagBitsKHR& compositeAlpha() const
-		{
-			return reinterpret_cast<const CompositeAlphaFlagBitsKHR&>(m_swapchainCreateInfoKHR.compositeAlpha);
-		}
-
-		SwapchainCreateInfoKHR& compositeAlpha(CompositeAlphaFlagBitsKHR compositeAlpha)
-		{
-			m_swapchainCreateInfoKHR.compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(compositeAlpha);
-			return *this;
-		}
-
-		const PresentModeKHR& presentMode() const
-		{
-			return reinterpret_cast<const PresentModeKHR&>(m_swapchainCreateInfoKHR.presentMode);
-		}
-
-		SwapchainCreateInfoKHR& presentMode(PresentModeKHR presentMode)
-		{
-			m_swapchainCreateInfoKHR.presentMode = static_cast<VkPresentModeKHR>(presentMode);
-			return *this;
-		}
-
-		const Bool32& clipped() const
-		{
-			return m_swapchainCreateInfoKHR.clipped;
-		}
-
-		SwapchainCreateInfoKHR& clipped(Bool32 clipped)
-		{
-			m_swapchainCreateInfoKHR.clipped = clipped;
-			return *this;
-		}
-
-		const SwapchainKHR& oldSwapchain() const
-		{
-			return m_swapchainCreateInfoKHR.oldSwapchain;
-		}
-
-		SwapchainCreateInfoKHR& oldSwapchain(SwapchainKHR oldSwapchain)
-		{
-			m_swapchainCreateInfoKHR.oldSwapchain = oldSwapchain;
-			return *this;
-		}
-
-		operator const VkSwapchainCreateInfoKHR&() const
-		{
-			return m_swapchainCreateInfoKHR;
-		}
-
-	private:
-		VkSwapchainCreateInfoKHR m_swapchainCreateInfoKHR;
-	};
-
-	enum class DebugReportFlagBitsEXT
-	{
-		eInformation = VK_DEBUG_REPORT_INFORMATION_BIT_EXT,
-		eWarning = VK_DEBUG_REPORT_WARNING_BIT_EXT,
-		ePerformanceWarning = VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT,
-		eError = VK_DEBUG_REPORT_ERROR_BIT_EXT,
-		eDebug = VK_DEBUG_REPORT_DEBUG_BIT_EXT
-	};
-
-	typedef Flags<DebugReportFlagBitsEXT, VkDebugReportFlagsEXT> DebugReportFlagsEXT;
-
-	inline DebugReportFlagsEXT operator|(DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1)
-	{
-		return DebugReportFlagsEXT(bit0) | bit1;
-	}
-
-	class DebugReportCallbackCreateInfoEXT
-	{
-	public:
-		DebugReportCallbackCreateInfoEXT(DebugReportFlagsEXT flags, PFN_vkDebugReportCallbackEXT pfnCallback, void* pUserData)
-		{
-			m_debugReportCallbackCreateInfoEXT.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
-			m_debugReportCallbackCreateInfoEXT.pNext = nullptr;
-			m_debugReportCallbackCreateInfoEXT.flags = static_cast<VkDebugReportFlagsEXT>(flags);
-			m_debugReportCallbackCreateInfoEXT.pfnCallback = pfnCallback;
-			m_debugReportCallbackCreateInfoEXT.pUserData = pUserData;
-		}
-
-		const StructureType& sType() const
-		{
-			return reinterpret_cast<const StructureType&>(m_debugReportCallbackCreateInfoEXT.sType);
-		}
-
-		DebugReportCallbackCreateInfoEXT& sType(StructureType sType)
-		{
-			m_debugReportCallbackCreateInfoEXT.sType = static_cast<VkStructureType>(sType);
-			return *this;
-		}
-
-		const void* pNext() const
-		{
-			return reinterpret_cast<const void*>(m_debugReportCallbackCreateInfoEXT.pNext);
-		}
-
-		DebugReportCallbackCreateInfoEXT& pNext(const void* pNext)
-		{
-			m_debugReportCallbackCreateInfoEXT.pNext = pNext;
-			return *this;
-		}
-
-		const DebugReportFlagsEXT& flags() const
-		{
-			return reinterpret_cast<const DebugReportFlagsEXT&>(m_debugReportCallbackCreateInfoEXT.flags);
-		}
-
-		DebugReportCallbackCreateInfoEXT& flags(DebugReportFlagsEXT flags)
-		{
-			m_debugReportCallbackCreateInfoEXT.flags = static_cast<VkDebugReportFlagsEXT>(flags);
-			return *this;
-		}
-
-		const PFN_vkDebugReportCallbackEXT& pfnCallback() const
-		{
-			return m_debugReportCallbackCreateInfoEXT.pfnCallback;
-		}
-
-		DebugReportCallbackCreateInfoEXT& pfnCallback(PFN_vkDebugReportCallbackEXT pfnCallback)
-		{
-			m_debugReportCallbackCreateInfoEXT.pfnCallback = pfnCallback;
-			return *this;
-		}
-
-		const void* pUserData() const
-		{
-			return reinterpret_cast<void*>(m_debugReportCallbackCreateInfoEXT.pUserData);
-		}
-
-		DebugReportCallbackCreateInfoEXT& pUserData(void* pUserData)
-		{
-			m_debugReportCallbackCreateInfoEXT.pUserData = pUserData;
-			return *this;
-		}
-
-		operator const VkDebugReportCallbackCreateInfoEXT&() const
-		{
-			return m_debugReportCallbackCreateInfoEXT;
-		}
-
-	private:
-		VkDebugReportCallbackCreateInfoEXT m_debugReportCallbackCreateInfoEXT;
-	};
-
-	inline Result createInstance(const InstanceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Instance* pInstance)
-	{
-		return static_cast<Result>(vkCreateInstance(reinterpret_cast<const VkInstanceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pInstance));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createInstance(const InstanceCreateInfo& createInfo, const AllocationCallbacks& allocator, Instance& instance)
-	{
-		return createInstance(&createInfo, &allocator, &instance);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyInstance(Instance instance, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyInstance(instance, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyInstance(Instance instance, const AllocationCallbacks& allocator)
-	{
-		destroyInstance(instance, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result enumeratePhysicalDevices(Instance instance, uint32_t* pPhysicalDeviceCount, PhysicalDevice* pPhysicalDevices)
-	{
-		return static_cast<Result>(vkEnumeratePhysicalDevices(instance, pPhysicalDeviceCount, pPhysicalDevices));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result enumeratePhysicalDevices(Instance instance, eastl::vector<PhysicalDevice> & physicalDevices)
-	{
-		uint32_t pPhysicalDeviceCount = 0;
-		Result result = enumeratePhysicalDevices(instance, &pPhysicalDeviceCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			physicalDevices.resize(pPhysicalDeviceCount);
-			result = enumeratePhysicalDevices(instance, &pPhysicalDeviceCount, physicalDevices.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline PFN_vkVoidFunction getDeviceProcAddr(Device device, const char* pName)
-	{
-		return vkGetDeviceProcAddr(device, pName);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline PFN_vkVoidFunction getDeviceProcAddr(Device device, eastl::string const&  name)
-	{
-		return getDeviceProcAddr(device, name.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline PFN_vkVoidFunction getInstanceProcAddr(Instance instance, const char* pName)
-	{
-		return vkGetInstanceProcAddr(instance, pName);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline PFN_vkVoidFunction getInstanceProcAddr(Instance instance, eastl::string const&  name)
-	{
-		return getInstanceProcAddr(instance, name.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getPhysicalDeviceProperties(PhysicalDevice physicalDevice, PhysicalDeviceProperties* pProperties)
-	{
-		vkGetPhysicalDeviceProperties(physicalDevice, reinterpret_cast<VkPhysicalDeviceProperties*>(pProperties));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getPhysicalDeviceProperties(PhysicalDevice physicalDevice, PhysicalDeviceProperties& properties)
-	{
-		getPhysicalDeviceProperties(physicalDevice, &properties);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getPhysicalDeviceQueueFamilyProperties(PhysicalDevice physicalDevice, uint32_t* pQueueFamilyPropertyCount, QueueFamilyProperties* pQueueFamilyProperties)
-	{
-		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, pQueueFamilyPropertyCount, reinterpret_cast<VkQueueFamilyProperties*>(pQueueFamilyProperties));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline eastl::vector<QueueFamilyProperties> getPhysicalDeviceQueueFamilyProperties(PhysicalDevice physicalDevice)
-	{
-		uint32_t pQueueFamilyPropertyCount = 0;
-		getPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, nullptr);
-		eastl::vector<QueueFamilyProperties> pQueueFamilyProperties(pQueueFamilyPropertyCount);
-		getPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, pQueueFamilyProperties.data());
-		return std::move(pQueueFamilyProperties);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getPhysicalDeviceMemoryProperties(PhysicalDevice physicalDevice, PhysicalDeviceMemoryProperties* pMemoryProperties)
-	{
-		vkGetPhysicalDeviceMemoryProperties(physicalDevice, reinterpret_cast<VkPhysicalDeviceMemoryProperties*>(pMemoryProperties));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getPhysicalDeviceMemoryProperties(PhysicalDevice physicalDevice, PhysicalDeviceMemoryProperties& memoryProperties)
-	{
-		getPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getPhysicalDeviceFeatures(PhysicalDevice physicalDevice, PhysicalDeviceFeatures* pFeatures)
-	{
-		vkGetPhysicalDeviceFeatures(physicalDevice, reinterpret_cast<VkPhysicalDeviceFeatures*>(pFeatures));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getPhysicalDeviceFeatures(PhysicalDevice physicalDevice, PhysicalDeviceFeatures& features)
-	{
-		getPhysicalDeviceFeatures(physicalDevice, &features);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getPhysicalDeviceFormatProperties(PhysicalDevice physicalDevice, Format format, FormatProperties* pFormatProperties)
-	{
-		vkGetPhysicalDeviceFormatProperties(physicalDevice, static_cast<VkFormat>(format), reinterpret_cast<VkFormatProperties*>(pFormatProperties));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getPhysicalDeviceFormatProperties(PhysicalDevice physicalDevice, Format format, FormatProperties& formatProperties)
-	{
-		getPhysicalDeviceFormatProperties(physicalDevice, format, &formatProperties);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getPhysicalDeviceImageFormatProperties(PhysicalDevice physicalDevice, Format format, ImageType type, ImageTiling tiling, ImageUsageFlags usage, ImageCreateFlags flags, ImageFormatProperties* pImageFormatProperties)
-	{
-		return static_cast<Result>(vkGetPhysicalDeviceImageFormatProperties(physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkImageTiling>(tiling), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageCreateFlags>(flags), reinterpret_cast<VkImageFormatProperties*>(pImageFormatProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPhysicalDeviceImageFormatProperties(PhysicalDevice physicalDevice, Format format, ImageType type, ImageTiling tiling, ImageUsageFlags usage, ImageCreateFlags flags, ImageFormatProperties& imageFormatProperties)
-	{
-		return getPhysicalDeviceImageFormatProperties(physicalDevice, format, type, tiling, usage, flags, &imageFormatProperties);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createDevice(PhysicalDevice physicalDevice, const DeviceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Device* pDevice)
-	{
-		return static_cast<Result>(vkCreateDevice(physicalDevice, reinterpret_cast<const VkDeviceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pDevice));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createDevice(PhysicalDevice physicalDevice, const DeviceCreateInfo& createInfo, const AllocationCallbacks& allocator, Device& device)
-	{
-		return createDevice(physicalDevice, &createInfo, &allocator, &device);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyDevice(Device device, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyDevice(device, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyDevice(Device device, const AllocationCallbacks& allocator)
-	{
-		destroyDevice(device, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result enumerateInstanceLayerProperties(uint32_t* pPropertyCount, LayerProperties* pProperties)
-	{
-		return static_cast<Result>(vkEnumerateInstanceLayerProperties(pPropertyCount, reinterpret_cast<VkLayerProperties*>(pProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result enumerateInstanceLayerProperties(eastl::vector<LayerProperties> & properties)
-	{
-		uint32_t pPropertyCount = 0;
-		Result result = enumerateInstanceLayerProperties(&pPropertyCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			properties.resize(pPropertyCount);
-			result = enumerateInstanceLayerProperties(&pPropertyCount, properties.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result enumerateInstanceExtensionProperties(const char* pLayerName, uint32_t* pPropertyCount, ExtensionProperties* pProperties)
-	{
-		return static_cast<Result>(vkEnumerateInstanceExtensionProperties(pLayerName, pPropertyCount, reinterpret_cast<VkExtensionProperties*>(pProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result enumerateInstanceExtensionProperties(eastl::string const&  layerName, eastl::vector<ExtensionProperties> & properties)
-	{
-		uint32_t pPropertyCount = 0;
-		Result result = enumerateInstanceExtensionProperties(layerName.data(), &pPropertyCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			properties.resize(pPropertyCount);
-			result = enumerateInstanceExtensionProperties(layerName.data(), &pPropertyCount, properties.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result enumerateDeviceLayerProperties(PhysicalDevice physicalDevice, uint32_t* pPropertyCount, LayerProperties* pProperties)
-	{
-		return static_cast<Result>(vkEnumerateDeviceLayerProperties(physicalDevice, pPropertyCount, reinterpret_cast<VkLayerProperties*>(pProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result enumerateDeviceLayerProperties(PhysicalDevice physicalDevice, eastl::vector<LayerProperties> & properties)
-	{
-		uint32_t pPropertyCount = 0;
-		Result result = enumerateDeviceLayerProperties(physicalDevice, &pPropertyCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			properties.resize(pPropertyCount);
-			result = enumerateDeviceLayerProperties(physicalDevice, &pPropertyCount, properties.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result enumerateDeviceExtensionProperties(PhysicalDevice physicalDevice, const char* pLayerName, uint32_t* pPropertyCount, ExtensionProperties* pProperties)
-	{
-		return static_cast<Result>(vkEnumerateDeviceExtensionProperties(physicalDevice, pLayerName, pPropertyCount, reinterpret_cast<VkExtensionProperties*>(pProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result enumerateDeviceExtensionProperties(PhysicalDevice physicalDevice, eastl::string const&  layerName, eastl::vector<ExtensionProperties> & properties)
-	{
-		uint32_t pPropertyCount = 0;
-		Result result = enumerateDeviceExtensionProperties(physicalDevice, layerName.data(), &pPropertyCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			properties.resize(pPropertyCount);
-			result = enumerateDeviceExtensionProperties(physicalDevice, layerName.data(), &pPropertyCount, properties.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getDeviceQueue(Device device, uint32_t queueFamilyIndex, uint32_t queueIndex, Queue* pQueue)
-	{
-		vkGetDeviceQueue(device, queueFamilyIndex, queueIndex, pQueue);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getDeviceQueue(Device device, uint32_t queueFamilyIndex, uint32_t queueIndex, Queue& queue)
-	{
-		getDeviceQueue(device, queueFamilyIndex, queueIndex, &queue);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result queueSubmit(Queue queue, uint32_t submitCount, const SubmitInfo* pSubmits, Fence fence)
-	{
-		return static_cast<Result>(vkQueueSubmit(queue, submitCount, reinterpret_cast<const VkSubmitInfo*>(pSubmits), fence));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result queueSubmit(Queue queue, eastl::vector<SubmitInfo> const& submits, Fence fence)
-	{
-		return queueSubmit(queue, static_cast<uint32_t>(submits.size()), submits.data(), fence);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result queueWaitIdle(Queue queue)
-	{
-		return static_cast<Result>(vkQueueWaitIdle(queue));
-	}
-
-	inline Result deviceWaitIdle(Device device)
-	{
-		return static_cast<Result>(vkDeviceWaitIdle(device));
-	}
-
-	inline Result allocateMemory(Device device, const MemoryAllocateInfo* pAllocateInfo, const AllocationCallbacks* pAllocator, DeviceMemory* pMemory)
-	{
-		return static_cast<Result>(vkAllocateMemory(device, reinterpret_cast<const VkMemoryAllocateInfo*>(pAllocateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pMemory));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result allocateMemory(Device device, const MemoryAllocateInfo& allocateInfo, const AllocationCallbacks& allocator, DeviceMemory& memory)
-	{
-		return allocateMemory(device, &allocateInfo, &allocator, &memory);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void freeMemory(Device device, DeviceMemory memory, const AllocationCallbacks* pAllocator)
-	{
-		vkFreeMemory(device, memory, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void freeMemory(Device device, DeviceMemory memory, const AllocationCallbacks& allocator)
-	{
-		freeMemory(device, memory, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result mapMemory(Device device, DeviceMemory memory, DeviceSize offset, DeviceSize size, MemoryMapFlags flags, void** ppData)
-	{
-		return static_cast<Result>(vkMapMemory(device, memory, offset, size, flags, ppData));
-	}
-
-	inline void unmapMemory(Device device, DeviceMemory memory)
-	{
-		vkUnmapMemory(device, memory);
-	}
-
-	inline Result flushMappedMemoryRanges(Device device, uint32_t memoryRangeCount, const MappedMemoryRange* pMemoryRanges)
-	{
-		return static_cast<Result>(vkFlushMappedMemoryRanges(device, memoryRangeCount, reinterpret_cast<const VkMappedMemoryRange*>(pMemoryRanges)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result flushMappedMemoryRanges(Device device, eastl::vector<MappedMemoryRange> const& memoryRanges)
-	{
-		return flushMappedMemoryRanges(device, static_cast<uint32_t>(memoryRanges.size()), memoryRanges.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result invalidateMappedMemoryRanges(Device device, uint32_t memoryRangeCount, const MappedMemoryRange* pMemoryRanges)
-	{
-		return static_cast<Result>(vkInvalidateMappedMemoryRanges(device, memoryRangeCount, reinterpret_cast<const VkMappedMemoryRange*>(pMemoryRanges)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result invalidateMappedMemoryRanges(Device device, eastl::vector<MappedMemoryRange> const& memoryRanges)
-	{
-		return invalidateMappedMemoryRanges(device, static_cast<uint32_t>(memoryRanges.size()), memoryRanges.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getDeviceMemoryCommitment(Device device, DeviceMemory memory, DeviceSize* pCommittedMemoryInBytes)
-	{
-		vkGetDeviceMemoryCommitment(device, memory, pCommittedMemoryInBytes);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getDeviceMemoryCommitment(Device device, DeviceMemory memory, DeviceSize& committedMemoryInBytes)
-	{
-		getDeviceMemoryCommitment(device, memory, &committedMemoryInBytes);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getBufferMemoryRequirements(Device device, Buffer buffer, MemoryRequirements* pMemoryRequirements)
-	{
-		vkGetBufferMemoryRequirements(device, buffer, reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getBufferMemoryRequirements(Device device, Buffer buffer, MemoryRequirements& memoryRequirements)
-	{
-		getBufferMemoryRequirements(device, buffer, &memoryRequirements);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result bindBufferMemory(Device device, Buffer buffer, DeviceMemory memory, DeviceSize memoryOffset)
-	{
-		return static_cast<Result>(vkBindBufferMemory(device, buffer, memory, memoryOffset));
-	}
-
-	inline void getImageMemoryRequirements(Device device, Image image, MemoryRequirements* pMemoryRequirements)
-	{
-		vkGetImageMemoryRequirements(device, image, reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getImageMemoryRequirements(Device device, Image image, MemoryRequirements& memoryRequirements)
-	{
-		getImageMemoryRequirements(device, image, &memoryRequirements);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result bindImageMemory(Device device, Image image, DeviceMemory memory, DeviceSize memoryOffset)
-	{
-		return static_cast<Result>(vkBindImageMemory(device, image, memory, memoryOffset));
-	}
-
-	inline void getImageSparseMemoryRequirements(Device device, Image image, uint32_t* pSparseMemoryRequirementCount, SparseImageMemoryRequirements* pSparseMemoryRequirements)
-	{
-		vkGetImageSparseMemoryRequirements(device, image, pSparseMemoryRequirementCount, reinterpret_cast<VkSparseImageMemoryRequirements*>(pSparseMemoryRequirements));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline eastl::vector<SparseImageMemoryRequirements> getImageSparseMemoryRequirements(Device device, Image image)
-	{
-		uint32_t pSparseMemoryRequirementCount = 0;
-		getImageSparseMemoryRequirements(device, image, &pSparseMemoryRequirementCount, nullptr);
-		eastl::vector<SparseImageMemoryRequirements> pSparseMemoryRequirements(pSparseMemoryRequirementCount);
-		getImageSparseMemoryRequirements(device, image, &pSparseMemoryRequirementCount, pSparseMemoryRequirements.data());
-		return std::move(pSparseMemoryRequirements);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getPhysicalDeviceSparseImageFormatProperties(PhysicalDevice physicalDevice, Format format, ImageType type, SampleCountFlagBits samples, ImageUsageFlags usage, ImageTiling tiling, uint32_t* pPropertyCount, SparseImageFormatProperties* pProperties)
-	{
-		vkGetPhysicalDeviceSparseImageFormatProperties(physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkSampleCountFlagBits>(samples), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageTiling>(tiling), pPropertyCount, reinterpret_cast<VkSparseImageFormatProperties*>(pProperties));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline eastl::vector<SparseImageFormatProperties> getPhysicalDeviceSparseImageFormatProperties(PhysicalDevice physicalDevice, Format format, ImageType type, SampleCountFlagBits samples, ImageUsageFlags usage, ImageTiling tiling)
-	{
-		uint32_t pPropertyCount = 0;
-		getPhysicalDeviceSparseImageFormatProperties(physicalDevice, format, type, samples, usage, tiling, &pPropertyCount, nullptr);
-		eastl::vector<SparseImageFormatProperties> pProperties(pPropertyCount);
-		getPhysicalDeviceSparseImageFormatProperties(physicalDevice, format, type, samples, usage, tiling, &pPropertyCount, pProperties.data());
-		return std::move(pProperties);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result queueBindSparse(Queue queue, uint32_t bindInfoCount, const BindSparseInfo* pBindInfo, Fence fence)
-	{
-		return static_cast<Result>(vkQueueBindSparse(queue, bindInfoCount, reinterpret_cast<const VkBindSparseInfo*>(pBindInfo), fence));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result queueBindSparse(Queue queue, eastl::vector<BindSparseInfo> const& bindInfo, Fence fence)
-	{
-		return queueBindSparse(queue, static_cast<uint32_t>(bindInfo.size()), bindInfo.data(), fence);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createFence(Device device, const FenceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Fence* pFence)
-	{
-		return static_cast<Result>(vkCreateFence(device, reinterpret_cast<const VkFenceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pFence));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createFence(Device device, const FenceCreateInfo& createInfo, const AllocationCallbacks& allocator, Fence& fence)
-	{
-		return createFence(device, &createInfo, &allocator, &fence);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyFence(Device device, Fence fence, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyFence(device, fence, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyFence(Device device, Fence fence, const AllocationCallbacks& allocator)
-	{
-		destroyFence(device, fence, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result resetFences(Device device, uint32_t fenceCount, const Fence* pFences)
-	{
-		return static_cast<Result>(vkResetFences(device, fenceCount, pFences));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result resetFences(Device device, eastl::vector<Fence> const& fences)
-	{
-		return resetFences(device, static_cast<uint32_t>(fences.size()), fences.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getFenceStatus(Device device, Fence fence)
-	{
-		return static_cast<Result>(vkGetFenceStatus(device, fence));
-	}
-
-	inline Result waitForFences(Device device, uint32_t fenceCount, const Fence* pFences, Bool32 waitAll, uint64_t timeout)
-	{
-		return static_cast<Result>(vkWaitForFences(device, fenceCount, pFences, waitAll, timeout));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result waitForFences(Device device, eastl::vector<Fence> const& fences, Bool32 waitAll, uint64_t timeout)
-	{
-		return waitForFences(device, static_cast<uint32_t>(fences.size()), fences.data(), waitAll, timeout);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createSemaphore(Device device, const SemaphoreCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Semaphore* pSemaphore)
-	{
-		return static_cast<Result>(vkCreateSemaphore(device, reinterpret_cast<const VkSemaphoreCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSemaphore));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createSemaphore(Device device, const SemaphoreCreateInfo& createInfo, const AllocationCallbacks& allocator, Semaphore& semaphore)
-	{
-		return createSemaphore(device, &createInfo, &allocator, &semaphore);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroySemaphore(Device device, Semaphore semaphore, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroySemaphore(device, semaphore, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroySemaphore(Device device, Semaphore semaphore, const AllocationCallbacks& allocator)
-	{
-		destroySemaphore(device, semaphore, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createEvent(Device device, const EventCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Event* pEvent)
-	{
-		return static_cast<Result>(vkCreateEvent(device, reinterpret_cast<const VkEventCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pEvent));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createEvent(Device device, const EventCreateInfo& createInfo, const AllocationCallbacks& allocator, Event& event)
-	{
-		return createEvent(device, &createInfo, &allocator, &event);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyEvent(Device device, Event event, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyEvent(device, event, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyEvent(Device device, Event event, const AllocationCallbacks& allocator)
-	{
-		destroyEvent(device, event, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getEventStatus(Device device, Event event)
-	{
-		return static_cast<Result>(vkGetEventStatus(device, event));
-	}
-
-	inline Result setEvent(Device device, Event event)
-	{
-		return static_cast<Result>(vkSetEvent(device, event));
-	}
-
-	inline Result resetEvent(Device device, Event event)
-	{
-		return static_cast<Result>(vkResetEvent(device, event));
-	}
-
-	inline Result createQueryPool(Device device, const QueryPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, QueryPool* pQueryPool)
-	{
-		return static_cast<Result>(vkCreateQueryPool(device, reinterpret_cast<const VkQueryPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pQueryPool));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createQueryPool(Device device, const QueryPoolCreateInfo& createInfo, const AllocationCallbacks& allocator, QueryPool& queryPool)
-	{
-		return createQueryPool(device, &createInfo, &allocator, &queryPool);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyQueryPool(Device device, QueryPool queryPool, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyQueryPool(device, queryPool, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyQueryPool(Device device, QueryPool queryPool, const AllocationCallbacks& allocator)
-	{
-		destroyQueryPool(device, queryPool, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getQueryPoolResults(Device device, QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, size_t dataSize, void* pData, DeviceSize stride, QueryResultFlags flags)
-	{
-		return static_cast<Result>(vkGetQueryPoolResults(device, queryPool, firstQuery, queryCount, dataSize, pData, stride, static_cast<VkQueryResultFlags>(flags)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getQueryPoolResults(Device device, QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, eastl::vector<uint8_t> & data, DeviceSize stride, QueryResultFlags flags)
-	{
-		return getQueryPoolResults(device, queryPool, firstQuery, queryCount, static_cast<size_t>(data.size()), data.data(), stride, flags);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createBuffer(Device device, const BufferCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Buffer* pBuffer)
-	{
-		return static_cast<Result>(vkCreateBuffer(device, reinterpret_cast<const VkBufferCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pBuffer));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createBuffer(Device device, const BufferCreateInfo& createInfo, const AllocationCallbacks& allocator, Buffer& buffer)
-	{
-		return createBuffer(device, &createInfo, &allocator, &buffer);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyBuffer(Device device, Buffer buffer, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyBuffer(device, buffer, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyBuffer(Device device, Buffer buffer, const AllocationCallbacks& allocator)
-	{
-		destroyBuffer(device, buffer, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createBufferView(Device device, const BufferViewCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, BufferView* pView)
-	{
-		return static_cast<Result>(vkCreateBufferView(device, reinterpret_cast<const VkBufferViewCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pView));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createBufferView(Device device, const BufferViewCreateInfo& createInfo, const AllocationCallbacks& allocator, BufferView& view)
-	{
-		return createBufferView(device, &createInfo, &allocator, &view);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyBufferView(Device device, BufferView bufferView, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyBufferView(device, bufferView, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyBufferView(Device device, BufferView bufferView, const AllocationCallbacks& allocator)
-	{
-		destroyBufferView(device, bufferView, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createImage(Device device, const ImageCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Image* pImage)
-	{
-		return static_cast<Result>(vkCreateImage(device, reinterpret_cast<const VkImageCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pImage));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createImage(Device device, const ImageCreateInfo& createInfo, const AllocationCallbacks& allocator, Image& image)
-	{
-		return createImage(device, &createInfo, &allocator, &image);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyImage(Device device, Image image, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyImage(device, image, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyImage(Device device, Image image, const AllocationCallbacks& allocator)
-	{
-		destroyImage(device, image, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getImageSubresourceLayout(Device device, Image image, const ImageSubresource* pSubresource, SubresourceLayout* pLayout)
-	{
-		vkGetImageSubresourceLayout(device, image, reinterpret_cast<const VkImageSubresource*>(pSubresource), reinterpret_cast<VkSubresourceLayout*>(pLayout));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getImageSubresourceLayout(Device device, Image image, const ImageSubresource& subresource, SubresourceLayout& layout)
-	{
-		getImageSubresourceLayout(device, image, &subresource, &layout);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createImageView(Device device, const ImageViewCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, ImageView* pView)
-	{
-		return static_cast<Result>(vkCreateImageView(device, reinterpret_cast<const VkImageViewCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pView));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createImageView(Device device, const ImageViewCreateInfo& createInfo, const AllocationCallbacks& allocator, ImageView& view)
-	{
-		return createImageView(device, &createInfo, &allocator, &view);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyImageView(Device device, ImageView imageView, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyImageView(device, imageView, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyImageView(Device device, ImageView imageView, const AllocationCallbacks& allocator)
-	{
-		destroyImageView(device, imageView, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createShaderModule(Device device, const ShaderModuleCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, ShaderModule* pShaderModule)
-	{
-		return static_cast<Result>(vkCreateShaderModule(device, reinterpret_cast<const VkShaderModuleCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pShaderModule));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createShaderModule(Device device, const ShaderModuleCreateInfo& createInfo, const AllocationCallbacks& allocator, ShaderModule& shaderModule)
-	{
-		return createShaderModule(device, &createInfo, &allocator, &shaderModule);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyShaderModule(Device device, ShaderModule shaderModule, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyShaderModule(device, shaderModule, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyShaderModule(Device device, ShaderModule shaderModule, const AllocationCallbacks& allocator)
-	{
-		destroyShaderModule(device, shaderModule, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createPipelineCache(Device device, const PipelineCacheCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, PipelineCache* pPipelineCache)
-	{
-		return static_cast<Result>(vkCreatePipelineCache(device, reinterpret_cast<const VkPipelineCacheCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pPipelineCache));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createPipelineCache(Device device, const PipelineCacheCreateInfo& createInfo, const AllocationCallbacks& allocator, PipelineCache& pipelineCache)
-	{
-		return createPipelineCache(device, &createInfo, &allocator, &pipelineCache);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyPipelineCache(Device device, PipelineCache pipelineCache, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyPipelineCache(device, pipelineCache, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyPipelineCache(Device device, PipelineCache pipelineCache, const AllocationCallbacks& allocator)
-	{
-		destroyPipelineCache(device, pipelineCache, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getPipelineCacheData(Device device, PipelineCache pipelineCache, size_t* pDataSize, void* pData)
-	{
-		return static_cast<Result>(vkGetPipelineCacheData(device, pipelineCache, pDataSize, pData));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPipelineCacheData(Device device, PipelineCache pipelineCache, eastl::vector<uint8_t> & data)
-	{
-		size_t pDataSize = 0;
-		Result result = getPipelineCacheData(device, pipelineCache, &pDataSize, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			data.resize(pDataSize);
-			result = getPipelineCacheData(device, pipelineCache, &pDataSize, data.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result mergePipelineCaches(Device device, PipelineCache dstCache, uint32_t srcCacheCount, const PipelineCache* pSrcCaches)
-	{
-		return static_cast<Result>(vkMergePipelineCaches(device, dstCache, srcCacheCount, pSrcCaches));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result mergePipelineCaches(Device device, PipelineCache dstCache, eastl::vector<PipelineCache> const& srcCaches)
-	{
-		return mergePipelineCaches(device, dstCache, static_cast<uint32_t>(srcCaches.size()), srcCaches.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createGraphicsPipelines(Device device, PipelineCache pipelineCache, uint32_t createInfoCount, const GraphicsPipelineCreateInfo* pCreateInfos, const AllocationCallbacks* pAllocator, Pipeline* pPipelines)
-	{
-		return static_cast<Result>(vkCreateGraphicsPipelines(device, pipelineCache, createInfoCount, reinterpret_cast<const VkGraphicsPipelineCreateInfo*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pPipelines));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createGraphicsPipelines(Device device, PipelineCache pipelineCache, eastl::vector<GraphicsPipelineCreateInfo> const& createInfos, const AllocationCallbacks& allocator, eastl::vector<Pipeline> & pipelines)
-	{
-		assert(createInfos.size() <= pipelines.size());
-		return createGraphicsPipelines(device, pipelineCache, static_cast<uint32_t>(createInfos.size()), createInfos.data(), &allocator, pipelines.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createComputePipelines(Device device, PipelineCache pipelineCache, uint32_t createInfoCount, const ComputePipelineCreateInfo* pCreateInfos, const AllocationCallbacks* pAllocator, Pipeline* pPipelines)
-	{
-		return static_cast<Result>(vkCreateComputePipelines(device, pipelineCache, createInfoCount, reinterpret_cast<const VkComputePipelineCreateInfo*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pPipelines));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createComputePipelines(Device device, PipelineCache pipelineCache, eastl::vector<ComputePipelineCreateInfo> const& createInfos, const AllocationCallbacks& allocator, eastl::vector<Pipeline> & pipelines)
-	{
-		assert(createInfos.size() <= pipelines.size());
-		return createComputePipelines(device, pipelineCache, static_cast<uint32_t>(createInfos.size()), createInfos.data(), &allocator, pipelines.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyPipeline(Device device, Pipeline pipeline, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyPipeline(device, pipeline, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyPipeline(Device device, Pipeline pipeline, const AllocationCallbacks& allocator)
-	{
-		destroyPipeline(device, pipeline, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createPipelineLayout(Device device, const PipelineLayoutCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, PipelineLayout* pPipelineLayout)
-	{
-		return static_cast<Result>(vkCreatePipelineLayout(device, reinterpret_cast<const VkPipelineLayoutCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pPipelineLayout));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createPipelineLayout(Device device, const PipelineLayoutCreateInfo& createInfo, const AllocationCallbacks& allocator, PipelineLayout& pipelineLayout)
-	{
-		return createPipelineLayout(device, &createInfo, &allocator, &pipelineLayout);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyPipelineLayout(Device device, PipelineLayout pipelineLayout, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyPipelineLayout(device, pipelineLayout, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyPipelineLayout(Device device, PipelineLayout pipelineLayout, const AllocationCallbacks& allocator)
-	{
-		destroyPipelineLayout(device, pipelineLayout, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createSampler(Device device, const SamplerCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Sampler* pSampler)
-	{
-		return static_cast<Result>(vkCreateSampler(device, reinterpret_cast<const VkSamplerCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSampler));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createSampler(Device device, const SamplerCreateInfo& createInfo, const AllocationCallbacks& allocator, Sampler& sampler)
-	{
-		return createSampler(device, &createInfo, &allocator, &sampler);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroySampler(Device device, Sampler sampler, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroySampler(device, sampler, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroySampler(Device device, Sampler sampler, const AllocationCallbacks& allocator)
-	{
-		destroySampler(device, sampler, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createDescriptorSetLayout(Device device, const DescriptorSetLayoutCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, DescriptorSetLayout* pSetLayout)
-	{
-		return static_cast<Result>(vkCreateDescriptorSetLayout(device, reinterpret_cast<const VkDescriptorSetLayoutCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSetLayout));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createDescriptorSetLayout(Device device, const DescriptorSetLayoutCreateInfo& createInfo, const AllocationCallbacks& allocator, DescriptorSetLayout& setLayout)
-	{
-		return createDescriptorSetLayout(device, &createInfo, &allocator, &setLayout);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyDescriptorSetLayout(Device device, DescriptorSetLayout descriptorSetLayout, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyDescriptorSetLayout(device, descriptorSetLayout, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyDescriptorSetLayout(Device device, DescriptorSetLayout descriptorSetLayout, const AllocationCallbacks& allocator)
-	{
-		destroyDescriptorSetLayout(device, descriptorSetLayout, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createDescriptorPool(Device device, const DescriptorPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, DescriptorPool* pDescriptorPool)
-	{
-		return static_cast<Result>(vkCreateDescriptorPool(device, reinterpret_cast<const VkDescriptorPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pDescriptorPool));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createDescriptorPool(Device device, const DescriptorPoolCreateInfo& createInfo, const AllocationCallbacks& allocator, DescriptorPool& descriptorPool)
-	{
-		return createDescriptorPool(device, &createInfo, &allocator, &descriptorPool);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyDescriptorPool(Device device, DescriptorPool descriptorPool, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyDescriptorPool(device, descriptorPool, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyDescriptorPool(Device device, DescriptorPool descriptorPool, const AllocationCallbacks& allocator)
-	{
-		destroyDescriptorPool(device, descriptorPool, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result resetDescriptorPool(Device device, DescriptorPool descriptorPool, DescriptorPoolResetFlags flags)
-	{
-		return static_cast<Result>(vkResetDescriptorPool(device, descriptorPool, flags));
-	}
-
-	inline Result allocateDescriptorSets(Device device, const DescriptorSetAllocateInfo* pAllocateInfo, DescriptorSet* pDescriptorSets)
-	{
-		return static_cast<Result>(vkAllocateDescriptorSets(device, reinterpret_cast<const VkDescriptorSetAllocateInfo*>(pAllocateInfo), pDescriptorSets));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result allocateDescriptorSets(Device device, const DescriptorSetAllocateInfo& allocateInfo, eastl::vector<DescriptorSet> & descriptorSets)
-	{
-		return allocateDescriptorSets(device, &allocateInfo, descriptorSets.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result freeDescriptorSets(Device device, DescriptorPool descriptorPool, uint32_t descriptorSetCount, const DescriptorSet* pDescriptorSets)
-	{
-		return static_cast<Result>(vkFreeDescriptorSets(device, descriptorPool, descriptorSetCount, pDescriptorSets));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result freeDescriptorSets(Device device, DescriptorPool descriptorPool, eastl::vector<DescriptorSet> const& descriptorSets)
-	{
-		return freeDescriptorSets(device, descriptorPool, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void updateDescriptorSets(Device device, uint32_t descriptorWriteCount, const WriteDescriptorSet* pDescriptorWrites, uint32_t descriptorCopyCount, const CopyDescriptorSet* pDescriptorCopies)
-	{
-		vkUpdateDescriptorSets(device, descriptorWriteCount, reinterpret_cast<const VkWriteDescriptorSet*>(pDescriptorWrites), descriptorCopyCount, reinterpret_cast<const VkCopyDescriptorSet*>(pDescriptorCopies));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void updateDescriptorSets(Device device, eastl::vector<WriteDescriptorSet> const& descriptorWrites, eastl::vector<CopyDescriptorSet> const& descriptorCopies)
-	{
-		updateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), static_cast<uint32_t>(descriptorCopies.size()), descriptorCopies.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createFramebuffer(Device device, const FramebufferCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Framebuffer* pFramebuffer)
-	{
-		return static_cast<Result>(vkCreateFramebuffer(device, reinterpret_cast<const VkFramebufferCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pFramebuffer));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createFramebuffer(Device device, const FramebufferCreateInfo& createInfo, const AllocationCallbacks& allocator, Framebuffer& framebuffer)
-	{
-		return createFramebuffer(device, &createInfo, &allocator, &framebuffer);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyFramebuffer(Device device, Framebuffer framebuffer, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyFramebuffer(device, framebuffer, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyFramebuffer(Device device, Framebuffer framebuffer, const AllocationCallbacks& allocator)
-	{
-		destroyFramebuffer(device, framebuffer, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createRenderPass(Device device, const RenderPassCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, RenderPass* pRenderPass)
-	{
-		return static_cast<Result>(vkCreateRenderPass(device, reinterpret_cast<const VkRenderPassCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pRenderPass));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createRenderPass(Device device, const RenderPassCreateInfo& createInfo, const AllocationCallbacks& allocator, RenderPass& renderPass)
-	{
-		return createRenderPass(device, &createInfo, &allocator, &renderPass);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyRenderPass(Device device, RenderPass renderPass, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyRenderPass(device, renderPass, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyRenderPass(Device device, RenderPass renderPass, const AllocationCallbacks& allocator)
-	{
-		destroyRenderPass(device, renderPass, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void getRenderAreaGranularity(Device device, RenderPass renderPass, Extent2D* pGranularity)
-	{
-		vkGetRenderAreaGranularity(device, renderPass, reinterpret_cast<VkExtent2D*>(pGranularity));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void getRenderAreaGranularity(Device device, RenderPass renderPass, Extent2D& granularity)
-	{
-		getRenderAreaGranularity(device, renderPass, &granularity);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createCommandPool(Device device, const CommandPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, CommandPool* pCommandPool)
-	{
-		return static_cast<Result>(vkCreateCommandPool(device, reinterpret_cast<const VkCommandPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pCommandPool));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createCommandPool(Device device, const CommandPoolCreateInfo& createInfo, const AllocationCallbacks& allocator, CommandPool& commandPool)
-	{
-		return createCommandPool(device, &createInfo, &allocator, &commandPool);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroyCommandPool(Device device, CommandPool commandPool, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroyCommandPool(device, commandPool, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyCommandPool(Device device, CommandPool commandPool, const AllocationCallbacks& allocator)
-	{
-		destroyCommandPool(device, commandPool, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result resetCommandPool(Device device, CommandPool commandPool, CommandPoolResetFlags flags)
-	{
-		return static_cast<Result>(vkResetCommandPool(device, commandPool, static_cast<VkCommandPoolResetFlags>(flags)));
-	}
-
-	inline Result allocateCommandBuffers(Device device, const CommandBufferAllocateInfo* pAllocateInfo, CommandBuffer* pCommandBuffers)
-	{
-		return static_cast<Result>(vkAllocateCommandBuffers(device, reinterpret_cast<const VkCommandBufferAllocateInfo*>(pAllocateInfo), pCommandBuffers));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result allocateCommandBuffers(Device device, const CommandBufferAllocateInfo& allocateInfo, eastl::vector<CommandBuffer> & commandBuffers)
-	{
-		return allocateCommandBuffers(device, &allocateInfo, commandBuffers.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void freeCommandBuffers(Device device, CommandPool commandPool, uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers)
-	{
-		vkFreeCommandBuffers(device, commandPool, commandBufferCount, pCommandBuffers);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void freeCommandBuffers(Device device, CommandPool commandPool, eastl::vector<CommandBuffer> const& commandBuffers)
-	{
-		freeCommandBuffers(device, commandPool, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result beginCommandBuffer(CommandBuffer commandBuffer, const CommandBufferBeginInfo* pBeginInfo)
-	{
-		return static_cast<Result>(vkBeginCommandBuffer(commandBuffer, reinterpret_cast<const VkCommandBufferBeginInfo*>(pBeginInfo)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result beginCommandBuffer(CommandBuffer commandBuffer, const CommandBufferBeginInfo& beginInfo)
-	{
-		return beginCommandBuffer(commandBuffer, &beginInfo);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result endCommandBuffer(CommandBuffer commandBuffer)
-	{
-		return static_cast<Result>(vkEndCommandBuffer(commandBuffer));
-	}
-
-	inline Result resetCommandBuffer(CommandBuffer commandBuffer, CommandBufferResetFlags flags)
-	{
-		return static_cast<Result>(vkResetCommandBuffer(commandBuffer, static_cast<VkCommandBufferResetFlags>(flags)));
-	}
-
-	inline void cmdBindPipeline(CommandBuffer commandBuffer, PipelineBindPoint pipelineBindPoint, Pipeline pipeline)
-	{
-		vkCmdBindPipeline(commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), pipeline);
-	}
-
-	inline void cmdSetViewport(CommandBuffer commandBuffer, uint32_t firstViewport, uint32_t viewportCount, const Viewport* pViewports)
-	{
-		vkCmdSetViewport(commandBuffer, firstViewport, viewportCount, reinterpret_cast<const VkViewport*>(pViewports));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdSetViewport(CommandBuffer commandBuffer, uint32_t firstViewport, eastl::vector<Viewport> const& viewports)
-	{
-		cmdSetViewport(commandBuffer, firstViewport, static_cast<uint32_t>(viewports.size()), viewports.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdSetScissor(CommandBuffer commandBuffer, uint32_t firstScissor, uint32_t scissorCount, const Rect2D* pScissors)
-	{
-		vkCmdSetScissor(commandBuffer, firstScissor, scissorCount, reinterpret_cast<const VkRect2D*>(pScissors));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdSetScissor(CommandBuffer commandBuffer, uint32_t firstScissor, eastl::vector<Rect2D> const& scissors)
-	{
-		cmdSetScissor(commandBuffer, firstScissor, static_cast<uint32_t>(scissors.size()), scissors.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdSetLineWidth(CommandBuffer commandBuffer, float lineWidth)
-	{
-		vkCmdSetLineWidth(commandBuffer, lineWidth);
-	}
-
-	inline void cmdSetDepthBias(CommandBuffer commandBuffer, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor)
-	{
-		vkCmdSetDepthBias(commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
-	}
-
-	inline void cmdSetBlendConstants(CommandBuffer commandBuffer, const float blendConstants[4])
-	{
-		vkCmdSetBlendConstants(commandBuffer, blendConstants);
-	}
-
-	inline void cmdSetDepthBounds(CommandBuffer commandBuffer, float minDepthBounds, float maxDepthBounds)
-	{
-		vkCmdSetDepthBounds(commandBuffer, minDepthBounds, maxDepthBounds);
-	}
-
-	inline void cmdSetStencilCompareMask(CommandBuffer commandBuffer, StencilFaceFlags faceMask, uint32_t compareMask)
-	{
-		vkCmdSetStencilCompareMask(commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), compareMask);
-	}
-
-	inline void cmdSetStencilWriteMask(CommandBuffer commandBuffer, StencilFaceFlags faceMask, uint32_t writeMask)
-	{
-		vkCmdSetStencilWriteMask(commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), writeMask);
-	}
-
-	inline void cmdSetStencilReference(CommandBuffer commandBuffer, StencilFaceFlags faceMask, uint32_t reference)
-	{
-		vkCmdSetStencilReference(commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), reference);
-	}
-
-	inline void cmdBindDescriptorSets(CommandBuffer commandBuffer, PipelineBindPoint pipelineBindPoint, PipelineLayout layout, uint32_t firstSet, uint32_t descriptorSetCount, const DescriptorSet* pDescriptorSets, uint32_t dynamicOffsetCount, const uint32_t* pDynamicOffsets)
-	{
-		vkCmdBindDescriptorSets(commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), layout, firstSet, descriptorSetCount, pDescriptorSets, dynamicOffsetCount, pDynamicOffsets);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdBindDescriptorSets(CommandBuffer commandBuffer, PipelineBindPoint pipelineBindPoint, PipelineLayout layout, uint32_t firstSet, eastl::vector<DescriptorSet> const& descriptorSets, eastl::vector<uint32_t> const& dynamicOffsets)
-	{
-		cmdBindDescriptorSets(commandBuffer, pipelineBindPoint, layout, firstSet, static_cast<uint32_t>(descriptorSets.size()), descriptorSets.data(), static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdBindIndexBuffer(CommandBuffer commandBuffer, Buffer buffer, DeviceSize offset, IndexType indexType)
-	{
-		vkCmdBindIndexBuffer(commandBuffer, buffer, offset, static_cast<VkIndexType>(indexType));
-	}
-
-	inline void cmdBindVertexBuffers(CommandBuffer commandBuffer, uint32_t firstBinding, uint32_t bindingCount, const Buffer* pBuffers, const DeviceSize* pOffsets)
-	{
-		vkCmdBindVertexBuffers(commandBuffer, firstBinding, bindingCount, pBuffers, pOffsets);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdBindVertexBuffers(CommandBuffer commandBuffer, uint32_t firstBinding, eastl::vector<Buffer> const& buffers, eastl::vector<DeviceSize> const& offsets)
-	{
-		assert(buffers.size() <= offsets.size());
-		cmdBindVertexBuffers(commandBuffer, firstBinding, static_cast<uint32_t>(buffers.size()), buffers.data(), offsets.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdDraw(CommandBuffer commandBuffer, uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
-	{
-		vkCmdDraw(commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
-	}
-
-	inline void cmdDrawIndexed(CommandBuffer commandBuffer, uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
-	{
-		vkCmdDrawIndexed(commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
-	}
-
-	inline void cmdDrawIndirect(CommandBuffer commandBuffer, Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride)
-	{
-		vkCmdDrawIndirect(commandBuffer, buffer, offset, drawCount, stride);
-	}
-
-	inline void cmdDrawIndexedIndirect(CommandBuffer commandBuffer, Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride)
-	{
-		vkCmdDrawIndexedIndirect(commandBuffer, buffer, offset, drawCount, stride);
-	}
-
-	inline void cmdDispatch(CommandBuffer commandBuffer, uint32_t x, uint32_t y, uint32_t z)
-	{
-		vkCmdDispatch(commandBuffer, x, y, z);
-	}
-
-	inline void cmdDispatchIndirect(CommandBuffer commandBuffer, Buffer buffer, DeviceSize offset)
-	{
-		vkCmdDispatchIndirect(commandBuffer, buffer, offset);
-	}
-
-	inline void cmdCopyBuffer(CommandBuffer commandBuffer, Buffer srcBuffer, Buffer dstBuffer, uint32_t regionCount, const BufferCopy* pRegions)
-	{
-		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, regionCount, reinterpret_cast<const VkBufferCopy*>(pRegions));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdCopyBuffer(CommandBuffer commandBuffer, Buffer srcBuffer, Buffer dstBuffer, eastl::vector<BufferCopy> const& regions)
-	{
-		cmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, static_cast<uint32_t>(regions.size()), regions.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdCopyImage(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageCopy* pRegions)
-	{
-		vkCmdCopyImage(commandBuffer, srcImage, static_cast<VkImageLayout>(srcImageLayout), dstImage, static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageCopy*>(pRegions));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdCopyImage(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageCopy> const& regions)
-	{
-		cmdCopyImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, static_cast<uint32_t>(regions.size()), regions.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdBlitImage(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageBlit* pRegions, Filter filter)
-	{
-		vkCmdBlitImage(commandBuffer, srcImage, static_cast<VkImageLayout>(srcImageLayout), dstImage, static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageBlit*>(pRegions), static_cast<VkFilter>(filter));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdBlitImage(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageBlit> const& regions, Filter filter)
-	{
-		cmdBlitImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, static_cast<uint32_t>(regions.size()), regions.data(), filter);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdCopyBufferToImage(CommandBuffer commandBuffer, Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const BufferImageCopy* pRegions)
-	{
-		vkCmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkBufferImageCopy*>(pRegions));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdCopyBufferToImage(CommandBuffer commandBuffer, Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, eastl::vector<BufferImageCopy> const& regions)
-	{
-		cmdCopyBufferToImage(commandBuffer, srcBuffer, dstImage, dstImageLayout, static_cast<uint32_t>(regions.size()), regions.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdCopyImageToBuffer(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Buffer dstBuffer, uint32_t regionCount, const BufferImageCopy* pRegions)
-	{
-		vkCmdCopyImageToBuffer(commandBuffer, srcImage, static_cast<VkImageLayout>(srcImageLayout), dstBuffer, regionCount, reinterpret_cast<const VkBufferImageCopy*>(pRegions));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdCopyImageToBuffer(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Buffer dstBuffer, eastl::vector<BufferImageCopy> const& regions)
-	{
-		cmdCopyImageToBuffer(commandBuffer, srcImage, srcImageLayout, dstBuffer, static_cast<uint32_t>(regions.size()), regions.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdUpdateBuffer(CommandBuffer commandBuffer, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize dataSize, const uint32_t* pData)
-	{
-		vkCmdUpdateBuffer(commandBuffer, dstBuffer, dstOffset, dataSize, pData);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdUpdateBuffer(CommandBuffer commandBuffer, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize dataSize, eastl::vector<uint32_t> const& data)
-	{
-		cmdUpdateBuffer(commandBuffer, dstBuffer, dstOffset, dataSize, data.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdFillBuffer(CommandBuffer commandBuffer, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize size, uint32_t data)
-	{
-		vkCmdFillBuffer(commandBuffer, dstBuffer, dstOffset, size, data);
-	}
-
-	inline void cmdClearColorImage(CommandBuffer commandBuffer, Image image, ImageLayout imageLayout, const ClearColorValue* pColor, uint32_t rangeCount, const ImageSubresourceRange* pRanges)
-	{
-		vkCmdClearColorImage(commandBuffer, image, static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearColorValue*>(pColor), rangeCount, reinterpret_cast<const VkImageSubresourceRange*>(pRanges));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdClearColorImage(CommandBuffer commandBuffer, Image image, ImageLayout imageLayout, const ClearColorValue& color, eastl::vector<ImageSubresourceRange> const& ranges)
-	{
-		cmdClearColorImage(commandBuffer, image, imageLayout, &color, static_cast<uint32_t>(ranges.size()), ranges.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdClearDepthStencilImage(CommandBuffer commandBuffer, Image image, ImageLayout imageLayout, const ClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const ImageSubresourceRange* pRanges)
-	{
-		vkCmdClearDepthStencilImage(commandBuffer, image, static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearDepthStencilValue*>(pDepthStencil), rangeCount, reinterpret_cast<const VkImageSubresourceRange*>(pRanges));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdClearDepthStencilImage(CommandBuffer commandBuffer, Image image, ImageLayout imageLayout, const ClearDepthStencilValue& depthStencil, eastl::vector<ImageSubresourceRange> const& ranges)
-	{
-		cmdClearDepthStencilImage(commandBuffer, image, imageLayout, &depthStencil, static_cast<uint32_t>(ranges.size()), ranges.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdClearAttachments(CommandBuffer commandBuffer, uint32_t attachmentCount, const ClearAttachment* pAttachments, uint32_t rectCount, const ClearRect* pRects)
-	{
-		vkCmdClearAttachments(commandBuffer, attachmentCount, reinterpret_cast<const VkClearAttachment*>(pAttachments), rectCount, reinterpret_cast<const VkClearRect*>(pRects));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdClearAttachments(CommandBuffer commandBuffer, eastl::vector<ClearAttachment> const& attachments, eastl::vector<ClearRect> const& rects)
-	{
-		cmdClearAttachments(commandBuffer, static_cast<uint32_t>(attachments.size()), attachments.data(), static_cast<uint32_t>(rects.size()), rects.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdResolveImage(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageResolve* pRegions)
-	{
-		vkCmdResolveImage(commandBuffer, srcImage, static_cast<VkImageLayout>(srcImageLayout), dstImage, static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageResolve*>(pRegions));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdResolveImage(CommandBuffer commandBuffer, Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageResolve> const& regions)
-	{
-		cmdResolveImage(commandBuffer, srcImage, srcImageLayout, dstImage, dstImageLayout, static_cast<uint32_t>(regions.size()), regions.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdSetEvent(CommandBuffer commandBuffer, Event event, PipelineStageFlags stageMask)
-	{
-		vkCmdSetEvent(commandBuffer, event, static_cast<VkPipelineStageFlags>(stageMask));
-	}
-
-	inline void cmdResetEvent(CommandBuffer commandBuffer, Event event, PipelineStageFlags stageMask)
-	{
-		vkCmdResetEvent(commandBuffer, event, static_cast<VkPipelineStageFlags>(stageMask));
-	}
-
-	inline void cmdWaitEvents(CommandBuffer commandBuffer, uint32_t eventCount, const Event* pEvents, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, uint32_t memoryBarrierCount, const MemoryBarrier* pMemoryBarriers, uint32_t bufferMemoryBarrierCount, const BufferMemoryBarrier* pBufferMemoryBarriers, uint32_t imageMemoryBarrierCount, const ImageMemoryBarrier* pImageMemoryBarriers)
-	{
-		vkCmdWaitEvents(commandBuffer, eventCount, pEvents, static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), memoryBarrierCount, reinterpret_cast<const VkMemoryBarrier*>(pMemoryBarriers), bufferMemoryBarrierCount, reinterpret_cast<const VkBufferMemoryBarrier*>(pBufferMemoryBarriers), imageMemoryBarrierCount, reinterpret_cast<const VkImageMemoryBarrier*>(pImageMemoryBarriers));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdWaitEvents(CommandBuffer commandBuffer, eastl::vector<Event> const& events, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, eastl::vector<MemoryBarrier> const& memoryBarriers, eastl::vector<BufferMemoryBarrier> const& bufferMemoryBarriers, eastl::vector<ImageMemoryBarrier> const& imageMemoryBarriers)
-	{
-		cmdWaitEvents(commandBuffer, static_cast<uint32_t>(events.size()), events.data(), srcStageMask, dstStageMask, static_cast<uint32_t>(memoryBarriers.size()), memoryBarriers.data(), static_cast<uint32_t>(bufferMemoryBarriers.size()), bufferMemoryBarriers.data(), static_cast<uint32_t>(imageMemoryBarriers.size()), imageMemoryBarriers.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdPipelineBarrier(CommandBuffer commandBuffer, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags, uint32_t memoryBarrierCount, const MemoryBarrier* pMemoryBarriers, uint32_t bufferMemoryBarrierCount, const BufferMemoryBarrier* pBufferMemoryBarriers, uint32_t imageMemoryBarrierCount, const ImageMemoryBarrier* pImageMemoryBarriers)
-	{
-		vkCmdPipelineBarrier(commandBuffer, static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<VkDependencyFlags>(dependencyFlags), memoryBarrierCount, reinterpret_cast<const VkMemoryBarrier*>(pMemoryBarriers), bufferMemoryBarrierCount, reinterpret_cast<const VkBufferMemoryBarrier*>(pBufferMemoryBarriers), imageMemoryBarrierCount, reinterpret_cast<const VkImageMemoryBarrier*>(pImageMemoryBarriers));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdPipelineBarrier(CommandBuffer commandBuffer, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags, eastl::vector<MemoryBarrier> const& memoryBarriers, eastl::vector<BufferMemoryBarrier> const& bufferMemoryBarriers, eastl::vector<ImageMemoryBarrier> const& imageMemoryBarriers)
-	{
-		cmdPipelineBarrier(commandBuffer, srcStageMask, dstStageMask, dependencyFlags, static_cast<uint32_t>(memoryBarriers.size()), memoryBarriers.data(), static_cast<uint32_t>(bufferMemoryBarriers.size()), bufferMemoryBarriers.data(), static_cast<uint32_t>(imageMemoryBarriers.size()), imageMemoryBarriers.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdBeginQuery(CommandBuffer commandBuffer, QueryPool queryPool, uint32_t query, QueryControlFlags flags)
-	{
-		vkCmdBeginQuery(commandBuffer, queryPool, query, static_cast<VkQueryControlFlags>(flags));
-	}
-
-	inline void cmdEndQuery(CommandBuffer commandBuffer, QueryPool queryPool, uint32_t query)
-	{
-		vkCmdEndQuery(commandBuffer, queryPool, query);
-	}
-
-	inline void cmdResetQueryPool(CommandBuffer commandBuffer, QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount)
-	{
-		vkCmdResetQueryPool(commandBuffer, queryPool, firstQuery, queryCount);
-	}
-
-	inline void cmdWriteTimestamp(CommandBuffer commandBuffer, PipelineStageFlagBits pipelineStage, QueryPool queryPool, uint32_t query)
-	{
-		vkCmdWriteTimestamp(commandBuffer, static_cast<VkPipelineStageFlagBits>(pipelineStage), queryPool, query);
-	}
-
-	inline void cmdCopyQueryPoolResults(CommandBuffer commandBuffer, QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize stride, QueryResultFlags flags)
-	{
-		vkCmdCopyQueryPoolResults(commandBuffer, queryPool, firstQuery, queryCount, dstBuffer, dstOffset, stride, static_cast<VkQueryResultFlags>(flags));
-	}
-
-	inline void cmdPushConstants(CommandBuffer commandBuffer, PipelineLayout layout, ShaderStageFlags stageFlags, uint32_t offset, uint32_t size, const void* pValues)
-	{
-		vkCmdPushConstants(commandBuffer, layout, static_cast<VkShaderStageFlags>(stageFlags), offset, size, pValues);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdPushConstants(CommandBuffer commandBuffer, PipelineLayout layout, ShaderStageFlags stageFlags, uint32_t offset, eastl::vector<uint8_t> const& values)
-	{
-		cmdPushConstants(commandBuffer, layout, stageFlags, offset, static_cast<uint32_t>(values.size()), values.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdBeginRenderPass(CommandBuffer commandBuffer, const RenderPassBeginInfo* pRenderPassBegin, SubpassContents contents)
-	{
-		vkCmdBeginRenderPass(commandBuffer, reinterpret_cast<const VkRenderPassBeginInfo*>(pRenderPassBegin), static_cast<VkSubpassContents>(contents));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdBeginRenderPass(CommandBuffer commandBuffer, const RenderPassBeginInfo& renderPassBegin, SubpassContents contents)
-	{
-		cmdBeginRenderPass(commandBuffer, &renderPassBegin, contents);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void cmdNextSubpass(CommandBuffer commandBuffer, SubpassContents contents)
-	{
-		vkCmdNextSubpass(commandBuffer, static_cast<VkSubpassContents>(contents));
-	}
-
-	inline void cmdEndRenderPass(CommandBuffer commandBuffer)
-	{
-		vkCmdEndRenderPass(commandBuffer);
-	}
-
-	inline void cmdExecuteCommands(CommandBuffer commandBuffer, uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers)
-	{
-		vkCmdExecuteCommands(commandBuffer, commandBufferCount, pCommandBuffers);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void cmdExecuteCommands(CommandBuffer commandBuffer, eastl::vector<CommandBuffer> const& commandBuffers)
-	{
-		cmdExecuteCommands(commandBuffer, static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroySurfaceKHR(Instance instance, SurfaceKHR surface, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroySurfaceKHR(instance, surface, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroySurfaceKHR(Instance instance, SurfaceKHR surface, const AllocationCallbacks& allocator)
-	{
-		destroySurfaceKHR(instance, surface, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getPhysicalDeviceSurfaceSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, SurfaceKHR surface, Bool32* pSupported)
-	{
-		return static_cast<Result>(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, pSupported));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPhysicalDeviceSurfaceSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, SurfaceKHR surface, Bool32& supported)
-	{
-		return getPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, &supported);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getPhysicalDeviceSurfaceCapabilitiesKHR(PhysicalDevice physicalDevice, SurfaceKHR surface, SurfaceCapabilitiesKHR* pSurfaceCapabilities)
-	{
-		return static_cast<Result>(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, reinterpret_cast<VkSurfaceCapabilitiesKHR*>(pSurfaceCapabilities)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPhysicalDeviceSurfaceCapabilitiesKHR(PhysicalDevice physicalDevice, SurfaceKHR surface, SurfaceCapabilitiesKHR& surfaceCapabilities)
-	{
-		return getPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getPhysicalDeviceSurfaceFormatsKHR(PhysicalDevice physicalDevice, SurfaceKHR surface, uint32_t* pSurfaceFormatCount, SurfaceFormatKHR* pSurfaceFormats)
-	{
-		return static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, pSurfaceFormatCount, reinterpret_cast<VkSurfaceFormatKHR*>(pSurfaceFormats)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPhysicalDeviceSurfaceFormatsKHR(PhysicalDevice physicalDevice, SurfaceKHR surface, eastl::vector<SurfaceFormatKHR> & surfaceFormats)
-	{
-		uint32_t pSurfaceFormatCount = 0;
-		Result result = getPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &pSurfaceFormatCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			surfaceFormats.resize(pSurfaceFormatCount);
-			result = getPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &pSurfaceFormatCount, surfaceFormats.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getPhysicalDeviceSurfacePresentModesKHR(PhysicalDevice physicalDevice, SurfaceKHR surface, uint32_t* pPresentModeCount, PresentModeKHR* pPresentModes)
-	{
-		return static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, pPresentModeCount, reinterpret_cast<VkPresentModeKHR*>(pPresentModes)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPhysicalDeviceSurfacePresentModesKHR(PhysicalDevice physicalDevice, SurfaceKHR surface, eastl::vector<PresentModeKHR> & presentModes)
-	{
-		uint32_t pPresentModeCount = 0;
-		Result result = getPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &pPresentModeCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			presentModes.resize(pPresentModeCount);
-			result = getPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &pPresentModeCount, presentModes.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createSwapchainKHR(Device device, const SwapchainCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SwapchainKHR* pSwapchain)
-	{
-		return static_cast<Result>(vkCreateSwapchainKHR(device, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSwapchain));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createSwapchainKHR(Device device, const SwapchainCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SwapchainKHR& swapchain)
-	{
-		return createSwapchainKHR(device, &createInfo, &allocator, &swapchain);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void destroySwapchainKHR(Device device, SwapchainKHR swapchain, const AllocationCallbacks* pAllocator)
-	{
-		vkDestroySwapchainKHR(device, swapchain, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroySwapchainKHR(Device device, SwapchainKHR swapchain, const AllocationCallbacks& allocator)
-	{
-		destroySwapchainKHR(device, swapchain, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getSwapchainImagesKHR(Device device, SwapchainKHR swapchain, uint32_t* pSwapchainImageCount, Image* pSwapchainImages)
-	{
-		return static_cast<Result>(vkGetSwapchainImagesKHR(device, swapchain, pSwapchainImageCount, pSwapchainImages));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getSwapchainImagesKHR(Device device, SwapchainKHR swapchain, eastl::vector<Image> & swapchainImages)
-	{
-		uint32_t pSwapchainImageCount = 0;
-		Result result = getSwapchainImagesKHR(device, swapchain, &pSwapchainImageCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			swapchainImages.resize(pSwapchainImageCount);
-			result = getSwapchainImagesKHR(device, swapchain, &pSwapchainImageCount, swapchainImages.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result acquireNextImageKHR(Device device, SwapchainKHR swapchain, uint64_t timeout, Semaphore semaphore, Fence fence, uint32_t* pImageIndex)
-	{
-		return static_cast<Result>(vkAcquireNextImageKHR(device, swapchain, timeout, semaphore, fence, pImageIndex));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result acquireNextImageKHR(Device device, SwapchainKHR swapchain, uint64_t timeout, Semaphore semaphore, Fence fence, uint32_t& imageIndex)
-	{
-		return acquireNextImageKHR(device, swapchain, timeout, semaphore, fence, &imageIndex);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result queuePresentKHR(Queue queue, const PresentInfoKHR* pPresentInfo)
-	{
-		return static_cast<Result>(vkQueuePresentKHR(queue, reinterpret_cast<const VkPresentInfoKHR*>(pPresentInfo)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result queuePresentKHR(Queue queue, const PresentInfoKHR& presentInfo)
-	{
-		return queuePresentKHR(queue, &presentInfo);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	class DisplayPlanePropertiesKHR
-	{
-	public:
-		DisplayPlanePropertiesKHR()
-			: DisplayPlanePropertiesKHR(DisplayKHR(), 0)
-		{}
-
-		DisplayPlanePropertiesKHR(DisplayKHR currentDisplay, uint32_t currentStackIndex)
-		{
-			m_displayPlanePropertiesKHR.currentDisplay = currentDisplay;
-			m_displayPlanePropertiesKHR.currentStackIndex = currentStackIndex;
-		}
-
-		const DisplayKHR& currentDisplay() const
-		{
-			return m_displayPlanePropertiesKHR.currentDisplay;
-		}
-
-		DisplayPlanePropertiesKHR& currentDisplay(DisplayKHR currentDisplay)
-		{
-			m_displayPlanePropertiesKHR.currentDisplay = currentDisplay;
-			return *this;
-		}
-
-		const uint32_t& currentStackIndex() const
-		{
-			return m_displayPlanePropertiesKHR.currentStackIndex;
-		}
-
-		DisplayPlanePropertiesKHR& currentStackIndex(uint32_t currentStackIndex)
-		{
-			m_displayPlanePropertiesKHR.currentStackIndex = currentStackIndex;
-			return *this;
-		}
-
-		operator const VkDisplayPlanePropertiesKHR&() const
-		{
-			return m_displayPlanePropertiesKHR;
-		}
-
-	private:
-		VkDisplayPlanePropertiesKHR m_displayPlanePropertiesKHR;
-	};
-
-	class DisplayModeParametersKHR
-	{
-	public:
-		DisplayModeParametersKHR()
-			: DisplayModeParametersKHR(Extent2D(), 0)
-		{}
-
-		DisplayModeParametersKHR(Extent2D visibleRegion, uint32_t refreshRate)
-		{
-			m_displayModeParametersKHR.visibleRegion = static_cast<VkExtent2D>(visibleRegion);
-			m_displayModeParametersKHR.refreshRate = refreshRate;
-		}
-
-		const Extent2D& visibleRegion() const
-		{
-			return reinterpret_cast<const Extent2D&>(m_displayModeParametersKHR.visibleRegion);
-		}
-
-		DisplayModeParametersKHR& visibleRegion(Extent2D visibleRegion)
-		{
-			m_displayModeParametersKHR.visibleRegion = static_cast<VkExtent2D>(visibleRegion);
-			return *this;
-		}
-
-		const uint32_t& refreshRate() const
-		{
-			return m_displayModeParametersKHR.refreshRate;
-		}
-
-		DisplayModeParametersKHR& refreshRate(uint32_t refreshRate)
-		{
-			m_displayModeParametersKHR.refreshRate = refreshRate;
-			return *this;
-		}
-
-		operator const VkDisplayModeParametersKHR&() const
-		{
-			return m_displayModeParametersKHR;
-		}
-
-	private:
-		VkDisplayModeParametersKHR m_displayModeParametersKHR;
-	};
-
-	class DisplayModePropertiesKHR
-	{
-	public:
-		DisplayModePropertiesKHR()
-			: DisplayModePropertiesKHR(DisplayModeKHR(), DisplayModeParametersKHR())
-		{}
-
-		DisplayModePropertiesKHR(DisplayModeKHR displayMode, DisplayModeParametersKHR parameters)
-		{
-			m_displayModePropertiesKHR.displayMode = displayMode;
-			m_displayModePropertiesKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
-		}
-
-		const DisplayModeKHR& displayMode() const
-		{
-			return m_displayModePropertiesKHR.displayMode;
-		}
-
-		DisplayModePropertiesKHR& displayMode(DisplayModeKHR displayMode)
-		{
-			m_displayModePropertiesKHR.displayMode = displayMode;
-			return *this;
-		}
-
-		const DisplayModeParametersKHR& parameters() const
-		{
-			return reinterpret_cast<const DisplayModeParametersKHR&>(m_displayModePropertiesKHR.parameters);
-		}
-
-		DisplayModePropertiesKHR& parameters(DisplayModeParametersKHR parameters)
-		{
-			m_displayModePropertiesKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
-			return *this;
-		}
-
-		operator const VkDisplayModePropertiesKHR&() const
-		{
-			return m_displayModePropertiesKHR;
-		}
-
-	private:
-		VkDisplayModePropertiesKHR m_displayModePropertiesKHR;
-	};
-
-	class DisplayModeCreateInfoKHR
-	{
-	public:
-		DisplayModeCreateInfoKHR()
-			: DisplayModeCreateInfoKHR(0, DisplayModeParametersKHR())
-		{}
-
-		DisplayModeCreateInfoKHR(DisplayModeCreateFlagsKHR flags, DisplayModeParametersKHR parameters)
-		{
-			m_displayModeCreateInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_MODE_CREATE_INFO_KHR;
-			m_displayModeCreateInfoKHR.pNext = nullptr;
-			m_displayModeCreateInfoKHR.flags = flags;
-			m_displayModeCreateInfoKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
-		}
-
-		const StructureType& sType() const
-		{
-			return reinterpret_cast<const StructureType&>(m_displayModeCreateInfoKHR.sType);
-		}
-
-		DisplayModeCreateInfoKHR& sType(StructureType sType)
-		{
-			m_displayModeCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
-			return *this;
-		}
-
-		const void* pNext() const
-		{
-			return reinterpret_cast<const void*>(m_displayModeCreateInfoKHR.pNext);
-		}
-
-		DisplayModeCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_displayModeCreateInfoKHR.pNext = pNext;
-			return *this;
-		}
-
-		const DisplayModeCreateFlagsKHR& flags() const
-		{
-			return m_displayModeCreateInfoKHR.flags;
-		}
-
-		DisplayModeCreateInfoKHR& flags(DisplayModeCreateFlagsKHR flags)
-		{
-			m_displayModeCreateInfoKHR.flags = flags;
-			return *this;
-		}
-
-		const DisplayModeParametersKHR& parameters() const
-		{
-			return reinterpret_cast<const DisplayModeParametersKHR&>(m_displayModeCreateInfoKHR.parameters);
-		}
-
-		DisplayModeCreateInfoKHR& parameters(DisplayModeParametersKHR parameters)
-		{
-			m_displayModeCreateInfoKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
-			return *this;
-		}
-
-		operator const VkDisplayModeCreateInfoKHR&() const
-		{
-			return m_displayModeCreateInfoKHR;
-		}
-
-	private:
-		VkDisplayModeCreateInfoKHR m_displayModeCreateInfoKHR;
-	};
+	static_assert(sizeof(SurfaceFormatKHR) == sizeof(VkSurfaceFormatKHR), "struct and wrapper have different size!");
 
 	enum class DisplayPlaneAlphaFlagBitsKHR
 	{
@@ -13712,9 +18983,25 @@ namespace vk
 			m_displayPlaneCapabilitiesKHR.maxDstExtent = static_cast<VkExtent2D>(maxDstExtent);
 		}
 
+		DisplayPlaneCapabilitiesKHR(VkDisplayPlaneCapabilitiesKHR const & rhs)
+			: m_displayPlaneCapabilitiesKHR(rhs)
+		{
+		}
+
+		DisplayPlaneCapabilitiesKHR& operator=(VkDisplayPlaneCapabilitiesKHR const & rhs)
+		{
+			m_displayPlaneCapabilitiesKHR = rhs;
+			return *this;
+		}
+
 		const DisplayPlaneAlphaFlagsKHR& supportedAlpha() const
 		{
 			return reinterpret_cast<const DisplayPlaneAlphaFlagsKHR&>(m_displayPlaneCapabilitiesKHR.supportedAlpha);
+		}
+
+		DisplayPlaneAlphaFlagsKHR& supportedAlpha()
+		{
+			return reinterpret_cast<DisplayPlaneAlphaFlagsKHR&>(m_displayPlaneCapabilitiesKHR.supportedAlpha);
 		}
 
 		DisplayPlaneCapabilitiesKHR& supportedAlpha(DisplayPlaneAlphaFlagsKHR supportedAlpha)
@@ -13728,6 +19015,11 @@ namespace vk
 			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.minSrcPosition);
 		}
 
+		Offset2D& minSrcPosition()
+		{
+			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.minSrcPosition);
+		}
+
 		DisplayPlaneCapabilitiesKHR& minSrcPosition(Offset2D minSrcPosition)
 		{
 			m_displayPlaneCapabilitiesKHR.minSrcPosition = static_cast<VkOffset2D>(minSrcPosition);
@@ -13737,6 +19029,11 @@ namespace vk
 		const Offset2D& maxSrcPosition() const
 		{
 			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.maxSrcPosition);
+		}
+
+		Offset2D& maxSrcPosition()
+		{
+			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.maxSrcPosition);
 		}
 
 		DisplayPlaneCapabilitiesKHR& maxSrcPosition(Offset2D maxSrcPosition)
@@ -13750,6 +19047,11 @@ namespace vk
 			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.minSrcExtent);
 		}
 
+		Extent2D& minSrcExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.minSrcExtent);
+		}
+
 		DisplayPlaneCapabilitiesKHR& minSrcExtent(Extent2D minSrcExtent)
 		{
 			m_displayPlaneCapabilitiesKHR.minSrcExtent = static_cast<VkExtent2D>(minSrcExtent);
@@ -13759,6 +19061,11 @@ namespace vk
 		const Extent2D& maxSrcExtent() const
 		{
 			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.maxSrcExtent);
+		}
+
+		Extent2D& maxSrcExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.maxSrcExtent);
 		}
 
 		DisplayPlaneCapabilitiesKHR& maxSrcExtent(Extent2D maxSrcExtent)
@@ -13772,6 +19079,11 @@ namespace vk
 			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.minDstPosition);
 		}
 
+		Offset2D& minDstPosition()
+		{
+			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.minDstPosition);
+		}
+
 		DisplayPlaneCapabilitiesKHR& minDstPosition(Offset2D minDstPosition)
 		{
 			m_displayPlaneCapabilitiesKHR.minDstPosition = static_cast<VkOffset2D>(minDstPosition);
@@ -13781,6 +19093,11 @@ namespace vk
 		const Offset2D& maxDstPosition() const
 		{
 			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.maxDstPosition);
+		}
+
+		Offset2D& maxDstPosition()
+		{
+			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.maxDstPosition);
 		}
 
 		DisplayPlaneCapabilitiesKHR& maxDstPosition(Offset2D maxDstPosition)
@@ -13794,6 +19111,11 @@ namespace vk
 			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.minDstExtent);
 		}
 
+		Extent2D& minDstExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.minDstExtent);
+		}
+
 		DisplayPlaneCapabilitiesKHR& minDstExtent(Extent2D minDstExtent)
 		{
 			m_displayPlaneCapabilitiesKHR.minDstExtent = static_cast<VkExtent2D>(minDstExtent);
@@ -13803,6 +19125,11 @@ namespace vk
 		const Extent2D& maxDstExtent() const
 		{
 			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.maxDstExtent);
+		}
+
+		Extent2D& maxDstExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.maxDstExtent);
 		}
 
 		DisplayPlaneCapabilitiesKHR& maxDstExtent(Extent2D maxDstExtent)
@@ -13819,6 +19146,42 @@ namespace vk
 	private:
 		VkDisplayPlaneCapabilitiesKHR m_displayPlaneCapabilitiesKHR;
 	};
+	static_assert(sizeof(DisplayPlaneCapabilitiesKHR) == sizeof(VkDisplayPlaneCapabilitiesKHR), "struct and wrapper have different size!");
+
+	enum class CompositeAlphaFlagBitsKHR
+	{
+		eOpaque = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+		ePreMultiplied = VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+		ePostMultiplied = VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+		eInherit = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
+	};
+
+	typedef Flags<CompositeAlphaFlagBitsKHR, VkCompositeAlphaFlagsKHR> CompositeAlphaFlagsKHR;
+
+	inline CompositeAlphaFlagsKHR operator|(CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1)
+	{
+		return CompositeAlphaFlagsKHR(bit0) | bit1;
+	}
+
+	enum class SurfaceTransformFlagBitsKHR
+	{
+		eIdentity = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
+		eRotate90 = VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR,
+		eRotate180 = VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR,
+		eRotate270 = VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR,
+		eHorizontalMirror = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_BIT_KHR,
+		eHorizontalMirrorRotate90 = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_90_BIT_KHR,
+		eHorizontalMirrorRotate180 = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_180_BIT_KHR,
+		eHorizontalMirrorRotate270 = VK_SURFACE_TRANSFORM_HORIZONTAL_MIRROR_ROTATE_270_BIT_KHR,
+		eInherit = VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR
+	};
+
+	typedef Flags<SurfaceTransformFlagBitsKHR, VkSurfaceTransformFlagsKHR> SurfaceTransformFlagsKHR;
+
+	inline SurfaceTransformFlagsKHR operator|(SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1)
+	{
+		return SurfaceTransformFlagsKHR(bit0) | bit1;
+	}
 
 	class DisplayPropertiesKHR
 	{
@@ -13829,7 +19192,7 @@ namespace vk
 
 		DisplayPropertiesKHR(DisplayKHR display, const char* displayName, Extent2D physicalDimensions, Extent2D physicalResolution, SurfaceTransformFlagsKHR supportedTransforms, Bool32 planeReorderPossible, Bool32 persistentContent)
 		{
-			m_displayPropertiesKHR.display = display;
+			m_displayPropertiesKHR.display = static_cast<VkDisplayKHR>(display);
 			m_displayPropertiesKHR.displayName = displayName;
 			m_displayPropertiesKHR.physicalDimensions = static_cast<VkExtent2D>(physicalDimensions);
 			m_displayPropertiesKHR.physicalResolution = static_cast<VkExtent2D>(physicalResolution);
@@ -13838,18 +19201,39 @@ namespace vk
 			m_displayPropertiesKHR.persistentContent = persistentContent;
 		}
 
+		DisplayPropertiesKHR(VkDisplayPropertiesKHR const & rhs)
+			: m_displayPropertiesKHR(rhs)
+		{
+		}
+
+		DisplayPropertiesKHR& operator=(VkDisplayPropertiesKHR const & rhs)
+		{
+			m_displayPropertiesKHR = rhs;
+			return *this;
+		}
+
 		const DisplayKHR& display() const
 		{
-			return m_displayPropertiesKHR.display;
+			return reinterpret_cast<const DisplayKHR&>(m_displayPropertiesKHR.display);
+		}
+
+		DisplayKHR& display()
+		{
+			return reinterpret_cast<DisplayKHR&>(m_displayPropertiesKHR.display);
 		}
 
 		DisplayPropertiesKHR& display(DisplayKHR display)
 		{
-			m_displayPropertiesKHR.display = display;
+			m_displayPropertiesKHR.display = static_cast<VkDisplayKHR>(display);
 			return *this;
 		}
 
 		const char* displayName() const
+		{
+			return reinterpret_cast<const char*>(m_displayPropertiesKHR.displayName);
+		}
+
+		const char* displayName()
 		{
 			return reinterpret_cast<const char*>(m_displayPropertiesKHR.displayName);
 		}
@@ -13865,6 +19249,11 @@ namespace vk
 			return reinterpret_cast<const Extent2D&>(m_displayPropertiesKHR.physicalDimensions);
 		}
 
+		Extent2D& physicalDimensions()
+		{
+			return reinterpret_cast<Extent2D&>(m_displayPropertiesKHR.physicalDimensions);
+		}
+
 		DisplayPropertiesKHR& physicalDimensions(Extent2D physicalDimensions)
 		{
 			m_displayPropertiesKHR.physicalDimensions = static_cast<VkExtent2D>(physicalDimensions);
@@ -13874,6 +19263,11 @@ namespace vk
 		const Extent2D& physicalResolution() const
 		{
 			return reinterpret_cast<const Extent2D&>(m_displayPropertiesKHR.physicalResolution);
+		}
+
+		Extent2D& physicalResolution()
+		{
+			return reinterpret_cast<Extent2D&>(m_displayPropertiesKHR.physicalResolution);
 		}
 
 		DisplayPropertiesKHR& physicalResolution(Extent2D physicalResolution)
@@ -13887,6 +19281,11 @@ namespace vk
 			return reinterpret_cast<const SurfaceTransformFlagsKHR&>(m_displayPropertiesKHR.supportedTransforms);
 		}
 
+		SurfaceTransformFlagsKHR& supportedTransforms()
+		{
+			return reinterpret_cast<SurfaceTransformFlagsKHR&>(m_displayPropertiesKHR.supportedTransforms);
+		}
+
 		DisplayPropertiesKHR& supportedTransforms(SurfaceTransformFlagsKHR supportedTransforms)
 		{
 			m_displayPropertiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
@@ -13898,6 +19297,11 @@ namespace vk
 			return m_displayPropertiesKHR.planeReorderPossible;
 		}
 
+		Bool32& planeReorderPossible()
+		{
+			return m_displayPropertiesKHR.planeReorderPossible;
+		}
+
 		DisplayPropertiesKHR& planeReorderPossible(Bool32 planeReorderPossible)
 		{
 			m_displayPropertiesKHR.planeReorderPossible = planeReorderPossible;
@@ -13905,6 +19309,11 @@ namespace vk
 		}
 
 		const Bool32& persistentContent() const
+		{
+			return m_displayPropertiesKHR.persistentContent;
+		}
+
+		Bool32& persistentContent()
 		{
 			return m_displayPropertiesKHR.persistentContent;
 		}
@@ -13923,20 +19332,21 @@ namespace vk
 	private:
 		VkDisplayPropertiesKHR m_displayPropertiesKHR;
 	};
+	static_assert(sizeof(DisplayPropertiesKHR) == sizeof(VkDisplayPropertiesKHR), "struct and wrapper have different size!");
 
 	class DisplaySurfaceCreateInfoKHR
 	{
 	public:
 		DisplaySurfaceCreateInfoKHR()
-			: DisplaySurfaceCreateInfoKHR(0, DisplayModeKHR(), 0, 0, SurfaceTransformFlagBitsKHR::eIdentity, 0, DisplayPlaneAlphaFlagBitsKHR::eOpaque, Extent2D())
+			: DisplaySurfaceCreateInfoKHR(DisplaySurfaceCreateFlagsKHR(), DisplayModeKHR(), 0, 0, SurfaceTransformFlagBitsKHR::eIdentity, 0, DisplayPlaneAlphaFlagBitsKHR::eOpaque, Extent2D())
 		{}
 
 		DisplaySurfaceCreateInfoKHR(DisplaySurfaceCreateFlagsKHR flags, DisplayModeKHR displayMode, uint32_t planeIndex, uint32_t planeStackIndex, SurfaceTransformFlagBitsKHR transform, float globalAlpha, DisplayPlaneAlphaFlagBitsKHR alphaMode, Extent2D imageExtent)
 		{
 			m_displaySurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
 			m_displaySurfaceCreateInfoKHR.pNext = nullptr;
-			m_displaySurfaceCreateInfoKHR.flags = flags;
-			m_displaySurfaceCreateInfoKHR.displayMode = displayMode;
+			m_displaySurfaceCreateInfoKHR.flags = static_cast<VkDisplaySurfaceCreateFlagsKHR>(flags);
+			m_displaySurfaceCreateInfoKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
 			m_displaySurfaceCreateInfoKHR.planeIndex = planeIndex;
 			m_displaySurfaceCreateInfoKHR.planeStackIndex = planeStackIndex;
 			m_displaySurfaceCreateInfoKHR.transform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform);
@@ -13945,9 +19355,25 @@ namespace vk
 			m_displaySurfaceCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
 		}
 
+		DisplaySurfaceCreateInfoKHR(VkDisplaySurfaceCreateInfoKHR const & rhs)
+			: m_displaySurfaceCreateInfoKHR(rhs)
+		{
+		}
+
+		DisplaySurfaceCreateInfoKHR& operator=(VkDisplaySurfaceCreateInfoKHR const & rhs)
+		{
+			m_displaySurfaceCreateInfoKHR = rhs;
+			return *this;
+		}
+
 		const StructureType& sType() const
 		{
 			return reinterpret_cast<const StructureType&>(m_displaySurfaceCreateInfoKHR.sType);
+		}
+
+		StructureType& sType()
+		{
+			return reinterpret_cast<StructureType&>(m_displaySurfaceCreateInfoKHR.sType);
 		}
 
 		DisplaySurfaceCreateInfoKHR& sType(StructureType sType)
@@ -13961,6 +19387,11 @@ namespace vk
 			return reinterpret_cast<const void*>(m_displaySurfaceCreateInfoKHR.pNext);
 		}
 
+		const void* pNext()
+		{
+			return reinterpret_cast<const void*>(m_displaySurfaceCreateInfoKHR.pNext);
+		}
+
 		DisplaySurfaceCreateInfoKHR& pNext(const void* pNext)
 		{
 			m_displaySurfaceCreateInfoKHR.pNext = pNext;
@@ -13969,27 +19400,42 @@ namespace vk
 
 		const DisplaySurfaceCreateFlagsKHR& flags() const
 		{
-			return m_displaySurfaceCreateInfoKHR.flags;
+			return reinterpret_cast<const DisplaySurfaceCreateFlagsKHR&>(m_displaySurfaceCreateInfoKHR.flags);
+		}
+
+		DisplaySurfaceCreateFlagsKHR& flags()
+		{
+			return reinterpret_cast<DisplaySurfaceCreateFlagsKHR&>(m_displaySurfaceCreateInfoKHR.flags);
 		}
 
 		DisplaySurfaceCreateInfoKHR& flags(DisplaySurfaceCreateFlagsKHR flags)
 		{
-			m_displaySurfaceCreateInfoKHR.flags = flags;
+			m_displaySurfaceCreateInfoKHR.flags = static_cast<VkDisplaySurfaceCreateFlagsKHR>(flags);
 			return *this;
 		}
 
 		const DisplayModeKHR& displayMode() const
 		{
-			return m_displaySurfaceCreateInfoKHR.displayMode;
+			return reinterpret_cast<const DisplayModeKHR&>(m_displaySurfaceCreateInfoKHR.displayMode);
+		}
+
+		DisplayModeKHR& displayMode()
+		{
+			return reinterpret_cast<DisplayModeKHR&>(m_displaySurfaceCreateInfoKHR.displayMode);
 		}
 
 		DisplaySurfaceCreateInfoKHR& displayMode(DisplayModeKHR displayMode)
 		{
-			m_displaySurfaceCreateInfoKHR.displayMode = displayMode;
+			m_displaySurfaceCreateInfoKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
 			return *this;
 		}
 
 		const uint32_t& planeIndex() const
+		{
+			return m_displaySurfaceCreateInfoKHR.planeIndex;
+		}
+
+		uint32_t& planeIndex()
 		{
 			return m_displaySurfaceCreateInfoKHR.planeIndex;
 		}
@@ -14005,6 +19451,11 @@ namespace vk
 			return m_displaySurfaceCreateInfoKHR.planeStackIndex;
 		}
 
+		uint32_t& planeStackIndex()
+		{
+			return m_displaySurfaceCreateInfoKHR.planeStackIndex;
+		}
+
 		DisplaySurfaceCreateInfoKHR& planeStackIndex(uint32_t planeStackIndex)
 		{
 			m_displaySurfaceCreateInfoKHR.planeStackIndex = planeStackIndex;
@@ -14016,6 +19467,11 @@ namespace vk
 			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.transform);
 		}
 
+		SurfaceTransformFlagBitsKHR& transform()
+		{
+			return reinterpret_cast<SurfaceTransformFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.transform);
+		}
+
 		DisplaySurfaceCreateInfoKHR& transform(SurfaceTransformFlagBitsKHR transform)
 		{
 			m_displaySurfaceCreateInfoKHR.transform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform);
@@ -14023,6 +19479,11 @@ namespace vk
 		}
 
 		const float& globalAlpha() const
+		{
+			return m_displaySurfaceCreateInfoKHR.globalAlpha;
+		}
+
+		float& globalAlpha()
 		{
 			return m_displaySurfaceCreateInfoKHR.globalAlpha;
 		}
@@ -14038,6 +19499,11 @@ namespace vk
 			return reinterpret_cast<const DisplayPlaneAlphaFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.alphaMode);
 		}
 
+		DisplayPlaneAlphaFlagBitsKHR& alphaMode()
+		{
+			return reinterpret_cast<DisplayPlaneAlphaFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.alphaMode);
+		}
+
 		DisplaySurfaceCreateInfoKHR& alphaMode(DisplayPlaneAlphaFlagBitsKHR alphaMode)
 		{
 			m_displaySurfaceCreateInfoKHR.alphaMode = static_cast<VkDisplayPlaneAlphaFlagBitsKHR>(alphaMode);
@@ -14047,6 +19513,11 @@ namespace vk
 		const Extent2D& imageExtent() const
 		{
 			return reinterpret_cast<const Extent2D&>(m_displaySurfaceCreateInfoKHR.imageExtent);
+		}
+
+		Extent2D& imageExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_displaySurfaceCreateInfoKHR.imageExtent);
 		}
 
 		DisplaySurfaceCreateInfoKHR& imageExtent(Extent2D imageExtent)
@@ -14063,908 +19534,4825 @@ namespace vk
 	private:
 		VkDisplaySurfaceCreateInfoKHR m_displaySurfaceCreateInfoKHR;
 	};
+	static_assert(sizeof(DisplaySurfaceCreateInfoKHR) == sizeof(VkDisplaySurfaceCreateInfoKHR), "struct and wrapper have different size!");
 
-	inline Result getPhysicalDeviceDisplayPropertiesKHR(PhysicalDevice physicalDevice, uint32_t* pPropertyCount, DisplayPropertiesKHR* pProperties)
-	{
-		return static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, pPropertyCount, reinterpret_cast<VkDisplayPropertiesKHR*>(pProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPhysicalDeviceDisplayPropertiesKHR(PhysicalDevice physicalDevice, eastl::vector<DisplayPropertiesKHR> & properties)
-	{
-		uint32_t pPropertyCount = 0;
-		Result result = getPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &pPropertyCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			properties.resize(pPropertyCount);
-			result = getPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &pPropertyCount, properties.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getPhysicalDeviceDisplayPlanePropertiesKHR(PhysicalDevice physicalDevice, uint32_t* pPropertyCount, DisplayPlanePropertiesKHR* pProperties)
-	{
-		return static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, pPropertyCount, reinterpret_cast<VkDisplayPlanePropertiesKHR*>(pProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getPhysicalDeviceDisplayPlanePropertiesKHR(PhysicalDevice physicalDevice, eastl::vector<DisplayPlanePropertiesKHR> & properties)
-	{
-		uint32_t pPropertyCount = 0;
-		Result result = getPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, &pPropertyCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			properties.resize(pPropertyCount);
-			result = getPhysicalDeviceDisplayPlanePropertiesKHR(physicalDevice, &pPropertyCount, properties.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getDisplayPlaneSupportedDisplaysKHR(PhysicalDevice physicalDevice, uint32_t planeIndex, uint32_t* pDisplayCount, DisplayKHR* pDisplays)
-	{
-		return static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(physicalDevice, planeIndex, pDisplayCount, pDisplays));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getDisplayPlaneSupportedDisplaysKHR(PhysicalDevice physicalDevice, uint32_t planeIndex, eastl::vector<DisplayKHR> & displays)
-	{
-		uint32_t pDisplayCount = 0;
-		Result result = getDisplayPlaneSupportedDisplaysKHR(physicalDevice, planeIndex, &pDisplayCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			displays.resize(pDisplayCount);
-			result = getDisplayPlaneSupportedDisplaysKHR(physicalDevice, planeIndex, &pDisplayCount, displays.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getDisplayModePropertiesKHR(PhysicalDevice physicalDevice, DisplayKHR display, uint32_t* pPropertyCount, DisplayModePropertiesKHR* pProperties)
-	{
-		return static_cast<Result>(vkGetDisplayModePropertiesKHR(physicalDevice, display, pPropertyCount, reinterpret_cast<VkDisplayModePropertiesKHR*>(pProperties)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getDisplayModePropertiesKHR(PhysicalDevice physicalDevice, DisplayKHR display, eastl::vector<DisplayModePropertiesKHR> & properties)
-	{
-		uint32_t pPropertyCount = 0;
-		Result result = getDisplayModePropertiesKHR(physicalDevice, display, &pPropertyCount, nullptr);
-		if (result == Result::eVkSuccess)
-		{
-			properties.resize(pPropertyCount);
-			result = getDisplayModePropertiesKHR(physicalDevice, display, &pPropertyCount, properties.data());
-		}
-		return result;
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createDisplayModeKHR(PhysicalDevice physicalDevice, DisplayKHR display, const DisplayModeCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, DisplayModeKHR* pMode)
-	{
-		return static_cast<Result>(vkCreateDisplayModeKHR(physicalDevice, display, reinterpret_cast<const VkDisplayModeCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pMode));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createDisplayModeKHR(PhysicalDevice physicalDevice, DisplayKHR display, const DisplayModeCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, DisplayModeKHR& mode)
-	{
-		return createDisplayModeKHR(physicalDevice, display, &createInfo, &allocator, &mode);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result getDisplayPlaneCapabilitiesKHR(PhysicalDevice physicalDevice, DisplayModeKHR mode, uint32_t planeIndex, DisplayPlaneCapabilitiesKHR* pCapabilities)
-	{
-		return static_cast<Result>(vkGetDisplayPlaneCapabilitiesKHR(physicalDevice, mode, planeIndex, reinterpret_cast<VkDisplayPlaneCapabilitiesKHR*>(pCapabilities)));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result getDisplayPlaneCapabilitiesKHR(PhysicalDevice physicalDevice, DisplayModeKHR mode, uint32_t planeIndex, DisplayPlaneCapabilitiesKHR& capabilities)
-	{
-		return getDisplayPlaneCapabilitiesKHR(physicalDevice, mode, planeIndex, &capabilities);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Result createDisplayPlaneSurfaceKHR(Instance instance, const DisplaySurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface)
-	{
-		return static_cast<Result>(vkCreateDisplayPlaneSurfaceKHR(instance, reinterpret_cast<const VkDisplaySurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSurface));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createDisplayPlaneSurfaceKHR(Instance instance, const DisplaySurfaceCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SurfaceKHR& surface)
-	{
-		return createDisplayPlaneSurfaceKHR(instance, &createInfo, &allocator, &surface);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	class DisplayPresentInfoKHR
+	class SurfaceCapabilitiesKHR
 	{
 	public:
-		DisplayPresentInfoKHR()
-			: DisplayPresentInfoKHR(Rect2D(), Rect2D(), 0)
+		SurfaceCapabilitiesKHR()
+			: SurfaceCapabilitiesKHR(0, 0, Extent2D(), Extent2D(), Extent2D(), 0, SurfaceTransformFlagsKHR(), SurfaceTransformFlagBitsKHR::eIdentity, CompositeAlphaFlagsKHR(), ImageUsageFlags())
 		{}
 
-		DisplayPresentInfoKHR(Rect2D srcRect, Rect2D dstRect, Bool32 persistent)
+		SurfaceCapabilitiesKHR(uint32_t minImageCount, uint32_t maxImageCount, Extent2D currentExtent, Extent2D minImageExtent, Extent2D maxImageExtent, uint32_t maxImageArrayLayers, SurfaceTransformFlagsKHR supportedTransforms, SurfaceTransformFlagBitsKHR currentTransform, CompositeAlphaFlagsKHR supportedCompositeAlpha, ImageUsageFlags supportedUsageFlags)
 		{
-			m_displayPresentInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_PRESENT_INFO_KHR;
-			m_displayPresentInfoKHR.pNext = nullptr;
-			m_displayPresentInfoKHR.srcRect = static_cast<VkRect2D>(srcRect);
-			m_displayPresentInfoKHR.dstRect = static_cast<VkRect2D>(dstRect);
-			m_displayPresentInfoKHR.persistent = persistent;
+			m_surfaceCapabilitiesKHR.minImageCount = minImageCount;
+			m_surfaceCapabilitiesKHR.maxImageCount = maxImageCount;
+			m_surfaceCapabilitiesKHR.currentExtent = static_cast<VkExtent2D>(currentExtent);
+			m_surfaceCapabilitiesKHR.minImageExtent = static_cast<VkExtent2D>(minImageExtent);
+			m_surfaceCapabilitiesKHR.maxImageExtent = static_cast<VkExtent2D>(maxImageExtent);
+			m_surfaceCapabilitiesKHR.maxImageArrayLayers = maxImageArrayLayers;
+			m_surfaceCapabilitiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
+			m_surfaceCapabilitiesKHR.currentTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(currentTransform);
+			m_surfaceCapabilitiesKHR.supportedCompositeAlpha = static_cast<VkCompositeAlphaFlagsKHR>(supportedCompositeAlpha);
+			m_surfaceCapabilitiesKHR.supportedUsageFlags = static_cast<VkImageUsageFlags>(supportedUsageFlags);
+		}
+
+		SurfaceCapabilitiesKHR(VkSurfaceCapabilitiesKHR const & rhs)
+			: m_surfaceCapabilitiesKHR(rhs)
+		{
+		}
+
+		SurfaceCapabilitiesKHR& operator=(VkSurfaceCapabilitiesKHR const & rhs)
+		{
+			m_surfaceCapabilitiesKHR = rhs;
+			return *this;
+		}
+
+		const uint32_t& minImageCount() const
+		{
+			return m_surfaceCapabilitiesKHR.minImageCount;
+		}
+
+		uint32_t& minImageCount()
+		{
+			return m_surfaceCapabilitiesKHR.minImageCount;
+		}
+
+		SurfaceCapabilitiesKHR& minImageCount(uint32_t minImageCount)
+		{
+			m_surfaceCapabilitiesKHR.minImageCount = minImageCount;
+			return *this;
+		}
+
+		const uint32_t& maxImageCount() const
+		{
+			return m_surfaceCapabilitiesKHR.maxImageCount;
+		}
+
+		uint32_t& maxImageCount()
+		{
+			return m_surfaceCapabilitiesKHR.maxImageCount;
+		}
+
+		SurfaceCapabilitiesKHR& maxImageCount(uint32_t maxImageCount)
+		{
+			m_surfaceCapabilitiesKHR.maxImageCount = maxImageCount;
+			return *this;
+		}
+
+		const Extent2D& currentExtent() const
+		{
+			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.currentExtent);
+		}
+
+		Extent2D& currentExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_surfaceCapabilitiesKHR.currentExtent);
+		}
+
+		SurfaceCapabilitiesKHR& currentExtent(Extent2D currentExtent)
+		{
+			m_surfaceCapabilitiesKHR.currentExtent = static_cast<VkExtent2D>(currentExtent);
+			return *this;
+		}
+
+		const Extent2D& minImageExtent() const
+		{
+			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.minImageExtent);
+		}
+
+		Extent2D& minImageExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_surfaceCapabilitiesKHR.minImageExtent);
+		}
+
+		SurfaceCapabilitiesKHR& minImageExtent(Extent2D minImageExtent)
+		{
+			m_surfaceCapabilitiesKHR.minImageExtent = static_cast<VkExtent2D>(minImageExtent);
+			return *this;
+		}
+
+		const Extent2D& maxImageExtent() const
+		{
+			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.maxImageExtent);
+		}
+
+		Extent2D& maxImageExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_surfaceCapabilitiesKHR.maxImageExtent);
+		}
+
+		SurfaceCapabilitiesKHR& maxImageExtent(Extent2D maxImageExtent)
+		{
+			m_surfaceCapabilitiesKHR.maxImageExtent = static_cast<VkExtent2D>(maxImageExtent);
+			return *this;
+		}
+
+		const uint32_t& maxImageArrayLayers() const
+		{
+			return m_surfaceCapabilitiesKHR.maxImageArrayLayers;
+		}
+
+		uint32_t& maxImageArrayLayers()
+		{
+			return m_surfaceCapabilitiesKHR.maxImageArrayLayers;
+		}
+
+		SurfaceCapabilitiesKHR& maxImageArrayLayers(uint32_t maxImageArrayLayers)
+		{
+			m_surfaceCapabilitiesKHR.maxImageArrayLayers = maxImageArrayLayers;
+			return *this;
+		}
+
+		const SurfaceTransformFlagsKHR& supportedTransforms() const
+		{
+			return reinterpret_cast<const SurfaceTransformFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedTransforms);
+		}
+
+		SurfaceTransformFlagsKHR& supportedTransforms()
+		{
+			return reinterpret_cast<SurfaceTransformFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedTransforms);
+		}
+
+		SurfaceCapabilitiesKHR& supportedTransforms(SurfaceTransformFlagsKHR supportedTransforms)
+		{
+			m_surfaceCapabilitiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
+			return *this;
+		}
+
+		const SurfaceTransformFlagBitsKHR& currentTransform() const
+		{
+			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_surfaceCapabilitiesKHR.currentTransform);
+		}
+
+		SurfaceTransformFlagBitsKHR& currentTransform()
+		{
+			return reinterpret_cast<SurfaceTransformFlagBitsKHR&>(m_surfaceCapabilitiesKHR.currentTransform);
+		}
+
+		SurfaceCapabilitiesKHR& currentTransform(SurfaceTransformFlagBitsKHR currentTransform)
+		{
+			m_surfaceCapabilitiesKHR.currentTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(currentTransform);
+			return *this;
+		}
+
+		const CompositeAlphaFlagsKHR& supportedCompositeAlpha() const
+		{
+			return reinterpret_cast<const CompositeAlphaFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedCompositeAlpha);
+		}
+
+		CompositeAlphaFlagsKHR& supportedCompositeAlpha()
+		{
+			return reinterpret_cast<CompositeAlphaFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedCompositeAlpha);
+		}
+
+		SurfaceCapabilitiesKHR& supportedCompositeAlpha(CompositeAlphaFlagsKHR supportedCompositeAlpha)
+		{
+			m_surfaceCapabilitiesKHR.supportedCompositeAlpha = static_cast<VkCompositeAlphaFlagsKHR>(supportedCompositeAlpha);
+			return *this;
+		}
+
+		const ImageUsageFlags& supportedUsageFlags() const
+		{
+			return reinterpret_cast<const ImageUsageFlags&>(m_surfaceCapabilitiesKHR.supportedUsageFlags);
+		}
+
+		ImageUsageFlags& supportedUsageFlags()
+		{
+			return reinterpret_cast<ImageUsageFlags&>(m_surfaceCapabilitiesKHR.supportedUsageFlags);
+		}
+
+		SurfaceCapabilitiesKHR& supportedUsageFlags(ImageUsageFlags supportedUsageFlags)
+		{
+			m_surfaceCapabilitiesKHR.supportedUsageFlags = static_cast<VkImageUsageFlags>(supportedUsageFlags);
+			return *this;
+		}
+
+		operator const VkSurfaceCapabilitiesKHR&() const
+		{
+			return m_surfaceCapabilitiesKHR;
+		}
+
+	private:
+		VkSurfaceCapabilitiesKHR m_surfaceCapabilitiesKHR;
+	};
+	static_assert(sizeof(SurfaceCapabilitiesKHR) == sizeof(VkSurfaceCapabilitiesKHR), "struct and wrapper have different size!");
+
+	class SwapchainCreateInfoKHR
+	{
+	public:
+		SwapchainCreateInfoKHR()
+			: SwapchainCreateInfoKHR(SwapchainCreateFlagsKHR(), SurfaceKHR(), 0, Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinearKHR, Extent2D(), 0, ImageUsageFlags(), SharingMode::eExclusive, 0, nullptr, SurfaceTransformFlagBitsKHR::eIdentity, CompositeAlphaFlagBitsKHR::eOpaque, PresentModeKHR::eImmediateKHR, 0, SwapchainKHR())
+		{}
+
+		SwapchainCreateInfoKHR(SwapchainCreateFlagsKHR flags, SurfaceKHR surface, uint32_t minImageCount, Format imageFormat, ColorSpaceKHR imageColorSpace, Extent2D imageExtent, uint32_t imageArrayLayers, ImageUsageFlags imageUsage, SharingMode imageSharingMode, uint32_t queueFamilyIndexCount, const uint32_t* pQueueFamilyIndices, SurfaceTransformFlagBitsKHR preTransform, CompositeAlphaFlagBitsKHR compositeAlpha, PresentModeKHR presentMode, Bool32 clipped, SwapchainKHR oldSwapchain)
+		{
+			m_swapchainCreateInfoKHR.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+			m_swapchainCreateInfoKHR.pNext = nullptr;
+			m_swapchainCreateInfoKHR.flags = static_cast<VkSwapchainCreateFlagsKHR>(flags);
+			m_swapchainCreateInfoKHR.surface = static_cast<VkSurfaceKHR>(surface);
+			m_swapchainCreateInfoKHR.minImageCount = minImageCount;
+			m_swapchainCreateInfoKHR.imageFormat = static_cast<VkFormat>(imageFormat);
+			m_swapchainCreateInfoKHR.imageColorSpace = static_cast<VkColorSpaceKHR>(imageColorSpace);
+			m_swapchainCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
+			m_swapchainCreateInfoKHR.imageArrayLayers = imageArrayLayers;
+			m_swapchainCreateInfoKHR.imageUsage = static_cast<VkImageUsageFlags>(imageUsage);
+			m_swapchainCreateInfoKHR.imageSharingMode = static_cast<VkSharingMode>(imageSharingMode);
+			m_swapchainCreateInfoKHR.queueFamilyIndexCount = queueFamilyIndexCount;
+			m_swapchainCreateInfoKHR.pQueueFamilyIndices = pQueueFamilyIndices;
+			m_swapchainCreateInfoKHR.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
+			m_swapchainCreateInfoKHR.compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(compositeAlpha);
+			m_swapchainCreateInfoKHR.presentMode = static_cast<VkPresentModeKHR>(presentMode);
+			m_swapchainCreateInfoKHR.clipped = clipped;
+			m_swapchainCreateInfoKHR.oldSwapchain = static_cast<VkSwapchainKHR>(oldSwapchain);
+		}
+
+		SwapchainCreateInfoKHR(VkSwapchainCreateInfoKHR const & rhs)
+			: m_swapchainCreateInfoKHR(rhs)
+		{
+		}
+
+		SwapchainCreateInfoKHR& operator=(VkSwapchainCreateInfoKHR const & rhs)
+		{
+			m_swapchainCreateInfoKHR = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
-			return reinterpret_cast<const StructureType&>(m_displayPresentInfoKHR.sType);
+			return reinterpret_cast<const StructureType&>(m_swapchainCreateInfoKHR.sType);
 		}
 
-		DisplayPresentInfoKHR& sType(StructureType sType)
+		StructureType& sType()
 		{
-			m_displayPresentInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return reinterpret_cast<StructureType&>(m_swapchainCreateInfoKHR.sType);
+		}
+
+		SwapchainCreateInfoKHR& sType(StructureType sType)
+		{
+			m_swapchainCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
 			return *this;
 		}
 
 		const void* pNext() const
 		{
-			return reinterpret_cast<const void*>(m_displayPresentInfoKHR.pNext);
+			return reinterpret_cast<const void*>(m_swapchainCreateInfoKHR.pNext);
 		}
 
-		DisplayPresentInfoKHR& pNext(const void* pNext)
+		const void* pNext()
 		{
-			m_displayPresentInfoKHR.pNext = pNext;
+			return reinterpret_cast<const void*>(m_swapchainCreateInfoKHR.pNext);
+		}
+
+		SwapchainCreateInfoKHR& pNext(const void* pNext)
+		{
+			m_swapchainCreateInfoKHR.pNext = pNext;
 			return *this;
 		}
 
-		const Rect2D& srcRect() const
+		const SwapchainCreateFlagsKHR& flags() const
 		{
-			return reinterpret_cast<const Rect2D&>(m_displayPresentInfoKHR.srcRect);
+			return reinterpret_cast<const SwapchainCreateFlagsKHR&>(m_swapchainCreateInfoKHR.flags);
 		}
 
-		DisplayPresentInfoKHR& srcRect(Rect2D srcRect)
+		SwapchainCreateFlagsKHR& flags()
 		{
-			m_displayPresentInfoKHR.srcRect = static_cast<VkRect2D>(srcRect);
+			return reinterpret_cast<SwapchainCreateFlagsKHR&>(m_swapchainCreateInfoKHR.flags);
+		}
+
+		SwapchainCreateInfoKHR& flags(SwapchainCreateFlagsKHR flags)
+		{
+			m_swapchainCreateInfoKHR.flags = static_cast<VkSwapchainCreateFlagsKHR>(flags);
 			return *this;
 		}
 
-		const Rect2D& dstRect() const
+		const SurfaceKHR& surface() const
 		{
-			return reinterpret_cast<const Rect2D&>(m_displayPresentInfoKHR.dstRect);
+			return reinterpret_cast<const SurfaceKHR&>(m_swapchainCreateInfoKHR.surface);
 		}
 
-		DisplayPresentInfoKHR& dstRect(Rect2D dstRect)
+		SurfaceKHR& surface()
 		{
-			m_displayPresentInfoKHR.dstRect = static_cast<VkRect2D>(dstRect);
+			return reinterpret_cast<SurfaceKHR&>(m_swapchainCreateInfoKHR.surface);
+		}
+
+		SwapchainCreateInfoKHR& surface(SurfaceKHR surface)
+		{
+			m_swapchainCreateInfoKHR.surface = static_cast<VkSurfaceKHR>(surface);
 			return *this;
 		}
 
-		const Bool32& persistent() const
+		const uint32_t& minImageCount() const
 		{
-			return m_displayPresentInfoKHR.persistent;
+			return m_swapchainCreateInfoKHR.minImageCount;
 		}
 
-		DisplayPresentInfoKHR& persistent(Bool32 persistent)
+		uint32_t& minImageCount()
 		{
-			m_displayPresentInfoKHR.persistent = persistent;
+			return m_swapchainCreateInfoKHR.minImageCount;
+		}
+
+		SwapchainCreateInfoKHR& minImageCount(uint32_t minImageCount)
+		{
+			m_swapchainCreateInfoKHR.minImageCount = minImageCount;
 			return *this;
 		}
 
-		operator const VkDisplayPresentInfoKHR&() const
+		const Format& imageFormat() const
 		{
-			return m_displayPresentInfoKHR;
+			return reinterpret_cast<const Format&>(m_swapchainCreateInfoKHR.imageFormat);
+		}
+
+		Format& imageFormat()
+		{
+			return reinterpret_cast<Format&>(m_swapchainCreateInfoKHR.imageFormat);
+		}
+
+		SwapchainCreateInfoKHR& imageFormat(Format imageFormat)
+		{
+			m_swapchainCreateInfoKHR.imageFormat = static_cast<VkFormat>(imageFormat);
+			return *this;
+		}
+
+		const ColorSpaceKHR& imageColorSpace() const
+		{
+			return reinterpret_cast<const ColorSpaceKHR&>(m_swapchainCreateInfoKHR.imageColorSpace);
+		}
+
+		ColorSpaceKHR& imageColorSpace()
+		{
+			return reinterpret_cast<ColorSpaceKHR&>(m_swapchainCreateInfoKHR.imageColorSpace);
+		}
+
+		SwapchainCreateInfoKHR& imageColorSpace(ColorSpaceKHR imageColorSpace)
+		{
+			m_swapchainCreateInfoKHR.imageColorSpace = static_cast<VkColorSpaceKHR>(imageColorSpace);
+			return *this;
+		}
+
+		const Extent2D& imageExtent() const
+		{
+			return reinterpret_cast<const Extent2D&>(m_swapchainCreateInfoKHR.imageExtent);
+		}
+
+		Extent2D& imageExtent()
+		{
+			return reinterpret_cast<Extent2D&>(m_swapchainCreateInfoKHR.imageExtent);
+		}
+
+		SwapchainCreateInfoKHR& imageExtent(Extent2D imageExtent)
+		{
+			m_swapchainCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
+			return *this;
+		}
+
+		const uint32_t& imageArrayLayers() const
+		{
+			return m_swapchainCreateInfoKHR.imageArrayLayers;
+		}
+
+		uint32_t& imageArrayLayers()
+		{
+			return m_swapchainCreateInfoKHR.imageArrayLayers;
+		}
+
+		SwapchainCreateInfoKHR& imageArrayLayers(uint32_t imageArrayLayers)
+		{
+			m_swapchainCreateInfoKHR.imageArrayLayers = imageArrayLayers;
+			return *this;
+		}
+
+		const ImageUsageFlags& imageUsage() const
+		{
+			return reinterpret_cast<const ImageUsageFlags&>(m_swapchainCreateInfoKHR.imageUsage);
+		}
+
+		ImageUsageFlags& imageUsage()
+		{
+			return reinterpret_cast<ImageUsageFlags&>(m_swapchainCreateInfoKHR.imageUsage);
+		}
+
+		SwapchainCreateInfoKHR& imageUsage(ImageUsageFlags imageUsage)
+		{
+			m_swapchainCreateInfoKHR.imageUsage = static_cast<VkImageUsageFlags>(imageUsage);
+			return *this;
+		}
+
+		const SharingMode& imageSharingMode() const
+		{
+			return reinterpret_cast<const SharingMode&>(m_swapchainCreateInfoKHR.imageSharingMode);
+		}
+
+		SharingMode& imageSharingMode()
+		{
+			return reinterpret_cast<SharingMode&>(m_swapchainCreateInfoKHR.imageSharingMode);
+		}
+
+		SwapchainCreateInfoKHR& imageSharingMode(SharingMode imageSharingMode)
+		{
+			m_swapchainCreateInfoKHR.imageSharingMode = static_cast<VkSharingMode>(imageSharingMode);
+			return *this;
+		}
+
+		const uint32_t& queueFamilyIndexCount() const
+		{
+			return m_swapchainCreateInfoKHR.queueFamilyIndexCount;
+		}
+
+		uint32_t& queueFamilyIndexCount()
+		{
+			return m_swapchainCreateInfoKHR.queueFamilyIndexCount;
+		}
+
+		SwapchainCreateInfoKHR& queueFamilyIndexCount(uint32_t queueFamilyIndexCount)
+		{
+			m_swapchainCreateInfoKHR.queueFamilyIndexCount = queueFamilyIndexCount;
+			return *this;
+		}
+
+		const uint32_t* pQueueFamilyIndices() const
+		{
+			return reinterpret_cast<const uint32_t*>(m_swapchainCreateInfoKHR.pQueueFamilyIndices);
+		}
+
+		const uint32_t* pQueueFamilyIndices()
+		{
+			return reinterpret_cast<const uint32_t*>(m_swapchainCreateInfoKHR.pQueueFamilyIndices);
+		}
+
+		SwapchainCreateInfoKHR& pQueueFamilyIndices(const uint32_t* pQueueFamilyIndices)
+		{
+			m_swapchainCreateInfoKHR.pQueueFamilyIndices = pQueueFamilyIndices;
+			return *this;
+		}
+
+		const SurfaceTransformFlagBitsKHR& preTransform() const
+		{
+			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_swapchainCreateInfoKHR.preTransform);
+		}
+
+		SurfaceTransformFlagBitsKHR& preTransform()
+		{
+			return reinterpret_cast<SurfaceTransformFlagBitsKHR&>(m_swapchainCreateInfoKHR.preTransform);
+		}
+
+		SwapchainCreateInfoKHR& preTransform(SurfaceTransformFlagBitsKHR preTransform)
+		{
+			m_swapchainCreateInfoKHR.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
+			return *this;
+		}
+
+		const CompositeAlphaFlagBitsKHR& compositeAlpha() const
+		{
+			return reinterpret_cast<const CompositeAlphaFlagBitsKHR&>(m_swapchainCreateInfoKHR.compositeAlpha);
+		}
+
+		CompositeAlphaFlagBitsKHR& compositeAlpha()
+		{
+			return reinterpret_cast<CompositeAlphaFlagBitsKHR&>(m_swapchainCreateInfoKHR.compositeAlpha);
+		}
+
+		SwapchainCreateInfoKHR& compositeAlpha(CompositeAlphaFlagBitsKHR compositeAlpha)
+		{
+			m_swapchainCreateInfoKHR.compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(compositeAlpha);
+			return *this;
+		}
+
+		const PresentModeKHR& presentMode() const
+		{
+			return reinterpret_cast<const PresentModeKHR&>(m_swapchainCreateInfoKHR.presentMode);
+		}
+
+		PresentModeKHR& presentMode()
+		{
+			return reinterpret_cast<PresentModeKHR&>(m_swapchainCreateInfoKHR.presentMode);
+		}
+
+		SwapchainCreateInfoKHR& presentMode(PresentModeKHR presentMode)
+		{
+			m_swapchainCreateInfoKHR.presentMode = static_cast<VkPresentModeKHR>(presentMode);
+			return *this;
+		}
+
+		const Bool32& clipped() const
+		{
+			return m_swapchainCreateInfoKHR.clipped;
+		}
+
+		Bool32& clipped()
+		{
+			return m_swapchainCreateInfoKHR.clipped;
+		}
+
+		SwapchainCreateInfoKHR& clipped(Bool32 clipped)
+		{
+			m_swapchainCreateInfoKHR.clipped = clipped;
+			return *this;
+		}
+
+		const SwapchainKHR& oldSwapchain() const
+		{
+			return reinterpret_cast<const SwapchainKHR&>(m_swapchainCreateInfoKHR.oldSwapchain);
+		}
+
+		SwapchainKHR& oldSwapchain()
+		{
+			return reinterpret_cast<SwapchainKHR&>(m_swapchainCreateInfoKHR.oldSwapchain);
+		}
+
+		SwapchainCreateInfoKHR& oldSwapchain(SwapchainKHR oldSwapchain)
+		{
+			m_swapchainCreateInfoKHR.oldSwapchain = static_cast<VkSwapchainKHR>(oldSwapchain);
+			return *this;
+		}
+
+		operator const VkSwapchainCreateInfoKHR&() const
+		{
+			return m_swapchainCreateInfoKHR;
 		}
 
 	private:
-		VkDisplayPresentInfoKHR m_displayPresentInfoKHR;
+		VkSwapchainCreateInfoKHR m_swapchainCreateInfoKHR;
 	};
+	static_assert(sizeof(SwapchainCreateInfoKHR) == sizeof(VkSwapchainCreateInfoKHR), "struct and wrapper have different size!");
 
-	inline Result createSharedSwapchainsKHR(Device device, uint32_t swapchainCount, const SwapchainCreateInfoKHR* pCreateInfos, const AllocationCallbacks* pAllocator, SwapchainKHR* pSwapchains)
-	{
-		return static_cast<Result>(vkCreateSharedSwapchainsKHR(device, swapchainCount, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSwapchains));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createSharedSwapchainsKHR(Device device, eastl::vector<SwapchainCreateInfoKHR> const& createInfos, const AllocationCallbacks& allocator, eastl::vector<SwapchainKHR> & swapchains)
-	{
-		assert(createInfos.size() <= swapchains.size());
-		return createSharedSwapchainsKHR(device, static_cast<uint32_t>(createInfos.size()), createInfos.data(), &allocator, swapchains.data());
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-#ifdef VK_USE_PLATFORM_XLIB_KHR
-
-	typedef VkFlags XlibSurfaceCreateFlagsKHR;
-	class XlibSurfaceCreateInfoKHR
+	class Device
 	{
 	public:
-		XlibSurfaceCreateInfoKHR()
-			: XlibSurfaceCreateInfoKHR(0, nullptr, 0)
+		Device()
+			: m_device(VK_NULL_HANDLE)
 		{}
 
-		XlibSurfaceCreateInfoKHR(XlibSurfaceCreateFlagsKHR flags, Display* dpy, Window window)
-		{
-			m_xlibSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
-			m_xlibSurfaceCreateInfoKHR.pNext = nullptr;
-			m_xlibSurfaceCreateInfoKHR.flags = flags;
-			m_xlibSurfaceCreateInfoKHR.dpy = dpy;
-			m_xlibSurfaceCreateInfoKHR.window = window;
-		}
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Device(VkDevice device)
+			: m_device(device)
+		{}
 
-		const StructureType& sType() const
+		Device& operator=(VkDevice device)
 		{
-			return reinterpret_cast<const StructureType&>(m_xlibSurfaceCreateInfoKHR.sType);
-		}
-
-		XlibSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_xlibSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			m_device = device;
 			return *this;
 		}
+#endif
 
-		const void* pNext() const
+		PFN_vkVoidFunction getProcAddr(const char* pName) const
 		{
-			return reinterpret_cast<const void*>(m_xlibSurfaceCreateInfoKHR.pNext);
+			return vkGetDeviceProcAddr(m_device, pName);
 		}
 
-		XlibSurfaceCreateInfoKHR& pNext(const void* pNext)
+#ifdef VKCPP_ENHANCED_MODE
+		PFN_vkVoidFunction getProcAddr(eastl::string const & name) const
 		{
-			m_xlibSurfaceCreateInfoKHR.pNext = pNext;
-			return *this;
+			return vkGetDeviceProcAddr(m_device, name.c_str());
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroy(const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyDevice(m_device, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-		const XlibSurfaceCreateFlagsKHR& flags() const
+#ifdef VKCPP_ENHANCED_MODE
+		void destroy(vk::Optional<const AllocationCallbacks> const & allocator) const
 		{
-			return m_xlibSurfaceCreateInfoKHR.flags;
+			vkDestroyDevice(m_device, reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex, Queue* pQueue) const
+		{
+			vkGetDeviceQueue(m_device, queueFamilyIndex, queueIndex, reinterpret_cast<VkQueue*>(pQueue));
 		}
 
-		XlibSurfaceCreateInfoKHR& flags(XlibSurfaceCreateFlagsKHR flags)
+#ifdef VKCPP_ENHANCED_MODE
+		Queue getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex) const
 		{
-			m_xlibSurfaceCreateInfoKHR.flags = flags;
-			return *this;
+			Queue queue;
+			vkGetDeviceQueue(m_device, queueFamilyIndex, queueIndex, reinterpret_cast<VkQueue*>(&queue));
+			return queue;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result waitIdle() const
+		{
+			return static_cast<Result>(vkDeviceWaitIdle(m_device));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void waitIdle() const
+		{
+			Result result = static_cast<Result>(vkDeviceWaitIdle(m_device));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::waitIdle");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result allocateMemory(const MemoryAllocateInfo* pAllocateInfo, const AllocationCallbacks* pAllocator, DeviceMemory* pMemory) const
+		{
+			return static_cast<Result>(vkAllocateMemory(m_device, reinterpret_cast<const VkMemoryAllocateInfo*>(pAllocateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDeviceMemory*>(pMemory)));
 		}
 
-		const Display* dpy() const
+#ifdef VKCPP_ENHANCED_MODE
+		DeviceMemory allocateMemory(const MemoryAllocateInfo & allocateInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
 		{
-			return reinterpret_cast<Display*>(m_xlibSurfaceCreateInfoKHR.dpy);
+			DeviceMemory memory;
+			Result result = static_cast<Result>(vkAllocateMemory(m_device, reinterpret_cast<const VkMemoryAllocateInfo*>(&allocateInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDeviceMemory*>(&memory)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::allocateMemory");
+			}
+			return memory;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void freeMemory(DeviceMemory memory, const AllocationCallbacks* pAllocator) const
+		{
+			vkFreeMemory(m_device, static_cast<VkDeviceMemory>(memory), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-		XlibSurfaceCreateInfoKHR& dpy(Display* dpy)
+#ifdef VKCPP_ENHANCED_MODE
+		void freeMemory(DeviceMemory memory, vk::Optional<const AllocationCallbacks> const & allocator) const
 		{
-			m_xlibSurfaceCreateInfoKHR.dpy = dpy;
-			return *this;
+			vkFreeMemory(m_device, static_cast<VkDeviceMemory>(memory), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result mapMemory(DeviceMemory memory, DeviceSize offset, DeviceSize size, MemoryMapFlags flags, void** ppData) const
+		{
+			return static_cast<Result>(vkMapMemory(m_device, static_cast<VkDeviceMemory>(memory), offset, size, static_cast<VkMemoryMapFlags>(flags), ppData));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void* mapMemory(DeviceMemory memory, DeviceSize offset, DeviceSize size, MemoryMapFlags flags) const
+		{
+			void* pData;
+			Result result = static_cast<Result>(vkMapMemory(m_device, static_cast<VkDeviceMemory>(memory), offset, size, static_cast<VkMemoryMapFlags>(flags), &pData));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::mapMemory");
+			}
+			return pData;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		void unmapMemory(DeviceMemory memory) const
+		{
+			vkUnmapMemory(m_device, static_cast<VkDeviceMemory>(memory));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void unmapMemory(DeviceMemory memory) const
+		{
+			vkUnmapMemory(m_device, static_cast<VkDeviceMemory>(memory));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result flushMappedMemoryRanges(uint32_t memoryRangeCount, const MappedMemoryRange* pMemoryRanges) const
+		{
+			return static_cast<Result>(vkFlushMappedMemoryRanges(m_device, memoryRangeCount, reinterpret_cast<const VkMappedMemoryRange*>(pMemoryRanges)));
 		}
 
-		const Window& window() const
+#ifdef VKCPP_ENHANCED_MODE
+		void flushMappedMemoryRanges(eastl::vector<MappedMemoryRange> const & memoryRanges) const
 		{
-			return m_xlibSurfaceCreateInfoKHR.window;
+			Result result = static_cast<Result>(vkFlushMappedMemoryRanges(m_device, static_cast<uint32_t>(memoryRanges.size()), reinterpret_cast<const VkMappedMemoryRange*>(memoryRanges.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::flushMappedMemoryRanges");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result invalidateMappedMemoryRanges(uint32_t memoryRangeCount, const MappedMemoryRange* pMemoryRanges) const
+		{
+			return static_cast<Result>(vkInvalidateMappedMemoryRanges(m_device, memoryRangeCount, reinterpret_cast<const VkMappedMemoryRange*>(pMemoryRanges)));
 		}
 
-		XlibSurfaceCreateInfoKHR& window(Window window)
+#ifdef VKCPP_ENHANCED_MODE
+		void invalidateMappedMemoryRanges(eastl::vector<MappedMemoryRange> const & memoryRanges) const
 		{
-			m_xlibSurfaceCreateInfoKHR.window = window;
-			return *this;
+			Result result = static_cast<Result>(vkInvalidateMappedMemoryRanges(m_device, static_cast<uint32_t>(memoryRanges.size()), reinterpret_cast<const VkMappedMemoryRange*>(memoryRanges.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::invalidateMappedMemoryRanges");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getMemoryCommitment(DeviceMemory memory, DeviceSize* pCommittedMemoryInBytes) const
+		{
+			vkGetDeviceMemoryCommitment(m_device, static_cast<VkDeviceMemory>(memory), pCommittedMemoryInBytes);
 		}
 
-		operator const VkXlibSurfaceCreateInfoKHR&() const
+#ifdef VKCPP_ENHANCED_MODE
+		DeviceSize getMemoryCommitment(DeviceMemory memory) const
 		{
-			return m_xlibSurfaceCreateInfoKHR;
+			DeviceSize committedMemoryInBytes;
+			vkGetDeviceMemoryCommitment(m_device, static_cast<VkDeviceMemory>(memory), &committedMemoryInBytes);
+			return committedMemoryInBytes;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getBufferMemoryRequirements(Buffer buffer, MemoryRequirements* pMemoryRequirements) const
+		{
+			vkGetBufferMemoryRequirements(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		MemoryRequirements getBufferMemoryRequirements(Buffer buffer) const
+		{
+			MemoryRequirements memoryRequirements;
+			vkGetBufferMemoryRequirements(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<VkMemoryRequirements*>(&memoryRequirements));
+			return memoryRequirements;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result bindBufferMemory(Buffer buffer, DeviceMemory memory, DeviceSize memoryOffset) const
+		{
+			return static_cast<Result>(vkBindBufferMemory(m_device, static_cast<VkBuffer>(buffer), static_cast<VkDeviceMemory>(memory), memoryOffset));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void bindBufferMemory(Buffer buffer, DeviceMemory memory, DeviceSize memoryOffset) const
+		{
+			Result result = static_cast<Result>(vkBindBufferMemory(m_device, static_cast<VkBuffer>(buffer), static_cast<VkDeviceMemory>(memory), memoryOffset));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::bindBufferMemory");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getImageMemoryRequirements(Image image, MemoryRequirements* pMemoryRequirements) const
+		{
+			vkGetImageMemoryRequirements(m_device, static_cast<VkImage>(image), reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		MemoryRequirements getImageMemoryRequirements(Image image) const
+		{
+			MemoryRequirements memoryRequirements;
+			vkGetImageMemoryRequirements(m_device, static_cast<VkImage>(image), reinterpret_cast<VkMemoryRequirements*>(&memoryRequirements));
+			return memoryRequirements;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result bindImageMemory(Image image, DeviceMemory memory, DeviceSize memoryOffset) const
+		{
+			return static_cast<Result>(vkBindImageMemory(m_device, static_cast<VkImage>(image), static_cast<VkDeviceMemory>(memory), memoryOffset));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void bindImageMemory(Image image, DeviceMemory memory, DeviceSize memoryOffset) const
+		{
+			Result result = static_cast<Result>(vkBindImageMemory(m_device, static_cast<VkImage>(image), static_cast<VkDeviceMemory>(memory), memoryOffset));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::bindImageMemory");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getImageSparseMemoryRequirements(Image image, uint32_t* pSparseMemoryRequirementCount, SparseImageMemoryRequirements* pSparseMemoryRequirements) const
+		{
+			vkGetImageSparseMemoryRequirements(m_device, static_cast<VkImage>(image), pSparseMemoryRequirementCount, reinterpret_cast<VkSparseImageMemoryRequirements*>(pSparseMemoryRequirements));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<SparseImageMemoryRequirements> getImageSparseMemoryRequirements(Image image) const
+		{
+			eastl::vector<SparseImageMemoryRequirements> sparseMemoryRequirements;
+			uint32_t sparseMemoryRequirementCount;
+			vkGetImageSparseMemoryRequirements(m_device, static_cast<VkImage>(image), &sparseMemoryRequirementCount, nullptr);
+			sparseMemoryRequirements.resize(sparseMemoryRequirementCount);
+			vkGetImageSparseMemoryRequirements(m_device, static_cast<VkImage>(image), &sparseMemoryRequirementCount, reinterpret_cast<VkSparseImageMemoryRequirements*>(sparseMemoryRequirements.data()));
+			return sparseMemoryRequirements;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createFence(const FenceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Fence* pFence) const
+		{
+			return static_cast<Result>(vkCreateFence(m_device, reinterpret_cast<const VkFenceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkFence*>(pFence)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Fence createFence(const FenceCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Fence fence;
+			Result result = static_cast<Result>(vkCreateFence(m_device, reinterpret_cast<const VkFenceCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkFence*>(&fence)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createFence");
+			}
+			return fence;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyFence(Fence fence, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyFence(m_device, static_cast<VkFence>(fence), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyFence(Fence fence, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyFence(m_device, static_cast<VkFence>(fence), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result resetFences(uint32_t fenceCount, const Fence* pFences) const
+		{
+			return static_cast<Result>(vkResetFences(m_device, fenceCount, reinterpret_cast<const VkFence*>(pFences)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void resetFences(eastl::vector<Fence> const & fences) const
+		{
+			Result result = static_cast<Result>(vkResetFences(m_device, static_cast<uint32_t>(fences.size()), reinterpret_cast<const VkFence*>(fences.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::resetFences");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result getFenceStatus(Fence fence) const
+		{
+			return static_cast<Result>(vkGetFenceStatus(m_device, static_cast<VkFence>(fence)));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getFenceStatus(Fence fence) const
+		{
+			Result result = static_cast<Result>(vkGetFenceStatus(m_device, static_cast<VkFence>(fence)));
+			if ((result != Result::eSuccess) && (result != Result::eNotReady))
+			{
+				throw std::system_error(result, "vk::Device::getFenceStatus");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result waitForFences(uint32_t fenceCount, const Fence* pFences, Bool32 waitAll, uint64_t timeout) const
+		{
+			return static_cast<Result>(vkWaitForFences(m_device, fenceCount, reinterpret_cast<const VkFence*>(pFences), waitAll, timeout));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result waitForFences(eastl::vector<Fence> const & fences, Bool32 waitAll, uint64_t timeout) const
+		{
+			Result result = static_cast<Result>(vkWaitForFences(m_device, static_cast<uint32_t>(fences.size()), reinterpret_cast<const VkFence*>(fences.data()), waitAll, timeout));
+			if ((result != Result::eSuccess) && (result != Result::eTimeout))
+			{
+				throw std::system_error(result, "vk::Device::waitForFences");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createSemaphore(const SemaphoreCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Semaphore* pSemaphore) const
+		{
+			return static_cast<Result>(vkCreateSemaphore(m_device, reinterpret_cast<const VkSemaphoreCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSemaphore*>(pSemaphore)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Semaphore createSemaphore(const SemaphoreCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Semaphore semaphore;
+			Result result = static_cast<Result>(vkCreateSemaphore(m_device, reinterpret_cast<const VkSemaphoreCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSemaphore*>(&semaphore)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createSemaphore");
+			}
+			return semaphore;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroySemaphore(Semaphore semaphore, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroySemaphore(m_device, static_cast<VkSemaphore>(semaphore), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroySemaphore(Semaphore semaphore, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroySemaphore(m_device, static_cast<VkSemaphore>(semaphore), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createEvent(const EventCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Event* pEvent) const
+		{
+			return static_cast<Result>(vkCreateEvent(m_device, reinterpret_cast<const VkEventCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkEvent*>(pEvent)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Event createEvent(const EventCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Event event;
+			Result result = static_cast<Result>(vkCreateEvent(m_device, reinterpret_cast<const VkEventCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkEvent*>(&event)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createEvent");
+			}
+			return event;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyEvent(Event event, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyEvent(m_device, static_cast<VkEvent>(event), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyEvent(Event event, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyEvent(m_device, static_cast<VkEvent>(event), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result getEventStatus(Event event) const
+		{
+			return static_cast<Result>(vkGetEventStatus(m_device, static_cast<VkEvent>(event)));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getEventStatus(Event event) const
+		{
+			Result result = static_cast<Result>(vkGetEventStatus(m_device, static_cast<VkEvent>(event)));
+			if ((result != Result::eEventSet) && (result != Result::eEventReset))
+			{
+				throw std::system_error(result, "vk::Device::getEventStatus");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result setEvent(Event event) const
+		{
+			return static_cast<Result>(vkSetEvent(m_device, static_cast<VkEvent>(event)));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void setEvent(Event event) const
+		{
+			Result result = static_cast<Result>(vkSetEvent(m_device, static_cast<VkEvent>(event)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::setEvent");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result resetEvent(Event event) const
+		{
+			return static_cast<Result>(vkResetEvent(m_device, static_cast<VkEvent>(event)));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void resetEvent(Event event) const
+		{
+			Result result = static_cast<Result>(vkResetEvent(m_device, static_cast<VkEvent>(event)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::resetEvent");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createQueryPool(const QueryPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, QueryPool* pQueryPool) const
+		{
+			return static_cast<Result>(vkCreateQueryPool(m_device, reinterpret_cast<const VkQueryPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkQueryPool*>(pQueryPool)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		QueryPool createQueryPool(const QueryPoolCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			QueryPool queryPool;
+			Result result = static_cast<Result>(vkCreateQueryPool(m_device, reinterpret_cast<const VkQueryPoolCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkQueryPool*>(&queryPool)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createQueryPool");
+			}
+			return queryPool;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyQueryPool(QueryPool queryPool, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyQueryPool(m_device, static_cast<VkQueryPool>(queryPool), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyQueryPool(QueryPool queryPool, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyQueryPool(m_device, static_cast<VkQueryPool>(queryPool), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, size_t dataSize, void* pData, DeviceSize stride, QueryResultFlags flags) const
+		{
+			return static_cast<Result>(vkGetQueryPoolResults(m_device, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, dataSize, pData, stride, static_cast<VkQueryResultFlags>(flags)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		template <typename T>
+		Result getQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, eastl::vector<T> & data, DeviceSize stride, QueryResultFlags flags) const
+		{
+			Result result = static_cast<Result>(vkGetQueryPoolResults(m_device, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, static_cast<size_t>(data.size() * sizeof(T)), reinterpret_cast<void*>(data.data()), stride, static_cast<VkQueryResultFlags>(flags)));
+			if ((result != Result::eSuccess) && (result != Result::eNotReady))
+			{
+				throw std::system_error(result, "vk::Device::getQueryPoolResults");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createBuffer(const BufferCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Buffer* pBuffer) const
+		{
+			return static_cast<Result>(vkCreateBuffer(m_device, reinterpret_cast<const VkBufferCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkBuffer*>(pBuffer)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Buffer createBuffer(const BufferCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Buffer buffer;
+			Result result = static_cast<Result>(vkCreateBuffer(m_device, reinterpret_cast<const VkBufferCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkBuffer*>(&buffer)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createBuffer");
+			}
+			return buffer;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyBuffer(Buffer buffer, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyBuffer(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyBuffer(Buffer buffer, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyBuffer(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createBufferView(const BufferViewCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, BufferView* pView) const
+		{
+			return static_cast<Result>(vkCreateBufferView(m_device, reinterpret_cast<const VkBufferViewCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkBufferView*>(pView)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		BufferView createBufferView(const BufferViewCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			BufferView view;
+			Result result = static_cast<Result>(vkCreateBufferView(m_device, reinterpret_cast<const VkBufferViewCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkBufferView*>(&view)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createBufferView");
+			}
+			return view;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyBufferView(BufferView bufferView, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyBufferView(m_device, static_cast<VkBufferView>(bufferView), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyBufferView(BufferView bufferView, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyBufferView(m_device, static_cast<VkBufferView>(bufferView), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createImage(const ImageCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Image* pImage) const
+		{
+			return static_cast<Result>(vkCreateImage(m_device, reinterpret_cast<const VkImageCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkImage*>(pImage)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Image createImage(const ImageCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Image image;
+			Result result = static_cast<Result>(vkCreateImage(m_device, reinterpret_cast<const VkImageCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkImage*>(&image)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createImage");
+			}
+			return image;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyImage(Image image, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyImage(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyImage(Image image, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyImage(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getImageSubresourceLayout(Image image, const ImageSubresource* pSubresource, SubresourceLayout* pLayout) const
+		{
+			vkGetImageSubresourceLayout(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkImageSubresource*>(pSubresource), reinterpret_cast<VkSubresourceLayout*>(pLayout));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		SubresourceLayout getImageSubresourceLayout(Image image, const ImageSubresource & subresource) const
+		{
+			SubresourceLayout layout;
+			vkGetImageSubresourceLayout(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkImageSubresource*>(&subresource), reinterpret_cast<VkSubresourceLayout*>(&layout));
+			return layout;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createImageView(const ImageViewCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, ImageView* pView) const
+		{
+			return static_cast<Result>(vkCreateImageView(m_device, reinterpret_cast<const VkImageViewCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkImageView*>(pView)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		ImageView createImageView(const ImageViewCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			ImageView view;
+			Result result = static_cast<Result>(vkCreateImageView(m_device, reinterpret_cast<const VkImageViewCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkImageView*>(&view)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createImageView");
+			}
+			return view;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyImageView(ImageView imageView, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyImageView(m_device, static_cast<VkImageView>(imageView), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyImageView(ImageView imageView, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyImageView(m_device, static_cast<VkImageView>(imageView), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createShaderModule(const ShaderModuleCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, ShaderModule* pShaderModule) const
+		{
+			return static_cast<Result>(vkCreateShaderModule(m_device, reinterpret_cast<const VkShaderModuleCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkShaderModule*>(pShaderModule)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		ShaderModule createShaderModule(const ShaderModuleCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			ShaderModule shaderModule;
+			Result result = static_cast<Result>(vkCreateShaderModule(m_device, reinterpret_cast<const VkShaderModuleCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkShaderModule*>(&shaderModule)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createShaderModule");
+			}
+			return shaderModule;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyShaderModule(ShaderModule shaderModule, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyShaderModule(m_device, static_cast<VkShaderModule>(shaderModule), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyShaderModule(ShaderModule shaderModule, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyShaderModule(m_device, static_cast<VkShaderModule>(shaderModule), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createPipelineCache(const PipelineCacheCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, PipelineCache* pPipelineCache) const
+		{
+			return static_cast<Result>(vkCreatePipelineCache(m_device, reinterpret_cast<const VkPipelineCacheCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipelineCache*>(pPipelineCache)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		PipelineCache createPipelineCache(const PipelineCacheCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			PipelineCache pipelineCache;
+			Result result = static_cast<Result>(vkCreatePipelineCache(m_device, reinterpret_cast<const VkPipelineCacheCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipelineCache*>(&pipelineCache)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createPipelineCache");
+			}
+			return pipelineCache;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyPipelineCache(PipelineCache pipelineCache, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyPipelineCache(m_device, static_cast<VkPipelineCache>(pipelineCache), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyPipelineCache(PipelineCache pipelineCache, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyPipelineCache(m_device, static_cast<VkPipelineCache>(pipelineCache), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getPipelineCacheData(PipelineCache pipelineCache, size_t* pDataSize, void* pData) const
+		{
+			return static_cast<Result>(vkGetPipelineCacheData(m_device, static_cast<VkPipelineCache>(pipelineCache), pDataSize, pData));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<uint8_t> getPipelineCacheData(PipelineCache pipelineCache) const
+		{
+			eastl::vector<uint8_t> data;
+			size_t dataSize;
+			Result result = static_cast<Result>(vkGetPipelineCacheData(m_device, static_cast<VkPipelineCache>(pipelineCache), &dataSize, nullptr));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::getPipelineCacheData");
+			}
+			data.resize(dataSize);
+			result = static_cast<Result>(vkGetPipelineCacheData(m_device, static_cast<VkPipelineCache>(pipelineCache), &dataSize, reinterpret_cast<void*>(data.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::getPipelineCacheData");
+			}
+			return data;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result mergePipelineCaches(PipelineCache dstCache, uint32_t srcCacheCount, const PipelineCache* pSrcCaches) const
+		{
+			return static_cast<Result>(vkMergePipelineCaches(m_device, static_cast<VkPipelineCache>(dstCache), srcCacheCount, reinterpret_cast<const VkPipelineCache*>(pSrcCaches)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void mergePipelineCaches(PipelineCache dstCache, eastl::vector<PipelineCache> const & srcCaches) const
+		{
+			Result result = static_cast<Result>(vkMergePipelineCaches(m_device, static_cast<VkPipelineCache>(dstCache), static_cast<uint32_t>(srcCaches.size()), reinterpret_cast<const VkPipelineCache*>(srcCaches.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::mergePipelineCaches");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createGraphicsPipelines(PipelineCache pipelineCache, uint32_t createInfoCount, const GraphicsPipelineCreateInfo* pCreateInfos, const AllocationCallbacks* pAllocator, Pipeline* pPipelines) const
+		{
+			return static_cast<Result>(vkCreateGraphicsPipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), createInfoCount, reinterpret_cast<const VkGraphicsPipelineCreateInfo*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipeline*>(pPipelines)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<Pipeline> createGraphicsPipelines(PipelineCache pipelineCache, eastl::vector<GraphicsPipelineCreateInfo> const & createInfos, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			eastl::vector<Pipeline> pipelines(createInfos.size());
+			Result result = static_cast<Result>(vkCreateGraphicsPipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), static_cast<uint32_t>(createInfos.size()), reinterpret_cast<const VkGraphicsPipelineCreateInfo*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipeline*>(pipelines.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createGraphicsPipelines");
+			}
+			return pipelines;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createComputePipelines(PipelineCache pipelineCache, uint32_t createInfoCount, const ComputePipelineCreateInfo* pCreateInfos, const AllocationCallbacks* pAllocator, Pipeline* pPipelines) const
+		{
+			return static_cast<Result>(vkCreateComputePipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), createInfoCount, reinterpret_cast<const VkComputePipelineCreateInfo*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipeline*>(pPipelines)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<Pipeline> createComputePipelines(PipelineCache pipelineCache, eastl::vector<ComputePipelineCreateInfo> const & createInfos, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			eastl::vector<Pipeline> pipelines(createInfos.size());
+			Result result = static_cast<Result>(vkCreateComputePipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), static_cast<uint32_t>(createInfos.size()), reinterpret_cast<const VkComputePipelineCreateInfo*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipeline*>(pipelines.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createComputePipelines");
+			}
+			return pipelines;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyPipeline(Pipeline pipeline, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyPipeline(m_device, static_cast<VkPipeline>(pipeline), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyPipeline(Pipeline pipeline, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyPipeline(m_device, static_cast<VkPipeline>(pipeline), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createPipelineLayout(const PipelineLayoutCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, PipelineLayout* pPipelineLayout) const
+		{
+			return static_cast<Result>(vkCreatePipelineLayout(m_device, reinterpret_cast<const VkPipelineLayoutCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipelineLayout*>(pPipelineLayout)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		PipelineLayout createPipelineLayout(const PipelineLayoutCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			PipelineLayout pipelineLayout;
+			Result result = static_cast<Result>(vkCreatePipelineLayout(m_device, reinterpret_cast<const VkPipelineLayoutCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipelineLayout*>(&pipelineLayout)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createPipelineLayout");
+			}
+			return pipelineLayout;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyPipelineLayout(PipelineLayout pipelineLayout, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyPipelineLayout(m_device, static_cast<VkPipelineLayout>(pipelineLayout), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyPipelineLayout(PipelineLayout pipelineLayout, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyPipelineLayout(m_device, static_cast<VkPipelineLayout>(pipelineLayout), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createSampler(const SamplerCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Sampler* pSampler) const
+		{
+			return static_cast<Result>(vkCreateSampler(m_device, reinterpret_cast<const VkSamplerCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSampler*>(pSampler)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Sampler createSampler(const SamplerCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Sampler sampler;
+			Result result = static_cast<Result>(vkCreateSampler(m_device, reinterpret_cast<const VkSamplerCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSampler*>(&sampler)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createSampler");
+			}
+			return sampler;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroySampler(Sampler sampler, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroySampler(m_device, static_cast<VkSampler>(sampler), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroySampler(Sampler sampler, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroySampler(m_device, static_cast<VkSampler>(sampler), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createDescriptorSetLayout(const DescriptorSetLayoutCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, DescriptorSetLayout* pSetLayout) const
+		{
+			return static_cast<Result>(vkCreateDescriptorSetLayout(m_device, reinterpret_cast<const VkDescriptorSetLayoutCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDescriptorSetLayout*>(pSetLayout)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		DescriptorSetLayout createDescriptorSetLayout(const DescriptorSetLayoutCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			DescriptorSetLayout setLayout;
+			Result result = static_cast<Result>(vkCreateDescriptorSetLayout(m_device, reinterpret_cast<const VkDescriptorSetLayoutCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDescriptorSetLayout*>(&setLayout)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createDescriptorSetLayout");
+			}
+			return setLayout;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyDescriptorSetLayout(DescriptorSetLayout descriptorSetLayout, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyDescriptorSetLayout(m_device, static_cast<VkDescriptorSetLayout>(descriptorSetLayout), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyDescriptorSetLayout(DescriptorSetLayout descriptorSetLayout, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyDescriptorSetLayout(m_device, static_cast<VkDescriptorSetLayout>(descriptorSetLayout), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createDescriptorPool(const DescriptorPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, DescriptorPool* pDescriptorPool) const
+		{
+			return static_cast<Result>(vkCreateDescriptorPool(m_device, reinterpret_cast<const VkDescriptorPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDescriptorPool*>(pDescriptorPool)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		DescriptorPool createDescriptorPool(const DescriptorPoolCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			DescriptorPool descriptorPool;
+			Result result = static_cast<Result>(vkCreateDescriptorPool(m_device, reinterpret_cast<const VkDescriptorPoolCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDescriptorPool*>(&descriptorPool)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createDescriptorPool");
+			}
+			return descriptorPool;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyDescriptorPool(DescriptorPool descriptorPool, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyDescriptorPool(DescriptorPool descriptorPool, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result resetDescriptorPool(DescriptorPool descriptorPool, DescriptorPoolResetFlags flags) const
+		{
+			return static_cast<Result>(vkResetDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), static_cast<VkDescriptorPoolResetFlags>(flags)));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void resetDescriptorPool(DescriptorPool descriptorPool, DescriptorPoolResetFlags flags) const
+		{
+			Result result = static_cast<Result>(vkResetDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), static_cast<VkDescriptorPoolResetFlags>(flags)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::resetDescriptorPool");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result allocateDescriptorSets(const DescriptorSetAllocateInfo* pAllocateInfo, DescriptorSet* pDescriptorSets) const
+		{
+			return static_cast<Result>(vkAllocateDescriptorSets(m_device, reinterpret_cast<const VkDescriptorSetAllocateInfo*>(pAllocateInfo), reinterpret_cast<VkDescriptorSet*>(pDescriptorSets)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<DescriptorSet> allocateDescriptorSets(const DescriptorSetAllocateInfo & allocateInfo) const
+		{
+			eastl::vector<DescriptorSet> descriptorSets(allocateInfo.descriptorSetCount());
+			Result result = static_cast<Result>(vkAllocateDescriptorSets(m_device, reinterpret_cast<const VkDescriptorSetAllocateInfo*>(&allocateInfo), reinterpret_cast<VkDescriptorSet*>(descriptorSets.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::allocateDescriptorSets");
+			}
+			return descriptorSets;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result freeDescriptorSets(DescriptorPool descriptorPool, uint32_t descriptorSetCount, const DescriptorSet* pDescriptorSets) const
+		{
+			return static_cast<Result>(vkFreeDescriptorSets(m_device, static_cast<VkDescriptorPool>(descriptorPool), descriptorSetCount, reinterpret_cast<const VkDescriptorSet*>(pDescriptorSets)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void freeDescriptorSets(DescriptorPool descriptorPool, eastl::vector<DescriptorSet> const & descriptorSets) const
+		{
+			Result result = static_cast<Result>(vkFreeDescriptorSets(m_device, static_cast<VkDescriptorPool>(descriptorPool), static_cast<uint32_t>(descriptorSets.size()), reinterpret_cast<const VkDescriptorSet*>(descriptorSets.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::freeDescriptorSets");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void updateDescriptorSets(uint32_t descriptorWriteCount, const WriteDescriptorSet* pDescriptorWrites, uint32_t descriptorCopyCount, const CopyDescriptorSet* pDescriptorCopies) const
+		{
+			vkUpdateDescriptorSets(m_device, descriptorWriteCount, reinterpret_cast<const VkWriteDescriptorSet*>(pDescriptorWrites), descriptorCopyCount, reinterpret_cast<const VkCopyDescriptorSet*>(pDescriptorCopies));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void updateDescriptorSets(eastl::vector<WriteDescriptorSet> const & descriptorWrites, eastl::vector<CopyDescriptorSet> const & descriptorCopies) const
+		{
+			vkUpdateDescriptorSets(m_device, static_cast<uint32_t>(descriptorWrites.size()), reinterpret_cast<const VkWriteDescriptorSet*>(descriptorWrites.data()), static_cast<uint32_t>(descriptorCopies.size()), reinterpret_cast<const VkCopyDescriptorSet*>(descriptorCopies.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createFramebuffer(const FramebufferCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Framebuffer* pFramebuffer) const
+		{
+			return static_cast<Result>(vkCreateFramebuffer(m_device, reinterpret_cast<const VkFramebufferCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkFramebuffer*>(pFramebuffer)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Framebuffer createFramebuffer(const FramebufferCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Framebuffer framebuffer;
+			Result result = static_cast<Result>(vkCreateFramebuffer(m_device, reinterpret_cast<const VkFramebufferCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkFramebuffer*>(&framebuffer)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createFramebuffer");
+			}
+			return framebuffer;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyFramebuffer(Framebuffer framebuffer, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyFramebuffer(m_device, static_cast<VkFramebuffer>(framebuffer), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyFramebuffer(Framebuffer framebuffer, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyFramebuffer(m_device, static_cast<VkFramebuffer>(framebuffer), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createRenderPass(const RenderPassCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, RenderPass* pRenderPass) const
+		{
+			return static_cast<Result>(vkCreateRenderPass(m_device, reinterpret_cast<const VkRenderPassCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkRenderPass*>(pRenderPass)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		RenderPass createRenderPass(const RenderPassCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			RenderPass renderPass;
+			Result result = static_cast<Result>(vkCreateRenderPass(m_device, reinterpret_cast<const VkRenderPassCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkRenderPass*>(&renderPass)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createRenderPass");
+			}
+			return renderPass;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyRenderPass(RenderPass renderPass, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyRenderPass(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyRenderPass(RenderPass renderPass, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyRenderPass(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getRenderAreaGranularity(RenderPass renderPass, Extent2D* pGranularity) const
+		{
+			vkGetRenderAreaGranularity(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<VkExtent2D*>(pGranularity));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Extent2D getRenderAreaGranularity(RenderPass renderPass) const
+		{
+			Extent2D granularity;
+			vkGetRenderAreaGranularity(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<VkExtent2D*>(&granularity));
+			return granularity;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createCommandPool(const CommandPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, CommandPool* pCommandPool) const
+		{
+			return static_cast<Result>(vkCreateCommandPool(m_device, reinterpret_cast<const VkCommandPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkCommandPool*>(pCommandPool)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		CommandPool createCommandPool(const CommandPoolCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			CommandPool commandPool;
+			Result result = static_cast<Result>(vkCreateCommandPool(m_device, reinterpret_cast<const VkCommandPoolCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkCommandPool*>(&commandPool)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createCommandPool");
+			}
+			return commandPool;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyCommandPool(CommandPool commandPool, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyCommandPool(m_device, static_cast<VkCommandPool>(commandPool), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyCommandPool(CommandPool commandPool, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyCommandPool(m_device, static_cast<VkCommandPool>(commandPool), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
+		Result resetCommandPool(CommandPool commandPool, CommandPoolResetFlags flags) const
+		{
+			return static_cast<Result>(vkResetCommandPool(m_device, static_cast<VkCommandPool>(commandPool), static_cast<VkCommandPoolResetFlags>(flags)));
+		}
+#endif /*!VKCPP_ENHANCED_MODE*/
+
+#ifdef VKCPP_ENHANCED_MODE
+		void resetCommandPool(CommandPool commandPool, CommandPoolResetFlags flags) const
+		{
+			Result result = static_cast<Result>(vkResetCommandPool(m_device, static_cast<VkCommandPool>(commandPool), static_cast<VkCommandPoolResetFlags>(flags)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::resetCommandPool");
+			}
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result allocateCommandBuffers(const CommandBufferAllocateInfo* pAllocateInfo, CommandBuffer* pCommandBuffers) const
+		{
+			return static_cast<Result>(vkAllocateCommandBuffers(m_device, reinterpret_cast<const VkCommandBufferAllocateInfo*>(pAllocateInfo), reinterpret_cast<VkCommandBuffer*>(pCommandBuffers)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<CommandBuffer> allocateCommandBuffers(const CommandBufferAllocateInfo & allocateInfo) const
+		{
+			eastl::vector<CommandBuffer> commandBuffers(allocateInfo.commandBufferCount());
+			Result result = static_cast<Result>(vkAllocateCommandBuffers(m_device, reinterpret_cast<const VkCommandBufferAllocateInfo*>(&allocateInfo), reinterpret_cast<VkCommandBuffer*>(commandBuffers.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::allocateCommandBuffers");
+			}
+			return commandBuffers;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void freeCommandBuffers(CommandPool commandPool, uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers) const
+		{
+			vkFreeCommandBuffers(m_device, static_cast<VkCommandPool>(commandPool), commandBufferCount, reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void freeCommandBuffers(CommandPool commandPool, eastl::vector<CommandBuffer> const & commandBuffers) const
+		{
+			vkFreeCommandBuffers(m_device, static_cast<VkCommandPool>(commandPool), static_cast<uint32_t>(commandBuffers.size()), reinterpret_cast<const VkCommandBuffer*>(commandBuffers.data()));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createSharedSwapchainsKHR(uint32_t swapchainCount, const SwapchainCreateInfoKHR* pCreateInfos, const AllocationCallbacks* pAllocator, SwapchainKHR* pSwapchains) const
+		{
+			return static_cast<Result>(vkCreateSharedSwapchainsKHR(m_device, swapchainCount, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSwapchainKHR*>(pSwapchains)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<SwapchainKHR> createSharedSwapchainsKHR(eastl::vector<SwapchainCreateInfoKHR> const & createInfos, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			eastl::vector<SwapchainKHR> swapchains(createInfos.size());
+			Result result = static_cast<Result>(vkCreateSharedSwapchainsKHR(m_device, static_cast<uint32_t>(createInfos.size()), reinterpret_cast<const VkSwapchainCreateInfoKHR*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSwapchainKHR*>(swapchains.data())));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createSharedSwapchainsKHR");
+			}
+			return swapchains;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createSwapchainKHR(const SwapchainCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SwapchainKHR* pSwapchain) const
+		{
+			return static_cast<Result>(vkCreateSwapchainKHR(m_device, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSwapchainKHR*>(pSwapchain)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		SwapchainKHR createSwapchainKHR(const SwapchainCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SwapchainKHR swapchain;
+			Result result = static_cast<Result>(vkCreateSwapchainKHR(m_device, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSwapchainKHR*>(&swapchain)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Device::createSwapchainKHR");
+			}
+			return swapchain;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroySwapchainKHR(SwapchainKHR swapchain, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroySwapchainKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroySwapchainKHR(SwapchainKHR swapchain, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroySwapchainKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getSwapchainImagesKHR(SwapchainKHR swapchain, uint32_t* pSwapchainImageCount, Image* pSwapchainImages) const
+		{
+			return static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), pSwapchainImageCount, reinterpret_cast<VkImage*>(pSwapchainImages)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getSwapchainImagesKHR(SwapchainKHR swapchain, eastl::vector<Image> & swapchainImages) const
+		{
+			uint32_t swapchainImageCount;
+			Result result = static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), &swapchainImageCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::Device::getSwapchainImagesKHR");
+			}
+			swapchainImages.resize(swapchainImageCount);
+			result = static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), &swapchainImageCount, reinterpret_cast<VkImage*>(swapchainImages.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::Device::getSwapchainImagesKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result acquireNextImageKHR(SwapchainKHR swapchain, uint64_t timeout, Semaphore semaphore, Fence fence, uint32_t* pImageIndex) const
+		{
+			return static_cast<Result>(vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), timeout, static_cast<VkSemaphore>(semaphore), static_cast<VkFence>(fence), pImageIndex));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result acquireNextImageKHR(SwapchainKHR swapchain, uint64_t timeout, Semaphore semaphore, Fence fence, uint32_t & imageIndex) const
+		{
+			Result result = static_cast<Result>(vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), timeout, static_cast<VkSemaphore>(semaphore), static_cast<VkFence>(fence), &imageIndex));
+			if ((result != Result::eSuccess) && (result != Result::eSuboptimalKHR))
+			{
+				throw std::system_error(result, "vk::Device::acquireNextImageKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkDevice() const
+		{
+			return m_device;
+		}
+
+		explicit operator bool() const
+		{
+			return m_device != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_device == VK_NULL_HANDLE;
 		}
 
 	private:
-		VkXlibSurfaceCreateInfoKHR m_xlibSurfaceCreateInfoKHR;
+		VkDevice m_device;
 	};
+	static_assert(sizeof(Device) == sizeof(VkDevice), "handle and wrapper have different size!");
 
-	inline Result createXlibSurfaceKHR(Instance instance, const XlibSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface)
-	{
-		return static_cast<Result>(vkCreateXlibSurfaceKHR(instance, reinterpret_cast<const VkXlibSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSurface));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createXlibSurfaceKHR(Instance instance, const XlibSurfaceCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SurfaceKHR& surface)
-	{
-		return createXlibSurfaceKHR(instance, &createInfo, &allocator, &surface);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Bool32 getPhysicalDeviceXlibPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, Display* dpy, VisualID visualID)
-	{
-		return vkGetPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, dpy, visualID);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Bool32 getPhysicalDeviceXlibPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, Display* dpy, VisualID visualID)
-	{
-		return getPhysicalDeviceXlibPresentationSupportKHR(physicalDevice, queueFamilyIndex, dpy, visualID);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-#endif /* VK_USE_PLATFORM_XLIB_KHR */
-
-#ifdef VK_USE_PLATFORM_XCB_KHR
-
-	typedef VkFlags XcbSurfaceCreateFlagsKHR;
-	class XcbSurfaceCreateInfoKHR
+	class PhysicalDevice
 	{
 	public:
-		XcbSurfaceCreateInfoKHR()
-			: XcbSurfaceCreateInfoKHR(0, nullptr, 0)
+		PhysicalDevice()
+			: m_physicalDevice(VK_NULL_HANDLE)
 		{}
 
-		XcbSurfaceCreateInfoKHR(XcbSurfaceCreateFlagsKHR flags, xcb_connection_t* connection, xcb_window_t window)
-		{
-			m_xcbSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-			m_xcbSurfaceCreateInfoKHR.pNext = nullptr;
-			m_xcbSurfaceCreateInfoKHR.flags = flags;
-			m_xcbSurfaceCreateInfoKHR.connection = connection;
-			m_xcbSurfaceCreateInfoKHR.window = window;
-		}
-
-		const StructureType& sType() const
-		{
-			return reinterpret_cast<const StructureType&>(m_xcbSurfaceCreateInfoKHR.sType);
-		}
-
-		XcbSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_xcbSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
-			return *this;
-		}
-
-		const void* pNext() const
-		{
-			return reinterpret_cast<const void*>(m_xcbSurfaceCreateInfoKHR.pNext);
-		}
-
-		XcbSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_xcbSurfaceCreateInfoKHR.pNext = pNext;
-			return *this;
-		}
-
-		const XcbSurfaceCreateFlagsKHR& flags() const
-		{
-			return m_xcbSurfaceCreateInfoKHR.flags;
-		}
-
-		XcbSurfaceCreateInfoKHR& flags(XcbSurfaceCreateFlagsKHR flags)
-		{
-			m_xcbSurfaceCreateInfoKHR.flags = flags;
-			return *this;
-		}
-
-		const xcb_connection_t* connection() const
-		{
-			return reinterpret_cast<xcb_connection_t*>(m_xcbSurfaceCreateInfoKHR.connection);
-		}
-
-		XcbSurfaceCreateInfoKHR& connection(xcb_connection_t* connection)
-		{
-			m_xcbSurfaceCreateInfoKHR.connection = connection;
-			return *this;
-		}
-
-		const xcb_window_t& window() const
-		{
-			return m_xcbSurfaceCreateInfoKHR.window;
-		}
-
-		XcbSurfaceCreateInfoKHR& window(xcb_window_t window)
-		{
-			m_xcbSurfaceCreateInfoKHR.window = window;
-			return *this;
-		}
-
-		operator const VkXcbSurfaceCreateInfoKHR&() const
-		{
-			return m_xcbSurfaceCreateInfoKHR;
-		}
-
-	private:
-		VkXcbSurfaceCreateInfoKHR m_xcbSurfaceCreateInfoKHR;
-	};
-
-	inline Result createXcbSurfaceKHR(Instance instance, const XcbSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface)
-	{
-		return static_cast<Result>(vkCreateXcbSurfaceKHR(instance, reinterpret_cast<const VkXcbSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSurface));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createXcbSurfaceKHR(Instance instance, const XcbSurfaceCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SurfaceKHR& surface)
-	{
-		return createXcbSurfaceKHR(instance, &createInfo, &allocator, &surface);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Bool32 getPhysicalDeviceXcbPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, xcb_connection_t* connection, xcb_visualid_t visual_id)
-	{
-		return vkGetPhysicalDeviceXcbPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection, visual_id);
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Bool32 getPhysicalDeviceXcbPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, xcb_connection_t* connection, xcb_visualid_t visual_id)
-	{
-		return getPhysicalDeviceXcbPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection, visual_id);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-#endif /* VK_USE_PLATFORM_XCB_KHR */
-
-#ifdef VK_USE_PLATFORM_WAYLAND_KHR
-
-	typedef VkFlags WaylandSurfaceCreateFlagsKHR;
-	class WaylandSurfaceCreateInfoKHR
-	{
-	public:
-		WaylandSurfaceCreateInfoKHR()
-			: WaylandSurfaceCreateInfoKHR(0, nullptr, nullptr)
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		PhysicalDevice(VkPhysicalDevice physicalDevice)
+			: m_physicalDevice(physicalDevice)
 		{}
 
-		WaylandSurfaceCreateInfoKHR(WaylandSurfaceCreateFlagsKHR flags, struct wl_display* display, struct wl_surface* surface)
+		PhysicalDevice& operator=(VkPhysicalDevice physicalDevice)
 		{
-			m_waylandSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
-			m_waylandSurfaceCreateInfoKHR.pNext = nullptr;
-			m_waylandSurfaceCreateInfoKHR.flags = flags;
-			m_waylandSurfaceCreateInfoKHR.display = display;
-			m_waylandSurfaceCreateInfoKHR.surface = surface;
-		}
-
-		const StructureType& sType() const
-		{
-			return reinterpret_cast<const StructureType&>(m_waylandSurfaceCreateInfoKHR.sType);
-		}
-
-		WaylandSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_waylandSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			m_physicalDevice = physicalDevice;
 			return *this;
 		}
+#endif
 
-		const void* pNext() const
+		void getProperties(PhysicalDeviceProperties* pProperties) const
 		{
-			return reinterpret_cast<const void*>(m_waylandSurfaceCreateInfoKHR.pNext);
+			vkGetPhysicalDeviceProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceProperties*>(pProperties));
 		}
-
-		WaylandSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_waylandSurfaceCreateInfoKHR.pNext = pNext;
-			return *this;
-		}
-
-		const WaylandSurfaceCreateFlagsKHR& flags() const
-		{
-			return m_waylandSurfaceCreateInfoKHR.flags;
-		}
-
-		WaylandSurfaceCreateInfoKHR& flags(WaylandSurfaceCreateFlagsKHR flags)
-		{
-			m_waylandSurfaceCreateInfoKHR.flags = flags;
-			return *this;
-		}
-
-		const struct wl_display* display() const
-		{
-			return reinterpret_cast<struct wl_display*>(m_waylandSurfaceCreateInfoKHR.display);
-		}
-
-		WaylandSurfaceCreateInfoKHR& display(struct wl_display* display)
-		{
-			m_waylandSurfaceCreateInfoKHR.display = display;
-			return *this;
-		}
-
-		const struct wl_surface* surface() const
-		{
-			return reinterpret_cast<struct wl_surface*>(m_waylandSurfaceCreateInfoKHR.surface);
-		}
-
-		WaylandSurfaceCreateInfoKHR& surface(struct wl_surface* surface)
-		{
-			m_waylandSurfaceCreateInfoKHR.surface = surface;
-			return *this;
-		}
-
-		operator const VkWaylandSurfaceCreateInfoKHR&() const
-		{
-			return m_waylandSurfaceCreateInfoKHR;
-		}
-
-	private:
-		VkWaylandSurfaceCreateInfoKHR m_waylandSurfaceCreateInfoKHR;
-	};
-
-	inline Result createWaylandSurfaceKHR(Instance instance, const WaylandSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface)
-	{
-		return static_cast<Result>(vkCreateWaylandSurfaceKHR(instance, reinterpret_cast<const VkWaylandSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSurface));
-	}
 
 #ifdef VKCPP_ENHANCED_MODE
-	inline Result createWaylandSurfaceKHR(Instance instance, const WaylandSurfaceCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SurfaceKHR& surface)
-	{
-		return createWaylandSurfaceKHR(instance, &createInfo, &allocator, &surface);
-	}
-#endif    // VKCPP_ENHANCED_MODE
+		PhysicalDeviceProperties getProperties() const
+		{
+			PhysicalDeviceProperties properties;
+			vkGetPhysicalDeviceProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceProperties*>(&properties));
+			return properties;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
 
-	inline Bool32 getPhysicalDeviceWaylandPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, struct wl_display* display)
-	{
-		return vkGetPhysicalDeviceWaylandPresentationSupportKHR(physicalDevice, queueFamilyIndex, display);
-	}
+		void getQueueFamilyProperties(uint32_t* pQueueFamilyPropertyCount, QueueFamilyProperties* pQueueFamilyProperties) const
+		{
+			vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, pQueueFamilyPropertyCount, reinterpret_cast<VkQueueFamilyProperties*>(pQueueFamilyProperties));
+		}
 
 #ifdef VKCPP_ENHANCED_MODE
-	inline Bool32 getPhysicalDeviceWaylandPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, struct wl_display* display)
-	{
-		return getPhysicalDeviceWaylandPresentationSupportKHR(physicalDevice, queueFamilyIndex, display);
-	}
-#endif    // VKCPP_ENHANCED_MODE
+		eastl::vector<QueueFamilyProperties> getQueueFamilyProperties() const
+		{
+			eastl::vector<QueueFamilyProperties> queueFamilyProperties;
+			uint32_t queueFamilyPropertyCount;
+			vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, &queueFamilyPropertyCount, nullptr);
+			queueFamilyProperties.resize(queueFamilyPropertyCount);
+			vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, &queueFamilyPropertyCount, reinterpret_cast<VkQueueFamilyProperties*>(queueFamilyProperties.data()));
+			return queueFamilyProperties;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
 
-#endif /* VK_USE_PLATFORM_WAYLAND_KHR */
+		void getMemoryProperties(PhysicalDeviceMemoryProperties* pMemoryProperties) const
+		{
+			vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceMemoryProperties*>(pMemoryProperties));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		PhysicalDeviceMemoryProperties getMemoryProperties() const
+		{
+			PhysicalDeviceMemoryProperties memoryProperties;
+			vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceMemoryProperties*>(&memoryProperties));
+			return memoryProperties;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getFeatures(PhysicalDeviceFeatures* pFeatures) const
+		{
+			vkGetPhysicalDeviceFeatures(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceFeatures*>(pFeatures));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		PhysicalDeviceFeatures getFeatures() const
+		{
+			PhysicalDeviceFeatures features;
+			vkGetPhysicalDeviceFeatures(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceFeatures*>(&features));
+			return features;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getFormatProperties(Format format, FormatProperties* pFormatProperties) const
+		{
+			vkGetPhysicalDeviceFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), reinterpret_cast<VkFormatProperties*>(pFormatProperties));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		FormatProperties getFormatProperties(Format format) const
+		{
+			FormatProperties formatProperties;
+			vkGetPhysicalDeviceFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), reinterpret_cast<VkFormatProperties*>(&formatProperties));
+			return formatProperties;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getImageFormatProperties(Format format, ImageType type, ImageTiling tiling, ImageUsageFlags usage, ImageCreateFlags flags, ImageFormatProperties* pImageFormatProperties) const
+		{
+			return static_cast<Result>(vkGetPhysicalDeviceImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkImageTiling>(tiling), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageCreateFlags>(flags), reinterpret_cast<VkImageFormatProperties*>(pImageFormatProperties)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		ImageFormatProperties getImageFormatProperties(Format format, ImageType type, ImageTiling tiling, ImageUsageFlags usage, ImageCreateFlags flags) const
+		{
+			ImageFormatProperties imageFormatProperties;
+			Result result = static_cast<Result>(vkGetPhysicalDeviceImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkImageTiling>(tiling), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageCreateFlags>(flags), reinterpret_cast<VkImageFormatProperties*>(&imageFormatProperties)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getImageFormatProperties");
+			}
+			return imageFormatProperties;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createDevice(const DeviceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Device* pDevice) const
+		{
+			return static_cast<Result>(vkCreateDevice(m_physicalDevice, reinterpret_cast<const VkDeviceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDevice*>(pDevice)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Device createDevice(const DeviceCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			Device device;
+			Result result = static_cast<Result>(vkCreateDevice(m_physicalDevice, reinterpret_cast<const VkDeviceCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDevice*>(&device)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::createDevice");
+			}
+			return device;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result enumerateDeviceLayerProperties(uint32_t* pPropertyCount, LayerProperties* pProperties) const
+		{
+			return static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, pPropertyCount, reinterpret_cast<VkLayerProperties*>(pProperties)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result enumerateDeviceLayerProperties(eastl::vector<LayerProperties> & properties) const
+		{
+			uint32_t propertyCount;
+			Result result = static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, &propertyCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceLayerProperties");
+			}
+			properties.resize(propertyCount);
+			result = static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, &propertyCount, reinterpret_cast<VkLayerProperties*>(properties.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceLayerProperties");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result enumerateDeviceExtensionProperties(const char* pLayerName, uint32_t* pPropertyCount, ExtensionProperties* pProperties) const
+		{
+			return static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, pLayerName, pPropertyCount, reinterpret_cast<VkExtensionProperties*>(pProperties)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result enumerateDeviceExtensionProperties(vk::Optional<eastl::string const> const & layerName, eastl::vector<ExtensionProperties> & properties) const
+		{
+			uint32_t propertyCount;
+			Result result = static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, layerName ? layerName->c_str() : nullptr, &propertyCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceExtensionProperties");
+			}
+			properties.resize(propertyCount);
+			result = static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, layerName ? layerName->c_str() : nullptr, &propertyCount, reinterpret_cast<VkExtensionProperties*>(properties.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceExtensionProperties");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void getSparseImageFormatProperties(Format format, ImageType type, SampleCountFlagBits samples, ImageUsageFlags usage, ImageTiling tiling, uint32_t* pPropertyCount, SparseImageFormatProperties* pProperties) const
+		{
+			vkGetPhysicalDeviceSparseImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkSampleCountFlagBits>(samples), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageTiling>(tiling), pPropertyCount, reinterpret_cast<VkSparseImageFormatProperties*>(pProperties));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		eastl::vector<SparseImageFormatProperties> getSparseImageFormatProperties(Format format, ImageType type, SampleCountFlagBits samples, ImageUsageFlags usage, ImageTiling tiling) const
+		{
+			eastl::vector<SparseImageFormatProperties> properties;
+			uint32_t propertyCount;
+			vkGetPhysicalDeviceSparseImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkSampleCountFlagBits>(samples), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageTiling>(tiling), &propertyCount, nullptr);
+			properties.resize(propertyCount);
+			vkGetPhysicalDeviceSparseImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkSampleCountFlagBits>(samples), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageTiling>(tiling), &propertyCount, reinterpret_cast<VkSparseImageFormatProperties*>(properties.data()));
+			return properties;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getDisplayPropertiesKHR(uint32_t* pPropertyCount, DisplayPropertiesKHR* pProperties) const
+		{
+			return static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, pPropertyCount, reinterpret_cast<VkDisplayPropertiesKHR*>(pProperties)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getDisplayPropertiesKHR(eastl::vector<DisplayPropertiesKHR> & properties) const
+		{
+			uint32_t propertyCount;
+			Result result = static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, &propertyCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPropertiesKHR");
+			}
+			properties.resize(propertyCount);
+			result = static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, &propertyCount, reinterpret_cast<VkDisplayPropertiesKHR*>(properties.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPropertiesKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getDisplayPlanePropertiesKHR(uint32_t* pPropertyCount, DisplayPlanePropertiesKHR* pProperties) const
+		{
+			return static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, pPropertyCount, reinterpret_cast<VkDisplayPlanePropertiesKHR*>(pProperties)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getDisplayPlanePropertiesKHR(eastl::vector<DisplayPlanePropertiesKHR> & properties) const
+		{
+			uint32_t propertyCount;
+			Result result = static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, &propertyCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlanePropertiesKHR");
+			}
+			properties.resize(propertyCount);
+			result = static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, &propertyCount, reinterpret_cast<VkDisplayPlanePropertiesKHR*>(properties.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlanePropertiesKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getDisplayPlaneSupportedDisplaysKHR(uint32_t planeIndex, uint32_t* pDisplayCount, DisplayKHR* pDisplays) const
+		{
+			return static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, pDisplayCount, reinterpret_cast<VkDisplayKHR*>(pDisplays)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getDisplayPlaneSupportedDisplaysKHR(uint32_t planeIndex, eastl::vector<DisplayKHR> & displays) const
+		{
+			uint32_t displayCount;
+			Result result = static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, &displayCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlaneSupportedDisplaysKHR");
+			}
+			displays.resize(displayCount);
+			result = static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, &displayCount, reinterpret_cast<VkDisplayKHR*>(displays.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlaneSupportedDisplaysKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getDisplayModePropertiesKHR(DisplayKHR display, uint32_t* pPropertyCount, DisplayModePropertiesKHR* pProperties) const
+		{
+			return static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), pPropertyCount, reinterpret_cast<VkDisplayModePropertiesKHR*>(pProperties)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getDisplayModePropertiesKHR(DisplayKHR display, eastl::vector<DisplayModePropertiesKHR> & properties) const
+		{
+			uint32_t propertyCount;
+			Result result = static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), &propertyCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayModePropertiesKHR");
+			}
+			properties.resize(propertyCount);
+			result = static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), &propertyCount, reinterpret_cast<VkDisplayModePropertiesKHR*>(properties.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayModePropertiesKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createDisplayModeKHR(DisplayKHR display, const DisplayModeCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, DisplayModeKHR* pMode) const
+		{
+			return static_cast<Result>(vkCreateDisplayModeKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), reinterpret_cast<const VkDisplayModeCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDisplayModeKHR*>(pMode)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		DisplayModeKHR createDisplayModeKHR(DisplayKHR display, const DisplayModeCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			DisplayModeKHR mode;
+			Result result = static_cast<Result>(vkCreateDisplayModeKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), reinterpret_cast<const VkDisplayModeCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDisplayModeKHR*>(&mode)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::createDisplayModeKHR");
+			}
+			return mode;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getDisplayPlaneCapabilitiesKHR(DisplayModeKHR mode, uint32_t planeIndex, DisplayPlaneCapabilitiesKHR* pCapabilities) const
+		{
+			return static_cast<Result>(vkGetDisplayPlaneCapabilitiesKHR(m_physicalDevice, static_cast<VkDisplayModeKHR>(mode), planeIndex, reinterpret_cast<VkDisplayPlaneCapabilitiesKHR*>(pCapabilities)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		DisplayPlaneCapabilitiesKHR getDisplayPlaneCapabilitiesKHR(DisplayModeKHR mode, uint32_t planeIndex) const
+		{
+			DisplayPlaneCapabilitiesKHR capabilities;
+			Result result = static_cast<Result>(vkGetDisplayPlaneCapabilitiesKHR(m_physicalDevice, static_cast<VkDisplayModeKHR>(mode), planeIndex, reinterpret_cast<VkDisplayPlaneCapabilitiesKHR*>(&capabilities)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlaneCapabilitiesKHR");
+			}
+			return capabilities;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_MIR_KHR
-
-	typedef VkFlags MirSurfaceCreateFlagsKHR;
-	class MirSurfaceCreateInfoKHR
-	{
-	public:
-		MirSurfaceCreateInfoKHR()
-			: MirSurfaceCreateInfoKHR(0, nullptr, nullptr)
-		{}
-
-		MirSurfaceCreateInfoKHR(MirSurfaceCreateFlagsKHR flags, MirConnection* connection, MirSurface* mirSurface)
+		Bool32 getMirPresentationSupportKHR(uint32_t queueFamilyIndex, MirConnection* connection) const
 		{
-			m_mirSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_MIR_SURFACE_CREATE_INFO_KHR;
-			m_mirSurfaceCreateInfoKHR.pNext = nullptr;
-			m_mirSurfaceCreateInfoKHR.flags = flags;
-			m_mirSurfaceCreateInfoKHR.connection = connection;
-			m_mirSurfaceCreateInfoKHR.mirSurface = mirSurface;
+			return vkGetPhysicalDeviceMirPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, connection);
 		}
-
-		const StructureType& sType() const
-		{
-			return reinterpret_cast<const StructureType&>(m_mirSurfaceCreateInfoKHR.sType);
-		}
-
-		MirSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_mirSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
-			return *this;
-		}
-
-		const void* pNext() const
-		{
-			return reinterpret_cast<const void*>(m_mirSurfaceCreateInfoKHR.pNext);
-		}
-
-		MirSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_mirSurfaceCreateInfoKHR.pNext = pNext;
-			return *this;
-		}
-
-		const MirSurfaceCreateFlagsKHR& flags() const
-		{
-			return m_mirSurfaceCreateInfoKHR.flags;
-		}
-
-		MirSurfaceCreateInfoKHR& flags(MirSurfaceCreateFlagsKHR flags)
-		{
-			m_mirSurfaceCreateInfoKHR.flags = flags;
-			return *this;
-		}
-
-		const MirConnection* connection() const
-		{
-			return reinterpret_cast<MirConnection*>(m_mirSurfaceCreateInfoKHR.connection);
-		}
-
-		MirSurfaceCreateInfoKHR& connection(MirConnection* connection)
-		{
-			m_mirSurfaceCreateInfoKHR.connection = connection;
-			return *this;
-		}
-
-		const MirSurface* mirSurface() const
-		{
-			return reinterpret_cast<MirSurface*>(m_mirSurfaceCreateInfoKHR.mirSurface);
-		}
-
-		MirSurfaceCreateInfoKHR& mirSurface(MirSurface* mirSurface)
-		{
-			m_mirSurfaceCreateInfoKHR.mirSurface = mirSurface;
-			return *this;
-		}
-
-		operator const VkMirSurfaceCreateInfoKHR&() const
-		{
-			return m_mirSurfaceCreateInfoKHR;
-		}
-
-	private:
-		VkMirSurfaceCreateInfoKHR m_mirSurfaceCreateInfoKHR;
-	};
-
-	inline Result createMirSurfaceKHR(Instance instance, const MirSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface)
-	{
-		return static_cast<Result>(vkCreateMirSurfaceKHR(instance, reinterpret_cast<const VkMirSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSurface));
-	}
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
 
 #ifdef VKCPP_ENHANCED_MODE
-	inline Result createMirSurfaceKHR(Instance instance, const MirSurfaceCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SurfaceKHR& surface)
-	{
-		return createMirSurfaceKHR(instance, &createInfo, &allocator, &surface);
-	}
-#endif    // VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_MIR_KHR
+		Bool32 getMirPresentationSupportKHR(uint32_t queueFamilyIndex, MirConnection & connection) const
+		{
+			return vkGetPhysicalDeviceMirPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &connection);
+		}
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
 
-	inline Bool32 getPhysicalDeviceMirPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, MirConnection* connection)
-	{
-		return vkGetPhysicalDeviceMirPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection);
-	}
+		Result getSurfaceSupportKHR(uint32_t queueFamilyIndex, SurfaceKHR surface, Bool32* pSupported) const
+		{
+			return static_cast<Result>(vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, queueFamilyIndex, static_cast<VkSurfaceKHR>(surface), pSupported));
+		}
 
 #ifdef VKCPP_ENHANCED_MODE
-	inline Bool32 getPhysicalDeviceMirPresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex, MirConnection* connection)
-	{
-		return getPhysicalDeviceMirPresentationSupportKHR(physicalDevice, queueFamilyIndex, connection);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-#endif /* VK_USE_PLATFORM_MIR_KHR */
-
-#ifdef VK_USE_PLATFORM_ANDROID_KHR
-
-	typedef VkFlags AndroidSurfaceCreateFlagsKHR;
-	class AndroidSurfaceCreateInfoKHR
-	{
-	public:
-		AndroidSurfaceCreateInfoKHR()
-			: AndroidSurfaceCreateInfoKHR(0, nullptr)
-		{}
-
-		AndroidSurfaceCreateInfoKHR(AndroidSurfaceCreateFlagsKHR flags, ANativeWindow* window)
+		Bool32 getSurfaceSupportKHR(uint32_t queueFamilyIndex, SurfaceKHR surface) const
 		{
-			m_androidSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-			m_androidSurfaceCreateInfoKHR.pNext = nullptr;
-			m_androidSurfaceCreateInfoKHR.flags = flags;
-			m_androidSurfaceCreateInfoKHR.window = window;
+			Bool32 supported;
+			Result result = static_cast<Result>(vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, queueFamilyIndex, static_cast<VkSurfaceKHR>(surface), &supported));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getSurfaceSupportKHR");
+			}
+			return supported;
 		}
+#endif /*VKCPP_ENHANCED_MODE*/
 
-		const StructureType& sType() const
+		Result getSurfaceCapabilitiesKHR(SurfaceKHR surface, SurfaceCapabilitiesKHR* pSurfaceCapabilities) const
 		{
-			return reinterpret_cast<const StructureType&>(m_androidSurfaceCreateInfoKHR.sType);
+			return static_cast<Result>(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<VkSurfaceCapabilitiesKHR*>(pSurfaceCapabilities)));
 		}
-
-		AndroidSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_androidSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
-			return *this;
-		}
-
-		const void* pNext() const
-		{
-			return reinterpret_cast<const void*>(m_androidSurfaceCreateInfoKHR.pNext);
-		}
-
-		AndroidSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_androidSurfaceCreateInfoKHR.pNext = pNext;
-			return *this;
-		}
-
-		const AndroidSurfaceCreateFlagsKHR& flags() const
-		{
-			return m_androidSurfaceCreateInfoKHR.flags;
-		}
-
-		AndroidSurfaceCreateInfoKHR& flags(AndroidSurfaceCreateFlagsKHR flags)
-		{
-			m_androidSurfaceCreateInfoKHR.flags = flags;
-			return *this;
-		}
-
-		const ANativeWindow* window() const
-		{
-			return reinterpret_cast<ANativeWindow*>(m_androidSurfaceCreateInfoKHR.window);
-		}
-
-		AndroidSurfaceCreateInfoKHR& window(ANativeWindow* window)
-		{
-			m_androidSurfaceCreateInfoKHR.window = window;
-			return *this;
-		}
-
-		operator const VkAndroidSurfaceCreateInfoKHR&() const
-		{
-			return m_androidSurfaceCreateInfoKHR;
-		}
-
-	private:
-		VkAndroidSurfaceCreateInfoKHR m_androidSurfaceCreateInfoKHR;
-	};
-
-	inline Result createAndroidSurfaceKHR(Instance instance, const AndroidSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface)
-	{
-		return static_cast<Result>(vkCreateAndroidSurfaceKHR(instance, reinterpret_cast<const VkAndroidSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSurface));
-	}
 
 #ifdef VKCPP_ENHANCED_MODE
-	inline Result createAndroidSurfaceKHR(Instance instance, const AndroidSurfaceCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SurfaceKHR& surface)
-	{
-		return createAndroidSurfaceKHR(instance, &createInfo, &allocator, &surface);
-	}
-#endif    // VKCPP_ENHANCED_MODE
+		Result getSurfaceCapabilitiesKHR(SurfaceKHR surface, SurfaceCapabilitiesKHR & surfaceCapabilities) const
+		{
+			Result result = static_cast<Result>(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<VkSurfaceCapabilitiesKHR*>(&surfaceCapabilities)));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getSurfaceCapabilitiesKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
 
-#endif /* VK_USE_PLATFORM_ANDROID_KHR */
+		Result getSurfaceFormatsKHR(SurfaceKHR surface, uint32_t* pSurfaceFormatCount, SurfaceFormatKHR* pSurfaceFormats) const
+		{
+			return static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), pSurfaceFormatCount, reinterpret_cast<VkSurfaceFormatKHR*>(pSurfaceFormats)));
+		}
 
+#ifdef VKCPP_ENHANCED_MODE
+		Result getSurfaceFormatsKHR(SurfaceKHR surface, eastl::vector<SurfaceFormatKHR> & surfaceFormats) const
+		{
+			uint32_t surfaceFormatCount;
+			Result result = static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &surfaceFormatCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getSurfaceFormatsKHR");
+			}
+			surfaceFormats.resize(surfaceFormatCount);
+			result = static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &surfaceFormatCount, reinterpret_cast<VkSurfaceFormatKHR*>(surfaceFormats.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getSurfaceFormatsKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result getSurfacePresentModesKHR(SurfaceKHR surface, uint32_t* pPresentModeCount, PresentModeKHR* pPresentModes) const
+		{
+			return static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), pPresentModeCount, reinterpret_cast<VkPresentModeKHR*>(pPresentModes)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result getSurfacePresentModesKHR(SurfaceKHR surface, eastl::vector<PresentModeKHR> & presentModes) const
+		{
+			uint32_t presentModeCount;
+			Result result = static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &presentModeCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getSurfacePresentModesKHR");
+			}
+			presentModes.resize(presentModeCount);
+			result = static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &presentModeCount, reinterpret_cast<VkPresentModeKHR*>(presentModes.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::PhysicalDevice::getSurfacePresentModesKHR");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+		Bool32 getWaylandPresentationSupportKHR(uint32_t queueFamilyIndex, struct wl_display* display) const
+		{
+			return vkGetPhysicalDeviceWaylandPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, display);
+		}
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+		Bool32 getWaylandPresentationSupportKHR(uint32_t queueFamilyIndex, struct wl_display & display) const
+		{
+			return vkGetPhysicalDeviceWaylandPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &display);
+		}
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifndef VKCPP_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_WIN32_KHR
+		Bool32 getWin32PresentationSupportKHR(uint32_t queueFamilyIndex) const
+		{
+			return vkGetPhysicalDeviceWin32PresentationSupportKHR(m_physicalDevice, queueFamilyIndex);
+		}
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+#endif /*!VKCPP_ENHANCED_MODE*/
 
-	typedef VkFlags Win32SurfaceCreateFlagsKHR;
-	class Win32SurfaceCreateInfoKHR
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+		Bool32 getWin32PresentationSupportKHR(uint32_t queueFamilyIndex) const
+		{
+			return vkGetPhysicalDeviceWin32PresentationSupportKHR(m_physicalDevice, queueFamilyIndex);
+		}
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+		Bool32 getXlibPresentationSupportKHR(uint32_t queueFamilyIndex, Display* dpy, VisualID visualID) const
+		{
+			return vkGetPhysicalDeviceXlibPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, dpy, visualID);
+		}
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+		Bool32 getXlibPresentationSupportKHR(uint32_t queueFamilyIndex, Display & dpy, VisualID visualID) const
+		{
+			return vkGetPhysicalDeviceXlibPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &dpy, visualID);
+		}
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+		Bool32 getXcbPresentationSupportKHR(uint32_t queueFamilyIndex, xcb_connection_t* connection, xcb_visualid_t visual_id) const
+		{
+			return vkGetPhysicalDeviceXcbPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, connection, visual_id);
+		}
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_XCB_KHR
+		Bool32 getXcbPresentationSupportKHR(uint32_t queueFamilyIndex, xcb_connection_t & connection, xcb_visualid_t visual_id) const
+		{
+			return vkGetPhysicalDeviceXcbPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &connection, visual_id);
+		}
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkPhysicalDevice() const
+		{
+			return m_physicalDevice;
+		}
+
+		explicit operator bool() const
+		{
+			return m_physicalDevice != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_physicalDevice == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkPhysicalDevice m_physicalDevice;
+	};
+	static_assert(sizeof(PhysicalDevice) == sizeof(VkPhysicalDevice), "handle and wrapper have different size!");
+
+	enum class DebugReportFlagBitsEXT
+	{
+		eInformation = VK_DEBUG_REPORT_INFORMATION_BIT_EXT,
+		eWarning = VK_DEBUG_REPORT_WARNING_BIT_EXT,
+		ePerformanceWarning = VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT,
+		eError = VK_DEBUG_REPORT_ERROR_BIT_EXT,
+		eDebug = VK_DEBUG_REPORT_DEBUG_BIT_EXT
+	};
+
+	typedef Flags<DebugReportFlagBitsEXT, VkDebugReportFlagsEXT> DebugReportFlagsEXT;
+
+	inline DebugReportFlagsEXT operator|(DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1)
+	{
+		return DebugReportFlagsEXT(bit0) | bit1;
+	}
+
+	class DebugReportCallbackCreateInfoEXT
 	{
 	public:
-		Win32SurfaceCreateInfoKHR()
-			: Win32SurfaceCreateInfoKHR(0, 0, 0)
-		{}
-
-		Win32SurfaceCreateInfoKHR(Win32SurfaceCreateFlagsKHR flags, HINSTANCE hinstance, HWND hwnd)
+		DebugReportCallbackCreateInfoEXT(DebugReportFlagsEXT flags, PFN_vkDebugReportCallbackEXT pfnCallback, void* pUserData)
 		{
-			m_win32SurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-			m_win32SurfaceCreateInfoKHR.pNext = nullptr;
-			m_win32SurfaceCreateInfoKHR.flags = flags;
-			m_win32SurfaceCreateInfoKHR.hinstance = hinstance;
-			m_win32SurfaceCreateInfoKHR.hwnd = hwnd;
+			m_debugReportCallbackCreateInfoEXT.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
+			m_debugReportCallbackCreateInfoEXT.pNext = nullptr;
+			m_debugReportCallbackCreateInfoEXT.flags = static_cast<VkDebugReportFlagsEXT>(flags);
+			m_debugReportCallbackCreateInfoEXT.pfnCallback = pfnCallback;
+			m_debugReportCallbackCreateInfoEXT.pUserData = pUserData;
+		}
+
+		DebugReportCallbackCreateInfoEXT(VkDebugReportCallbackCreateInfoEXT const & rhs)
+			: m_debugReportCallbackCreateInfoEXT(rhs)
+		{
+		}
+
+		DebugReportCallbackCreateInfoEXT& operator=(VkDebugReportCallbackCreateInfoEXT const & rhs)
+		{
+			m_debugReportCallbackCreateInfoEXT = rhs;
+			return *this;
 		}
 
 		const StructureType& sType() const
 		{
-			return reinterpret_cast<const StructureType&>(m_win32SurfaceCreateInfoKHR.sType);
+			return reinterpret_cast<const StructureType&>(m_debugReportCallbackCreateInfoEXT.sType);
 		}
 
-		Win32SurfaceCreateInfoKHR& sType(StructureType sType)
+		StructureType& sType()
 		{
-			m_win32SurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			return reinterpret_cast<StructureType&>(m_debugReportCallbackCreateInfoEXT.sType);
+		}
+
+		DebugReportCallbackCreateInfoEXT& sType(StructureType sType)
+		{
+			m_debugReportCallbackCreateInfoEXT.sType = static_cast<VkStructureType>(sType);
 			return *this;
 		}
 
 		const void* pNext() const
 		{
-			return reinterpret_cast<const void*>(m_win32SurfaceCreateInfoKHR.pNext);
+			return reinterpret_cast<const void*>(m_debugReportCallbackCreateInfoEXT.pNext);
 		}
 
-		Win32SurfaceCreateInfoKHR& pNext(const void* pNext)
+		const void* pNext()
 		{
-			m_win32SurfaceCreateInfoKHR.pNext = pNext;
+			return reinterpret_cast<const void*>(m_debugReportCallbackCreateInfoEXT.pNext);
+		}
+
+		DebugReportCallbackCreateInfoEXT& pNext(const void* pNext)
+		{
+			m_debugReportCallbackCreateInfoEXT.pNext = pNext;
 			return *this;
 		}
 
-		const Win32SurfaceCreateFlagsKHR& flags() const
+		const DebugReportFlagsEXT& flags() const
 		{
-			return m_win32SurfaceCreateInfoKHR.flags;
+			return reinterpret_cast<const DebugReportFlagsEXT&>(m_debugReportCallbackCreateInfoEXT.flags);
 		}
 
-		Win32SurfaceCreateInfoKHR& flags(Win32SurfaceCreateFlagsKHR flags)
+		DebugReportFlagsEXT& flags()
 		{
-			m_win32SurfaceCreateInfoKHR.flags = flags;
+			return reinterpret_cast<DebugReportFlagsEXT&>(m_debugReportCallbackCreateInfoEXT.flags);
+		}
+
+		DebugReportCallbackCreateInfoEXT& flags(DebugReportFlagsEXT flags)
+		{
+			m_debugReportCallbackCreateInfoEXT.flags = static_cast<VkDebugReportFlagsEXT>(flags);
 			return *this;
 		}
 
-		const HINSTANCE& hinstance() const
+		const PFN_vkDebugReportCallbackEXT& pfnCallback() const
 		{
-			return m_win32SurfaceCreateInfoKHR.hinstance;
+			return m_debugReportCallbackCreateInfoEXT.pfnCallback;
 		}
 
-		Win32SurfaceCreateInfoKHR& hinstance(HINSTANCE hinstance)
+		PFN_vkDebugReportCallbackEXT& pfnCallback()
 		{
-			m_win32SurfaceCreateInfoKHR.hinstance = hinstance;
+			return m_debugReportCallbackCreateInfoEXT.pfnCallback;
+		}
+
+		DebugReportCallbackCreateInfoEXT& pfnCallback(PFN_vkDebugReportCallbackEXT pfnCallback)
+		{
+			m_debugReportCallbackCreateInfoEXT.pfnCallback = pfnCallback;
 			return *this;
 		}
 
-		const HWND& hwnd() const
+		const void* pUserData() const
 		{
-			return m_win32SurfaceCreateInfoKHR.hwnd;
+			return reinterpret_cast<const void*>(m_debugReportCallbackCreateInfoEXT.pUserData);
 		}
 
-		Win32SurfaceCreateInfoKHR& hwnd(HWND hwnd)
+		void* pUserData()
 		{
-			m_win32SurfaceCreateInfoKHR.hwnd = hwnd;
+			return reinterpret_cast<void*>(m_debugReportCallbackCreateInfoEXT.pUserData);
+		}
+
+		DebugReportCallbackCreateInfoEXT& pUserData(void* pUserData)
+		{
+			m_debugReportCallbackCreateInfoEXT.pUserData = pUserData;
 			return *this;
 		}
 
-		operator const VkWin32SurfaceCreateInfoKHR&() const
+		operator const VkDebugReportCallbackCreateInfoEXT&() const
 		{
-			return m_win32SurfaceCreateInfoKHR;
+			return m_debugReportCallbackCreateInfoEXT;
 		}
 
 	private:
-		VkWin32SurfaceCreateInfoKHR m_win32SurfaceCreateInfoKHR;
+		VkDebugReportCallbackCreateInfoEXT m_debugReportCallbackCreateInfoEXT;
 	};
-
-	inline Result createWin32SurfaceKHR(Instance instance, const Win32SurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface)
-	{
-		return static_cast<Result>(vkCreateWin32SurfaceKHR(instance, reinterpret_cast<const VkWin32SurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pSurface));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result createWin32SurfaceKHR(Instance instance, const Win32SurfaceCreateInfoKHR& createInfo, const AllocationCallbacks& allocator, SurfaceKHR& surface)
-	{
-		return createWin32SurfaceKHR(instance, &createInfo, &allocator, &surface);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline Bool32 getPhysicalDeviceWin32PresentationSupportKHR(PhysicalDevice physicalDevice, uint32_t queueFamilyIndex)
-	{
-		return vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice, queueFamilyIndex);
-	}
-
-#endif /* VK_USE_PLATFORM_WIN32_KHR */
+	static_assert(sizeof(DebugReportCallbackCreateInfoEXT) == sizeof(VkDebugReportCallbackCreateInfoEXT), "struct and wrapper have different size!");
 
 	enum class DebugReportObjectTypeEXT
 	{
-		eVkDebugReportObjectTypeUnknownExt = VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT,
-		eVkDebugReportObjectTypeInstanceExt = VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT,
-		eVkDebugReportObjectTypePhysicalDeviceExt = VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT,
-		eVkDebugReportObjectTypeDeviceExt = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT,
-		eVkDebugReportObjectTypeQueueExt = VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT,
-		eVkDebugReportObjectTypeSemaphoreExt = VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT,
-		eVkDebugReportObjectTypeCommandBufferExt = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
-		eVkDebugReportObjectTypeFenceExt = VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT,
-		eVkDebugReportObjectTypeDeviceMemoryExt = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT,
-		eVkDebugReportObjectTypeBufferExt = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT,
-		eVkDebugReportObjectTypeImageExt = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
-		eVkDebugReportObjectTypeEventExt = VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT,
-		eVkDebugReportObjectTypeQueryPoolExt = VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT,
-		eVkDebugReportObjectTypeBufferViewExt = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT,
-		eVkDebugReportObjectTypeImageViewExt = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT,
-		eVkDebugReportObjectTypeShaderModuleExt = VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT,
-		eVkDebugReportObjectTypePipelineCacheExt = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT,
-		eVkDebugReportObjectTypePipelineLayoutExt = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT,
-		eVkDebugReportObjectTypeRenderPassExt = VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
-		eVkDebugReportObjectTypePipelineExt = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
-		eVkDebugReportObjectTypeDescriptorSetLayoutExt = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT,
-		eVkDebugReportObjectTypeSamplerExt = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT,
-		eVkDebugReportObjectTypeDescriptorPoolExt = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT,
-		eVkDebugReportObjectTypeDescriptorSetExt = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT,
-		eVkDebugReportObjectTypeFramebufferExt = VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT,
-		eVkDebugReportObjectTypeCommandPoolExt = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT,
-		eVkDebugReportObjectTypeSurfaceKhrExt = VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT,
-		eVkDebugReportObjectTypeSwapchainKhrExt = VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT,
-		eVkDebugReportObjectTypeDebugReportExt = VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_EXT
+		eUnknownEXT = VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT,
+		eInstanceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT,
+		ePhysicalDeviceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT,
+		eDeviceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT,
+		eQueueEXT = VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT,
+		eSemaphoreEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT,
+		eCommandBufferEXT = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
+		eFenceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT,
+		eDeviceMemoryEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT,
+		eBufferEXT = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT,
+		eImageEXT = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
+		eEventEXT = VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT,
+		eQueryPoolEXT = VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT,
+		eBufferViewEXT = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT,
+		eImageViewEXT = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT,
+		eShaderModuleEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT,
+		ePipelineCacheEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT,
+		ePipelineLayoutEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT,
+		eRenderPassEXT = VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
+		ePipelineEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
+		eDescriptorSetLayoutEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT,
+		eSamplerEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT,
+		eDescriptorPoolEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT,
+		eDescriptorSetEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT,
+		eFramebufferEXT = VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT,
+		eCommandPoolEXT = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT,
+		eSurfaceKhrEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT,
+		eSwapchainKhrEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT,
+		eDebugReportEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_EXT
 	};
+
+	class Instance
+	{
+	public:
+		Instance()
+			: m_instance(VK_NULL_HANDLE)
+		{}
+
+#if defined(VK_CPP_TYPESAFE_CONVERSION)
+		Instance(VkInstance instance)
+			: m_instance(instance)
+		{}
+
+		Instance& operator=(VkInstance instance)
+		{
+			m_instance = instance;
+			return *this;
+		}
+#endif
+
+		void destroy(const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyInstance(m_instance, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroy(vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyInstance(m_instance, reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result enumeratePhysicalDevices(uint32_t* pPhysicalDeviceCount, PhysicalDevice* pPhysicalDevices) const
+		{
+			return static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, pPhysicalDeviceCount, reinterpret_cast<VkPhysicalDevice*>(pPhysicalDevices)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		Result enumeratePhysicalDevices(eastl::vector<PhysicalDevice> & physicalDevices) const
+		{
+			uint32_t physicalDeviceCount;
+			Result result = static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, nullptr));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::Instance::enumeratePhysicalDevices");
+			}
+			physicalDevices.resize(physicalDeviceCount);
+			result = static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, reinterpret_cast<VkPhysicalDevice*>(physicalDevices.data())));
+			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			{
+				throw std::system_error(result, "vk::Instance::enumeratePhysicalDevices");
+			}
+			return result;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		PFN_vkVoidFunction getProcAddr(const char* pName) const
+		{
+			return vkGetInstanceProcAddr(m_instance, pName);
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		PFN_vkVoidFunction getProcAddr(eastl::string const & name) const
+		{
+			return vkGetInstanceProcAddr(m_instance, name.c_str());
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+		Result createAndroidSurfaceKHR(const AndroidSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
+		{
+			return static_cast<Result>(vkCreateAndroidSurfaceKHR(m_instance, reinterpret_cast<const VkAndroidSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
+		}
+#endif /*VK_USE_PLATFORM_ANDROID_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+		SurfaceKHR createAndroidSurfaceKHR(const AndroidSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SurfaceKHR surface;
+			Result result = static_cast<Result>(vkCreateAndroidSurfaceKHR(m_instance, reinterpret_cast<const VkAndroidSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createAndroidSurfaceKHR");
+			}
+			return surface;
+		}
+#endif /*VK_USE_PLATFORM_ANDROID_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createDisplayPlaneSurfaceKHR(const DisplaySurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
+		{
+			return static_cast<Result>(vkCreateDisplayPlaneSurfaceKHR(m_instance, reinterpret_cast<const VkDisplaySurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		SurfaceKHR createDisplayPlaneSurfaceKHR(const DisplaySurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SurfaceKHR surface;
+			Result result = static_cast<Result>(vkCreateDisplayPlaneSurfaceKHR(m_instance, reinterpret_cast<const VkDisplaySurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createDisplayPlaneSurfaceKHR");
+			}
+			return surface;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_MIR_KHR
+		Result createMirSurfaceKHR(const MirSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
+		{
+			return static_cast<Result>(vkCreateMirSurfaceKHR(m_instance, reinterpret_cast<const VkMirSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
+		}
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_MIR_KHR
+		SurfaceKHR createMirSurfaceKHR(const MirSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SurfaceKHR surface;
+			Result result = static_cast<Result>(vkCreateMirSurfaceKHR(m_instance, reinterpret_cast<const VkMirSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createMirSurfaceKHR");
+			}
+			return surface;
+		}
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroySurfaceKHR(SurfaceKHR surface, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroySurfaceKHR(m_instance, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroySurfaceKHR(SurfaceKHR surface, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroySurfaceKHR(m_instance, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+		Result createWaylandSurfaceKHR(const WaylandSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
+		{
+			return static_cast<Result>(vkCreateWaylandSurfaceKHR(m_instance, reinterpret_cast<const VkWaylandSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
+		}
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+		SurfaceKHR createWaylandSurfaceKHR(const WaylandSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SurfaceKHR surface;
+			Result result = static_cast<Result>(vkCreateWaylandSurfaceKHR(m_instance, reinterpret_cast<const VkWaylandSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createWaylandSurfaceKHR");
+			}
+			return surface;
+		}
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+		Result createWin32SurfaceKHR(const Win32SurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
+		{
+			return static_cast<Result>(vkCreateWin32SurfaceKHR(m_instance, reinterpret_cast<const VkWin32SurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
+		}
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+		SurfaceKHR createWin32SurfaceKHR(const Win32SurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SurfaceKHR surface;
+			Result result = static_cast<Result>(vkCreateWin32SurfaceKHR(m_instance, reinterpret_cast<const VkWin32SurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createWin32SurfaceKHR");
+			}
+			return surface;
+		}
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+		Result createXlibSurfaceKHR(const XlibSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
+		{
+			return static_cast<Result>(vkCreateXlibSurfaceKHR(m_instance, reinterpret_cast<const VkXlibSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
+		}
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+		SurfaceKHR createXlibSurfaceKHR(const XlibSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SurfaceKHR surface;
+			Result result = static_cast<Result>(vkCreateXlibSurfaceKHR(m_instance, reinterpret_cast<const VkXlibSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createXlibSurfaceKHR");
+			}
+			return surface;
+		}
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+		Result createXcbSurfaceKHR(const XcbSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
+		{
+			return static_cast<Result>(vkCreateXcbSurfaceKHR(m_instance, reinterpret_cast<const VkXcbSurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
+		}
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+
+#ifdef VKCPP_ENHANCED_MODE
+#ifdef VK_USE_PLATFORM_XCB_KHR
+		SurfaceKHR createXcbSurfaceKHR(const XcbSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			SurfaceKHR surface;
+			Result result = static_cast<Result>(vkCreateXcbSurfaceKHR(m_instance, reinterpret_cast<const VkXcbSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createXcbSurfaceKHR");
+			}
+			return surface;
+		}
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		Result createDebugReportCallbackEXT(const DebugReportCallbackCreateInfoEXT* pCreateInfo, const AllocationCallbacks* pAllocator, DebugReportCallbackEXT* pCallback) const
+		{
+			return static_cast<Result>(vkCreateDebugReportCallbackEXT(m_instance, reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDebugReportCallbackEXT*>(pCallback)));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		DebugReportCallbackEXT createDebugReportCallbackEXT(const DebugReportCallbackCreateInfoEXT & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			DebugReportCallbackEXT callback;
+			Result result = static_cast<Result>(vkCreateDebugReportCallbackEXT(m_instance, reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDebugReportCallbackEXT*>(&callback)));
+			if (result != Result::eSuccess)
+			{
+				throw std::system_error(result, "vk::Instance::createDebugReportCallbackEXT");
+			}
+			return callback;
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void destroyDebugReportCallbackEXT(DebugReportCallbackEXT callback, const AllocationCallbacks* pAllocator) const
+		{
+			vkDestroyDebugReportCallbackEXT(m_instance, static_cast<VkDebugReportCallbackEXT>(callback), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void destroyDebugReportCallbackEXT(DebugReportCallbackEXT callback, vk::Optional<const AllocationCallbacks> const & allocator) const
+		{
+			vkDestroyDebugReportCallbackEXT(m_instance, static_cast<VkDebugReportCallbackEXT>(callback), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+		void debugReportMessageEXT(DebugReportFlagsEXT flags, DebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage) const
+		{
+			vkDebugReportMessageEXT(m_instance, static_cast<VkDebugReportFlagsEXT>(flags), static_cast<VkDebugReportObjectTypeEXT>(objectType), object, location, messageCode, pLayerPrefix, pMessage);
+		}
+
+#ifdef VKCPP_ENHANCED_MODE
+		void debugReportMessageEXT(DebugReportFlagsEXT flags, DebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, eastl::string const & layerPrefix, eastl::string const & message) const
+		{
+			vkDebugReportMessageEXT(m_instance, static_cast<VkDebugReportFlagsEXT>(flags), static_cast<VkDebugReportObjectTypeEXT>(objectType), object, location, messageCode, layerPrefix.c_str(), message.c_str());
+		}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+#if !defined(VK_CPP_TYPESAFE_CONVERSION)
+		explicit
+#endif
+			operator VkInstance() const
+		{
+			return m_instance;
+		}
+
+		explicit operator bool() const
+		{
+			return m_instance != VK_NULL_HANDLE;
+		}
+
+		bool operator!() const
+		{
+			return m_instance == VK_NULL_HANDLE;
+		}
+
+	private:
+		VkInstance m_instance;
+	};
+	static_assert(sizeof(Instance) == sizeof(VkInstance), "handle and wrapper have different size!");
 
 	enum class DebugReportErrorEXT
 	{
-		eVkDebugReportErrorNoneExt = VK_DEBUG_REPORT_ERROR_NONE_EXT,
-		eVkDebugReportErrorCallbackRefExt = VK_DEBUG_REPORT_ERROR_CALLBACK_REF_EXT
+		eNoneEXT = VK_DEBUG_REPORT_ERROR_NONE_EXT,
+		eCallbackRefEXT = VK_DEBUG_REPORT_ERROR_CALLBACK_REF_EXT
 	};
 
-	inline Result createDebugReportCallbackEXT(Instance instance, const DebugReportCallbackCreateInfoEXT* pCreateInfo, const AllocationCallbacks* pAllocator, DebugReportCallbackEXT* pCallback)
+	inline Result createInstance(const InstanceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Instance* pInstance)
 	{
-		return static_cast<Result>(vkCreateDebugReportCallbackEXT(instance, reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), pCallback));
+		return static_cast<Result>(vkCreateInstance(reinterpret_cast<const VkInstanceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkInstance*>(pInstance)));
 	}
 
 #ifdef VKCPP_ENHANCED_MODE
-	inline Result createDebugReportCallbackEXT(Instance instance, const DebugReportCallbackCreateInfoEXT& createInfo, const AllocationCallbacks& allocator, DebugReportCallbackEXT& callback)
+	inline Instance createInstance(const InstanceCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator)
 	{
-		return createDebugReportCallbackEXT(instance, &createInfo, &allocator, &callback);
+		Instance instance;
+		Result result = static_cast<Result>(vkCreateInstance(reinterpret_cast<const VkInstanceCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkInstance*>(&instance)));
+		if (result != Result::eSuccess)
+		{
+			throw std::system_error(result, "vk::createInstance");
+		}
+		return instance;
 	}
-#endif    // VKCPP_ENHANCED_MODE
+#endif /*VKCPP_ENHANCED_MODE*/
 
-	inline void destroyDebugReportCallbackEXT(Instance instance, DebugReportCallbackEXT callback, const AllocationCallbacks* pAllocator)
+	inline Result enumerateInstanceLayerProperties(uint32_t* pPropertyCount, LayerProperties* pProperties)
 	{
-		vkDestroyDebugReportCallbackEXT(instance, callback, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
-	}
-
-#ifdef VKCPP_ENHANCED_MODE
-	inline void destroyDebugReportCallbackEXT(Instance instance, DebugReportCallbackEXT callback, const AllocationCallbacks& allocator)
-	{
-		destroyDebugReportCallbackEXT(instance, callback, &allocator);
-	}
-#endif    // VKCPP_ENHANCED_MODE
-
-	inline void debugReportMessageEXT(Instance instance, DebugReportFlagsEXT flags, DebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage)
-	{
-		vkDebugReportMessageEXT(instance, static_cast<VkDebugReportFlagsEXT>(flags), static_cast<VkDebugReportObjectTypeEXT>(objectType), object, location, messageCode, pLayerPrefix, pMessage);
+		return static_cast<Result>(vkEnumerateInstanceLayerProperties(pPropertyCount, reinterpret_cast<VkLayerProperties*>(pProperties)));
 	}
 
 #ifdef VKCPP_ENHANCED_MODE
-	inline void debugReportMessageEXT(Instance instance, DebugReportFlagsEXT flags, DebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char& layerPrefix, const char& message)
+	inline Result enumerateInstanceLayerProperties(eastl::vector<LayerProperties> & properties)
 	{
-		debugReportMessageEXT(instance, flags, objectType, object, location, messageCode, &layerPrefix, &message);
+		uint32_t propertyCount;
+		Result result = static_cast<Result>(vkEnumerateInstanceLayerProperties(&propertyCount, nullptr));
+		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+		{
+			throw std::system_error(result, "vk::enumerateInstanceLayerProperties");
+		}
+		properties.resize(propertyCount);
+		result = static_cast<Result>(vkEnumerateInstanceLayerProperties(&propertyCount, reinterpret_cast<VkLayerProperties*>(properties.data())));
+		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+		{
+			throw std::system_error(result, "vk::enumerateInstanceLayerProperties");
+		}
+		return result;
 	}
-#endif    // VKCPP_ENHANCED_MODE
+#endif /*VKCPP_ENHANCED_MODE*/
 
-}
+	inline Result enumerateInstanceExtensionProperties(const char* pLayerName, uint32_t* pPropertyCount, ExtensionProperties* pProperties)
+	{
+		return static_cast<Result>(vkEnumerateInstanceExtensionProperties(pLayerName, pPropertyCount, reinterpret_cast<VkExtensionProperties*>(pProperties)));
+	}
+
+#ifdef VKCPP_ENHANCED_MODE
+	inline Result enumerateInstanceExtensionProperties(vk::Optional<eastl::string const> const & layerName, eastl::vector<ExtensionProperties> & properties)
+	{
+		uint32_t propertyCount;
+		Result result = static_cast<Result>(vkEnumerateInstanceExtensionProperties(layerName ? layerName->c_str() : nullptr, &propertyCount, nullptr));
+		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+		{
+			throw std::system_error(result, "vk::enumerateInstanceExtensionProperties");
+		}
+		properties.resize(propertyCount);
+		result = static_cast<Result>(vkEnumerateInstanceExtensionProperties(layerName ? layerName->c_str() : nullptr, &propertyCount, reinterpret_cast<VkExtensionProperties*>(properties.data())));
+		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+		{
+			throw std::system_error(result, "vk::enumerateInstanceExtensionProperties");
+		}
+		return result;
+	}
+#endif /*VKCPP_ENHANCED_MODE*/
+
+	inline eastl::string to_string(FramebufferCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(FramebufferCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(QueryPoolCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(QueryPoolCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(RenderPassCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(RenderPassCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SamplerCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SamplerCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineLayoutCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineLayoutCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineCacheCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineCacheCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineDepthStencilStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineDepthStencilStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineDynamicStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineDynamicStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineColorBlendStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineColorBlendStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineMultisampleStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineMultisampleStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineRasterizationStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineRasterizationStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineViewportStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineViewportStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineTessellationStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineTessellationStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineInputAssemblyStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineInputAssemblyStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineVertexInputStateCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineVertexInputStateCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineShaderStageCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(PipelineShaderStageCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DescriptorSetLayoutCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DescriptorSetLayoutCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(BufferViewCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(BufferViewCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(InstanceCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(InstanceCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DeviceCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DeviceCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DeviceQueueCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DeviceQueueCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(ImageViewCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(ImageViewCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SemaphoreCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SemaphoreCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(ShaderModuleCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(ShaderModuleCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(EventCreateFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(EventCreateFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(MemoryMapFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(MemoryMapFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SubpassDescriptionFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SubpassDescriptionFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DescriptorPoolResetFlagBits)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DescriptorPoolResetFlags)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SwapchainCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(SwapchainCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DisplayModeCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DisplayModeCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DisplaySurfaceCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+
+	inline eastl::string to_string(DisplaySurfaceCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+	inline eastl::string to_string(AndroidSurfaceCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_ANDROID_KHR*/
+
+#ifdef VK_USE_PLATFORM_ANDROID_KHR
+	inline eastl::string to_string(AndroidSurfaceCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_ANDROID_KHR*/
+
+#ifdef VK_USE_PLATFORM_MIR_KHR
+	inline eastl::string to_string(MirSurfaceCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+
+#ifdef VK_USE_PLATFORM_MIR_KHR
+	inline eastl::string to_string(MirSurfaceCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_MIR_KHR*/
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+	inline eastl::string to_string(WaylandSurfaceCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+
+#ifdef VK_USE_PLATFORM_WAYLAND_KHR
+	inline eastl::string to_string(WaylandSurfaceCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	inline eastl::string to_string(Win32SurfaceCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+
+#ifdef VK_USE_PLATFORM_WIN32_KHR
+	inline eastl::string to_string(Win32SurfaceCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_WIN32_KHR*/
+
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+	inline eastl::string to_string(XlibSurfaceCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+
+#ifdef VK_USE_PLATFORM_XLIB_KHR
+	inline eastl::string to_string(XlibSurfaceCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_XLIB_KHR*/
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+	inline eastl::string to_string(XcbSurfaceCreateFlagBitsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+
+#ifdef VK_USE_PLATFORM_XCB_KHR
+	inline eastl::string to_string(XcbSurfaceCreateFlagsKHR)
+	{
+		return eastl::string();
+	}
+#endif /*VK_USE_PLATFORM_XCB_KHR*/
+
+	inline eastl::string to_string(ImageLayout value)
+	{
+		switch (value)
+		{
+		case ImageLayout::eUndefined: return "Undefined";
+		case ImageLayout::eGeneral: return "General";
+		case ImageLayout::eColorAttachmentOptimal: return "ColorAttachmentOptimal";
+		case ImageLayout::eDepthStencilAttachmentOptimal: return "DepthStencilAttachmentOptimal";
+		case ImageLayout::eDepthStencilReadOnlyOptimal: return "DepthStencilReadOnlyOptimal";
+		case ImageLayout::eShaderReadOnlyOptimal: return "ShaderReadOnlyOptimal";
+		case ImageLayout::eTransferSrcOptimal: return "TransferSrcOptimal";
+		case ImageLayout::eTransferDstOptimal: return "TransferDstOptimal";
+		case ImageLayout::ePreinitialized: return "Preinitialized";
+		case ImageLayout::ePresentSrcKHR: return "PresentSrcKHR";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(AttachmentLoadOp value)
+	{
+		switch (value)
+		{
+		case AttachmentLoadOp::eLoad: return "Load";
+		case AttachmentLoadOp::eClear: return "Clear";
+		case AttachmentLoadOp::eDontCare: return "DontCare";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(AttachmentStoreOp value)
+	{
+		switch (value)
+		{
+		case AttachmentStoreOp::eStore: return "Store";
+		case AttachmentStoreOp::eDontCare: return "DontCare";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ImageType value)
+	{
+		switch (value)
+		{
+		case ImageType::e1D: return "1D";
+		case ImageType::e2D: return "2D";
+		case ImageType::e3D: return "3D";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ImageTiling value)
+	{
+		switch (value)
+		{
+		case ImageTiling::eOptimal: return "Optimal";
+		case ImageTiling::eLinear: return "Linear";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ImageViewType value)
+	{
+		switch (value)
+		{
+		case ImageViewType::e1D: return "1D";
+		case ImageViewType::e2D: return "2D";
+		case ImageViewType::e3D: return "3D";
+		case ImageViewType::eCube: return "Cube";
+		case ImageViewType::e1DArray: return "1DArray";
+		case ImageViewType::e2DArray: return "2DArray";
+		case ImageViewType::eCubeArray: return "CubeArray";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CommandBufferLevel value)
+	{
+		switch (value)
+		{
+		case CommandBufferLevel::ePrimary: return "Primary";
+		case CommandBufferLevel::eSecondary: return "Secondary";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ComponentSwizzle value)
+	{
+		switch (value)
+		{
+		case ComponentSwizzle::eIdentity: return "Identity";
+		case ComponentSwizzle::eZero: return "Zero";
+		case ComponentSwizzle::eOne: return "One";
+		case ComponentSwizzle::eR: return "R";
+		case ComponentSwizzle::eG: return "G";
+		case ComponentSwizzle::eB: return "B";
+		case ComponentSwizzle::eA: return "A";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DescriptorType value)
+	{
+		switch (value)
+		{
+		case DescriptorType::eSampler: return "Sampler";
+		case DescriptorType::eCombinedImageSampler: return "CombinedImageSampler";
+		case DescriptorType::eSampledImage: return "SampledImage";
+		case DescriptorType::eStorageImage: return "StorageImage";
+		case DescriptorType::eUniformTexelBuffer: return "UniformTexelBuffer";
+		case DescriptorType::eStorageTexelBuffer: return "StorageTexelBuffer";
+		case DescriptorType::eUniformBuffer: return "UniformBuffer";
+		case DescriptorType::eStorageBuffer: return "StorageBuffer";
+		case DescriptorType::eUniformBufferDynamic: return "UniformBufferDynamic";
+		case DescriptorType::eStorageBufferDynamic: return "StorageBufferDynamic";
+		case DescriptorType::eInputAttachment: return "InputAttachment";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(QueryType value)
+	{
+		switch (value)
+		{
+		case QueryType::eOcclusion: return "Occlusion";
+		case QueryType::ePipelineStatistics: return "PipelineStatistics";
+		case QueryType::eTimestamp: return "Timestamp";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(BorderColor value)
+	{
+		switch (value)
+		{
+		case BorderColor::eFloatTransparentBlack: return "FloatTransparentBlack";
+		case BorderColor::eIntTransparentBlack: return "IntTransparentBlack";
+		case BorderColor::eFloatOpaqueBlack: return "FloatOpaqueBlack";
+		case BorderColor::eIntOpaqueBlack: return "IntOpaqueBlack";
+		case BorderColor::eFloatOpaqueWhite: return "FloatOpaqueWhite";
+		case BorderColor::eIntOpaqueWhite: return "IntOpaqueWhite";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(PipelineBindPoint value)
+	{
+		switch (value)
+		{
+		case PipelineBindPoint::eGraphics: return "Graphics";
+		case PipelineBindPoint::eCompute: return "Compute";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(PipelineCacheHeaderVersion value)
+	{
+		switch (value)
+		{
+		case PipelineCacheHeaderVersion::eOne: return "One";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(PrimitiveTopology value)
+	{
+		switch (value)
+		{
+		case PrimitiveTopology::ePointList: return "PointList";
+		case PrimitiveTopology::eLineList: return "LineList";
+		case PrimitiveTopology::eLineStrip: return "LineStrip";
+		case PrimitiveTopology::eTriangleList: return "TriangleList";
+		case PrimitiveTopology::eTriangleStrip: return "TriangleStrip";
+		case PrimitiveTopology::eTriangleFan: return "TriangleFan";
+		case PrimitiveTopology::eLineListWithAdjacency: return "LineListWithAdjacency";
+		case PrimitiveTopology::eLineStripWithAdjacency: return "LineStripWithAdjacency";
+		case PrimitiveTopology::eTriangleListWithAdjacency: return "TriangleListWithAdjacency";
+		case PrimitiveTopology::eTriangleStripWithAdjacency: return "TriangleStripWithAdjacency";
+		case PrimitiveTopology::ePatchList: return "PatchList";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SharingMode value)
+	{
+		switch (value)
+		{
+		case SharingMode::eExclusive: return "Exclusive";
+		case SharingMode::eConcurrent: return "Concurrent";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(IndexType value)
+	{
+		switch (value)
+		{
+		case IndexType::eUint16: return "Uint16";
+		case IndexType::eUint32: return "Uint32";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(Filter value)
+	{
+		switch (value)
+		{
+		case Filter::eNearest: return "Nearest";
+		case Filter::eLinear: return "Linear";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SamplerMipmapMode value)
+	{
+		switch (value)
+		{
+		case SamplerMipmapMode::eNearest: return "Nearest";
+		case SamplerMipmapMode::eLinear: return "Linear";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SamplerAddressMode value)
+	{
+		switch (value)
+		{
+		case SamplerAddressMode::eRepeat: return "Repeat";
+		case SamplerAddressMode::eMirroredRepeat: return "MirroredRepeat";
+		case SamplerAddressMode::eClampToEdge: return "ClampToEdge";
+		case SamplerAddressMode::eClampToBorder: return "ClampToBorder";
+		case SamplerAddressMode::eMirrorClampToEdge: return "MirrorClampToEdge";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CompareOp value)
+	{
+		switch (value)
+		{
+		case CompareOp::eNever: return "Never";
+		case CompareOp::eLess: return "Less";
+		case CompareOp::eEqual: return "Equal";
+		case CompareOp::eLessOrEqual: return "LessOrEqual";
+		case CompareOp::eGreater: return "Greater";
+		case CompareOp::eNotEqual: return "NotEqual";
+		case CompareOp::eGreaterOrEqual: return "GreaterOrEqual";
+		case CompareOp::eAlways: return "Always";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(PolygonMode value)
+	{
+		switch (value)
+		{
+		case PolygonMode::eFill: return "Fill";
+		case PolygonMode::eLine: return "Line";
+		case PolygonMode::ePoint: return "Point";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CullModeFlagBits value)
+	{
+		switch (value)
+		{
+		case CullModeFlagBits::eNone: return "None";
+		case CullModeFlagBits::eFront: return "Front";
+		case CullModeFlagBits::eBack: return "Back";
+		case CullModeFlagBits::eFrontAndBack: return "FrontAndBack";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CullModeFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::CullModeFlagBits::eNone) result += "None | ";
+		if (value & vk::CullModeFlagBits::eFront) result += "Front | ";
+		if (value & vk::CullModeFlagBits::eBack) result += "Back | ";
+		if (value & vk::CullModeFlagBits::eFrontAndBack) result += "FrontAndBack | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(FrontFace value)
+	{
+		switch (value)
+		{
+		case FrontFace::eCounterClockwise: return "CounterClockwise";
+		case FrontFace::eClockwise: return "Clockwise";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(BlendFactor value)
+	{
+		switch (value)
+		{
+		case BlendFactor::eZero: return "Zero";
+		case BlendFactor::eOne: return "One";
+		case BlendFactor::eSrcColor: return "SrcColor";
+		case BlendFactor::eOneMinusSrcColor: return "OneMinusSrcColor";
+		case BlendFactor::eDstColor: return "DstColor";
+		case BlendFactor::eOneMinusDstColor: return "OneMinusDstColor";
+		case BlendFactor::eSrcAlpha: return "SrcAlpha";
+		case BlendFactor::eOneMinusSrcAlpha: return "OneMinusSrcAlpha";
+		case BlendFactor::eDstAlpha: return "DstAlpha";
+		case BlendFactor::eOneMinusDstAlpha: return "OneMinusDstAlpha";
+		case BlendFactor::eConstantColor: return "ConstantColor";
+		case BlendFactor::eOneMinusConstantColor: return "OneMinusConstantColor";
+		case BlendFactor::eConstantAlpha: return "ConstantAlpha";
+		case BlendFactor::eOneMinusConstantAlpha: return "OneMinusConstantAlpha";
+		case BlendFactor::eSrcAlphaSaturate: return "SrcAlphaSaturate";
+		case BlendFactor::eSrc1Color: return "Src1Color";
+		case BlendFactor::eOneMinusSrc1Color: return "OneMinusSrc1Color";
+		case BlendFactor::eSrc1Alpha: return "Src1Alpha";
+		case BlendFactor::eOneMinusSrc1Alpha: return "OneMinusSrc1Alpha";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(BlendOp value)
+	{
+		switch (value)
+		{
+		case BlendOp::eAdd: return "Add";
+		case BlendOp::eSubtract: return "Subtract";
+		case BlendOp::eReverseSubtract: return "ReverseSubtract";
+		case BlendOp::eMin: return "Min";
+		case BlendOp::eMax: return "Max";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(StencilOp value)
+	{
+		switch (value)
+		{
+		case StencilOp::eKeep: return "Keep";
+		case StencilOp::eZero: return "Zero";
+		case StencilOp::eReplace: return "Replace";
+		case StencilOp::eIncrementAndClamp: return "IncrementAndClamp";
+		case StencilOp::eDecrementAndClamp: return "DecrementAndClamp";
+		case StencilOp::eInvert: return "Invert";
+		case StencilOp::eIncrementAndWrap: return "IncrementAndWrap";
+		case StencilOp::eDecrementAndWrap: return "DecrementAndWrap";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(LogicOp value)
+	{
+		switch (value)
+		{
+		case LogicOp::eClear: return "Clear";
+		case LogicOp::eAnd: return "And";
+		case LogicOp::eAndReverse: return "AndReverse";
+		case LogicOp::eCopy: return "Copy";
+		case LogicOp::eAndInverted: return "AndInverted";
+		case LogicOp::eNoOp: return "NoOp";
+		case LogicOp::eXor: return "Xor";
+		case LogicOp::eOr: return "Or";
+		case LogicOp::eNor: return "Nor";
+		case LogicOp::eEquivalent: return "Equivalent";
+		case LogicOp::eInvert: return "Invert";
+		case LogicOp::eOrReverse: return "OrReverse";
+		case LogicOp::eCopyInverted: return "CopyInverted";
+		case LogicOp::eOrInverted: return "OrInverted";
+		case LogicOp::eNand: return "Nand";
+		case LogicOp::eSet: return "Set";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(InternalAllocationType value)
+	{
+		switch (value)
+		{
+		case InternalAllocationType::eExecutable: return "Executable";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SystemAllocationScope value)
+	{
+		switch (value)
+		{
+		case SystemAllocationScope::eCommand: return "Command";
+		case SystemAllocationScope::eObject: return "Object";
+		case SystemAllocationScope::eCache: return "Cache";
+		case SystemAllocationScope::eDevice: return "Device";
+		case SystemAllocationScope::eInstance: return "Instance";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(PhysicalDeviceType value)
+	{
+		switch (value)
+		{
+		case PhysicalDeviceType::eOther: return "Other";
+		case PhysicalDeviceType::eIntegratedGpu: return "IntegratedGpu";
+		case PhysicalDeviceType::eDiscreteGpu: return "DiscreteGpu";
+		case PhysicalDeviceType::eVirtualGpu: return "VirtualGpu";
+		case PhysicalDeviceType::eCpu: return "Cpu";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(VertexInputRate value)
+	{
+		switch (value)
+		{
+		case VertexInputRate::eVertex: return "Vertex";
+		case VertexInputRate::eInstance: return "Instance";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(Format value)
+	{
+		switch (value)
+		{
+		case Format::eUndefined: return "Undefined";
+		case Format::eR4G4UnormPack8: return "R4G4UnormPack8";
+		case Format::eR4G4B4A4UnormPack16: return "R4G4B4A4UnormPack16";
+		case Format::eB4G4R4A4UnormPack16: return "B4G4R4A4UnormPack16";
+		case Format::eR5G6B5UnormPack16: return "R5G6B5UnormPack16";
+		case Format::eB5G6R5UnormPack16: return "B5G6R5UnormPack16";
+		case Format::eR5G5B5A1UnormPack16: return "R5G5B5A1UnormPack16";
+		case Format::eB5G5R5A1UnormPack16: return "B5G5R5A1UnormPack16";
+		case Format::eA1R5G5B5UnormPack16: return "A1R5G5B5UnormPack16";
+		case Format::eR8Unorm: return "R8Unorm";
+		case Format::eR8Snorm: return "R8Snorm";
+		case Format::eR8Uscaled: return "R8Uscaled";
+		case Format::eR8Sscaled: return "R8Sscaled";
+		case Format::eR8Uint: return "R8Uint";
+		case Format::eR8Sint: return "R8Sint";
+		case Format::eR8Srgb: return "R8Srgb";
+		case Format::eR8G8Unorm: return "R8G8Unorm";
+		case Format::eR8G8Snorm: return "R8G8Snorm";
+		case Format::eR8G8Uscaled: return "R8G8Uscaled";
+		case Format::eR8G8Sscaled: return "R8G8Sscaled";
+		case Format::eR8G8Uint: return "R8G8Uint";
+		case Format::eR8G8Sint: return "R8G8Sint";
+		case Format::eR8G8Srgb: return "R8G8Srgb";
+		case Format::eR8G8B8Unorm: return "R8G8B8Unorm";
+		case Format::eR8G8B8Snorm: return "R8G8B8Snorm";
+		case Format::eR8G8B8Uscaled: return "R8G8B8Uscaled";
+		case Format::eR8G8B8Sscaled: return "R8G8B8Sscaled";
+		case Format::eR8G8B8Uint: return "R8G8B8Uint";
+		case Format::eR8G8B8Sint: return "R8G8B8Sint";
+		case Format::eR8G8B8Srgb: return "R8G8B8Srgb";
+		case Format::eB8G8R8Unorm: return "B8G8R8Unorm";
+		case Format::eB8G8R8Snorm: return "B8G8R8Snorm";
+		case Format::eB8G8R8Uscaled: return "B8G8R8Uscaled";
+		case Format::eB8G8R8Sscaled: return "B8G8R8Sscaled";
+		case Format::eB8G8R8Uint: return "B8G8R8Uint";
+		case Format::eB8G8R8Sint: return "B8G8R8Sint";
+		case Format::eB8G8R8Srgb: return "B8G8R8Srgb";
+		case Format::eR8G8B8A8Unorm: return "R8G8B8A8Unorm";
+		case Format::eR8G8B8A8Snorm: return "R8G8B8A8Snorm";
+		case Format::eR8G8B8A8Uscaled: return "R8G8B8A8Uscaled";
+		case Format::eR8G8B8A8Sscaled: return "R8G8B8A8Sscaled";
+		case Format::eR8G8B8A8Uint: return "R8G8B8A8Uint";
+		case Format::eR8G8B8A8Sint: return "R8G8B8A8Sint";
+		case Format::eR8G8B8A8Srgb: return "R8G8B8A8Srgb";
+		case Format::eB8G8R8A8Unorm: return "B8G8R8A8Unorm";
+		case Format::eB8G8R8A8Snorm: return "B8G8R8A8Snorm";
+		case Format::eB8G8R8A8Uscaled: return "B8G8R8A8Uscaled";
+		case Format::eB8G8R8A8Sscaled: return "B8G8R8A8Sscaled";
+		case Format::eB8G8R8A8Uint: return "B8G8R8A8Uint";
+		case Format::eB8G8R8A8Sint: return "B8G8R8A8Sint";
+		case Format::eB8G8R8A8Srgb: return "B8G8R8A8Srgb";
+		case Format::eA8B8G8R8UnormPack32: return "A8B8G8R8UnormPack32";
+		case Format::eA8B8G8R8SnormPack32: return "A8B8G8R8SnormPack32";
+		case Format::eA8B8G8R8UscaledPack32: return "A8B8G8R8UscaledPack32";
+		case Format::eA8B8G8R8SscaledPack32: return "A8B8G8R8SscaledPack32";
+		case Format::eA8B8G8R8UintPack32: return "A8B8G8R8UintPack32";
+		case Format::eA8B8G8R8SintPack32: return "A8B8G8R8SintPack32";
+		case Format::eA8B8G8R8SrgbPack32: return "A8B8G8R8SrgbPack32";
+		case Format::eA2R10G10B10UnormPack32: return "A2R10G10B10UnormPack32";
+		case Format::eA2R10G10B10SnormPack32: return "A2R10G10B10SnormPack32";
+		case Format::eA2R10G10B10UscaledPack32: return "A2R10G10B10UscaledPack32";
+		case Format::eA2R10G10B10SscaledPack32: return "A2R10G10B10SscaledPack32";
+		case Format::eA2R10G10B10UintPack32: return "A2R10G10B10UintPack32";
+		case Format::eA2R10G10B10SintPack32: return "A2R10G10B10SintPack32";
+		case Format::eA2B10G10R10UnormPack32: return "A2B10G10R10UnormPack32";
+		case Format::eA2B10G10R10SnormPack32: return "A2B10G10R10SnormPack32";
+		case Format::eA2B10G10R10UscaledPack32: return "A2B10G10R10UscaledPack32";
+		case Format::eA2B10G10R10SscaledPack32: return "A2B10G10R10SscaledPack32";
+		case Format::eA2B10G10R10UintPack32: return "A2B10G10R10UintPack32";
+		case Format::eA2B10G10R10SintPack32: return "A2B10G10R10SintPack32";
+		case Format::eR16Unorm: return "R16Unorm";
+		case Format::eR16Snorm: return "R16Snorm";
+		case Format::eR16Uscaled: return "R16Uscaled";
+		case Format::eR16Sscaled: return "R16Sscaled";
+		case Format::eR16Uint: return "R16Uint";
+		case Format::eR16Sint: return "R16Sint";
+		case Format::eR16Sfloat: return "R16Sfloat";
+		case Format::eR16G16Unorm: return "R16G16Unorm";
+		case Format::eR16G16Snorm: return "R16G16Snorm";
+		case Format::eR16G16Uscaled: return "R16G16Uscaled";
+		case Format::eR16G16Sscaled: return "R16G16Sscaled";
+		case Format::eR16G16Uint: return "R16G16Uint";
+		case Format::eR16G16Sint: return "R16G16Sint";
+		case Format::eR16G16Sfloat: return "R16G16Sfloat";
+		case Format::eR16G16B16Unorm: return "R16G16B16Unorm";
+		case Format::eR16G16B16Snorm: return "R16G16B16Snorm";
+		case Format::eR16G16B16Uscaled: return "R16G16B16Uscaled";
+		case Format::eR16G16B16Sscaled: return "R16G16B16Sscaled";
+		case Format::eR16G16B16Uint: return "R16G16B16Uint";
+		case Format::eR16G16B16Sint: return "R16G16B16Sint";
+		case Format::eR16G16B16Sfloat: return "R16G16B16Sfloat";
+		case Format::eR16G16B16A16Unorm: return "R16G16B16A16Unorm";
+		case Format::eR16G16B16A16Snorm: return "R16G16B16A16Snorm";
+		case Format::eR16G16B16A16Uscaled: return "R16G16B16A16Uscaled";
+		case Format::eR16G16B16A16Sscaled: return "R16G16B16A16Sscaled";
+		case Format::eR16G16B16A16Uint: return "R16G16B16A16Uint";
+		case Format::eR16G16B16A16Sint: return "R16G16B16A16Sint";
+		case Format::eR16G16B16A16Sfloat: return "R16G16B16A16Sfloat";
+		case Format::eR32Uint: return "R32Uint";
+		case Format::eR32Sint: return "R32Sint";
+		case Format::eR32Sfloat: return "R32Sfloat";
+		case Format::eR32G32Uint: return "R32G32Uint";
+		case Format::eR32G32Sint: return "R32G32Sint";
+		case Format::eR32G32Sfloat: return "R32G32Sfloat";
+		case Format::eR32G32B32Uint: return "R32G32B32Uint";
+		case Format::eR32G32B32Sint: return "R32G32B32Sint";
+		case Format::eR32G32B32Sfloat: return "R32G32B32Sfloat";
+		case Format::eR32G32B32A32Uint: return "R32G32B32A32Uint";
+		case Format::eR32G32B32A32Sint: return "R32G32B32A32Sint";
+		case Format::eR32G32B32A32Sfloat: return "R32G32B32A32Sfloat";
+		case Format::eR64Uint: return "R64Uint";
+		case Format::eR64Sint: return "R64Sint";
+		case Format::eR64Sfloat: return "R64Sfloat";
+		case Format::eR64G64Uint: return "R64G64Uint";
+		case Format::eR64G64Sint: return "R64G64Sint";
+		case Format::eR64G64Sfloat: return "R64G64Sfloat";
+		case Format::eR64G64B64Uint: return "R64G64B64Uint";
+		case Format::eR64G64B64Sint: return "R64G64B64Sint";
+		case Format::eR64G64B64Sfloat: return "R64G64B64Sfloat";
+		case Format::eR64G64B64A64Uint: return "R64G64B64A64Uint";
+		case Format::eR64G64B64A64Sint: return "R64G64B64A64Sint";
+		case Format::eR64G64B64A64Sfloat: return "R64G64B64A64Sfloat";
+		case Format::eB10G11R11UfloatPack32: return "B10G11R11UfloatPack32";
+		case Format::eE5B9G9R9UfloatPack32: return "E5B9G9R9UfloatPack32";
+		case Format::eD16Unorm: return "D16Unorm";
+		case Format::eX8D24UnormPack32: return "X8D24UnormPack32";
+		case Format::eD32Sfloat: return "D32Sfloat";
+		case Format::eS8Uint: return "S8Uint";
+		case Format::eD16UnormS8Uint: return "D16UnormS8Uint";
+		case Format::eD24UnormS8Uint: return "D24UnormS8Uint";
+		case Format::eD32SfloatS8Uint: return "D32SfloatS8Uint";
+		case Format::eBc1RgbUnormBlock: return "Bc1RgbUnormBlock";
+		case Format::eBc1RgbSrgbBlock: return "Bc1RgbSrgbBlock";
+		case Format::eBc1RgbaUnormBlock: return "Bc1RgbaUnormBlock";
+		case Format::eBc1RgbaSrgbBlock: return "Bc1RgbaSrgbBlock";
+		case Format::eBc2UnormBlock: return "Bc2UnormBlock";
+		case Format::eBc2SrgbBlock: return "Bc2SrgbBlock";
+		case Format::eBc3UnormBlock: return "Bc3UnormBlock";
+		case Format::eBc3SrgbBlock: return "Bc3SrgbBlock";
+		case Format::eBc4UnormBlock: return "Bc4UnormBlock";
+		case Format::eBc4SnormBlock: return "Bc4SnormBlock";
+		case Format::eBc5UnormBlock: return "Bc5UnormBlock";
+		case Format::eBc5SnormBlock: return "Bc5SnormBlock";
+		case Format::eBc6HUfloatBlock: return "Bc6HUfloatBlock";
+		case Format::eBc6HSfloatBlock: return "Bc6HSfloatBlock";
+		case Format::eBc7UnormBlock: return "Bc7UnormBlock";
+		case Format::eBc7SrgbBlock: return "Bc7SrgbBlock";
+		case Format::eEtc2R8G8B8UnormBlock: return "Etc2R8G8B8UnormBlock";
+		case Format::eEtc2R8G8B8SrgbBlock: return "Etc2R8G8B8SrgbBlock";
+		case Format::eEtc2R8G8B8A1UnormBlock: return "Etc2R8G8B8A1UnormBlock";
+		case Format::eEtc2R8G8B8A1SrgbBlock: return "Etc2R8G8B8A1SrgbBlock";
+		case Format::eEtc2R8G8B8A8UnormBlock: return "Etc2R8G8B8A8UnormBlock";
+		case Format::eEtc2R8G8B8A8SrgbBlock: return "Etc2R8G8B8A8SrgbBlock";
+		case Format::eEacR11UnormBlock: return "EacR11UnormBlock";
+		case Format::eEacR11SnormBlock: return "EacR11SnormBlock";
+		case Format::eEacR11G11UnormBlock: return "EacR11G11UnormBlock";
+		case Format::eEacR11G11SnormBlock: return "EacR11G11SnormBlock";
+		case Format::eAstc4x4UnormBlock: return "Astc4x4UnormBlock";
+		case Format::eAstc4x4SrgbBlock: return "Astc4x4SrgbBlock";
+		case Format::eAstc5x4UnormBlock: return "Astc5x4UnormBlock";
+		case Format::eAstc5x4SrgbBlock: return "Astc5x4SrgbBlock";
+		case Format::eAstc5x5UnormBlock: return "Astc5x5UnormBlock";
+		case Format::eAstc5x5SrgbBlock: return "Astc5x5SrgbBlock";
+		case Format::eAstc6x5UnormBlock: return "Astc6x5UnormBlock";
+		case Format::eAstc6x5SrgbBlock: return "Astc6x5SrgbBlock";
+		case Format::eAstc6x6UnormBlock: return "Astc6x6UnormBlock";
+		case Format::eAstc6x6SrgbBlock: return "Astc6x6SrgbBlock";
+		case Format::eAstc8x5UnormBlock: return "Astc8x5UnormBlock";
+		case Format::eAstc8x5SrgbBlock: return "Astc8x5SrgbBlock";
+		case Format::eAstc8x6UnormBlock: return "Astc8x6UnormBlock";
+		case Format::eAstc8x6SrgbBlock: return "Astc8x6SrgbBlock";
+		case Format::eAstc8x8UnormBlock: return "Astc8x8UnormBlock";
+		case Format::eAstc8x8SrgbBlock: return "Astc8x8SrgbBlock";
+		case Format::eAstc10x5UnormBlock: return "Astc10x5UnormBlock";
+		case Format::eAstc10x5SrgbBlock: return "Astc10x5SrgbBlock";
+		case Format::eAstc10x6UnormBlock: return "Astc10x6UnormBlock";
+		case Format::eAstc10x6SrgbBlock: return "Astc10x6SrgbBlock";
+		case Format::eAstc10x8UnormBlock: return "Astc10x8UnormBlock";
+		case Format::eAstc10x8SrgbBlock: return "Astc10x8SrgbBlock";
+		case Format::eAstc10x10UnormBlock: return "Astc10x10UnormBlock";
+		case Format::eAstc10x10SrgbBlock: return "Astc10x10SrgbBlock";
+		case Format::eAstc12x10UnormBlock: return "Astc12x10UnormBlock";
+		case Format::eAstc12x10SrgbBlock: return "Astc12x10SrgbBlock";
+		case Format::eAstc12x12UnormBlock: return "Astc12x12UnormBlock";
+		case Format::eAstc12x12SrgbBlock: return "Astc12x12SrgbBlock";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(StructureType value)
+	{
+		switch (value)
+		{
+		case StructureType::eApplicationInfo: return "ApplicationInfo";
+		case StructureType::eInstanceCreateInfo: return "InstanceCreateInfo";
+		case StructureType::eDeviceQueueCreateInfo: return "DeviceQueueCreateInfo";
+		case StructureType::eDeviceCreateInfo: return "DeviceCreateInfo";
+		case StructureType::eSubmitInfo: return "SubmitInfo";
+		case StructureType::eMemoryAllocateInfo: return "MemoryAllocateInfo";
+		case StructureType::eMappedMemoryRange: return "MappedMemoryRange";
+		case StructureType::eBindSparseInfo: return "BindSparseInfo";
+		case StructureType::eFenceCreateInfo: return "FenceCreateInfo";
+		case StructureType::eSemaphoreCreateInfo: return "SemaphoreCreateInfo";
+		case StructureType::eEventCreateInfo: return "EventCreateInfo";
+		case StructureType::eQueryPoolCreateInfo: return "QueryPoolCreateInfo";
+		case StructureType::eBufferCreateInfo: return "BufferCreateInfo";
+		case StructureType::eBufferViewCreateInfo: return "BufferViewCreateInfo";
+		case StructureType::eImageCreateInfo: return "ImageCreateInfo";
+		case StructureType::eImageViewCreateInfo: return "ImageViewCreateInfo";
+		case StructureType::eShaderModuleCreateInfo: return "ShaderModuleCreateInfo";
+		case StructureType::ePipelineCacheCreateInfo: return "PipelineCacheCreateInfo";
+		case StructureType::ePipelineShaderStageCreateInfo: return "PipelineShaderStageCreateInfo";
+		case StructureType::ePipelineVertexInputStateCreateInfo: return "PipelineVertexInputStateCreateInfo";
+		case StructureType::ePipelineInputAssemblyStateCreateInfo: return "PipelineInputAssemblyStateCreateInfo";
+		case StructureType::ePipelineTessellationStateCreateInfo: return "PipelineTessellationStateCreateInfo";
+		case StructureType::ePipelineViewportStateCreateInfo: return "PipelineViewportStateCreateInfo";
+		case StructureType::ePipelineRasterizationStateCreateInfo: return "PipelineRasterizationStateCreateInfo";
+		case StructureType::ePipelineMultisampleStateCreateInfo: return "PipelineMultisampleStateCreateInfo";
+		case StructureType::ePipelineDepthStencilStateCreateInfo: return "PipelineDepthStencilStateCreateInfo";
+		case StructureType::ePipelineColorBlendStateCreateInfo: return "PipelineColorBlendStateCreateInfo";
+		case StructureType::ePipelineDynamicStateCreateInfo: return "PipelineDynamicStateCreateInfo";
+		case StructureType::eGraphicsPipelineCreateInfo: return "GraphicsPipelineCreateInfo";
+		case StructureType::eComputePipelineCreateInfo: return "ComputePipelineCreateInfo";
+		case StructureType::ePipelineLayoutCreateInfo: return "PipelineLayoutCreateInfo";
+		case StructureType::eSamplerCreateInfo: return "SamplerCreateInfo";
+		case StructureType::eDescriptorSetLayoutCreateInfo: return "DescriptorSetLayoutCreateInfo";
+		case StructureType::eDescriptorPoolCreateInfo: return "DescriptorPoolCreateInfo";
+		case StructureType::eDescriptorSetAllocateInfo: return "DescriptorSetAllocateInfo";
+		case StructureType::eWriteDescriptorSet: return "WriteDescriptorSet";
+		case StructureType::eCopyDescriptorSet: return "CopyDescriptorSet";
+		case StructureType::eFramebufferCreateInfo: return "FramebufferCreateInfo";
+		case StructureType::eRenderPassCreateInfo: return "RenderPassCreateInfo";
+		case StructureType::eCommandPoolCreateInfo: return "CommandPoolCreateInfo";
+		case StructureType::eCommandBufferAllocateInfo: return "CommandBufferAllocateInfo";
+		case StructureType::eCommandBufferInheritanceInfo: return "CommandBufferInheritanceInfo";
+		case StructureType::eCommandBufferBeginInfo: return "CommandBufferBeginInfo";
+		case StructureType::eRenderPassBeginInfo: return "RenderPassBeginInfo";
+		case StructureType::eBufferMemoryBarrier: return "BufferMemoryBarrier";
+		case StructureType::eImageMemoryBarrier: return "ImageMemoryBarrier";
+		case StructureType::eMemoryBarrier: return "MemoryBarrier";
+		case StructureType::eLoaderInstanceCreateInfo: return "LoaderInstanceCreateInfo";
+		case StructureType::eLoaderDeviceCreateInfo: return "LoaderDeviceCreateInfo";
+		case StructureType::eSwapchainCreateInfoKHR: return "SwapchainCreateInfoKHR";
+		case StructureType::ePresentInfoKHR: return "PresentInfoKHR";
+		case StructureType::eDisplayModeCreateInfoKHR: return "DisplayModeCreateInfoKHR";
+		case StructureType::eDisplaySurfaceCreateInfoKHR: return "DisplaySurfaceCreateInfoKHR";
+		case StructureType::eDisplayPresentInfoKHR: return "DisplayPresentInfoKHR";
+		case StructureType::eXlibSurfaceCreateInfoKHR: return "XlibSurfaceCreateInfoKHR";
+		case StructureType::eXcbSurfaceCreateInfoKHR: return "XcbSurfaceCreateInfoKHR";
+		case StructureType::eWaylandSurfaceCreateInfoKHR: return "WaylandSurfaceCreateInfoKHR";
+		case StructureType::eMirSurfaceCreateInfoKHR: return "MirSurfaceCreateInfoKHR";
+		case StructureType::eAndroidSurfaceCreateInfoKHR: return "AndroidSurfaceCreateInfoKHR";
+		case StructureType::eWin32SurfaceCreateInfoKHR: return "Win32SurfaceCreateInfoKHR";
+		case StructureType::eDebugReportCallbackCreateInfoEXT: return "DebugReportCallbackCreateInfoEXT";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SubpassContents value)
+	{
+		switch (value)
+		{
+		case SubpassContents::eInline: return "Inline";
+		case SubpassContents::eSecondaryCommandBuffers: return "SecondaryCommandBuffers";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DynamicState value)
+	{
+		switch (value)
+		{
+		case DynamicState::eViewport: return "Viewport";
+		case DynamicState::eScissor: return "Scissor";
+		case DynamicState::eLineWidth: return "LineWidth";
+		case DynamicState::eDepthBias: return "DepthBias";
+		case DynamicState::eBlendConstants: return "BlendConstants";
+		case DynamicState::eDepthBounds: return "DepthBounds";
+		case DynamicState::eStencilCompareMask: return "StencilCompareMask";
+		case DynamicState::eStencilWriteMask: return "StencilWriteMask";
+		case DynamicState::eStencilReference: return "StencilReference";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(QueueFlagBits value)
+	{
+		switch (value)
+		{
+		case QueueFlagBits::eGraphics: return "Graphics";
+		case QueueFlagBits::eCompute: return "Compute";
+		case QueueFlagBits::eTransfer: return "Transfer";
+		case QueueFlagBits::eSparseBinding: return "SparseBinding";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(QueueFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::QueueFlagBits::eGraphics) result += "Graphics | ";
+		if (value & vk::QueueFlagBits::eCompute) result += "Compute | ";
+		if (value & vk::QueueFlagBits::eTransfer) result += "Transfer | ";
+		if (value & vk::QueueFlagBits::eSparseBinding) result += "SparseBinding | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(MemoryPropertyFlagBits value)
+	{
+		switch (value)
+		{
+		case MemoryPropertyFlagBits::eDeviceLocal: return "DeviceLocal";
+		case MemoryPropertyFlagBits::eHostVisible: return "HostVisible";
+		case MemoryPropertyFlagBits::eHostCoherent: return "HostCoherent";
+		case MemoryPropertyFlagBits::eHostCached: return "HostCached";
+		case MemoryPropertyFlagBits::eLazilyAllocated: return "LazilyAllocated";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(MemoryPropertyFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::MemoryPropertyFlagBits::eDeviceLocal) result += "DeviceLocal | ";
+		if (value & vk::MemoryPropertyFlagBits::eHostVisible) result += "HostVisible | ";
+		if (value & vk::MemoryPropertyFlagBits::eHostCoherent) result += "HostCoherent | ";
+		if (value & vk::MemoryPropertyFlagBits::eHostCached) result += "HostCached | ";
+		if (value & vk::MemoryPropertyFlagBits::eLazilyAllocated) result += "LazilyAllocated | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(MemoryHeapFlagBits value)
+	{
+		switch (value)
+		{
+		case MemoryHeapFlagBits::eDeviceLocal: return "DeviceLocal";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(MemoryHeapFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::MemoryHeapFlagBits::eDeviceLocal) result += "DeviceLocal | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(AccessFlagBits value)
+	{
+		switch (value)
+		{
+		case AccessFlagBits::eIndirectCommandRead: return "IndirectCommandRead";
+		case AccessFlagBits::eIndexRead: return "IndexRead";
+		case AccessFlagBits::eVertexAttributeRead: return "VertexAttributeRead";
+		case AccessFlagBits::eUniformRead: return "UniformRead";
+		case AccessFlagBits::eInputAttachmentRead: return "InputAttachmentRead";
+		case AccessFlagBits::eShaderRead: return "ShaderRead";
+		case AccessFlagBits::eShaderWrite: return "ShaderWrite";
+		case AccessFlagBits::eColorAttachmentRead: return "ColorAttachmentRead";
+		case AccessFlagBits::eColorAttachmentWrite: return "ColorAttachmentWrite";
+		case AccessFlagBits::eDepthStencilAttachmentRead: return "DepthStencilAttachmentRead";
+		case AccessFlagBits::eDepthStencilAttachmentWrite: return "DepthStencilAttachmentWrite";
+		case AccessFlagBits::eTransferRead: return "TransferRead";
+		case AccessFlagBits::eTransferWrite: return "TransferWrite";
+		case AccessFlagBits::eHostRead: return "HostRead";
+		case AccessFlagBits::eHostWrite: return "HostWrite";
+		case AccessFlagBits::eMemoryRead: return "MemoryRead";
+		case AccessFlagBits::eMemoryWrite: return "MemoryWrite";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(AccessFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::AccessFlagBits::eIndirectCommandRead) result += "IndirectCommandRead | ";
+		if (value & vk::AccessFlagBits::eIndexRead) result += "IndexRead | ";
+		if (value & vk::AccessFlagBits::eVertexAttributeRead) result += "VertexAttributeRead | ";
+		if (value & vk::AccessFlagBits::eUniformRead) result += "UniformRead | ";
+		if (value & vk::AccessFlagBits::eInputAttachmentRead) result += "InputAttachmentRead | ";
+		if (value & vk::AccessFlagBits::eShaderRead) result += "ShaderRead | ";
+		if (value & vk::AccessFlagBits::eShaderWrite) result += "ShaderWrite | ";
+		if (value & vk::AccessFlagBits::eColorAttachmentRead) result += "ColorAttachmentRead | ";
+		if (value & vk::AccessFlagBits::eColorAttachmentWrite) result += "ColorAttachmentWrite | ";
+		if (value & vk::AccessFlagBits::eDepthStencilAttachmentRead) result += "DepthStencilAttachmentRead | ";
+		if (value & vk::AccessFlagBits::eDepthStencilAttachmentWrite) result += "DepthStencilAttachmentWrite | ";
+		if (value & vk::AccessFlagBits::eTransferRead) result += "TransferRead | ";
+		if (value & vk::AccessFlagBits::eTransferWrite) result += "TransferWrite | ";
+		if (value & vk::AccessFlagBits::eHostRead) result += "HostRead | ";
+		if (value & vk::AccessFlagBits::eHostWrite) result += "HostWrite | ";
+		if (value & vk::AccessFlagBits::eMemoryRead) result += "MemoryRead | ";
+		if (value & vk::AccessFlagBits::eMemoryWrite) result += "MemoryWrite | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(BufferUsageFlagBits value)
+	{
+		switch (value)
+		{
+		case BufferUsageFlagBits::eTransferSrc: return "TransferSrc";
+		case BufferUsageFlagBits::eTransferDst: return "TransferDst";
+		case BufferUsageFlagBits::eUniformTexelBuffer: return "UniformTexelBuffer";
+		case BufferUsageFlagBits::eStorageTexelBuffer: return "StorageTexelBuffer";
+		case BufferUsageFlagBits::eUniformBuffer: return "UniformBuffer";
+		case BufferUsageFlagBits::eStorageBuffer: return "StorageBuffer";
+		case BufferUsageFlagBits::eIndexBuffer: return "IndexBuffer";
+		case BufferUsageFlagBits::eVertexBuffer: return "VertexBuffer";
+		case BufferUsageFlagBits::eIndirectBuffer: return "IndirectBuffer";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(BufferUsageFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::BufferUsageFlagBits::eTransferSrc) result += "TransferSrc | ";
+		if (value & vk::BufferUsageFlagBits::eTransferDst) result += "TransferDst | ";
+		if (value & vk::BufferUsageFlagBits::eUniformTexelBuffer) result += "UniformTexelBuffer | ";
+		if (value & vk::BufferUsageFlagBits::eStorageTexelBuffer) result += "StorageTexelBuffer | ";
+		if (value & vk::BufferUsageFlagBits::eUniformBuffer) result += "UniformBuffer | ";
+		if (value & vk::BufferUsageFlagBits::eStorageBuffer) result += "StorageBuffer | ";
+		if (value & vk::BufferUsageFlagBits::eIndexBuffer) result += "IndexBuffer | ";
+		if (value & vk::BufferUsageFlagBits::eVertexBuffer) result += "VertexBuffer | ";
+		if (value & vk::BufferUsageFlagBits::eIndirectBuffer) result += "IndirectBuffer | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(BufferCreateFlagBits value)
+	{
+		switch (value)
+		{
+		case BufferCreateFlagBits::eSparseBinding: return "SparseBinding";
+		case BufferCreateFlagBits::eSparseResidency: return "SparseResidency";
+		case BufferCreateFlagBits::eSparseAliased: return "SparseAliased";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(BufferCreateFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::BufferCreateFlagBits::eSparseBinding) result += "SparseBinding | ";
+		if (value & vk::BufferCreateFlagBits::eSparseResidency) result += "SparseResidency | ";
+		if (value & vk::BufferCreateFlagBits::eSparseAliased) result += "SparseAliased | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(ShaderStageFlagBits value)
+	{
+		switch (value)
+		{
+		case ShaderStageFlagBits::eVertex: return "Vertex";
+		case ShaderStageFlagBits::eTessellationControl: return "TessellationControl";
+		case ShaderStageFlagBits::eTessellationEvaluation: return "TessellationEvaluation";
+		case ShaderStageFlagBits::eGeometry: return "Geometry";
+		case ShaderStageFlagBits::eFragment: return "Fragment";
+		case ShaderStageFlagBits::eCompute: return "Compute";
+		case ShaderStageFlagBits::eAllGraphics: return "AllGraphics";
+		case ShaderStageFlagBits::eAll: return "All";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ShaderStageFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::ShaderStageFlagBits::eVertex) result += "Vertex | ";
+		if (value & vk::ShaderStageFlagBits::eTessellationControl) result += "TessellationControl | ";
+		if (value & vk::ShaderStageFlagBits::eTessellationEvaluation) result += "TessellationEvaluation | ";
+		if (value & vk::ShaderStageFlagBits::eGeometry) result += "Geometry | ";
+		if (value & vk::ShaderStageFlagBits::eFragment) result += "Fragment | ";
+		if (value & vk::ShaderStageFlagBits::eCompute) result += "Compute | ";
+		if (value & vk::ShaderStageFlagBits::eAllGraphics) result += "AllGraphics | ";
+		if (value & vk::ShaderStageFlagBits::eAll) result += "All | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(ImageUsageFlagBits value)
+	{
+		switch (value)
+		{
+		case ImageUsageFlagBits::eTransferSrc: return "TransferSrc";
+		case ImageUsageFlagBits::eTransferDst: return "TransferDst";
+		case ImageUsageFlagBits::eSampled: return "Sampled";
+		case ImageUsageFlagBits::eStorage: return "Storage";
+		case ImageUsageFlagBits::eColorAttachment: return "ColorAttachment";
+		case ImageUsageFlagBits::eDepthStencilAttachment: return "DepthStencilAttachment";
+		case ImageUsageFlagBits::eTransientAttachment: return "TransientAttachment";
+		case ImageUsageFlagBits::eInputAttachment: return "InputAttachment";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ImageUsageFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::ImageUsageFlagBits::eTransferSrc) result += "TransferSrc | ";
+		if (value & vk::ImageUsageFlagBits::eTransferDst) result += "TransferDst | ";
+		if (value & vk::ImageUsageFlagBits::eSampled) result += "Sampled | ";
+		if (value & vk::ImageUsageFlagBits::eStorage) result += "Storage | ";
+		if (value & vk::ImageUsageFlagBits::eColorAttachment) result += "ColorAttachment | ";
+		if (value & vk::ImageUsageFlagBits::eDepthStencilAttachment) result += "DepthStencilAttachment | ";
+		if (value & vk::ImageUsageFlagBits::eTransientAttachment) result += "TransientAttachment | ";
+		if (value & vk::ImageUsageFlagBits::eInputAttachment) result += "InputAttachment | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(ImageCreateFlagBits value)
+	{
+		switch (value)
+		{
+		case ImageCreateFlagBits::eSparseBinding: return "SparseBinding";
+		case ImageCreateFlagBits::eSparseResidency: return "SparseResidency";
+		case ImageCreateFlagBits::eSparseAliased: return "SparseAliased";
+		case ImageCreateFlagBits::eMutableFormat: return "MutableFormat";
+		case ImageCreateFlagBits::eCubeCompatible: return "CubeCompatible";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ImageCreateFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::ImageCreateFlagBits::eSparseBinding) result += "SparseBinding | ";
+		if (value & vk::ImageCreateFlagBits::eSparseResidency) result += "SparseResidency | ";
+		if (value & vk::ImageCreateFlagBits::eSparseAliased) result += "SparseAliased | ";
+		if (value & vk::ImageCreateFlagBits::eMutableFormat) result += "MutableFormat | ";
+		if (value & vk::ImageCreateFlagBits::eCubeCompatible) result += "CubeCompatible | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(PipelineCreateFlagBits value)
+	{
+		switch (value)
+		{
+		case PipelineCreateFlagBits::eDisableOptimization: return "DisableOptimization";
+		case PipelineCreateFlagBits::eAllowDerivatives: return "AllowDerivatives";
+		case PipelineCreateFlagBits::eDerivative: return "Derivative";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(PipelineCreateFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::PipelineCreateFlagBits::eDisableOptimization) result += "DisableOptimization | ";
+		if (value & vk::PipelineCreateFlagBits::eAllowDerivatives) result += "AllowDerivatives | ";
+		if (value & vk::PipelineCreateFlagBits::eDerivative) result += "Derivative | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(ColorComponentFlagBits value)
+	{
+		switch (value)
+		{
+		case ColorComponentFlagBits::eR: return "R";
+		case ColorComponentFlagBits::eG: return "G";
+		case ColorComponentFlagBits::eB: return "B";
+		case ColorComponentFlagBits::eA: return "A";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ColorComponentFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::ColorComponentFlagBits::eR) result += "R | ";
+		if (value & vk::ColorComponentFlagBits::eG) result += "G | ";
+		if (value & vk::ColorComponentFlagBits::eB) result += "B | ";
+		if (value & vk::ColorComponentFlagBits::eA) result += "A | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(FenceCreateFlagBits value)
+	{
+		switch (value)
+		{
+		case FenceCreateFlagBits::eSignaled: return "Signaled";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(FenceCreateFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::FenceCreateFlagBits::eSignaled) result += "Signaled | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(FormatFeatureFlagBits value)
+	{
+		switch (value)
+		{
+		case FormatFeatureFlagBits::eSampledImage: return "SampledImage";
+		case FormatFeatureFlagBits::eStorageImage: return "StorageImage";
+		case FormatFeatureFlagBits::eStorageImageAtomic: return "StorageImageAtomic";
+		case FormatFeatureFlagBits::eUniformTexelBuffer: return "UniformTexelBuffer";
+		case FormatFeatureFlagBits::eStorageTexelBuffer: return "StorageTexelBuffer";
+		case FormatFeatureFlagBits::eStorageTexelBufferAtomic: return "StorageTexelBufferAtomic";
+		case FormatFeatureFlagBits::eVertexBuffer: return "VertexBuffer";
+		case FormatFeatureFlagBits::eColorAttachment: return "ColorAttachment";
+		case FormatFeatureFlagBits::eColorAttachmentBlend: return "ColorAttachmentBlend";
+		case FormatFeatureFlagBits::eDepthStencilAttachment: return "DepthStencilAttachment";
+		case FormatFeatureFlagBits::eBlitSrc: return "BlitSrc";
+		case FormatFeatureFlagBits::eBlitDst: return "BlitDst";
+		case FormatFeatureFlagBits::eSampledImageFilterLinear: return "SampledImageFilterLinear";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(FormatFeatureFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::FormatFeatureFlagBits::eSampledImage) result += "SampledImage | ";
+		if (value & vk::FormatFeatureFlagBits::eStorageImage) result += "StorageImage | ";
+		if (value & vk::FormatFeatureFlagBits::eStorageImageAtomic) result += "StorageImageAtomic | ";
+		if (value & vk::FormatFeatureFlagBits::eUniformTexelBuffer) result += "UniformTexelBuffer | ";
+		if (value & vk::FormatFeatureFlagBits::eStorageTexelBuffer) result += "StorageTexelBuffer | ";
+		if (value & vk::FormatFeatureFlagBits::eStorageTexelBufferAtomic) result += "StorageTexelBufferAtomic | ";
+		if (value & vk::FormatFeatureFlagBits::eVertexBuffer) result += "VertexBuffer | ";
+		if (value & vk::FormatFeatureFlagBits::eColorAttachment) result += "ColorAttachment | ";
+		if (value & vk::FormatFeatureFlagBits::eColorAttachmentBlend) result += "ColorAttachmentBlend | ";
+		if (value & vk::FormatFeatureFlagBits::eDepthStencilAttachment) result += "DepthStencilAttachment | ";
+		if (value & vk::FormatFeatureFlagBits::eBlitSrc) result += "BlitSrc | ";
+		if (value & vk::FormatFeatureFlagBits::eBlitDst) result += "BlitDst | ";
+		if (value & vk::FormatFeatureFlagBits::eSampledImageFilterLinear) result += "SampledImageFilterLinear | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(QueryControlFlagBits value)
+	{
+		switch (value)
+		{
+		case QueryControlFlagBits::ePrecise: return "Precise";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(QueryControlFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::QueryControlFlagBits::ePrecise) result += "Precise | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(QueryResultFlagBits value)
+	{
+		switch (value)
+		{
+		case QueryResultFlagBits::e64: return "64";
+		case QueryResultFlagBits::eWait: return "Wait";
+		case QueryResultFlagBits::eWithAvailability: return "WithAvailability";
+		case QueryResultFlagBits::ePartial: return "Partial";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(QueryResultFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::QueryResultFlagBits::e64) result += "64 | ";
+		if (value & vk::QueryResultFlagBits::eWait) result += "Wait | ";
+		if (value & vk::QueryResultFlagBits::eWithAvailability) result += "WithAvailability | ";
+		if (value & vk::QueryResultFlagBits::ePartial) result += "Partial | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(CommandBufferUsageFlagBits value)
+	{
+		switch (value)
+		{
+		case CommandBufferUsageFlagBits::eOneTimeSubmit: return "OneTimeSubmit";
+		case CommandBufferUsageFlagBits::eRenderPassContinue: return "RenderPassContinue";
+		case CommandBufferUsageFlagBits::eSimultaneousUse: return "SimultaneousUse";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CommandBufferUsageFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::CommandBufferUsageFlagBits::eOneTimeSubmit) result += "OneTimeSubmit | ";
+		if (value & vk::CommandBufferUsageFlagBits::eRenderPassContinue) result += "RenderPassContinue | ";
+		if (value & vk::CommandBufferUsageFlagBits::eSimultaneousUse) result += "SimultaneousUse | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(QueryPipelineStatisticFlagBits value)
+	{
+		switch (value)
+		{
+		case QueryPipelineStatisticFlagBits::eInputAssemblyVertices: return "InputAssemblyVertices";
+		case QueryPipelineStatisticFlagBits::eInputAssemblyPrimitives: return "InputAssemblyPrimitives";
+		case QueryPipelineStatisticFlagBits::eVertexShaderInvocations: return "VertexShaderInvocations";
+		case QueryPipelineStatisticFlagBits::eGeometryShaderInvocations: return "GeometryShaderInvocations";
+		case QueryPipelineStatisticFlagBits::eGeometryShaderPrimitives: return "GeometryShaderPrimitives";
+		case QueryPipelineStatisticFlagBits::eClippingInvocations: return "ClippingInvocations";
+		case QueryPipelineStatisticFlagBits::eClippingPrimitives: return "ClippingPrimitives";
+		case QueryPipelineStatisticFlagBits::eFragmentShaderInvocations: return "FragmentShaderInvocations";
+		case QueryPipelineStatisticFlagBits::eTessellationControlShaderPatches: return "TessellationControlShaderPatches";
+		case QueryPipelineStatisticFlagBits::eTessellationEvaluationShaderInvocations: return "TessellationEvaluationShaderInvocations";
+		case QueryPipelineStatisticFlagBits::eComputeShaderInvocations: return "ComputeShaderInvocations";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(QueryPipelineStatisticFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::QueryPipelineStatisticFlagBits::eInputAssemblyVertices) result += "InputAssemblyVertices | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eInputAssemblyPrimitives) result += "InputAssemblyPrimitives | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eVertexShaderInvocations) result += "VertexShaderInvocations | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eGeometryShaderInvocations) result += "GeometryShaderInvocations | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eGeometryShaderPrimitives) result += "GeometryShaderPrimitives | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eClippingInvocations) result += "ClippingInvocations | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eClippingPrimitives) result += "ClippingPrimitives | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eFragmentShaderInvocations) result += "FragmentShaderInvocations | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eTessellationControlShaderPatches) result += "TessellationControlShaderPatches | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eTessellationEvaluationShaderInvocations) result += "TessellationEvaluationShaderInvocations | ";
+		if (value & vk::QueryPipelineStatisticFlagBits::eComputeShaderInvocations) result += "ComputeShaderInvocations | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(ImageAspectFlagBits value)
+	{
+		switch (value)
+		{
+		case ImageAspectFlagBits::eColor: return "Color";
+		case ImageAspectFlagBits::eDepth: return "Depth";
+		case ImageAspectFlagBits::eStencil: return "Stencil";
+		case ImageAspectFlagBits::eMetadata: return "Metadata";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ImageAspectFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::ImageAspectFlagBits::eColor) result += "Color | ";
+		if (value & vk::ImageAspectFlagBits::eDepth) result += "Depth | ";
+		if (value & vk::ImageAspectFlagBits::eStencil) result += "Stencil | ";
+		if (value & vk::ImageAspectFlagBits::eMetadata) result += "Metadata | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(SparseImageFormatFlagBits value)
+	{
+		switch (value)
+		{
+		case SparseImageFormatFlagBits::eSingleMiptail: return "SingleMiptail";
+		case SparseImageFormatFlagBits::eAlignedMipSize: return "AlignedMipSize";
+		case SparseImageFormatFlagBits::eNonstandardBlockSize: return "NonstandardBlockSize";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SparseImageFormatFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::SparseImageFormatFlagBits::eSingleMiptail) result += "SingleMiptail | ";
+		if (value & vk::SparseImageFormatFlagBits::eAlignedMipSize) result += "AlignedMipSize | ";
+		if (value & vk::SparseImageFormatFlagBits::eNonstandardBlockSize) result += "NonstandardBlockSize | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(SparseMemoryBindFlagBits value)
+	{
+		switch (value)
+		{
+		case SparseMemoryBindFlagBits::eMetadata: return "Metadata";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SparseMemoryBindFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::SparseMemoryBindFlagBits::eMetadata) result += "Metadata | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(PipelineStageFlagBits value)
+	{
+		switch (value)
+		{
+		case PipelineStageFlagBits::eTopOfPipe: return "TopOfPipe";
+		case PipelineStageFlagBits::eDrawIndirect: return "DrawIndirect";
+		case PipelineStageFlagBits::eVertexInput: return "VertexInput";
+		case PipelineStageFlagBits::eVertexShader: return "VertexShader";
+		case PipelineStageFlagBits::eTessellationControlShader: return "TessellationControlShader";
+		case PipelineStageFlagBits::eTessellationEvaluationShader: return "TessellationEvaluationShader";
+		case PipelineStageFlagBits::eGeometryShader: return "GeometryShader";
+		case PipelineStageFlagBits::eFragmentShader: return "FragmentShader";
+		case PipelineStageFlagBits::eEarlyFragmentTests: return "EarlyFragmentTests";
+		case PipelineStageFlagBits::eLateFragmentTests: return "LateFragmentTests";
+		case PipelineStageFlagBits::eColorAttachmentOutput: return "ColorAttachmentOutput";
+		case PipelineStageFlagBits::eComputeShader: return "ComputeShader";
+		case PipelineStageFlagBits::eTransfer: return "Transfer";
+		case PipelineStageFlagBits::eBottomOfPipe: return "BottomOfPipe";
+		case PipelineStageFlagBits::eHost: return "Host";
+		case PipelineStageFlagBits::eAllGraphics: return "AllGraphics";
+		case PipelineStageFlagBits::eAllCommands: return "AllCommands";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(PipelineStageFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::PipelineStageFlagBits::eTopOfPipe) result += "TopOfPipe | ";
+		if (value & vk::PipelineStageFlagBits::eDrawIndirect) result += "DrawIndirect | ";
+		if (value & vk::PipelineStageFlagBits::eVertexInput) result += "VertexInput | ";
+		if (value & vk::PipelineStageFlagBits::eVertexShader) result += "VertexShader | ";
+		if (value & vk::PipelineStageFlagBits::eTessellationControlShader) result += "TessellationControlShader | ";
+		if (value & vk::PipelineStageFlagBits::eTessellationEvaluationShader) result += "TessellationEvaluationShader | ";
+		if (value & vk::PipelineStageFlagBits::eGeometryShader) result += "GeometryShader | ";
+		if (value & vk::PipelineStageFlagBits::eFragmentShader) result += "FragmentShader | ";
+		if (value & vk::PipelineStageFlagBits::eEarlyFragmentTests) result += "EarlyFragmentTests | ";
+		if (value & vk::PipelineStageFlagBits::eLateFragmentTests) result += "LateFragmentTests | ";
+		if (value & vk::PipelineStageFlagBits::eColorAttachmentOutput) result += "ColorAttachmentOutput | ";
+		if (value & vk::PipelineStageFlagBits::eComputeShader) result += "ComputeShader | ";
+		if (value & vk::PipelineStageFlagBits::eTransfer) result += "Transfer | ";
+		if (value & vk::PipelineStageFlagBits::eBottomOfPipe) result += "BottomOfPipe | ";
+		if (value & vk::PipelineStageFlagBits::eHost) result += "Host | ";
+		if (value & vk::PipelineStageFlagBits::eAllGraphics) result += "AllGraphics | ";
+		if (value & vk::PipelineStageFlagBits::eAllCommands) result += "AllCommands | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(CommandPoolCreateFlagBits value)
+	{
+		switch (value)
+		{
+		case CommandPoolCreateFlagBits::eTransient: return "Transient";
+		case CommandPoolCreateFlagBits::eResetCommandBuffer: return "ResetCommandBuffer";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CommandPoolCreateFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::CommandPoolCreateFlagBits::eTransient) result += "Transient | ";
+		if (value & vk::CommandPoolCreateFlagBits::eResetCommandBuffer) result += "ResetCommandBuffer | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(CommandPoolResetFlagBits value)
+	{
+		switch (value)
+		{
+		case CommandPoolResetFlagBits::eReleaseResources: return "ReleaseResources";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CommandPoolResetFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::CommandPoolResetFlagBits::eReleaseResources) result += "ReleaseResources | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(CommandBufferResetFlagBits value)
+	{
+		switch (value)
+		{
+		case CommandBufferResetFlagBits::eReleaseResources: return "ReleaseResources";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CommandBufferResetFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::CommandBufferResetFlagBits::eReleaseResources) result += "ReleaseResources | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(SampleCountFlagBits value)
+	{
+		switch (value)
+		{
+		case SampleCountFlagBits::e1: return "1";
+		case SampleCountFlagBits::e2: return "2";
+		case SampleCountFlagBits::e4: return "4";
+		case SampleCountFlagBits::e8: return "8";
+		case SampleCountFlagBits::e16: return "16";
+		case SampleCountFlagBits::e32: return "32";
+		case SampleCountFlagBits::e64: return "64";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SampleCountFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::SampleCountFlagBits::e1) result += "1 | ";
+		if (value & vk::SampleCountFlagBits::e2) result += "2 | ";
+		if (value & vk::SampleCountFlagBits::e4) result += "4 | ";
+		if (value & vk::SampleCountFlagBits::e8) result += "8 | ";
+		if (value & vk::SampleCountFlagBits::e16) result += "16 | ";
+		if (value & vk::SampleCountFlagBits::e32) result += "32 | ";
+		if (value & vk::SampleCountFlagBits::e64) result += "64 | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(AttachmentDescriptionFlagBits value)
+	{
+		switch (value)
+		{
+		case AttachmentDescriptionFlagBits::eMayAlias: return "MayAlias";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(AttachmentDescriptionFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::AttachmentDescriptionFlagBits::eMayAlias) result += "MayAlias | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(StencilFaceFlagBits value)
+	{
+		switch (value)
+		{
+		case StencilFaceFlagBits::eFront: return "Front";
+		case StencilFaceFlagBits::eBack: return "Back";
+		case StencilFaceFlagBits::eVkStencilFrontAndBack: return "VkStencilFrontAndBack";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(StencilFaceFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::StencilFaceFlagBits::eFront) result += "Front | ";
+		if (value & vk::StencilFaceFlagBits::eBack) result += "Back | ";
+		if (value & vk::StencilFaceFlagBits::eVkStencilFrontAndBack) result += "VkStencilFrontAndBack | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(DescriptorPoolCreateFlagBits value)
+	{
+		switch (value)
+		{
+		case DescriptorPoolCreateFlagBits::eFreeDescriptorSet: return "FreeDescriptorSet";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DescriptorPoolCreateFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet) result += "FreeDescriptorSet | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(DependencyFlagBits value)
+	{
+		switch (value)
+		{
+		case DependencyFlagBits::eByRegion: return "ByRegion";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DependencyFlags value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::DependencyFlagBits::eByRegion) result += "ByRegion | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(PresentModeKHR value)
+	{
+		switch (value)
+		{
+		case PresentModeKHR::eImmediateKHR: return "ImmediateKHR";
+		case PresentModeKHR::eMailboxKHR: return "MailboxKHR";
+		case PresentModeKHR::eFifoKHR: return "FifoKHR";
+		case PresentModeKHR::eFifoRelaxedKHR: return "FifoRelaxedKHR";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(ColorSpaceKHR value)
+	{
+		switch (value)
+		{
+		case ColorSpaceKHR::eVkColorspaceSrgbNonlinearKHR: return "VkColorspaceSrgbNonlinearKHR";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DisplayPlaneAlphaFlagBitsKHR value)
+	{
+		switch (value)
+		{
+		case DisplayPlaneAlphaFlagBitsKHR::eOpaque: return "Opaque";
+		case DisplayPlaneAlphaFlagBitsKHR::eGlobal: return "Global";
+		case DisplayPlaneAlphaFlagBitsKHR::ePerPixel: return "PerPixel";
+		case DisplayPlaneAlphaFlagBitsKHR::ePerPixelPremultiplied: return "PerPixelPremultiplied";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DisplayPlaneAlphaFlagsKHR value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::eOpaque) result += "Opaque | ";
+		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::eGlobal) result += "Global | ";
+		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::ePerPixel) result += "PerPixel | ";
+		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::ePerPixelPremultiplied) result += "PerPixelPremultiplied | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(CompositeAlphaFlagBitsKHR value)
+	{
+		switch (value)
+		{
+		case CompositeAlphaFlagBitsKHR::eOpaque: return "Opaque";
+		case CompositeAlphaFlagBitsKHR::ePreMultiplied: return "PreMultiplied";
+		case CompositeAlphaFlagBitsKHR::ePostMultiplied: return "PostMultiplied";
+		case CompositeAlphaFlagBitsKHR::eInherit: return "Inherit";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(CompositeAlphaFlagsKHR value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::CompositeAlphaFlagBitsKHR::eOpaque) result += "Opaque | ";
+		if (value & vk::CompositeAlphaFlagBitsKHR::ePreMultiplied) result += "PreMultiplied | ";
+		if (value & vk::CompositeAlphaFlagBitsKHR::ePostMultiplied) result += "PostMultiplied | ";
+		if (value & vk::CompositeAlphaFlagBitsKHR::eInherit) result += "Inherit | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(SurfaceTransformFlagBitsKHR value)
+	{
+		switch (value)
+		{
+		case SurfaceTransformFlagBitsKHR::eIdentity: return "Identity";
+		case SurfaceTransformFlagBitsKHR::eRotate90: return "Rotate90";
+		case SurfaceTransformFlagBitsKHR::eRotate180: return "Rotate180";
+		case SurfaceTransformFlagBitsKHR::eRotate270: return "Rotate270";
+		case SurfaceTransformFlagBitsKHR::eHorizontalMirror: return "HorizontalMirror";
+		case SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate90: return "HorizontalMirrorRotate90";
+		case SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180: return "HorizontalMirrorRotate180";
+		case SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270: return "HorizontalMirrorRotate270";
+		case SurfaceTransformFlagBitsKHR::eInherit: return "Inherit";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(SurfaceTransformFlagsKHR value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::SurfaceTransformFlagBitsKHR::eIdentity) result += "Identity | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eRotate90) result += "Rotate90 | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eRotate180) result += "Rotate180 | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eRotate270) result += "Rotate270 | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirror) result += "HorizontalMirror | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate90) result += "HorizontalMirrorRotate90 | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180) result += "HorizontalMirrorRotate180 | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270) result += "HorizontalMirrorRotate270 | ";
+		if (value & vk::SurfaceTransformFlagBitsKHR::eInherit) result += "Inherit | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(DebugReportFlagBitsEXT value)
+	{
+		switch (value)
+		{
+		case DebugReportFlagBitsEXT::eInformation: return "Information";
+		case DebugReportFlagBitsEXT::eWarning: return "Warning";
+		case DebugReportFlagBitsEXT::ePerformanceWarning: return "PerformanceWarning";
+		case DebugReportFlagBitsEXT::eError: return "Error";
+		case DebugReportFlagBitsEXT::eDebug: return "Debug";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DebugReportFlagsEXT value)
+	{
+		if (!value) return eastl::string();
+		eastl::string result;
+		if (value & vk::DebugReportFlagBitsEXT::eInformation) result += "Information | ";
+		if (value & vk::DebugReportFlagBitsEXT::eWarning) result += "Warning | ";
+		if (value & vk::DebugReportFlagBitsEXT::ePerformanceWarning) result += "PerformanceWarning | ";
+		if (value & vk::DebugReportFlagBitsEXT::eError) result += "Error | ";
+		if (value & vk::DebugReportFlagBitsEXT::eDebug) result += "Debug | ";
+		return result.substr(0, result.size() - 3);
+	}
+
+	inline eastl::string to_string(DebugReportObjectTypeEXT value)
+	{
+		switch (value)
+		{
+		case DebugReportObjectTypeEXT::eUnknownEXT: return "UnknownEXT";
+		case DebugReportObjectTypeEXT::eInstanceEXT: return "InstanceEXT";
+		case DebugReportObjectTypeEXT::ePhysicalDeviceEXT: return "PhysicalDeviceEXT";
+		case DebugReportObjectTypeEXT::eDeviceEXT: return "DeviceEXT";
+		case DebugReportObjectTypeEXT::eQueueEXT: return "QueueEXT";
+		case DebugReportObjectTypeEXT::eSemaphoreEXT: return "SemaphoreEXT";
+		case DebugReportObjectTypeEXT::eCommandBufferEXT: return "CommandBufferEXT";
+		case DebugReportObjectTypeEXT::eFenceEXT: return "FenceEXT";
+		case DebugReportObjectTypeEXT::eDeviceMemoryEXT: return "DeviceMemoryEXT";
+		case DebugReportObjectTypeEXT::eBufferEXT: return "BufferEXT";
+		case DebugReportObjectTypeEXT::eImageEXT: return "ImageEXT";
+		case DebugReportObjectTypeEXT::eEventEXT: return "EventEXT";
+		case DebugReportObjectTypeEXT::eQueryPoolEXT: return "QueryPoolEXT";
+		case DebugReportObjectTypeEXT::eBufferViewEXT: return "BufferViewEXT";
+		case DebugReportObjectTypeEXT::eImageViewEXT: return "ImageViewEXT";
+		case DebugReportObjectTypeEXT::eShaderModuleEXT: return "ShaderModuleEXT";
+		case DebugReportObjectTypeEXT::ePipelineCacheEXT: return "PipelineCacheEXT";
+		case DebugReportObjectTypeEXT::ePipelineLayoutEXT: return "PipelineLayoutEXT";
+		case DebugReportObjectTypeEXT::eRenderPassEXT: return "RenderPassEXT";
+		case DebugReportObjectTypeEXT::ePipelineEXT: return "PipelineEXT";
+		case DebugReportObjectTypeEXT::eDescriptorSetLayoutEXT: return "DescriptorSetLayoutEXT";
+		case DebugReportObjectTypeEXT::eSamplerEXT: return "SamplerEXT";
+		case DebugReportObjectTypeEXT::eDescriptorPoolEXT: return "DescriptorPoolEXT";
+		case DebugReportObjectTypeEXT::eDescriptorSetEXT: return "DescriptorSetEXT";
+		case DebugReportObjectTypeEXT::eFramebufferEXT: return "FramebufferEXT";
+		case DebugReportObjectTypeEXT::eCommandPoolEXT: return "CommandPoolEXT";
+		case DebugReportObjectTypeEXT::eSurfaceKhrEXT: return "SurfaceKhrEXT";
+		case DebugReportObjectTypeEXT::eSwapchainKhrEXT: return "SwapchainKhrEXT";
+		case DebugReportObjectTypeEXT::eDebugReportEXT: return "DebugReportEXT";
+		default: return "unknown";
+		}
+	}
+
+	inline eastl::string to_string(DebugReportErrorEXT value)
+	{
+		switch (value)
+		{
+		case DebugReportErrorEXT::eNoneEXT: return "NoneEXT";
+		case DebugReportErrorEXT::eCallbackRefEXT: return "CallbackRefEXT";
+		default: return "unknown";
+		}
+	}
+
+} // namespace vk
+
+#endif

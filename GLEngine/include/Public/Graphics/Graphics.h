@@ -19,6 +19,8 @@ public:
 	enum class EFaceCulling { FRONT, BACK, NONE };
 	enum class EDepthFunc { LESS, LEQUAL, EQUAL, GREATER };
 
+	~Graphics();
+
 	void clear(const glm::vec4& color, bool clearColor = true, bool clearDepth = true);
 	void swap();
 
@@ -49,11 +51,11 @@ public:
 	void* getHWND() const          { return m_hwnd; }
 	void* getHINSTANCE() const     { return m_hinstance; }
 	void* getHDC() const           { return m_hdc; }
+	void* getWNDPROC() const       { return m_wndproc; }
 
 private:
 
 	Graphics(const char* windowName, uint screenWidth, uint screenHeight, uint screenXPos, uint screenYPos, const EWindowMode& windowMode);
-	~Graphics();
 	Graphics(const Graphics& copy) = delete;
 
 	void createGLContext();
@@ -66,6 +68,7 @@ private:
 	void* m_hinstance           = NULL;
 	void* m_hwnd                = NULL;
 	void* m_hdc                 = NULL;
+	void* m_wndproc             = NULL;
 	bool m_fullscreen           = false;
 	bool m_bordered             = false;
 	bool m_vsync                = false;

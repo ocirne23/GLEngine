@@ -3,7 +3,6 @@
 #include "Utils/FileUtils.h"
 #include "EASTL/algorithm.h"
 
-#define NOMINMAX
 #include <windows.h>
 
 BEGIN_UNNAMED_NAMESPACE()

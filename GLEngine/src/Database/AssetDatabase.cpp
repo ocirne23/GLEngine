@@ -96,7 +96,6 @@ IAsset* AssetDatabase::loadAsset(const eastl::string& a_databaseEntryName, EAsse
 		m_loadedAssets.insert({a_databaseEntryName, asset});
 		return asset;
 	}
-
 	return NULL;
 }
 

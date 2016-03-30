@@ -57,7 +57,7 @@ void FPSCameraController::update(PerspectiveCamera& a_camera, float a_deltaSec, 
 
 	// Rotate horizontally
 	direction = glm::rotate(direction, xLookRotation, UP);
-	float xzAngle = glm::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
+	float xzAngle = std::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
 
 	// Rotate vertically
 	glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));

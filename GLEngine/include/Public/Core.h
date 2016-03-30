@@ -1,10 +1,30 @@
 #pragma once
 
+#include "gsl/gsl.h"
+
 #undef NULL
 #define NULL nullptr
 
-#define SAFE_DELETE(X) if (X) {delete X; X = NULL; }
-#define SAFE_DELETE_ARRAY(X) if (X) { delete[] X; X = NULL; }
+template <typename T>
+void SAFE_DELETE(owner<T*> owner)
+{
+	if (owner)
+	{
+		delete owner;
+		owner = NULL;
+	}
+}
+
+template <typename T>
+void SAFE_DELETE_ARRAY(owner<T*> owner)
+{
+	if (owner)
+	{
+		delete[] owner;
+		owner = NULL;
+	}
+}
+
 #define BEGIN_NAMESPACE(X) namespace X {
 #define END_NAMESPACE(X) }
 #define BEGIN_UNNAMED_NAMESPACE() namespace {

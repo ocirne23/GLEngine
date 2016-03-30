@@ -7,7 +7,7 @@
 #include "Graphics/Utils/CheckGLError.h"
 #include "Utils/StringUtils.h"
 
-#include <glm/gtx/random.hpp>
+#include <glm/gtc/random.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 

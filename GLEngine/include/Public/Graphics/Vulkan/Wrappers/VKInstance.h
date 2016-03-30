@@ -14,7 +14,7 @@ public:
 	~VKInstance();
 
 	void initialize();
-	
+
 	uint getNumPhysicalDevices() const 
 	{ 
 		assert(m_initialized); 
@@ -36,7 +36,7 @@ private:
 private:
 	
 	bool m_initialized = false;
-
+	bool m_validationEnabled = false;
 	vk::Instance m_instance = NULL;
 	eastl::vector<VKPhysicalDevice> m_physicalDevices;
 };

@@ -13,6 +13,8 @@ class GLContext
 public:
 	friend class Graphics;
 
+	~GLContext();
+
 	uint getGLMajorVersion() const                   { return m_glMajorVersion; }
 	uint getGLMinorVersion() const                   { return m_glMinorVersion; }
 	uint getMaxTextureUnits() const                  { return m_maxTextureUnits; }
@@ -25,7 +27,6 @@ public:
 private:
 
 	GLContext();
-	~GLContext();
 	GLContext(const GLContext& copy) = delete;
 
 private:

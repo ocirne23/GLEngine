@@ -19,8 +19,8 @@ void VKPhysicalDevice::initialize(not_null<VKInstance*> a_instance, vk::Physical
 	m_instance = a_instance;
 	m_physDevice = a_physDevice;
 
-	vk::getPhysicalDeviceMemoryProperties(m_physDevice, m_memProperties);
-	m_queueFamilyProperties = vk::getPhysicalDeviceQueueFamilyProperties(m_physDevice);
+	m_memProperties = m_physDevice.getMemoryProperties();
+	m_queueFamilyProperties = m_physDevice.getQueueFamilyProperties();
 
 	m_initialized = true;
 }
@@ -38,7 +38,8 @@ uint VKPhysicalDevice::getQueueNodeIndex(VKDevice::EDeviceType a_deviceType)
 {
 	if (a_deviceType == VKDevice::EDeviceType::Graphics)
 	{
-		return getSwapchain().getGraphicsQueueNodeIndex();
+		assert(false); //TODO
+		return 0;// getSwapchain().getGraphicsQueueNodeIndex();
 	}
 	else
 	{
@@ -75,7 +76,7 @@ vk::Format VKPhysicalDevice::getDepthFormat()
 	for (auto& format : depthFormats)
 	{
 		vk::FormatProperties formatProperties;
-		vk::getPhysicalDeviceFormatProperties(m_physDevice, format, formatProperties);
+		m_physDevice.getFormatProperties(format, &formatProperties);
 		// Format must support depth stencil attachment for optimal tiling
 		if (formatProperties.optimalTilingFeatures() & vk::FormatFeatureFlagBits::eDepthStencilAttachment)
 			return format;
@@ -92,11 +93,11 @@ VKDevice& VKPhysicalDevice::getDevice(VKDevice::EDeviceType a_deviceType)
 		device.initialize(*this, a_deviceType, getQueueNodeIndex(a_deviceType));
 	return device;
 }
-
+/*
 VKSwapchain& VKPhysicalDevice::getSwapchain()
 {
 	assert(m_initialized);
 	if (!m_swapchain.isInitialized())
 		m_swapchain.initialize(*m_instance, *this);
 	return m_swapchain;
-}
+}*/

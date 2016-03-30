@@ -2,7 +2,6 @@
 
 #include "Utils/FileHandle.h"
 
-#define NOMINMAX
 #include <Windows.h>
 #include <fileapi.h>
 #include <assert.h>
