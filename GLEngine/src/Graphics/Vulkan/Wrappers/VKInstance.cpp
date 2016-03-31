@@ -42,7 +42,6 @@ void VKInstance::initialize()
 
 	VKVerifier result = vk::createInstance(&instanceCreateInfo, NULL, &m_instance);
 
-
 	eastl::vector<vk::PhysicalDevice> physDevices;
 	result = m_instance.enumeratePhysicalDevices(physDevices);
 	

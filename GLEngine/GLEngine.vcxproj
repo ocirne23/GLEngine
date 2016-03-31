@@ -89,9 +89,12 @@
     <ClCompile Include="src\Graphics\Vulkan\Test\vulkantools.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandBuffer.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandPool.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKDevice.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKInstance.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKPhysicalDevice.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKSwapchain.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
@@ -621,9 +624,12 @@
     <ClInclude Include="include\Public\Graphics\Mantle\Wrappers\GRPhysicalGPU.h" />
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandPool.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDevice.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKInstance.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPhysicalDevice.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchain.h" />
     <ClInclude Include="include\Public\Utils\StringUtils.h" />
     <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
     <ClInclude Include="include\3rdparty\EASTL\utility.h" />

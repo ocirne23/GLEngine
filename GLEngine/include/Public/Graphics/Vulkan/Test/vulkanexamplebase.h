@@ -37,6 +37,7 @@
 #include "Graphics/Vulkan/Test/vulkanMeshLoader.hpp"
 
 #include "Graphics/Vulkan/Wrappers/VKInstance.h"
+#include "Graphics/Vulkan/Wrappers/VKSwapchain.h"
 
 
 #define M_PI 3.14159265359
@@ -139,6 +140,10 @@ public:
 protected:
 
 	VKInstance m_instance;
+	VKPhysicalDevice* m_physDevice = NULL;
+	VKDevice* m_device = NULL;
+	VKSwapchain* m_swapchain = NULL;
+
 
 	float frameTimer = 1.0f;
 	VkInstance instance;

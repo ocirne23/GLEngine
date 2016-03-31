@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "Graphics/Vulkan/vk_cpp.h"
 #include "Graphics/Vulkan/Wrappers/VKDevice.h"
-//#include "Graphics/Vulkan/Wrappers/VKSwapchain.h"
+#include "Graphics/Vulkan/Wrappers/VKSwapchain.h"
 
 #include "gsl/gsl.h"
 #include "EASTL/vector.h"
@@ -22,7 +22,7 @@ public:
 	bool isInitialized() const { return m_initialized; }
 
 	VKDevice& getDevice(VKDevice::EDeviceType deviceType = VKDevice::EDeviceType::Graphics);
-	//VKSwapchain& getSwapchain();
+	VKSwapchain& getSwapchain();
 	uint getQueueNodeIndex(VKDevice::EDeviceType deviceType);
 	vk::Format getDepthFormat();
 
@@ -63,5 +63,5 @@ private:
 	eastl::vector<vk::QueueFamilyProperties> m_queueFamilyProperties;
 	VKDevice m_devices[uint(VKDevice::EDeviceType::NUM_TYPES)];
 
-	//VKSwapchain m_swapchain;
+	VKSwapchain m_swapchain;
 };

@@ -16,7 +16,7 @@ void VKCommandPool::initialize(vk::Device a_device, uint a_queueNodeIndex)
 		.queueFamilyIndex(a_queueNodeIndex)
 		.flags(vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
-	VKVerifier result = vk::createCommandPool(a_device, &commandPoolCreateInfo, NULL, &m_pool);
+	m_pool = a_device.createCommandPool(commandPoolCreateInfo, NULL);
 
 	m_initialized = true;
 }

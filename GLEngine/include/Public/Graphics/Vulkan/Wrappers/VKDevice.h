@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Graphics/Vulkan/vk_cpp.h"
-//#include "Graphics/Vulkan/Wrappers/VKCommandPool.h"
+#include "Graphics/Vulkan/Wrappers/VKCommandPool.h"
 
 class VKPhysicalDevice;
 
@@ -38,13 +38,13 @@ public:
 		return m_physDevice; 
 	}
 
-	//VKCommandPool& getCommandPool();
+	VKCommandPool& getCommandPool();
 
 private:
 
 	friend class VKPhysicalDevice;
 
-	void initialize(VKPhysicalDevice& physDevice, EDeviceType type, uint queueFamilyIndex);
+	void initialize(VKPhysicalDevice& physDevice, EDeviceType type);
 	void cleanup();
 
 private:
@@ -55,5 +55,5 @@ private:
 	vk::Device m_device;
 	vk::Queue m_queue;
 
-	//VKCommandPool m_commandPool;
+	VKCommandPool m_commandPool;
 };

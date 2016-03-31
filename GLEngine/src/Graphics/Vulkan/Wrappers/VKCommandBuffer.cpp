@@ -23,7 +23,7 @@ void VKCommandBuffer::initialize(VKDevice& a_device)
 		.level(vk::CommandBufferLevel::ePrimary)
 		.commandBufferCount(1);
 
-	vk::allocateCommandBuffers(a_device.getVKDevice(), &commandBufferAllocateInfo, &m_commandBuffer);
+	m_commandBuffer = a_device.getVKDevice().allocateCommandBuffers(commandBufferAllocateInfo)[0];
 
 	m_initialized = true;
 }
@@ -33,9 +33,8 @@ void VKCommandBuffer::cleanup()
 	assert(m_initialized);
 	assert(!m_begun);
 
-	VKVerifier result = vk::queueWaitIdle(m_device->getVKQueue()); // Maybe seperate?
-
-	vk::freeCommandBuffers(m_device->getVKDevice(), m_device->getCommandPool().getVKCommandPool(), 1, &m_commandBuffer);
+	m_device->getVKQueue().waitIdle(); // Maybe seperate?
+	m_device->getVKDevice().freeCommandBuffers(m_device->getCommandPool().getVKCommandPool(), 1, &m_commandBuffer);
 	m_commandBuffer = VK_NULL_HANDLE;
 
 	m_initialized = false;
@@ -46,7 +45,7 @@ void VKCommandBuffer::begin()
 	assert(m_initialized);
 	assert(!m_begun);
 	vk::CommandBufferBeginInfo commandBufferBeginInfo = vk::CommandBufferBeginInfo();
-	vk::beginCommandBuffer(m_commandBuffer, commandBufferBeginInfo);
+	m_commandBuffer.begin(commandBufferBeginInfo);
 	m_begun = true;
 }
 
@@ -54,7 +53,7 @@ void VKCommandBuffer::end()
 {
 	assert(m_initialized);
 	assert(m_begun);
-	vk::endCommandBuffer(m_commandBuffer);
+	m_commandBuffer.end();
 	m_begun = false;
 }
 
@@ -67,12 +66,11 @@ void VKCommandBuffer::submit()
 		.commandBufferCount(1)
 		.pCommandBuffers(&m_commandBuffer);
 
-	VKVerifier result = vk::queueSubmit(m_device->getVKQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+	VKVerifier result = m_device->getVKQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
 }
 
 void VKCommandBuffer::waitIdle()
 {
 	assert(m_initialized);
-
-	vk::queueWaitIdle(m_device->getVKQueue());
+	m_device->getVKQueue().waitIdle();
 }

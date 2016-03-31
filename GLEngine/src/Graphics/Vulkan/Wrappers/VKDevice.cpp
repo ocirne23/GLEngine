@@ -10,19 +10,21 @@ VKDevice::~VKDevice()
 	if (m_initialized)
 		cleanup();
 }
-/*
+
 VKCommandPool& VKDevice::getCommandPool()
 {
 	if (!m_commandPool.isInitialized())
 		m_commandPool.initialize(m_device, m_physDevice->getQueueNodeIndex(m_type));
 	return m_commandPool;
 }
-*/
 
-void VKDevice::initialize(VKPhysicalDevice& a_physDevice, EDeviceType a_type, uint a_queueFamilyIndex)
+
+void VKDevice::initialize(VKPhysicalDevice& a_physDevice, EDeviceType a_type)
 {
 	if (m_initialized)
 		cleanup();
+
+	uint queueFamilyIndex = a_physDevice.getQueueNodeIndex(a_type);
 
 	m_physDevice = &a_physDevice;
 	m_type = a_type;
@@ -31,7 +33,7 @@ void VKDevice::initialize(VKPhysicalDevice& a_physDevice, EDeviceType a_type, ui
 	eastl::array<float, 1> queuePriorities = { 0.0f };
 
 	vk::DeviceQueueCreateInfo deviceQueueCreateInfo = vk::DeviceQueueCreateInfo()
-		.queueFamilyIndex(a_queueFamilyIndex)
+		.queueFamilyIndex(queueFamilyIndex)
 		.queueCount(1)
 		.pQueuePriorities(queuePriorities.data());
 
@@ -51,7 +53,7 @@ void VKDevice::initialize(VKPhysicalDevice& a_physDevice, EDeviceType a_type, ui
 	}
 
 	m_device = a_physDevice.getVKPhysicalDevice().createDevice(deviceCreateInfo, NULL);
-	m_queue = m_device.getQueue(a_queueFamilyIndex, 0);
+	m_queue = m_device.getQueue(queueFamilyIndex, 0);
 
 	m_initialized = true;
 }

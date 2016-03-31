@@ -23,13 +23,13 @@ void VKSwapchain::initialize(VKInstance& a_instance, VKPhysicalDevice& a_physDev
 		.hinstance(scast<HINSTANCE>(GLEngine::graphics->getHINSTANCE()))
 		.hwnd(scast<HWND>(GLEngine::graphics->getHWND()));
 
-	VKVerifier result = vk::createWin32SurfaceKHR(a_instance.getVKInstance(), &win32SurfaceCreateInfo, NULL, &m_surface);
+	m_surface = a_instance.getVKInstance().createWin32SurfaceKHR(win32SurfaceCreateInfo, NULL);
 
 	const eastl::vector<vk::QueueFamilyProperties>& queueFamilyProperties = a_physDevice.getQueueFamilyProperties();
 	eastl::vector<vk::Bool32> supportsPresent;
 	supportsPresent.resize(queueFamilyProperties.size());
 	for (uint i = 0; i < queueFamilyProperties.size(); ++i)
-		vk::getPhysicalDeviceSurfaceSupportKHR(a_physDevice.getVKPhysicalDevice(), i, m_surface, supportsPresent[i]);
+		supportsPresent[i] = a_physDevice.getVKPhysicalDevice().getSurfaceSupportKHR(i, m_surface);
 
 	// Search for a graphics and a present queue in the array of queue
 	// families, try to find one that supports both
@@ -71,11 +71,13 @@ void VKSwapchain::initialize(VKInstance& a_instance, VKPhysicalDevice& a_physDev
 	if (graphicsQueueNodeIndex != presentQueueNodeIndex)
 		assert(false);
 
+	assert(graphicsQueueNodeIndex == a_physDevice.getQueueNodeIndex(VKDevice::EDeviceType::Graphics));
+
 	m_graphicsQueueNodeIndex = graphicsQueueNodeIndex;
 	m_presentQueueNodeIndex = presentQueueNodeIndex;
 
 	eastl::vector<vk::SurfaceFormatKHR> surfaceFormats;
-	result = vk::getPhysicalDeviceSurfaceFormatsKHR(a_physDevice.getVKPhysicalDevice(), m_surface, surfaceFormats);
+	VKVerifier result = a_physDevice.getVKPhysicalDevice().getSurfaceFormatsKHR(m_surface, surfaceFormats);
 
 	// If the format list includes just one entry of VK_FORMAT_UNDEFINED,
 	// the surface has no preferred format.  Otherwise, at least one
@@ -99,13 +101,14 @@ void VKSwapchain::setup(VKCommandBuffer& a_setupCommandBuffer, uint a_width, uin
 	assert(m_initialized);
 	assert(!m_setup);
 
+	vk::PhysicalDevice physDevice = m_physDevice->getVKPhysicalDevice();
 	vk::SwapchainKHR oldSwapchain = m_swapchain;
 
 	vk::SurfaceCapabilitiesKHR surfaceCapabilities;
-	VKVerifier result = vk::getPhysicalDeviceSurfaceCapabilitiesKHR(m_physDevice->getVKPhysicalDevice(), m_surface, surfaceCapabilities);
+	VKVerifier result = physDevice.getSurfaceCapabilitiesKHR(m_surface, surfaceCapabilities);
 
 	eastl::vector<vk::PresentModeKHR> presentModes;
-	result = vk::getPhysicalDeviceSurfacePresentModesKHR(m_physDevice->getVKPhysicalDevice(), m_surface, presentModes);
+	result = physDevice.getSurfacePresentModesKHR(m_surface, presentModes);
 
 	vk::Extent2D swapchainExtent(a_width, a_height);
 	if (surfaceCapabilities.currentExtent().width() != -1)
@@ -116,16 +119,16 @@ void VKSwapchain::setup(VKCommandBuffer& a_setupCommandBuffer, uint a_width, uin
 		a_height = swapchainExtent.height(); */
 	}
 
-	vk::PresentModeKHR swapchainPresentMode = vk::PresentModeKHR::eVkPresentModeFifoKhr;
+	vk::PresentModeKHR swapchainPresentMode = vk::PresentModeKHR::eFifoKHR;
 	for (uint i = 0; i < presentModes.size(); ++i)
 	{
-		if (presentModes[i] == vk::PresentModeKHR::eVkPresentModeMailboxKhr)
+		if (presentModes[i] == vk::PresentModeKHR::eMailboxKHR)
 		{
-			swapchainPresentMode = vk::PresentModeKHR::eVkPresentModeMailboxKhr;
+			swapchainPresentMode = vk::PresentModeKHR::eMailboxKHR;
 			break;
 		}
-		if ((swapchainPresentMode != vk::PresentModeKHR::eVkPresentModeMailboxKhr) && presentModes[i] == vk::PresentModeKHR::eVkPresentModeImmediateKhr)
-			swapchainPresentMode = vk::PresentModeKHR::eVkPresentModeImmediateKhr;
+		if ((swapchainPresentMode != vk::PresentModeKHR::eMailboxKHR) && presentModes[i] == vk::PresentModeKHR::eImmediateKHR)
+			swapchainPresentMode = vk::PresentModeKHR::eImmediateKHR;
 	}
 
 	uint desiredNumSwapchainImages = surfaceCapabilities.minImageCount() + 1;
@@ -156,13 +159,12 @@ void VKSwapchain::setup(VKCommandBuffer& a_setupCommandBuffer, uint a_width, uin
 		.compositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
 
 	vk::Device device = m_physDevice->getDevice(VKDevice::EDeviceType::Graphics).getVKDevice();
+	m_swapchain = device.createSwapchainKHR(swapchainCreateInfo, NULL);
 
-	result = vk::createSwapchainKHR(device, &swapchainCreateInfo, NULL, &m_swapchain);
+	if (oldSwapchain)
+		device.destroySwapchainKHR(oldSwapchain, NULL);
 
-	if (oldSwapchain != VK_NULL_HANDLE)
-		vk::destroySwapchainKHR(device, oldSwapchain, NULL);
-
-	result = vk::getSwapchainImagesKHR(device, m_swapchain, m_images);
+	result = device.getSwapchainImagesKHR(m_swapchain, m_images);
 	m_views.resize(m_images.size());
 
 	for (uint i = 0; i < m_images.size(); ++i)
@@ -182,9 +184,9 @@ void VKSwapchain::setup(VKCommandBuffer& a_setupCommandBuffer, uint a_width, uin
 				1)) // layerCount
 			.viewType(vk::ImageViewType::e2D);
 
-		VKUtils::setImageLayout(a_setupCommandBuffer.getVKCommandBuffer(), m_images[i], vk::ImageAspectFlagBits::eColor, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKhr);
+		VKUtils::setImageLayout(a_setupCommandBuffer.getVKCommandBuffer(), m_images[i], vk::ImageAspectFlagBits::eColor, vk::ImageLayout::eUndefined, vk::ImageLayout::ePresentSrcKHR);
 		colorAttachmentViewCreateInfo.image(m_images[i]);
-		result = vk::createImageView(device, &colorAttachmentViewCreateInfo, NULL, &m_views[i]);
+		m_views[i] = device.createImageView(colorAttachmentViewCreateInfo, NULL);
 	}
 
 	m_setup = true;

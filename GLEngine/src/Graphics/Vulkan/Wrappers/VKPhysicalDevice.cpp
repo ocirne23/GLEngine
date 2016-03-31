@@ -36,26 +36,21 @@ void VKPhysicalDevice::cleanup()
 
 uint VKPhysicalDevice::getQueueNodeIndex(VKDevice::EDeviceType a_deviceType)
 {
-	if (a_deviceType == VKDevice::EDeviceType::Graphics)
+	for (uint i = 0; i < m_queueFamilyProperties.size(); ++i)
 	{
-		assert(false); //TODO
-		return 0;// getSwapchain().getGraphicsQueueNodeIndex();
-	}
-	else
-	{
-		for (uint i = 0; i < m_queueFamilyProperties.size(); ++i)
-		{
-			vk::QueueFlags flags = m_queueFamilyProperties[i].queueFlags();
-			if (a_deviceType == VKDevice::EDeviceType::Compute)
-				if (flags & vk::QueueFlagBits::eCompute)
-					return i;
-			if (a_deviceType == VKDevice::EDeviceType::Transfer)
-				if (flags & vk::QueueFlagBits::eTransfer)
-					return i;
-			if (a_deviceType == VKDevice::EDeviceType::SparseBinding)
-				if (flags & vk::QueueFlagBits::eSparseBinding)
-					return i;
-		}
+		vk::QueueFlags flags = m_queueFamilyProperties[i].queueFlags();
+		if (a_deviceType == VKDevice::EDeviceType::Graphics)
+			if (flags & vk::QueueFlagBits::eGraphics)
+				return i;
+		if (a_deviceType == VKDevice::EDeviceType::Compute)
+			if (flags & vk::QueueFlagBits::eCompute)
+				return i;
+		if (a_deviceType == VKDevice::EDeviceType::Transfer)
+			if (flags & vk::QueueFlagBits::eTransfer)
+				return i;
+		if (a_deviceType == VKDevice::EDeviceType::SparseBinding)
+			if (flags & vk::QueueFlagBits::eSparseBinding)
+				return i;
 	}
 
 	assert(false);
@@ -67,8 +62,6 @@ vk::Format VKPhysicalDevice::getDepthFormat()
 	// Since all depth formats may be optional, we need to find a suitable depth format to use
 	// Start with the highest precision packed format
 	eastl::vector<vk::Format> depthFormats = {
-		vk::Format::eD32SfloatS8Uint,
-		vk::Format::eD32Sfloat,
 		vk::Format::eD24UnormS8Uint, 
 		vk::Format::eD16UnormS8Uint, 
 		vk::Format::eD16Unorm 
@@ -90,14 +83,14 @@ VKDevice& VKPhysicalDevice::getDevice(VKDevice::EDeviceType a_deviceType)
 	assert(m_initialized);
 	VKDevice& device = m_devices[uint(a_deviceType)];
 	if (!device.isInitialized())
-		device.initialize(*this, a_deviceType, getQueueNodeIndex(a_deviceType));
+		device.initialize(*this, a_deviceType);
 	return device;
 }
-/*
+
 VKSwapchain& VKPhysicalDevice::getSwapchain()
 {
 	assert(m_initialized);
 	if (!m_swapchain.isInitialized())
 		m_swapchain.initialize(*m_instance, *this);
 	return m_swapchain;
-}*/
+}

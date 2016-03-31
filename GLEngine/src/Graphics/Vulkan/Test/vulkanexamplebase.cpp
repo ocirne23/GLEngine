@@ -16,9 +16,6 @@ VkResult VulkanExampleBase::createInstance(bool enableValidation)
 {
 	this->enableValidation = enableValidation;
 
-	m_instance.initialize();
-
-
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 	appInfo.pApplicationName = name.c_str();
@@ -346,13 +343,15 @@ void VulkanExampleBase::submitPostPresentBarrier(VkImage image)
 
 VulkanExampleBase::VulkanExampleBase(bool enableValidation)
 {
+	setupConsole("VulkanExample");
+
 	width = 1280;
 	height = 720;
 	zoom = -2.5f;
 	title = "Vulkan Example - Basic indexed triangle";
 	initVulkan(enableValidation);
-	if (enableValidation)
-		setupConsole("VulkanExample");
+	//if (enableValidation)
+
 }
 
 VulkanExampleBase::~VulkanExampleBase()
@@ -391,70 +390,19 @@ VulkanExampleBase::~VulkanExampleBase()
 
 void VulkanExampleBase::initVulkan(bool enableValidation)
 {
-	VkResult err;
+	
+	m_instance.initialize();
+	m_physDevice = &m_instance.getPhysicalDevice();
+	m_device = &m_physDevice->getDevice();
 
-	err = createInstance(enableValidation);
-	if (err)
-		vkTools::exitFatal("Could not create Vulkan instance : \n" + vkTools::errorString(err), "Fatal error");
-	uint32_t gpuCount = 0;
-	err = vkEnumeratePhysicalDevices(instance, &gpuCount, nullptr);
-	assert(!err);		
-	assert(gpuCount > 0);
-	std::vector<VkPhysicalDevice> physicalDevices(gpuCount);
-	err = vkEnumeratePhysicalDevices(instance, &gpuCount, physicalDevices.data());
-	if (err)
-	{
-		vkTools::exitFatal("Could not enumerate phyiscal devices : \n" + vkTools::errorString(err), "Fatal error");
-	}
+	depthFormat = scast<VkFormat>(m_physDevice->getDepthFormat());
+	instance = m_instance.getVKInstance();
+	physicalDevice = m_physDevice->getVKPhysicalDevice();
+	deviceMemoryProperties = m_physDevice->getMemProperties();
+	device = m_device->getVKDevice();
+	queue = m_device->getVKQueue();
 
-	physicalDevice = physicalDevices[0];
-
-	uint32_t graphicsQueueIndex = 0;
-	uint32_t queueCount;
-	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, NULL);
-	assert(queueCount >= 1);
-
-	std::vector<VkQueueFamilyProperties> queueProps;
-	queueProps.resize(queueCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueCount, queueProps.data());
-
-	for (graphicsQueueIndex = 0; graphicsQueueIndex < queueCount; graphicsQueueIndex++)
-	{
-		if (queueProps[graphicsQueueIndex].queueFlags & VK_QUEUE_GRAPHICS_BIT)
-			break;
-	}
-	assert(graphicsQueueIndex < queueCount);
-
-	std::array<float, 1> queuePriorities = { 0.0f };
-	VkDeviceQueueCreateInfo queueCreateInfo = {};
-	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueCreateInfo.queueFamilyIndex = graphicsQueueIndex;
-	queueCreateInfo.queueCount = 1;
-	queueCreateInfo.pQueuePriorities = queuePriorities.data();
-
-	err = createDevice(queueCreateInfo, enableValidation);
-	assert(!err);
-
-	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &deviceMemoryProperties);
-	vkGetDeviceQueue(device, graphicsQueueIndex, 0, &queue);
-
-	std::vector<VkFormat> depthFormats = { VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D16_UNORM_S8_UINT, VK_FORMAT_D16_UNORM };
-	bool depthFormatFound = false;
-	for (auto& format : depthFormats)
-	{
-		VkFormatProperties formatProps;
-		vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &formatProps);
-		if (formatProps.optimalTilingFeatures && VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
-		{
-			depthFormat = format;
-			depthFormatFound = true;
-			break;
-		}		
-	}
-
-	assert(depthFormatFound);
-
-	swapChain.init(instance, physicalDevice, device);
+	//swapChain.init(instance, physicalDevice, device);
 }
 
 void VulkanExampleBase::setupConsole(std::string title)
@@ -552,7 +500,7 @@ void VulkanExampleBase::createCommandPool()
 {
 	VkCommandPoolCreateInfo cmdPoolInfo = {};
 	cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	cmdPoolInfo.queueFamilyIndex = swapChain.queueNodeIndex;
+	cmdPoolInfo.queueFamilyIndex = m_swapchain->getGraphicsQueueNodeIndex();
 	cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 	VkResult vkRes = vkCreateCommandPool(device, &cmdPoolInfo, nullptr, &cmdPool);
 	assert(!vkRes);
@@ -696,6 +644,9 @@ void VulkanExampleBase::setupRenderPass()
 
 void VulkanExampleBase::initSwapchain()
 {
+	m_swapchain->initialize(m_instance, *m_physDevice);
+
+
 	swapChain.initSwapChain(windowInstance, window);
 }
 
