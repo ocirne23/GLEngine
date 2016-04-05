@@ -89,8 +89,8 @@
     <ClCompile Include="src\Graphics\Vulkan\Test\vulkantools.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandBuffer.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandPool.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKDevice.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKInstance.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKPhysicalDevice.cpp" />
@@ -624,8 +624,8 @@
     <ClInclude Include="include\Public\Graphics\Mantle\Wrappers\GRPhysicalGPU.h" />
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandPool.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDevice.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKInstance.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPhysicalDevice.h" />

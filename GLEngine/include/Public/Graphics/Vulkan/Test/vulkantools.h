@@ -9,6 +9,7 @@
 #pragma once
 
 #include "vulkan/vulkan.h"
+#include "Graphics/Vulkan/vk_cpp.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -53,11 +54,7 @@ namespace vkTools
 	// Load a binary file into a buffer (e.g. SPIR-V)
 	char *readBinaryFile(const char *filename, size_t *psize);
 	// Load a SPIR-V shader
-	VkShaderModule loadShader(const char *fileName, VkDevice device, VkShaderStageFlagBits stage);
-	// Load a GLSL shader
-	// Note : Only for testing purposes, support for directly feeding GLSL shaders into Vulkan
-	// may be dropped at some point	
-	VkShaderModule loadShaderGLSL(const char *fileName, VkDevice device, VkShaderStageFlagBits stage);
+	VkShaderModule loadShader(const char *fileName, VkDevice device, vk::ShaderStageFlagBits stage);
 
 	// Returns a pre-present image memory barrier
 	// Transforms the image's layout from color attachment to present khr

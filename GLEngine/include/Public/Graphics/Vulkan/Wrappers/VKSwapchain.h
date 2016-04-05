@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "Graphics/Vulkan/vk_cpp.h"
+#include "Graphics/Vulkan/Wrappers/VKCommandBuffer.h"
 
 class VKCommandBuffer;
 class VKInstance;
@@ -14,24 +15,16 @@ public:
 	VKSwapchain() {}
 	VKSwapchain(const VKSwapchain& copy) { assert(!m_initialized); }
 	~VKSwapchain();
-	void initialize(VKInstance& instance, VKPhysicalDevice& physDevice);
-	void setup(VKCommandBuffer& setupCommandBuffer, uint width, uint height);
-	void cleanup();
 
-	vk::SwapchainKHR getVKSwapchain() { return m_swapchain; }
-
+	void initialize(VKPhysicalDevice& physDevice, VKCommandBuffer& setupCmdBuffer, uint width, uint height);
 	bool isInitialized() const { return m_initialized; }
+	void cleanup();
+	void acquireNextImage(vk::Semaphore presentCompleteSemaphore, uint& currentBuffer);
 
-	uint getGraphicsQueueNodeIndex() const 
+	vk::SwapchainKHR getVKSwapchain() 
 	{ 
 		assert(m_initialized); 
-		return m_graphicsQueueNodeIndex; 
-	}
-
-	uint getPresentQueueNodeIndex() const
-	{
-		assert(m_initialized);
-		return m_presentQueueNodeIndex;
+		return m_swapchain; 
 	}
 
 	vk::Format getColorFormat() const
@@ -64,15 +57,13 @@ public:
 
 private:
 
-	bool m_initialized             = false;
-	bool m_setup                   = false;
-	VKInstance* m_instance         = NULL;
-	VKPhysicalDevice* m_physDevice = NULL;
-	vk::SwapchainKHR m_swapchain   = NULL;
-	vk::SurfaceKHR m_surface       = NULL;
-	uint m_graphicsQueueNodeIndex  = UINT32_MAX;
-	uint m_presentQueueNodeIndex   = UINT32_MAX;
-	vk::Format m_colorFormat       = vk::Format::eUndefined;
+	bool m_initialized              = false;
+	vk::Instance m_instance         = NULL;
+	vk::PhysicalDevice m_physDevice = NULL;
+	vk::Device m_device             = NULL;
+	vk::SwapchainKHR m_swapchain    = NULL;
+	vk::SurfaceKHR m_surface        = NULL;
+	vk::Format m_colorFormat        = vk::Format::eUndefined;
 	vk::ColorSpaceKHR m_colorSpace;
 
 	eastl::vector<vk::Image> m_images;

@@ -35,5 +35,7 @@ private:
 	bool m_initialized = false;
 	bool m_begun = false;
 	vk::CommandBuffer m_commandBuffer;
-	VKDevice* m_device;
+	vk::Device m_device;
+	vk::Queue m_queue;
+	vk::CommandPool m_commandPool;
 };

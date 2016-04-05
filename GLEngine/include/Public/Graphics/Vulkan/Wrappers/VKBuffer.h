@@ -27,7 +27,7 @@ private:
 
 	bool m_initialized        = false;
 	bool m_mapped             = false;
-	VKDevice* m_device        = NULL;
+	vk::Device m_device       = NULL;
 	vk::DeviceMemory m_memory = NULL;
 	vk::Buffer m_buffer       = NULL;
 	uint64 m_sizeBytes        = 0;

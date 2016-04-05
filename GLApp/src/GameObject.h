@@ -24,10 +24,10 @@ private:
 
 private:
 
-	glm::vec3 m_position;
+	glm::vec3 m_position     = glm::vec3(0, 0, 0);
 	float m_scale            = 1.0f;
 	glm::vec4 m_axisRotation = glm::vec4(0, 1, 0, 0);
 	bool m_dirty             = true;
-	glm::mat4 m_transform;
+	glm::mat4 m_transform    = glm::mat4(1);
 	GLScene* m_scene         = NULL;
 };

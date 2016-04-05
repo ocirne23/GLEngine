@@ -12,64 +12,6 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-VkResult VulkanExampleBase::createInstance(bool enableValidation)
-{
-	this->enableValidation = enableValidation;
-
-	VkApplicationInfo appInfo = {};
-	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pApplicationName = name.c_str();
-	appInfo.pEngineName = name.c_str();
-	appInfo.apiVersion = VK_API_VERSION;
-
-	std::vector<const char*> enabledExtensions = { VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME };
-
-	VkInstanceCreateInfo instanceCreateInfo = {};
-	instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	instanceCreateInfo.pNext = NULL;
-	instanceCreateInfo.pApplicationInfo = &appInfo;
-	if (enabledExtensions.size() > 0)
-	{
-		if (enableValidation)
-		{
-			enabledExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-		}
-		instanceCreateInfo.enabledExtensionCount = (uint32_t)enabledExtensions.size();
-		instanceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
-	}
-	if (enableValidation)
-	{
-		instanceCreateInfo.enabledLayerCount = vkDebug::validationLayerCount; // todo : change validation layer names!
-		instanceCreateInfo.ppEnabledLayerNames = vkDebug::validationLayerNames;
-	}
-	return vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
-}
-
-VkResult VulkanExampleBase::createDevice(VkDeviceQueueCreateInfo requestedQueues, bool enableValidation)
-{
-	std::vector<const char*> enabledExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-
-	VkDeviceCreateInfo deviceCreateInfo = {};
-	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-	deviceCreateInfo.pNext = NULL;
-	deviceCreateInfo.queueCreateInfoCount = 1;
-	deviceCreateInfo.pQueueCreateInfos = &requestedQueues;
-	deviceCreateInfo.pEnabledFeatures = NULL;
-
-	if (enabledExtensions.size() > 0)
-	{
-		deviceCreateInfo.enabledExtensionCount = (uint32_t)enabledExtensions.size();
-		deviceCreateInfo.ppEnabledExtensionNames = enabledExtensions.data();
-	}
-	if (enableValidation)
-	{
-		deviceCreateInfo.enabledLayerCount = vkDebug::validationLayerCount; // todo : validation layer names
-		deviceCreateInfo.ppEnabledLayerNames = vkDebug::validationLayerNames;
-	}
-
-	return vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device);
-}
-
 bool VulkanExampleBase::checkCommandBuffers()
 {
 	for (auto& cmdBuffer : m_drawCmdBuffers)
@@ -84,7 +26,7 @@ bool VulkanExampleBase::checkCommandBuffers()
 
 void VulkanExampleBase::createCommandBuffers()
 {
-	m_drawCmdBuffers.resize(m_swapchain->getNumImages());
+	m_drawCmdBuffers.resize(m_swapchain.getNumImages());
 	eastl::for_each(m_drawCmdBuffers.begin(), m_drawCmdBuffers.end(), [&](VKCommandBuffer& a_buffer) {
 		a_buffer.initialize(*m_device);
 	});
@@ -93,52 +35,38 @@ void VulkanExampleBase::createCommandBuffers()
 
 void VulkanExampleBase::destroyCommandBuffers()
 {
-	m_setupCmdBuffer.cleanup();
 	m_postPresentCmdBuffer.cleanup();
 	eastl::for_each(m_drawCmdBuffers.begin(), m_drawCmdBuffers.end(), [&](VKCommandBuffer& a_buffer) {
 		a_buffer.cleanup();
 	});
 }
 
-void VulkanExampleBase::createSetupCommandBuffer()
-{
-	m_setupCmdBuffer.initialize(*m_device);
-	m_setupCmdBuffer.begin();
-}
-
-void VulkanExampleBase::flushSetupCommandBuffer()
-{
-	m_setupCmdBuffer.end();
-	m_setupCmdBuffer.submit();
-	m_setupCmdBuffer.waitIdle();
-	m_setupCmdBuffer.cleanup();
-}
-
 void VulkanExampleBase::createPipelineCache()
 {
-	VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
-	pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-	VkResult err = vkCreatePipelineCache(device, &pipelineCacheCreateInfo, nullptr, &pipelineCache);
-	assert(!err);
+	vk::PipelineCacheCreateInfo pipelineCacheCreateInfo = vk::PipelineCacheCreateInfo();
+	pipelineCache = m_device->getVKDevice().createPipelineCache(pipelineCacheCreateInfo, NULL);
 }
 
 void VulkanExampleBase::prepare()
 {
 	if (enableValidation)
-	{
 		vkDebug::setupDebugging(instance, VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT, NULL);
-	}
 
-	createCommandPool();
-	createSetupCommandBuffer();
-	setupSwapChain();
+	VKCommandBuffer setupCmdBuffer;
+	setupCmdBuffer.initialize(*m_device);
+	setupCmdBuffer.begin();
+	m_swapchain.initialize(*m_physDevice, setupCmdBuffer, width, height);
+	setupDepthStencil(setupCmdBuffer);
+	setupCmdBuffer.end();
+	setupCmdBuffer.submit();
+	setupCmdBuffer.waitIdle();
+
 	createCommandBuffers();
-	setupDepthStencil();
+	
 	setupRenderPass();
 	createPipelineCache();
 	setupFrameBuffer();
-	flushSetupCommandBuffer();
-	createSetupCommandBuffer();
+
 	textureLoader = new vkTools::VulkanTextureLoader(physicalDevice, device, queue, cmdPool);
 
 	prepareVertices();
@@ -151,27 +79,14 @@ void VulkanExampleBase::prepare()
 	prepared = true;
 }
 
-VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(const char * fileName, VkShaderStageFlagBits stage)
+VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShader(const char* a_fileName, vk::ShaderStageFlagBits a_stage)
 {
-	VkPipelineShaderStageCreateInfo shaderStage = {};
-	shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	shaderStage.stage = stage;
-	shaderStage.module = vkTools::loadShader(fileName, device, stage);
-	shaderStage.pName = "main"; // todo : make param
-	assert(shaderStage.module != NULL);
-	shaderModules.push_back(shaderStage.module);
-	return shaderStage;
-}
-
-VkPipelineShaderStageCreateInfo VulkanExampleBase::loadShaderGLSL(const char * fileName, VkShaderStageFlagBits stage)
-{
-	VkPipelineShaderStageCreateInfo shaderStage = {};
-	shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-	shaderStage.stage = stage;
-	shaderStage.module = vkTools::loadShaderGLSL(fileName, device, stage);
-	shaderStage.pName = "main"; // todo : make param
-	assert(shaderStage.module != NULL);
-	shaderModules.push_back(shaderStage.module);
+	vk::PipelineShaderStageCreateInfo shaderStage = vk::PipelineShaderStageCreateInfo()
+		.stage(a_stage)
+		.module(vkTools::loadShader(a_fileName, device, a_stage))
+		.pName("main");
+	assert(shaderStage.module() != NULL);
+	shaderModules.push_back(shaderStage.module());
 	return shaderStage;
 }
 
@@ -312,47 +227,11 @@ VulkanExampleBase::VulkanExampleBase(bool enableValidation)
 	initVulkan(enableValidation);
 }
 
-VulkanExampleBase::~VulkanExampleBase()
-{
-	m_swapchain->cleanup();
-	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-	if (m_setupCmdBuffer.isInitialized())
-		m_setupCmdBuffer.cleanup();
-	destroyCommandBuffers();
-	vkDestroyRenderPass(device, renderPass, nullptr);
-	for (uint32_t i = 0; i < frameBuffers.size(); i++)
-		vkDestroyFramebuffer(device, frameBuffers[i], nullptr);
-	for (auto& shaderModule : shaderModules)
-		vkDestroyShaderModule(device, shaderModule, nullptr);
-	vkDestroyImageView(device, depthStencil.view, nullptr);
-	vkDestroyImage(device, depthStencil.image, nullptr);
-	vkFreeMemory(device, depthStencil.mem, nullptr);
-	vkDestroyPipelineCache(device, pipelineCache, nullptr);
-	if (textureLoader)
-		delete textureLoader;
-	vkDestroyCommandPool(device, cmdPool, nullptr);
-	vkDestroyDevice(device, nullptr); 
-	if (enableValidation)
-		vkDebug::freeDebugCallback(instance);
-	vkDestroyInstance(instance, nullptr);
-	vkDestroyPipeline(device, pipelines.solid, nullptr);
-	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
-	vkDestroyBuffer(device, vertices.buf, nullptr);
-	vkFreeMemory(device, vertices.mem, nullptr);
-	vkDestroyBuffer(device, indices.buf, nullptr);
-	vkFreeMemory(device, indices.mem, nullptr);
-	vkDestroyBuffer(device, uniformDataVS.buffer, nullptr);
-	vkFreeMemory(device, uniformDataVS.memory, nullptr);
-}
-
 void VulkanExampleBase::initVulkan(bool enableValidation)
 {
-	
 	m_instance.initialize();
 	m_physDevice = &m_instance.getPhysicalDevice();
 	m_device = &m_physDevice->getDevice();
-	m_swapchain = &m_physDevice->getSwapchain();
 
 	depthFormat = scast<VkFormat>(m_physDevice->getDepthFormat());
 	instance = m_instance.getVKInstance();
@@ -455,17 +334,7 @@ VkBool32 VulkanExampleBase::getMemoryType(uint32_t typeBits, VkFlags properties,
 	return false;
 }
 
-void VulkanExampleBase::createCommandPool()
-{
-	VkCommandPoolCreateInfo cmdPoolInfo = {};
-	cmdPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-	cmdPoolInfo.queueFamilyIndex = m_swapchain->getGraphicsQueueNodeIndex();
-	cmdPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-	VkResult vkRes = vkCreateCommandPool(device, &cmdPoolInfo, nullptr, &cmdPool);
-	assert(!vkRes);
-}
-
-void VulkanExampleBase::setupDepthStencil()
+void VulkanExampleBase::setupDepthStencil(VKCommandBuffer& a_setupCmdBuffer)
 {
 	VkImageCreateInfo image = {};
 	image.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -512,7 +381,8 @@ void VulkanExampleBase::setupDepthStencil()
 
 	err = vkBindImageMemory(device, depthStencil.image, depthStencil.mem, 0);
 	assert(!err);
-	vkTools::setImageLayout(m_setupCmdBuffer.getVKCommandBuffer(), depthStencil.image, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+	
+	vkTools::setImageLayout(a_setupCmdBuffer.getVKCommandBuffer(), depthStencil.image, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
 	depthStencilView.image = depthStencil.image;
 	err = vkCreateImageView(device, &depthStencilView, nullptr, &depthStencil.view);
@@ -535,10 +405,10 @@ void VulkanExampleBase::setupFrameBuffer()
 	frameBufferCreateInfo.height = height;
 	frameBufferCreateInfo.layers = 1;
 
-	frameBuffers.resize(m_swapchain->getNumImages());
+	frameBuffers.resize(m_swapchain.getNumImages());
 	for (uint32_t i = 0; i < frameBuffers.size(); i++)
 	{
-		attachments[0] = m_swapchain->getView(i);
+		attachments[0] = m_swapchain.getView(i);
 		VkResult err = vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &frameBuffers[i]);
 		assert(!err);
 	}
@@ -601,15 +471,8 @@ void VulkanExampleBase::setupRenderPass()
 	assert(!err);
 }
 
-void VulkanExampleBase::initSwapchain()
-{
-}
-
 void VulkanExampleBase::setupSwapChain()
 {
-	m_swapchain->setup(m_setupCmdBuffer, width, height);
-
-	//swapChain.setup(setupCmdBuffer, &width, &height);
 }
 
 void VulkanExampleBase::buildCommandBuffers()
@@ -669,7 +532,7 @@ void VulkanExampleBase::buildCommandBuffers()
 		prePresentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		prePresentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		prePresentBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-		prePresentBarrier.image = m_swapchain->getImage(i);
+		prePresentBarrier.image = m_swapchain.getImage(i);
 
 		VkImageMemoryBarrier *pMemoryBarrier = &prePresentBarrier;
 		vkCmdPipelineBarrier(
@@ -697,14 +560,13 @@ void VulkanExampleBase::draw()
 	err = vkCreateSemaphore(device, &presentCompleteSemaphoreCreateInfo, nullptr, &presentCompleteSemaphore);
 	assert(!err);
 
-	m_device->getVKDevice().acquireNextImageKHR(m_swapchain->getVKSwapchain(), UINT64_MAX, presentCompleteSemaphore, VK_NULL_HANDLE, currentBuffer);
+	m_swapchain.acquireNextImage(presentCompleteSemaphore, currentBuffer);
 
 	VkCommandBuffer drawCmdBuffer = m_drawCmdBuffers[currentBuffer].getVKCommandBuffer();
-	VkCommandBuffer postPresentCmdBuffer = m_postPresentCmdBuffer.getVKCommandBuffer();
 
 	m_drawCmdBuffers[currentBuffer].submit(presentCompleteSemaphore);
 
-	vk::SwapchainKHR swapchain = m_swapchain->getVKSwapchain();
+	vk::SwapchainKHR swapchain = m_swapchain.getVKSwapchain();
 	vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
 		.swapchainCount(1)
 		.pSwapchains(&swapchain)
@@ -723,7 +585,7 @@ void VulkanExampleBase::draw()
 	postPresentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	postPresentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	postPresentBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-	postPresentBarrier.image = m_swapchain->getImage(currentBuffer);
+	postPresentBarrier.image = m_swapchain.getImage(currentBuffer);
 
 	m_postPresentCmdBuffer.begin();
 	vkCmdPipelineBarrier(
@@ -966,8 +828,8 @@ void VulkanExampleBase::preparePipelines()
 	multisampleState.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
 	VkPipelineShaderStageCreateInfo shaderStages[2] = { {},{} };
-	shaderStages[0] = loadShader("Assets/Shaders/vulkan/triangle.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
-	shaderStages[1] = loadShader("Assets/Shaders/vulkan/triangle.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+	shaderStages[0] = loadShader("Assets/Shaders/vulkan/triangle.vert.spv", vk::ShaderStageFlagBits::eVertex);
+	shaderStages[1] = loadShader("Assets/Shaders/vulkan/triangle.frag.spv", vk::ShaderStageFlagBits::eFragment);
 
 	pipelineCreateInfo.stageCount = 2;
 	pipelineCreateInfo.pVertexInputState = &vertices.vi;

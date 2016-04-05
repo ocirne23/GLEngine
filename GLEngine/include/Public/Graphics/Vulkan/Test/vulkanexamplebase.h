@@ -48,7 +48,7 @@ class VulkanExampleBase
 public:
 
 	VulkanExampleBase(bool enableValidation);
-	~VulkanExampleBase();
+	~VulkanExampleBase() {}
 
 	void initVulkan(bool enableValidation);
 	void setupConsole(std::string title);
@@ -58,24 +58,17 @@ public:
 	void viewChanged();
 
 	VkBool32 getMemoryType(uint32_t typeBits, VkFlags properties, uint32_t *typeIndex);
-	void createCommandPool();
-	void setupDepthStencil();
+	void setupDepthStencil(VKCommandBuffer& setupCmdBuffer);
 	void setupFrameBuffer();
 	void setupRenderPass();
-
-	void initSwapchain();
-	void setupSwapChain();
 
 	bool checkCommandBuffers();
 	void createCommandBuffers();
 	void destroyCommandBuffers();
-	void createSetupCommandBuffer();
-	void flushSetupCommandBuffer();
 	void createPipelineCache();
 	void prepare();
 
-	VkPipelineShaderStageCreateInfo loadShader(const char* fileName, VkShaderStageFlagBits stage);
-	VkPipelineShaderStageCreateInfo loadShaderGLSL(const char* fileName, VkShaderStageFlagBits stage);
+	VkPipelineShaderStageCreateInfo loadShader(const char* fileName, vk::ShaderStageFlagBits stage);
 	VkBool32 createBuffer(
 		VkBufferUsageFlags usage,
 		VkDeviceSize size,
@@ -142,11 +135,10 @@ protected:
 	VKInstance m_instance;
 	VKPhysicalDevice* m_physDevice = NULL;
 	VKDevice* m_device = NULL;
-	VKSwapchain* m_swapchain = NULL;
-	VKCommandBuffer m_setupCmdBuffer;
+	
+	VKSwapchain m_swapchain;
 	VKCommandBuffer m_postPresentCmdBuffer;
 	eastl::vector<VKCommandBuffer> m_drawCmdBuffers;
-
 
 	float frameTimer = 1.0f;
 	VkInstance instance;
@@ -157,13 +149,11 @@ protected:
 	VkFormat colorformat = VK_FORMAT_B8G8R8A8_UNORM;
 	VkFormat depthFormat;
 	VkCommandPool cmdPool;
-	//VkCommandBuffer postPresentCmdBuffer = VK_NULL_HANDLE;
-	//std::vector<VkCommandBuffer> drawCmdBuffers;
 	VkRenderPass renderPass;
 	std::vector<VkFramebuffer> frameBuffers;
 	uint32_t currentBuffer = 0;
 	VkDescriptorPool descriptorPool;
-	std::vector<VkShaderModule> shaderModules;
+	std::vector<vk::ShaderModule> shaderModules;
 	VkPipelineCache pipelineCache;
 	vkTools::VulkanTextureLoader *textureLoader = nullptr;
 

@@ -16,14 +16,15 @@ void VKCommandBuffer::initialize(VKDevice& a_device)
 	if (m_initialized)
 		cleanup();
 
-	m_device = &a_device;
-
+	m_device = a_device.getVKDevice();
+	m_commandPool = a_device.getVKCommandPool();
+	m_queue = a_device.getVKQueue();
 	vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
-		.commandPool(a_device.getCommandPool().getVKCommandPool())
+		.commandPool(m_commandPool)
 		.level(vk::CommandBufferLevel::ePrimary)
 		.commandBufferCount(1);
 
-	m_commandBuffer = a_device.getVKDevice().allocateCommandBuffers(commandBufferAllocateInfo)[0];
+	m_commandBuffer = m_device.allocateCommandBuffers(commandBufferAllocateInfo)[0];
 
 	m_initialized = true;
 }
@@ -33,8 +34,8 @@ void VKCommandBuffer::cleanup()
 	assert(m_initialized);
 	assert(!m_begun);
 
-	m_device->getVKQueue().waitIdle(); // Maybe seperate?
-	m_device->getVKDevice().freeCommandBuffers(m_device->getCommandPool().getVKCommandPool(), 1, &m_commandBuffer);
+	m_queue.waitIdle(); // Maybe seperate?
+	m_device.freeCommandBuffers(m_commandPool, 1, &m_commandBuffer);
 	m_commandBuffer = VK_NULL_HANDLE;
 
 	m_initialized = false;
@@ -68,11 +69,11 @@ void VKCommandBuffer::submit(vk::Semaphore a_waitSemaphore)
 		.waitSemaphoreCount((a_waitSemaphore != NULL) ? 1 : 0)
 		.pWaitSemaphores(&a_waitSemaphore);
 
-	VKVerifier result = m_device->getVKQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
+	VKVerifier result = m_queue.submit(1, &submitInfo, VK_NULL_HANDLE);
 }
 
 void VKCommandBuffer::waitIdle()
 {
 	assert(m_initialized);
-	m_device->getVKQueue().waitIdle();
+	m_queue.waitIdle();
 }

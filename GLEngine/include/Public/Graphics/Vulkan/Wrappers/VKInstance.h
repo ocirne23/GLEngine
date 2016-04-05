@@ -14,6 +14,7 @@ public:
 	~VKInstance();
 
 	void initialize();
+	void cleanup();
 
 	uint getNumPhysicalDevices() const 
 	{ 
@@ -28,10 +29,6 @@ public:
 	}
 
 	VKPhysicalDevice& getPhysicalDevice(uint index = 0);
-
-private:
-	
-	void cleanup();
 
 private:
 	

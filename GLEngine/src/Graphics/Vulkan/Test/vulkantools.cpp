@@ -229,7 +229,7 @@ namespace vkTools
 		return (char*)shader_code;
 	}
 
-	VkShaderModule loadShader(const char *fileName, VkDevice device, VkShaderStageFlagBits stage) 
+	VkShaderModule loadShader(const char *fileName, VkDevice device, vk::ShaderStageFlagBits stage) 
 	{
 		size_t size = 0;
 		const char *shaderCode = readBinaryFile(fileName, &size);

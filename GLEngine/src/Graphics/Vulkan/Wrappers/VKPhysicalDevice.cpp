@@ -2,7 +2,7 @@
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
-
+#include "Graphics/Vulkan/Wrappers/VKInstance.h"
 #include "Graphics/Vulkan/Utils/VKVerifier.h"
 
 VKPhysicalDevice::~VKPhysicalDevice()
@@ -34,7 +34,7 @@ void VKPhysicalDevice::cleanup()
 	m_initialized = false;
 }
 
-uint VKPhysicalDevice::getQueueNodeIndex(VKDevice::EDeviceType a_deviceType)
+uint VKPhysicalDevice::getQueueFamilyIndex(VKDevice::EDeviceType a_deviceType)
 {
 	for (uint i = 0; i < m_queueFamilyProperties.size(); ++i)
 	{
@@ -78,6 +78,12 @@ vk::Format VKPhysicalDevice::getDepthFormat()
 	return vk::Format::eUndefined;
 }
 
+vk::Instance VKPhysicalDevice::getVKInstance()
+{
+	assert(m_initialized);
+	return m_instance->getVKInstance();
+}
+
 VKDevice& VKPhysicalDevice::getDevice(VKDevice::EDeviceType a_deviceType)
 {
 	assert(m_initialized);
@@ -85,12 +91,4 @@ VKDevice& VKPhysicalDevice::getDevice(VKDevice::EDeviceType a_deviceType)
 	if (!device.isInitialized())
 		device.initialize(*this, a_deviceType);
 	return device;
-}
-
-VKSwapchain& VKPhysicalDevice::getSwapchain()
-{
-	assert(m_initialized);
-	if (!m_swapchain.isInitialized())
-		m_swapchain.initialize(*m_instance, *this);
-	return m_swapchain;
 }

@@ -100,7 +100,7 @@
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKDevice.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKSwapchain.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandBuffer.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandPool.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -1031,7 +1031,7 @@
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDevice.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchain.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandPool.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

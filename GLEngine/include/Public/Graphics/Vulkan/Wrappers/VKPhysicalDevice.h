@@ -3,13 +3,11 @@
 #include "Core.h"
 #include "Graphics/Vulkan/vk_cpp.h"
 #include "Graphics/Vulkan/Wrappers/VKDevice.h"
-#include "Graphics/Vulkan/Wrappers/VKSwapchain.h"
 
 #include "gsl/gsl.h"
 #include "EASTL/vector.h"
 
 class VKInstance;
-class VKSwapchain;
 
 class VKPhysicalDevice
 {
@@ -22,15 +20,12 @@ public:
 	bool isInitialized() const { return m_initialized; }
 
 	VKDevice& getDevice(VKDevice::EDeviceType deviceType = VKDevice::EDeviceType::Graphics);
-	VKSwapchain& getSwapchain();
-	uint getQueueNodeIndex(VKDevice::EDeviceType deviceType);
+	uint getQueueFamilyIndex(VKDevice::EDeviceType deviceType);
+
 	vk::Format getDepthFormat();
 
-	VKInstance* getInstance() 
-	{ 
-		assert(m_initialized); 
-		return m_instance; 
-	}
+	vk::Instance getVKInstance();
+
 	vk::PhysicalDevice getVKPhysicalDevice()
 	{
 		assert(m_initialized);
@@ -62,6 +57,4 @@ private:
 	vk::PhysicalDeviceMemoryProperties m_memProperties;
 	eastl::vector<vk::QueueFamilyProperties> m_queueFamilyProperties;
 	VKDevice m_devices[uint(VKDevice::EDeviceType::NUM_TYPES)];
-
-	VKSwapchain m_swapchain;
 };

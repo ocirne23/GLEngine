@@ -2,7 +2,6 @@
 
 #include "Core.h"
 #include "Graphics/Vulkan/vk_cpp.h"
-#include "Graphics/Vulkan/Wrappers/VKCommandPool.h"
 
 class VKPhysicalDevice;
 
@@ -32,13 +31,17 @@ public:
 		return m_queue;
 	}
 
+	vk::CommandPool getVKCommandPool()
+	{
+		assert(m_initialized);
+		return m_commandPool;
+	}
+
 	VKPhysicalDevice* getPhysDevice() 
 	{ 
 		assert(m_initialized); 
 		return m_physDevice; 
 	}
-
-	VKCommandPool& getCommandPool();
 
 private:
 
@@ -54,6 +57,5 @@ private:
 	EDeviceType m_type = EDeviceType::Uninitialized;
 	vk::Device m_device;
 	vk::Queue m_queue;
-
-	VKCommandPool m_commandPool;
+	vk::CommandPool m_commandPool;
 };
