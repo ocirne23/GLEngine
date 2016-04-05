@@ -16,6 +16,9 @@ VKSwapchain::~VKSwapchain()
 
 void VKSwapchain::initialize(VKInstance& a_instance, VKPhysicalDevice& a_physDevice)
 {
+	if (m_initialized)
+		cleanup();
+
 	m_instance = &a_instance;
 	m_physDevice = &a_physDevice;
 

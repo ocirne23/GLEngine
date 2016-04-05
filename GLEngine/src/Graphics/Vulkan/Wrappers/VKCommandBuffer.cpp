@@ -57,14 +57,16 @@ void VKCommandBuffer::end()
 	m_begun = false;
 }
 
-void VKCommandBuffer::submit()
+void VKCommandBuffer::submit(vk::Semaphore a_waitSemaphore)
 {
 	assert(m_initialized);
 	assert(!m_begun);
 
 	vk::SubmitInfo submitInfo = vk::SubmitInfo()
 		.commandBufferCount(1)
-		.pCommandBuffers(&m_commandBuffer);
+		.pCommandBuffers(&m_commandBuffer)
+		.waitSemaphoreCount((a_waitSemaphore != NULL) ? 1 : 0)
+		.pWaitSemaphores(&a_waitSemaphore);
 
 	VKVerifier result = m_device->getVKQueue().submit(1, &submitInfo, VK_NULL_HANDLE);
 }

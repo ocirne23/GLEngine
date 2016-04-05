@@ -18,7 +18,7 @@ public:
 
 	void begin();
 	void end();
-	void submit();
+	void submit(vk::Semaphore waitSemaphore = NULL);
 	void waitIdle();
 
 	vk::CommandBuffer getVKCommandBuffer()

@@ -72,9 +72,9 @@ VkResult VulkanExampleBase::createDevice(VkDeviceQueueCreateInfo requestedQueues
 
 bool VulkanExampleBase::checkCommandBuffers()
 {
-	for (auto& cmdBuffer : drawCmdBuffers)
+	for (auto& cmdBuffer : m_drawCmdBuffers)
 	{
-		if (cmdBuffer == VK_NULL_HANDLE)
+		if (!cmdBuffer.isInitialized())
 		{
 			return false;
 		}
@@ -84,73 +84,34 @@ bool VulkanExampleBase::checkCommandBuffers()
 
 void VulkanExampleBase::createCommandBuffers()
 {
-	drawCmdBuffers.resize(swapChain.imageCount);
-
-	VkCommandBufferAllocateInfo cmdBufAllocateInfo = 
-		vkTools::initializers::commandBufferAllocateInfo(
-			cmdPool,
-			VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-			(uint32_t)drawCmdBuffers.size());
-	VkResult vkRes = vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, drawCmdBuffers.data());
-	assert(!vkRes);
-	cmdBufAllocateInfo.commandBufferCount = 1;
-	vkRes = vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &postPresentCmdBuffer);
-	assert(!vkRes);
+	m_drawCmdBuffers.resize(m_swapchain->getNumImages());
+	eastl::for_each(m_drawCmdBuffers.begin(), m_drawCmdBuffers.end(), [&](VKCommandBuffer& a_buffer) {
+		a_buffer.initialize(*m_device);
+	});
+	m_postPresentCmdBuffer.initialize(*m_device);
 }
 
 void VulkanExampleBase::destroyCommandBuffers()
 {
-	vkFreeCommandBuffers(device, cmdPool, (uint32_t)drawCmdBuffers.size(), drawCmdBuffers.data());
-	vkFreeCommandBuffers(device, cmdPool, 1, &postPresentCmdBuffer);
+	m_setupCmdBuffer.cleanup();
+	m_postPresentCmdBuffer.cleanup();
+	eastl::for_each(m_drawCmdBuffers.begin(), m_drawCmdBuffers.end(), [&](VKCommandBuffer& a_buffer) {
+		a_buffer.cleanup();
+	});
 }
 
 void VulkanExampleBase::createSetupCommandBuffer()
 {
-	if (setupCmdBuffer != VK_NULL_HANDLE)
-	{
-		vkFreeCommandBuffers(device, cmdPool, 1, &setupCmdBuffer);
-		setupCmdBuffer = VK_NULL_HANDLE; // todo : check if still necessary
-	}
-
-	VkCommandBufferAllocateInfo cmdBufAllocateInfo =
-		vkTools::initializers::commandBufferAllocateInfo(
-			cmdPool,
-			VK_COMMAND_BUFFER_LEVEL_PRIMARY,
-			1);
-
-	VkResult vkRes = vkAllocateCommandBuffers(device, &cmdBufAllocateInfo, &setupCmdBuffer);
-	assert(!vkRes);
-
-	VkCommandBufferBeginInfo cmdBufInfo = {};
-	cmdBufInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-	vkRes = vkBeginCommandBuffer(setupCmdBuffer, &cmdBufInfo);
-	assert(!vkRes);
+	m_setupCmdBuffer.initialize(*m_device);
+	m_setupCmdBuffer.begin();
 }
 
 void VulkanExampleBase::flushSetupCommandBuffer()
 {
-	VkResult err;
-
-	if (setupCmdBuffer == VK_NULL_HANDLE)
-		return;
-
-	err = vkEndCommandBuffer(setupCmdBuffer);
-	assert(!err);
-
-	VkSubmitInfo submitInfo = {};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &setupCmdBuffer;
-
-	err = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-	assert(!err);
-
-	err = vkQueueWaitIdle(queue);
-	assert(!err);
-
-	vkFreeCommandBuffers(device, cmdPool, 1, &setupCmdBuffer);
-	setupCmdBuffer = VK_NULL_HANDLE; // todo : check if still necessary
+	m_setupCmdBuffer.end();
+	m_setupCmdBuffer.submit();
+	m_setupCmdBuffer.waitIdle();
+	m_setupCmdBuffer.cleanup();
 }
 
 void VulkanExampleBase::createPipelineCache()
@@ -317,25 +278,24 @@ void VulkanExampleBase::renderLoop()
 // todo : comment
 void VulkanExampleBase::submitPostPresentBarrier(VkImage image)
 {
-	VkCommandBufferBeginInfo cmdBufInfo = vkTools::initializers::commandBufferBeginInfo();
-	VkResult vkRes = vkBeginCommandBuffer(postPresentCmdBuffer, &cmdBufInfo);
-	assert(!vkRes);
+	m_postPresentCmdBuffer.begin();
+	VkCommandBuffer postPresentBuffer = m_postPresentCmdBuffer.getVKCommandBuffer();
 	VkImageMemoryBarrier postPresentBarrier = vkTools::postPresentBarrier(image);
 	vkCmdPipelineBarrier(
-		postPresentCmdBuffer,
+		postPresentBuffer,
 		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		0,
 		0, NULL, // No memory barriers,
 		0, NULL, // No buffer barriers,
 		1, &postPresentBarrier);
-	vkRes = vkEndCommandBuffer(postPresentCmdBuffer);
-	assert(!vkRes);
+	m_postPresentCmdBuffer.end();
+
 	VkSubmitInfo submitInfo = {};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &postPresentCmdBuffer;
-	vkRes = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+	submitInfo.pCommandBuffers = &postPresentBuffer;
+	VkResult vkRes = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 	assert(!vkRes);
 	vkRes = vkQueueWaitIdle(queue);
 	assert(!vkRes);
@@ -350,16 +310,14 @@ VulkanExampleBase::VulkanExampleBase(bool enableValidation)
 	zoom = -2.5f;
 	title = "Vulkan Example - Basic indexed triangle";
 	initVulkan(enableValidation);
-	//if (enableValidation)
-
 }
 
 VulkanExampleBase::~VulkanExampleBase()
 {
-	swapChain.cleanup();
+	m_swapchain->cleanup();
 	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
-	if (setupCmdBuffer != VK_NULL_HANDLE) 
-		vkFreeCommandBuffers(device, cmdPool, 1, &setupCmdBuffer);
+	if (m_setupCmdBuffer.isInitialized())
+		m_setupCmdBuffer.cleanup();
 	destroyCommandBuffers();
 	vkDestroyRenderPass(device, renderPass, nullptr);
 	for (uint32_t i = 0; i < frameBuffers.size(); i++)
@@ -394,6 +352,7 @@ void VulkanExampleBase::initVulkan(bool enableValidation)
 	m_instance.initialize();
 	m_physDevice = &m_instance.getPhysicalDevice();
 	m_device = &m_physDevice->getDevice();
+	m_swapchain = &m_physDevice->getSwapchain();
 
 	depthFormat = scast<VkFormat>(m_physDevice->getDepthFormat());
 	instance = m_instance.getVKInstance();
@@ -553,7 +512,7 @@ void VulkanExampleBase::setupDepthStencil()
 
 	err = vkBindImageMemory(device, depthStencil.image, depthStencil.mem, 0);
 	assert(!err);
-	vkTools::setImageLayout(setupCmdBuffer, depthStencil.image, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+	vkTools::setImageLayout(m_setupCmdBuffer.getVKCommandBuffer(), depthStencil.image, VK_IMAGE_ASPECT_DEPTH_BIT, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
 	depthStencilView.image = depthStencil.image;
 	err = vkCreateImageView(device, &depthStencilView, nullptr, &depthStencil.view);
@@ -576,10 +535,10 @@ void VulkanExampleBase::setupFrameBuffer()
 	frameBufferCreateInfo.height = height;
 	frameBufferCreateInfo.layers = 1;
 
-	frameBuffers.resize(swapChain.imageCount);
+	frameBuffers.resize(m_swapchain->getNumImages());
 	for (uint32_t i = 0; i < frameBuffers.size(); i++)
 	{
-		attachments[0] = swapChain.buffers[i].view;
+		attachments[0] = m_swapchain->getView(i);
 		VkResult err = vkCreateFramebuffer(device, &frameBufferCreateInfo, nullptr, &frameBuffers[i]);
 		assert(!err);
 	}
@@ -644,23 +603,17 @@ void VulkanExampleBase::setupRenderPass()
 
 void VulkanExampleBase::initSwapchain()
 {
-	m_swapchain->initialize(m_instance, *m_physDevice);
-
-
-	swapChain.initSwapChain(windowInstance, window);
 }
 
 void VulkanExampleBase::setupSwapChain()
 {
-	swapChain.setup(setupCmdBuffer, &width, &height);
+	m_swapchain->setup(m_setupCmdBuffer, width, height);
+
+	//swapChain.setup(setupCmdBuffer, &width, &height);
 }
 
 void VulkanExampleBase::buildCommandBuffers()
 {
-	VkCommandBufferBeginInfo cmdBufInfo = {};
-	cmdBufInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	cmdBufInfo.pNext = NULL;
-
 	VkClearValue clearValues[2];
 	clearValues[0].color = defaultClearColor;
 	clearValues[1].depthStencil = { 1.0f, 0 };
@@ -676,38 +629,35 @@ void VulkanExampleBase::buildCommandBuffers()
 	renderPassBeginInfo.clearValueCount = 2;
 	renderPassBeginInfo.pClearValues = clearValues;
 
-	VkResult err;
-
-	for (int32_t i = 0; i < drawCmdBuffers.size(); ++i)
+	for (int32_t i = 0; i < m_drawCmdBuffers.size(); ++i)
 	{
 		renderPassBeginInfo.framebuffer = frameBuffers[i];
-		err = vkBeginCommandBuffer(drawCmdBuffers[i], &cmdBufInfo);
-		assert(!err);
+		m_drawCmdBuffers[i].begin();
 
-		vkCmdBeginRenderPass(drawCmdBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(m_drawCmdBuffers[i].getVKCommandBuffer(), &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 		VkViewport viewport = {};
 		viewport.height = (float)height;
 		viewport.width = (float)width;
 		viewport.minDepth = (float) 0.0f;
 		viewport.maxDepth = (float) 1.0f;
-		vkCmdSetViewport(drawCmdBuffers[i], 0, 1, &viewport);
+		vkCmdSetViewport(m_drawCmdBuffers[i].getVKCommandBuffer(), 0, 1, &viewport);
 
 		VkRect2D scissor = {};
 		scissor.extent.width = width;
 		scissor.extent.height = height;
 		scissor.offset.x = 0;
 		scissor.offset.y = 0;
-		vkCmdSetScissor(drawCmdBuffers[i], 0, 1, &scissor);
+		vkCmdSetScissor(m_drawCmdBuffers[i].getVKCommandBuffer(), 0, 1, &scissor);
 
-		vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, NULL);
-		vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.solid);
+		vkCmdBindDescriptorSets(m_drawCmdBuffers[i].getVKCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, NULL);
+		vkCmdBindPipeline(m_drawCmdBuffers[i].getVKCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.solid);
 
 		VkDeviceSize offsets[1] = { 0 };
-		vkCmdBindVertexBuffers(drawCmdBuffers[i], VERTEX_BUFFER_BIND_ID, 1, &vertices.buf, offsets);
-		vkCmdBindIndexBuffer(drawCmdBuffers[i], indices.buf, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdDrawIndexed(drawCmdBuffers[i], indices.count, 1, 0, 0, 1);
-		vkCmdEndRenderPass(drawCmdBuffers[i]);
+		vkCmdBindVertexBuffers(m_drawCmdBuffers[i].getVKCommandBuffer(), VERTEX_BUFFER_BIND_ID, 1, &vertices.buf, offsets);
+		vkCmdBindIndexBuffer(m_drawCmdBuffers[i].getVKCommandBuffer(), indices.buf, 0, VK_INDEX_TYPE_UINT32);
+		vkCmdDrawIndexed(m_drawCmdBuffers[i].getVKCommandBuffer(), indices.count, 1, 0, 0, 1);
+		vkCmdEndRenderPass(m_drawCmdBuffers[i].getVKCommandBuffer());
 
 		VkImageMemoryBarrier prePresentBarrier = {};
 		prePresentBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -719,11 +669,11 @@ void VulkanExampleBase::buildCommandBuffers()
 		prePresentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		prePresentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 		prePresentBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-		prePresentBarrier.image = swapChain.buffers[i].image;
+		prePresentBarrier.image = m_swapchain->getImage(i);
 
 		VkImageMemoryBarrier *pMemoryBarrier = &prePresentBarrier;
 		vkCmdPipelineBarrier(
-			drawCmdBuffers[i],
+			m_drawCmdBuffers[i].getVKCommandBuffer(),
 			VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 			VK_FLAGS_NONE,
@@ -731,8 +681,7 @@ void VulkanExampleBase::buildCommandBuffers()
 			0, nullptr,
 			1, &prePresentBarrier);
 
-		err = vkEndCommandBuffer(drawCmdBuffers[i]);
-		assert(!err);
+		m_drawCmdBuffers[i].end();
 	}
 }
 
@@ -748,21 +697,19 @@ void VulkanExampleBase::draw()
 	err = vkCreateSemaphore(device, &presentCompleteSemaphoreCreateInfo, nullptr, &presentCompleteSemaphore);
 	assert(!err);
 
-	err = swapChain.acquireNextImage(presentCompleteSemaphore, &currentBuffer);
-	assert(!err);
+	m_device->getVKDevice().acquireNextImageKHR(m_swapchain->getVKSwapchain(), UINT64_MAX, presentCompleteSemaphore, VK_NULL_HANDLE, currentBuffer);
 
-	VkSubmitInfo submitInfo = {};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.waitSemaphoreCount = 1;
-	submitInfo.pWaitSemaphores = &presentCompleteSemaphore;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &drawCmdBuffers[currentBuffer];
+	VkCommandBuffer drawCmdBuffer = m_drawCmdBuffers[currentBuffer].getVKCommandBuffer();
+	VkCommandBuffer postPresentCmdBuffer = m_postPresentCmdBuffer.getVKCommandBuffer();
 
-	err = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-	assert(!err);
+	m_drawCmdBuffers[currentBuffer].submit(presentCompleteSemaphore);
 
-	err = swapChain.queuePresent(queue, currentBuffer);
-	assert(!err);
+	vk::SwapchainKHR swapchain = m_swapchain->getVKSwapchain();
+	vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
+		.swapchainCount(1)
+		.pSwapchains(&swapchain)
+		.pImageIndices(&currentBuffer);
+	m_device->getVKQueue().presentKHR(presentInfo);
 
 	vkDestroySemaphore(device, presentCompleteSemaphore, nullptr);
 
@@ -776,32 +723,21 @@ void VulkanExampleBase::draw()
 	postPresentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	postPresentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	postPresentBarrier.subresourceRange = { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
-	postPresentBarrier.image = swapChain.buffers[currentBuffer].image;
+	postPresentBarrier.image = m_swapchain->getImage(currentBuffer);
 
-	VkCommandBufferBeginInfo cmdBufInfo = {};
-	cmdBufInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	err = vkBeginCommandBuffer(postPresentCmdBuffer, &cmdBufInfo);
-	assert(!err);
-
+	m_postPresentCmdBuffer.begin();
 	vkCmdPipelineBarrier(
-		postPresentCmdBuffer,
+		m_postPresentCmdBuffer.getVKCommandBuffer(),
 		VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
 		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		VK_FLAGS_NONE,
 		0, nullptr,
 		0, nullptr,
 		1, &postPresentBarrier);
-
-	err = vkEndCommandBuffer(postPresentCmdBuffer);
-	assert(!err);
-	submitInfo = {};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &postPresentCmdBuffer;
-	err = vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-	assert(!err);
-	err = vkQueueWaitIdle(queue);
-	assert(!err);
+	
+	m_postPresentCmdBuffer.end();
+	m_postPresentCmdBuffer.submit();
+	m_postPresentCmdBuffer.waitIdle();
 }
 
 void VulkanExampleBase::prepareVertices()

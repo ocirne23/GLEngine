@@ -38,7 +38,7 @@
 
 #include "Graphics/Vulkan/Wrappers/VKInstance.h"
 #include "Graphics/Vulkan/Wrappers/VKSwapchain.h"
-
+#include "Graphics/Vulkan/Wrappers/VKCommandBuffer.h"
 
 #define M_PI 3.14159265359
 #define deg_to_rad(deg) deg * float(M_PI / 180)
@@ -143,6 +143,9 @@ protected:
 	VKPhysicalDevice* m_physDevice = NULL;
 	VKDevice* m_device = NULL;
 	VKSwapchain* m_swapchain = NULL;
+	VKCommandBuffer m_setupCmdBuffer;
+	VKCommandBuffer m_postPresentCmdBuffer;
+	eastl::vector<VKCommandBuffer> m_drawCmdBuffers;
 
 
 	float frameTimer = 1.0f;
@@ -154,16 +157,14 @@ protected:
 	VkFormat colorformat = VK_FORMAT_B8G8R8A8_UNORM;
 	VkFormat depthFormat;
 	VkCommandPool cmdPool;
-	VkCommandBuffer setupCmdBuffer = VK_NULL_HANDLE;
-	VkCommandBuffer postPresentCmdBuffer = VK_NULL_HANDLE;
-	std::vector<VkCommandBuffer> drawCmdBuffers;
+	//VkCommandBuffer postPresentCmdBuffer = VK_NULL_HANDLE;
+	//std::vector<VkCommandBuffer> drawCmdBuffers;
 	VkRenderPass renderPass;
 	std::vector<VkFramebuffer> frameBuffers;
 	uint32_t currentBuffer = 0;
 	VkDescriptorPool descriptorPool;
 	std::vector<VkShaderModule> shaderModules;
 	VkPipelineCache pipelineCache;
-	VulkanSwapChain swapChain;
 	vkTools::VulkanTextureLoader *textureLoader = nullptr;
 
 private:
