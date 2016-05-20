@@ -75,13 +75,6 @@
     <ClCompile Include="src\3rdparty\EASTL\red_black_tree.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\string.cpp" />
     <ClCompile Include="src\Graphics\UI\CEGUIManager.cpp" />
-    <ClCompile Include="src\Graphics\Mantle\MantleTest.cpp" />
-    <ClCompile Include="src\Graphics\Mantle\MantleTest2.cpp" />
-    <ClCompile Include="src\Graphics\Mantle\GRApplication.cpp" />
-    <ClCompile Include="src\Graphics\Mantle\Wrappers\GRDevice.cpp" />
-    <ClCompile Include="src\Graphics\Mantle\Wrappers\GRPhysicalGPU.cpp" />
-    <ClCompile Include="src\Graphics\Mantle\Wrappers\GRDeviceQueue.cpp" />
-    <ClCompile Include="src\Graphics\Mantle\mantle.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\thread_support.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\numeric_limits.cpp" />
@@ -90,17 +83,7 @@
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
     <ClCompile Include="include\3rdparty\gli\core\dummy.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Test\triangle.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Test\vulkanandroid.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Test\vulkandebug.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Test\vulkanexamplebase.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Test\vulkantools.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKInstance.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKPhysicalDevice.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKDevice.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKSwapchain.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKCommandBuffer.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\VKContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -910,12 +893,6 @@
     <ClInclude Include="include\3rdparty\CEGUI\XMLSerializer.h" />
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderObject.h" />
-    <ClInclude Include="include\Public\Graphics\Mantle\Wrappers\GRDevice.h" />
-    <ClInclude Include="include\Public\Graphics\Mantle\GRApplication.h" />
-    <ClInclude Include="include\Public\Graphics\Mantle\Wrappers\GRPhysicalGPU.h" />
-    <ClInclude Include="include\Public\Graphics\Mantle\Wrappers\GRDeviceQueue.h" />
-    <ClInclude Include="include\Private\Graphics\Mantle\mantle.h" />
-    <ClInclude Include="include\Public\Graphics\Mantle\MantleTest.h" />
     <ClInclude Include="include\3rdparty\gsl\gsl.h" />
     <ClInclude Include="include\3rdparty\gsl\gsl_assert.h" />
     <ClInclude Include="include\3rdparty\gsl\gsl_util.h" />
@@ -986,14 +963,6 @@
     <ClInclude Include="include\Public\Graphics\Vulkan\vk_cpp.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKUtils.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKDebug.h" />
-    <ClInclude Include="..\..\..\..\Desktop\Vulkan-master\base\vulkantools.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\vulkanandroid.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\vulkandebug.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\vulkanexamplebase.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\vulkanMeshLoader.hpp" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\vulkanswapchain.hpp" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\vulkanTextureLoader.hpp" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\vulkantools.h" />
     <ClInclude Include="include\3rdparty\gli\core\fetch.hpp" />
     <ClInclude Include="include\3rdparty\gli\core\flip.hpp" />
     <ClInclude Include="include\3rdparty\gli\core\generate_mipmaps.hpp" />
@@ -1025,13 +994,7 @@
     <ClInclude Include="include\3rdparty\gli\texture3d.hpp" />
     <ClInclude Include="include\3rdparty\gli\type.hpp" />
     <ClInclude Include="include\3rdparty\gli\view.hpp" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Test\triangle.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKInstance.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPhysicalDevice.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKDevice.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKSwapchain.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKCommandBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\VKContext.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

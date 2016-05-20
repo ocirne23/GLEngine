@@ -52,20 +52,26 @@
 #ifndef VK_CPP_H_
 #define VK_CPP_H_
 
-#define VKCPP_ENHANCED_MODE
+#define VK_USE_PLATFORM_WIN32_KHR
 
 #include <array>
 #include <cassert>
 #include <cstdint>
 #include <cstring>
-#include <EASTL/array.h>
-#include <EASTL/vector.h>
-#include <EASTL/string.h>
 #include <string>
 #include <system_error>
-#include <vulkan/vulkan.h>
 
-static_assert(VK_MAKE_VERSION(1, 0, 5) == VK_API_VERSION, "Wrong VK_API_VERSION!");
+#include "vulkan/vk_sdk_platform.h"
+#include "vulkan/vk_platform.h"
+#include "vulkan/vulkan.h"
+
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+#include "EASTL/vector.h"
+#include "EASTL/array.h"
+#include "EASTL/string.h"
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
+
+static_assert(VK_HEADER_VERSION == 11, "Wrong VK_HEADER_VERSION!");
 
 // 32-bit vulkan is not typesafe for handles, so don't allow copy constructors on this platform by default.
 // To enable this feature on 32-bit platforms please define VK_CPP_TYPESAFE_CONVERSION
@@ -73,9 +79,26 @@ static_assert(VK_MAKE_VERSION(1, 0, 5) == VK_API_VERSION, "Wrong VK_API_VERSION!
 #define VK_CPP_TYPESAFE_CONVERSION 1
 #endif
 
+#if !defined(VK_CPP_HAS_UNRESTRICTED_UNIONS)
+# if defined(__clang__)
+#  if __has_feature(cxx_unrestricted_unions)
+#   define VK_CPP_HAS_UNRESTRICTED_UNIONS
+#  endif
+# elif defined(__GNUC__)
+#  define GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#  if 40600 <= GCC_VERSION
+#   define VK_CPP_HAS_UNRESTRICTED_UNIONS
+#  endif
+# elif defined(_MSC_VER)
+#  if 1900 <= _MSC_VER
+#   define VK_CPP_HAS_UNRESTRICTED_UNIONS
+#  endif
+# endif
+#endif
+
 namespace vk
 {
-	template <typename BitType, typename MaskType = uint32_t>
+	template <typename BitType, typename MaskType = VkFlags>
 	class Flags
 	{
 	public:
@@ -154,7 +177,7 @@ namespace vk
 			return m_mask != rhs.m_mask;
 		}
 
-		operator bool() const
+		explicit operator bool() const
 		{
 			return !!m_mask;
 		}
@@ -201,6 +224,69 @@ namespace vk
 		RefType *m_ptr;
 	};
 
+	template <typename T>
+	class ArrayProxy
+	{
+	public:
+		ArrayProxy(std::nullptr_t)
+			: m_count(0)
+			, m_ptr(nullptr)
+		{}
+
+		ArrayProxy(T & ptr)
+			: m_count(1)
+			, m_ptr(&ptr)
+		{}
+
+		ArrayProxy(uint32_t count, T * ptr)
+			: m_count(count)
+			, m_ptr(ptr)
+		{}
+
+		template <size_t N>
+		ArrayProxy(eastl::array<typename eastl::remove_const<T>::type, N> & data)
+			: m_count(N)
+			, m_ptr(data.data())
+		{}
+
+		template <size_t N>
+		ArrayProxy(eastl::array<typename eastl::remove_const<T>::type, N> const& data)
+			: m_count(N)
+			, m_ptr(data.data())
+		{}
+
+		template <class Allocator = eastl::allocator<typename eastl::remove_const<T>::type>>
+		ArrayProxy(eastl::vector<typename eastl::remove_const<T>::type, Allocator> & data)
+			: m_count(static_cast<uint32_t>(data.size()))
+			, m_ptr(data.data())
+		{}
+
+		template <class Allocator = eastl::allocator<typename eastl::remove_const<T>::type>>
+		ArrayProxy(eastl::vector<typename eastl::remove_const<T>::type, Allocator> const& data)
+			: m_count(static_cast<uint32_t>(data.size()))
+			, m_ptr(data.data())
+		{}
+
+		ArrayProxy(std::initializer_list<T> const& data)
+			: m_count(static_cast<uint32_t>(data.end() - data.begin()))
+			, m_ptr(data.begin())
+		{}
+
+		uint32_t size() const
+		{
+			return m_count;
+		}
+
+		T * data() const
+		{
+			return m_ptr;
+		}
+
+	private:
+		uint32_t  m_count;
+		T *       m_ptr;
+	};
+
 	enum class Result
 	{
 		eSuccess = VK_SUCCESS,
@@ -229,7 +315,7 @@ namespace vk
 		eErrorInvalidShaderNV = VK_ERROR_INVALID_SHADER_NV
 	};
 
-	inline eastl::string to_string(Result value)
+	inline std::string to_string(Result value)
 	{
 		switch (value)
 		{
@@ -257,7 +343,7 @@ namespace vk
 		case Result::eErrorIncompatibleDisplayKHR: return "ErrorIncompatibleDisplayKHR";
 		case Result::eErrorValidationFailedEXT: return "ErrorValidationFailedEXT";
 		case Result::eErrorInvalidShaderNV: return "ErrorInvalidShaderNV";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
@@ -269,7 +355,7 @@ namespace vk
 	{
 	public:
 		virtual const char* name() const noexcept override { return "vk::Result"; }
-		virtual std::string message(int ev) const override { return std::string(to_string(static_cast<vk::Result>(ev)).c_str()); }
+		virtual std::string message(int ev) const override { return to_string(static_cast<Result>(ev)); }
 	};
 
 #if defined(_MSC_VER) && (_MSC_VER == 1800)
@@ -303,14 +389,17 @@ namespace std
 
 namespace vk
 {
-	typedef uint32_t SampleMask;
-	typedef uint32_t Bool32;
-	typedef uint64_t DeviceSize;
+	using SampleMask = uint32_t;
+
+	using Bool32 = uint32_t;
+
+	using DeviceSize = uint64_t;
+
 	enum class FramebufferCreateFlagBits
 	{
 	};
 
-	typedef Flags<FramebufferCreateFlagBits, VkFramebufferCreateFlags> FramebufferCreateFlags;
+	using FramebufferCreateFlags = Flags<FramebufferCreateFlagBits, VkFramebufferCreateFlags>;
 
 	inline FramebufferCreateFlags operator|(FramebufferCreateFlagBits bit0, FramebufferCreateFlagBits bit1)
 	{
@@ -321,7 +410,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<QueryPoolCreateFlagBits, VkQueryPoolCreateFlags> QueryPoolCreateFlags;
+	using QueryPoolCreateFlags = Flags<QueryPoolCreateFlagBits, VkQueryPoolCreateFlags>;
 
 	inline QueryPoolCreateFlags operator|(QueryPoolCreateFlagBits bit0, QueryPoolCreateFlagBits bit1)
 	{
@@ -332,7 +421,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<RenderPassCreateFlagBits, VkRenderPassCreateFlags> RenderPassCreateFlags;
+	using RenderPassCreateFlags = Flags<RenderPassCreateFlagBits, VkRenderPassCreateFlags>;
 
 	inline RenderPassCreateFlags operator|(RenderPassCreateFlagBits bit0, RenderPassCreateFlagBits bit1)
 	{
@@ -343,7 +432,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<SamplerCreateFlagBits, VkSamplerCreateFlags> SamplerCreateFlags;
+	using SamplerCreateFlags = Flags<SamplerCreateFlagBits, VkSamplerCreateFlags>;
 
 	inline SamplerCreateFlags operator|(SamplerCreateFlagBits bit0, SamplerCreateFlagBits bit1)
 	{
@@ -354,7 +443,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineLayoutCreateFlagBits, VkPipelineLayoutCreateFlags> PipelineLayoutCreateFlags;
+	using PipelineLayoutCreateFlags = Flags<PipelineLayoutCreateFlagBits, VkPipelineLayoutCreateFlags>;
 
 	inline PipelineLayoutCreateFlags operator|(PipelineLayoutCreateFlagBits bit0, PipelineLayoutCreateFlagBits bit1)
 	{
@@ -365,7 +454,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineCacheCreateFlagBits, VkPipelineCacheCreateFlags> PipelineCacheCreateFlags;
+	using PipelineCacheCreateFlags = Flags<PipelineCacheCreateFlagBits, VkPipelineCacheCreateFlags>;
 
 	inline PipelineCacheCreateFlags operator|(PipelineCacheCreateFlagBits bit0, PipelineCacheCreateFlagBits bit1)
 	{
@@ -376,7 +465,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineDepthStencilStateCreateFlagBits, VkPipelineDepthStencilStateCreateFlags> PipelineDepthStencilStateCreateFlags;
+	using PipelineDepthStencilStateCreateFlags = Flags<PipelineDepthStencilStateCreateFlagBits, VkPipelineDepthStencilStateCreateFlags>;
 
 	inline PipelineDepthStencilStateCreateFlags operator|(PipelineDepthStencilStateCreateFlagBits bit0, PipelineDepthStencilStateCreateFlagBits bit1)
 	{
@@ -387,7 +476,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineDynamicStateCreateFlagBits, VkPipelineDynamicStateCreateFlags> PipelineDynamicStateCreateFlags;
+	using PipelineDynamicStateCreateFlags = Flags<PipelineDynamicStateCreateFlagBits, VkPipelineDynamicStateCreateFlags>;
 
 	inline PipelineDynamicStateCreateFlags operator|(PipelineDynamicStateCreateFlagBits bit0, PipelineDynamicStateCreateFlagBits bit1)
 	{
@@ -398,7 +487,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineColorBlendStateCreateFlagBits, VkPipelineColorBlendStateCreateFlags> PipelineColorBlendStateCreateFlags;
+	using PipelineColorBlendStateCreateFlags = Flags<PipelineColorBlendStateCreateFlagBits, VkPipelineColorBlendStateCreateFlags>;
 
 	inline PipelineColorBlendStateCreateFlags operator|(PipelineColorBlendStateCreateFlagBits bit0, PipelineColorBlendStateCreateFlagBits bit1)
 	{
@@ -409,7 +498,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineMultisampleStateCreateFlagBits, VkPipelineMultisampleStateCreateFlags> PipelineMultisampleStateCreateFlags;
+	using PipelineMultisampleStateCreateFlags = Flags<PipelineMultisampleStateCreateFlagBits, VkPipelineMultisampleStateCreateFlags>;
 
 	inline PipelineMultisampleStateCreateFlags operator|(PipelineMultisampleStateCreateFlagBits bit0, PipelineMultisampleStateCreateFlagBits bit1)
 	{
@@ -420,7 +509,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineRasterizationStateCreateFlagBits, VkPipelineRasterizationStateCreateFlags> PipelineRasterizationStateCreateFlags;
+	using PipelineRasterizationStateCreateFlags = Flags<PipelineRasterizationStateCreateFlagBits, VkPipelineRasterizationStateCreateFlags>;
 
 	inline PipelineRasterizationStateCreateFlags operator|(PipelineRasterizationStateCreateFlagBits bit0, PipelineRasterizationStateCreateFlagBits bit1)
 	{
@@ -431,7 +520,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineViewportStateCreateFlagBits, VkPipelineViewportStateCreateFlags> PipelineViewportStateCreateFlags;
+	using PipelineViewportStateCreateFlags = Flags<PipelineViewportStateCreateFlagBits, VkPipelineViewportStateCreateFlags>;
 
 	inline PipelineViewportStateCreateFlags operator|(PipelineViewportStateCreateFlagBits bit0, PipelineViewportStateCreateFlagBits bit1)
 	{
@@ -442,7 +531,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineTessellationStateCreateFlagBits, VkPipelineTessellationStateCreateFlags> PipelineTessellationStateCreateFlags;
+	using PipelineTessellationStateCreateFlags = Flags<PipelineTessellationStateCreateFlagBits, VkPipelineTessellationStateCreateFlags>;
 
 	inline PipelineTessellationStateCreateFlags operator|(PipelineTessellationStateCreateFlagBits bit0, PipelineTessellationStateCreateFlagBits bit1)
 	{
@@ -453,7 +542,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineInputAssemblyStateCreateFlagBits, VkPipelineInputAssemblyStateCreateFlags> PipelineInputAssemblyStateCreateFlags;
+	using PipelineInputAssemblyStateCreateFlags = Flags<PipelineInputAssemblyStateCreateFlagBits, VkPipelineInputAssemblyStateCreateFlags>;
 
 	inline PipelineInputAssemblyStateCreateFlags operator|(PipelineInputAssemblyStateCreateFlagBits bit0, PipelineInputAssemblyStateCreateFlagBits bit1)
 	{
@@ -464,7 +553,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineVertexInputStateCreateFlagBits, VkPipelineVertexInputStateCreateFlags> PipelineVertexInputStateCreateFlags;
+	using PipelineVertexInputStateCreateFlags = Flags<PipelineVertexInputStateCreateFlagBits, VkPipelineVertexInputStateCreateFlags>;
 
 	inline PipelineVertexInputStateCreateFlags operator|(PipelineVertexInputStateCreateFlagBits bit0, PipelineVertexInputStateCreateFlagBits bit1)
 	{
@@ -475,7 +564,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<PipelineShaderStageCreateFlagBits, VkPipelineShaderStageCreateFlags> PipelineShaderStageCreateFlags;
+	using PipelineShaderStageCreateFlags = Flags<PipelineShaderStageCreateFlagBits, VkPipelineShaderStageCreateFlags>;
 
 	inline PipelineShaderStageCreateFlags operator|(PipelineShaderStageCreateFlagBits bit0, PipelineShaderStageCreateFlagBits bit1)
 	{
@@ -486,7 +575,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<DescriptorSetLayoutCreateFlagBits, VkDescriptorSetLayoutCreateFlags> DescriptorSetLayoutCreateFlags;
+	using DescriptorSetLayoutCreateFlags = Flags<DescriptorSetLayoutCreateFlagBits, VkDescriptorSetLayoutCreateFlags>;
 
 	inline DescriptorSetLayoutCreateFlags operator|(DescriptorSetLayoutCreateFlagBits bit0, DescriptorSetLayoutCreateFlagBits bit1)
 	{
@@ -497,7 +586,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<BufferViewCreateFlagBits, VkBufferViewCreateFlags> BufferViewCreateFlags;
+	using BufferViewCreateFlags = Flags<BufferViewCreateFlagBits, VkBufferViewCreateFlags>;
 
 	inline BufferViewCreateFlags operator|(BufferViewCreateFlagBits bit0, BufferViewCreateFlagBits bit1)
 	{
@@ -508,7 +597,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<InstanceCreateFlagBits, VkInstanceCreateFlags> InstanceCreateFlags;
+	using InstanceCreateFlags = Flags<InstanceCreateFlagBits, VkInstanceCreateFlags>;
 
 	inline InstanceCreateFlags operator|(InstanceCreateFlagBits bit0, InstanceCreateFlagBits bit1)
 	{
@@ -519,7 +608,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<DeviceCreateFlagBits, VkDeviceCreateFlags> DeviceCreateFlags;
+	using DeviceCreateFlags = Flags<DeviceCreateFlagBits, VkDeviceCreateFlags>;
 
 	inline DeviceCreateFlags operator|(DeviceCreateFlagBits bit0, DeviceCreateFlagBits bit1)
 	{
@@ -530,7 +619,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<DeviceQueueCreateFlagBits, VkDeviceQueueCreateFlags> DeviceQueueCreateFlags;
+	using DeviceQueueCreateFlags = Flags<DeviceQueueCreateFlagBits, VkDeviceQueueCreateFlags>;
 
 	inline DeviceQueueCreateFlags operator|(DeviceQueueCreateFlagBits bit0, DeviceQueueCreateFlagBits bit1)
 	{
@@ -541,7 +630,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<ImageViewCreateFlagBits, VkImageViewCreateFlags> ImageViewCreateFlags;
+	using ImageViewCreateFlags = Flags<ImageViewCreateFlagBits, VkImageViewCreateFlags>;
 
 	inline ImageViewCreateFlags operator|(ImageViewCreateFlagBits bit0, ImageViewCreateFlagBits bit1)
 	{
@@ -552,7 +641,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<SemaphoreCreateFlagBits, VkSemaphoreCreateFlags> SemaphoreCreateFlags;
+	using SemaphoreCreateFlags = Flags<SemaphoreCreateFlagBits, VkSemaphoreCreateFlags>;
 
 	inline SemaphoreCreateFlags operator|(SemaphoreCreateFlagBits bit0, SemaphoreCreateFlagBits bit1)
 	{
@@ -563,7 +652,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<ShaderModuleCreateFlagBits, VkShaderModuleCreateFlags> ShaderModuleCreateFlags;
+	using ShaderModuleCreateFlags = Flags<ShaderModuleCreateFlagBits, VkShaderModuleCreateFlags>;
 
 	inline ShaderModuleCreateFlags operator|(ShaderModuleCreateFlagBits bit0, ShaderModuleCreateFlagBits bit1)
 	{
@@ -574,7 +663,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<EventCreateFlagBits, VkEventCreateFlags> EventCreateFlags;
+	using EventCreateFlags = Flags<EventCreateFlagBits, VkEventCreateFlags>;
 
 	inline EventCreateFlags operator|(EventCreateFlagBits bit0, EventCreateFlagBits bit1)
 	{
@@ -585,7 +674,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<MemoryMapFlagBits, VkMemoryMapFlags> MemoryMapFlags;
+	using MemoryMapFlags = Flags<MemoryMapFlagBits, VkMemoryMapFlags>;
 
 	inline MemoryMapFlags operator|(MemoryMapFlagBits bit0, MemoryMapFlagBits bit1)
 	{
@@ -596,7 +685,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<SubpassDescriptionFlagBits, VkSubpassDescriptionFlags> SubpassDescriptionFlags;
+	using SubpassDescriptionFlags = Flags<SubpassDescriptionFlagBits, VkSubpassDescriptionFlags>;
 
 	inline SubpassDescriptionFlags operator|(SubpassDescriptionFlagBits bit0, SubpassDescriptionFlagBits bit1)
 	{
@@ -607,7 +696,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<DescriptorPoolResetFlagBits, VkDescriptorPoolResetFlags> DescriptorPoolResetFlags;
+	using DescriptorPoolResetFlags = Flags<DescriptorPoolResetFlagBits, VkDescriptorPoolResetFlags>;
 
 	inline DescriptorPoolResetFlags operator|(DescriptorPoolResetFlagBits bit0, DescriptorPoolResetFlagBits bit1)
 	{
@@ -618,7 +707,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<SwapchainCreateFlagBitsKHR, VkSwapchainCreateFlagsKHR> SwapchainCreateFlagsKHR;
+	using SwapchainCreateFlagsKHR = Flags<SwapchainCreateFlagBitsKHR, VkSwapchainCreateFlagsKHR>;
 
 	inline SwapchainCreateFlagsKHR operator|(SwapchainCreateFlagBitsKHR bit0, SwapchainCreateFlagBitsKHR bit1)
 	{
@@ -629,7 +718,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<DisplayModeCreateFlagBitsKHR, VkDisplayModeCreateFlagsKHR> DisplayModeCreateFlagsKHR;
+	using DisplayModeCreateFlagsKHR = Flags<DisplayModeCreateFlagBitsKHR, VkDisplayModeCreateFlagsKHR>;
 
 	inline DisplayModeCreateFlagsKHR operator|(DisplayModeCreateFlagBitsKHR bit0, DisplayModeCreateFlagBitsKHR bit1)
 	{
@@ -640,7 +729,7 @@ namespace vk
 	{
 	};
 
-	typedef Flags<DisplaySurfaceCreateFlagBitsKHR, VkDisplaySurfaceCreateFlagsKHR> DisplaySurfaceCreateFlagsKHR;
+	using DisplaySurfaceCreateFlagsKHR = Flags<DisplaySurfaceCreateFlagBitsKHR, VkDisplaySurfaceCreateFlagsKHR>;
 
 	inline DisplaySurfaceCreateFlagsKHR operator|(DisplaySurfaceCreateFlagBitsKHR bit0, DisplaySurfaceCreateFlagBitsKHR bit1)
 	{
@@ -654,7 +743,7 @@ namespace vk
 #endif /*VK_USE_PLATFORM_ANDROID_KHR*/
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-	typedef Flags<AndroidSurfaceCreateFlagBitsKHR, VkAndroidSurfaceCreateFlagsKHR> AndroidSurfaceCreateFlagsKHR;
+	using AndroidSurfaceCreateFlagsKHR = Flags<AndroidSurfaceCreateFlagBitsKHR, VkAndroidSurfaceCreateFlagsKHR>;
 
 	inline AndroidSurfaceCreateFlagsKHR operator|(AndroidSurfaceCreateFlagBitsKHR bit0, AndroidSurfaceCreateFlagBitsKHR bit1)
 	{
@@ -669,7 +758,7 @@ namespace vk
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
 
 #ifdef VK_USE_PLATFORM_MIR_KHR
-	typedef Flags<MirSurfaceCreateFlagBitsKHR, VkMirSurfaceCreateFlagsKHR> MirSurfaceCreateFlagsKHR;
+	using MirSurfaceCreateFlagsKHR = Flags<MirSurfaceCreateFlagBitsKHR, VkMirSurfaceCreateFlagsKHR>;
 
 	inline MirSurfaceCreateFlagsKHR operator|(MirSurfaceCreateFlagBitsKHR bit0, MirSurfaceCreateFlagBitsKHR bit1)
 	{
@@ -684,7 +773,7 @@ namespace vk
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
 
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
-	typedef Flags<WaylandSurfaceCreateFlagBitsKHR, VkWaylandSurfaceCreateFlagsKHR> WaylandSurfaceCreateFlagsKHR;
+	using WaylandSurfaceCreateFlagsKHR = Flags<WaylandSurfaceCreateFlagBitsKHR, VkWaylandSurfaceCreateFlagsKHR>;
 
 	inline WaylandSurfaceCreateFlagsKHR operator|(WaylandSurfaceCreateFlagBitsKHR bit0, WaylandSurfaceCreateFlagBitsKHR bit1)
 	{
@@ -699,7 +788,7 @@ namespace vk
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
 
 #ifdef VK_USE_PLATFORM_WIN32_KHR
-	typedef Flags<Win32SurfaceCreateFlagBitsKHR, VkWin32SurfaceCreateFlagsKHR> Win32SurfaceCreateFlagsKHR;
+	using Win32SurfaceCreateFlagsKHR = Flags<Win32SurfaceCreateFlagBitsKHR, VkWin32SurfaceCreateFlagsKHR>;
 
 	inline Win32SurfaceCreateFlagsKHR operator|(Win32SurfaceCreateFlagBitsKHR bit0, Win32SurfaceCreateFlagBitsKHR bit1)
 	{
@@ -714,7 +803,7 @@ namespace vk
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-	typedef Flags<XlibSurfaceCreateFlagBitsKHR, VkXlibSurfaceCreateFlagsKHR> XlibSurfaceCreateFlagsKHR;
+	using XlibSurfaceCreateFlagsKHR = Flags<XlibSurfaceCreateFlagBitsKHR, VkXlibSurfaceCreateFlagsKHR>;
 
 	inline XlibSurfaceCreateFlagsKHR operator|(XlibSurfaceCreateFlagBitsKHR bit0, XlibSurfaceCreateFlagBitsKHR bit1)
 	{
@@ -729,7 +818,7 @@ namespace vk
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
-	typedef Flags<XcbSurfaceCreateFlagBitsKHR, VkXcbSurfaceCreateFlagsKHR> XcbSurfaceCreateFlagsKHR;
+	using XcbSurfaceCreateFlagsKHR = Flags<XcbSurfaceCreateFlagBitsKHR, VkXcbSurfaceCreateFlagsKHR>;
 
 	inline XcbSurfaceCreateFlagsKHR operator|(XcbSurfaceCreateFlagBitsKHR bit0, XcbSurfaceCreateFlagBitsKHR bit1)
 	{
@@ -1787,2883 +1876,1651 @@ namespace vk
 	};
 	static_assert(sizeof(DebugReportCallbackEXT) == sizeof(VkDebugReportCallbackEXT), "handle and wrapper have different size!");
 
-	class Offset2D
+	struct Offset2D
 	{
-	public:
 		Offset2D()
 			: Offset2D(0, 0)
 		{}
 
-		Offset2D(int32_t x, int32_t y)
+		Offset2D(int32_t x_, int32_t y_)
 		{
-			m_offset2D.x = x;
-			m_offset2D.y = y;
+			x = x_;
+			y = y_;
 		}
 
 		Offset2D(VkOffset2D const & rhs)
-			: m_offset2D(rhs)
 		{
+			memcpy(this, &rhs, sizeof(Offset2D));
 		}
 
 		Offset2D& operator=(VkOffset2D const & rhs)
 		{
-			m_offset2D = rhs;
+			memcpy(this, &rhs, sizeof(Offset2D));
 			return *this;
 		}
 
-		const int32_t& x() const
+		Offset2D& setX(int32_t x_)
 		{
-			return m_offset2D.x;
-		}
-
-		int32_t& x()
-		{
-			return m_offset2D.x;
-		}
-
-		Offset2D& x(int32_t x)
-		{
-			m_offset2D.x = x;
+			x = x_;
 			return *this;
 		}
 
-		const int32_t& y() const
+		Offset2D& setY(int32_t y_)
 		{
-			return m_offset2D.y;
-		}
-
-		int32_t& y()
-		{
-			return m_offset2D.y;
-		}
-
-		Offset2D& y(int32_t y)
-		{
-			m_offset2D.y = y;
+			y = y_;
 			return *this;
 		}
 
 		operator const VkOffset2D&() const
 		{
-			return m_offset2D;
+			return *reinterpret_cast<const VkOffset2D*>(this);
 		}
 
-	private:
-		VkOffset2D m_offset2D;
+		int32_t x;
+		int32_t y;
 	};
 	static_assert(sizeof(Offset2D) == sizeof(VkOffset2D), "struct and wrapper have different size!");
 
-	class Offset3D
+	struct Offset3D
 	{
-	public:
 		Offset3D()
 			: Offset3D(0, 0, 0)
 		{}
 
-		Offset3D(int32_t x, int32_t y, int32_t z)
+		Offset3D(int32_t x_, int32_t y_, int32_t z_)
 		{
-			m_offset3D.x = x;
-			m_offset3D.y = y;
-			m_offset3D.z = z;
+			x = x_;
+			y = y_;
+			z = z_;
 		}
 
 		Offset3D(VkOffset3D const & rhs)
-			: m_offset3D(rhs)
 		{
+			memcpy(this, &rhs, sizeof(Offset3D));
 		}
 
 		Offset3D& operator=(VkOffset3D const & rhs)
 		{
-			m_offset3D = rhs;
+			memcpy(this, &rhs, sizeof(Offset3D));
 			return *this;
 		}
 
-		const int32_t& x() const
+		Offset3D& setX(int32_t x_)
 		{
-			return m_offset3D.x;
-		}
-
-		int32_t& x()
-		{
-			return m_offset3D.x;
-		}
-
-		Offset3D& x(int32_t x)
-		{
-			m_offset3D.x = x;
+			x = x_;
 			return *this;
 		}
 
-		const int32_t& y() const
+		Offset3D& setY(int32_t y_)
 		{
-			return m_offset3D.y;
-		}
-
-		int32_t& y()
-		{
-			return m_offset3D.y;
-		}
-
-		Offset3D& y(int32_t y)
-		{
-			m_offset3D.y = y;
+			y = y_;
 			return *this;
 		}
 
-		const int32_t& z() const
+		Offset3D& setZ(int32_t z_)
 		{
-			return m_offset3D.z;
-		}
-
-		int32_t& z()
-		{
-			return m_offset3D.z;
-		}
-
-		Offset3D& z(int32_t z)
-		{
-			m_offset3D.z = z;
+			z = z_;
 			return *this;
 		}
 
 		operator const VkOffset3D&() const
 		{
-			return m_offset3D;
+			return *reinterpret_cast<const VkOffset3D*>(this);
 		}
 
-	private:
-		VkOffset3D m_offset3D;
+		int32_t x;
+		int32_t y;
+		int32_t z;
 	};
 	static_assert(sizeof(Offset3D) == sizeof(VkOffset3D), "struct and wrapper have different size!");
 
-	class Extent2D
+	struct Extent2D
 	{
-	public:
 		Extent2D()
 			: Extent2D(0, 0)
 		{}
 
-		Extent2D(uint32_t width, uint32_t height)
+		Extent2D(uint32_t width_, uint32_t height_)
 		{
-			m_extent2D.width = width;
-			m_extent2D.height = height;
+			width = width_;
+			height = height_;
 		}
 
 		Extent2D(VkExtent2D const & rhs)
-			: m_extent2D(rhs)
 		{
+			memcpy(this, &rhs, sizeof(Extent2D));
 		}
 
 		Extent2D& operator=(VkExtent2D const & rhs)
 		{
-			m_extent2D = rhs;
+			memcpy(this, &rhs, sizeof(Extent2D));
 			return *this;
 		}
 
-		const uint32_t& width() const
+		Extent2D& setWidth(uint32_t width_)
 		{
-			return m_extent2D.width;
-		}
-
-		uint32_t& width()
-		{
-			return m_extent2D.width;
-		}
-
-		Extent2D& width(uint32_t width)
-		{
-			m_extent2D.width = width;
+			width = width_;
 			return *this;
 		}
 
-		const uint32_t& height() const
+		Extent2D& setHeight(uint32_t height_)
 		{
-			return m_extent2D.height;
-		}
-
-		uint32_t& height()
-		{
-			return m_extent2D.height;
-		}
-
-		Extent2D& height(uint32_t height)
-		{
-			m_extent2D.height = height;
+			height = height_;
 			return *this;
 		}
 
 		operator const VkExtent2D&() const
 		{
-			return m_extent2D;
+			return *reinterpret_cast<const VkExtent2D*>(this);
 		}
 
-	private:
-		VkExtent2D m_extent2D;
+		uint32_t width;
+		uint32_t height;
 	};
 	static_assert(sizeof(Extent2D) == sizeof(VkExtent2D), "struct and wrapper have different size!");
 
-	class Extent3D
+	struct Extent3D
 	{
-	public:
 		Extent3D()
 			: Extent3D(0, 0, 0)
 		{}
 
-		Extent3D(uint32_t width, uint32_t height, uint32_t depth)
+		Extent3D(uint32_t width_, uint32_t height_, uint32_t depth_)
 		{
-			m_extent3D.width = width;
-			m_extent3D.height = height;
-			m_extent3D.depth = depth;
+			width = width_;
+			height = height_;
+			depth = depth_;
 		}
 
 		Extent3D(VkExtent3D const & rhs)
-			: m_extent3D(rhs)
 		{
+			memcpy(this, &rhs, sizeof(Extent3D));
 		}
 
 		Extent3D& operator=(VkExtent3D const & rhs)
 		{
-			m_extent3D = rhs;
+			memcpy(this, &rhs, sizeof(Extent3D));
 			return *this;
 		}
 
-		const uint32_t& width() const
+		Extent3D& setWidth(uint32_t width_)
 		{
-			return m_extent3D.width;
-		}
-
-		uint32_t& width()
-		{
-			return m_extent3D.width;
-		}
-
-		Extent3D& width(uint32_t width)
-		{
-			m_extent3D.width = width;
+			width = width_;
 			return *this;
 		}
 
-		const uint32_t& height() const
+		Extent3D& setHeight(uint32_t height_)
 		{
-			return m_extent3D.height;
-		}
-
-		uint32_t& height()
-		{
-			return m_extent3D.height;
-		}
-
-		Extent3D& height(uint32_t height)
-		{
-			m_extent3D.height = height;
+			height = height_;
 			return *this;
 		}
 
-		const uint32_t& depth() const
+		Extent3D& setDepth(uint32_t depth_)
 		{
-			return m_extent3D.depth;
-		}
-
-		uint32_t& depth()
-		{
-			return m_extent3D.depth;
-		}
-
-		Extent3D& depth(uint32_t depth)
-		{
-			m_extent3D.depth = depth;
+			depth = depth_;
 			return *this;
 		}
 
 		operator const VkExtent3D&() const
 		{
-			return m_extent3D;
+			return *reinterpret_cast<const VkExtent3D*>(this);
 		}
 
-	private:
-		VkExtent3D m_extent3D;
+		uint32_t width;
+		uint32_t height;
+		uint32_t depth;
 	};
 	static_assert(sizeof(Extent3D) == sizeof(VkExtent3D), "struct and wrapper have different size!");
 
-	class Viewport
+	struct Viewport
 	{
-	public:
 		Viewport()
 			: Viewport(0, 0, 0, 0, 0, 0)
 		{}
 
-		Viewport(float x, float y, float width, float height, float minDepth, float maxDepth)
+		Viewport(float x_, float y_, float width_, float height_, float minDepth_, float maxDepth_)
 		{
-			m_viewport.x = x;
-			m_viewport.y = y;
-			m_viewport.width = width;
-			m_viewport.height = height;
-			m_viewport.minDepth = minDepth;
-			m_viewport.maxDepth = maxDepth;
+			x = x_;
+			y = y_;
+			width = width_;
+			height = height_;
+			minDepth = minDepth_;
+			maxDepth = maxDepth_;
 		}
 
 		Viewport(VkViewport const & rhs)
-			: m_viewport(rhs)
 		{
+			memcpy(this, &rhs, sizeof(Viewport));
 		}
 
 		Viewport& operator=(VkViewport const & rhs)
 		{
-			m_viewport = rhs;
+			memcpy(this, &rhs, sizeof(Viewport));
 			return *this;
 		}
 
-		const float& x() const
+		Viewport& setX(float x_)
 		{
-			return m_viewport.x;
-		}
-
-		float& x()
-		{
-			return m_viewport.x;
-		}
-
-		Viewport& x(float x)
-		{
-			m_viewport.x = x;
+			x = x_;
 			return *this;
 		}
 
-		const float& y() const
+		Viewport& setY(float y_)
 		{
-			return m_viewport.y;
-		}
-
-		float& y()
-		{
-			return m_viewport.y;
-		}
-
-		Viewport& y(float y)
-		{
-			m_viewport.y = y;
+			y = y_;
 			return *this;
 		}
 
-		const float& width() const
+		Viewport& setWidth(float width_)
 		{
-			return m_viewport.width;
-		}
-
-		float& width()
-		{
-			return m_viewport.width;
-		}
-
-		Viewport& width(float width)
-		{
-			m_viewport.width = width;
+			width = width_;
 			return *this;
 		}
 
-		const float& height() const
+		Viewport& setHeight(float height_)
 		{
-			return m_viewport.height;
-		}
-
-		float& height()
-		{
-			return m_viewport.height;
-		}
-
-		Viewport& height(float height)
-		{
-			m_viewport.height = height;
+			height = height_;
 			return *this;
 		}
 
-		const float& minDepth() const
+		Viewport& setMinDepth(float minDepth_)
 		{
-			return m_viewport.minDepth;
-		}
-
-		float& minDepth()
-		{
-			return m_viewport.minDepth;
-		}
-
-		Viewport& minDepth(float minDepth)
-		{
-			m_viewport.minDepth = minDepth;
+			minDepth = minDepth_;
 			return *this;
 		}
 
-		const float& maxDepth() const
+		Viewport& setMaxDepth(float maxDepth_)
 		{
-			return m_viewport.maxDepth;
-		}
-
-		float& maxDepth()
-		{
-			return m_viewport.maxDepth;
-		}
-
-		Viewport& maxDepth(float maxDepth)
-		{
-			m_viewport.maxDepth = maxDepth;
+			maxDepth = maxDepth_;
 			return *this;
 		}
 
 		operator const VkViewport&() const
 		{
-			return m_viewport;
+			return *reinterpret_cast<const VkViewport*>(this);
 		}
 
-	private:
-		VkViewport m_viewport;
+		float x;
+		float y;
+		float width;
+		float height;
+		float minDepth;
+		float maxDepth;
 	};
 	static_assert(sizeof(Viewport) == sizeof(VkViewport), "struct and wrapper have different size!");
 
-	class Rect2D
+	struct Rect2D
 	{
-	public:
 		Rect2D()
 			: Rect2D(Offset2D(), Extent2D())
 		{}
 
-		Rect2D(Offset2D offset, Extent2D extent)
+		Rect2D(Offset2D offset_, Extent2D extent_)
 		{
-			m_rect2D.offset = static_cast<VkOffset2D>(offset);
-			m_rect2D.extent = static_cast<VkExtent2D>(extent);
+			offset = offset_;
+			extent = extent_;
 		}
 
 		Rect2D(VkRect2D const & rhs)
-			: m_rect2D(rhs)
 		{
+			memcpy(this, &rhs, sizeof(Rect2D));
 		}
 
 		Rect2D& operator=(VkRect2D const & rhs)
 		{
-			m_rect2D = rhs;
+			memcpy(this, &rhs, sizeof(Rect2D));
 			return *this;
 		}
 
-		const Offset2D& offset() const
+		Rect2D& setOffset(Offset2D offset_)
 		{
-			return reinterpret_cast<const Offset2D&>(m_rect2D.offset);
-		}
-
-		Offset2D& offset()
-		{
-			return reinterpret_cast<Offset2D&>(m_rect2D.offset);
-		}
-
-		Rect2D& offset(Offset2D offset)
-		{
-			m_rect2D.offset = static_cast<VkOffset2D>(offset);
+			offset = offset_;
 			return *this;
 		}
 
-		const Extent2D& extent() const
+		Rect2D& setExtent(Extent2D extent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_rect2D.extent);
-		}
-
-		Extent2D& extent()
-		{
-			return reinterpret_cast<Extent2D&>(m_rect2D.extent);
-		}
-
-		Rect2D& extent(Extent2D extent)
-		{
-			m_rect2D.extent = static_cast<VkExtent2D>(extent);
+			extent = extent_;
 			return *this;
 		}
 
 		operator const VkRect2D&() const
 		{
-			return m_rect2D;
+			return *reinterpret_cast<const VkRect2D*>(this);
 		}
 
-	private:
-		VkRect2D m_rect2D;
+		Offset2D offset;
+		Extent2D extent;
 	};
 	static_assert(sizeof(Rect2D) == sizeof(VkRect2D), "struct and wrapper have different size!");
 
-	class ClearRect
+	struct ClearRect
 	{
-	public:
 		ClearRect()
 			: ClearRect(Rect2D(), 0, 0)
 		{}
 
-		ClearRect(Rect2D rect, uint32_t baseArrayLayer, uint32_t layerCount)
+		ClearRect(Rect2D rect_, uint32_t baseArrayLayer_, uint32_t layerCount_)
 		{
-			m_clearRect.rect = static_cast<VkRect2D>(rect);
-			m_clearRect.baseArrayLayer = baseArrayLayer;
-			m_clearRect.layerCount = layerCount;
+			rect = rect_;
+			baseArrayLayer = baseArrayLayer_;
+			layerCount = layerCount_;
 		}
 
 		ClearRect(VkClearRect const & rhs)
-			: m_clearRect(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ClearRect));
 		}
 
 		ClearRect& operator=(VkClearRect const & rhs)
 		{
-			m_clearRect = rhs;
+			memcpy(this, &rhs, sizeof(ClearRect));
 			return *this;
 		}
 
-		const Rect2D& rect() const
+		ClearRect& setRect(Rect2D rect_)
 		{
-			return reinterpret_cast<const Rect2D&>(m_clearRect.rect);
-		}
-
-		Rect2D& rect()
-		{
-			return reinterpret_cast<Rect2D&>(m_clearRect.rect);
-		}
-
-		ClearRect& rect(Rect2D rect)
-		{
-			m_clearRect.rect = static_cast<VkRect2D>(rect);
+			rect = rect_;
 			return *this;
 		}
 
-		const uint32_t& baseArrayLayer() const
+		ClearRect& setBaseArrayLayer(uint32_t baseArrayLayer_)
 		{
-			return m_clearRect.baseArrayLayer;
-		}
-
-		uint32_t& baseArrayLayer()
-		{
-			return m_clearRect.baseArrayLayer;
-		}
-
-		ClearRect& baseArrayLayer(uint32_t baseArrayLayer)
-		{
-			m_clearRect.baseArrayLayer = baseArrayLayer;
+			baseArrayLayer = baseArrayLayer_;
 			return *this;
 		}
 
-		const uint32_t& layerCount() const
+		ClearRect& setLayerCount(uint32_t layerCount_)
 		{
-			return m_clearRect.layerCount;
-		}
-
-		uint32_t& layerCount()
-		{
-			return m_clearRect.layerCount;
-		}
-
-		ClearRect& layerCount(uint32_t layerCount)
-		{
-			m_clearRect.layerCount = layerCount;
+			layerCount = layerCount_;
 			return *this;
 		}
 
 		operator const VkClearRect&() const
 		{
-			return m_clearRect;
+			return *reinterpret_cast<const VkClearRect*>(this);
 		}
 
-	private:
-		VkClearRect m_clearRect;
+		Rect2D rect;
+		uint32_t baseArrayLayer;
+		uint32_t layerCount;
 	};
 	static_assert(sizeof(ClearRect) == sizeof(VkClearRect), "struct and wrapper have different size!");
 
-	class ExtensionProperties
+	struct ExtensionProperties
 	{
-	public:
-		const char* extensionName() const
-		{
-			return reinterpret_cast<const char*>(m_extensionProperties.extensionName);
-		}
-
-		const uint32_t& specVersion() const
-		{
-			return m_extensionProperties.specVersion;
-		}
-
 		operator const VkExtensionProperties&() const
 		{
-			return m_extensionProperties;
+			return *reinterpret_cast<const VkExtensionProperties*>(this);
 		}
 
-	private:
-		VkExtensionProperties m_extensionProperties;
+		char extensionName[VK_MAX_EXTENSION_NAME_SIZE];
+		uint32_t specVersion;
 	};
 	static_assert(sizeof(ExtensionProperties) == sizeof(VkExtensionProperties), "struct and wrapper have different size!");
 
-	class LayerProperties
+	struct LayerProperties
 	{
-	public:
-		const char* layerName() const
-		{
-			return reinterpret_cast<const char*>(m_layerProperties.layerName);
-		}
-
-		const uint32_t& specVersion() const
-		{
-			return m_layerProperties.specVersion;
-		}
-
-		const uint32_t& implementationVersion() const
-		{
-			return m_layerProperties.implementationVersion;
-		}
-
-		const char* description() const
-		{
-			return reinterpret_cast<const char*>(m_layerProperties.description);
-		}
-
 		operator const VkLayerProperties&() const
 		{
-			return m_layerProperties;
+			return *reinterpret_cast<const VkLayerProperties*>(this);
 		}
 
-	private:
-		VkLayerProperties m_layerProperties;
+		char layerName[VK_MAX_EXTENSION_NAME_SIZE];
+		uint32_t specVersion;
+		uint32_t implementationVersion;
+		char description[VK_MAX_DESCRIPTION_SIZE];
 	};
 	static_assert(sizeof(LayerProperties) == sizeof(VkLayerProperties), "struct and wrapper have different size!");
 
-	class AllocationCallbacks
+	struct AllocationCallbacks
 	{
-	public:
-		AllocationCallbacks(void* pUserData, PFN_vkAllocationFunction pfnAllocation, PFN_vkReallocationFunction pfnReallocation, PFN_vkFreeFunction pfnFree, PFN_vkInternalAllocationNotification pfnInternalAllocation, PFN_vkInternalFreeNotification pfnInternalFree)
+		AllocationCallbacks(void* pUserData_, PFN_vkAllocationFunction pfnAllocation_, PFN_vkReallocationFunction pfnReallocation_, PFN_vkFreeFunction pfnFree_, PFN_vkInternalAllocationNotification pfnInternalAllocation_, PFN_vkInternalFreeNotification pfnInternalFree_)
 		{
-			m_allocationCallbacks.pUserData = pUserData;
-			m_allocationCallbacks.pfnAllocation = pfnAllocation;
-			m_allocationCallbacks.pfnReallocation = pfnReallocation;
-			m_allocationCallbacks.pfnFree = pfnFree;
-			m_allocationCallbacks.pfnInternalAllocation = pfnInternalAllocation;
-			m_allocationCallbacks.pfnInternalFree = pfnInternalFree;
+			pUserData = pUserData_;
+			pfnAllocation = pfnAllocation_;
+			pfnReallocation = pfnReallocation_;
+			pfnFree = pfnFree_;
+			pfnInternalAllocation = pfnInternalAllocation_;
+			pfnInternalFree = pfnInternalFree_;
 		}
 
 		AllocationCallbacks(VkAllocationCallbacks const & rhs)
-			: m_allocationCallbacks(rhs)
 		{
+			memcpy(this, &rhs, sizeof(AllocationCallbacks));
 		}
 
 		AllocationCallbacks& operator=(VkAllocationCallbacks const & rhs)
 		{
-			m_allocationCallbacks = rhs;
+			memcpy(this, &rhs, sizeof(AllocationCallbacks));
 			return *this;
 		}
 
-		const void* pUserData() const
+		AllocationCallbacks& setPUserData(void* pUserData_)
 		{
-			return reinterpret_cast<const void*>(m_allocationCallbacks.pUserData);
-		}
-
-		void* pUserData()
-		{
-			return reinterpret_cast<void*>(m_allocationCallbacks.pUserData);
-		}
-
-		AllocationCallbacks& pUserData(void* pUserData)
-		{
-			m_allocationCallbacks.pUserData = pUserData;
+			pUserData = pUserData_;
 			return *this;
 		}
 
-		const PFN_vkAllocationFunction& pfnAllocation() const
+		AllocationCallbacks& setPfnAllocation(PFN_vkAllocationFunction pfnAllocation_)
 		{
-			return m_allocationCallbacks.pfnAllocation;
-		}
-
-		PFN_vkAllocationFunction& pfnAllocation()
-		{
-			return m_allocationCallbacks.pfnAllocation;
-		}
-
-		AllocationCallbacks& pfnAllocation(PFN_vkAllocationFunction pfnAllocation)
-		{
-			m_allocationCallbacks.pfnAllocation = pfnAllocation;
+			pfnAllocation = pfnAllocation_;
 			return *this;
 		}
 
-		const PFN_vkReallocationFunction& pfnReallocation() const
+		AllocationCallbacks& setPfnReallocation(PFN_vkReallocationFunction pfnReallocation_)
 		{
-			return m_allocationCallbacks.pfnReallocation;
-		}
-
-		PFN_vkReallocationFunction& pfnReallocation()
-		{
-			return m_allocationCallbacks.pfnReallocation;
-		}
-
-		AllocationCallbacks& pfnReallocation(PFN_vkReallocationFunction pfnReallocation)
-		{
-			m_allocationCallbacks.pfnReallocation = pfnReallocation;
+			pfnReallocation = pfnReallocation_;
 			return *this;
 		}
 
-		const PFN_vkFreeFunction& pfnFree() const
+		AllocationCallbacks& setPfnFree(PFN_vkFreeFunction pfnFree_)
 		{
-			return m_allocationCallbacks.pfnFree;
-		}
-
-		PFN_vkFreeFunction& pfnFree()
-		{
-			return m_allocationCallbacks.pfnFree;
-		}
-
-		AllocationCallbacks& pfnFree(PFN_vkFreeFunction pfnFree)
-		{
-			m_allocationCallbacks.pfnFree = pfnFree;
+			pfnFree = pfnFree_;
 			return *this;
 		}
 
-		const PFN_vkInternalAllocationNotification& pfnInternalAllocation() const
+		AllocationCallbacks& setPfnInternalAllocation(PFN_vkInternalAllocationNotification pfnInternalAllocation_)
 		{
-			return m_allocationCallbacks.pfnInternalAllocation;
-		}
-
-		PFN_vkInternalAllocationNotification& pfnInternalAllocation()
-		{
-			return m_allocationCallbacks.pfnInternalAllocation;
-		}
-
-		AllocationCallbacks& pfnInternalAllocation(PFN_vkInternalAllocationNotification pfnInternalAllocation)
-		{
-			m_allocationCallbacks.pfnInternalAllocation = pfnInternalAllocation;
+			pfnInternalAllocation = pfnInternalAllocation_;
 			return *this;
 		}
 
-		const PFN_vkInternalFreeNotification& pfnInternalFree() const
+		AllocationCallbacks& setPfnInternalFree(PFN_vkInternalFreeNotification pfnInternalFree_)
 		{
-			return m_allocationCallbacks.pfnInternalFree;
-		}
-
-		PFN_vkInternalFreeNotification& pfnInternalFree()
-		{
-			return m_allocationCallbacks.pfnInternalFree;
-		}
-
-		AllocationCallbacks& pfnInternalFree(PFN_vkInternalFreeNotification pfnInternalFree)
-		{
-			m_allocationCallbacks.pfnInternalFree = pfnInternalFree;
+			pfnInternalFree = pfnInternalFree_;
 			return *this;
 		}
 
 		operator const VkAllocationCallbacks&() const
 		{
-			return m_allocationCallbacks;
+			return *reinterpret_cast<const VkAllocationCallbacks*>(this);
 		}
 
-	private:
-		VkAllocationCallbacks m_allocationCallbacks;
+		void* pUserData;
+		PFN_vkAllocationFunction pfnAllocation;
+		PFN_vkReallocationFunction pfnReallocation;
+		PFN_vkFreeFunction pfnFree;
+		PFN_vkInternalAllocationNotification pfnInternalAllocation;
+		PFN_vkInternalFreeNotification pfnInternalFree;
 	};
 	static_assert(sizeof(AllocationCallbacks) == sizeof(VkAllocationCallbacks), "struct and wrapper have different size!");
 
-	class MemoryRequirements
+	struct MemoryRequirements
 	{
-	public:
-		const DeviceSize& size() const
-		{
-			return m_memoryRequirements.size;
-		}
-
-		const DeviceSize& alignment() const
-		{
-			return m_memoryRequirements.alignment;
-		}
-
-		const uint32_t& memoryTypeBits() const
-		{
-			return m_memoryRequirements.memoryTypeBits;
-		}
-
 		operator const VkMemoryRequirements&() const
 		{
-			return m_memoryRequirements;
+			return *reinterpret_cast<const VkMemoryRequirements*>(this);
 		}
 
-	private:
-		VkMemoryRequirements m_memoryRequirements;
+		DeviceSize size;
+		DeviceSize alignment;
+		uint32_t memoryTypeBits;
 	};
 	static_assert(sizeof(MemoryRequirements) == sizeof(VkMemoryRequirements), "struct and wrapper have different size!");
 
-	class DescriptorBufferInfo
+	struct DescriptorBufferInfo
 	{
-	public:
 		DescriptorBufferInfo()
 			: DescriptorBufferInfo(Buffer(), 0, 0)
 		{}
 
-		DescriptorBufferInfo(Buffer buffer, DeviceSize offset, DeviceSize range)
+		DescriptorBufferInfo(Buffer buffer_, DeviceSize offset_, DeviceSize range_)
 		{
-			m_descriptorBufferInfo.buffer = static_cast<VkBuffer>(buffer);
-			m_descriptorBufferInfo.offset = offset;
-			m_descriptorBufferInfo.range = range;
+			buffer = buffer_;
+			offset = offset_;
+			range = range_;
 		}
 
 		DescriptorBufferInfo(VkDescriptorBufferInfo const & rhs)
-			: m_descriptorBufferInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DescriptorBufferInfo));
 		}
 
 		DescriptorBufferInfo& operator=(VkDescriptorBufferInfo const & rhs)
 		{
-			m_descriptorBufferInfo = rhs;
+			memcpy(this, &rhs, sizeof(DescriptorBufferInfo));
 			return *this;
 		}
 
-		const Buffer& buffer() const
+		DescriptorBufferInfo& setBuffer(Buffer buffer_)
 		{
-			return reinterpret_cast<const Buffer&>(m_descriptorBufferInfo.buffer);
-		}
-
-		Buffer& buffer()
-		{
-			return reinterpret_cast<Buffer&>(m_descriptorBufferInfo.buffer);
-		}
-
-		DescriptorBufferInfo& buffer(Buffer buffer)
-		{
-			m_descriptorBufferInfo.buffer = static_cast<VkBuffer>(buffer);
+			buffer = buffer_;
 			return *this;
 		}
 
-		const DeviceSize& offset() const
+		DescriptorBufferInfo& setOffset(DeviceSize offset_)
 		{
-			return m_descriptorBufferInfo.offset;
-		}
-
-		DeviceSize& offset()
-		{
-			return m_descriptorBufferInfo.offset;
-		}
-
-		DescriptorBufferInfo& offset(DeviceSize offset)
-		{
-			m_descriptorBufferInfo.offset = offset;
+			offset = offset_;
 			return *this;
 		}
 
-		const DeviceSize& range() const
+		DescriptorBufferInfo& setRange(DeviceSize range_)
 		{
-			return m_descriptorBufferInfo.range;
-		}
-
-		DeviceSize& range()
-		{
-			return m_descriptorBufferInfo.range;
-		}
-
-		DescriptorBufferInfo& range(DeviceSize range)
-		{
-			m_descriptorBufferInfo.range = range;
+			range = range_;
 			return *this;
 		}
 
 		operator const VkDescriptorBufferInfo&() const
 		{
-			return m_descriptorBufferInfo;
+			return *reinterpret_cast<const VkDescriptorBufferInfo*>(this);
 		}
 
-	private:
-		VkDescriptorBufferInfo m_descriptorBufferInfo;
+		Buffer buffer;
+		DeviceSize offset;
+		DeviceSize range;
 	};
 	static_assert(sizeof(DescriptorBufferInfo) == sizeof(VkDescriptorBufferInfo), "struct and wrapper have different size!");
 
-	class SubresourceLayout
+	struct SubresourceLayout
 	{
-	public:
-		const DeviceSize& offset() const
-		{
-			return m_subresourceLayout.offset;
-		}
-
-		const DeviceSize& size() const
-		{
-			return m_subresourceLayout.size;
-		}
-
-		const DeviceSize& rowPitch() const
-		{
-			return m_subresourceLayout.rowPitch;
-		}
-
-		const DeviceSize& arrayPitch() const
-		{
-			return m_subresourceLayout.arrayPitch;
-		}
-
-		const DeviceSize& depthPitch() const
-		{
-			return m_subresourceLayout.depthPitch;
-		}
-
 		operator const VkSubresourceLayout&() const
 		{
-			return m_subresourceLayout;
+			return *reinterpret_cast<const VkSubresourceLayout*>(this);
 		}
 
-	private:
-		VkSubresourceLayout m_subresourceLayout;
+		DeviceSize offset;
+		DeviceSize size;
+		DeviceSize rowPitch;
+		DeviceSize arrayPitch;
+		DeviceSize depthPitch;
 	};
 	static_assert(sizeof(SubresourceLayout) == sizeof(VkSubresourceLayout), "struct and wrapper have different size!");
 
-	class BufferCopy
+	struct BufferCopy
 	{
-	public:
 		BufferCopy()
 			: BufferCopy(0, 0, 0)
 		{}
 
-		BufferCopy(DeviceSize srcOffset, DeviceSize dstOffset, DeviceSize size)
+		BufferCopy(DeviceSize srcOffset_, DeviceSize dstOffset_, DeviceSize size_)
 		{
-			m_bufferCopy.srcOffset = srcOffset;
-			m_bufferCopy.dstOffset = dstOffset;
-			m_bufferCopy.size = size;
+			srcOffset = srcOffset_;
+			dstOffset = dstOffset_;
+			size = size_;
 		}
 
 		BufferCopy(VkBufferCopy const & rhs)
-			: m_bufferCopy(rhs)
 		{
+			memcpy(this, &rhs, sizeof(BufferCopy));
 		}
 
 		BufferCopy& operator=(VkBufferCopy const & rhs)
 		{
-			m_bufferCopy = rhs;
+			memcpy(this, &rhs, sizeof(BufferCopy));
 			return *this;
 		}
 
-		const DeviceSize& srcOffset() const
+		BufferCopy& setSrcOffset(DeviceSize srcOffset_)
 		{
-			return m_bufferCopy.srcOffset;
-		}
-
-		DeviceSize& srcOffset()
-		{
-			return m_bufferCopy.srcOffset;
-		}
-
-		BufferCopy& srcOffset(DeviceSize srcOffset)
-		{
-			m_bufferCopy.srcOffset = srcOffset;
+			srcOffset = srcOffset_;
 			return *this;
 		}
 
-		const DeviceSize& dstOffset() const
+		BufferCopy& setDstOffset(DeviceSize dstOffset_)
 		{
-			return m_bufferCopy.dstOffset;
-		}
-
-		DeviceSize& dstOffset()
-		{
-			return m_bufferCopy.dstOffset;
-		}
-
-		BufferCopy& dstOffset(DeviceSize dstOffset)
-		{
-			m_bufferCopy.dstOffset = dstOffset;
+			dstOffset = dstOffset_;
 			return *this;
 		}
 
-		const DeviceSize& size() const
+		BufferCopy& setSize(DeviceSize size_)
 		{
-			return m_bufferCopy.size;
-		}
-
-		DeviceSize& size()
-		{
-			return m_bufferCopy.size;
-		}
-
-		BufferCopy& size(DeviceSize size)
-		{
-			m_bufferCopy.size = size;
+			size = size_;
 			return *this;
 		}
 
 		operator const VkBufferCopy&() const
 		{
-			return m_bufferCopy;
+			return *reinterpret_cast<const VkBufferCopy*>(this);
 		}
 
-	private:
-		VkBufferCopy m_bufferCopy;
+		DeviceSize srcOffset;
+		DeviceSize dstOffset;
+		DeviceSize size;
 	};
 	static_assert(sizeof(BufferCopy) == sizeof(VkBufferCopy), "struct and wrapper have different size!");
 
-	class SpecializationMapEntry
+	struct SpecializationMapEntry
 	{
-	public:
 		SpecializationMapEntry()
 			: SpecializationMapEntry(0, 0, 0)
 		{}
 
-		SpecializationMapEntry(uint32_t constantID, uint32_t offset, size_t size)
+		SpecializationMapEntry(uint32_t constantID_, uint32_t offset_, size_t size_)
 		{
-			m_specializationMapEntry.constantID = constantID;
-			m_specializationMapEntry.offset = offset;
-			m_specializationMapEntry.size = size;
+			constantID = constantID_;
+			offset = offset_;
+			size = size_;
 		}
 
 		SpecializationMapEntry(VkSpecializationMapEntry const & rhs)
-			: m_specializationMapEntry(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SpecializationMapEntry));
 		}
 
 		SpecializationMapEntry& operator=(VkSpecializationMapEntry const & rhs)
 		{
-			m_specializationMapEntry = rhs;
+			memcpy(this, &rhs, sizeof(SpecializationMapEntry));
 			return *this;
 		}
 
-		const uint32_t& constantID() const
+		SpecializationMapEntry& setConstantID(uint32_t constantID_)
 		{
-			return m_specializationMapEntry.constantID;
-		}
-
-		uint32_t& constantID()
-		{
-			return m_specializationMapEntry.constantID;
-		}
-
-		SpecializationMapEntry& constantID(uint32_t constantID)
-		{
-			m_specializationMapEntry.constantID = constantID;
+			constantID = constantID_;
 			return *this;
 		}
 
-		const uint32_t& offset() const
+		SpecializationMapEntry& setOffset(uint32_t offset_)
 		{
-			return m_specializationMapEntry.offset;
-		}
-
-		uint32_t& offset()
-		{
-			return m_specializationMapEntry.offset;
-		}
-
-		SpecializationMapEntry& offset(uint32_t offset)
-		{
-			m_specializationMapEntry.offset = offset;
+			offset = offset_;
 			return *this;
 		}
 
-		const size_t& size() const
+		SpecializationMapEntry& setSize(size_t size_)
 		{
-			return m_specializationMapEntry.size;
-		}
-
-		size_t& size()
-		{
-			return m_specializationMapEntry.size;
-		}
-
-		SpecializationMapEntry& size(size_t size)
-		{
-			m_specializationMapEntry.size = size;
+			size = size_;
 			return *this;
 		}
 
 		operator const VkSpecializationMapEntry&() const
 		{
-			return m_specializationMapEntry;
+			return *reinterpret_cast<const VkSpecializationMapEntry*>(this);
 		}
 
-	private:
-		VkSpecializationMapEntry m_specializationMapEntry;
+		uint32_t constantID;
+		uint32_t offset;
+		size_t size;
 	};
 	static_assert(sizeof(SpecializationMapEntry) == sizeof(VkSpecializationMapEntry), "struct and wrapper have different size!");
 
-	class SpecializationInfo
+	struct SpecializationInfo
 	{
-	public:
 		SpecializationInfo()
 			: SpecializationInfo(0, nullptr, 0, nullptr)
 		{}
 
-		SpecializationInfo(uint32_t mapEntryCount, const SpecializationMapEntry* pMapEntries, size_t dataSize, const void* pData)
+		SpecializationInfo(uint32_t mapEntryCount_, const SpecializationMapEntry* pMapEntries_, size_t dataSize_, const void* pData_)
 		{
-			m_specializationInfo.mapEntryCount = mapEntryCount;
-			m_specializationInfo.pMapEntries = reinterpret_cast<const VkSpecializationMapEntry*>(pMapEntries);
-			m_specializationInfo.dataSize = dataSize;
-			m_specializationInfo.pData = pData;
+			mapEntryCount = mapEntryCount_;
+			pMapEntries = pMapEntries_;
+			dataSize = dataSize_;
+			pData = pData_;
 		}
 
 		SpecializationInfo(VkSpecializationInfo const & rhs)
-			: m_specializationInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SpecializationInfo));
 		}
 
 		SpecializationInfo& operator=(VkSpecializationInfo const & rhs)
 		{
-			m_specializationInfo = rhs;
+			memcpy(this, &rhs, sizeof(SpecializationInfo));
 			return *this;
 		}
 
-		const uint32_t& mapEntryCount() const
+		SpecializationInfo& setMapEntryCount(uint32_t mapEntryCount_)
 		{
-			return m_specializationInfo.mapEntryCount;
-		}
-
-		uint32_t& mapEntryCount()
-		{
-			return m_specializationInfo.mapEntryCount;
-		}
-
-		SpecializationInfo& mapEntryCount(uint32_t mapEntryCount)
-		{
-			m_specializationInfo.mapEntryCount = mapEntryCount;
+			mapEntryCount = mapEntryCount_;
 			return *this;
 		}
 
-		const SpecializationMapEntry* pMapEntries() const
+		SpecializationInfo& setPMapEntries(const SpecializationMapEntry* pMapEntries_)
 		{
-			return reinterpret_cast<const SpecializationMapEntry*>(m_specializationInfo.pMapEntries);
-		}
-
-		const SpecializationMapEntry* pMapEntries()
-		{
-			return reinterpret_cast<const SpecializationMapEntry*>(m_specializationInfo.pMapEntries);
-		}
-
-		SpecializationInfo& pMapEntries(const SpecializationMapEntry* pMapEntries)
-		{
-			m_specializationInfo.pMapEntries = reinterpret_cast<const VkSpecializationMapEntry*>(pMapEntries);
+			pMapEntries = pMapEntries_;
 			return *this;
 		}
 
-		const size_t& dataSize() const
+		SpecializationInfo& setDataSize(size_t dataSize_)
 		{
-			return m_specializationInfo.dataSize;
-		}
-
-		size_t& dataSize()
-		{
-			return m_specializationInfo.dataSize;
-		}
-
-		SpecializationInfo& dataSize(size_t dataSize)
-		{
-			m_specializationInfo.dataSize = dataSize;
+			dataSize = dataSize_;
 			return *this;
 		}
 
-		const void* pData() const
+		SpecializationInfo& setPData(const void* pData_)
 		{
-			return reinterpret_cast<const void*>(m_specializationInfo.pData);
-		}
-
-		const void* pData()
-		{
-			return reinterpret_cast<const void*>(m_specializationInfo.pData);
-		}
-
-		SpecializationInfo& pData(const void* pData)
-		{
-			m_specializationInfo.pData = pData;
+			pData = pData_;
 			return *this;
 		}
 
 		operator const VkSpecializationInfo&() const
 		{
-			return m_specializationInfo;
+			return *reinterpret_cast<const VkSpecializationInfo*>(this);
 		}
 
-	private:
-		VkSpecializationInfo m_specializationInfo;
+		uint32_t mapEntryCount;
+		const SpecializationMapEntry* pMapEntries;
+		size_t dataSize;
+		const void* pData;
 	};
 	static_assert(sizeof(SpecializationInfo) == sizeof(VkSpecializationInfo), "struct and wrapper have different size!");
 
-	class ClearColorValue
+	union ClearColorValue
 	{
-	public:
-		ClearColorValue(const eastl::array<float, 4>& float32 = { 0 })
+		ClearColorValue(const eastl::array<float, 4>& float32_ = { 0 })
 		{
-			memcpy(&m_clearColorValue.float32, float32.data(), 4 * sizeof(float));
+			memcpy(&float32, float32_.data(), 4 * sizeof(float));
 		}
 
-		const float* float32() const
+		ClearColorValue(const eastl::array<int32_t, 4>& int32_)
 		{
-			return reinterpret_cast<const float*>(m_clearColorValue.float32);
+			memcpy(&int32, int32_.data(), 4 * sizeof(int32_t));
 		}
 
-		float* float32()
+		ClearColorValue(const eastl::array<uint32_t, 4>& uint32_)
 		{
-			return reinterpret_cast<float*>(m_clearColorValue.float32);
+			memcpy(&uint32, uint32_.data(), 4 * sizeof(uint32_t));
 		}
 
-		ClearColorValue& float32(eastl::array<float, 4> float32)
+		ClearColorValue& setFloat32(eastl::array<float, 4> float32_)
 		{
-			memcpy(&m_clearColorValue.float32, float32.data(), 4 * sizeof(float));
+			memcpy(&float32, float32_.data(), 4 * sizeof(float));
 			return *this;
 		}
 
-		ClearColorValue(const eastl::array<int32_t, 4>& int32)
+		ClearColorValue& setInt32(eastl::array<int32_t, 4> int32_)
 		{
-			memcpy(&m_clearColorValue.int32, int32.data(), 4 * sizeof(int32_t));
-		}
-
-		const int32_t* int32() const
-		{
-			return reinterpret_cast<const int32_t*>(m_clearColorValue.int32);
-		}
-
-		int32_t* int32()
-		{
-			return reinterpret_cast<int32_t*>(m_clearColorValue.int32);
-		}
-
-		ClearColorValue& int32(eastl::array<int32_t, 4> int32)
-		{
-			memcpy(&m_clearColorValue.int32, int32.data(), 4 * sizeof(int32_t));
+			memcpy(&int32, int32_.data(), 4 * sizeof(int32_t));
 			return *this;
 		}
 
-		ClearColorValue(const eastl::array<uint32_t, 4>& uint32)
+		ClearColorValue& setUint32(eastl::array<uint32_t, 4> uint32_)
 		{
-			memcpy(&m_clearColorValue.uint32, uint32.data(), 4 * sizeof(uint32_t));
-		}
-
-		const uint32_t* uint32() const
-		{
-			return reinterpret_cast<const uint32_t*>(m_clearColorValue.uint32);
-		}
-
-		uint32_t* uint32()
-		{
-			return reinterpret_cast<uint32_t*>(m_clearColorValue.uint32);
-		}
-
-		ClearColorValue& uint32(eastl::array<uint32_t, 4> uint32)
-		{
-			memcpy(&m_clearColorValue.uint32, uint32.data(), 4 * sizeof(uint32_t));
+			memcpy(&uint32, uint32_.data(), 4 * sizeof(uint32_t));
 			return *this;
 		}
 
 		operator VkClearColorValue const& () const
 		{
-			return m_clearColorValue;
+			return *reinterpret_cast<const VkClearColorValue*>(this);
 		}
 
-	private:
-		VkClearColorValue m_clearColorValue;
+		float float32[4];
+		int32_t int32[4];
+		uint32_t uint32[4];
 	};
 
-	class ClearDepthStencilValue
+	struct ClearDepthStencilValue
 	{
-	public:
 		ClearDepthStencilValue()
 			: ClearDepthStencilValue(0, 0)
 		{}
 
-		ClearDepthStencilValue(float depth, uint32_t stencil)
+		ClearDepthStencilValue(float depth_, uint32_t stencil_)
 		{
-			m_clearDepthStencilValue.depth = depth;
-			m_clearDepthStencilValue.stencil = stencil;
+			depth = depth_;
+			stencil = stencil_;
 		}
 
 		ClearDepthStencilValue(VkClearDepthStencilValue const & rhs)
-			: m_clearDepthStencilValue(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ClearDepthStencilValue));
 		}
 
 		ClearDepthStencilValue& operator=(VkClearDepthStencilValue const & rhs)
 		{
-			m_clearDepthStencilValue = rhs;
+			memcpy(this, &rhs, sizeof(ClearDepthStencilValue));
 			return *this;
 		}
 
-		const float& depth() const
+		ClearDepthStencilValue& setDepth(float depth_)
 		{
-			return m_clearDepthStencilValue.depth;
-		}
-
-		float& depth()
-		{
-			return m_clearDepthStencilValue.depth;
-		}
-
-		ClearDepthStencilValue& depth(float depth)
-		{
-			m_clearDepthStencilValue.depth = depth;
+			depth = depth_;
 			return *this;
 		}
 
-		const uint32_t& stencil() const
+		ClearDepthStencilValue& setStencil(uint32_t stencil_)
 		{
-			return m_clearDepthStencilValue.stencil;
-		}
-
-		uint32_t& stencil()
-		{
-			return m_clearDepthStencilValue.stencil;
-		}
-
-		ClearDepthStencilValue& stencil(uint32_t stencil)
-		{
-			m_clearDepthStencilValue.stencil = stencil;
+			stencil = stencil_;
 			return *this;
 		}
 
 		operator const VkClearDepthStencilValue&() const
 		{
-			return m_clearDepthStencilValue;
+			return *reinterpret_cast<const VkClearDepthStencilValue*>(this);
 		}
 
-	private:
-		VkClearDepthStencilValue m_clearDepthStencilValue;
+		float depth;
+		uint32_t stencil;
 	};
 	static_assert(sizeof(ClearDepthStencilValue) == sizeof(VkClearDepthStencilValue), "struct and wrapper have different size!");
 
-	class ClearValue
+	union ClearValue
 	{
-	public:
-		ClearValue(ClearColorValue color = ClearColorValue())
+		ClearValue(ClearColorValue color_ = ClearColorValue())
 		{
-			m_clearValue.color = color;
+			color = color_;
 		}
 
-		const ClearColorValue& color() const
+		ClearValue(ClearDepthStencilValue depthStencil_)
 		{
-			return reinterpret_cast<const ClearColorValue&>(m_clearValue.color);
+			depthStencil = depthStencil_;
 		}
 
-		ClearColorValue& color()
+		ClearValue& setColor(ClearColorValue color_)
 		{
-			return reinterpret_cast<ClearColorValue&>(m_clearValue.color);
-		}
-
-		ClearValue& color(ClearColorValue color)
-		{
-			m_clearValue.color = static_cast<VkClearColorValue>(color);
+			color = color_;
 			return *this;
 		}
 
-		ClearValue(ClearDepthStencilValue depthStencil)
+		ClearValue& setDepthStencil(ClearDepthStencilValue depthStencil_)
 		{
-			m_clearValue.depthStencil = depthStencil;
-		}
-
-		const ClearDepthStencilValue& depthStencil() const
-		{
-			return reinterpret_cast<const ClearDepthStencilValue&>(m_clearValue.depthStencil);
-		}
-
-		ClearDepthStencilValue& depthStencil()
-		{
-			return reinterpret_cast<ClearDepthStencilValue&>(m_clearValue.depthStencil);
-		}
-
-		ClearValue& depthStencil(ClearDepthStencilValue depthStencil)
-		{
-			m_clearValue.depthStencil = static_cast<VkClearDepthStencilValue>(depthStencil);
+			depthStencil = depthStencil_;
 			return *this;
 		}
 
 		operator VkClearValue const& () const
 		{
-			return m_clearValue;
+			return *reinterpret_cast<const VkClearValue*>(this);
 		}
 
-	private:
-		VkClearValue m_clearValue;
+#ifdef VK_CPP_HAS_UNRESTRICTED_UNIONS
+		ClearColorValue color;
+		ClearDepthStencilValue depthStencil;
+#else
+		VkClearColorValue color;
+		VkClearDepthStencilValue depthStencil;
+#endif  // VK_CPP_HAS_UNRESTRICTED_UNIONS
 	};
 
-	class PhysicalDeviceFeatures
+	struct PhysicalDeviceFeatures
 	{
-	public:
 		PhysicalDeviceFeatures()
 			: PhysicalDeviceFeatures(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 		{}
 
-		PhysicalDeviceFeatures(Bool32 robustBufferAccess, Bool32 fullDrawIndexUint32, Bool32 imageCubeArray, Bool32 independentBlend, Bool32 geometryShader, Bool32 tessellationShader, Bool32 sampleRateShading, Bool32 dualSrcBlend, Bool32 logicOp, Bool32 multiDrawIndirect, Bool32 drawIndirectFirstInstance, Bool32 depthClamp, Bool32 depthBiasClamp, Bool32 fillModeNonSolid, Bool32 depthBounds, Bool32 wideLines, Bool32 largePoints, Bool32 alphaToOne, Bool32 multiViewport, Bool32 samplerAnisotropy, Bool32 textureCompressionETC2, Bool32 textureCompressionASTC_LDR, Bool32 textureCompressionBC, Bool32 occlusionQueryPrecise, Bool32 pipelineStatisticsQuery, Bool32 vertexPipelineStoresAndAtomics, Bool32 fragmentStoresAndAtomics, Bool32 shaderTessellationAndGeometryPointSize, Bool32 shaderImageGatherExtended, Bool32 shaderStorageImageExtendedFormats, Bool32 shaderStorageImageMultisample, Bool32 shaderStorageImageReadWithoutFormat, Bool32 shaderStorageImageWriteWithoutFormat, Bool32 shaderUniformBufferArrayDynamicIndexing, Bool32 shaderSampledImageArrayDynamicIndexing, Bool32 shaderStorageBufferArrayDynamicIndexing, Bool32 shaderStorageImageArrayDynamicIndexing, Bool32 shaderClipDistance, Bool32 shaderCullDistance, Bool32 shaderFloat64, Bool32 shaderInt64, Bool32 shaderInt16, Bool32 shaderResourceResidency, Bool32 shaderResourceMinLod, Bool32 sparseBinding, Bool32 sparseResidencyBuffer, Bool32 sparseResidencyImage2D, Bool32 sparseResidencyImage3D, Bool32 sparseResidency2Samples, Bool32 sparseResidency4Samples, Bool32 sparseResidency8Samples, Bool32 sparseResidency16Samples, Bool32 sparseResidencyAliased, Bool32 variableMultisampleRate, Bool32 inheritedQueries)
+		PhysicalDeviceFeatures(Bool32 robustBufferAccess_, Bool32 fullDrawIndexUint32_, Bool32 imageCubeArray_, Bool32 independentBlend_, Bool32 geometryShader_, Bool32 tessellationShader_, Bool32 sampleRateShading_, Bool32 dualSrcBlend_, Bool32 logicOp_, Bool32 multiDrawIndirect_, Bool32 drawIndirectFirstInstance_, Bool32 depthClamp_, Bool32 depthBiasClamp_, Bool32 fillModeNonSolid_, Bool32 depthBounds_, Bool32 wideLines_, Bool32 largePoints_, Bool32 alphaToOne_, Bool32 multiViewport_, Bool32 samplerAnisotropy_, Bool32 textureCompressionETC2_, Bool32 textureCompressionASTC_LDR_, Bool32 textureCompressionBC_, Bool32 occlusionQueryPrecise_, Bool32 pipelineStatisticsQuery_, Bool32 vertexPipelineStoresAndAtomics_, Bool32 fragmentStoresAndAtomics_, Bool32 shaderTessellationAndGeometryPointSize_, Bool32 shaderImageGatherExtended_, Bool32 shaderStorageImageExtendedFormats_, Bool32 shaderStorageImageMultisample_, Bool32 shaderStorageImageReadWithoutFormat_, Bool32 shaderStorageImageWriteWithoutFormat_, Bool32 shaderUniformBufferArrayDynamicIndexing_, Bool32 shaderSampledImageArrayDynamicIndexing_, Bool32 shaderStorageBufferArrayDynamicIndexing_, Bool32 shaderStorageImageArrayDynamicIndexing_, Bool32 shaderClipDistance_, Bool32 shaderCullDistance_, Bool32 shaderFloat64_, Bool32 shaderInt64_, Bool32 shaderInt16_, Bool32 shaderResourceResidency_, Bool32 shaderResourceMinLod_, Bool32 sparseBinding_, Bool32 sparseResidencyBuffer_, Bool32 sparseResidencyImage2D_, Bool32 sparseResidencyImage3D_, Bool32 sparseResidency2Samples_, Bool32 sparseResidency4Samples_, Bool32 sparseResidency8Samples_, Bool32 sparseResidency16Samples_, Bool32 sparseResidencyAliased_, Bool32 variableMultisampleRate_, Bool32 inheritedQueries_)
 		{
-			m_physicalDeviceFeatures.robustBufferAccess = robustBufferAccess;
-			m_physicalDeviceFeatures.fullDrawIndexUint32 = fullDrawIndexUint32;
-			m_physicalDeviceFeatures.imageCubeArray = imageCubeArray;
-			m_physicalDeviceFeatures.independentBlend = independentBlend;
-			m_physicalDeviceFeatures.geometryShader = geometryShader;
-			m_physicalDeviceFeatures.tessellationShader = tessellationShader;
-			m_physicalDeviceFeatures.sampleRateShading = sampleRateShading;
-			m_physicalDeviceFeatures.dualSrcBlend = dualSrcBlend;
-			m_physicalDeviceFeatures.logicOp = logicOp;
-			m_physicalDeviceFeatures.multiDrawIndirect = multiDrawIndirect;
-			m_physicalDeviceFeatures.drawIndirectFirstInstance = drawIndirectFirstInstance;
-			m_physicalDeviceFeatures.depthClamp = depthClamp;
-			m_physicalDeviceFeatures.depthBiasClamp = depthBiasClamp;
-			m_physicalDeviceFeatures.fillModeNonSolid = fillModeNonSolid;
-			m_physicalDeviceFeatures.depthBounds = depthBounds;
-			m_physicalDeviceFeatures.wideLines = wideLines;
-			m_physicalDeviceFeatures.largePoints = largePoints;
-			m_physicalDeviceFeatures.alphaToOne = alphaToOne;
-			m_physicalDeviceFeatures.multiViewport = multiViewport;
-			m_physicalDeviceFeatures.samplerAnisotropy = samplerAnisotropy;
-			m_physicalDeviceFeatures.textureCompressionETC2 = textureCompressionETC2;
-			m_physicalDeviceFeatures.textureCompressionASTC_LDR = textureCompressionASTC_LDR;
-			m_physicalDeviceFeatures.textureCompressionBC = textureCompressionBC;
-			m_physicalDeviceFeatures.occlusionQueryPrecise = occlusionQueryPrecise;
-			m_physicalDeviceFeatures.pipelineStatisticsQuery = pipelineStatisticsQuery;
-			m_physicalDeviceFeatures.vertexPipelineStoresAndAtomics = vertexPipelineStoresAndAtomics;
-			m_physicalDeviceFeatures.fragmentStoresAndAtomics = fragmentStoresAndAtomics;
-			m_physicalDeviceFeatures.shaderTessellationAndGeometryPointSize = shaderTessellationAndGeometryPointSize;
-			m_physicalDeviceFeatures.shaderImageGatherExtended = shaderImageGatherExtended;
-			m_physicalDeviceFeatures.shaderStorageImageExtendedFormats = shaderStorageImageExtendedFormats;
-			m_physicalDeviceFeatures.shaderStorageImageMultisample = shaderStorageImageMultisample;
-			m_physicalDeviceFeatures.shaderStorageImageReadWithoutFormat = shaderStorageImageReadWithoutFormat;
-			m_physicalDeviceFeatures.shaderStorageImageWriteWithoutFormat = shaderStorageImageWriteWithoutFormat;
-			m_physicalDeviceFeatures.shaderUniformBufferArrayDynamicIndexing = shaderUniformBufferArrayDynamicIndexing;
-			m_physicalDeviceFeatures.shaderSampledImageArrayDynamicIndexing = shaderSampledImageArrayDynamicIndexing;
-			m_physicalDeviceFeatures.shaderStorageBufferArrayDynamicIndexing = shaderStorageBufferArrayDynamicIndexing;
-			m_physicalDeviceFeatures.shaderStorageImageArrayDynamicIndexing = shaderStorageImageArrayDynamicIndexing;
-			m_physicalDeviceFeatures.shaderClipDistance = shaderClipDistance;
-			m_physicalDeviceFeatures.shaderCullDistance = shaderCullDistance;
-			m_physicalDeviceFeatures.shaderFloat64 = shaderFloat64;
-			m_physicalDeviceFeatures.shaderInt64 = shaderInt64;
-			m_physicalDeviceFeatures.shaderInt16 = shaderInt16;
-			m_physicalDeviceFeatures.shaderResourceResidency = shaderResourceResidency;
-			m_physicalDeviceFeatures.shaderResourceMinLod = shaderResourceMinLod;
-			m_physicalDeviceFeatures.sparseBinding = sparseBinding;
-			m_physicalDeviceFeatures.sparseResidencyBuffer = sparseResidencyBuffer;
-			m_physicalDeviceFeatures.sparseResidencyImage2D = sparseResidencyImage2D;
-			m_physicalDeviceFeatures.sparseResidencyImage3D = sparseResidencyImage3D;
-			m_physicalDeviceFeatures.sparseResidency2Samples = sparseResidency2Samples;
-			m_physicalDeviceFeatures.sparseResidency4Samples = sparseResidency4Samples;
-			m_physicalDeviceFeatures.sparseResidency8Samples = sparseResidency8Samples;
-			m_physicalDeviceFeatures.sparseResidency16Samples = sparseResidency16Samples;
-			m_physicalDeviceFeatures.sparseResidencyAliased = sparseResidencyAliased;
-			m_physicalDeviceFeatures.variableMultisampleRate = variableMultisampleRate;
-			m_physicalDeviceFeatures.inheritedQueries = inheritedQueries;
+			robustBufferAccess = robustBufferAccess_;
+			fullDrawIndexUint32 = fullDrawIndexUint32_;
+			imageCubeArray = imageCubeArray_;
+			independentBlend = independentBlend_;
+			geometryShader = geometryShader_;
+			tessellationShader = tessellationShader_;
+			sampleRateShading = sampleRateShading_;
+			dualSrcBlend = dualSrcBlend_;
+			logicOp = logicOp_;
+			multiDrawIndirect = multiDrawIndirect_;
+			drawIndirectFirstInstance = drawIndirectFirstInstance_;
+			depthClamp = depthClamp_;
+			depthBiasClamp = depthBiasClamp_;
+			fillModeNonSolid = fillModeNonSolid_;
+			depthBounds = depthBounds_;
+			wideLines = wideLines_;
+			largePoints = largePoints_;
+			alphaToOne = alphaToOne_;
+			multiViewport = multiViewport_;
+			samplerAnisotropy = samplerAnisotropy_;
+			textureCompressionETC2 = textureCompressionETC2_;
+			textureCompressionASTC_LDR = textureCompressionASTC_LDR_;
+			textureCompressionBC = textureCompressionBC_;
+			occlusionQueryPrecise = occlusionQueryPrecise_;
+			pipelineStatisticsQuery = pipelineStatisticsQuery_;
+			vertexPipelineStoresAndAtomics = vertexPipelineStoresAndAtomics_;
+			fragmentStoresAndAtomics = fragmentStoresAndAtomics_;
+			shaderTessellationAndGeometryPointSize = shaderTessellationAndGeometryPointSize_;
+			shaderImageGatherExtended = shaderImageGatherExtended_;
+			shaderStorageImageExtendedFormats = shaderStorageImageExtendedFormats_;
+			shaderStorageImageMultisample = shaderStorageImageMultisample_;
+			shaderStorageImageReadWithoutFormat = shaderStorageImageReadWithoutFormat_;
+			shaderStorageImageWriteWithoutFormat = shaderStorageImageWriteWithoutFormat_;
+			shaderUniformBufferArrayDynamicIndexing = shaderUniformBufferArrayDynamicIndexing_;
+			shaderSampledImageArrayDynamicIndexing = shaderSampledImageArrayDynamicIndexing_;
+			shaderStorageBufferArrayDynamicIndexing = shaderStorageBufferArrayDynamicIndexing_;
+			shaderStorageImageArrayDynamicIndexing = shaderStorageImageArrayDynamicIndexing_;
+			shaderClipDistance = shaderClipDistance_;
+			shaderCullDistance = shaderCullDistance_;
+			shaderFloat64 = shaderFloat64_;
+			shaderInt64 = shaderInt64_;
+			shaderInt16 = shaderInt16_;
+			shaderResourceResidency = shaderResourceResidency_;
+			shaderResourceMinLod = shaderResourceMinLod_;
+			sparseBinding = sparseBinding_;
+			sparseResidencyBuffer = sparseResidencyBuffer_;
+			sparseResidencyImage2D = sparseResidencyImage2D_;
+			sparseResidencyImage3D = sparseResidencyImage3D_;
+			sparseResidency2Samples = sparseResidency2Samples_;
+			sparseResidency4Samples = sparseResidency4Samples_;
+			sparseResidency8Samples = sparseResidency8Samples_;
+			sparseResidency16Samples = sparseResidency16Samples_;
+			sparseResidencyAliased = sparseResidencyAliased_;
+			variableMultisampleRate = variableMultisampleRate_;
+			inheritedQueries = inheritedQueries_;
 		}
 
 		PhysicalDeviceFeatures(VkPhysicalDeviceFeatures const & rhs)
-			: m_physicalDeviceFeatures(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PhysicalDeviceFeatures));
 		}
 
 		PhysicalDeviceFeatures& operator=(VkPhysicalDeviceFeatures const & rhs)
 		{
-			m_physicalDeviceFeatures = rhs;
+			memcpy(this, &rhs, sizeof(PhysicalDeviceFeatures));
 			return *this;
 		}
 
-		const Bool32& robustBufferAccess() const
+		PhysicalDeviceFeatures& setRobustBufferAccess(Bool32 robustBufferAccess_)
 		{
-			return m_physicalDeviceFeatures.robustBufferAccess;
-		}
-
-		Bool32& robustBufferAccess()
-		{
-			return m_physicalDeviceFeatures.robustBufferAccess;
-		}
-
-		PhysicalDeviceFeatures& robustBufferAccess(Bool32 robustBufferAccess)
-		{
-			m_physicalDeviceFeatures.robustBufferAccess = robustBufferAccess;
+			robustBufferAccess = robustBufferAccess_;
 			return *this;
 		}
 
-		const Bool32& fullDrawIndexUint32() const
+		PhysicalDeviceFeatures& setFullDrawIndexUint32(Bool32 fullDrawIndexUint32_)
 		{
-			return m_physicalDeviceFeatures.fullDrawIndexUint32;
-		}
-
-		Bool32& fullDrawIndexUint32()
-		{
-			return m_physicalDeviceFeatures.fullDrawIndexUint32;
-		}
-
-		PhysicalDeviceFeatures& fullDrawIndexUint32(Bool32 fullDrawIndexUint32)
-		{
-			m_physicalDeviceFeatures.fullDrawIndexUint32 = fullDrawIndexUint32;
+			fullDrawIndexUint32 = fullDrawIndexUint32_;
 			return *this;
 		}
 
-		const Bool32& imageCubeArray() const
+		PhysicalDeviceFeatures& setImageCubeArray(Bool32 imageCubeArray_)
 		{
-			return m_physicalDeviceFeatures.imageCubeArray;
-		}
-
-		Bool32& imageCubeArray()
-		{
-			return m_physicalDeviceFeatures.imageCubeArray;
-		}
-
-		PhysicalDeviceFeatures& imageCubeArray(Bool32 imageCubeArray)
-		{
-			m_physicalDeviceFeatures.imageCubeArray = imageCubeArray;
+			imageCubeArray = imageCubeArray_;
 			return *this;
 		}
 
-		const Bool32& independentBlend() const
+		PhysicalDeviceFeatures& setIndependentBlend(Bool32 independentBlend_)
 		{
-			return m_physicalDeviceFeatures.independentBlend;
-		}
-
-		Bool32& independentBlend()
-		{
-			return m_physicalDeviceFeatures.independentBlend;
-		}
-
-		PhysicalDeviceFeatures& independentBlend(Bool32 independentBlend)
-		{
-			m_physicalDeviceFeatures.independentBlend = independentBlend;
+			independentBlend = independentBlend_;
 			return *this;
 		}
 
-		const Bool32& geometryShader() const
+		PhysicalDeviceFeatures& setGeometryShader(Bool32 geometryShader_)
 		{
-			return m_physicalDeviceFeatures.geometryShader;
-		}
-
-		Bool32& geometryShader()
-		{
-			return m_physicalDeviceFeatures.geometryShader;
-		}
-
-		PhysicalDeviceFeatures& geometryShader(Bool32 geometryShader)
-		{
-			m_physicalDeviceFeatures.geometryShader = geometryShader;
+			geometryShader = geometryShader_;
 			return *this;
 		}
 
-		const Bool32& tessellationShader() const
+		PhysicalDeviceFeatures& setTessellationShader(Bool32 tessellationShader_)
 		{
-			return m_physicalDeviceFeatures.tessellationShader;
-		}
-
-		Bool32& tessellationShader()
-		{
-			return m_physicalDeviceFeatures.tessellationShader;
-		}
-
-		PhysicalDeviceFeatures& tessellationShader(Bool32 tessellationShader)
-		{
-			m_physicalDeviceFeatures.tessellationShader = tessellationShader;
+			tessellationShader = tessellationShader_;
 			return *this;
 		}
 
-		const Bool32& sampleRateShading() const
+		PhysicalDeviceFeatures& setSampleRateShading(Bool32 sampleRateShading_)
 		{
-			return m_physicalDeviceFeatures.sampleRateShading;
-		}
-
-		Bool32& sampleRateShading()
-		{
-			return m_physicalDeviceFeatures.sampleRateShading;
-		}
-
-		PhysicalDeviceFeatures& sampleRateShading(Bool32 sampleRateShading)
-		{
-			m_physicalDeviceFeatures.sampleRateShading = sampleRateShading;
+			sampleRateShading = sampleRateShading_;
 			return *this;
 		}
 
-		const Bool32& dualSrcBlend() const
+		PhysicalDeviceFeatures& setDualSrcBlend(Bool32 dualSrcBlend_)
 		{
-			return m_physicalDeviceFeatures.dualSrcBlend;
-		}
-
-		Bool32& dualSrcBlend()
-		{
-			return m_physicalDeviceFeatures.dualSrcBlend;
-		}
-
-		PhysicalDeviceFeatures& dualSrcBlend(Bool32 dualSrcBlend)
-		{
-			m_physicalDeviceFeatures.dualSrcBlend = dualSrcBlend;
+			dualSrcBlend = dualSrcBlend_;
 			return *this;
 		}
 
-		const Bool32& logicOp() const
+		PhysicalDeviceFeatures& setLogicOp(Bool32 logicOp_)
 		{
-			return m_physicalDeviceFeatures.logicOp;
-		}
-
-		Bool32& logicOp()
-		{
-			return m_physicalDeviceFeatures.logicOp;
-		}
-
-		PhysicalDeviceFeatures& logicOp(Bool32 logicOp)
-		{
-			m_physicalDeviceFeatures.logicOp = logicOp;
+			logicOp = logicOp_;
 			return *this;
 		}
 
-		const Bool32& multiDrawIndirect() const
+		PhysicalDeviceFeatures& setMultiDrawIndirect(Bool32 multiDrawIndirect_)
 		{
-			return m_physicalDeviceFeatures.multiDrawIndirect;
-		}
-
-		Bool32& multiDrawIndirect()
-		{
-			return m_physicalDeviceFeatures.multiDrawIndirect;
-		}
-
-		PhysicalDeviceFeatures& multiDrawIndirect(Bool32 multiDrawIndirect)
-		{
-			m_physicalDeviceFeatures.multiDrawIndirect = multiDrawIndirect;
+			multiDrawIndirect = multiDrawIndirect_;
 			return *this;
 		}
 
-		const Bool32& drawIndirectFirstInstance() const
+		PhysicalDeviceFeatures& setDrawIndirectFirstInstance(Bool32 drawIndirectFirstInstance_)
 		{
-			return m_physicalDeviceFeatures.drawIndirectFirstInstance;
-		}
-
-		Bool32& drawIndirectFirstInstance()
-		{
-			return m_physicalDeviceFeatures.drawIndirectFirstInstance;
-		}
-
-		PhysicalDeviceFeatures& drawIndirectFirstInstance(Bool32 drawIndirectFirstInstance)
-		{
-			m_physicalDeviceFeatures.drawIndirectFirstInstance = drawIndirectFirstInstance;
+			drawIndirectFirstInstance = drawIndirectFirstInstance_;
 			return *this;
 		}
 
-		const Bool32& depthClamp() const
+		PhysicalDeviceFeatures& setDepthClamp(Bool32 depthClamp_)
 		{
-			return m_physicalDeviceFeatures.depthClamp;
-		}
-
-		Bool32& depthClamp()
-		{
-			return m_physicalDeviceFeatures.depthClamp;
-		}
-
-		PhysicalDeviceFeatures& depthClamp(Bool32 depthClamp)
-		{
-			m_physicalDeviceFeatures.depthClamp = depthClamp;
+			depthClamp = depthClamp_;
 			return *this;
 		}
 
-		const Bool32& depthBiasClamp() const
+		PhysicalDeviceFeatures& setDepthBiasClamp(Bool32 depthBiasClamp_)
 		{
-			return m_physicalDeviceFeatures.depthBiasClamp;
-		}
-
-		Bool32& depthBiasClamp()
-		{
-			return m_physicalDeviceFeatures.depthBiasClamp;
-		}
-
-		PhysicalDeviceFeatures& depthBiasClamp(Bool32 depthBiasClamp)
-		{
-			m_physicalDeviceFeatures.depthBiasClamp = depthBiasClamp;
+			depthBiasClamp = depthBiasClamp_;
 			return *this;
 		}
 
-		const Bool32& fillModeNonSolid() const
+		PhysicalDeviceFeatures& setFillModeNonSolid(Bool32 fillModeNonSolid_)
 		{
-			return m_physicalDeviceFeatures.fillModeNonSolid;
-		}
-
-		Bool32& fillModeNonSolid()
-		{
-			return m_physicalDeviceFeatures.fillModeNonSolid;
-		}
-
-		PhysicalDeviceFeatures& fillModeNonSolid(Bool32 fillModeNonSolid)
-		{
-			m_physicalDeviceFeatures.fillModeNonSolid = fillModeNonSolid;
+			fillModeNonSolid = fillModeNonSolid_;
 			return *this;
 		}
 
-		const Bool32& depthBounds() const
+		PhysicalDeviceFeatures& setDepthBounds(Bool32 depthBounds_)
 		{
-			return m_physicalDeviceFeatures.depthBounds;
-		}
-
-		Bool32& depthBounds()
-		{
-			return m_physicalDeviceFeatures.depthBounds;
-		}
-
-		PhysicalDeviceFeatures& depthBounds(Bool32 depthBounds)
-		{
-			m_physicalDeviceFeatures.depthBounds = depthBounds;
+			depthBounds = depthBounds_;
 			return *this;
 		}
 
-		const Bool32& wideLines() const
+		PhysicalDeviceFeatures& setWideLines(Bool32 wideLines_)
 		{
-			return m_physicalDeviceFeatures.wideLines;
-		}
-
-		Bool32& wideLines()
-		{
-			return m_physicalDeviceFeatures.wideLines;
-		}
-
-		PhysicalDeviceFeatures& wideLines(Bool32 wideLines)
-		{
-			m_physicalDeviceFeatures.wideLines = wideLines;
+			wideLines = wideLines_;
 			return *this;
 		}
 
-		const Bool32& largePoints() const
+		PhysicalDeviceFeatures& setLargePoints(Bool32 largePoints_)
 		{
-			return m_physicalDeviceFeatures.largePoints;
-		}
-
-		Bool32& largePoints()
-		{
-			return m_physicalDeviceFeatures.largePoints;
-		}
-
-		PhysicalDeviceFeatures& largePoints(Bool32 largePoints)
-		{
-			m_physicalDeviceFeatures.largePoints = largePoints;
+			largePoints = largePoints_;
 			return *this;
 		}
 
-		const Bool32& alphaToOne() const
+		PhysicalDeviceFeatures& setAlphaToOne(Bool32 alphaToOne_)
 		{
-			return m_physicalDeviceFeatures.alphaToOne;
-		}
-
-		Bool32& alphaToOne()
-		{
-			return m_physicalDeviceFeatures.alphaToOne;
-		}
-
-		PhysicalDeviceFeatures& alphaToOne(Bool32 alphaToOne)
-		{
-			m_physicalDeviceFeatures.alphaToOne = alphaToOne;
+			alphaToOne = alphaToOne_;
 			return *this;
 		}
 
-		const Bool32& multiViewport() const
+		PhysicalDeviceFeatures& setMultiViewport(Bool32 multiViewport_)
 		{
-			return m_physicalDeviceFeatures.multiViewport;
-		}
-
-		Bool32& multiViewport()
-		{
-			return m_physicalDeviceFeatures.multiViewport;
-		}
-
-		PhysicalDeviceFeatures& multiViewport(Bool32 multiViewport)
-		{
-			m_physicalDeviceFeatures.multiViewport = multiViewport;
+			multiViewport = multiViewport_;
 			return *this;
 		}
 
-		const Bool32& samplerAnisotropy() const
+		PhysicalDeviceFeatures& setSamplerAnisotropy(Bool32 samplerAnisotropy_)
 		{
-			return m_physicalDeviceFeatures.samplerAnisotropy;
-		}
-
-		Bool32& samplerAnisotropy()
-		{
-			return m_physicalDeviceFeatures.samplerAnisotropy;
-		}
-
-		PhysicalDeviceFeatures& samplerAnisotropy(Bool32 samplerAnisotropy)
-		{
-			m_physicalDeviceFeatures.samplerAnisotropy = samplerAnisotropy;
+			samplerAnisotropy = samplerAnisotropy_;
 			return *this;
 		}
 
-		const Bool32& textureCompressionETC2() const
+		PhysicalDeviceFeatures& setTextureCompressionETC2(Bool32 textureCompressionETC2_)
 		{
-			return m_physicalDeviceFeatures.textureCompressionETC2;
-		}
-
-		Bool32& textureCompressionETC2()
-		{
-			return m_physicalDeviceFeatures.textureCompressionETC2;
-		}
-
-		PhysicalDeviceFeatures& textureCompressionETC2(Bool32 textureCompressionETC2)
-		{
-			m_physicalDeviceFeatures.textureCompressionETC2 = textureCompressionETC2;
+			textureCompressionETC2 = textureCompressionETC2_;
 			return *this;
 		}
 
-		const Bool32& textureCompressionASTC_LDR() const
+		PhysicalDeviceFeatures& setTextureCompressionASTC_LDR(Bool32 textureCompressionASTC_LDR_)
 		{
-			return m_physicalDeviceFeatures.textureCompressionASTC_LDR;
-		}
-
-		Bool32& textureCompressionASTC_LDR()
-		{
-			return m_physicalDeviceFeatures.textureCompressionASTC_LDR;
-		}
-
-		PhysicalDeviceFeatures& textureCompressionASTC_LDR(Bool32 textureCompressionASTC_LDR)
-		{
-			m_physicalDeviceFeatures.textureCompressionASTC_LDR = textureCompressionASTC_LDR;
+			textureCompressionASTC_LDR = textureCompressionASTC_LDR_;
 			return *this;
 		}
 
-		const Bool32& textureCompressionBC() const
+		PhysicalDeviceFeatures& setTextureCompressionBC(Bool32 textureCompressionBC_)
 		{
-			return m_physicalDeviceFeatures.textureCompressionBC;
-		}
-
-		Bool32& textureCompressionBC()
-		{
-			return m_physicalDeviceFeatures.textureCompressionBC;
-		}
-
-		PhysicalDeviceFeatures& textureCompressionBC(Bool32 textureCompressionBC)
-		{
-			m_physicalDeviceFeatures.textureCompressionBC = textureCompressionBC;
+			textureCompressionBC = textureCompressionBC_;
 			return *this;
 		}
 
-		const Bool32& occlusionQueryPrecise() const
+		PhysicalDeviceFeatures& setOcclusionQueryPrecise(Bool32 occlusionQueryPrecise_)
 		{
-			return m_physicalDeviceFeatures.occlusionQueryPrecise;
-		}
-
-		Bool32& occlusionQueryPrecise()
-		{
-			return m_physicalDeviceFeatures.occlusionQueryPrecise;
-		}
-
-		PhysicalDeviceFeatures& occlusionQueryPrecise(Bool32 occlusionQueryPrecise)
-		{
-			m_physicalDeviceFeatures.occlusionQueryPrecise = occlusionQueryPrecise;
+			occlusionQueryPrecise = occlusionQueryPrecise_;
 			return *this;
 		}
 
-		const Bool32& pipelineStatisticsQuery() const
+		PhysicalDeviceFeatures& setPipelineStatisticsQuery(Bool32 pipelineStatisticsQuery_)
 		{
-			return m_physicalDeviceFeatures.pipelineStatisticsQuery;
-		}
-
-		Bool32& pipelineStatisticsQuery()
-		{
-			return m_physicalDeviceFeatures.pipelineStatisticsQuery;
-		}
-
-		PhysicalDeviceFeatures& pipelineStatisticsQuery(Bool32 pipelineStatisticsQuery)
-		{
-			m_physicalDeviceFeatures.pipelineStatisticsQuery = pipelineStatisticsQuery;
+			pipelineStatisticsQuery = pipelineStatisticsQuery_;
 			return *this;
 		}
 
-		const Bool32& vertexPipelineStoresAndAtomics() const
+		PhysicalDeviceFeatures& setVertexPipelineStoresAndAtomics(Bool32 vertexPipelineStoresAndAtomics_)
 		{
-			return m_physicalDeviceFeatures.vertexPipelineStoresAndAtomics;
-		}
-
-		Bool32& vertexPipelineStoresAndAtomics()
-		{
-			return m_physicalDeviceFeatures.vertexPipelineStoresAndAtomics;
-		}
-
-		PhysicalDeviceFeatures& vertexPipelineStoresAndAtomics(Bool32 vertexPipelineStoresAndAtomics)
-		{
-			m_physicalDeviceFeatures.vertexPipelineStoresAndAtomics = vertexPipelineStoresAndAtomics;
+			vertexPipelineStoresAndAtomics = vertexPipelineStoresAndAtomics_;
 			return *this;
 		}
 
-		const Bool32& fragmentStoresAndAtomics() const
+		PhysicalDeviceFeatures& setFragmentStoresAndAtomics(Bool32 fragmentStoresAndAtomics_)
 		{
-			return m_physicalDeviceFeatures.fragmentStoresAndAtomics;
-		}
-
-		Bool32& fragmentStoresAndAtomics()
-		{
-			return m_physicalDeviceFeatures.fragmentStoresAndAtomics;
-		}
-
-		PhysicalDeviceFeatures& fragmentStoresAndAtomics(Bool32 fragmentStoresAndAtomics)
-		{
-			m_physicalDeviceFeatures.fragmentStoresAndAtomics = fragmentStoresAndAtomics;
+			fragmentStoresAndAtomics = fragmentStoresAndAtomics_;
 			return *this;
 		}
 
-		const Bool32& shaderTessellationAndGeometryPointSize() const
+		PhysicalDeviceFeatures& setShaderTessellationAndGeometryPointSize(Bool32 shaderTessellationAndGeometryPointSize_)
 		{
-			return m_physicalDeviceFeatures.shaderTessellationAndGeometryPointSize;
-		}
-
-		Bool32& shaderTessellationAndGeometryPointSize()
-		{
-			return m_physicalDeviceFeatures.shaderTessellationAndGeometryPointSize;
-		}
-
-		PhysicalDeviceFeatures& shaderTessellationAndGeometryPointSize(Bool32 shaderTessellationAndGeometryPointSize)
-		{
-			m_physicalDeviceFeatures.shaderTessellationAndGeometryPointSize = shaderTessellationAndGeometryPointSize;
+			shaderTessellationAndGeometryPointSize = shaderTessellationAndGeometryPointSize_;
 			return *this;
 		}
 
-		const Bool32& shaderImageGatherExtended() const
+		PhysicalDeviceFeatures& setShaderImageGatherExtended(Bool32 shaderImageGatherExtended_)
 		{
-			return m_physicalDeviceFeatures.shaderImageGatherExtended;
-		}
-
-		Bool32& shaderImageGatherExtended()
-		{
-			return m_physicalDeviceFeatures.shaderImageGatherExtended;
-		}
-
-		PhysicalDeviceFeatures& shaderImageGatherExtended(Bool32 shaderImageGatherExtended)
-		{
-			m_physicalDeviceFeatures.shaderImageGatherExtended = shaderImageGatherExtended;
+			shaderImageGatherExtended = shaderImageGatherExtended_;
 			return *this;
 		}
 
-		const Bool32& shaderStorageImageExtendedFormats() const
+		PhysicalDeviceFeatures& setShaderStorageImageExtendedFormats(Bool32 shaderStorageImageExtendedFormats_)
 		{
-			return m_physicalDeviceFeatures.shaderStorageImageExtendedFormats;
-		}
-
-		Bool32& shaderStorageImageExtendedFormats()
-		{
-			return m_physicalDeviceFeatures.shaderStorageImageExtendedFormats;
-		}
-
-		PhysicalDeviceFeatures& shaderStorageImageExtendedFormats(Bool32 shaderStorageImageExtendedFormats)
-		{
-			m_physicalDeviceFeatures.shaderStorageImageExtendedFormats = shaderStorageImageExtendedFormats;
+			shaderStorageImageExtendedFormats = shaderStorageImageExtendedFormats_;
 			return *this;
 		}
 
-		const Bool32& shaderStorageImageMultisample() const
+		PhysicalDeviceFeatures& setShaderStorageImageMultisample(Bool32 shaderStorageImageMultisample_)
 		{
-			return m_physicalDeviceFeatures.shaderStorageImageMultisample;
-		}
-
-		Bool32& shaderStorageImageMultisample()
-		{
-			return m_physicalDeviceFeatures.shaderStorageImageMultisample;
-		}
-
-		PhysicalDeviceFeatures& shaderStorageImageMultisample(Bool32 shaderStorageImageMultisample)
-		{
-			m_physicalDeviceFeatures.shaderStorageImageMultisample = shaderStorageImageMultisample;
+			shaderStorageImageMultisample = shaderStorageImageMultisample_;
 			return *this;
 		}
 
-		const Bool32& shaderStorageImageReadWithoutFormat() const
+		PhysicalDeviceFeatures& setShaderStorageImageReadWithoutFormat(Bool32 shaderStorageImageReadWithoutFormat_)
 		{
-			return m_physicalDeviceFeatures.shaderStorageImageReadWithoutFormat;
-		}
-
-		Bool32& shaderStorageImageReadWithoutFormat()
-		{
-			return m_physicalDeviceFeatures.shaderStorageImageReadWithoutFormat;
-		}
-
-		PhysicalDeviceFeatures& shaderStorageImageReadWithoutFormat(Bool32 shaderStorageImageReadWithoutFormat)
-		{
-			m_physicalDeviceFeatures.shaderStorageImageReadWithoutFormat = shaderStorageImageReadWithoutFormat;
+			shaderStorageImageReadWithoutFormat = shaderStorageImageReadWithoutFormat_;
 			return *this;
 		}
 
-		const Bool32& shaderStorageImageWriteWithoutFormat() const
+		PhysicalDeviceFeatures& setShaderStorageImageWriteWithoutFormat(Bool32 shaderStorageImageWriteWithoutFormat_)
 		{
-			return m_physicalDeviceFeatures.shaderStorageImageWriteWithoutFormat;
-		}
-
-		Bool32& shaderStorageImageWriteWithoutFormat()
-		{
-			return m_physicalDeviceFeatures.shaderStorageImageWriteWithoutFormat;
-		}
-
-		PhysicalDeviceFeatures& shaderStorageImageWriteWithoutFormat(Bool32 shaderStorageImageWriteWithoutFormat)
-		{
-			m_physicalDeviceFeatures.shaderStorageImageWriteWithoutFormat = shaderStorageImageWriteWithoutFormat;
+			shaderStorageImageWriteWithoutFormat = shaderStorageImageWriteWithoutFormat_;
 			return *this;
 		}
 
-		const Bool32& shaderUniformBufferArrayDynamicIndexing() const
+		PhysicalDeviceFeatures& setShaderUniformBufferArrayDynamicIndexing(Bool32 shaderUniformBufferArrayDynamicIndexing_)
 		{
-			return m_physicalDeviceFeatures.shaderUniformBufferArrayDynamicIndexing;
-		}
-
-		Bool32& shaderUniformBufferArrayDynamicIndexing()
-		{
-			return m_physicalDeviceFeatures.shaderUniformBufferArrayDynamicIndexing;
-		}
-
-		PhysicalDeviceFeatures& shaderUniformBufferArrayDynamicIndexing(Bool32 shaderUniformBufferArrayDynamicIndexing)
-		{
-			m_physicalDeviceFeatures.shaderUniformBufferArrayDynamicIndexing = shaderUniformBufferArrayDynamicIndexing;
+			shaderUniformBufferArrayDynamicIndexing = shaderUniformBufferArrayDynamicIndexing_;
 			return *this;
 		}
 
-		const Bool32& shaderSampledImageArrayDynamicIndexing() const
+		PhysicalDeviceFeatures& setShaderSampledImageArrayDynamicIndexing(Bool32 shaderSampledImageArrayDynamicIndexing_)
 		{
-			return m_physicalDeviceFeatures.shaderSampledImageArrayDynamicIndexing;
-		}
-
-		Bool32& shaderSampledImageArrayDynamicIndexing()
-		{
-			return m_physicalDeviceFeatures.shaderSampledImageArrayDynamicIndexing;
-		}
-
-		PhysicalDeviceFeatures& shaderSampledImageArrayDynamicIndexing(Bool32 shaderSampledImageArrayDynamicIndexing)
-		{
-			m_physicalDeviceFeatures.shaderSampledImageArrayDynamicIndexing = shaderSampledImageArrayDynamicIndexing;
+			shaderSampledImageArrayDynamicIndexing = shaderSampledImageArrayDynamicIndexing_;
 			return *this;
 		}
 
-		const Bool32& shaderStorageBufferArrayDynamicIndexing() const
+		PhysicalDeviceFeatures& setShaderStorageBufferArrayDynamicIndexing(Bool32 shaderStorageBufferArrayDynamicIndexing_)
 		{
-			return m_physicalDeviceFeatures.shaderStorageBufferArrayDynamicIndexing;
-		}
-
-		Bool32& shaderStorageBufferArrayDynamicIndexing()
-		{
-			return m_physicalDeviceFeatures.shaderStorageBufferArrayDynamicIndexing;
-		}
-
-		PhysicalDeviceFeatures& shaderStorageBufferArrayDynamicIndexing(Bool32 shaderStorageBufferArrayDynamicIndexing)
-		{
-			m_physicalDeviceFeatures.shaderStorageBufferArrayDynamicIndexing = shaderStorageBufferArrayDynamicIndexing;
+			shaderStorageBufferArrayDynamicIndexing = shaderStorageBufferArrayDynamicIndexing_;
 			return *this;
 		}
 
-		const Bool32& shaderStorageImageArrayDynamicIndexing() const
+		PhysicalDeviceFeatures& setShaderStorageImageArrayDynamicIndexing(Bool32 shaderStorageImageArrayDynamicIndexing_)
 		{
-			return m_physicalDeviceFeatures.shaderStorageImageArrayDynamicIndexing;
-		}
-
-		Bool32& shaderStorageImageArrayDynamicIndexing()
-		{
-			return m_physicalDeviceFeatures.shaderStorageImageArrayDynamicIndexing;
-		}
-
-		PhysicalDeviceFeatures& shaderStorageImageArrayDynamicIndexing(Bool32 shaderStorageImageArrayDynamicIndexing)
-		{
-			m_physicalDeviceFeatures.shaderStorageImageArrayDynamicIndexing = shaderStorageImageArrayDynamicIndexing;
+			shaderStorageImageArrayDynamicIndexing = shaderStorageImageArrayDynamicIndexing_;
 			return *this;
 		}
 
-		const Bool32& shaderClipDistance() const
+		PhysicalDeviceFeatures& setShaderClipDistance(Bool32 shaderClipDistance_)
 		{
-			return m_physicalDeviceFeatures.shaderClipDistance;
-		}
-
-		Bool32& shaderClipDistance()
-		{
-			return m_physicalDeviceFeatures.shaderClipDistance;
-		}
-
-		PhysicalDeviceFeatures& shaderClipDistance(Bool32 shaderClipDistance)
-		{
-			m_physicalDeviceFeatures.shaderClipDistance = shaderClipDistance;
+			shaderClipDistance = shaderClipDistance_;
 			return *this;
 		}
 
-		const Bool32& shaderCullDistance() const
+		PhysicalDeviceFeatures& setShaderCullDistance(Bool32 shaderCullDistance_)
 		{
-			return m_physicalDeviceFeatures.shaderCullDistance;
-		}
-
-		Bool32& shaderCullDistance()
-		{
-			return m_physicalDeviceFeatures.shaderCullDistance;
-		}
-
-		PhysicalDeviceFeatures& shaderCullDistance(Bool32 shaderCullDistance)
-		{
-			m_physicalDeviceFeatures.shaderCullDistance = shaderCullDistance;
+			shaderCullDistance = shaderCullDistance_;
 			return *this;
 		}
 
-		const Bool32& shaderFloat64() const
+		PhysicalDeviceFeatures& setShaderFloat64(Bool32 shaderFloat64_)
 		{
-			return m_physicalDeviceFeatures.shaderFloat64;
-		}
-
-		Bool32& shaderFloat64()
-		{
-			return m_physicalDeviceFeatures.shaderFloat64;
-		}
-
-		PhysicalDeviceFeatures& shaderFloat64(Bool32 shaderFloat64)
-		{
-			m_physicalDeviceFeatures.shaderFloat64 = shaderFloat64;
+			shaderFloat64 = shaderFloat64_;
 			return *this;
 		}
 
-		const Bool32& shaderInt64() const
+		PhysicalDeviceFeatures& setShaderInt64(Bool32 shaderInt64_)
 		{
-			return m_physicalDeviceFeatures.shaderInt64;
-		}
-
-		Bool32& shaderInt64()
-		{
-			return m_physicalDeviceFeatures.shaderInt64;
-		}
-
-		PhysicalDeviceFeatures& shaderInt64(Bool32 shaderInt64)
-		{
-			m_physicalDeviceFeatures.shaderInt64 = shaderInt64;
+			shaderInt64 = shaderInt64_;
 			return *this;
 		}
 
-		const Bool32& shaderInt16() const
+		PhysicalDeviceFeatures& setShaderInt16(Bool32 shaderInt16_)
 		{
-			return m_physicalDeviceFeatures.shaderInt16;
-		}
-
-		Bool32& shaderInt16()
-		{
-			return m_physicalDeviceFeatures.shaderInt16;
-		}
-
-		PhysicalDeviceFeatures& shaderInt16(Bool32 shaderInt16)
-		{
-			m_physicalDeviceFeatures.shaderInt16 = shaderInt16;
+			shaderInt16 = shaderInt16_;
 			return *this;
 		}
 
-		const Bool32& shaderResourceResidency() const
+		PhysicalDeviceFeatures& setShaderResourceResidency(Bool32 shaderResourceResidency_)
 		{
-			return m_physicalDeviceFeatures.shaderResourceResidency;
-		}
-
-		Bool32& shaderResourceResidency()
-		{
-			return m_physicalDeviceFeatures.shaderResourceResidency;
-		}
-
-		PhysicalDeviceFeatures& shaderResourceResidency(Bool32 shaderResourceResidency)
-		{
-			m_physicalDeviceFeatures.shaderResourceResidency = shaderResourceResidency;
+			shaderResourceResidency = shaderResourceResidency_;
 			return *this;
 		}
 
-		const Bool32& shaderResourceMinLod() const
+		PhysicalDeviceFeatures& setShaderResourceMinLod(Bool32 shaderResourceMinLod_)
 		{
-			return m_physicalDeviceFeatures.shaderResourceMinLod;
-		}
-
-		Bool32& shaderResourceMinLod()
-		{
-			return m_physicalDeviceFeatures.shaderResourceMinLod;
-		}
-
-		PhysicalDeviceFeatures& shaderResourceMinLod(Bool32 shaderResourceMinLod)
-		{
-			m_physicalDeviceFeatures.shaderResourceMinLod = shaderResourceMinLod;
+			shaderResourceMinLod = shaderResourceMinLod_;
 			return *this;
 		}
 
-		const Bool32& sparseBinding() const
+		PhysicalDeviceFeatures& setSparseBinding(Bool32 sparseBinding_)
 		{
-			return m_physicalDeviceFeatures.sparseBinding;
-		}
-
-		Bool32& sparseBinding()
-		{
-			return m_physicalDeviceFeatures.sparseBinding;
-		}
-
-		PhysicalDeviceFeatures& sparseBinding(Bool32 sparseBinding)
-		{
-			m_physicalDeviceFeatures.sparseBinding = sparseBinding;
+			sparseBinding = sparseBinding_;
 			return *this;
 		}
 
-		const Bool32& sparseResidencyBuffer() const
+		PhysicalDeviceFeatures& setSparseResidencyBuffer(Bool32 sparseResidencyBuffer_)
 		{
-			return m_physicalDeviceFeatures.sparseResidencyBuffer;
-		}
-
-		Bool32& sparseResidencyBuffer()
-		{
-			return m_physicalDeviceFeatures.sparseResidencyBuffer;
-		}
-
-		PhysicalDeviceFeatures& sparseResidencyBuffer(Bool32 sparseResidencyBuffer)
-		{
-			m_physicalDeviceFeatures.sparseResidencyBuffer = sparseResidencyBuffer;
+			sparseResidencyBuffer = sparseResidencyBuffer_;
 			return *this;
 		}
 
-		const Bool32& sparseResidencyImage2D() const
+		PhysicalDeviceFeatures& setSparseResidencyImage2D(Bool32 sparseResidencyImage2D_)
 		{
-			return m_physicalDeviceFeatures.sparseResidencyImage2D;
-		}
-
-		Bool32& sparseResidencyImage2D()
-		{
-			return m_physicalDeviceFeatures.sparseResidencyImage2D;
-		}
-
-		PhysicalDeviceFeatures& sparseResidencyImage2D(Bool32 sparseResidencyImage2D)
-		{
-			m_physicalDeviceFeatures.sparseResidencyImage2D = sparseResidencyImage2D;
+			sparseResidencyImage2D = sparseResidencyImage2D_;
 			return *this;
 		}
 
-		const Bool32& sparseResidencyImage3D() const
+		PhysicalDeviceFeatures& setSparseResidencyImage3D(Bool32 sparseResidencyImage3D_)
 		{
-			return m_physicalDeviceFeatures.sparseResidencyImage3D;
-		}
-
-		Bool32& sparseResidencyImage3D()
-		{
-			return m_physicalDeviceFeatures.sparseResidencyImage3D;
-		}
-
-		PhysicalDeviceFeatures& sparseResidencyImage3D(Bool32 sparseResidencyImage3D)
-		{
-			m_physicalDeviceFeatures.sparseResidencyImage3D = sparseResidencyImage3D;
+			sparseResidencyImage3D = sparseResidencyImage3D_;
 			return *this;
 		}
 
-		const Bool32& sparseResidency2Samples() const
+		PhysicalDeviceFeatures& setSparseResidency2Samples(Bool32 sparseResidency2Samples_)
 		{
-			return m_physicalDeviceFeatures.sparseResidency2Samples;
-		}
-
-		Bool32& sparseResidency2Samples()
-		{
-			return m_physicalDeviceFeatures.sparseResidency2Samples;
-		}
-
-		PhysicalDeviceFeatures& sparseResidency2Samples(Bool32 sparseResidency2Samples)
-		{
-			m_physicalDeviceFeatures.sparseResidency2Samples = sparseResidency2Samples;
+			sparseResidency2Samples = sparseResidency2Samples_;
 			return *this;
 		}
 
-		const Bool32& sparseResidency4Samples() const
+		PhysicalDeviceFeatures& setSparseResidency4Samples(Bool32 sparseResidency4Samples_)
 		{
-			return m_physicalDeviceFeatures.sparseResidency4Samples;
-		}
-
-		Bool32& sparseResidency4Samples()
-		{
-			return m_physicalDeviceFeatures.sparseResidency4Samples;
-		}
-
-		PhysicalDeviceFeatures& sparseResidency4Samples(Bool32 sparseResidency4Samples)
-		{
-			m_physicalDeviceFeatures.sparseResidency4Samples = sparseResidency4Samples;
+			sparseResidency4Samples = sparseResidency4Samples_;
 			return *this;
 		}
 
-		const Bool32& sparseResidency8Samples() const
+		PhysicalDeviceFeatures& setSparseResidency8Samples(Bool32 sparseResidency8Samples_)
 		{
-			return m_physicalDeviceFeatures.sparseResidency8Samples;
-		}
-
-		Bool32& sparseResidency8Samples()
-		{
-			return m_physicalDeviceFeatures.sparseResidency8Samples;
-		}
-
-		PhysicalDeviceFeatures& sparseResidency8Samples(Bool32 sparseResidency8Samples)
-		{
-			m_physicalDeviceFeatures.sparseResidency8Samples = sparseResidency8Samples;
+			sparseResidency8Samples = sparseResidency8Samples_;
 			return *this;
 		}
 
-		const Bool32& sparseResidency16Samples() const
+		PhysicalDeviceFeatures& setSparseResidency16Samples(Bool32 sparseResidency16Samples_)
 		{
-			return m_physicalDeviceFeatures.sparseResidency16Samples;
-		}
-
-		Bool32& sparseResidency16Samples()
-		{
-			return m_physicalDeviceFeatures.sparseResidency16Samples;
-		}
-
-		PhysicalDeviceFeatures& sparseResidency16Samples(Bool32 sparseResidency16Samples)
-		{
-			m_physicalDeviceFeatures.sparseResidency16Samples = sparseResidency16Samples;
+			sparseResidency16Samples = sparseResidency16Samples_;
 			return *this;
 		}
 
-		const Bool32& sparseResidencyAliased() const
+		PhysicalDeviceFeatures& setSparseResidencyAliased(Bool32 sparseResidencyAliased_)
 		{
-			return m_physicalDeviceFeatures.sparseResidencyAliased;
-		}
-
-		Bool32& sparseResidencyAliased()
-		{
-			return m_physicalDeviceFeatures.sparseResidencyAliased;
-		}
-
-		PhysicalDeviceFeatures& sparseResidencyAliased(Bool32 sparseResidencyAliased)
-		{
-			m_physicalDeviceFeatures.sparseResidencyAliased = sparseResidencyAliased;
+			sparseResidencyAliased = sparseResidencyAliased_;
 			return *this;
 		}
 
-		const Bool32& variableMultisampleRate() const
+		PhysicalDeviceFeatures& setVariableMultisampleRate(Bool32 variableMultisampleRate_)
 		{
-			return m_physicalDeviceFeatures.variableMultisampleRate;
-		}
-
-		Bool32& variableMultisampleRate()
-		{
-			return m_physicalDeviceFeatures.variableMultisampleRate;
-		}
-
-		PhysicalDeviceFeatures& variableMultisampleRate(Bool32 variableMultisampleRate)
-		{
-			m_physicalDeviceFeatures.variableMultisampleRate = variableMultisampleRate;
+			variableMultisampleRate = variableMultisampleRate_;
 			return *this;
 		}
 
-		const Bool32& inheritedQueries() const
+		PhysicalDeviceFeatures& setInheritedQueries(Bool32 inheritedQueries_)
 		{
-			return m_physicalDeviceFeatures.inheritedQueries;
-		}
-
-		Bool32& inheritedQueries()
-		{
-			return m_physicalDeviceFeatures.inheritedQueries;
-		}
-
-		PhysicalDeviceFeatures& inheritedQueries(Bool32 inheritedQueries)
-		{
-			m_physicalDeviceFeatures.inheritedQueries = inheritedQueries;
+			inheritedQueries = inheritedQueries_;
 			return *this;
 		}
 
 		operator const VkPhysicalDeviceFeatures&() const
 		{
-			return m_physicalDeviceFeatures;
+			return *reinterpret_cast<const VkPhysicalDeviceFeatures*>(this);
 		}
 
-	private:
-		VkPhysicalDeviceFeatures m_physicalDeviceFeatures;
+		Bool32 robustBufferAccess;
+		Bool32 fullDrawIndexUint32;
+		Bool32 imageCubeArray;
+		Bool32 independentBlend;
+		Bool32 geometryShader;
+		Bool32 tessellationShader;
+		Bool32 sampleRateShading;
+		Bool32 dualSrcBlend;
+		Bool32 logicOp;
+		Bool32 multiDrawIndirect;
+		Bool32 drawIndirectFirstInstance;
+		Bool32 depthClamp;
+		Bool32 depthBiasClamp;
+		Bool32 fillModeNonSolid;
+		Bool32 depthBounds;
+		Bool32 wideLines;
+		Bool32 largePoints;
+		Bool32 alphaToOne;
+		Bool32 multiViewport;
+		Bool32 samplerAnisotropy;
+		Bool32 textureCompressionETC2;
+		Bool32 textureCompressionASTC_LDR;
+		Bool32 textureCompressionBC;
+		Bool32 occlusionQueryPrecise;
+		Bool32 pipelineStatisticsQuery;
+		Bool32 vertexPipelineStoresAndAtomics;
+		Bool32 fragmentStoresAndAtomics;
+		Bool32 shaderTessellationAndGeometryPointSize;
+		Bool32 shaderImageGatherExtended;
+		Bool32 shaderStorageImageExtendedFormats;
+		Bool32 shaderStorageImageMultisample;
+		Bool32 shaderStorageImageReadWithoutFormat;
+		Bool32 shaderStorageImageWriteWithoutFormat;
+		Bool32 shaderUniformBufferArrayDynamicIndexing;
+		Bool32 shaderSampledImageArrayDynamicIndexing;
+		Bool32 shaderStorageBufferArrayDynamicIndexing;
+		Bool32 shaderStorageImageArrayDynamicIndexing;
+		Bool32 shaderClipDistance;
+		Bool32 shaderCullDistance;
+		Bool32 shaderFloat64;
+		Bool32 shaderInt64;
+		Bool32 shaderInt16;
+		Bool32 shaderResourceResidency;
+		Bool32 shaderResourceMinLod;
+		Bool32 sparseBinding;
+		Bool32 sparseResidencyBuffer;
+		Bool32 sparseResidencyImage2D;
+		Bool32 sparseResidencyImage3D;
+		Bool32 sparseResidency2Samples;
+		Bool32 sparseResidency4Samples;
+		Bool32 sparseResidency8Samples;
+		Bool32 sparseResidency16Samples;
+		Bool32 sparseResidencyAliased;
+		Bool32 variableMultisampleRate;
+		Bool32 inheritedQueries;
 	};
 	static_assert(sizeof(PhysicalDeviceFeatures) == sizeof(VkPhysicalDeviceFeatures), "struct and wrapper have different size!");
 
-	class PhysicalDeviceSparseProperties
+	struct PhysicalDeviceSparseProperties
 	{
-	public:
-		const Bool32& residencyStandard2DBlockShape() const
-		{
-			return m_physicalDeviceSparseProperties.residencyStandard2DBlockShape;
-		}
-
-		const Bool32& residencyStandard2DMultisampleBlockShape() const
-		{
-			return m_physicalDeviceSparseProperties.residencyStandard2DMultisampleBlockShape;
-		}
-
-		const Bool32& residencyStandard3DBlockShape() const
-		{
-			return m_physicalDeviceSparseProperties.residencyStandard3DBlockShape;
-		}
-
-		const Bool32& residencyAlignedMipSize() const
-		{
-			return m_physicalDeviceSparseProperties.residencyAlignedMipSize;
-		}
-
-		const Bool32& residencyNonResidentStrict() const
-		{
-			return m_physicalDeviceSparseProperties.residencyNonResidentStrict;
-		}
-
 		operator const VkPhysicalDeviceSparseProperties&() const
 		{
-			return m_physicalDeviceSparseProperties;
+			return *reinterpret_cast<const VkPhysicalDeviceSparseProperties*>(this);
 		}
 
-	private:
-		VkPhysicalDeviceSparseProperties m_physicalDeviceSparseProperties;
+		Bool32 residencyStandard2DBlockShape;
+		Bool32 residencyStandard2DMultisampleBlockShape;
+		Bool32 residencyStandard3DBlockShape;
+		Bool32 residencyAlignedMipSize;
+		Bool32 residencyNonResidentStrict;
 	};
 	static_assert(sizeof(PhysicalDeviceSparseProperties) == sizeof(VkPhysicalDeviceSparseProperties), "struct and wrapper have different size!");
 
-	class DrawIndirectCommand
+	struct DrawIndirectCommand
 	{
-	public:
 		DrawIndirectCommand()
 			: DrawIndirectCommand(0, 0, 0, 0)
 		{}
 
-		DrawIndirectCommand(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance)
+		DrawIndirectCommand(uint32_t vertexCount_, uint32_t instanceCount_, uint32_t firstVertex_, uint32_t firstInstance_)
 		{
-			m_drawIndirectCommand.vertexCount = vertexCount;
-			m_drawIndirectCommand.instanceCount = instanceCount;
-			m_drawIndirectCommand.firstVertex = firstVertex;
-			m_drawIndirectCommand.firstInstance = firstInstance;
+			vertexCount = vertexCount_;
+			instanceCount = instanceCount_;
+			firstVertex = firstVertex_;
+			firstInstance = firstInstance_;
 		}
 
 		DrawIndirectCommand(VkDrawIndirectCommand const & rhs)
-			: m_drawIndirectCommand(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DrawIndirectCommand));
 		}
 
 		DrawIndirectCommand& operator=(VkDrawIndirectCommand const & rhs)
 		{
-			m_drawIndirectCommand = rhs;
+			memcpy(this, &rhs, sizeof(DrawIndirectCommand));
 			return *this;
 		}
 
-		const uint32_t& vertexCount() const
+		DrawIndirectCommand& setVertexCount(uint32_t vertexCount_)
 		{
-			return m_drawIndirectCommand.vertexCount;
-		}
-
-		uint32_t& vertexCount()
-		{
-			return m_drawIndirectCommand.vertexCount;
-		}
-
-		DrawIndirectCommand& vertexCount(uint32_t vertexCount)
-		{
-			m_drawIndirectCommand.vertexCount = vertexCount;
+			vertexCount = vertexCount_;
 			return *this;
 		}
 
-		const uint32_t& instanceCount() const
+		DrawIndirectCommand& setInstanceCount(uint32_t instanceCount_)
 		{
-			return m_drawIndirectCommand.instanceCount;
-		}
-
-		uint32_t& instanceCount()
-		{
-			return m_drawIndirectCommand.instanceCount;
-		}
-
-		DrawIndirectCommand& instanceCount(uint32_t instanceCount)
-		{
-			m_drawIndirectCommand.instanceCount = instanceCount;
+			instanceCount = instanceCount_;
 			return *this;
 		}
 
-		const uint32_t& firstVertex() const
+		DrawIndirectCommand& setFirstVertex(uint32_t firstVertex_)
 		{
-			return m_drawIndirectCommand.firstVertex;
-		}
-
-		uint32_t& firstVertex()
-		{
-			return m_drawIndirectCommand.firstVertex;
-		}
-
-		DrawIndirectCommand& firstVertex(uint32_t firstVertex)
-		{
-			m_drawIndirectCommand.firstVertex = firstVertex;
+			firstVertex = firstVertex_;
 			return *this;
 		}
 
-		const uint32_t& firstInstance() const
+		DrawIndirectCommand& setFirstInstance(uint32_t firstInstance_)
 		{
-			return m_drawIndirectCommand.firstInstance;
-		}
-
-		uint32_t& firstInstance()
-		{
-			return m_drawIndirectCommand.firstInstance;
-		}
-
-		DrawIndirectCommand& firstInstance(uint32_t firstInstance)
-		{
-			m_drawIndirectCommand.firstInstance = firstInstance;
+			firstInstance = firstInstance_;
 			return *this;
 		}
 
 		operator const VkDrawIndirectCommand&() const
 		{
-			return m_drawIndirectCommand;
+			return *reinterpret_cast<const VkDrawIndirectCommand*>(this);
 		}
 
-	private:
-		VkDrawIndirectCommand m_drawIndirectCommand;
+		uint32_t vertexCount;
+		uint32_t instanceCount;
+		uint32_t firstVertex;
+		uint32_t firstInstance;
 	};
 	static_assert(sizeof(DrawIndirectCommand) == sizeof(VkDrawIndirectCommand), "struct and wrapper have different size!");
 
-	class DrawIndexedIndirectCommand
+	struct DrawIndexedIndirectCommand
 	{
-	public:
 		DrawIndexedIndirectCommand()
 			: DrawIndexedIndirectCommand(0, 0, 0, 0, 0)
 		{}
 
-		DrawIndexedIndirectCommand(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
+		DrawIndexedIndirectCommand(uint32_t indexCount_, uint32_t instanceCount_, uint32_t firstIndex_, int32_t vertexOffset_, uint32_t firstInstance_)
 		{
-			m_drawIndexedIndirectCommand.indexCount = indexCount;
-			m_drawIndexedIndirectCommand.instanceCount = instanceCount;
-			m_drawIndexedIndirectCommand.firstIndex = firstIndex;
-			m_drawIndexedIndirectCommand.vertexOffset = vertexOffset;
-			m_drawIndexedIndirectCommand.firstInstance = firstInstance;
+			indexCount = indexCount_;
+			instanceCount = instanceCount_;
+			firstIndex = firstIndex_;
+			vertexOffset = vertexOffset_;
+			firstInstance = firstInstance_;
 		}
 
 		DrawIndexedIndirectCommand(VkDrawIndexedIndirectCommand const & rhs)
-			: m_drawIndexedIndirectCommand(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DrawIndexedIndirectCommand));
 		}
 
 		DrawIndexedIndirectCommand& operator=(VkDrawIndexedIndirectCommand const & rhs)
 		{
-			m_drawIndexedIndirectCommand = rhs;
+			memcpy(this, &rhs, sizeof(DrawIndexedIndirectCommand));
 			return *this;
 		}
 
-		const uint32_t& indexCount() const
+		DrawIndexedIndirectCommand& setIndexCount(uint32_t indexCount_)
 		{
-			return m_drawIndexedIndirectCommand.indexCount;
-		}
-
-		uint32_t& indexCount()
-		{
-			return m_drawIndexedIndirectCommand.indexCount;
-		}
-
-		DrawIndexedIndirectCommand& indexCount(uint32_t indexCount)
-		{
-			m_drawIndexedIndirectCommand.indexCount = indexCount;
+			indexCount = indexCount_;
 			return *this;
 		}
 
-		const uint32_t& instanceCount() const
+		DrawIndexedIndirectCommand& setInstanceCount(uint32_t instanceCount_)
 		{
-			return m_drawIndexedIndirectCommand.instanceCount;
-		}
-
-		uint32_t& instanceCount()
-		{
-			return m_drawIndexedIndirectCommand.instanceCount;
-		}
-
-		DrawIndexedIndirectCommand& instanceCount(uint32_t instanceCount)
-		{
-			m_drawIndexedIndirectCommand.instanceCount = instanceCount;
+			instanceCount = instanceCount_;
 			return *this;
 		}
 
-		const uint32_t& firstIndex() const
+		DrawIndexedIndirectCommand& setFirstIndex(uint32_t firstIndex_)
 		{
-			return m_drawIndexedIndirectCommand.firstIndex;
-		}
-
-		uint32_t& firstIndex()
-		{
-			return m_drawIndexedIndirectCommand.firstIndex;
-		}
-
-		DrawIndexedIndirectCommand& firstIndex(uint32_t firstIndex)
-		{
-			m_drawIndexedIndirectCommand.firstIndex = firstIndex;
+			firstIndex = firstIndex_;
 			return *this;
 		}
 
-		const int32_t& vertexOffset() const
+		DrawIndexedIndirectCommand& setVertexOffset(int32_t vertexOffset_)
 		{
-			return m_drawIndexedIndirectCommand.vertexOffset;
-		}
-
-		int32_t& vertexOffset()
-		{
-			return m_drawIndexedIndirectCommand.vertexOffset;
-		}
-
-		DrawIndexedIndirectCommand& vertexOffset(int32_t vertexOffset)
-		{
-			m_drawIndexedIndirectCommand.vertexOffset = vertexOffset;
+			vertexOffset = vertexOffset_;
 			return *this;
 		}
 
-		const uint32_t& firstInstance() const
+		DrawIndexedIndirectCommand& setFirstInstance(uint32_t firstInstance_)
 		{
-			return m_drawIndexedIndirectCommand.firstInstance;
-		}
-
-		uint32_t& firstInstance()
-		{
-			return m_drawIndexedIndirectCommand.firstInstance;
-		}
-
-		DrawIndexedIndirectCommand& firstInstance(uint32_t firstInstance)
-		{
-			m_drawIndexedIndirectCommand.firstInstance = firstInstance;
+			firstInstance = firstInstance_;
 			return *this;
 		}
 
 		operator const VkDrawIndexedIndirectCommand&() const
 		{
-			return m_drawIndexedIndirectCommand;
+			return *reinterpret_cast<const VkDrawIndexedIndirectCommand*>(this);
 		}
 
-	private:
-		VkDrawIndexedIndirectCommand m_drawIndexedIndirectCommand;
+		uint32_t indexCount;
+		uint32_t instanceCount;
+		uint32_t firstIndex;
+		int32_t vertexOffset;
+		uint32_t firstInstance;
 	};
 	static_assert(sizeof(DrawIndexedIndirectCommand) == sizeof(VkDrawIndexedIndirectCommand), "struct and wrapper have different size!");
 
-	class DispatchIndirectCommand
+	struct DispatchIndirectCommand
 	{
-	public:
 		DispatchIndirectCommand()
 			: DispatchIndirectCommand(0, 0, 0)
 		{}
 
-		DispatchIndirectCommand(uint32_t x, uint32_t y, uint32_t z)
+		DispatchIndirectCommand(uint32_t x_, uint32_t y_, uint32_t z_)
 		{
-			m_dispatchIndirectCommand.x = x;
-			m_dispatchIndirectCommand.y = y;
-			m_dispatchIndirectCommand.z = z;
+			x = x_;
+			y = y_;
+			z = z_;
 		}
 
 		DispatchIndirectCommand(VkDispatchIndirectCommand const & rhs)
-			: m_dispatchIndirectCommand(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DispatchIndirectCommand));
 		}
 
 		DispatchIndirectCommand& operator=(VkDispatchIndirectCommand const & rhs)
 		{
-			m_dispatchIndirectCommand = rhs;
+			memcpy(this, &rhs, sizeof(DispatchIndirectCommand));
 			return *this;
 		}
 
-		const uint32_t& x() const
+		DispatchIndirectCommand& setX(uint32_t x_)
 		{
-			return m_dispatchIndirectCommand.x;
-		}
-
-		uint32_t& x()
-		{
-			return m_dispatchIndirectCommand.x;
-		}
-
-		DispatchIndirectCommand& x(uint32_t x)
-		{
-			m_dispatchIndirectCommand.x = x;
+			x = x_;
 			return *this;
 		}
 
-		const uint32_t& y() const
+		DispatchIndirectCommand& setY(uint32_t y_)
 		{
-			return m_dispatchIndirectCommand.y;
-		}
-
-		uint32_t& y()
-		{
-			return m_dispatchIndirectCommand.y;
-		}
-
-		DispatchIndirectCommand& y(uint32_t y)
-		{
-			m_dispatchIndirectCommand.y = y;
+			y = y_;
 			return *this;
 		}
 
-		const uint32_t& z() const
+		DispatchIndirectCommand& setZ(uint32_t z_)
 		{
-			return m_dispatchIndirectCommand.z;
-		}
-
-		uint32_t& z()
-		{
-			return m_dispatchIndirectCommand.z;
-		}
-
-		DispatchIndirectCommand& z(uint32_t z)
-		{
-			m_dispatchIndirectCommand.z = z;
+			z = z_;
 			return *this;
 		}
 
 		operator const VkDispatchIndirectCommand&() const
 		{
-			return m_dispatchIndirectCommand;
+			return *reinterpret_cast<const VkDispatchIndirectCommand*>(this);
 		}
 
-	private:
-		VkDispatchIndirectCommand m_dispatchIndirectCommand;
+		uint32_t x;
+		uint32_t y;
+		uint32_t z;
 	};
 	static_assert(sizeof(DispatchIndirectCommand) == sizeof(VkDispatchIndirectCommand), "struct and wrapper have different size!");
 
-	class DisplayPlanePropertiesKHR
+	struct DisplayPlanePropertiesKHR
 	{
-	public:
 		DisplayPlanePropertiesKHR()
 			: DisplayPlanePropertiesKHR(DisplayKHR(), 0)
 		{}
 
-		DisplayPlanePropertiesKHR(DisplayKHR currentDisplay, uint32_t currentStackIndex)
+		DisplayPlanePropertiesKHR(DisplayKHR currentDisplay_, uint32_t currentStackIndex_)
 		{
-			m_displayPlanePropertiesKHR.currentDisplay = static_cast<VkDisplayKHR>(currentDisplay);
-			m_displayPlanePropertiesKHR.currentStackIndex = currentStackIndex;
+			currentDisplay = currentDisplay_;
+			currentStackIndex = currentStackIndex_;
 		}
 
 		DisplayPlanePropertiesKHR(VkDisplayPlanePropertiesKHR const & rhs)
-			: m_displayPlanePropertiesKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplayPlanePropertiesKHR));
 		}
 
 		DisplayPlanePropertiesKHR& operator=(VkDisplayPlanePropertiesKHR const & rhs)
 		{
-			m_displayPlanePropertiesKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplayPlanePropertiesKHR));
 			return *this;
 		}
 
-		const DisplayKHR& currentDisplay() const
+		DisplayPlanePropertiesKHR& setCurrentDisplay(DisplayKHR currentDisplay_)
 		{
-			return reinterpret_cast<const DisplayKHR&>(m_displayPlanePropertiesKHR.currentDisplay);
-		}
-
-		DisplayKHR& currentDisplay()
-		{
-			return reinterpret_cast<DisplayKHR&>(m_displayPlanePropertiesKHR.currentDisplay);
-		}
-
-		DisplayPlanePropertiesKHR& currentDisplay(DisplayKHR currentDisplay)
-		{
-			m_displayPlanePropertiesKHR.currentDisplay = static_cast<VkDisplayKHR>(currentDisplay);
+			currentDisplay = currentDisplay_;
 			return *this;
 		}
 
-		const uint32_t& currentStackIndex() const
+		DisplayPlanePropertiesKHR& setCurrentStackIndex(uint32_t currentStackIndex_)
 		{
-			return m_displayPlanePropertiesKHR.currentStackIndex;
-		}
-
-		uint32_t& currentStackIndex()
-		{
-			return m_displayPlanePropertiesKHR.currentStackIndex;
-		}
-
-		DisplayPlanePropertiesKHR& currentStackIndex(uint32_t currentStackIndex)
-		{
-			m_displayPlanePropertiesKHR.currentStackIndex = currentStackIndex;
+			currentStackIndex = currentStackIndex_;
 			return *this;
 		}
 
 		operator const VkDisplayPlanePropertiesKHR&() const
 		{
-			return m_displayPlanePropertiesKHR;
+			return *reinterpret_cast<const VkDisplayPlanePropertiesKHR*>(this);
 		}
 
-	private:
-		VkDisplayPlanePropertiesKHR m_displayPlanePropertiesKHR;
+		DisplayKHR currentDisplay;
+		uint32_t currentStackIndex;
 	};
 	static_assert(sizeof(DisplayPlanePropertiesKHR) == sizeof(VkDisplayPlanePropertiesKHR), "struct and wrapper have different size!");
 
-	class DisplayModeParametersKHR
+	struct DisplayModeParametersKHR
 	{
-	public:
 		DisplayModeParametersKHR()
 			: DisplayModeParametersKHR(Extent2D(), 0)
 		{}
 
-		DisplayModeParametersKHR(Extent2D visibleRegion, uint32_t refreshRate)
+		DisplayModeParametersKHR(Extent2D visibleRegion_, uint32_t refreshRate_)
 		{
-			m_displayModeParametersKHR.visibleRegion = static_cast<VkExtent2D>(visibleRegion);
-			m_displayModeParametersKHR.refreshRate = refreshRate;
+			visibleRegion = visibleRegion_;
+			refreshRate = refreshRate_;
 		}
 
 		DisplayModeParametersKHR(VkDisplayModeParametersKHR const & rhs)
-			: m_displayModeParametersKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplayModeParametersKHR));
 		}
 
 		DisplayModeParametersKHR& operator=(VkDisplayModeParametersKHR const & rhs)
 		{
-			m_displayModeParametersKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplayModeParametersKHR));
 			return *this;
 		}
 
-		const Extent2D& visibleRegion() const
+		DisplayModeParametersKHR& setVisibleRegion(Extent2D visibleRegion_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displayModeParametersKHR.visibleRegion);
-		}
-
-		Extent2D& visibleRegion()
-		{
-			return reinterpret_cast<Extent2D&>(m_displayModeParametersKHR.visibleRegion);
-		}
-
-		DisplayModeParametersKHR& visibleRegion(Extent2D visibleRegion)
-		{
-			m_displayModeParametersKHR.visibleRegion = static_cast<VkExtent2D>(visibleRegion);
+			visibleRegion = visibleRegion_;
 			return *this;
 		}
 
-		const uint32_t& refreshRate() const
+		DisplayModeParametersKHR& setRefreshRate(uint32_t refreshRate_)
 		{
-			return m_displayModeParametersKHR.refreshRate;
-		}
-
-		uint32_t& refreshRate()
-		{
-			return m_displayModeParametersKHR.refreshRate;
-		}
-
-		DisplayModeParametersKHR& refreshRate(uint32_t refreshRate)
-		{
-			m_displayModeParametersKHR.refreshRate = refreshRate;
+			refreshRate = refreshRate_;
 			return *this;
 		}
 
 		operator const VkDisplayModeParametersKHR&() const
 		{
-			return m_displayModeParametersKHR;
+			return *reinterpret_cast<const VkDisplayModeParametersKHR*>(this);
 		}
 
-	private:
-		VkDisplayModeParametersKHR m_displayModeParametersKHR;
+		Extent2D visibleRegion;
+		uint32_t refreshRate;
 	};
 	static_assert(sizeof(DisplayModeParametersKHR) == sizeof(VkDisplayModeParametersKHR), "struct and wrapper have different size!");
 
-	class DisplayModePropertiesKHR
+	struct DisplayModePropertiesKHR
 	{
-	public:
 		DisplayModePropertiesKHR()
 			: DisplayModePropertiesKHR(DisplayModeKHR(), DisplayModeParametersKHR())
 		{}
 
-		DisplayModePropertiesKHR(DisplayModeKHR displayMode, DisplayModeParametersKHR parameters)
+		DisplayModePropertiesKHR(DisplayModeKHR displayMode_, DisplayModeParametersKHR parameters_)
 		{
-			m_displayModePropertiesKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
-			m_displayModePropertiesKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+			displayMode = displayMode_;
+			parameters = parameters_;
 		}
 
 		DisplayModePropertiesKHR(VkDisplayModePropertiesKHR const & rhs)
-			: m_displayModePropertiesKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplayModePropertiesKHR));
 		}
 
 		DisplayModePropertiesKHR& operator=(VkDisplayModePropertiesKHR const & rhs)
 		{
-			m_displayModePropertiesKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplayModePropertiesKHR));
 			return *this;
 		}
 
-		const DisplayModeKHR& displayMode() const
+		DisplayModePropertiesKHR& setDisplayMode(DisplayModeKHR displayMode_)
 		{
-			return reinterpret_cast<const DisplayModeKHR&>(m_displayModePropertiesKHR.displayMode);
-		}
-
-		DisplayModeKHR& displayMode()
-		{
-			return reinterpret_cast<DisplayModeKHR&>(m_displayModePropertiesKHR.displayMode);
-		}
-
-		DisplayModePropertiesKHR& displayMode(DisplayModeKHR displayMode)
-		{
-			m_displayModePropertiesKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
+			displayMode = displayMode_;
 			return *this;
 		}
 
-		const DisplayModeParametersKHR& parameters() const
+		DisplayModePropertiesKHR& setParameters(DisplayModeParametersKHR parameters_)
 		{
-			return reinterpret_cast<const DisplayModeParametersKHR&>(m_displayModePropertiesKHR.parameters);
-		}
-
-		DisplayModeParametersKHR& parameters()
-		{
-			return reinterpret_cast<DisplayModeParametersKHR&>(m_displayModePropertiesKHR.parameters);
-		}
-
-		DisplayModePropertiesKHR& parameters(DisplayModeParametersKHR parameters)
-		{
-			m_displayModePropertiesKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+			parameters = parameters_;
 			return *this;
 		}
 
 		operator const VkDisplayModePropertiesKHR&() const
 		{
-			return m_displayModePropertiesKHR;
+			return *reinterpret_cast<const VkDisplayModePropertiesKHR*>(this);
 		}
 
-	private:
-		VkDisplayModePropertiesKHR m_displayModePropertiesKHR;
+		DisplayModeKHR displayMode;
+		DisplayModeParametersKHR parameters;
 	};
 	static_assert(sizeof(DisplayModePropertiesKHR) == sizeof(VkDisplayModePropertiesKHR), "struct and wrapper have different size!");
 
@@ -4681,152 +3538,101 @@ namespace vk
 		ePresentSrcKHR = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 	};
 
-	class DescriptorImageInfo
+	struct DescriptorImageInfo
 	{
-	public:
 		DescriptorImageInfo()
 			: DescriptorImageInfo(Sampler(), ImageView(), ImageLayout::eUndefined)
 		{}
 
-		DescriptorImageInfo(Sampler sampler, ImageView imageView, ImageLayout imageLayout)
+		DescriptorImageInfo(Sampler sampler_, ImageView imageView_, ImageLayout imageLayout_)
 		{
-			m_descriptorImageInfo.sampler = static_cast<VkSampler>(sampler);
-			m_descriptorImageInfo.imageView = static_cast<VkImageView>(imageView);
-			m_descriptorImageInfo.imageLayout = static_cast<VkImageLayout>(imageLayout);
+			sampler = sampler_;
+			imageView = imageView_;
+			imageLayout = imageLayout_;
 		}
 
 		DescriptorImageInfo(VkDescriptorImageInfo const & rhs)
-			: m_descriptorImageInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DescriptorImageInfo));
 		}
 
 		DescriptorImageInfo& operator=(VkDescriptorImageInfo const & rhs)
 		{
-			m_descriptorImageInfo = rhs;
+			memcpy(this, &rhs, sizeof(DescriptorImageInfo));
 			return *this;
 		}
 
-		const Sampler& sampler() const
+		DescriptorImageInfo& setSampler(Sampler sampler_)
 		{
-			return reinterpret_cast<const Sampler&>(m_descriptorImageInfo.sampler);
-		}
-
-		Sampler& sampler()
-		{
-			return reinterpret_cast<Sampler&>(m_descriptorImageInfo.sampler);
-		}
-
-		DescriptorImageInfo& sampler(Sampler sampler)
-		{
-			m_descriptorImageInfo.sampler = static_cast<VkSampler>(sampler);
+			sampler = sampler_;
 			return *this;
 		}
 
-		const ImageView& imageView() const
+		DescriptorImageInfo& setImageView(ImageView imageView_)
 		{
-			return reinterpret_cast<const ImageView&>(m_descriptorImageInfo.imageView);
-		}
-
-		ImageView& imageView()
-		{
-			return reinterpret_cast<ImageView&>(m_descriptorImageInfo.imageView);
-		}
-
-		DescriptorImageInfo& imageView(ImageView imageView)
-		{
-			m_descriptorImageInfo.imageView = static_cast<VkImageView>(imageView);
+			imageView = imageView_;
 			return *this;
 		}
 
-		const ImageLayout& imageLayout() const
+		DescriptorImageInfo& setImageLayout(ImageLayout imageLayout_)
 		{
-			return reinterpret_cast<const ImageLayout&>(m_descriptorImageInfo.imageLayout);
-		}
-
-		ImageLayout& imageLayout()
-		{
-			return reinterpret_cast<ImageLayout&>(m_descriptorImageInfo.imageLayout);
-		}
-
-		DescriptorImageInfo& imageLayout(ImageLayout imageLayout)
-		{
-			m_descriptorImageInfo.imageLayout = static_cast<VkImageLayout>(imageLayout);
+			imageLayout = imageLayout_;
 			return *this;
 		}
 
 		operator const VkDescriptorImageInfo&() const
 		{
-			return m_descriptorImageInfo;
+			return *reinterpret_cast<const VkDescriptorImageInfo*>(this);
 		}
 
-	private:
-		VkDescriptorImageInfo m_descriptorImageInfo;
+		Sampler sampler;
+		ImageView imageView;
+		ImageLayout imageLayout;
 	};
 	static_assert(sizeof(DescriptorImageInfo) == sizeof(VkDescriptorImageInfo), "struct and wrapper have different size!");
 
-	class AttachmentReference
+	struct AttachmentReference
 	{
-	public:
 		AttachmentReference()
 			: AttachmentReference(0, ImageLayout::eUndefined)
 		{}
 
-		AttachmentReference(uint32_t attachment, ImageLayout layout)
+		AttachmentReference(uint32_t attachment_, ImageLayout layout_)
 		{
-			m_attachmentReference.attachment = attachment;
-			m_attachmentReference.layout = static_cast<VkImageLayout>(layout);
+			attachment = attachment_;
+			layout = layout_;
 		}
 
 		AttachmentReference(VkAttachmentReference const & rhs)
-			: m_attachmentReference(rhs)
 		{
+			memcpy(this, &rhs, sizeof(AttachmentReference));
 		}
 
 		AttachmentReference& operator=(VkAttachmentReference const & rhs)
 		{
-			m_attachmentReference = rhs;
+			memcpy(this, &rhs, sizeof(AttachmentReference));
 			return *this;
 		}
 
-		const uint32_t& attachment() const
+		AttachmentReference& setAttachment(uint32_t attachment_)
 		{
-			return m_attachmentReference.attachment;
-		}
-
-		uint32_t& attachment()
-		{
-			return m_attachmentReference.attachment;
-		}
-
-		AttachmentReference& attachment(uint32_t attachment)
-		{
-			m_attachmentReference.attachment = attachment;
+			attachment = attachment_;
 			return *this;
 		}
 
-		const ImageLayout& layout() const
+		AttachmentReference& setLayout(ImageLayout layout_)
 		{
-			return reinterpret_cast<const ImageLayout&>(m_attachmentReference.layout);
-		}
-
-		ImageLayout& layout()
-		{
-			return reinterpret_cast<ImageLayout&>(m_attachmentReference.layout);
-		}
-
-		AttachmentReference& layout(ImageLayout layout)
-		{
-			m_attachmentReference.layout = static_cast<VkImageLayout>(layout);
+			layout = layout_;
 			return *this;
 		}
 
 		operator const VkAttachmentReference&() const
 		{
-			return m_attachmentReference;
+			return *reinterpret_cast<const VkAttachmentReference*>(this);
 		}
 
-	private:
-		VkAttachmentReference m_attachmentReference;
+		uint32_t attachment;
+		ImageLayout layout;
 	};
 	static_assert(sizeof(AttachmentReference) == sizeof(VkAttachmentReference), "struct and wrapper have different size!");
 
@@ -4884,103 +3690,64 @@ namespace vk
 		eA = VK_COMPONENT_SWIZZLE_A
 	};
 
-	class ComponentMapping
+	struct ComponentMapping
 	{
-	public:
 		ComponentMapping()
 			: ComponentMapping(ComponentSwizzle::eIdentity, ComponentSwizzle::eIdentity, ComponentSwizzle::eIdentity, ComponentSwizzle::eIdentity)
 		{}
 
-		ComponentMapping(ComponentSwizzle r, ComponentSwizzle g, ComponentSwizzle b, ComponentSwizzle a)
+		ComponentMapping(ComponentSwizzle r_, ComponentSwizzle g_, ComponentSwizzle b_, ComponentSwizzle a_)
 		{
-			m_componentMapping.r = static_cast<VkComponentSwizzle>(r);
-			m_componentMapping.g = static_cast<VkComponentSwizzle>(g);
-			m_componentMapping.b = static_cast<VkComponentSwizzle>(b);
-			m_componentMapping.a = static_cast<VkComponentSwizzle>(a);
+			r = r_;
+			g = g_;
+			b = b_;
+			a = a_;
 		}
 
 		ComponentMapping(VkComponentMapping const & rhs)
-			: m_componentMapping(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ComponentMapping));
 		}
 
 		ComponentMapping& operator=(VkComponentMapping const & rhs)
 		{
-			m_componentMapping = rhs;
+			memcpy(this, &rhs, sizeof(ComponentMapping));
 			return *this;
 		}
 
-		const ComponentSwizzle& r() const
+		ComponentMapping& setR(ComponentSwizzle r_)
 		{
-			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.r);
-		}
-
-		ComponentSwizzle& r()
-		{
-			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.r);
-		}
-
-		ComponentMapping& r(ComponentSwizzle r)
-		{
-			m_componentMapping.r = static_cast<VkComponentSwizzle>(r);
+			r = r_;
 			return *this;
 		}
 
-		const ComponentSwizzle& g() const
+		ComponentMapping& setG(ComponentSwizzle g_)
 		{
-			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.g);
-		}
-
-		ComponentSwizzle& g()
-		{
-			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.g);
-		}
-
-		ComponentMapping& g(ComponentSwizzle g)
-		{
-			m_componentMapping.g = static_cast<VkComponentSwizzle>(g);
+			g = g_;
 			return *this;
 		}
 
-		const ComponentSwizzle& b() const
+		ComponentMapping& setB(ComponentSwizzle b_)
 		{
-			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.b);
-		}
-
-		ComponentSwizzle& b()
-		{
-			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.b);
-		}
-
-		ComponentMapping& b(ComponentSwizzle b)
-		{
-			m_componentMapping.b = static_cast<VkComponentSwizzle>(b);
+			b = b_;
 			return *this;
 		}
 
-		const ComponentSwizzle& a() const
+		ComponentMapping& setA(ComponentSwizzle a_)
 		{
-			return reinterpret_cast<const ComponentSwizzle&>(m_componentMapping.a);
-		}
-
-		ComponentSwizzle& a()
-		{
-			return reinterpret_cast<ComponentSwizzle&>(m_componentMapping.a);
-		}
-
-		ComponentMapping& a(ComponentSwizzle a)
-		{
-			m_componentMapping.a = static_cast<VkComponentSwizzle>(a);
+			a = a_;
 			return *this;
 		}
 
 		operator const VkComponentMapping&() const
 		{
-			return m_componentMapping;
+			return *reinterpret_cast<const VkComponentMapping*>(this);
 		}
 
-	private:
-		VkComponentMapping m_componentMapping;
+		ComponentSwizzle r;
+		ComponentSwizzle g;
+		ComponentSwizzle b;
+		ComponentSwizzle a;
 	};
 	static_assert(sizeof(ComponentMapping) == sizeof(VkComponentMapping), "struct and wrapper have different size!");
 
@@ -4999,69 +3766,48 @@ namespace vk
 		eInputAttachment = VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT
 	};
 
-	class DescriptorPoolSize
+	struct DescriptorPoolSize
 	{
-	public:
 		DescriptorPoolSize()
 			: DescriptorPoolSize(DescriptorType::eSampler, 0)
 		{}
 
-		DescriptorPoolSize(DescriptorType type, uint32_t descriptorCount)
+		DescriptorPoolSize(DescriptorType type_, uint32_t descriptorCount_)
 		{
-			m_descriptorPoolSize.type = static_cast<VkDescriptorType>(type);
-			m_descriptorPoolSize.descriptorCount = descriptorCount;
+			type = type_;
+			descriptorCount = descriptorCount_;
 		}
 
 		DescriptorPoolSize(VkDescriptorPoolSize const & rhs)
-			: m_descriptorPoolSize(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DescriptorPoolSize));
 		}
 
 		DescriptorPoolSize& operator=(VkDescriptorPoolSize const & rhs)
 		{
-			m_descriptorPoolSize = rhs;
+			memcpy(this, &rhs, sizeof(DescriptorPoolSize));
 			return *this;
 		}
 
-		const DescriptorType& type() const
+		DescriptorPoolSize& setType(DescriptorType type_)
 		{
-			return reinterpret_cast<const DescriptorType&>(m_descriptorPoolSize.type);
-		}
-
-		DescriptorType& type()
-		{
-			return reinterpret_cast<DescriptorType&>(m_descriptorPoolSize.type);
-		}
-
-		DescriptorPoolSize& type(DescriptorType type)
-		{
-			m_descriptorPoolSize.type = static_cast<VkDescriptorType>(type);
+			type = type_;
 			return *this;
 		}
 
-		const uint32_t& descriptorCount() const
+		DescriptorPoolSize& setDescriptorCount(uint32_t descriptorCount_)
 		{
-			return m_descriptorPoolSize.descriptorCount;
-		}
-
-		uint32_t& descriptorCount()
-		{
-			return m_descriptorPoolSize.descriptorCount;
-		}
-
-		DescriptorPoolSize& descriptorCount(uint32_t descriptorCount)
-		{
-			m_descriptorPoolSize.descriptorCount = descriptorCount;
+			descriptorCount = descriptorCount_;
 			return *this;
 		}
 
 		operator const VkDescriptorPoolSize&() const
 		{
-			return m_descriptorPoolSize;
+			return *reinterpret_cast<const VkDescriptorPoolSize*>(this);
 		}
 
-	private:
-		VkDescriptorPoolSize m_descriptorPoolSize;
+		DescriptorType type;
+		uint32_t descriptorCount;
 	};
 	static_assert(sizeof(DescriptorPoolSize) == sizeof(VkDescriptorPoolSize), "struct and wrapper have different size!");
 
@@ -5088,205 +3834,112 @@ namespace vk
 		eCompute = VK_PIPELINE_BIND_POINT_COMPUTE
 	};
 
-	class SubpassDescription
+	struct SubpassDescription
 	{
-	public:
 		SubpassDescription()
 			: SubpassDescription(SubpassDescriptionFlags(), PipelineBindPoint::eGraphics, 0, nullptr, 0, nullptr, nullptr, nullptr, 0, nullptr)
 		{}
 
-		SubpassDescription(SubpassDescriptionFlags flags, PipelineBindPoint pipelineBindPoint, uint32_t inputAttachmentCount, const AttachmentReference* pInputAttachments, uint32_t colorAttachmentCount, const AttachmentReference* pColorAttachments, const AttachmentReference* pResolveAttachments, const AttachmentReference* pDepthStencilAttachment, uint32_t preserveAttachmentCount, const uint32_t* pPreserveAttachments)
+		SubpassDescription(SubpassDescriptionFlags flags_, PipelineBindPoint pipelineBindPoint_, uint32_t inputAttachmentCount_, const AttachmentReference* pInputAttachments_, uint32_t colorAttachmentCount_, const AttachmentReference* pColorAttachments_, const AttachmentReference* pResolveAttachments_, const AttachmentReference* pDepthStencilAttachment_, uint32_t preserveAttachmentCount_, const uint32_t* pPreserveAttachments_)
 		{
-			m_subpassDescription.flags = static_cast<VkSubpassDescriptionFlags>(flags);
-			m_subpassDescription.pipelineBindPoint = static_cast<VkPipelineBindPoint>(pipelineBindPoint);
-			m_subpassDescription.inputAttachmentCount = inputAttachmentCount;
-			m_subpassDescription.pInputAttachments = reinterpret_cast<const VkAttachmentReference*>(pInputAttachments);
-			m_subpassDescription.colorAttachmentCount = colorAttachmentCount;
-			m_subpassDescription.pColorAttachments = reinterpret_cast<const VkAttachmentReference*>(pColorAttachments);
-			m_subpassDescription.pResolveAttachments = reinterpret_cast<const VkAttachmentReference*>(pResolveAttachments);
-			m_subpassDescription.pDepthStencilAttachment = reinterpret_cast<const VkAttachmentReference*>(pDepthStencilAttachment);
-			m_subpassDescription.preserveAttachmentCount = preserveAttachmentCount;
-			m_subpassDescription.pPreserveAttachments = pPreserveAttachments;
+			flags = flags_;
+			pipelineBindPoint = pipelineBindPoint_;
+			inputAttachmentCount = inputAttachmentCount_;
+			pInputAttachments = pInputAttachments_;
+			colorAttachmentCount = colorAttachmentCount_;
+			pColorAttachments = pColorAttachments_;
+			pResolveAttachments = pResolveAttachments_;
+			pDepthStencilAttachment = pDepthStencilAttachment_;
+			preserveAttachmentCount = preserveAttachmentCount_;
+			pPreserveAttachments = pPreserveAttachments_;
 		}
 
 		SubpassDescription(VkSubpassDescription const & rhs)
-			: m_subpassDescription(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SubpassDescription));
 		}
 
 		SubpassDescription& operator=(VkSubpassDescription const & rhs)
 		{
-			m_subpassDescription = rhs;
+			memcpy(this, &rhs, sizeof(SubpassDescription));
 			return *this;
 		}
 
-		const SubpassDescriptionFlags& flags() const
+		SubpassDescription& setFlags(SubpassDescriptionFlags flags_)
 		{
-			return reinterpret_cast<const SubpassDescriptionFlags&>(m_subpassDescription.flags);
-		}
-
-		SubpassDescriptionFlags& flags()
-		{
-			return reinterpret_cast<SubpassDescriptionFlags&>(m_subpassDescription.flags);
-		}
-
-		SubpassDescription& flags(SubpassDescriptionFlags flags)
-		{
-			m_subpassDescription.flags = static_cast<VkSubpassDescriptionFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const PipelineBindPoint& pipelineBindPoint() const
+		SubpassDescription& setPipelineBindPoint(PipelineBindPoint pipelineBindPoint_)
 		{
-			return reinterpret_cast<const PipelineBindPoint&>(m_subpassDescription.pipelineBindPoint);
-		}
-
-		PipelineBindPoint& pipelineBindPoint()
-		{
-			return reinterpret_cast<PipelineBindPoint&>(m_subpassDescription.pipelineBindPoint);
-		}
-
-		SubpassDescription& pipelineBindPoint(PipelineBindPoint pipelineBindPoint)
-		{
-			m_subpassDescription.pipelineBindPoint = static_cast<VkPipelineBindPoint>(pipelineBindPoint);
+			pipelineBindPoint = pipelineBindPoint_;
 			return *this;
 		}
 
-		const uint32_t& inputAttachmentCount() const
+		SubpassDescription& setInputAttachmentCount(uint32_t inputAttachmentCount_)
 		{
-			return m_subpassDescription.inputAttachmentCount;
-		}
-
-		uint32_t& inputAttachmentCount()
-		{
-			return m_subpassDescription.inputAttachmentCount;
-		}
-
-		SubpassDescription& inputAttachmentCount(uint32_t inputAttachmentCount)
-		{
-			m_subpassDescription.inputAttachmentCount = inputAttachmentCount;
+			inputAttachmentCount = inputAttachmentCount_;
 			return *this;
 		}
 
-		const AttachmentReference* pInputAttachments() const
+		SubpassDescription& setPInputAttachments(const AttachmentReference* pInputAttachments_)
 		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pInputAttachments);
-		}
-
-		const AttachmentReference* pInputAttachments()
-		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pInputAttachments);
-		}
-
-		SubpassDescription& pInputAttachments(const AttachmentReference* pInputAttachments)
-		{
-			m_subpassDescription.pInputAttachments = reinterpret_cast<const VkAttachmentReference*>(pInputAttachments);
+			pInputAttachments = pInputAttachments_;
 			return *this;
 		}
 
-		const uint32_t& colorAttachmentCount() const
+		SubpassDescription& setColorAttachmentCount(uint32_t colorAttachmentCount_)
 		{
-			return m_subpassDescription.colorAttachmentCount;
-		}
-
-		uint32_t& colorAttachmentCount()
-		{
-			return m_subpassDescription.colorAttachmentCount;
-		}
-
-		SubpassDescription& colorAttachmentCount(uint32_t colorAttachmentCount)
-		{
-			m_subpassDescription.colorAttachmentCount = colorAttachmentCount;
+			colorAttachmentCount = colorAttachmentCount_;
 			return *this;
 		}
 
-		const AttachmentReference* pColorAttachments() const
+		SubpassDescription& setPColorAttachments(const AttachmentReference* pColorAttachments_)
 		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pColorAttachments);
-		}
-
-		const AttachmentReference* pColorAttachments()
-		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pColorAttachments);
-		}
-
-		SubpassDescription& pColorAttachments(const AttachmentReference* pColorAttachments)
-		{
-			m_subpassDescription.pColorAttachments = reinterpret_cast<const VkAttachmentReference*>(pColorAttachments);
+			pColorAttachments = pColorAttachments_;
 			return *this;
 		}
 
-		const AttachmentReference* pResolveAttachments() const
+		SubpassDescription& setPResolveAttachments(const AttachmentReference* pResolveAttachments_)
 		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pResolveAttachments);
-		}
-
-		const AttachmentReference* pResolveAttachments()
-		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pResolveAttachments);
-		}
-
-		SubpassDescription& pResolveAttachments(const AttachmentReference* pResolveAttachments)
-		{
-			m_subpassDescription.pResolveAttachments = reinterpret_cast<const VkAttachmentReference*>(pResolveAttachments);
+			pResolveAttachments = pResolveAttachments_;
 			return *this;
 		}
 
-		const AttachmentReference* pDepthStencilAttachment() const
+		SubpassDescription& setPDepthStencilAttachment(const AttachmentReference* pDepthStencilAttachment_)
 		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pDepthStencilAttachment);
-		}
-
-		const AttachmentReference* pDepthStencilAttachment()
-		{
-			return reinterpret_cast<const AttachmentReference*>(m_subpassDescription.pDepthStencilAttachment);
-		}
-
-		SubpassDescription& pDepthStencilAttachment(const AttachmentReference* pDepthStencilAttachment)
-		{
-			m_subpassDescription.pDepthStencilAttachment = reinterpret_cast<const VkAttachmentReference*>(pDepthStencilAttachment);
+			pDepthStencilAttachment = pDepthStencilAttachment_;
 			return *this;
 		}
 
-		const uint32_t& preserveAttachmentCount() const
+		SubpassDescription& setPreserveAttachmentCount(uint32_t preserveAttachmentCount_)
 		{
-			return m_subpassDescription.preserveAttachmentCount;
-		}
-
-		uint32_t& preserveAttachmentCount()
-		{
-			return m_subpassDescription.preserveAttachmentCount;
-		}
-
-		SubpassDescription& preserveAttachmentCount(uint32_t preserveAttachmentCount)
-		{
-			m_subpassDescription.preserveAttachmentCount = preserveAttachmentCount;
+			preserveAttachmentCount = preserveAttachmentCount_;
 			return *this;
 		}
 
-		const uint32_t* pPreserveAttachments() const
+		SubpassDescription& setPPreserveAttachments(const uint32_t* pPreserveAttachments_)
 		{
-			return reinterpret_cast<const uint32_t*>(m_subpassDescription.pPreserveAttachments);
-		}
-
-		const uint32_t* pPreserveAttachments()
-		{
-			return reinterpret_cast<const uint32_t*>(m_subpassDescription.pPreserveAttachments);
-		}
-
-		SubpassDescription& pPreserveAttachments(const uint32_t* pPreserveAttachments)
-		{
-			m_subpassDescription.pPreserveAttachments = pPreserveAttachments;
+			pPreserveAttachments = pPreserveAttachments_;
 			return *this;
 		}
 
 		operator const VkSubpassDescription&() const
 		{
-			return m_subpassDescription;
+			return *reinterpret_cast<const VkSubpassDescription*>(this);
 		}
 
-	private:
-		VkSubpassDescription m_subpassDescription;
+		SubpassDescriptionFlags flags;
+		PipelineBindPoint pipelineBindPoint;
+		uint32_t inputAttachmentCount;
+		const AttachmentReference* pInputAttachments;
+		uint32_t colorAttachmentCount;
+		const AttachmentReference* pColorAttachments;
+		const AttachmentReference* pResolveAttachments;
+		const AttachmentReference* pDepthStencilAttachment;
+		uint32_t preserveAttachmentCount;
+		const uint32_t* pPreserveAttachments;
 	};
 	static_assert(sizeof(SubpassDescription) == sizeof(VkSubpassDescription), "struct and wrapper have different size!");
 
@@ -5325,7 +3978,8 @@ namespace vk
 	enum class Filter
 	{
 		eNearest = VK_FILTER_NEAREST,
-		eLinear = VK_FILTER_LINEAR
+		eLinear = VK_FILTER_LINEAR,
+		eCubicIMG = VK_FILTER_CUBIC_IMG
 	};
 
 	enum class SamplerMipmapMode
@@ -5370,7 +4024,7 @@ namespace vk
 		eFrontAndBack = VK_CULL_MODE_FRONT_AND_BACK
 	};
 
-	typedef Flags<CullModeFlagBits, VkCullModeFlags> CullModeFlags;
+	using CullModeFlags = Flags<CullModeFlagBits, VkCullModeFlags>;
 
 	inline CullModeFlags operator|(CullModeFlagBits bit0, CullModeFlagBits bit1)
 	{
@@ -5427,154 +4081,88 @@ namespace vk
 		eDecrementAndWrap = VK_STENCIL_OP_DECREMENT_AND_WRAP
 	};
 
-	class StencilOpState
+	struct StencilOpState
 	{
-	public:
 		StencilOpState()
 			: StencilOpState(StencilOp::eKeep, StencilOp::eKeep, StencilOp::eKeep, CompareOp::eNever, 0, 0, 0)
 		{}
 
-		StencilOpState(StencilOp failOp, StencilOp passOp, StencilOp depthFailOp, CompareOp compareOp, uint32_t compareMask, uint32_t writeMask, uint32_t reference)
+		StencilOpState(StencilOp failOp_, StencilOp passOp_, StencilOp depthFailOp_, CompareOp compareOp_, uint32_t compareMask_, uint32_t writeMask_, uint32_t reference_)
 		{
-			m_stencilOpState.failOp = static_cast<VkStencilOp>(failOp);
-			m_stencilOpState.passOp = static_cast<VkStencilOp>(passOp);
-			m_stencilOpState.depthFailOp = static_cast<VkStencilOp>(depthFailOp);
-			m_stencilOpState.compareOp = static_cast<VkCompareOp>(compareOp);
-			m_stencilOpState.compareMask = compareMask;
-			m_stencilOpState.writeMask = writeMask;
-			m_stencilOpState.reference = reference;
+			failOp = failOp_;
+			passOp = passOp_;
+			depthFailOp = depthFailOp_;
+			compareOp = compareOp_;
+			compareMask = compareMask_;
+			writeMask = writeMask_;
+			reference = reference_;
 		}
 
 		StencilOpState(VkStencilOpState const & rhs)
-			: m_stencilOpState(rhs)
 		{
+			memcpy(this, &rhs, sizeof(StencilOpState));
 		}
 
 		StencilOpState& operator=(VkStencilOpState const & rhs)
 		{
-			m_stencilOpState = rhs;
+			memcpy(this, &rhs, sizeof(StencilOpState));
 			return *this;
 		}
 
-		const StencilOp& failOp() const
+		StencilOpState& setFailOp(StencilOp failOp_)
 		{
-			return reinterpret_cast<const StencilOp&>(m_stencilOpState.failOp);
-		}
-
-		StencilOp& failOp()
-		{
-			return reinterpret_cast<StencilOp&>(m_stencilOpState.failOp);
-		}
-
-		StencilOpState& failOp(StencilOp failOp)
-		{
-			m_stencilOpState.failOp = static_cast<VkStencilOp>(failOp);
+			failOp = failOp_;
 			return *this;
 		}
 
-		const StencilOp& passOp() const
+		StencilOpState& setPassOp(StencilOp passOp_)
 		{
-			return reinterpret_cast<const StencilOp&>(m_stencilOpState.passOp);
-		}
-
-		StencilOp& passOp()
-		{
-			return reinterpret_cast<StencilOp&>(m_stencilOpState.passOp);
-		}
-
-		StencilOpState& passOp(StencilOp passOp)
-		{
-			m_stencilOpState.passOp = static_cast<VkStencilOp>(passOp);
+			passOp = passOp_;
 			return *this;
 		}
 
-		const StencilOp& depthFailOp() const
+		StencilOpState& setDepthFailOp(StencilOp depthFailOp_)
 		{
-			return reinterpret_cast<const StencilOp&>(m_stencilOpState.depthFailOp);
-		}
-
-		StencilOp& depthFailOp()
-		{
-			return reinterpret_cast<StencilOp&>(m_stencilOpState.depthFailOp);
-		}
-
-		StencilOpState& depthFailOp(StencilOp depthFailOp)
-		{
-			m_stencilOpState.depthFailOp = static_cast<VkStencilOp>(depthFailOp);
+			depthFailOp = depthFailOp_;
 			return *this;
 		}
 
-		const CompareOp& compareOp() const
+		StencilOpState& setCompareOp(CompareOp compareOp_)
 		{
-			return reinterpret_cast<const CompareOp&>(m_stencilOpState.compareOp);
-		}
-
-		CompareOp& compareOp()
-		{
-			return reinterpret_cast<CompareOp&>(m_stencilOpState.compareOp);
-		}
-
-		StencilOpState& compareOp(CompareOp compareOp)
-		{
-			m_stencilOpState.compareOp = static_cast<VkCompareOp>(compareOp);
+			compareOp = compareOp_;
 			return *this;
 		}
 
-		const uint32_t& compareMask() const
+		StencilOpState& setCompareMask(uint32_t compareMask_)
 		{
-			return m_stencilOpState.compareMask;
-		}
-
-		uint32_t& compareMask()
-		{
-			return m_stencilOpState.compareMask;
-		}
-
-		StencilOpState& compareMask(uint32_t compareMask)
-		{
-			m_stencilOpState.compareMask = compareMask;
+			compareMask = compareMask_;
 			return *this;
 		}
 
-		const uint32_t& writeMask() const
+		StencilOpState& setWriteMask(uint32_t writeMask_)
 		{
-			return m_stencilOpState.writeMask;
-		}
-
-		uint32_t& writeMask()
-		{
-			return m_stencilOpState.writeMask;
-		}
-
-		StencilOpState& writeMask(uint32_t writeMask)
-		{
-			m_stencilOpState.writeMask = writeMask;
+			writeMask = writeMask_;
 			return *this;
 		}
 
-		const uint32_t& reference() const
+		StencilOpState& setReference(uint32_t reference_)
 		{
-			return m_stencilOpState.reference;
-		}
-
-		uint32_t& reference()
-		{
-			return m_stencilOpState.reference;
-		}
-
-		StencilOpState& reference(uint32_t reference)
-		{
-			m_stencilOpState.reference = reference;
+			reference = reference_;
 			return *this;
 		}
 
 		operator const VkStencilOpState&() const
 		{
-			return m_stencilOpState;
+			return *reinterpret_cast<const VkStencilOpState*>(this);
 		}
 
-	private:
-		VkStencilOpState m_stencilOpState;
+		StencilOp failOp;
+		StencilOp passOp;
+		StencilOp depthFailOp;
+		CompareOp compareOp;
+		uint32_t compareMask;
+		uint32_t writeMask;
+		uint32_t reference;
 	};
 	static_assert(sizeof(StencilOpState) == sizeof(VkStencilOpState), "struct and wrapper have different size!");
 
@@ -5627,86 +4215,56 @@ namespace vk
 		eInstance = VK_VERTEX_INPUT_RATE_INSTANCE
 	};
 
-	class VertexInputBindingDescription
+	struct VertexInputBindingDescription
 	{
-	public:
 		VertexInputBindingDescription()
 			: VertexInputBindingDescription(0, 0, VertexInputRate::eVertex)
 		{}
 
-		VertexInputBindingDescription(uint32_t binding, uint32_t stride, VertexInputRate inputRate)
+		VertexInputBindingDescription(uint32_t binding_, uint32_t stride_, VertexInputRate inputRate_)
 		{
-			m_vertexInputBindingDescription.binding = binding;
-			m_vertexInputBindingDescription.stride = stride;
-			m_vertexInputBindingDescription.inputRate = static_cast<VkVertexInputRate>(inputRate);
+			binding = binding_;
+			stride = stride_;
+			inputRate = inputRate_;
 		}
 
 		VertexInputBindingDescription(VkVertexInputBindingDescription const & rhs)
-			: m_vertexInputBindingDescription(rhs)
 		{
+			memcpy(this, &rhs, sizeof(VertexInputBindingDescription));
 		}
 
 		VertexInputBindingDescription& operator=(VkVertexInputBindingDescription const & rhs)
 		{
-			m_vertexInputBindingDescription = rhs;
+			memcpy(this, &rhs, sizeof(VertexInputBindingDescription));
 			return *this;
 		}
 
-		const uint32_t& binding() const
+		VertexInputBindingDescription& setBinding(uint32_t binding_)
 		{
-			return m_vertexInputBindingDescription.binding;
-		}
-
-		uint32_t& binding()
-		{
-			return m_vertexInputBindingDescription.binding;
-		}
-
-		VertexInputBindingDescription& binding(uint32_t binding)
-		{
-			m_vertexInputBindingDescription.binding = binding;
+			binding = binding_;
 			return *this;
 		}
 
-		const uint32_t& stride() const
+		VertexInputBindingDescription& setStride(uint32_t stride_)
 		{
-			return m_vertexInputBindingDescription.stride;
-		}
-
-		uint32_t& stride()
-		{
-			return m_vertexInputBindingDescription.stride;
-		}
-
-		VertexInputBindingDescription& stride(uint32_t stride)
-		{
-			m_vertexInputBindingDescription.stride = stride;
+			stride = stride_;
 			return *this;
 		}
 
-		const VertexInputRate& inputRate() const
+		VertexInputBindingDescription& setInputRate(VertexInputRate inputRate_)
 		{
-			return reinterpret_cast<const VertexInputRate&>(m_vertexInputBindingDescription.inputRate);
-		}
-
-		VertexInputRate& inputRate()
-		{
-			return reinterpret_cast<VertexInputRate&>(m_vertexInputBindingDescription.inputRate);
-		}
-
-		VertexInputBindingDescription& inputRate(VertexInputRate inputRate)
-		{
-			m_vertexInputBindingDescription.inputRate = static_cast<VkVertexInputRate>(inputRate);
+			inputRate = inputRate_;
 			return *this;
 		}
 
 		operator const VkVertexInputBindingDescription&() const
 		{
-			return m_vertexInputBindingDescription;
+			return *reinterpret_cast<const VkVertexInputBindingDescription*>(this);
 		}
 
-	private:
-		VkVertexInputBindingDescription m_vertexInputBindingDescription;
+		uint32_t binding;
+		uint32_t stride;
+		VertexInputRate inputRate;
 	};
 	static_assert(sizeof(VertexInputBindingDescription) == sizeof(VkVertexInputBindingDescription), "struct and wrapper have different size!");
 
@@ -5899,103 +4457,64 @@ namespace vk
 		eAstc12x12SrgbBlock = VK_FORMAT_ASTC_12x12_SRGB_BLOCK
 	};
 
-	class VertexInputAttributeDescription
+	struct VertexInputAttributeDescription
 	{
-	public:
 		VertexInputAttributeDescription()
 			: VertexInputAttributeDescription(0, 0, Format::eUndefined, 0)
 		{}
 
-		VertexInputAttributeDescription(uint32_t location, uint32_t binding, Format format, uint32_t offset)
+		VertexInputAttributeDescription(uint32_t location_, uint32_t binding_, Format format_, uint32_t offset_)
 		{
-			m_vertexInputAttributeDescription.location = location;
-			m_vertexInputAttributeDescription.binding = binding;
-			m_vertexInputAttributeDescription.format = static_cast<VkFormat>(format);
-			m_vertexInputAttributeDescription.offset = offset;
+			location = location_;
+			binding = binding_;
+			format = format_;
+			offset = offset_;
 		}
 
 		VertexInputAttributeDescription(VkVertexInputAttributeDescription const & rhs)
-			: m_vertexInputAttributeDescription(rhs)
 		{
+			memcpy(this, &rhs, sizeof(VertexInputAttributeDescription));
 		}
 
 		VertexInputAttributeDescription& operator=(VkVertexInputAttributeDescription const & rhs)
 		{
-			m_vertexInputAttributeDescription = rhs;
+			memcpy(this, &rhs, sizeof(VertexInputAttributeDescription));
 			return *this;
 		}
 
-		const uint32_t& location() const
+		VertexInputAttributeDescription& setLocation(uint32_t location_)
 		{
-			return m_vertexInputAttributeDescription.location;
-		}
-
-		uint32_t& location()
-		{
-			return m_vertexInputAttributeDescription.location;
-		}
-
-		VertexInputAttributeDescription& location(uint32_t location)
-		{
-			m_vertexInputAttributeDescription.location = location;
+			location = location_;
 			return *this;
 		}
 
-		const uint32_t& binding() const
+		VertexInputAttributeDescription& setBinding(uint32_t binding_)
 		{
-			return m_vertexInputAttributeDescription.binding;
-		}
-
-		uint32_t& binding()
-		{
-			return m_vertexInputAttributeDescription.binding;
-		}
-
-		VertexInputAttributeDescription& binding(uint32_t binding)
-		{
-			m_vertexInputAttributeDescription.binding = binding;
+			binding = binding_;
 			return *this;
 		}
 
-		const Format& format() const
+		VertexInputAttributeDescription& setFormat(Format format_)
 		{
-			return reinterpret_cast<const Format&>(m_vertexInputAttributeDescription.format);
-		}
-
-		Format& format()
-		{
-			return reinterpret_cast<Format&>(m_vertexInputAttributeDescription.format);
-		}
-
-		VertexInputAttributeDescription& format(Format format)
-		{
-			m_vertexInputAttributeDescription.format = static_cast<VkFormat>(format);
+			format = format_;
 			return *this;
 		}
 
-		const uint32_t& offset() const
+		VertexInputAttributeDescription& setOffset(uint32_t offset_)
 		{
-			return m_vertexInputAttributeDescription.offset;
-		}
-
-		uint32_t& offset()
-		{
-			return m_vertexInputAttributeDescription.offset;
-		}
-
-		VertexInputAttributeDescription& offset(uint32_t offset)
-		{
-			m_vertexInputAttributeDescription.offset = offset;
+			offset = offset_;
 			return *this;
 		}
 
 		operator const VkVertexInputAttributeDescription&() const
 		{
-			return m_vertexInputAttributeDescription;
+			return *reinterpret_cast<const VkVertexInputAttributeDescription*>(this);
 		}
 
-	private:
-		VkVertexInputAttributeDescription m_vertexInputAttributeDescription;
+		uint32_t location;
+		uint32_t binding;
+		Format format;
+		uint32_t offset;
 	};
 	static_assert(sizeof(VertexInputAttributeDescription) == sizeof(VkVertexInputAttributeDescription), "struct and wrapper have different size!");
 
@@ -6064,4642 +4583,2638 @@ namespace vk
 		eDebugReportCallbackCreateInfoEXT = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT
 	};
 
-	class ApplicationInfo
+	struct ApplicationInfo
 	{
-	public:
 		ApplicationInfo()
 			: ApplicationInfo(nullptr, 0, nullptr, 0, 0)
 		{}
 
-		ApplicationInfo(const char* pApplicationName, uint32_t applicationVersion, const char* pEngineName, uint32_t engineVersion, uint32_t apiVersion)
+		ApplicationInfo(const char* pApplicationName_, uint32_t applicationVersion_, const char* pEngineName_, uint32_t engineVersion_, uint32_t apiVersion_)
 		{
-			m_applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-			m_applicationInfo.pNext = nullptr;
-			m_applicationInfo.pApplicationName = pApplicationName;
-			m_applicationInfo.applicationVersion = applicationVersion;
-			m_applicationInfo.pEngineName = pEngineName;
-			m_applicationInfo.engineVersion = engineVersion;
-			m_applicationInfo.apiVersion = apiVersion;
+			sType = StructureType::eApplicationInfo;
+			pNext = nullptr;
+			pApplicationName = pApplicationName_;
+			applicationVersion = applicationVersion_;
+			pEngineName = pEngineName_;
+			engineVersion = engineVersion_;
+			apiVersion = apiVersion_;
 		}
 
 		ApplicationInfo(VkApplicationInfo const & rhs)
-			: m_applicationInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ApplicationInfo));
 		}
 
 		ApplicationInfo& operator=(VkApplicationInfo const & rhs)
 		{
-			m_applicationInfo = rhs;
+			memcpy(this, &rhs, sizeof(ApplicationInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		ApplicationInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_applicationInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_applicationInfo.sType);
-		}
-
-		ApplicationInfo& sType(StructureType sType)
-		{
-			m_applicationInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		ApplicationInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_applicationInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_applicationInfo.pNext);
-		}
-
-		ApplicationInfo& pNext(const void* pNext)
-		{
-			m_applicationInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const char* pApplicationName() const
+		ApplicationInfo& setPApplicationName(const char* pApplicationName_)
 		{
-			return reinterpret_cast<const char*>(m_applicationInfo.pApplicationName);
-		}
-
-		const char* pApplicationName()
-		{
-			return reinterpret_cast<const char*>(m_applicationInfo.pApplicationName);
-		}
-
-		ApplicationInfo& pApplicationName(const char* pApplicationName)
-		{
-			m_applicationInfo.pApplicationName = pApplicationName;
+			pApplicationName = pApplicationName_;
 			return *this;
 		}
 
-		const uint32_t& applicationVersion() const
+		ApplicationInfo& setApplicationVersion(uint32_t applicationVersion_)
 		{
-			return m_applicationInfo.applicationVersion;
-		}
-
-		uint32_t& applicationVersion()
-		{
-			return m_applicationInfo.applicationVersion;
-		}
-
-		ApplicationInfo& applicationVersion(uint32_t applicationVersion)
-		{
-			m_applicationInfo.applicationVersion = applicationVersion;
+			applicationVersion = applicationVersion_;
 			return *this;
 		}
 
-		const char* pEngineName() const
+		ApplicationInfo& setPEngineName(const char* pEngineName_)
 		{
-			return reinterpret_cast<const char*>(m_applicationInfo.pEngineName);
-		}
-
-		const char* pEngineName()
-		{
-			return reinterpret_cast<const char*>(m_applicationInfo.pEngineName);
-		}
-
-		ApplicationInfo& pEngineName(const char* pEngineName)
-		{
-			m_applicationInfo.pEngineName = pEngineName;
+			pEngineName = pEngineName_;
 			return *this;
 		}
 
-		const uint32_t& engineVersion() const
+		ApplicationInfo& setEngineVersion(uint32_t engineVersion_)
 		{
-			return m_applicationInfo.engineVersion;
-		}
-
-		uint32_t& engineVersion()
-		{
-			return m_applicationInfo.engineVersion;
-		}
-
-		ApplicationInfo& engineVersion(uint32_t engineVersion)
-		{
-			m_applicationInfo.engineVersion = engineVersion;
+			engineVersion = engineVersion_;
 			return *this;
 		}
 
-		const uint32_t& apiVersion() const
+		ApplicationInfo& setApiVersion(uint32_t apiVersion_)
 		{
-			return m_applicationInfo.apiVersion;
-		}
-
-		uint32_t& apiVersion()
-		{
-			return m_applicationInfo.apiVersion;
-		}
-
-		ApplicationInfo& apiVersion(uint32_t apiVersion)
-		{
-			m_applicationInfo.apiVersion = apiVersion;
+			apiVersion = apiVersion_;
 			return *this;
 		}
 
 		operator const VkApplicationInfo&() const
 		{
-			return m_applicationInfo;
+			return *reinterpret_cast<const VkApplicationInfo*>(this);
 		}
 
-	private:
-		VkApplicationInfo m_applicationInfo;
+		StructureType sType;
+		const void* pNext;
+		const char* pApplicationName;
+		uint32_t applicationVersion;
+		const char* pEngineName;
+		uint32_t engineVersion;
+		uint32_t apiVersion;
 	};
 	static_assert(sizeof(ApplicationInfo) == sizeof(VkApplicationInfo), "struct and wrapper have different size!");
 
-	class DeviceQueueCreateInfo
+	struct DeviceQueueCreateInfo
 	{
-	public:
 		DeviceQueueCreateInfo()
 			: DeviceQueueCreateInfo(DeviceQueueCreateFlags(), 0, 0, nullptr)
 		{}
 
-		DeviceQueueCreateInfo(DeviceQueueCreateFlags flags, uint32_t queueFamilyIndex, uint32_t queueCount, const float* pQueuePriorities)
+		DeviceQueueCreateInfo(DeviceQueueCreateFlags flags_, uint32_t queueFamilyIndex_, uint32_t queueCount_, const float* pQueuePriorities_)
 		{
-			m_deviceQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			m_deviceQueueCreateInfo.pNext = nullptr;
-			m_deviceQueueCreateInfo.flags = static_cast<VkDeviceQueueCreateFlags>(flags);
-			m_deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndex;
-			m_deviceQueueCreateInfo.queueCount = queueCount;
-			m_deviceQueueCreateInfo.pQueuePriorities = pQueuePriorities;
+			sType = StructureType::eDeviceQueueCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			queueFamilyIndex = queueFamilyIndex_;
+			queueCount = queueCount_;
+			pQueuePriorities = pQueuePriorities_;
 		}
 
 		DeviceQueueCreateInfo(VkDeviceQueueCreateInfo const & rhs)
-			: m_deviceQueueCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DeviceQueueCreateInfo));
 		}
 
 		DeviceQueueCreateInfo& operator=(VkDeviceQueueCreateInfo const & rhs)
 		{
-			m_deviceQueueCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(DeviceQueueCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DeviceQueueCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_deviceQueueCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_deviceQueueCreateInfo.sType);
-		}
-
-		DeviceQueueCreateInfo& sType(StructureType sType)
-		{
-			m_deviceQueueCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DeviceQueueCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_deviceQueueCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_deviceQueueCreateInfo.pNext);
-		}
-
-		DeviceQueueCreateInfo& pNext(const void* pNext)
-		{
-			m_deviceQueueCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DeviceQueueCreateFlags& flags() const
+		DeviceQueueCreateInfo& setFlags(DeviceQueueCreateFlags flags_)
 		{
-			return reinterpret_cast<const DeviceQueueCreateFlags&>(m_deviceQueueCreateInfo.flags);
-		}
-
-		DeviceQueueCreateFlags& flags()
-		{
-			return reinterpret_cast<DeviceQueueCreateFlags&>(m_deviceQueueCreateInfo.flags);
-		}
-
-		DeviceQueueCreateInfo& flags(DeviceQueueCreateFlags flags)
-		{
-			m_deviceQueueCreateInfo.flags = static_cast<VkDeviceQueueCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& queueFamilyIndex() const
+		DeviceQueueCreateInfo& setQueueFamilyIndex(uint32_t queueFamilyIndex_)
 		{
-			return m_deviceQueueCreateInfo.queueFamilyIndex;
-		}
-
-		uint32_t& queueFamilyIndex()
-		{
-			return m_deviceQueueCreateInfo.queueFamilyIndex;
-		}
-
-		DeviceQueueCreateInfo& queueFamilyIndex(uint32_t queueFamilyIndex)
-		{
-			m_deviceQueueCreateInfo.queueFamilyIndex = queueFamilyIndex;
+			queueFamilyIndex = queueFamilyIndex_;
 			return *this;
 		}
 
-		const uint32_t& queueCount() const
+		DeviceQueueCreateInfo& setQueueCount(uint32_t queueCount_)
 		{
-			return m_deviceQueueCreateInfo.queueCount;
-		}
-
-		uint32_t& queueCount()
-		{
-			return m_deviceQueueCreateInfo.queueCount;
-		}
-
-		DeviceQueueCreateInfo& queueCount(uint32_t queueCount)
-		{
-			m_deviceQueueCreateInfo.queueCount = queueCount;
+			queueCount = queueCount_;
 			return *this;
 		}
 
-		const float* pQueuePriorities() const
+		DeviceQueueCreateInfo& setPQueuePriorities(const float* pQueuePriorities_)
 		{
-			return reinterpret_cast<const float*>(m_deviceQueueCreateInfo.pQueuePriorities);
-		}
-
-		const float* pQueuePriorities()
-		{
-			return reinterpret_cast<const float*>(m_deviceQueueCreateInfo.pQueuePriorities);
-		}
-
-		DeviceQueueCreateInfo& pQueuePriorities(const float* pQueuePriorities)
-		{
-			m_deviceQueueCreateInfo.pQueuePriorities = pQueuePriorities;
+			pQueuePriorities = pQueuePriorities_;
 			return *this;
 		}
 
 		operator const VkDeviceQueueCreateInfo&() const
 		{
-			return m_deviceQueueCreateInfo;
+			return *reinterpret_cast<const VkDeviceQueueCreateInfo*>(this);
 		}
 
-	private:
-		VkDeviceQueueCreateInfo m_deviceQueueCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		DeviceQueueCreateFlags flags;
+		uint32_t queueFamilyIndex;
+		uint32_t queueCount;
+		const float* pQueuePriorities;
 	};
 	static_assert(sizeof(DeviceQueueCreateInfo) == sizeof(VkDeviceQueueCreateInfo), "struct and wrapper have different size!");
 
-	class DeviceCreateInfo
+	struct DeviceCreateInfo
 	{
-	public:
 		DeviceCreateInfo()
 			: DeviceCreateInfo(DeviceCreateFlags(), 0, nullptr, 0, nullptr, 0, nullptr, nullptr)
 		{}
 
-		DeviceCreateInfo(DeviceCreateFlags flags, uint32_t queueCreateInfoCount, const DeviceQueueCreateInfo* pQueueCreateInfos, uint32_t enabledLayerCount, const char* const* ppEnabledLayerNames, uint32_t enabledExtensionCount, const char* const* ppEnabledExtensionNames, const PhysicalDeviceFeatures* pEnabledFeatures)
+		DeviceCreateInfo(DeviceCreateFlags flags_, uint32_t queueCreateInfoCount_, const DeviceQueueCreateInfo* pQueueCreateInfos_, uint32_t enabledLayerCount_, const char* const* ppEnabledLayerNames_, uint32_t enabledExtensionCount_, const char* const* ppEnabledExtensionNames_, const PhysicalDeviceFeatures* pEnabledFeatures_)
 		{
-			m_deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-			m_deviceCreateInfo.pNext = nullptr;
-			m_deviceCreateInfo.flags = static_cast<VkDeviceCreateFlags>(flags);
-			m_deviceCreateInfo.queueCreateInfoCount = queueCreateInfoCount;
-			m_deviceCreateInfo.pQueueCreateInfos = reinterpret_cast<const VkDeviceQueueCreateInfo*>(pQueueCreateInfos);
-			m_deviceCreateInfo.enabledLayerCount = enabledLayerCount;
-			m_deviceCreateInfo.ppEnabledLayerNames = ppEnabledLayerNames;
-			m_deviceCreateInfo.enabledExtensionCount = enabledExtensionCount;
-			m_deviceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
-			m_deviceCreateInfo.pEnabledFeatures = reinterpret_cast<const VkPhysicalDeviceFeatures*>(pEnabledFeatures);
+			sType = StructureType::eDeviceCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			queueCreateInfoCount = queueCreateInfoCount_;
+			pQueueCreateInfos = pQueueCreateInfos_;
+			enabledLayerCount = enabledLayerCount_;
+			ppEnabledLayerNames = ppEnabledLayerNames_;
+			enabledExtensionCount = enabledExtensionCount_;
+			ppEnabledExtensionNames = ppEnabledExtensionNames_;
+			pEnabledFeatures = pEnabledFeatures_;
 		}
 
 		DeviceCreateInfo(VkDeviceCreateInfo const & rhs)
-			: m_deviceCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DeviceCreateInfo));
 		}
 
 		DeviceCreateInfo& operator=(VkDeviceCreateInfo const & rhs)
 		{
-			m_deviceCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(DeviceCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DeviceCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_deviceCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_deviceCreateInfo.sType);
-		}
-
-		DeviceCreateInfo& sType(StructureType sType)
-		{
-			m_deviceCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DeviceCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_deviceCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_deviceCreateInfo.pNext);
-		}
-
-		DeviceCreateInfo& pNext(const void* pNext)
-		{
-			m_deviceCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DeviceCreateFlags& flags() const
+		DeviceCreateInfo& setFlags(DeviceCreateFlags flags_)
 		{
-			return reinterpret_cast<const DeviceCreateFlags&>(m_deviceCreateInfo.flags);
-		}
-
-		DeviceCreateFlags& flags()
-		{
-			return reinterpret_cast<DeviceCreateFlags&>(m_deviceCreateInfo.flags);
-		}
-
-		DeviceCreateInfo& flags(DeviceCreateFlags flags)
-		{
-			m_deviceCreateInfo.flags = static_cast<VkDeviceCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& queueCreateInfoCount() const
+		DeviceCreateInfo& setQueueCreateInfoCount(uint32_t queueCreateInfoCount_)
 		{
-			return m_deviceCreateInfo.queueCreateInfoCount;
-		}
-
-		uint32_t& queueCreateInfoCount()
-		{
-			return m_deviceCreateInfo.queueCreateInfoCount;
-		}
-
-		DeviceCreateInfo& queueCreateInfoCount(uint32_t queueCreateInfoCount)
-		{
-			m_deviceCreateInfo.queueCreateInfoCount = queueCreateInfoCount;
+			queueCreateInfoCount = queueCreateInfoCount_;
 			return *this;
 		}
 
-		const DeviceQueueCreateInfo* pQueueCreateInfos() const
+		DeviceCreateInfo& setPQueueCreateInfos(const DeviceQueueCreateInfo* pQueueCreateInfos_)
 		{
-			return reinterpret_cast<const DeviceQueueCreateInfo*>(m_deviceCreateInfo.pQueueCreateInfos);
-		}
-
-		const DeviceQueueCreateInfo* pQueueCreateInfos()
-		{
-			return reinterpret_cast<const DeviceQueueCreateInfo*>(m_deviceCreateInfo.pQueueCreateInfos);
-		}
-
-		DeviceCreateInfo& pQueueCreateInfos(const DeviceQueueCreateInfo* pQueueCreateInfos)
-		{
-			m_deviceCreateInfo.pQueueCreateInfos = reinterpret_cast<const VkDeviceQueueCreateInfo*>(pQueueCreateInfos);
+			pQueueCreateInfos = pQueueCreateInfos_;
 			return *this;
 		}
 
-		const uint32_t& enabledLayerCount() const
+		DeviceCreateInfo& setEnabledLayerCount(uint32_t enabledLayerCount_)
 		{
-			return m_deviceCreateInfo.enabledLayerCount;
-		}
-
-		uint32_t& enabledLayerCount()
-		{
-			return m_deviceCreateInfo.enabledLayerCount;
-		}
-
-		DeviceCreateInfo& enabledLayerCount(uint32_t enabledLayerCount)
-		{
-			m_deviceCreateInfo.enabledLayerCount = enabledLayerCount;
+			enabledLayerCount = enabledLayerCount_;
 			return *this;
 		}
 
-		const char* const* ppEnabledLayerNames() const
+		DeviceCreateInfo& setPpEnabledLayerNames(const char* const* ppEnabledLayerNames_)
 		{
-			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledLayerNames);
-		}
-
-		const char* const* ppEnabledLayerNames()
-		{
-			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledLayerNames);
-		}
-
-		DeviceCreateInfo& ppEnabledLayerNames(const char* const* ppEnabledLayerNames)
-		{
-			m_deviceCreateInfo.ppEnabledLayerNames = ppEnabledLayerNames;
+			ppEnabledLayerNames = ppEnabledLayerNames_;
 			return *this;
 		}
 
-		const uint32_t& enabledExtensionCount() const
+		DeviceCreateInfo& setEnabledExtensionCount(uint32_t enabledExtensionCount_)
 		{
-			return m_deviceCreateInfo.enabledExtensionCount;
-		}
-
-		uint32_t& enabledExtensionCount()
-		{
-			return m_deviceCreateInfo.enabledExtensionCount;
-		}
-
-		DeviceCreateInfo& enabledExtensionCount(uint32_t enabledExtensionCount)
-		{
-			m_deviceCreateInfo.enabledExtensionCount = enabledExtensionCount;
+			enabledExtensionCount = enabledExtensionCount_;
 			return *this;
 		}
 
-		const char* const* ppEnabledExtensionNames() const
+		DeviceCreateInfo& setPpEnabledExtensionNames(const char* const* ppEnabledExtensionNames_)
 		{
-			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledExtensionNames);
-		}
-
-		const char* const* ppEnabledExtensionNames()
-		{
-			return reinterpret_cast<const char* const*>(m_deviceCreateInfo.ppEnabledExtensionNames);
-		}
-
-		DeviceCreateInfo& ppEnabledExtensionNames(const char* const* ppEnabledExtensionNames)
-		{
-			m_deviceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
+			ppEnabledExtensionNames = ppEnabledExtensionNames_;
 			return *this;
 		}
 
-		const PhysicalDeviceFeatures* pEnabledFeatures() const
+		DeviceCreateInfo& setPEnabledFeatures(const PhysicalDeviceFeatures* pEnabledFeatures_)
 		{
-			return reinterpret_cast<const PhysicalDeviceFeatures*>(m_deviceCreateInfo.pEnabledFeatures);
-		}
-
-		const PhysicalDeviceFeatures* pEnabledFeatures()
-		{
-			return reinterpret_cast<const PhysicalDeviceFeatures*>(m_deviceCreateInfo.pEnabledFeatures);
-		}
-
-		DeviceCreateInfo& pEnabledFeatures(const PhysicalDeviceFeatures* pEnabledFeatures)
-		{
-			m_deviceCreateInfo.pEnabledFeatures = reinterpret_cast<const VkPhysicalDeviceFeatures*>(pEnabledFeatures);
+			pEnabledFeatures = pEnabledFeatures_;
 			return *this;
 		}
 
 		operator const VkDeviceCreateInfo&() const
 		{
-			return m_deviceCreateInfo;
+			return *reinterpret_cast<const VkDeviceCreateInfo*>(this);
 		}
 
-	private:
-		VkDeviceCreateInfo m_deviceCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		DeviceCreateFlags flags;
+		uint32_t queueCreateInfoCount;
+		const DeviceQueueCreateInfo* pQueueCreateInfos;
+		uint32_t enabledLayerCount;
+		const char* const* ppEnabledLayerNames;
+		uint32_t enabledExtensionCount;
+		const char* const* ppEnabledExtensionNames;
+		const PhysicalDeviceFeatures* pEnabledFeatures;
 	};
 	static_assert(sizeof(DeviceCreateInfo) == sizeof(VkDeviceCreateInfo), "struct and wrapper have different size!");
 
-	class InstanceCreateInfo
+	struct InstanceCreateInfo
 	{
-	public:
 		InstanceCreateInfo()
 			: InstanceCreateInfo(InstanceCreateFlags(), nullptr, 0, nullptr, 0, nullptr)
 		{}
 
-		InstanceCreateInfo(InstanceCreateFlags flags, const ApplicationInfo* pApplicationInfo, uint32_t enabledLayerCount, const char* const* ppEnabledLayerNames, uint32_t enabledExtensionCount, const char* const* ppEnabledExtensionNames)
+		InstanceCreateInfo(InstanceCreateFlags flags_, const ApplicationInfo* pApplicationInfo_, uint32_t enabledLayerCount_, const char* const* ppEnabledLayerNames_, uint32_t enabledExtensionCount_, const char* const* ppEnabledExtensionNames_)
 		{
-			m_instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-			m_instanceCreateInfo.pNext = nullptr;
-			m_instanceCreateInfo.flags = static_cast<VkInstanceCreateFlags>(flags);
-			m_instanceCreateInfo.pApplicationInfo = reinterpret_cast<const VkApplicationInfo*>(pApplicationInfo);
-			m_instanceCreateInfo.enabledLayerCount = enabledLayerCount;
-			m_instanceCreateInfo.ppEnabledLayerNames = ppEnabledLayerNames;
-			m_instanceCreateInfo.enabledExtensionCount = enabledExtensionCount;
-			m_instanceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
+			sType = StructureType::eInstanceCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			pApplicationInfo = pApplicationInfo_;
+			enabledLayerCount = enabledLayerCount_;
+			ppEnabledLayerNames = ppEnabledLayerNames_;
+			enabledExtensionCount = enabledExtensionCount_;
+			ppEnabledExtensionNames = ppEnabledExtensionNames_;
 		}
 
 		InstanceCreateInfo(VkInstanceCreateInfo const & rhs)
-			: m_instanceCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(InstanceCreateInfo));
 		}
 
 		InstanceCreateInfo& operator=(VkInstanceCreateInfo const & rhs)
 		{
-			m_instanceCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(InstanceCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		InstanceCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_instanceCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_instanceCreateInfo.sType);
-		}
-
-		InstanceCreateInfo& sType(StructureType sType)
-		{
-			m_instanceCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		InstanceCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_instanceCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_instanceCreateInfo.pNext);
-		}
-
-		InstanceCreateInfo& pNext(const void* pNext)
-		{
-			m_instanceCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const InstanceCreateFlags& flags() const
+		InstanceCreateInfo& setFlags(InstanceCreateFlags flags_)
 		{
-			return reinterpret_cast<const InstanceCreateFlags&>(m_instanceCreateInfo.flags);
-		}
-
-		InstanceCreateFlags& flags()
-		{
-			return reinterpret_cast<InstanceCreateFlags&>(m_instanceCreateInfo.flags);
-		}
-
-		InstanceCreateInfo& flags(InstanceCreateFlags flags)
-		{
-			m_instanceCreateInfo.flags = static_cast<VkInstanceCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const ApplicationInfo* pApplicationInfo() const
+		InstanceCreateInfo& setPApplicationInfo(const ApplicationInfo* pApplicationInfo_)
 		{
-			return reinterpret_cast<const ApplicationInfo*>(m_instanceCreateInfo.pApplicationInfo);
-		}
-
-		const ApplicationInfo* pApplicationInfo()
-		{
-			return reinterpret_cast<const ApplicationInfo*>(m_instanceCreateInfo.pApplicationInfo);
-		}
-
-		InstanceCreateInfo& pApplicationInfo(const ApplicationInfo* pApplicationInfo)
-		{
-			m_instanceCreateInfo.pApplicationInfo = reinterpret_cast<const VkApplicationInfo*>(pApplicationInfo);
+			pApplicationInfo = pApplicationInfo_;
 			return *this;
 		}
 
-		const uint32_t& enabledLayerCount() const
+		InstanceCreateInfo& setEnabledLayerCount(uint32_t enabledLayerCount_)
 		{
-			return m_instanceCreateInfo.enabledLayerCount;
-		}
-
-		uint32_t& enabledLayerCount()
-		{
-			return m_instanceCreateInfo.enabledLayerCount;
-		}
-
-		InstanceCreateInfo& enabledLayerCount(uint32_t enabledLayerCount)
-		{
-			m_instanceCreateInfo.enabledLayerCount = enabledLayerCount;
+			enabledLayerCount = enabledLayerCount_;
 			return *this;
 		}
 
-		const char* const* ppEnabledLayerNames() const
+		InstanceCreateInfo& setPpEnabledLayerNames(const char* const* ppEnabledLayerNames_)
 		{
-			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledLayerNames);
-		}
-
-		const char* const* ppEnabledLayerNames()
-		{
-			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledLayerNames);
-		}
-
-		InstanceCreateInfo& ppEnabledLayerNames(const char* const* ppEnabledLayerNames)
-		{
-			m_instanceCreateInfo.ppEnabledLayerNames = ppEnabledLayerNames;
+			ppEnabledLayerNames = ppEnabledLayerNames_;
 			return *this;
 		}
 
-		const uint32_t& enabledExtensionCount() const
+		InstanceCreateInfo& setEnabledExtensionCount(uint32_t enabledExtensionCount_)
 		{
-			return m_instanceCreateInfo.enabledExtensionCount;
-		}
-
-		uint32_t& enabledExtensionCount()
-		{
-			return m_instanceCreateInfo.enabledExtensionCount;
-		}
-
-		InstanceCreateInfo& enabledExtensionCount(uint32_t enabledExtensionCount)
-		{
-			m_instanceCreateInfo.enabledExtensionCount = enabledExtensionCount;
+			enabledExtensionCount = enabledExtensionCount_;
 			return *this;
 		}
 
-		const char* const* ppEnabledExtensionNames() const
+		InstanceCreateInfo& setPpEnabledExtensionNames(const char* const* ppEnabledExtensionNames_)
 		{
-			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledExtensionNames);
-		}
-
-		const char* const* ppEnabledExtensionNames()
-		{
-			return reinterpret_cast<const char* const*>(m_instanceCreateInfo.ppEnabledExtensionNames);
-		}
-
-		InstanceCreateInfo& ppEnabledExtensionNames(const char* const* ppEnabledExtensionNames)
-		{
-			m_instanceCreateInfo.ppEnabledExtensionNames = ppEnabledExtensionNames;
+			ppEnabledExtensionNames = ppEnabledExtensionNames_;
 			return *this;
 		}
 
 		operator const VkInstanceCreateInfo&() const
 		{
-			return m_instanceCreateInfo;
+			return *reinterpret_cast<const VkInstanceCreateInfo*>(this);
 		}
 
-	private:
-		VkInstanceCreateInfo m_instanceCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		InstanceCreateFlags flags;
+		const ApplicationInfo* pApplicationInfo;
+		uint32_t enabledLayerCount;
+		const char* const* ppEnabledLayerNames;
+		uint32_t enabledExtensionCount;
+		const char* const* ppEnabledExtensionNames;
 	};
 	static_assert(sizeof(InstanceCreateInfo) == sizeof(VkInstanceCreateInfo), "struct and wrapper have different size!");
 
-	class MemoryAllocateInfo
+	struct MemoryAllocateInfo
 	{
-	public:
 		MemoryAllocateInfo()
 			: MemoryAllocateInfo(0, 0)
 		{}
 
-		MemoryAllocateInfo(DeviceSize allocationSize, uint32_t memoryTypeIndex)
+		MemoryAllocateInfo(DeviceSize allocationSize_, uint32_t memoryTypeIndex_)
 		{
-			m_memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			m_memoryAllocateInfo.pNext = nullptr;
-			m_memoryAllocateInfo.allocationSize = allocationSize;
-			m_memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+			sType = StructureType::eMemoryAllocateInfo;
+			pNext = nullptr;
+			allocationSize = allocationSize_;
+			memoryTypeIndex = memoryTypeIndex_;
 		}
 
 		MemoryAllocateInfo(VkMemoryAllocateInfo const & rhs)
-			: m_memoryAllocateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(MemoryAllocateInfo));
 		}
 
 		MemoryAllocateInfo& operator=(VkMemoryAllocateInfo const & rhs)
 		{
-			m_memoryAllocateInfo = rhs;
+			memcpy(this, &rhs, sizeof(MemoryAllocateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		MemoryAllocateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_memoryAllocateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_memoryAllocateInfo.sType);
-		}
-
-		MemoryAllocateInfo& sType(StructureType sType)
-		{
-			m_memoryAllocateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		MemoryAllocateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_memoryAllocateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_memoryAllocateInfo.pNext);
-		}
-
-		MemoryAllocateInfo& pNext(const void* pNext)
-		{
-			m_memoryAllocateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DeviceSize& allocationSize() const
+		MemoryAllocateInfo& setAllocationSize(DeviceSize allocationSize_)
 		{
-			return m_memoryAllocateInfo.allocationSize;
-		}
-
-		DeviceSize& allocationSize()
-		{
-			return m_memoryAllocateInfo.allocationSize;
-		}
-
-		MemoryAllocateInfo& allocationSize(DeviceSize allocationSize)
-		{
-			m_memoryAllocateInfo.allocationSize = allocationSize;
+			allocationSize = allocationSize_;
 			return *this;
 		}
 
-		const uint32_t& memoryTypeIndex() const
+		MemoryAllocateInfo& setMemoryTypeIndex(uint32_t memoryTypeIndex_)
 		{
-			return m_memoryAllocateInfo.memoryTypeIndex;
-		}
-
-		uint32_t& memoryTypeIndex()
-		{
-			return m_memoryAllocateInfo.memoryTypeIndex;
-		}
-
-		MemoryAllocateInfo& memoryTypeIndex(uint32_t memoryTypeIndex)
-		{
-			m_memoryAllocateInfo.memoryTypeIndex = memoryTypeIndex;
+			memoryTypeIndex = memoryTypeIndex_;
 			return *this;
 		}
 
 		operator const VkMemoryAllocateInfo&() const
 		{
-			return m_memoryAllocateInfo;
+			return *reinterpret_cast<const VkMemoryAllocateInfo*>(this);
 		}
 
-	private:
-		VkMemoryAllocateInfo m_memoryAllocateInfo;
+		StructureType sType;
+		const void* pNext;
+		DeviceSize allocationSize;
+		uint32_t memoryTypeIndex;
 	};
 	static_assert(sizeof(MemoryAllocateInfo) == sizeof(VkMemoryAllocateInfo), "struct and wrapper have different size!");
 
-	class MappedMemoryRange
+	struct MappedMemoryRange
 	{
-	public:
 		MappedMemoryRange()
 			: MappedMemoryRange(DeviceMemory(), 0, 0)
 		{}
 
-		MappedMemoryRange(DeviceMemory memory, DeviceSize offset, DeviceSize size)
+		MappedMemoryRange(DeviceMemory memory_, DeviceSize offset_, DeviceSize size_)
 		{
-			m_mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-			m_mappedMemoryRange.pNext = nullptr;
-			m_mappedMemoryRange.memory = static_cast<VkDeviceMemory>(memory);
-			m_mappedMemoryRange.offset = offset;
-			m_mappedMemoryRange.size = size;
+			sType = StructureType::eMappedMemoryRange;
+			pNext = nullptr;
+			memory = memory_;
+			offset = offset_;
+			size = size_;
 		}
 
 		MappedMemoryRange(VkMappedMemoryRange const & rhs)
-			: m_mappedMemoryRange(rhs)
 		{
+			memcpy(this, &rhs, sizeof(MappedMemoryRange));
 		}
 
 		MappedMemoryRange& operator=(VkMappedMemoryRange const & rhs)
 		{
-			m_mappedMemoryRange = rhs;
+			memcpy(this, &rhs, sizeof(MappedMemoryRange));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		MappedMemoryRange& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_mappedMemoryRange.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_mappedMemoryRange.sType);
-		}
-
-		MappedMemoryRange& sType(StructureType sType)
-		{
-			m_mappedMemoryRange.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		MappedMemoryRange& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_mappedMemoryRange.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_mappedMemoryRange.pNext);
-		}
-
-		MappedMemoryRange& pNext(const void* pNext)
-		{
-			m_mappedMemoryRange.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DeviceMemory& memory() const
+		MappedMemoryRange& setMemory(DeviceMemory memory_)
 		{
-			return reinterpret_cast<const DeviceMemory&>(m_mappedMemoryRange.memory);
-		}
-
-		DeviceMemory& memory()
-		{
-			return reinterpret_cast<DeviceMemory&>(m_mappedMemoryRange.memory);
-		}
-
-		MappedMemoryRange& memory(DeviceMemory memory)
-		{
-			m_mappedMemoryRange.memory = static_cast<VkDeviceMemory>(memory);
+			memory = memory_;
 			return *this;
 		}
 
-		const DeviceSize& offset() const
+		MappedMemoryRange& setOffset(DeviceSize offset_)
 		{
-			return m_mappedMemoryRange.offset;
-		}
-
-		DeviceSize& offset()
-		{
-			return m_mappedMemoryRange.offset;
-		}
-
-		MappedMemoryRange& offset(DeviceSize offset)
-		{
-			m_mappedMemoryRange.offset = offset;
+			offset = offset_;
 			return *this;
 		}
 
-		const DeviceSize& size() const
+		MappedMemoryRange& setSize(DeviceSize size_)
 		{
-			return m_mappedMemoryRange.size;
-		}
-
-		DeviceSize& size()
-		{
-			return m_mappedMemoryRange.size;
-		}
-
-		MappedMemoryRange& size(DeviceSize size)
-		{
-			m_mappedMemoryRange.size = size;
+			size = size_;
 			return *this;
 		}
 
 		operator const VkMappedMemoryRange&() const
 		{
-			return m_mappedMemoryRange;
+			return *reinterpret_cast<const VkMappedMemoryRange*>(this);
 		}
 
-	private:
-		VkMappedMemoryRange m_mappedMemoryRange;
+		StructureType sType;
+		const void* pNext;
+		DeviceMemory memory;
+		DeviceSize offset;
+		DeviceSize size;
 	};
 	static_assert(sizeof(MappedMemoryRange) == sizeof(VkMappedMemoryRange), "struct and wrapper have different size!");
 
-	class WriteDescriptorSet
+	struct WriteDescriptorSet
 	{
-	public:
 		WriteDescriptorSet()
 			: WriteDescriptorSet(DescriptorSet(), 0, 0, 0, DescriptorType::eSampler, nullptr, nullptr, nullptr)
 		{}
 
-		WriteDescriptorSet(DescriptorSet dstSet, uint32_t dstBinding, uint32_t dstArrayElement, uint32_t descriptorCount, DescriptorType descriptorType, const DescriptorImageInfo* pImageInfo, const DescriptorBufferInfo* pBufferInfo, const BufferView* pTexelBufferView)
+		WriteDescriptorSet(DescriptorSet dstSet_, uint32_t dstBinding_, uint32_t dstArrayElement_, uint32_t descriptorCount_, DescriptorType descriptorType_, const DescriptorImageInfo* pImageInfo_, const DescriptorBufferInfo* pBufferInfo_, const BufferView* pTexelBufferView_)
 		{
-			m_writeDescriptorSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			m_writeDescriptorSet.pNext = nullptr;
-			m_writeDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
-			m_writeDescriptorSet.dstBinding = dstBinding;
-			m_writeDescriptorSet.dstArrayElement = dstArrayElement;
-			m_writeDescriptorSet.descriptorCount = descriptorCount;
-			m_writeDescriptorSet.descriptorType = static_cast<VkDescriptorType>(descriptorType);
-			m_writeDescriptorSet.pImageInfo = reinterpret_cast<const VkDescriptorImageInfo*>(pImageInfo);
-			m_writeDescriptorSet.pBufferInfo = reinterpret_cast<const VkDescriptorBufferInfo*>(pBufferInfo);
-			m_writeDescriptorSet.pTexelBufferView = reinterpret_cast<const VkBufferView*>(pTexelBufferView);
+			sType = StructureType::eWriteDescriptorSet;
+			pNext = nullptr;
+			dstSet = dstSet_;
+			dstBinding = dstBinding_;
+			dstArrayElement = dstArrayElement_;
+			descriptorCount = descriptorCount_;
+			descriptorType = descriptorType_;
+			pImageInfo = pImageInfo_;
+			pBufferInfo = pBufferInfo_;
+			pTexelBufferView = pTexelBufferView_;
 		}
 
 		WriteDescriptorSet(VkWriteDescriptorSet const & rhs)
-			: m_writeDescriptorSet(rhs)
 		{
+			memcpy(this, &rhs, sizeof(WriteDescriptorSet));
 		}
 
 		WriteDescriptorSet& operator=(VkWriteDescriptorSet const & rhs)
 		{
-			m_writeDescriptorSet = rhs;
+			memcpy(this, &rhs, sizeof(WriteDescriptorSet));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		WriteDescriptorSet& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_writeDescriptorSet.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_writeDescriptorSet.sType);
-		}
-
-		WriteDescriptorSet& sType(StructureType sType)
-		{
-			m_writeDescriptorSet.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		WriteDescriptorSet& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_writeDescriptorSet.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_writeDescriptorSet.pNext);
-		}
-
-		WriteDescriptorSet& pNext(const void* pNext)
-		{
-			m_writeDescriptorSet.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DescriptorSet& dstSet() const
+		WriteDescriptorSet& setDstSet(DescriptorSet dstSet_)
 		{
-			return reinterpret_cast<const DescriptorSet&>(m_writeDescriptorSet.dstSet);
-		}
-
-		DescriptorSet& dstSet()
-		{
-			return reinterpret_cast<DescriptorSet&>(m_writeDescriptorSet.dstSet);
-		}
-
-		WriteDescriptorSet& dstSet(DescriptorSet dstSet)
-		{
-			m_writeDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
+			dstSet = dstSet_;
 			return *this;
 		}
 
-		const uint32_t& dstBinding() const
+		WriteDescriptorSet& setDstBinding(uint32_t dstBinding_)
 		{
-			return m_writeDescriptorSet.dstBinding;
-		}
-
-		uint32_t& dstBinding()
-		{
-			return m_writeDescriptorSet.dstBinding;
-		}
-
-		WriteDescriptorSet& dstBinding(uint32_t dstBinding)
-		{
-			m_writeDescriptorSet.dstBinding = dstBinding;
+			dstBinding = dstBinding_;
 			return *this;
 		}
 
-		const uint32_t& dstArrayElement() const
+		WriteDescriptorSet& setDstArrayElement(uint32_t dstArrayElement_)
 		{
-			return m_writeDescriptorSet.dstArrayElement;
-		}
-
-		uint32_t& dstArrayElement()
-		{
-			return m_writeDescriptorSet.dstArrayElement;
-		}
-
-		WriteDescriptorSet& dstArrayElement(uint32_t dstArrayElement)
-		{
-			m_writeDescriptorSet.dstArrayElement = dstArrayElement;
+			dstArrayElement = dstArrayElement_;
 			return *this;
 		}
 
-		const uint32_t& descriptorCount() const
+		WriteDescriptorSet& setDescriptorCount(uint32_t descriptorCount_)
 		{
-			return m_writeDescriptorSet.descriptorCount;
-		}
-
-		uint32_t& descriptorCount()
-		{
-			return m_writeDescriptorSet.descriptorCount;
-		}
-
-		WriteDescriptorSet& descriptorCount(uint32_t descriptorCount)
-		{
-			m_writeDescriptorSet.descriptorCount = descriptorCount;
+			descriptorCount = descriptorCount_;
 			return *this;
 		}
 
-		const DescriptorType& descriptorType() const
+		WriteDescriptorSet& setDescriptorType(DescriptorType descriptorType_)
 		{
-			return reinterpret_cast<const DescriptorType&>(m_writeDescriptorSet.descriptorType);
-		}
-
-		DescriptorType& descriptorType()
-		{
-			return reinterpret_cast<DescriptorType&>(m_writeDescriptorSet.descriptorType);
-		}
-
-		WriteDescriptorSet& descriptorType(DescriptorType descriptorType)
-		{
-			m_writeDescriptorSet.descriptorType = static_cast<VkDescriptorType>(descriptorType);
+			descriptorType = descriptorType_;
 			return *this;
 		}
 
-		const DescriptorImageInfo* pImageInfo() const
+		WriteDescriptorSet& setPImageInfo(const DescriptorImageInfo* pImageInfo_)
 		{
-			return reinterpret_cast<const DescriptorImageInfo*>(m_writeDescriptorSet.pImageInfo);
-		}
-
-		const DescriptorImageInfo* pImageInfo()
-		{
-			return reinterpret_cast<const DescriptorImageInfo*>(m_writeDescriptorSet.pImageInfo);
-		}
-
-		WriteDescriptorSet& pImageInfo(const DescriptorImageInfo* pImageInfo)
-		{
-			m_writeDescriptorSet.pImageInfo = reinterpret_cast<const VkDescriptorImageInfo*>(pImageInfo);
+			pImageInfo = pImageInfo_;
 			return *this;
 		}
 
-		const DescriptorBufferInfo* pBufferInfo() const
+		WriteDescriptorSet& setPBufferInfo(const DescriptorBufferInfo* pBufferInfo_)
 		{
-			return reinterpret_cast<const DescriptorBufferInfo*>(m_writeDescriptorSet.pBufferInfo);
-		}
-
-		const DescriptorBufferInfo* pBufferInfo()
-		{
-			return reinterpret_cast<const DescriptorBufferInfo*>(m_writeDescriptorSet.pBufferInfo);
-		}
-
-		WriteDescriptorSet& pBufferInfo(const DescriptorBufferInfo* pBufferInfo)
-		{
-			m_writeDescriptorSet.pBufferInfo = reinterpret_cast<const VkDescriptorBufferInfo*>(pBufferInfo);
+			pBufferInfo = pBufferInfo_;
 			return *this;
 		}
 
-		const BufferView* pTexelBufferView() const
+		WriteDescriptorSet& setPTexelBufferView(const BufferView* pTexelBufferView_)
 		{
-			return reinterpret_cast<const BufferView*>(m_writeDescriptorSet.pTexelBufferView);
-		}
-
-		const BufferView* pTexelBufferView()
-		{
-			return reinterpret_cast<const BufferView*>(m_writeDescriptorSet.pTexelBufferView);
-		}
-
-		WriteDescriptorSet& pTexelBufferView(const BufferView* pTexelBufferView)
-		{
-			m_writeDescriptorSet.pTexelBufferView = reinterpret_cast<const VkBufferView*>(pTexelBufferView);
+			pTexelBufferView = pTexelBufferView_;
 			return *this;
 		}
 
 		operator const VkWriteDescriptorSet&() const
 		{
-			return m_writeDescriptorSet;
+			return *reinterpret_cast<const VkWriteDescriptorSet*>(this);
 		}
 
-	private:
-		VkWriteDescriptorSet m_writeDescriptorSet;
+		StructureType sType;
+		const void* pNext;
+		DescriptorSet dstSet;
+		uint32_t dstBinding;
+		uint32_t dstArrayElement;
+		uint32_t descriptorCount;
+		DescriptorType descriptorType;
+		const DescriptorImageInfo* pImageInfo;
+		const DescriptorBufferInfo* pBufferInfo;
+		const BufferView* pTexelBufferView;
 	};
 	static_assert(sizeof(WriteDescriptorSet) == sizeof(VkWriteDescriptorSet), "struct and wrapper have different size!");
 
-	class CopyDescriptorSet
+	struct CopyDescriptorSet
 	{
-	public:
 		CopyDescriptorSet()
 			: CopyDescriptorSet(DescriptorSet(), 0, 0, DescriptorSet(), 0, 0, 0)
 		{}
 
-		CopyDescriptorSet(DescriptorSet srcSet, uint32_t srcBinding, uint32_t srcArrayElement, DescriptorSet dstSet, uint32_t dstBinding, uint32_t dstArrayElement, uint32_t descriptorCount)
+		CopyDescriptorSet(DescriptorSet srcSet_, uint32_t srcBinding_, uint32_t srcArrayElement_, DescriptorSet dstSet_, uint32_t dstBinding_, uint32_t dstArrayElement_, uint32_t descriptorCount_)
 		{
-			m_copyDescriptorSet.sType = VK_STRUCTURE_TYPE_COPY_DESCRIPTOR_SET;
-			m_copyDescriptorSet.pNext = nullptr;
-			m_copyDescriptorSet.srcSet = static_cast<VkDescriptorSet>(srcSet);
-			m_copyDescriptorSet.srcBinding = srcBinding;
-			m_copyDescriptorSet.srcArrayElement = srcArrayElement;
-			m_copyDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
-			m_copyDescriptorSet.dstBinding = dstBinding;
-			m_copyDescriptorSet.dstArrayElement = dstArrayElement;
-			m_copyDescriptorSet.descriptorCount = descriptorCount;
+			sType = StructureType::eCopyDescriptorSet;
+			pNext = nullptr;
+			srcSet = srcSet_;
+			srcBinding = srcBinding_;
+			srcArrayElement = srcArrayElement_;
+			dstSet = dstSet_;
+			dstBinding = dstBinding_;
+			dstArrayElement = dstArrayElement_;
+			descriptorCount = descriptorCount_;
 		}
 
 		CopyDescriptorSet(VkCopyDescriptorSet const & rhs)
-			: m_copyDescriptorSet(rhs)
 		{
+			memcpy(this, &rhs, sizeof(CopyDescriptorSet));
 		}
 
 		CopyDescriptorSet& operator=(VkCopyDescriptorSet const & rhs)
 		{
-			m_copyDescriptorSet = rhs;
+			memcpy(this, &rhs, sizeof(CopyDescriptorSet));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		CopyDescriptorSet& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_copyDescriptorSet.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_copyDescriptorSet.sType);
-		}
-
-		CopyDescriptorSet& sType(StructureType sType)
-		{
-			m_copyDescriptorSet.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		CopyDescriptorSet& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_copyDescriptorSet.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_copyDescriptorSet.pNext);
-		}
-
-		CopyDescriptorSet& pNext(const void* pNext)
-		{
-			m_copyDescriptorSet.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DescriptorSet& srcSet() const
+		CopyDescriptorSet& setSrcSet(DescriptorSet srcSet_)
 		{
-			return reinterpret_cast<const DescriptorSet&>(m_copyDescriptorSet.srcSet);
-		}
-
-		DescriptorSet& srcSet()
-		{
-			return reinterpret_cast<DescriptorSet&>(m_copyDescriptorSet.srcSet);
-		}
-
-		CopyDescriptorSet& srcSet(DescriptorSet srcSet)
-		{
-			m_copyDescriptorSet.srcSet = static_cast<VkDescriptorSet>(srcSet);
+			srcSet = srcSet_;
 			return *this;
 		}
 
-		const uint32_t& srcBinding() const
+		CopyDescriptorSet& setSrcBinding(uint32_t srcBinding_)
 		{
-			return m_copyDescriptorSet.srcBinding;
-		}
-
-		uint32_t& srcBinding()
-		{
-			return m_copyDescriptorSet.srcBinding;
-		}
-
-		CopyDescriptorSet& srcBinding(uint32_t srcBinding)
-		{
-			m_copyDescriptorSet.srcBinding = srcBinding;
+			srcBinding = srcBinding_;
 			return *this;
 		}
 
-		const uint32_t& srcArrayElement() const
+		CopyDescriptorSet& setSrcArrayElement(uint32_t srcArrayElement_)
 		{
-			return m_copyDescriptorSet.srcArrayElement;
-		}
-
-		uint32_t& srcArrayElement()
-		{
-			return m_copyDescriptorSet.srcArrayElement;
-		}
-
-		CopyDescriptorSet& srcArrayElement(uint32_t srcArrayElement)
-		{
-			m_copyDescriptorSet.srcArrayElement = srcArrayElement;
+			srcArrayElement = srcArrayElement_;
 			return *this;
 		}
 
-		const DescriptorSet& dstSet() const
+		CopyDescriptorSet& setDstSet(DescriptorSet dstSet_)
 		{
-			return reinterpret_cast<const DescriptorSet&>(m_copyDescriptorSet.dstSet);
-		}
-
-		DescriptorSet& dstSet()
-		{
-			return reinterpret_cast<DescriptorSet&>(m_copyDescriptorSet.dstSet);
-		}
-
-		CopyDescriptorSet& dstSet(DescriptorSet dstSet)
-		{
-			m_copyDescriptorSet.dstSet = static_cast<VkDescriptorSet>(dstSet);
+			dstSet = dstSet_;
 			return *this;
 		}
 
-		const uint32_t& dstBinding() const
+		CopyDescriptorSet& setDstBinding(uint32_t dstBinding_)
 		{
-			return m_copyDescriptorSet.dstBinding;
-		}
-
-		uint32_t& dstBinding()
-		{
-			return m_copyDescriptorSet.dstBinding;
-		}
-
-		CopyDescriptorSet& dstBinding(uint32_t dstBinding)
-		{
-			m_copyDescriptorSet.dstBinding = dstBinding;
+			dstBinding = dstBinding_;
 			return *this;
 		}
 
-		const uint32_t& dstArrayElement() const
+		CopyDescriptorSet& setDstArrayElement(uint32_t dstArrayElement_)
 		{
-			return m_copyDescriptorSet.dstArrayElement;
-		}
-
-		uint32_t& dstArrayElement()
-		{
-			return m_copyDescriptorSet.dstArrayElement;
-		}
-
-		CopyDescriptorSet& dstArrayElement(uint32_t dstArrayElement)
-		{
-			m_copyDescriptorSet.dstArrayElement = dstArrayElement;
+			dstArrayElement = dstArrayElement_;
 			return *this;
 		}
 
-		const uint32_t& descriptorCount() const
+		CopyDescriptorSet& setDescriptorCount(uint32_t descriptorCount_)
 		{
-			return m_copyDescriptorSet.descriptorCount;
-		}
-
-		uint32_t& descriptorCount()
-		{
-			return m_copyDescriptorSet.descriptorCount;
-		}
-
-		CopyDescriptorSet& descriptorCount(uint32_t descriptorCount)
-		{
-			m_copyDescriptorSet.descriptorCount = descriptorCount;
+			descriptorCount = descriptorCount_;
 			return *this;
 		}
 
 		operator const VkCopyDescriptorSet&() const
 		{
-			return m_copyDescriptorSet;
+			return *reinterpret_cast<const VkCopyDescriptorSet*>(this);
 		}
 
-	private:
-		VkCopyDescriptorSet m_copyDescriptorSet;
+		StructureType sType;
+		const void* pNext;
+		DescriptorSet srcSet;
+		uint32_t srcBinding;
+		uint32_t srcArrayElement;
+		DescriptorSet dstSet;
+		uint32_t dstBinding;
+		uint32_t dstArrayElement;
+		uint32_t descriptorCount;
 	};
 	static_assert(sizeof(CopyDescriptorSet) == sizeof(VkCopyDescriptorSet), "struct and wrapper have different size!");
 
-	class BufferViewCreateInfo
+	struct BufferViewCreateInfo
 	{
-	public:
 		BufferViewCreateInfo()
 			: BufferViewCreateInfo(BufferViewCreateFlags(), Buffer(), Format::eUndefined, 0, 0)
 		{}
 
-		BufferViewCreateInfo(BufferViewCreateFlags flags, Buffer buffer, Format format, DeviceSize offset, DeviceSize range)
+		BufferViewCreateInfo(BufferViewCreateFlags flags_, Buffer buffer_, Format format_, DeviceSize offset_, DeviceSize range_)
 		{
-			m_bufferViewCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
-			m_bufferViewCreateInfo.pNext = nullptr;
-			m_bufferViewCreateInfo.flags = static_cast<VkBufferViewCreateFlags>(flags);
-			m_bufferViewCreateInfo.buffer = static_cast<VkBuffer>(buffer);
-			m_bufferViewCreateInfo.format = static_cast<VkFormat>(format);
-			m_bufferViewCreateInfo.offset = offset;
-			m_bufferViewCreateInfo.range = range;
+			sType = StructureType::eBufferViewCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			buffer = buffer_;
+			format = format_;
+			offset = offset_;
+			range = range_;
 		}
 
 		BufferViewCreateInfo(VkBufferViewCreateInfo const & rhs)
-			: m_bufferViewCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(BufferViewCreateInfo));
 		}
 
 		BufferViewCreateInfo& operator=(VkBufferViewCreateInfo const & rhs)
 		{
-			m_bufferViewCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(BufferViewCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		BufferViewCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_bufferViewCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_bufferViewCreateInfo.sType);
-		}
-
-		BufferViewCreateInfo& sType(StructureType sType)
-		{
-			m_bufferViewCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		BufferViewCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_bufferViewCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_bufferViewCreateInfo.pNext);
-		}
-
-		BufferViewCreateInfo& pNext(const void* pNext)
-		{
-			m_bufferViewCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const BufferViewCreateFlags& flags() const
+		BufferViewCreateInfo& setFlags(BufferViewCreateFlags flags_)
 		{
-			return reinterpret_cast<const BufferViewCreateFlags&>(m_bufferViewCreateInfo.flags);
-		}
-
-		BufferViewCreateFlags& flags()
-		{
-			return reinterpret_cast<BufferViewCreateFlags&>(m_bufferViewCreateInfo.flags);
-		}
-
-		BufferViewCreateInfo& flags(BufferViewCreateFlags flags)
-		{
-			m_bufferViewCreateInfo.flags = static_cast<VkBufferViewCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Buffer& buffer() const
+		BufferViewCreateInfo& setBuffer(Buffer buffer_)
 		{
-			return reinterpret_cast<const Buffer&>(m_bufferViewCreateInfo.buffer);
-		}
-
-		Buffer& buffer()
-		{
-			return reinterpret_cast<Buffer&>(m_bufferViewCreateInfo.buffer);
-		}
-
-		BufferViewCreateInfo& buffer(Buffer buffer)
-		{
-			m_bufferViewCreateInfo.buffer = static_cast<VkBuffer>(buffer);
+			buffer = buffer_;
 			return *this;
 		}
 
-		const Format& format() const
+		BufferViewCreateInfo& setFormat(Format format_)
 		{
-			return reinterpret_cast<const Format&>(m_bufferViewCreateInfo.format);
-		}
-
-		Format& format()
-		{
-			return reinterpret_cast<Format&>(m_bufferViewCreateInfo.format);
-		}
-
-		BufferViewCreateInfo& format(Format format)
-		{
-			m_bufferViewCreateInfo.format = static_cast<VkFormat>(format);
+			format = format_;
 			return *this;
 		}
 
-		const DeviceSize& offset() const
+		BufferViewCreateInfo& setOffset(DeviceSize offset_)
 		{
-			return m_bufferViewCreateInfo.offset;
-		}
-
-		DeviceSize& offset()
-		{
-			return m_bufferViewCreateInfo.offset;
-		}
-
-		BufferViewCreateInfo& offset(DeviceSize offset)
-		{
-			m_bufferViewCreateInfo.offset = offset;
+			offset = offset_;
 			return *this;
 		}
 
-		const DeviceSize& range() const
+		BufferViewCreateInfo& setRange(DeviceSize range_)
 		{
-			return m_bufferViewCreateInfo.range;
-		}
-
-		DeviceSize& range()
-		{
-			return m_bufferViewCreateInfo.range;
-		}
-
-		BufferViewCreateInfo& range(DeviceSize range)
-		{
-			m_bufferViewCreateInfo.range = range;
+			range = range_;
 			return *this;
 		}
 
 		operator const VkBufferViewCreateInfo&() const
 		{
-			return m_bufferViewCreateInfo;
+			return *reinterpret_cast<const VkBufferViewCreateInfo*>(this);
 		}
 
-	private:
-		VkBufferViewCreateInfo m_bufferViewCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		BufferViewCreateFlags flags;
+		Buffer buffer;
+		Format format;
+		DeviceSize offset;
+		DeviceSize range;
 	};
 	static_assert(sizeof(BufferViewCreateInfo) == sizeof(VkBufferViewCreateInfo), "struct and wrapper have different size!");
 
-	class ShaderModuleCreateInfo
+	struct ShaderModuleCreateInfo
 	{
-	public:
 		ShaderModuleCreateInfo()
 			: ShaderModuleCreateInfo(ShaderModuleCreateFlags(), 0, nullptr)
 		{}
 
-		ShaderModuleCreateInfo(ShaderModuleCreateFlags flags, size_t codeSize, const uint32_t* pCode)
+		ShaderModuleCreateInfo(ShaderModuleCreateFlags flags_, size_t codeSize_, const uint32_t* pCode_)
 		{
-			m_shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-			m_shaderModuleCreateInfo.pNext = nullptr;
-			m_shaderModuleCreateInfo.flags = static_cast<VkShaderModuleCreateFlags>(flags);
-			m_shaderModuleCreateInfo.codeSize = codeSize;
-			m_shaderModuleCreateInfo.pCode = pCode;
+			sType = StructureType::eShaderModuleCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			codeSize = codeSize_;
+			pCode = pCode_;
 		}
 
 		ShaderModuleCreateInfo(VkShaderModuleCreateInfo const & rhs)
-			: m_shaderModuleCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ShaderModuleCreateInfo));
 		}
 
 		ShaderModuleCreateInfo& operator=(VkShaderModuleCreateInfo const & rhs)
 		{
-			m_shaderModuleCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(ShaderModuleCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		ShaderModuleCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_shaderModuleCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_shaderModuleCreateInfo.sType);
-		}
-
-		ShaderModuleCreateInfo& sType(StructureType sType)
-		{
-			m_shaderModuleCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		ShaderModuleCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_shaderModuleCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_shaderModuleCreateInfo.pNext);
-		}
-
-		ShaderModuleCreateInfo& pNext(const void* pNext)
-		{
-			m_shaderModuleCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const ShaderModuleCreateFlags& flags() const
+		ShaderModuleCreateInfo& setFlags(ShaderModuleCreateFlags flags_)
 		{
-			return reinterpret_cast<const ShaderModuleCreateFlags&>(m_shaderModuleCreateInfo.flags);
-		}
-
-		ShaderModuleCreateFlags& flags()
-		{
-			return reinterpret_cast<ShaderModuleCreateFlags&>(m_shaderModuleCreateInfo.flags);
-		}
-
-		ShaderModuleCreateInfo& flags(ShaderModuleCreateFlags flags)
-		{
-			m_shaderModuleCreateInfo.flags = static_cast<VkShaderModuleCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const size_t& codeSize() const
+		ShaderModuleCreateInfo& setCodeSize(size_t codeSize_)
 		{
-			return m_shaderModuleCreateInfo.codeSize;
-		}
-
-		size_t& codeSize()
-		{
-			return m_shaderModuleCreateInfo.codeSize;
-		}
-
-		ShaderModuleCreateInfo& codeSize(size_t codeSize)
-		{
-			m_shaderModuleCreateInfo.codeSize = codeSize;
+			codeSize = codeSize_;
 			return *this;
 		}
 
-		const uint32_t* pCode() const
+		ShaderModuleCreateInfo& setPCode(const uint32_t* pCode_)
 		{
-			return reinterpret_cast<const uint32_t*>(m_shaderModuleCreateInfo.pCode);
-		}
-
-		const uint32_t* pCode()
-		{
-			return reinterpret_cast<const uint32_t*>(m_shaderModuleCreateInfo.pCode);
-		}
-
-		ShaderModuleCreateInfo& pCode(const uint32_t* pCode)
-		{
-			m_shaderModuleCreateInfo.pCode = pCode;
+			pCode = pCode_;
 			return *this;
 		}
 
 		operator const VkShaderModuleCreateInfo&() const
 		{
-			return m_shaderModuleCreateInfo;
+			return *reinterpret_cast<const VkShaderModuleCreateInfo*>(this);
 		}
 
-	private:
-		VkShaderModuleCreateInfo m_shaderModuleCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		ShaderModuleCreateFlags flags;
+		size_t codeSize;
+		const uint32_t* pCode;
 	};
 	static_assert(sizeof(ShaderModuleCreateInfo) == sizeof(VkShaderModuleCreateInfo), "struct and wrapper have different size!");
 
-	class DescriptorSetAllocateInfo
+	struct DescriptorSetAllocateInfo
 	{
-	public:
 		DescriptorSetAllocateInfo()
 			: DescriptorSetAllocateInfo(DescriptorPool(), 0, nullptr)
 		{}
 
-		DescriptorSetAllocateInfo(DescriptorPool descriptorPool, uint32_t descriptorSetCount, const DescriptorSetLayout* pSetLayouts)
+		DescriptorSetAllocateInfo(DescriptorPool descriptorPool_, uint32_t descriptorSetCount_, const DescriptorSetLayout* pSetLayouts_)
 		{
-			m_descriptorSetAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-			m_descriptorSetAllocateInfo.pNext = nullptr;
-			m_descriptorSetAllocateInfo.descriptorPool = static_cast<VkDescriptorPool>(descriptorPool);
-			m_descriptorSetAllocateInfo.descriptorSetCount = descriptorSetCount;
-			m_descriptorSetAllocateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
+			sType = StructureType::eDescriptorSetAllocateInfo;
+			pNext = nullptr;
+			descriptorPool = descriptorPool_;
+			descriptorSetCount = descriptorSetCount_;
+			pSetLayouts = pSetLayouts_;
 		}
 
 		DescriptorSetAllocateInfo(VkDescriptorSetAllocateInfo const & rhs)
-			: m_descriptorSetAllocateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DescriptorSetAllocateInfo));
 		}
 
 		DescriptorSetAllocateInfo& operator=(VkDescriptorSetAllocateInfo const & rhs)
 		{
-			m_descriptorSetAllocateInfo = rhs;
+			memcpy(this, &rhs, sizeof(DescriptorSetAllocateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DescriptorSetAllocateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_descriptorSetAllocateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_descriptorSetAllocateInfo.sType);
-		}
-
-		DescriptorSetAllocateInfo& sType(StructureType sType)
-		{
-			m_descriptorSetAllocateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DescriptorSetAllocateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_descriptorSetAllocateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_descriptorSetAllocateInfo.pNext);
-		}
-
-		DescriptorSetAllocateInfo& pNext(const void* pNext)
-		{
-			m_descriptorSetAllocateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DescriptorPool& descriptorPool() const
+		DescriptorSetAllocateInfo& setDescriptorPool(DescriptorPool descriptorPool_)
 		{
-			return reinterpret_cast<const DescriptorPool&>(m_descriptorSetAllocateInfo.descriptorPool);
-		}
-
-		DescriptorPool& descriptorPool()
-		{
-			return reinterpret_cast<DescriptorPool&>(m_descriptorSetAllocateInfo.descriptorPool);
-		}
-
-		DescriptorSetAllocateInfo& descriptorPool(DescriptorPool descriptorPool)
-		{
-			m_descriptorSetAllocateInfo.descriptorPool = static_cast<VkDescriptorPool>(descriptorPool);
+			descriptorPool = descriptorPool_;
 			return *this;
 		}
 
-		const uint32_t& descriptorSetCount() const
+		DescriptorSetAllocateInfo& setDescriptorSetCount(uint32_t descriptorSetCount_)
 		{
-			return m_descriptorSetAllocateInfo.descriptorSetCount;
-		}
-
-		uint32_t& descriptorSetCount()
-		{
-			return m_descriptorSetAllocateInfo.descriptorSetCount;
-		}
-
-		DescriptorSetAllocateInfo& descriptorSetCount(uint32_t descriptorSetCount)
-		{
-			m_descriptorSetAllocateInfo.descriptorSetCount = descriptorSetCount;
+			descriptorSetCount = descriptorSetCount_;
 			return *this;
 		}
 
-		const DescriptorSetLayout* pSetLayouts() const
+		DescriptorSetAllocateInfo& setPSetLayouts(const DescriptorSetLayout* pSetLayouts_)
 		{
-			return reinterpret_cast<const DescriptorSetLayout*>(m_descriptorSetAllocateInfo.pSetLayouts);
-		}
-
-		const DescriptorSetLayout* pSetLayouts()
-		{
-			return reinterpret_cast<const DescriptorSetLayout*>(m_descriptorSetAllocateInfo.pSetLayouts);
-		}
-
-		DescriptorSetAllocateInfo& pSetLayouts(const DescriptorSetLayout* pSetLayouts)
-		{
-			m_descriptorSetAllocateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
+			pSetLayouts = pSetLayouts_;
 			return *this;
 		}
 
 		operator const VkDescriptorSetAllocateInfo&() const
 		{
-			return m_descriptorSetAllocateInfo;
+			return *reinterpret_cast<const VkDescriptorSetAllocateInfo*>(this);
 		}
 
-	private:
-		VkDescriptorSetAllocateInfo m_descriptorSetAllocateInfo;
+		StructureType sType;
+		const void* pNext;
+		DescriptorPool descriptorPool;
+		uint32_t descriptorSetCount;
+		const DescriptorSetLayout* pSetLayouts;
 	};
 	static_assert(sizeof(DescriptorSetAllocateInfo) == sizeof(VkDescriptorSetAllocateInfo), "struct and wrapper have different size!");
 
-	class PipelineVertexInputStateCreateInfo
+	struct PipelineVertexInputStateCreateInfo
 	{
-	public:
 		PipelineVertexInputStateCreateInfo()
 			: PipelineVertexInputStateCreateInfo(PipelineVertexInputStateCreateFlags(), 0, nullptr, 0, nullptr)
 		{}
 
-		PipelineVertexInputStateCreateInfo(PipelineVertexInputStateCreateFlags flags, uint32_t vertexBindingDescriptionCount, const VertexInputBindingDescription* pVertexBindingDescriptions, uint32_t vertexAttributeDescriptionCount, const VertexInputAttributeDescription* pVertexAttributeDescriptions)
+		PipelineVertexInputStateCreateInfo(PipelineVertexInputStateCreateFlags flags_, uint32_t vertexBindingDescriptionCount_, const VertexInputBindingDescription* pVertexBindingDescriptions_, uint32_t vertexAttributeDescriptionCount_, const VertexInputAttributeDescription* pVertexAttributeDescriptions_)
 		{
-			m_pipelineVertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-			m_pipelineVertexInputStateCreateInfo.pNext = nullptr;
-			m_pipelineVertexInputStateCreateInfo.flags = static_cast<VkPipelineVertexInputStateCreateFlags>(flags);
-			m_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = vertexBindingDescriptionCount;
-			m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = reinterpret_cast<const VkVertexInputBindingDescription*>(pVertexBindingDescriptions);
-			m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = vertexAttributeDescriptionCount;
-			m_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = reinterpret_cast<const VkVertexInputAttributeDescription*>(pVertexAttributeDescriptions);
+			sType = StructureType::ePipelineVertexInputStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			vertexBindingDescriptionCount = vertexBindingDescriptionCount_;
+			pVertexBindingDescriptions = pVertexBindingDescriptions_;
+			vertexAttributeDescriptionCount = vertexAttributeDescriptionCount_;
+			pVertexAttributeDescriptions = pVertexAttributeDescriptions_;
 		}
 
 		PipelineVertexInputStateCreateInfo(VkPipelineVertexInputStateCreateInfo const & rhs)
-			: m_pipelineVertexInputStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineVertexInputStateCreateInfo));
 		}
 
 		PipelineVertexInputStateCreateInfo& operator=(VkPipelineVertexInputStateCreateInfo const & rhs)
 		{
-			m_pipelineVertexInputStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineVertexInputStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineVertexInputStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineVertexInputStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineVertexInputStateCreateInfo.sType);
-		}
-
-		PipelineVertexInputStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineVertexInputStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineVertexInputStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineVertexInputStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineVertexInputStateCreateInfo.pNext);
-		}
-
-		PipelineVertexInputStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineVertexInputStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineVertexInputStateCreateFlags& flags() const
+		PipelineVertexInputStateCreateInfo& setFlags(PipelineVertexInputStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineVertexInputStateCreateFlags&>(m_pipelineVertexInputStateCreateInfo.flags);
-		}
-
-		PipelineVertexInputStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineVertexInputStateCreateFlags&>(m_pipelineVertexInputStateCreateInfo.flags);
-		}
-
-		PipelineVertexInputStateCreateInfo& flags(PipelineVertexInputStateCreateFlags flags)
-		{
-			m_pipelineVertexInputStateCreateInfo.flags = static_cast<VkPipelineVertexInputStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& vertexBindingDescriptionCount() const
+		PipelineVertexInputStateCreateInfo& setVertexBindingDescriptionCount(uint32_t vertexBindingDescriptionCount_)
 		{
-			return m_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount;
-		}
-
-		uint32_t& vertexBindingDescriptionCount()
-		{
-			return m_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount;
-		}
-
-		PipelineVertexInputStateCreateInfo& vertexBindingDescriptionCount(uint32_t vertexBindingDescriptionCount)
-		{
-			m_pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = vertexBindingDescriptionCount;
+			vertexBindingDescriptionCount = vertexBindingDescriptionCount_;
 			return *this;
 		}
 
-		const VertexInputBindingDescription* pVertexBindingDescriptions() const
+		PipelineVertexInputStateCreateInfo& setPVertexBindingDescriptions(const VertexInputBindingDescription* pVertexBindingDescriptions_)
 		{
-			return reinterpret_cast<const VertexInputBindingDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions);
-		}
-
-		const VertexInputBindingDescription* pVertexBindingDescriptions()
-		{
-			return reinterpret_cast<const VertexInputBindingDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions);
-		}
-
-		PipelineVertexInputStateCreateInfo& pVertexBindingDescriptions(const VertexInputBindingDescription* pVertexBindingDescriptions)
-		{
-			m_pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions = reinterpret_cast<const VkVertexInputBindingDescription*>(pVertexBindingDescriptions);
+			pVertexBindingDescriptions = pVertexBindingDescriptions_;
 			return *this;
 		}
 
-		const uint32_t& vertexAttributeDescriptionCount() const
+		PipelineVertexInputStateCreateInfo& setVertexAttributeDescriptionCount(uint32_t vertexAttributeDescriptionCount_)
 		{
-			return m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount;
-		}
-
-		uint32_t& vertexAttributeDescriptionCount()
-		{
-			return m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount;
-		}
-
-		PipelineVertexInputStateCreateInfo& vertexAttributeDescriptionCount(uint32_t vertexAttributeDescriptionCount)
-		{
-			m_pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount = vertexAttributeDescriptionCount;
+			vertexAttributeDescriptionCount = vertexAttributeDescriptionCount_;
 			return *this;
 		}
 
-		const VertexInputAttributeDescription* pVertexAttributeDescriptions() const
+		PipelineVertexInputStateCreateInfo& setPVertexAttributeDescriptions(const VertexInputAttributeDescription* pVertexAttributeDescriptions_)
 		{
-			return reinterpret_cast<const VertexInputAttributeDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions);
-		}
-
-		const VertexInputAttributeDescription* pVertexAttributeDescriptions()
-		{
-			return reinterpret_cast<const VertexInputAttributeDescription*>(m_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions);
-		}
-
-		PipelineVertexInputStateCreateInfo& pVertexAttributeDescriptions(const VertexInputAttributeDescription* pVertexAttributeDescriptions)
-		{
-			m_pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions = reinterpret_cast<const VkVertexInputAttributeDescription*>(pVertexAttributeDescriptions);
+			pVertexAttributeDescriptions = pVertexAttributeDescriptions_;
 			return *this;
 		}
 
 		operator const VkPipelineVertexInputStateCreateInfo&() const
 		{
-			return m_pipelineVertexInputStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineVertexInputStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineVertexInputStateCreateInfo m_pipelineVertexInputStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineVertexInputStateCreateFlags flags;
+		uint32_t vertexBindingDescriptionCount;
+		const VertexInputBindingDescription* pVertexBindingDescriptions;
+		uint32_t vertexAttributeDescriptionCount;
+		const VertexInputAttributeDescription* pVertexAttributeDescriptions;
 	};
 	static_assert(sizeof(PipelineVertexInputStateCreateInfo) == sizeof(VkPipelineVertexInputStateCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineInputAssemblyStateCreateInfo
+	struct PipelineInputAssemblyStateCreateInfo
 	{
-	public:
 		PipelineInputAssemblyStateCreateInfo()
 			: PipelineInputAssemblyStateCreateInfo(PipelineInputAssemblyStateCreateFlags(), PrimitiveTopology::ePointList, 0)
 		{}
 
-		PipelineInputAssemblyStateCreateInfo(PipelineInputAssemblyStateCreateFlags flags, PrimitiveTopology topology, Bool32 primitiveRestartEnable)
+		PipelineInputAssemblyStateCreateInfo(PipelineInputAssemblyStateCreateFlags flags_, PrimitiveTopology topology_, Bool32 primitiveRestartEnable_)
 		{
-			m_pipelineInputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-			m_pipelineInputAssemblyStateCreateInfo.pNext = nullptr;
-			m_pipelineInputAssemblyStateCreateInfo.flags = static_cast<VkPipelineInputAssemblyStateCreateFlags>(flags);
-			m_pipelineInputAssemblyStateCreateInfo.topology = static_cast<VkPrimitiveTopology>(topology);
-			m_pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = primitiveRestartEnable;
+			sType = StructureType::ePipelineInputAssemblyStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			topology = topology_;
+			primitiveRestartEnable = primitiveRestartEnable_;
 		}
 
 		PipelineInputAssemblyStateCreateInfo(VkPipelineInputAssemblyStateCreateInfo const & rhs)
-			: m_pipelineInputAssemblyStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineInputAssemblyStateCreateInfo));
 		}
 
 		PipelineInputAssemblyStateCreateInfo& operator=(VkPipelineInputAssemblyStateCreateInfo const & rhs)
 		{
-			m_pipelineInputAssemblyStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineInputAssemblyStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineInputAssemblyStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineInputAssemblyStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineInputAssemblyStateCreateInfo.sType);
-		}
-
-		PipelineInputAssemblyStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineInputAssemblyStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineInputAssemblyStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineInputAssemblyStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineInputAssemblyStateCreateInfo.pNext);
-		}
-
-		PipelineInputAssemblyStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineInputAssemblyStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineInputAssemblyStateCreateFlags& flags() const
+		PipelineInputAssemblyStateCreateInfo& setFlags(PipelineInputAssemblyStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineInputAssemblyStateCreateFlags&>(m_pipelineInputAssemblyStateCreateInfo.flags);
-		}
-
-		PipelineInputAssemblyStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineInputAssemblyStateCreateFlags&>(m_pipelineInputAssemblyStateCreateInfo.flags);
-		}
-
-		PipelineInputAssemblyStateCreateInfo& flags(PipelineInputAssemblyStateCreateFlags flags)
-		{
-			m_pipelineInputAssemblyStateCreateInfo.flags = static_cast<VkPipelineInputAssemblyStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const PrimitiveTopology& topology() const
+		PipelineInputAssemblyStateCreateInfo& setTopology(PrimitiveTopology topology_)
 		{
-			return reinterpret_cast<const PrimitiveTopology&>(m_pipelineInputAssemblyStateCreateInfo.topology);
-		}
-
-		PrimitiveTopology& topology()
-		{
-			return reinterpret_cast<PrimitiveTopology&>(m_pipelineInputAssemblyStateCreateInfo.topology);
-		}
-
-		PipelineInputAssemblyStateCreateInfo& topology(PrimitiveTopology topology)
-		{
-			m_pipelineInputAssemblyStateCreateInfo.topology = static_cast<VkPrimitiveTopology>(topology);
+			topology = topology_;
 			return *this;
 		}
 
-		const Bool32& primitiveRestartEnable() const
+		PipelineInputAssemblyStateCreateInfo& setPrimitiveRestartEnable(Bool32 primitiveRestartEnable_)
 		{
-			return m_pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable;
-		}
-
-		Bool32& primitiveRestartEnable()
-		{
-			return m_pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable;
-		}
-
-		PipelineInputAssemblyStateCreateInfo& primitiveRestartEnable(Bool32 primitiveRestartEnable)
-		{
-			m_pipelineInputAssemblyStateCreateInfo.primitiveRestartEnable = primitiveRestartEnable;
+			primitiveRestartEnable = primitiveRestartEnable_;
 			return *this;
 		}
 
 		operator const VkPipelineInputAssemblyStateCreateInfo&() const
 		{
-			return m_pipelineInputAssemblyStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineInputAssemblyStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineInputAssemblyStateCreateInfo m_pipelineInputAssemblyStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineInputAssemblyStateCreateFlags flags;
+		PrimitiveTopology topology;
+		Bool32 primitiveRestartEnable;
 	};
 	static_assert(sizeof(PipelineInputAssemblyStateCreateInfo) == sizeof(VkPipelineInputAssemblyStateCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineTessellationStateCreateInfo
+	struct PipelineTessellationStateCreateInfo
 	{
-	public:
 		PipelineTessellationStateCreateInfo()
 			: PipelineTessellationStateCreateInfo(PipelineTessellationStateCreateFlags(), 0)
 		{}
 
-		PipelineTessellationStateCreateInfo(PipelineTessellationStateCreateFlags flags, uint32_t patchControlPoints)
+		PipelineTessellationStateCreateInfo(PipelineTessellationStateCreateFlags flags_, uint32_t patchControlPoints_)
 		{
-			m_pipelineTessellationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
-			m_pipelineTessellationStateCreateInfo.pNext = nullptr;
-			m_pipelineTessellationStateCreateInfo.flags = static_cast<VkPipelineTessellationStateCreateFlags>(flags);
-			m_pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
+			sType = StructureType::ePipelineTessellationStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			patchControlPoints = patchControlPoints_;
 		}
 
 		PipelineTessellationStateCreateInfo(VkPipelineTessellationStateCreateInfo const & rhs)
-			: m_pipelineTessellationStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineTessellationStateCreateInfo));
 		}
 
 		PipelineTessellationStateCreateInfo& operator=(VkPipelineTessellationStateCreateInfo const & rhs)
 		{
-			m_pipelineTessellationStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineTessellationStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineTessellationStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineTessellationStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineTessellationStateCreateInfo.sType);
-		}
-
-		PipelineTessellationStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineTessellationStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineTessellationStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineTessellationStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineTessellationStateCreateInfo.pNext);
-		}
-
-		PipelineTessellationStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineTessellationStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineTessellationStateCreateFlags& flags() const
+		PipelineTessellationStateCreateInfo& setFlags(PipelineTessellationStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineTessellationStateCreateFlags&>(m_pipelineTessellationStateCreateInfo.flags);
-		}
-
-		PipelineTessellationStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineTessellationStateCreateFlags&>(m_pipelineTessellationStateCreateInfo.flags);
-		}
-
-		PipelineTessellationStateCreateInfo& flags(PipelineTessellationStateCreateFlags flags)
-		{
-			m_pipelineTessellationStateCreateInfo.flags = static_cast<VkPipelineTessellationStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& patchControlPoints() const
+		PipelineTessellationStateCreateInfo& setPatchControlPoints(uint32_t patchControlPoints_)
 		{
-			return m_pipelineTessellationStateCreateInfo.patchControlPoints;
-		}
-
-		uint32_t& patchControlPoints()
-		{
-			return m_pipelineTessellationStateCreateInfo.patchControlPoints;
-		}
-
-		PipelineTessellationStateCreateInfo& patchControlPoints(uint32_t patchControlPoints)
-		{
-			m_pipelineTessellationStateCreateInfo.patchControlPoints = patchControlPoints;
+			patchControlPoints = patchControlPoints_;
 			return *this;
 		}
 
 		operator const VkPipelineTessellationStateCreateInfo&() const
 		{
-			return m_pipelineTessellationStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineTessellationStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineTessellationStateCreateInfo m_pipelineTessellationStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineTessellationStateCreateFlags flags;
+		uint32_t patchControlPoints;
 	};
 	static_assert(sizeof(PipelineTessellationStateCreateInfo) == sizeof(VkPipelineTessellationStateCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineViewportStateCreateInfo
+	struct PipelineViewportStateCreateInfo
 	{
-	public:
 		PipelineViewportStateCreateInfo()
 			: PipelineViewportStateCreateInfo(PipelineViewportStateCreateFlags(), 0, nullptr, 0, nullptr)
 		{}
 
-		PipelineViewportStateCreateInfo(PipelineViewportStateCreateFlags flags, uint32_t viewportCount, const Viewport* pViewports, uint32_t scissorCount, const Rect2D* pScissors)
+		PipelineViewportStateCreateInfo(PipelineViewportStateCreateFlags flags_, uint32_t viewportCount_, const Viewport* pViewports_, uint32_t scissorCount_, const Rect2D* pScissors_)
 		{
-			m_pipelineViewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-			m_pipelineViewportStateCreateInfo.pNext = nullptr;
-			m_pipelineViewportStateCreateInfo.flags = static_cast<VkPipelineViewportStateCreateFlags>(flags);
-			m_pipelineViewportStateCreateInfo.viewportCount = viewportCount;
-			m_pipelineViewportStateCreateInfo.pViewports = reinterpret_cast<const VkViewport*>(pViewports);
-			m_pipelineViewportStateCreateInfo.scissorCount = scissorCount;
-			m_pipelineViewportStateCreateInfo.pScissors = reinterpret_cast<const VkRect2D*>(pScissors);
+			sType = StructureType::ePipelineViewportStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			viewportCount = viewportCount_;
+			pViewports = pViewports_;
+			scissorCount = scissorCount_;
+			pScissors = pScissors_;
 		}
 
 		PipelineViewportStateCreateInfo(VkPipelineViewportStateCreateInfo const & rhs)
-			: m_pipelineViewportStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineViewportStateCreateInfo));
 		}
 
 		PipelineViewportStateCreateInfo& operator=(VkPipelineViewportStateCreateInfo const & rhs)
 		{
-			m_pipelineViewportStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineViewportStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineViewportStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineViewportStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineViewportStateCreateInfo.sType);
-		}
-
-		PipelineViewportStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineViewportStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineViewportStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineViewportStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineViewportStateCreateInfo.pNext);
-		}
-
-		PipelineViewportStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineViewportStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineViewportStateCreateFlags& flags() const
+		PipelineViewportStateCreateInfo& setFlags(PipelineViewportStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineViewportStateCreateFlags&>(m_pipelineViewportStateCreateInfo.flags);
-		}
-
-		PipelineViewportStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineViewportStateCreateFlags&>(m_pipelineViewportStateCreateInfo.flags);
-		}
-
-		PipelineViewportStateCreateInfo& flags(PipelineViewportStateCreateFlags flags)
-		{
-			m_pipelineViewportStateCreateInfo.flags = static_cast<VkPipelineViewportStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& viewportCount() const
+		PipelineViewportStateCreateInfo& setViewportCount(uint32_t viewportCount_)
 		{
-			return m_pipelineViewportStateCreateInfo.viewportCount;
-		}
-
-		uint32_t& viewportCount()
-		{
-			return m_pipelineViewportStateCreateInfo.viewportCount;
-		}
-
-		PipelineViewportStateCreateInfo& viewportCount(uint32_t viewportCount)
-		{
-			m_pipelineViewportStateCreateInfo.viewportCount = viewportCount;
+			viewportCount = viewportCount_;
 			return *this;
 		}
 
-		const Viewport* pViewports() const
+		PipelineViewportStateCreateInfo& setPViewports(const Viewport* pViewports_)
 		{
-			return reinterpret_cast<const Viewport*>(m_pipelineViewportStateCreateInfo.pViewports);
-		}
-
-		const Viewport* pViewports()
-		{
-			return reinterpret_cast<const Viewport*>(m_pipelineViewportStateCreateInfo.pViewports);
-		}
-
-		PipelineViewportStateCreateInfo& pViewports(const Viewport* pViewports)
-		{
-			m_pipelineViewportStateCreateInfo.pViewports = reinterpret_cast<const VkViewport*>(pViewports);
+			pViewports = pViewports_;
 			return *this;
 		}
 
-		const uint32_t& scissorCount() const
+		PipelineViewportStateCreateInfo& setScissorCount(uint32_t scissorCount_)
 		{
-			return m_pipelineViewportStateCreateInfo.scissorCount;
-		}
-
-		uint32_t& scissorCount()
-		{
-			return m_pipelineViewportStateCreateInfo.scissorCount;
-		}
-
-		PipelineViewportStateCreateInfo& scissorCount(uint32_t scissorCount)
-		{
-			m_pipelineViewportStateCreateInfo.scissorCount = scissorCount;
+			scissorCount = scissorCount_;
 			return *this;
 		}
 
-		const Rect2D* pScissors() const
+		PipelineViewportStateCreateInfo& setPScissors(const Rect2D* pScissors_)
 		{
-			return reinterpret_cast<const Rect2D*>(m_pipelineViewportStateCreateInfo.pScissors);
-		}
-
-		const Rect2D* pScissors()
-		{
-			return reinterpret_cast<const Rect2D*>(m_pipelineViewportStateCreateInfo.pScissors);
-		}
-
-		PipelineViewportStateCreateInfo& pScissors(const Rect2D* pScissors)
-		{
-			m_pipelineViewportStateCreateInfo.pScissors = reinterpret_cast<const VkRect2D*>(pScissors);
+			pScissors = pScissors_;
 			return *this;
 		}
 
 		operator const VkPipelineViewportStateCreateInfo&() const
 		{
-			return m_pipelineViewportStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineViewportStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineViewportStateCreateInfo m_pipelineViewportStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineViewportStateCreateFlags flags;
+		uint32_t viewportCount;
+		const Viewport* pViewports;
+		uint32_t scissorCount;
+		const Rect2D* pScissors;
 	};
 	static_assert(sizeof(PipelineViewportStateCreateInfo) == sizeof(VkPipelineViewportStateCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineRasterizationStateCreateInfo
+	struct PipelineRasterizationStateCreateInfo
 	{
-	public:
 		PipelineRasterizationStateCreateInfo()
 			: PipelineRasterizationStateCreateInfo(PipelineRasterizationStateCreateFlags(), 0, 0, PolygonMode::eFill, CullModeFlags(), FrontFace::eCounterClockwise, 0, 0, 0, 0, 0)
 		{}
 
-		PipelineRasterizationStateCreateInfo(PipelineRasterizationStateCreateFlags flags, Bool32 depthClampEnable, Bool32 rasterizerDiscardEnable, PolygonMode polygonMode, CullModeFlags cullMode, FrontFace frontFace, Bool32 depthBiasEnable, float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor, float lineWidth)
+		PipelineRasterizationStateCreateInfo(PipelineRasterizationStateCreateFlags flags_, Bool32 depthClampEnable_, Bool32 rasterizerDiscardEnable_, PolygonMode polygonMode_, CullModeFlags cullMode_, FrontFace frontFace_, Bool32 depthBiasEnable_, float depthBiasConstantFactor_, float depthBiasClamp_, float depthBiasSlopeFactor_, float lineWidth_)
 		{
-			m_pipelineRasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-			m_pipelineRasterizationStateCreateInfo.pNext = nullptr;
-			m_pipelineRasterizationStateCreateInfo.flags = static_cast<VkPipelineRasterizationStateCreateFlags>(flags);
-			m_pipelineRasterizationStateCreateInfo.depthClampEnable = depthClampEnable;
-			m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = rasterizerDiscardEnable;
-			m_pipelineRasterizationStateCreateInfo.polygonMode = static_cast<VkPolygonMode>(polygonMode);
-			m_pipelineRasterizationStateCreateInfo.cullMode = static_cast<VkCullModeFlags>(cullMode);
-			m_pipelineRasterizationStateCreateInfo.frontFace = static_cast<VkFrontFace>(frontFace);
-			m_pipelineRasterizationStateCreateInfo.depthBiasEnable = depthBiasEnable;
-			m_pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = depthBiasConstantFactor;
-			m_pipelineRasterizationStateCreateInfo.depthBiasClamp = depthBiasClamp;
-			m_pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = depthBiasSlopeFactor;
-			m_pipelineRasterizationStateCreateInfo.lineWidth = lineWidth;
+			sType = StructureType::ePipelineRasterizationStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			depthClampEnable = depthClampEnable_;
+			rasterizerDiscardEnable = rasterizerDiscardEnable_;
+			polygonMode = polygonMode_;
+			cullMode = cullMode_;
+			frontFace = frontFace_;
+			depthBiasEnable = depthBiasEnable_;
+			depthBiasConstantFactor = depthBiasConstantFactor_;
+			depthBiasClamp = depthBiasClamp_;
+			depthBiasSlopeFactor = depthBiasSlopeFactor_;
+			lineWidth = lineWidth_;
 		}
 
 		PipelineRasterizationStateCreateInfo(VkPipelineRasterizationStateCreateInfo const & rhs)
-			: m_pipelineRasterizationStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineRasterizationStateCreateInfo));
 		}
 
 		PipelineRasterizationStateCreateInfo& operator=(VkPipelineRasterizationStateCreateInfo const & rhs)
 		{
-			m_pipelineRasterizationStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineRasterizationStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineRasterizationStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineRasterizationStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineRasterizationStateCreateInfo.sType);
-		}
-
-		PipelineRasterizationStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineRasterizationStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineRasterizationStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineRasterizationStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineRasterizationStateCreateInfo.pNext);
-		}
-
-		PipelineRasterizationStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineRasterizationStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineRasterizationStateCreateFlags& flags() const
+		PipelineRasterizationStateCreateInfo& setFlags(PipelineRasterizationStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineRasterizationStateCreateFlags&>(m_pipelineRasterizationStateCreateInfo.flags);
-		}
-
-		PipelineRasterizationStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineRasterizationStateCreateFlags&>(m_pipelineRasterizationStateCreateInfo.flags);
-		}
-
-		PipelineRasterizationStateCreateInfo& flags(PipelineRasterizationStateCreateFlags flags)
-		{
-			m_pipelineRasterizationStateCreateInfo.flags = static_cast<VkPipelineRasterizationStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Bool32& depthClampEnable() const
+		PipelineRasterizationStateCreateInfo& setDepthClampEnable(Bool32 depthClampEnable_)
 		{
-			return m_pipelineRasterizationStateCreateInfo.depthClampEnable;
-		}
-
-		Bool32& depthClampEnable()
-		{
-			return m_pipelineRasterizationStateCreateInfo.depthClampEnable;
-		}
-
-		PipelineRasterizationStateCreateInfo& depthClampEnable(Bool32 depthClampEnable)
-		{
-			m_pipelineRasterizationStateCreateInfo.depthClampEnable = depthClampEnable;
+			depthClampEnable = depthClampEnable_;
 			return *this;
 		}
 
-		const Bool32& rasterizerDiscardEnable() const
+		PipelineRasterizationStateCreateInfo& setRasterizerDiscardEnable(Bool32 rasterizerDiscardEnable_)
 		{
-			return m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable;
-		}
-
-		Bool32& rasterizerDiscardEnable()
-		{
-			return m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable;
-		}
-
-		PipelineRasterizationStateCreateInfo& rasterizerDiscardEnable(Bool32 rasterizerDiscardEnable)
-		{
-			m_pipelineRasterizationStateCreateInfo.rasterizerDiscardEnable = rasterizerDiscardEnable;
+			rasterizerDiscardEnable = rasterizerDiscardEnable_;
 			return *this;
 		}
 
-		const PolygonMode& polygonMode() const
+		PipelineRasterizationStateCreateInfo& setPolygonMode(PolygonMode polygonMode_)
 		{
-			return reinterpret_cast<const PolygonMode&>(m_pipelineRasterizationStateCreateInfo.polygonMode);
-		}
-
-		PolygonMode& polygonMode()
-		{
-			return reinterpret_cast<PolygonMode&>(m_pipelineRasterizationStateCreateInfo.polygonMode);
-		}
-
-		PipelineRasterizationStateCreateInfo& polygonMode(PolygonMode polygonMode)
-		{
-			m_pipelineRasterizationStateCreateInfo.polygonMode = static_cast<VkPolygonMode>(polygonMode);
+			polygonMode = polygonMode_;
 			return *this;
 		}
 
-		const CullModeFlags& cullMode() const
+		PipelineRasterizationStateCreateInfo& setCullMode(CullModeFlags cullMode_)
 		{
-			return reinterpret_cast<const CullModeFlags&>(m_pipelineRasterizationStateCreateInfo.cullMode);
-		}
-
-		CullModeFlags& cullMode()
-		{
-			return reinterpret_cast<CullModeFlags&>(m_pipelineRasterizationStateCreateInfo.cullMode);
-		}
-
-		PipelineRasterizationStateCreateInfo& cullMode(CullModeFlags cullMode)
-		{
-			m_pipelineRasterizationStateCreateInfo.cullMode = static_cast<VkCullModeFlags>(cullMode);
+			cullMode = cullMode_;
 			return *this;
 		}
 
-		const FrontFace& frontFace() const
+		PipelineRasterizationStateCreateInfo& setFrontFace(FrontFace frontFace_)
 		{
-			return reinterpret_cast<const FrontFace&>(m_pipelineRasterizationStateCreateInfo.frontFace);
-		}
-
-		FrontFace& frontFace()
-		{
-			return reinterpret_cast<FrontFace&>(m_pipelineRasterizationStateCreateInfo.frontFace);
-		}
-
-		PipelineRasterizationStateCreateInfo& frontFace(FrontFace frontFace)
-		{
-			m_pipelineRasterizationStateCreateInfo.frontFace = static_cast<VkFrontFace>(frontFace);
+			frontFace = frontFace_;
 			return *this;
 		}
 
-		const Bool32& depthBiasEnable() const
+		PipelineRasterizationStateCreateInfo& setDepthBiasEnable(Bool32 depthBiasEnable_)
 		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasEnable;
-		}
-
-		Bool32& depthBiasEnable()
-		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasEnable;
-		}
-
-		PipelineRasterizationStateCreateInfo& depthBiasEnable(Bool32 depthBiasEnable)
-		{
-			m_pipelineRasterizationStateCreateInfo.depthBiasEnable = depthBiasEnable;
+			depthBiasEnable = depthBiasEnable_;
 			return *this;
 		}
 
-		const float& depthBiasConstantFactor() const
+		PipelineRasterizationStateCreateInfo& setDepthBiasConstantFactor(float depthBiasConstantFactor_)
 		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasConstantFactor;
-		}
-
-		float& depthBiasConstantFactor()
-		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasConstantFactor;
-		}
-
-		PipelineRasterizationStateCreateInfo& depthBiasConstantFactor(float depthBiasConstantFactor)
-		{
-			m_pipelineRasterizationStateCreateInfo.depthBiasConstantFactor = depthBiasConstantFactor;
+			depthBiasConstantFactor = depthBiasConstantFactor_;
 			return *this;
 		}
 
-		const float& depthBiasClamp() const
+		PipelineRasterizationStateCreateInfo& setDepthBiasClamp(float depthBiasClamp_)
 		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasClamp;
-		}
-
-		float& depthBiasClamp()
-		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasClamp;
-		}
-
-		PipelineRasterizationStateCreateInfo& depthBiasClamp(float depthBiasClamp)
-		{
-			m_pipelineRasterizationStateCreateInfo.depthBiasClamp = depthBiasClamp;
+			depthBiasClamp = depthBiasClamp_;
 			return *this;
 		}
 
-		const float& depthBiasSlopeFactor() const
+		PipelineRasterizationStateCreateInfo& setDepthBiasSlopeFactor(float depthBiasSlopeFactor_)
 		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor;
-		}
-
-		float& depthBiasSlopeFactor()
-		{
-			return m_pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor;
-		}
-
-		PipelineRasterizationStateCreateInfo& depthBiasSlopeFactor(float depthBiasSlopeFactor)
-		{
-			m_pipelineRasterizationStateCreateInfo.depthBiasSlopeFactor = depthBiasSlopeFactor;
+			depthBiasSlopeFactor = depthBiasSlopeFactor_;
 			return *this;
 		}
 
-		const float& lineWidth() const
+		PipelineRasterizationStateCreateInfo& setLineWidth(float lineWidth_)
 		{
-			return m_pipelineRasterizationStateCreateInfo.lineWidth;
-		}
-
-		float& lineWidth()
-		{
-			return m_pipelineRasterizationStateCreateInfo.lineWidth;
-		}
-
-		PipelineRasterizationStateCreateInfo& lineWidth(float lineWidth)
-		{
-			m_pipelineRasterizationStateCreateInfo.lineWidth = lineWidth;
+			lineWidth = lineWidth_;
 			return *this;
 		}
 
 		operator const VkPipelineRasterizationStateCreateInfo&() const
 		{
-			return m_pipelineRasterizationStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineRasterizationStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineRasterizationStateCreateInfo m_pipelineRasterizationStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineRasterizationStateCreateFlags flags;
+		Bool32 depthClampEnable;
+		Bool32 rasterizerDiscardEnable;
+		PolygonMode polygonMode;
+		CullModeFlags cullMode;
+		FrontFace frontFace;
+		Bool32 depthBiasEnable;
+		float depthBiasConstantFactor;
+		float depthBiasClamp;
+		float depthBiasSlopeFactor;
+		float lineWidth;
 	};
 	static_assert(sizeof(PipelineRasterizationStateCreateInfo) == sizeof(VkPipelineRasterizationStateCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineDepthStencilStateCreateInfo
+	struct PipelineDepthStencilStateCreateInfo
 	{
-	public:
 		PipelineDepthStencilStateCreateInfo()
 			: PipelineDepthStencilStateCreateInfo(PipelineDepthStencilStateCreateFlags(), 0, 0, CompareOp::eNever, 0, 0, StencilOpState(), StencilOpState(), 0, 0)
 		{}
 
-		PipelineDepthStencilStateCreateInfo(PipelineDepthStencilStateCreateFlags flags, Bool32 depthTestEnable, Bool32 depthWriteEnable, CompareOp depthCompareOp, Bool32 depthBoundsTestEnable, Bool32 stencilTestEnable, StencilOpState front, StencilOpState back, float minDepthBounds, float maxDepthBounds)
+		PipelineDepthStencilStateCreateInfo(PipelineDepthStencilStateCreateFlags flags_, Bool32 depthTestEnable_, Bool32 depthWriteEnable_, CompareOp depthCompareOp_, Bool32 depthBoundsTestEnable_, Bool32 stencilTestEnable_, StencilOpState front_, StencilOpState back_, float minDepthBounds_, float maxDepthBounds_)
 		{
-			m_pipelineDepthStencilStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-			m_pipelineDepthStencilStateCreateInfo.pNext = nullptr;
-			m_pipelineDepthStencilStateCreateInfo.flags = static_cast<VkPipelineDepthStencilStateCreateFlags>(flags);
-			m_pipelineDepthStencilStateCreateInfo.depthTestEnable = depthTestEnable;
-			m_pipelineDepthStencilStateCreateInfo.depthWriteEnable = depthWriteEnable;
-			m_pipelineDepthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(depthCompareOp);
-			m_pipelineDepthStencilStateCreateInfo.depthBoundsTestEnable = depthBoundsTestEnable;
-			m_pipelineDepthStencilStateCreateInfo.stencilTestEnable = stencilTestEnable;
-			m_pipelineDepthStencilStateCreateInfo.front = static_cast<VkStencilOpState>(front);
-			m_pipelineDepthStencilStateCreateInfo.back = static_cast<VkStencilOpState>(back);
-			m_pipelineDepthStencilStateCreateInfo.minDepthBounds = minDepthBounds;
-			m_pipelineDepthStencilStateCreateInfo.maxDepthBounds = maxDepthBounds;
+			sType = StructureType::ePipelineDepthStencilStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			depthTestEnable = depthTestEnable_;
+			depthWriteEnable = depthWriteEnable_;
+			depthCompareOp = depthCompareOp_;
+			depthBoundsTestEnable = depthBoundsTestEnable_;
+			stencilTestEnable = stencilTestEnable_;
+			front = front_;
+			back = back_;
+			minDepthBounds = minDepthBounds_;
+			maxDepthBounds = maxDepthBounds_;
 		}
 
 		PipelineDepthStencilStateCreateInfo(VkPipelineDepthStencilStateCreateInfo const & rhs)
-			: m_pipelineDepthStencilStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineDepthStencilStateCreateInfo));
 		}
 
 		PipelineDepthStencilStateCreateInfo& operator=(VkPipelineDepthStencilStateCreateInfo const & rhs)
 		{
-			m_pipelineDepthStencilStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineDepthStencilStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineDepthStencilStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineDepthStencilStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineDepthStencilStateCreateInfo.sType);
-		}
-
-		PipelineDepthStencilStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineDepthStencilStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineDepthStencilStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineDepthStencilStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineDepthStencilStateCreateInfo.pNext);
-		}
-
-		PipelineDepthStencilStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineDepthStencilStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineDepthStencilStateCreateFlags& flags() const
+		PipelineDepthStencilStateCreateInfo& setFlags(PipelineDepthStencilStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineDepthStencilStateCreateFlags&>(m_pipelineDepthStencilStateCreateInfo.flags);
-		}
-
-		PipelineDepthStencilStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineDepthStencilStateCreateFlags&>(m_pipelineDepthStencilStateCreateInfo.flags);
-		}
-
-		PipelineDepthStencilStateCreateInfo& flags(PipelineDepthStencilStateCreateFlags flags)
-		{
-			m_pipelineDepthStencilStateCreateInfo.flags = static_cast<VkPipelineDepthStencilStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Bool32& depthTestEnable() const
+		PipelineDepthStencilStateCreateInfo& setDepthTestEnable(Bool32 depthTestEnable_)
 		{
-			return m_pipelineDepthStencilStateCreateInfo.depthTestEnable;
-		}
-
-		Bool32& depthTestEnable()
-		{
-			return m_pipelineDepthStencilStateCreateInfo.depthTestEnable;
-		}
-
-		PipelineDepthStencilStateCreateInfo& depthTestEnable(Bool32 depthTestEnable)
-		{
-			m_pipelineDepthStencilStateCreateInfo.depthTestEnable = depthTestEnable;
+			depthTestEnable = depthTestEnable_;
 			return *this;
 		}
 
-		const Bool32& depthWriteEnable() const
+		PipelineDepthStencilStateCreateInfo& setDepthWriteEnable(Bool32 depthWriteEnable_)
 		{
-			return m_pipelineDepthStencilStateCreateInfo.depthWriteEnable;
-		}
-
-		Bool32& depthWriteEnable()
-		{
-			return m_pipelineDepthStencilStateCreateInfo.depthWriteEnable;
-		}
-
-		PipelineDepthStencilStateCreateInfo& depthWriteEnable(Bool32 depthWriteEnable)
-		{
-			m_pipelineDepthStencilStateCreateInfo.depthWriteEnable = depthWriteEnable;
+			depthWriteEnable = depthWriteEnable_;
 			return *this;
 		}
 
-		const CompareOp& depthCompareOp() const
+		PipelineDepthStencilStateCreateInfo& setDepthCompareOp(CompareOp depthCompareOp_)
 		{
-			return reinterpret_cast<const CompareOp&>(m_pipelineDepthStencilStateCreateInfo.depthCompareOp);
-		}
-
-		CompareOp& depthCompareOp()
-		{
-			return reinterpret_cast<CompareOp&>(m_pipelineDepthStencilStateCreateInfo.depthCompareOp);
-		}
-
-		PipelineDepthStencilStateCreateInfo& depthCompareOp(CompareOp depthCompareOp)
-		{
-			m_pipelineDepthStencilStateCreateInfo.depthCompareOp = static_cast<VkCompareOp>(depthCompareOp);
+			depthCompareOp = depthCompareOp_;
 			return *this;
 		}
 
-		const Bool32& depthBoundsTestEnable() const
+		PipelineDepthStencilStateCreateInfo& setDepthBoundsTestEnable(Bool32 depthBoundsTestEnable_)
 		{
-			return m_pipelineDepthStencilStateCreateInfo.depthBoundsTestEnable;
-		}
-
-		Bool32& depthBoundsTestEnable()
-		{
-			return m_pipelineDepthStencilStateCreateInfo.depthBoundsTestEnable;
-		}
-
-		PipelineDepthStencilStateCreateInfo& depthBoundsTestEnable(Bool32 depthBoundsTestEnable)
-		{
-			m_pipelineDepthStencilStateCreateInfo.depthBoundsTestEnable = depthBoundsTestEnable;
+			depthBoundsTestEnable = depthBoundsTestEnable_;
 			return *this;
 		}
 
-		const Bool32& stencilTestEnable() const
+		PipelineDepthStencilStateCreateInfo& setStencilTestEnable(Bool32 stencilTestEnable_)
 		{
-			return m_pipelineDepthStencilStateCreateInfo.stencilTestEnable;
-		}
-
-		Bool32& stencilTestEnable()
-		{
-			return m_pipelineDepthStencilStateCreateInfo.stencilTestEnable;
-		}
-
-		PipelineDepthStencilStateCreateInfo& stencilTestEnable(Bool32 stencilTestEnable)
-		{
-			m_pipelineDepthStencilStateCreateInfo.stencilTestEnable = stencilTestEnable;
+			stencilTestEnable = stencilTestEnable_;
 			return *this;
 		}
 
-		const StencilOpState& front() const
+		PipelineDepthStencilStateCreateInfo& setFront(StencilOpState front_)
 		{
-			return reinterpret_cast<const StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.front);
-		}
-
-		StencilOpState& front()
-		{
-			return reinterpret_cast<StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.front);
-		}
-
-		PipelineDepthStencilStateCreateInfo& front(StencilOpState front)
-		{
-			m_pipelineDepthStencilStateCreateInfo.front = static_cast<VkStencilOpState>(front);
+			front = front_;
 			return *this;
 		}
 
-		const StencilOpState& back() const
+		PipelineDepthStencilStateCreateInfo& setBack(StencilOpState back_)
 		{
-			return reinterpret_cast<const StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.back);
-		}
-
-		StencilOpState& back()
-		{
-			return reinterpret_cast<StencilOpState&>(m_pipelineDepthStencilStateCreateInfo.back);
-		}
-
-		PipelineDepthStencilStateCreateInfo& back(StencilOpState back)
-		{
-			m_pipelineDepthStencilStateCreateInfo.back = static_cast<VkStencilOpState>(back);
+			back = back_;
 			return *this;
 		}
 
-		const float& minDepthBounds() const
+		PipelineDepthStencilStateCreateInfo& setMinDepthBounds(float minDepthBounds_)
 		{
-			return m_pipelineDepthStencilStateCreateInfo.minDepthBounds;
-		}
-
-		float& minDepthBounds()
-		{
-			return m_pipelineDepthStencilStateCreateInfo.minDepthBounds;
-		}
-
-		PipelineDepthStencilStateCreateInfo& minDepthBounds(float minDepthBounds)
-		{
-			m_pipelineDepthStencilStateCreateInfo.minDepthBounds = minDepthBounds;
+			minDepthBounds = minDepthBounds_;
 			return *this;
 		}
 
-		const float& maxDepthBounds() const
+		PipelineDepthStencilStateCreateInfo& setMaxDepthBounds(float maxDepthBounds_)
 		{
-			return m_pipelineDepthStencilStateCreateInfo.maxDepthBounds;
-		}
-
-		float& maxDepthBounds()
-		{
-			return m_pipelineDepthStencilStateCreateInfo.maxDepthBounds;
-		}
-
-		PipelineDepthStencilStateCreateInfo& maxDepthBounds(float maxDepthBounds)
-		{
-			m_pipelineDepthStencilStateCreateInfo.maxDepthBounds = maxDepthBounds;
+			maxDepthBounds = maxDepthBounds_;
 			return *this;
 		}
 
 		operator const VkPipelineDepthStencilStateCreateInfo&() const
 		{
-			return m_pipelineDepthStencilStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineDepthStencilStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineDepthStencilStateCreateInfo m_pipelineDepthStencilStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineDepthStencilStateCreateFlags flags;
+		Bool32 depthTestEnable;
+		Bool32 depthWriteEnable;
+		CompareOp depthCompareOp;
+		Bool32 depthBoundsTestEnable;
+		Bool32 stencilTestEnable;
+		StencilOpState front;
+		StencilOpState back;
+		float minDepthBounds;
+		float maxDepthBounds;
 	};
 	static_assert(sizeof(PipelineDepthStencilStateCreateInfo) == sizeof(VkPipelineDepthStencilStateCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineCacheCreateInfo
+	struct PipelineCacheCreateInfo
 	{
-	public:
 		PipelineCacheCreateInfo()
 			: PipelineCacheCreateInfo(PipelineCacheCreateFlags(), 0, nullptr)
 		{}
 
-		PipelineCacheCreateInfo(PipelineCacheCreateFlags flags, size_t initialDataSize, const void* pInitialData)
+		PipelineCacheCreateInfo(PipelineCacheCreateFlags flags_, size_t initialDataSize_, const void* pInitialData_)
 		{
-			m_pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-			m_pipelineCacheCreateInfo.pNext = nullptr;
-			m_pipelineCacheCreateInfo.flags = static_cast<VkPipelineCacheCreateFlags>(flags);
-			m_pipelineCacheCreateInfo.initialDataSize = initialDataSize;
-			m_pipelineCacheCreateInfo.pInitialData = pInitialData;
+			sType = StructureType::ePipelineCacheCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			initialDataSize = initialDataSize_;
+			pInitialData = pInitialData_;
 		}
 
 		PipelineCacheCreateInfo(VkPipelineCacheCreateInfo const & rhs)
-			: m_pipelineCacheCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineCacheCreateInfo));
 		}
 
 		PipelineCacheCreateInfo& operator=(VkPipelineCacheCreateInfo const & rhs)
 		{
-			m_pipelineCacheCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineCacheCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineCacheCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineCacheCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineCacheCreateInfo.sType);
-		}
-
-		PipelineCacheCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineCacheCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineCacheCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pNext);
-		}
-
-		PipelineCacheCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineCacheCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineCacheCreateFlags& flags() const
+		PipelineCacheCreateInfo& setFlags(PipelineCacheCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineCacheCreateFlags&>(m_pipelineCacheCreateInfo.flags);
-		}
-
-		PipelineCacheCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineCacheCreateFlags&>(m_pipelineCacheCreateInfo.flags);
-		}
-
-		PipelineCacheCreateInfo& flags(PipelineCacheCreateFlags flags)
-		{
-			m_pipelineCacheCreateInfo.flags = static_cast<VkPipelineCacheCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const size_t& initialDataSize() const
+		PipelineCacheCreateInfo& setInitialDataSize(size_t initialDataSize_)
 		{
-			return m_pipelineCacheCreateInfo.initialDataSize;
-		}
-
-		size_t& initialDataSize()
-		{
-			return m_pipelineCacheCreateInfo.initialDataSize;
-		}
-
-		PipelineCacheCreateInfo& initialDataSize(size_t initialDataSize)
-		{
-			m_pipelineCacheCreateInfo.initialDataSize = initialDataSize;
+			initialDataSize = initialDataSize_;
 			return *this;
 		}
 
-		const void* pInitialData() const
+		PipelineCacheCreateInfo& setPInitialData(const void* pInitialData_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pInitialData);
-		}
-
-		const void* pInitialData()
-		{
-			return reinterpret_cast<const void*>(m_pipelineCacheCreateInfo.pInitialData);
-		}
-
-		PipelineCacheCreateInfo& pInitialData(const void* pInitialData)
-		{
-			m_pipelineCacheCreateInfo.pInitialData = pInitialData;
+			pInitialData = pInitialData_;
 			return *this;
 		}
 
 		operator const VkPipelineCacheCreateInfo&() const
 		{
-			return m_pipelineCacheCreateInfo;
+			return *reinterpret_cast<const VkPipelineCacheCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineCacheCreateInfo m_pipelineCacheCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineCacheCreateFlags flags;
+		size_t initialDataSize;
+		const void* pInitialData;
 	};
 	static_assert(sizeof(PipelineCacheCreateInfo) == sizeof(VkPipelineCacheCreateInfo), "struct and wrapper have different size!");
 
-	class SamplerCreateInfo
+	struct SamplerCreateInfo
 	{
-	public:
 		SamplerCreateInfo()
 			: SamplerCreateInfo(SamplerCreateFlags(), Filter::eNearest, Filter::eNearest, SamplerMipmapMode::eNearest, SamplerAddressMode::eRepeat, SamplerAddressMode::eRepeat, SamplerAddressMode::eRepeat, 0, 0, 0, 0, CompareOp::eNever, 0, 0, BorderColor::eFloatTransparentBlack, 0)
 		{}
 
-		SamplerCreateInfo(SamplerCreateFlags flags, Filter magFilter, Filter minFilter, SamplerMipmapMode mipmapMode, SamplerAddressMode addressModeU, SamplerAddressMode addressModeV, SamplerAddressMode addressModeW, float mipLodBias, Bool32 anisotropyEnable, float maxAnisotropy, Bool32 compareEnable, CompareOp compareOp, float minLod, float maxLod, BorderColor borderColor, Bool32 unnormalizedCoordinates)
+		SamplerCreateInfo(SamplerCreateFlags flags_, Filter magFilter_, Filter minFilter_, SamplerMipmapMode mipmapMode_, SamplerAddressMode addressModeU_, SamplerAddressMode addressModeV_, SamplerAddressMode addressModeW_, float mipLodBias_, Bool32 anisotropyEnable_, float maxAnisotropy_, Bool32 compareEnable_, CompareOp compareOp_, float minLod_, float maxLod_, BorderColor borderColor_, Bool32 unnormalizedCoordinates_)
 		{
-			m_samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-			m_samplerCreateInfo.pNext = nullptr;
-			m_samplerCreateInfo.flags = static_cast<VkSamplerCreateFlags>(flags);
-			m_samplerCreateInfo.magFilter = static_cast<VkFilter>(magFilter);
-			m_samplerCreateInfo.minFilter = static_cast<VkFilter>(minFilter);
-			m_samplerCreateInfo.mipmapMode = static_cast<VkSamplerMipmapMode>(mipmapMode);
-			m_samplerCreateInfo.addressModeU = static_cast<VkSamplerAddressMode>(addressModeU);
-			m_samplerCreateInfo.addressModeV = static_cast<VkSamplerAddressMode>(addressModeV);
-			m_samplerCreateInfo.addressModeW = static_cast<VkSamplerAddressMode>(addressModeW);
-			m_samplerCreateInfo.mipLodBias = mipLodBias;
-			m_samplerCreateInfo.anisotropyEnable = anisotropyEnable;
-			m_samplerCreateInfo.maxAnisotropy = maxAnisotropy;
-			m_samplerCreateInfo.compareEnable = compareEnable;
-			m_samplerCreateInfo.compareOp = static_cast<VkCompareOp>(compareOp);
-			m_samplerCreateInfo.minLod = minLod;
-			m_samplerCreateInfo.maxLod = maxLod;
-			m_samplerCreateInfo.borderColor = static_cast<VkBorderColor>(borderColor);
-			m_samplerCreateInfo.unnormalizedCoordinates = unnormalizedCoordinates;
+			sType = StructureType::eSamplerCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			magFilter = magFilter_;
+			minFilter = minFilter_;
+			mipmapMode = mipmapMode_;
+			addressModeU = addressModeU_;
+			addressModeV = addressModeV_;
+			addressModeW = addressModeW_;
+			mipLodBias = mipLodBias_;
+			anisotropyEnable = anisotropyEnable_;
+			maxAnisotropy = maxAnisotropy_;
+			compareEnable = compareEnable_;
+			compareOp = compareOp_;
+			minLod = minLod_;
+			maxLod = maxLod_;
+			borderColor = borderColor_;
+			unnormalizedCoordinates = unnormalizedCoordinates_;
 		}
 
 		SamplerCreateInfo(VkSamplerCreateInfo const & rhs)
-			: m_samplerCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SamplerCreateInfo));
 		}
 
 		SamplerCreateInfo& operator=(VkSamplerCreateInfo const & rhs)
 		{
-			m_samplerCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(SamplerCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		SamplerCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_samplerCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_samplerCreateInfo.sType);
-		}
-
-		SamplerCreateInfo& sType(StructureType sType)
-		{
-			m_samplerCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		SamplerCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_samplerCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_samplerCreateInfo.pNext);
-		}
-
-		SamplerCreateInfo& pNext(const void* pNext)
-		{
-			m_samplerCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const SamplerCreateFlags& flags() const
+		SamplerCreateInfo& setFlags(SamplerCreateFlags flags_)
 		{
-			return reinterpret_cast<const SamplerCreateFlags&>(m_samplerCreateInfo.flags);
-		}
-
-		SamplerCreateFlags& flags()
-		{
-			return reinterpret_cast<SamplerCreateFlags&>(m_samplerCreateInfo.flags);
-		}
-
-		SamplerCreateInfo& flags(SamplerCreateFlags flags)
-		{
-			m_samplerCreateInfo.flags = static_cast<VkSamplerCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Filter& magFilter() const
+		SamplerCreateInfo& setMagFilter(Filter magFilter_)
 		{
-			return reinterpret_cast<const Filter&>(m_samplerCreateInfo.magFilter);
-		}
-
-		Filter& magFilter()
-		{
-			return reinterpret_cast<Filter&>(m_samplerCreateInfo.magFilter);
-		}
-
-		SamplerCreateInfo& magFilter(Filter magFilter)
-		{
-			m_samplerCreateInfo.magFilter = static_cast<VkFilter>(magFilter);
+			magFilter = magFilter_;
 			return *this;
 		}
 
-		const Filter& minFilter() const
+		SamplerCreateInfo& setMinFilter(Filter minFilter_)
 		{
-			return reinterpret_cast<const Filter&>(m_samplerCreateInfo.minFilter);
-		}
-
-		Filter& minFilter()
-		{
-			return reinterpret_cast<Filter&>(m_samplerCreateInfo.minFilter);
-		}
-
-		SamplerCreateInfo& minFilter(Filter minFilter)
-		{
-			m_samplerCreateInfo.minFilter = static_cast<VkFilter>(minFilter);
+			minFilter = minFilter_;
 			return *this;
 		}
 
-		const SamplerMipmapMode& mipmapMode() const
+		SamplerCreateInfo& setMipmapMode(SamplerMipmapMode mipmapMode_)
 		{
-			return reinterpret_cast<const SamplerMipmapMode&>(m_samplerCreateInfo.mipmapMode);
-		}
-
-		SamplerMipmapMode& mipmapMode()
-		{
-			return reinterpret_cast<SamplerMipmapMode&>(m_samplerCreateInfo.mipmapMode);
-		}
-
-		SamplerCreateInfo& mipmapMode(SamplerMipmapMode mipmapMode)
-		{
-			m_samplerCreateInfo.mipmapMode = static_cast<VkSamplerMipmapMode>(mipmapMode);
+			mipmapMode = mipmapMode_;
 			return *this;
 		}
 
-		const SamplerAddressMode& addressModeU() const
+		SamplerCreateInfo& setAddressModeU(SamplerAddressMode addressModeU_)
 		{
-			return reinterpret_cast<const SamplerAddressMode&>(m_samplerCreateInfo.addressModeU);
-		}
-
-		SamplerAddressMode& addressModeU()
-		{
-			return reinterpret_cast<SamplerAddressMode&>(m_samplerCreateInfo.addressModeU);
-		}
-
-		SamplerCreateInfo& addressModeU(SamplerAddressMode addressModeU)
-		{
-			m_samplerCreateInfo.addressModeU = static_cast<VkSamplerAddressMode>(addressModeU);
+			addressModeU = addressModeU_;
 			return *this;
 		}
 
-		const SamplerAddressMode& addressModeV() const
+		SamplerCreateInfo& setAddressModeV(SamplerAddressMode addressModeV_)
 		{
-			return reinterpret_cast<const SamplerAddressMode&>(m_samplerCreateInfo.addressModeV);
-		}
-
-		SamplerAddressMode& addressModeV()
-		{
-			return reinterpret_cast<SamplerAddressMode&>(m_samplerCreateInfo.addressModeV);
-		}
-
-		SamplerCreateInfo& addressModeV(SamplerAddressMode addressModeV)
-		{
-			m_samplerCreateInfo.addressModeV = static_cast<VkSamplerAddressMode>(addressModeV);
+			addressModeV = addressModeV_;
 			return *this;
 		}
 
-		const SamplerAddressMode& addressModeW() const
+		SamplerCreateInfo& setAddressModeW(SamplerAddressMode addressModeW_)
 		{
-			return reinterpret_cast<const SamplerAddressMode&>(m_samplerCreateInfo.addressModeW);
-		}
-
-		SamplerAddressMode& addressModeW()
-		{
-			return reinterpret_cast<SamplerAddressMode&>(m_samplerCreateInfo.addressModeW);
-		}
-
-		SamplerCreateInfo& addressModeW(SamplerAddressMode addressModeW)
-		{
-			m_samplerCreateInfo.addressModeW = static_cast<VkSamplerAddressMode>(addressModeW);
+			addressModeW = addressModeW_;
 			return *this;
 		}
 
-		const float& mipLodBias() const
+		SamplerCreateInfo& setMipLodBias(float mipLodBias_)
 		{
-			return m_samplerCreateInfo.mipLodBias;
-		}
-
-		float& mipLodBias()
-		{
-			return m_samplerCreateInfo.mipLodBias;
-		}
-
-		SamplerCreateInfo& mipLodBias(float mipLodBias)
-		{
-			m_samplerCreateInfo.mipLodBias = mipLodBias;
+			mipLodBias = mipLodBias_;
 			return *this;
 		}
 
-		const Bool32& anisotropyEnable() const
+		SamplerCreateInfo& setAnisotropyEnable(Bool32 anisotropyEnable_)
 		{
-			return m_samplerCreateInfo.anisotropyEnable;
-		}
-
-		Bool32& anisotropyEnable()
-		{
-			return m_samplerCreateInfo.anisotropyEnable;
-		}
-
-		SamplerCreateInfo& anisotropyEnable(Bool32 anisotropyEnable)
-		{
-			m_samplerCreateInfo.anisotropyEnable = anisotropyEnable;
+			anisotropyEnable = anisotropyEnable_;
 			return *this;
 		}
 
-		const float& maxAnisotropy() const
+		SamplerCreateInfo& setMaxAnisotropy(float maxAnisotropy_)
 		{
-			return m_samplerCreateInfo.maxAnisotropy;
-		}
-
-		float& maxAnisotropy()
-		{
-			return m_samplerCreateInfo.maxAnisotropy;
-		}
-
-		SamplerCreateInfo& maxAnisotropy(float maxAnisotropy)
-		{
-			m_samplerCreateInfo.maxAnisotropy = maxAnisotropy;
+			maxAnisotropy = maxAnisotropy_;
 			return *this;
 		}
 
-		const Bool32& compareEnable() const
+		SamplerCreateInfo& setCompareEnable(Bool32 compareEnable_)
 		{
-			return m_samplerCreateInfo.compareEnable;
-		}
-
-		Bool32& compareEnable()
-		{
-			return m_samplerCreateInfo.compareEnable;
-		}
-
-		SamplerCreateInfo& compareEnable(Bool32 compareEnable)
-		{
-			m_samplerCreateInfo.compareEnable = compareEnable;
+			compareEnable = compareEnable_;
 			return *this;
 		}
 
-		const CompareOp& compareOp() const
+		SamplerCreateInfo& setCompareOp(CompareOp compareOp_)
 		{
-			return reinterpret_cast<const CompareOp&>(m_samplerCreateInfo.compareOp);
-		}
-
-		CompareOp& compareOp()
-		{
-			return reinterpret_cast<CompareOp&>(m_samplerCreateInfo.compareOp);
-		}
-
-		SamplerCreateInfo& compareOp(CompareOp compareOp)
-		{
-			m_samplerCreateInfo.compareOp = static_cast<VkCompareOp>(compareOp);
+			compareOp = compareOp_;
 			return *this;
 		}
 
-		const float& minLod() const
+		SamplerCreateInfo& setMinLod(float minLod_)
 		{
-			return m_samplerCreateInfo.minLod;
-		}
-
-		float& minLod()
-		{
-			return m_samplerCreateInfo.minLod;
-		}
-
-		SamplerCreateInfo& minLod(float minLod)
-		{
-			m_samplerCreateInfo.minLod = minLod;
+			minLod = minLod_;
 			return *this;
 		}
 
-		const float& maxLod() const
+		SamplerCreateInfo& setMaxLod(float maxLod_)
 		{
-			return m_samplerCreateInfo.maxLod;
-		}
-
-		float& maxLod()
-		{
-			return m_samplerCreateInfo.maxLod;
-		}
-
-		SamplerCreateInfo& maxLod(float maxLod)
-		{
-			m_samplerCreateInfo.maxLod = maxLod;
+			maxLod = maxLod_;
 			return *this;
 		}
 
-		const BorderColor& borderColor() const
+		SamplerCreateInfo& setBorderColor(BorderColor borderColor_)
 		{
-			return reinterpret_cast<const BorderColor&>(m_samplerCreateInfo.borderColor);
-		}
-
-		BorderColor& borderColor()
-		{
-			return reinterpret_cast<BorderColor&>(m_samplerCreateInfo.borderColor);
-		}
-
-		SamplerCreateInfo& borderColor(BorderColor borderColor)
-		{
-			m_samplerCreateInfo.borderColor = static_cast<VkBorderColor>(borderColor);
+			borderColor = borderColor_;
 			return *this;
 		}
 
-		const Bool32& unnormalizedCoordinates() const
+		SamplerCreateInfo& setUnnormalizedCoordinates(Bool32 unnormalizedCoordinates_)
 		{
-			return m_samplerCreateInfo.unnormalizedCoordinates;
-		}
-
-		Bool32& unnormalizedCoordinates()
-		{
-			return m_samplerCreateInfo.unnormalizedCoordinates;
-		}
-
-		SamplerCreateInfo& unnormalizedCoordinates(Bool32 unnormalizedCoordinates)
-		{
-			m_samplerCreateInfo.unnormalizedCoordinates = unnormalizedCoordinates;
+			unnormalizedCoordinates = unnormalizedCoordinates_;
 			return *this;
 		}
 
 		operator const VkSamplerCreateInfo&() const
 		{
-			return m_samplerCreateInfo;
+			return *reinterpret_cast<const VkSamplerCreateInfo*>(this);
 		}
 
-	private:
-		VkSamplerCreateInfo m_samplerCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		SamplerCreateFlags flags;
+		Filter magFilter;
+		Filter minFilter;
+		SamplerMipmapMode mipmapMode;
+		SamplerAddressMode addressModeU;
+		SamplerAddressMode addressModeV;
+		SamplerAddressMode addressModeW;
+		float mipLodBias;
+		Bool32 anisotropyEnable;
+		float maxAnisotropy;
+		Bool32 compareEnable;
+		CompareOp compareOp;
+		float minLod;
+		float maxLod;
+		BorderColor borderColor;
+		Bool32 unnormalizedCoordinates;
 	};
 	static_assert(sizeof(SamplerCreateInfo) == sizeof(VkSamplerCreateInfo), "struct and wrapper have different size!");
 
-	class CommandBufferAllocateInfo
+	struct CommandBufferAllocateInfo
 	{
-	public:
 		CommandBufferAllocateInfo()
 			: CommandBufferAllocateInfo(CommandPool(), CommandBufferLevel::ePrimary, 0)
 		{}
 
-		CommandBufferAllocateInfo(CommandPool commandPool, CommandBufferLevel level, uint32_t commandBufferCount)
+		CommandBufferAllocateInfo(CommandPool commandPool_, CommandBufferLevel level_, uint32_t commandBufferCount_)
 		{
-			m_commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			m_commandBufferAllocateInfo.pNext = nullptr;
-			m_commandBufferAllocateInfo.commandPool = static_cast<VkCommandPool>(commandPool);
-			m_commandBufferAllocateInfo.level = static_cast<VkCommandBufferLevel>(level);
-			m_commandBufferAllocateInfo.commandBufferCount = commandBufferCount;
+			sType = StructureType::eCommandBufferAllocateInfo;
+			pNext = nullptr;
+			commandPool = commandPool_;
+			level = level_;
+			commandBufferCount = commandBufferCount_;
 		}
 
 		CommandBufferAllocateInfo(VkCommandBufferAllocateInfo const & rhs)
-			: m_commandBufferAllocateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(CommandBufferAllocateInfo));
 		}
 
 		CommandBufferAllocateInfo& operator=(VkCommandBufferAllocateInfo const & rhs)
 		{
-			m_commandBufferAllocateInfo = rhs;
+			memcpy(this, &rhs, sizeof(CommandBufferAllocateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		CommandBufferAllocateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_commandBufferAllocateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_commandBufferAllocateInfo.sType);
-		}
-
-		CommandBufferAllocateInfo& sType(StructureType sType)
-		{
-			m_commandBufferAllocateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		CommandBufferAllocateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_commandBufferAllocateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_commandBufferAllocateInfo.pNext);
-		}
-
-		CommandBufferAllocateInfo& pNext(const void* pNext)
-		{
-			m_commandBufferAllocateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const CommandPool& commandPool() const
+		CommandBufferAllocateInfo& setCommandPool(CommandPool commandPool_)
 		{
-			return reinterpret_cast<const CommandPool&>(m_commandBufferAllocateInfo.commandPool);
-		}
-
-		CommandPool& commandPool()
-		{
-			return reinterpret_cast<CommandPool&>(m_commandBufferAllocateInfo.commandPool);
-		}
-
-		CommandBufferAllocateInfo& commandPool(CommandPool commandPool)
-		{
-			m_commandBufferAllocateInfo.commandPool = static_cast<VkCommandPool>(commandPool);
+			commandPool = commandPool_;
 			return *this;
 		}
 
-		const CommandBufferLevel& level() const
+		CommandBufferAllocateInfo& setLevel(CommandBufferLevel level_)
 		{
-			return reinterpret_cast<const CommandBufferLevel&>(m_commandBufferAllocateInfo.level);
-		}
-
-		CommandBufferLevel& level()
-		{
-			return reinterpret_cast<CommandBufferLevel&>(m_commandBufferAllocateInfo.level);
-		}
-
-		CommandBufferAllocateInfo& level(CommandBufferLevel level)
-		{
-			m_commandBufferAllocateInfo.level = static_cast<VkCommandBufferLevel>(level);
+			level = level_;
 			return *this;
 		}
 
-		const uint32_t& commandBufferCount() const
+		CommandBufferAllocateInfo& setCommandBufferCount(uint32_t commandBufferCount_)
 		{
-			return m_commandBufferAllocateInfo.commandBufferCount;
-		}
-
-		uint32_t& commandBufferCount()
-		{
-			return m_commandBufferAllocateInfo.commandBufferCount;
-		}
-
-		CommandBufferAllocateInfo& commandBufferCount(uint32_t commandBufferCount)
-		{
-			m_commandBufferAllocateInfo.commandBufferCount = commandBufferCount;
+			commandBufferCount = commandBufferCount_;
 			return *this;
 		}
 
 		operator const VkCommandBufferAllocateInfo&() const
 		{
-			return m_commandBufferAllocateInfo;
+			return *reinterpret_cast<const VkCommandBufferAllocateInfo*>(this);
 		}
 
-	private:
-		VkCommandBufferAllocateInfo m_commandBufferAllocateInfo;
+		StructureType sType;
+		const void* pNext;
+		CommandPool commandPool;
+		CommandBufferLevel level;
+		uint32_t commandBufferCount;
 	};
 	static_assert(sizeof(CommandBufferAllocateInfo) == sizeof(VkCommandBufferAllocateInfo), "struct and wrapper have different size!");
 
-	class RenderPassBeginInfo
+	struct RenderPassBeginInfo
 	{
-	public:
 		RenderPassBeginInfo()
 			: RenderPassBeginInfo(RenderPass(), Framebuffer(), Rect2D(), 0, nullptr)
 		{}
 
-		RenderPassBeginInfo(RenderPass renderPass, Framebuffer framebuffer, Rect2D renderArea, uint32_t clearValueCount, const ClearValue* pClearValues)
+		RenderPassBeginInfo(RenderPass renderPass_, Framebuffer framebuffer_, Rect2D renderArea_, uint32_t clearValueCount_, const ClearValue* pClearValues_)
 		{
-			m_renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-			m_renderPassBeginInfo.pNext = nullptr;
-			m_renderPassBeginInfo.renderPass = static_cast<VkRenderPass>(renderPass);
-			m_renderPassBeginInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
-			m_renderPassBeginInfo.renderArea = static_cast<VkRect2D>(renderArea);
-			m_renderPassBeginInfo.clearValueCount = clearValueCount;
-			m_renderPassBeginInfo.pClearValues = reinterpret_cast<const VkClearValue*>(pClearValues);
+			sType = StructureType::eRenderPassBeginInfo;
+			pNext = nullptr;
+			renderPass = renderPass_;
+			framebuffer = framebuffer_;
+			renderArea = renderArea_;
+			clearValueCount = clearValueCount_;
+			pClearValues = pClearValues_;
 		}
 
 		RenderPassBeginInfo(VkRenderPassBeginInfo const & rhs)
-			: m_renderPassBeginInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(RenderPassBeginInfo));
 		}
 
 		RenderPassBeginInfo& operator=(VkRenderPassBeginInfo const & rhs)
 		{
-			m_renderPassBeginInfo = rhs;
+			memcpy(this, &rhs, sizeof(RenderPassBeginInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		RenderPassBeginInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_renderPassBeginInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_renderPassBeginInfo.sType);
-		}
-
-		RenderPassBeginInfo& sType(StructureType sType)
-		{
-			m_renderPassBeginInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		RenderPassBeginInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_renderPassBeginInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_renderPassBeginInfo.pNext);
-		}
-
-		RenderPassBeginInfo& pNext(const void* pNext)
-		{
-			m_renderPassBeginInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const RenderPass& renderPass() const
+		RenderPassBeginInfo& setRenderPass(RenderPass renderPass_)
 		{
-			return reinterpret_cast<const RenderPass&>(m_renderPassBeginInfo.renderPass);
-		}
-
-		RenderPass& renderPass()
-		{
-			return reinterpret_cast<RenderPass&>(m_renderPassBeginInfo.renderPass);
-		}
-
-		RenderPassBeginInfo& renderPass(RenderPass renderPass)
-		{
-			m_renderPassBeginInfo.renderPass = static_cast<VkRenderPass>(renderPass);
+			renderPass = renderPass_;
 			return *this;
 		}
 
-		const Framebuffer& framebuffer() const
+		RenderPassBeginInfo& setFramebuffer(Framebuffer framebuffer_)
 		{
-			return reinterpret_cast<const Framebuffer&>(m_renderPassBeginInfo.framebuffer);
-		}
-
-		Framebuffer& framebuffer()
-		{
-			return reinterpret_cast<Framebuffer&>(m_renderPassBeginInfo.framebuffer);
-		}
-
-		RenderPassBeginInfo& framebuffer(Framebuffer framebuffer)
-		{
-			m_renderPassBeginInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
+			framebuffer = framebuffer_;
 			return *this;
 		}
 
-		const Rect2D& renderArea() const
+		RenderPassBeginInfo& setRenderArea(Rect2D renderArea_)
 		{
-			return reinterpret_cast<const Rect2D&>(m_renderPassBeginInfo.renderArea);
-		}
-
-		Rect2D& renderArea()
-		{
-			return reinterpret_cast<Rect2D&>(m_renderPassBeginInfo.renderArea);
-		}
-
-		RenderPassBeginInfo& renderArea(Rect2D renderArea)
-		{
-			m_renderPassBeginInfo.renderArea = static_cast<VkRect2D>(renderArea);
+			renderArea = renderArea_;
 			return *this;
 		}
 
-		const uint32_t& clearValueCount() const
+		RenderPassBeginInfo& setClearValueCount(uint32_t clearValueCount_)
 		{
-			return m_renderPassBeginInfo.clearValueCount;
-		}
-
-		uint32_t& clearValueCount()
-		{
-			return m_renderPassBeginInfo.clearValueCount;
-		}
-
-		RenderPassBeginInfo& clearValueCount(uint32_t clearValueCount)
-		{
-			m_renderPassBeginInfo.clearValueCount = clearValueCount;
+			clearValueCount = clearValueCount_;
 			return *this;
 		}
 
-		const ClearValue* pClearValues() const
+		RenderPassBeginInfo& setPClearValues(const ClearValue* pClearValues_)
 		{
-			return reinterpret_cast<const ClearValue*>(m_renderPassBeginInfo.pClearValues);
-		}
-
-		const ClearValue* pClearValues()
-		{
-			return reinterpret_cast<const ClearValue*>(m_renderPassBeginInfo.pClearValues);
-		}
-
-		RenderPassBeginInfo& pClearValues(const ClearValue* pClearValues)
-		{
-			m_renderPassBeginInfo.pClearValues = reinterpret_cast<const VkClearValue*>(pClearValues);
+			pClearValues = pClearValues_;
 			return *this;
 		}
 
 		operator const VkRenderPassBeginInfo&() const
 		{
-			return m_renderPassBeginInfo;
+			return *reinterpret_cast<const VkRenderPassBeginInfo*>(this);
 		}
 
-	private:
-		VkRenderPassBeginInfo m_renderPassBeginInfo;
+		StructureType sType;
+		const void* pNext;
+		RenderPass renderPass;
+		Framebuffer framebuffer;
+		Rect2D renderArea;
+		uint32_t clearValueCount;
+		const ClearValue* pClearValues;
 	};
 	static_assert(sizeof(RenderPassBeginInfo) == sizeof(VkRenderPassBeginInfo), "struct and wrapper have different size!");
 
-	class EventCreateInfo
+	struct EventCreateInfo
 	{
-	public:
 		EventCreateInfo()
 			: EventCreateInfo(EventCreateFlags())
 		{}
 
-		EventCreateInfo(EventCreateFlags flags)
+		EventCreateInfo(EventCreateFlags flags_)
 		{
-			m_eventCreateInfo.sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
-			m_eventCreateInfo.pNext = nullptr;
-			m_eventCreateInfo.flags = static_cast<VkEventCreateFlags>(flags);
+			sType = StructureType::eEventCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
 		}
 
 		EventCreateInfo(VkEventCreateInfo const & rhs)
-			: m_eventCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(EventCreateInfo));
 		}
 
 		EventCreateInfo& operator=(VkEventCreateInfo const & rhs)
 		{
-			m_eventCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(EventCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		EventCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_eventCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_eventCreateInfo.sType);
-		}
-
-		EventCreateInfo& sType(StructureType sType)
-		{
-			m_eventCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		EventCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_eventCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_eventCreateInfo.pNext);
-		}
-
-		EventCreateInfo& pNext(const void* pNext)
-		{
-			m_eventCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const EventCreateFlags& flags() const
+		EventCreateInfo& setFlags(EventCreateFlags flags_)
 		{
-			return reinterpret_cast<const EventCreateFlags&>(m_eventCreateInfo.flags);
-		}
-
-		EventCreateFlags& flags()
-		{
-			return reinterpret_cast<EventCreateFlags&>(m_eventCreateInfo.flags);
-		}
-
-		EventCreateInfo& flags(EventCreateFlags flags)
-		{
-			m_eventCreateInfo.flags = static_cast<VkEventCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
 		operator const VkEventCreateInfo&() const
 		{
-			return m_eventCreateInfo;
+			return *reinterpret_cast<const VkEventCreateInfo*>(this);
 		}
 
-	private:
-		VkEventCreateInfo m_eventCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		EventCreateFlags flags;
 	};
 	static_assert(sizeof(EventCreateInfo) == sizeof(VkEventCreateInfo), "struct and wrapper have different size!");
 
-	class SemaphoreCreateInfo
+	struct SemaphoreCreateInfo
 	{
-	public:
 		SemaphoreCreateInfo()
 			: SemaphoreCreateInfo(SemaphoreCreateFlags())
 		{}
 
-		SemaphoreCreateInfo(SemaphoreCreateFlags flags)
+		SemaphoreCreateInfo(SemaphoreCreateFlags flags_)
 		{
-			m_semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			m_semaphoreCreateInfo.pNext = nullptr;
-			m_semaphoreCreateInfo.flags = static_cast<VkSemaphoreCreateFlags>(flags);
+			sType = StructureType::eSemaphoreCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
 		}
 
 		SemaphoreCreateInfo(VkSemaphoreCreateInfo const & rhs)
-			: m_semaphoreCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SemaphoreCreateInfo));
 		}
 
 		SemaphoreCreateInfo& operator=(VkSemaphoreCreateInfo const & rhs)
 		{
-			m_semaphoreCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(SemaphoreCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		SemaphoreCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_semaphoreCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_semaphoreCreateInfo.sType);
-		}
-
-		SemaphoreCreateInfo& sType(StructureType sType)
-		{
-			m_semaphoreCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		SemaphoreCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_semaphoreCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_semaphoreCreateInfo.pNext);
-		}
-
-		SemaphoreCreateInfo& pNext(const void* pNext)
-		{
-			m_semaphoreCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const SemaphoreCreateFlags& flags() const
+		SemaphoreCreateInfo& setFlags(SemaphoreCreateFlags flags_)
 		{
-			return reinterpret_cast<const SemaphoreCreateFlags&>(m_semaphoreCreateInfo.flags);
-		}
-
-		SemaphoreCreateFlags& flags()
-		{
-			return reinterpret_cast<SemaphoreCreateFlags&>(m_semaphoreCreateInfo.flags);
-		}
-
-		SemaphoreCreateInfo& flags(SemaphoreCreateFlags flags)
-		{
-			m_semaphoreCreateInfo.flags = static_cast<VkSemaphoreCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
 		operator const VkSemaphoreCreateInfo&() const
 		{
-			return m_semaphoreCreateInfo;
+			return *reinterpret_cast<const VkSemaphoreCreateInfo*>(this);
 		}
 
-	private:
-		VkSemaphoreCreateInfo m_semaphoreCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		SemaphoreCreateFlags flags;
 	};
 	static_assert(sizeof(SemaphoreCreateInfo) == sizeof(VkSemaphoreCreateInfo), "struct and wrapper have different size!");
 
-	class FramebufferCreateInfo
+	struct FramebufferCreateInfo
 	{
-	public:
 		FramebufferCreateInfo()
 			: FramebufferCreateInfo(FramebufferCreateFlags(), RenderPass(), 0, nullptr, 0, 0, 0)
 		{}
 
-		FramebufferCreateInfo(FramebufferCreateFlags flags, RenderPass renderPass, uint32_t attachmentCount, const ImageView* pAttachments, uint32_t width, uint32_t height, uint32_t layers)
+		FramebufferCreateInfo(FramebufferCreateFlags flags_, RenderPass renderPass_, uint32_t attachmentCount_, const ImageView* pAttachments_, uint32_t width_, uint32_t height_, uint32_t layers_)
 		{
-			m_framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			m_framebufferCreateInfo.pNext = nullptr;
-			m_framebufferCreateInfo.flags = static_cast<VkFramebufferCreateFlags>(flags);
-			m_framebufferCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
-			m_framebufferCreateInfo.attachmentCount = attachmentCount;
-			m_framebufferCreateInfo.pAttachments = reinterpret_cast<const VkImageView*>(pAttachments);
-			m_framebufferCreateInfo.width = width;
-			m_framebufferCreateInfo.height = height;
-			m_framebufferCreateInfo.layers = layers;
+			sType = StructureType::eFramebufferCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			renderPass = renderPass_;
+			attachmentCount = attachmentCount_;
+			pAttachments = pAttachments_;
+			width = width_;
+			height = height_;
+			layers = layers_;
 		}
 
 		FramebufferCreateInfo(VkFramebufferCreateInfo const & rhs)
-			: m_framebufferCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(FramebufferCreateInfo));
 		}
 
 		FramebufferCreateInfo& operator=(VkFramebufferCreateInfo const & rhs)
 		{
-			m_framebufferCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(FramebufferCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		FramebufferCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_framebufferCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_framebufferCreateInfo.sType);
-		}
-
-		FramebufferCreateInfo& sType(StructureType sType)
-		{
-			m_framebufferCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		FramebufferCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_framebufferCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_framebufferCreateInfo.pNext);
-		}
-
-		FramebufferCreateInfo& pNext(const void* pNext)
-		{
-			m_framebufferCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const FramebufferCreateFlags& flags() const
+		FramebufferCreateInfo& setFlags(FramebufferCreateFlags flags_)
 		{
-			return reinterpret_cast<const FramebufferCreateFlags&>(m_framebufferCreateInfo.flags);
-		}
-
-		FramebufferCreateFlags& flags()
-		{
-			return reinterpret_cast<FramebufferCreateFlags&>(m_framebufferCreateInfo.flags);
-		}
-
-		FramebufferCreateInfo& flags(FramebufferCreateFlags flags)
-		{
-			m_framebufferCreateInfo.flags = static_cast<VkFramebufferCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const RenderPass& renderPass() const
+		FramebufferCreateInfo& setRenderPass(RenderPass renderPass_)
 		{
-			return reinterpret_cast<const RenderPass&>(m_framebufferCreateInfo.renderPass);
-		}
-
-		RenderPass& renderPass()
-		{
-			return reinterpret_cast<RenderPass&>(m_framebufferCreateInfo.renderPass);
-		}
-
-		FramebufferCreateInfo& renderPass(RenderPass renderPass)
-		{
-			m_framebufferCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
+			renderPass = renderPass_;
 			return *this;
 		}
 
-		const uint32_t& attachmentCount() const
+		FramebufferCreateInfo& setAttachmentCount(uint32_t attachmentCount_)
 		{
-			return m_framebufferCreateInfo.attachmentCount;
-		}
-
-		uint32_t& attachmentCount()
-		{
-			return m_framebufferCreateInfo.attachmentCount;
-		}
-
-		FramebufferCreateInfo& attachmentCount(uint32_t attachmentCount)
-		{
-			m_framebufferCreateInfo.attachmentCount = attachmentCount;
+			attachmentCount = attachmentCount_;
 			return *this;
 		}
 
-		const ImageView* pAttachments() const
+		FramebufferCreateInfo& setPAttachments(const ImageView* pAttachments_)
 		{
-			return reinterpret_cast<const ImageView*>(m_framebufferCreateInfo.pAttachments);
-		}
-
-		const ImageView* pAttachments()
-		{
-			return reinterpret_cast<const ImageView*>(m_framebufferCreateInfo.pAttachments);
-		}
-
-		FramebufferCreateInfo& pAttachments(const ImageView* pAttachments)
-		{
-			m_framebufferCreateInfo.pAttachments = reinterpret_cast<const VkImageView*>(pAttachments);
+			pAttachments = pAttachments_;
 			return *this;
 		}
 
-		const uint32_t& width() const
+		FramebufferCreateInfo& setWidth(uint32_t width_)
 		{
-			return m_framebufferCreateInfo.width;
-		}
-
-		uint32_t& width()
-		{
-			return m_framebufferCreateInfo.width;
-		}
-
-		FramebufferCreateInfo& width(uint32_t width)
-		{
-			m_framebufferCreateInfo.width = width;
+			width = width_;
 			return *this;
 		}
 
-		const uint32_t& height() const
+		FramebufferCreateInfo& setHeight(uint32_t height_)
 		{
-			return m_framebufferCreateInfo.height;
-		}
-
-		uint32_t& height()
-		{
-			return m_framebufferCreateInfo.height;
-		}
-
-		FramebufferCreateInfo& height(uint32_t height)
-		{
-			m_framebufferCreateInfo.height = height;
+			height = height_;
 			return *this;
 		}
 
-		const uint32_t& layers() const
+		FramebufferCreateInfo& setLayers(uint32_t layers_)
 		{
-			return m_framebufferCreateInfo.layers;
-		}
-
-		uint32_t& layers()
-		{
-			return m_framebufferCreateInfo.layers;
-		}
-
-		FramebufferCreateInfo& layers(uint32_t layers)
-		{
-			m_framebufferCreateInfo.layers = layers;
+			layers = layers_;
 			return *this;
 		}
 
 		operator const VkFramebufferCreateInfo&() const
 		{
-			return m_framebufferCreateInfo;
+			return *reinterpret_cast<const VkFramebufferCreateInfo*>(this);
 		}
 
-	private:
-		VkFramebufferCreateInfo m_framebufferCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		FramebufferCreateFlags flags;
+		RenderPass renderPass;
+		uint32_t attachmentCount;
+		const ImageView* pAttachments;
+		uint32_t width;
+		uint32_t height;
+		uint32_t layers;
 	};
 	static_assert(sizeof(FramebufferCreateInfo) == sizeof(VkFramebufferCreateInfo), "struct and wrapper have different size!");
 
-	class DisplayModeCreateInfoKHR
+	struct DisplayModeCreateInfoKHR
 	{
-	public:
 		DisplayModeCreateInfoKHR()
 			: DisplayModeCreateInfoKHR(DisplayModeCreateFlagsKHR(), DisplayModeParametersKHR())
 		{}
 
-		DisplayModeCreateInfoKHR(DisplayModeCreateFlagsKHR flags, DisplayModeParametersKHR parameters)
+		DisplayModeCreateInfoKHR(DisplayModeCreateFlagsKHR flags_, DisplayModeParametersKHR parameters_)
 		{
-			m_displayModeCreateInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_MODE_CREATE_INFO_KHR;
-			m_displayModeCreateInfoKHR.pNext = nullptr;
-			m_displayModeCreateInfoKHR.flags = static_cast<VkDisplayModeCreateFlagsKHR>(flags);
-			m_displayModeCreateInfoKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+			sType = StructureType::eDisplayModeCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			parameters = parameters_;
 		}
 
 		DisplayModeCreateInfoKHR(VkDisplayModeCreateInfoKHR const & rhs)
-			: m_displayModeCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplayModeCreateInfoKHR));
 		}
 
 		DisplayModeCreateInfoKHR& operator=(VkDisplayModeCreateInfoKHR const & rhs)
 		{
-			m_displayModeCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplayModeCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DisplayModeCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_displayModeCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_displayModeCreateInfoKHR.sType);
-		}
-
-		DisplayModeCreateInfoKHR& sType(StructureType sType)
-		{
-			m_displayModeCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DisplayModeCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_displayModeCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_displayModeCreateInfoKHR.pNext);
-		}
-
-		DisplayModeCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_displayModeCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DisplayModeCreateFlagsKHR& flags() const
+		DisplayModeCreateInfoKHR& setFlags(DisplayModeCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const DisplayModeCreateFlagsKHR&>(m_displayModeCreateInfoKHR.flags);
-		}
-
-		DisplayModeCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<DisplayModeCreateFlagsKHR&>(m_displayModeCreateInfoKHR.flags);
-		}
-
-		DisplayModeCreateInfoKHR& flags(DisplayModeCreateFlagsKHR flags)
-		{
-			m_displayModeCreateInfoKHR.flags = static_cast<VkDisplayModeCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const DisplayModeParametersKHR& parameters() const
+		DisplayModeCreateInfoKHR& setParameters(DisplayModeParametersKHR parameters_)
 		{
-			return reinterpret_cast<const DisplayModeParametersKHR&>(m_displayModeCreateInfoKHR.parameters);
-		}
-
-		DisplayModeParametersKHR& parameters()
-		{
-			return reinterpret_cast<DisplayModeParametersKHR&>(m_displayModeCreateInfoKHR.parameters);
-		}
-
-		DisplayModeCreateInfoKHR& parameters(DisplayModeParametersKHR parameters)
-		{
-			m_displayModeCreateInfoKHR.parameters = static_cast<VkDisplayModeParametersKHR>(parameters);
+			parameters = parameters_;
 			return *this;
 		}
 
 		operator const VkDisplayModeCreateInfoKHR&() const
 		{
-			return m_displayModeCreateInfoKHR;
+			return *reinterpret_cast<const VkDisplayModeCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkDisplayModeCreateInfoKHR m_displayModeCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		DisplayModeCreateFlagsKHR flags;
+		DisplayModeParametersKHR parameters;
 	};
 	static_assert(sizeof(DisplayModeCreateInfoKHR) == sizeof(VkDisplayModeCreateInfoKHR), "struct and wrapper have different size!");
 
-	class DisplayPresentInfoKHR
+	struct DisplayPresentInfoKHR
 	{
-	public:
 		DisplayPresentInfoKHR()
 			: DisplayPresentInfoKHR(Rect2D(), Rect2D(), 0)
 		{}
 
-		DisplayPresentInfoKHR(Rect2D srcRect, Rect2D dstRect, Bool32 persistent)
+		DisplayPresentInfoKHR(Rect2D srcRect_, Rect2D dstRect_, Bool32 persistent_)
 		{
-			m_displayPresentInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_PRESENT_INFO_KHR;
-			m_displayPresentInfoKHR.pNext = nullptr;
-			m_displayPresentInfoKHR.srcRect = static_cast<VkRect2D>(srcRect);
-			m_displayPresentInfoKHR.dstRect = static_cast<VkRect2D>(dstRect);
-			m_displayPresentInfoKHR.persistent = persistent;
+			sType = StructureType::eDisplayPresentInfoKHR;
+			pNext = nullptr;
+			srcRect = srcRect_;
+			dstRect = dstRect_;
+			persistent = persistent_;
 		}
 
 		DisplayPresentInfoKHR(VkDisplayPresentInfoKHR const & rhs)
-			: m_displayPresentInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplayPresentInfoKHR));
 		}
 
 		DisplayPresentInfoKHR& operator=(VkDisplayPresentInfoKHR const & rhs)
 		{
-			m_displayPresentInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplayPresentInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DisplayPresentInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_displayPresentInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_displayPresentInfoKHR.sType);
-		}
-
-		DisplayPresentInfoKHR& sType(StructureType sType)
-		{
-			m_displayPresentInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DisplayPresentInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_displayPresentInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_displayPresentInfoKHR.pNext);
-		}
-
-		DisplayPresentInfoKHR& pNext(const void* pNext)
-		{
-			m_displayPresentInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const Rect2D& srcRect() const
+		DisplayPresentInfoKHR& setSrcRect(Rect2D srcRect_)
 		{
-			return reinterpret_cast<const Rect2D&>(m_displayPresentInfoKHR.srcRect);
-		}
-
-		Rect2D& srcRect()
-		{
-			return reinterpret_cast<Rect2D&>(m_displayPresentInfoKHR.srcRect);
-		}
-
-		DisplayPresentInfoKHR& srcRect(Rect2D srcRect)
-		{
-			m_displayPresentInfoKHR.srcRect = static_cast<VkRect2D>(srcRect);
+			srcRect = srcRect_;
 			return *this;
 		}
 
-		const Rect2D& dstRect() const
+		DisplayPresentInfoKHR& setDstRect(Rect2D dstRect_)
 		{
-			return reinterpret_cast<const Rect2D&>(m_displayPresentInfoKHR.dstRect);
-		}
-
-		Rect2D& dstRect()
-		{
-			return reinterpret_cast<Rect2D&>(m_displayPresentInfoKHR.dstRect);
-		}
-
-		DisplayPresentInfoKHR& dstRect(Rect2D dstRect)
-		{
-			m_displayPresentInfoKHR.dstRect = static_cast<VkRect2D>(dstRect);
+			dstRect = dstRect_;
 			return *this;
 		}
 
-		const Bool32& persistent() const
+		DisplayPresentInfoKHR& setPersistent(Bool32 persistent_)
 		{
-			return m_displayPresentInfoKHR.persistent;
-		}
-
-		Bool32& persistent()
-		{
-			return m_displayPresentInfoKHR.persistent;
-		}
-
-		DisplayPresentInfoKHR& persistent(Bool32 persistent)
-		{
-			m_displayPresentInfoKHR.persistent = persistent;
+			persistent = persistent_;
 			return *this;
 		}
 
 		operator const VkDisplayPresentInfoKHR&() const
 		{
-			return m_displayPresentInfoKHR;
+			return *reinterpret_cast<const VkDisplayPresentInfoKHR*>(this);
 		}
 
-	private:
-		VkDisplayPresentInfoKHR m_displayPresentInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		Rect2D srcRect;
+		Rect2D dstRect;
+		Bool32 persistent;
 	};
 	static_assert(sizeof(DisplayPresentInfoKHR) == sizeof(VkDisplayPresentInfoKHR), "struct and wrapper have different size!");
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-	class AndroidSurfaceCreateInfoKHR
+	struct AndroidSurfaceCreateInfoKHR
 	{
-	public:
 		AndroidSurfaceCreateInfoKHR()
 			: AndroidSurfaceCreateInfoKHR(AndroidSurfaceCreateFlagsKHR(), nullptr)
 		{}
 
-		AndroidSurfaceCreateInfoKHR(AndroidSurfaceCreateFlagsKHR flags, ANativeWindow* window)
+		AndroidSurfaceCreateInfoKHR(AndroidSurfaceCreateFlagsKHR flags_, ANativeWindow* window_)
 		{
-			m_androidSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-			m_androidSurfaceCreateInfoKHR.pNext = nullptr;
-			m_androidSurfaceCreateInfoKHR.flags = static_cast<VkAndroidSurfaceCreateFlagsKHR>(flags);
-			m_androidSurfaceCreateInfoKHR.window = window;
+			sType = StructureType::eAndroidSurfaceCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			window = window_;
 		}
 
 		AndroidSurfaceCreateInfoKHR(VkAndroidSurfaceCreateInfoKHR const & rhs)
-			: m_androidSurfaceCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(AndroidSurfaceCreateInfoKHR));
 		}
 
 		AndroidSurfaceCreateInfoKHR& operator=(VkAndroidSurfaceCreateInfoKHR const & rhs)
 		{
-			m_androidSurfaceCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(AndroidSurfaceCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		AndroidSurfaceCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_androidSurfaceCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_androidSurfaceCreateInfoKHR.sType);
-		}
-
-		AndroidSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_androidSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		AndroidSurfaceCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_androidSurfaceCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_androidSurfaceCreateInfoKHR.pNext);
-		}
-
-		AndroidSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_androidSurfaceCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const AndroidSurfaceCreateFlagsKHR& flags() const
+		AndroidSurfaceCreateInfoKHR& setFlags(AndroidSurfaceCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const AndroidSurfaceCreateFlagsKHR&>(m_androidSurfaceCreateInfoKHR.flags);
-		}
-
-		AndroidSurfaceCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<AndroidSurfaceCreateFlagsKHR&>(m_androidSurfaceCreateInfoKHR.flags);
-		}
-
-		AndroidSurfaceCreateInfoKHR& flags(AndroidSurfaceCreateFlagsKHR flags)
-		{
-			m_androidSurfaceCreateInfoKHR.flags = static_cast<VkAndroidSurfaceCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const ANativeWindow* window() const
+		AndroidSurfaceCreateInfoKHR& setWindow(ANativeWindow* window_)
 		{
-			return reinterpret_cast<const ANativeWindow*>(m_androidSurfaceCreateInfoKHR.window);
-		}
-
-		ANativeWindow* window()
-		{
-			return reinterpret_cast<ANativeWindow*>(m_androidSurfaceCreateInfoKHR.window);
-		}
-
-		AndroidSurfaceCreateInfoKHR& window(ANativeWindow* window)
-		{
-			m_androidSurfaceCreateInfoKHR.window = window;
+			window = window_;
 			return *this;
 		}
 
 		operator const VkAndroidSurfaceCreateInfoKHR&() const
 		{
-			return m_androidSurfaceCreateInfoKHR;
+			return *reinterpret_cast<const VkAndroidSurfaceCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkAndroidSurfaceCreateInfoKHR m_androidSurfaceCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		AndroidSurfaceCreateFlagsKHR flags;
+		ANativeWindow* window;
 	};
 	static_assert(sizeof(AndroidSurfaceCreateInfoKHR) == sizeof(VkAndroidSurfaceCreateInfoKHR), "struct and wrapper have different size!");
 #endif /*VK_USE_PLATFORM_ANDROID_KHR*/
 
 #ifdef VK_USE_PLATFORM_MIR_KHR
-	class MirSurfaceCreateInfoKHR
+	struct MirSurfaceCreateInfoKHR
 	{
-	public:
 		MirSurfaceCreateInfoKHR()
 			: MirSurfaceCreateInfoKHR(MirSurfaceCreateFlagsKHR(), nullptr, nullptr)
 		{}
 
-		MirSurfaceCreateInfoKHR(MirSurfaceCreateFlagsKHR flags, MirConnection* connection, MirSurface* mirSurface)
+		MirSurfaceCreateInfoKHR(MirSurfaceCreateFlagsKHR flags_, MirConnection* connection_, MirSurface* mirSurface_)
 		{
-			m_mirSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_MIR_SURFACE_CREATE_INFO_KHR;
-			m_mirSurfaceCreateInfoKHR.pNext = nullptr;
-			m_mirSurfaceCreateInfoKHR.flags = static_cast<VkMirSurfaceCreateFlagsKHR>(flags);
-			m_mirSurfaceCreateInfoKHR.connection = connection;
-			m_mirSurfaceCreateInfoKHR.mirSurface = mirSurface;
+			sType = StructureType::eMirSurfaceCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			connection = connection_;
+			mirSurface = mirSurface_;
 		}
 
 		MirSurfaceCreateInfoKHR(VkMirSurfaceCreateInfoKHR const & rhs)
-			: m_mirSurfaceCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(MirSurfaceCreateInfoKHR));
 		}
 
 		MirSurfaceCreateInfoKHR& operator=(VkMirSurfaceCreateInfoKHR const & rhs)
 		{
-			m_mirSurfaceCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(MirSurfaceCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		MirSurfaceCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_mirSurfaceCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_mirSurfaceCreateInfoKHR.sType);
-		}
-
-		MirSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_mirSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		MirSurfaceCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_mirSurfaceCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_mirSurfaceCreateInfoKHR.pNext);
-		}
-
-		MirSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_mirSurfaceCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const MirSurfaceCreateFlagsKHR& flags() const
+		MirSurfaceCreateInfoKHR& setFlags(MirSurfaceCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const MirSurfaceCreateFlagsKHR&>(m_mirSurfaceCreateInfoKHR.flags);
-		}
-
-		MirSurfaceCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<MirSurfaceCreateFlagsKHR&>(m_mirSurfaceCreateInfoKHR.flags);
-		}
-
-		MirSurfaceCreateInfoKHR& flags(MirSurfaceCreateFlagsKHR flags)
-		{
-			m_mirSurfaceCreateInfoKHR.flags = static_cast<VkMirSurfaceCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const MirConnection* connection() const
+		MirSurfaceCreateInfoKHR& setConnection(MirConnection* connection_)
 		{
-			return reinterpret_cast<const MirConnection*>(m_mirSurfaceCreateInfoKHR.connection);
-		}
-
-		MirConnection* connection()
-		{
-			return reinterpret_cast<MirConnection*>(m_mirSurfaceCreateInfoKHR.connection);
-		}
-
-		MirSurfaceCreateInfoKHR& connection(MirConnection* connection)
-		{
-			m_mirSurfaceCreateInfoKHR.connection = connection;
+			connection = connection_;
 			return *this;
 		}
 
-		const MirSurface* mirSurface() const
+		MirSurfaceCreateInfoKHR& setMirSurface(MirSurface* mirSurface_)
 		{
-			return reinterpret_cast<const MirSurface*>(m_mirSurfaceCreateInfoKHR.mirSurface);
-		}
-
-		MirSurface* mirSurface()
-		{
-			return reinterpret_cast<MirSurface*>(m_mirSurfaceCreateInfoKHR.mirSurface);
-		}
-
-		MirSurfaceCreateInfoKHR& mirSurface(MirSurface* mirSurface)
-		{
-			m_mirSurfaceCreateInfoKHR.mirSurface = mirSurface;
+			mirSurface = mirSurface_;
 			return *this;
 		}
 
 		operator const VkMirSurfaceCreateInfoKHR&() const
 		{
-			return m_mirSurfaceCreateInfoKHR;
+			return *reinterpret_cast<const VkMirSurfaceCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkMirSurfaceCreateInfoKHR m_mirSurfaceCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		MirSurfaceCreateFlagsKHR flags;
+		MirConnection* connection;
+		MirSurface* mirSurface;
 	};
 	static_assert(sizeof(MirSurfaceCreateInfoKHR) == sizeof(VkMirSurfaceCreateInfoKHR), "struct and wrapper have different size!");
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
 
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
-	class WaylandSurfaceCreateInfoKHR
+	struct WaylandSurfaceCreateInfoKHR
 	{
-	public:
 		WaylandSurfaceCreateInfoKHR()
 			: WaylandSurfaceCreateInfoKHR(WaylandSurfaceCreateFlagsKHR(), nullptr, nullptr)
 		{}
 
-		WaylandSurfaceCreateInfoKHR(WaylandSurfaceCreateFlagsKHR flags, struct wl_display* display, struct wl_surface* surface)
+		WaylandSurfaceCreateInfoKHR(WaylandSurfaceCreateFlagsKHR flags_, struct wl_display* display_, struct wl_surface* surface_)
 		{
-			m_waylandSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_WAYLAND_SURFACE_CREATE_INFO_KHR;
-			m_waylandSurfaceCreateInfoKHR.pNext = nullptr;
-			m_waylandSurfaceCreateInfoKHR.flags = static_cast<VkWaylandSurfaceCreateFlagsKHR>(flags);
-			m_waylandSurfaceCreateInfoKHR.display = display;
-			m_waylandSurfaceCreateInfoKHR.surface = surface;
+			sType = StructureType::eWaylandSurfaceCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			display = display_;
+			surface = surface_;
 		}
 
 		WaylandSurfaceCreateInfoKHR(VkWaylandSurfaceCreateInfoKHR const & rhs)
-			: m_waylandSurfaceCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(WaylandSurfaceCreateInfoKHR));
 		}
 
 		WaylandSurfaceCreateInfoKHR& operator=(VkWaylandSurfaceCreateInfoKHR const & rhs)
 		{
-			m_waylandSurfaceCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(WaylandSurfaceCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		WaylandSurfaceCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_waylandSurfaceCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_waylandSurfaceCreateInfoKHR.sType);
-		}
-
-		WaylandSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_waylandSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		WaylandSurfaceCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_waylandSurfaceCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_waylandSurfaceCreateInfoKHR.pNext);
-		}
-
-		WaylandSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_waylandSurfaceCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const WaylandSurfaceCreateFlagsKHR& flags() const
+		WaylandSurfaceCreateInfoKHR& setFlags(WaylandSurfaceCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const WaylandSurfaceCreateFlagsKHR&>(m_waylandSurfaceCreateInfoKHR.flags);
-		}
-
-		WaylandSurfaceCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<WaylandSurfaceCreateFlagsKHR&>(m_waylandSurfaceCreateInfoKHR.flags);
-		}
-
-		WaylandSurfaceCreateInfoKHR& flags(WaylandSurfaceCreateFlagsKHR flags)
-		{
-			m_waylandSurfaceCreateInfoKHR.flags = static_cast<VkWaylandSurfaceCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const struct wl_display* display() const
+		WaylandSurfaceCreateInfoKHR& setDisplay(struct wl_display* display_)
 		{
-			return reinterpret_cast<const struct wl_display*>(m_waylandSurfaceCreateInfoKHR.display);
-		}
-
-		struct wl_display* display()
-		{
-			return reinterpret_cast<struct wl_display*>(m_waylandSurfaceCreateInfoKHR.display);
-		}
-
-		WaylandSurfaceCreateInfoKHR& display(struct wl_display* display)
-		{
-			m_waylandSurfaceCreateInfoKHR.display = display;
+			display = display_;
 			return *this;
 		}
 
-		const struct wl_surface* surface() const
+		WaylandSurfaceCreateInfoKHR& setSurface(struct wl_surface* surface_)
 		{
-			return reinterpret_cast<const struct wl_surface*>(m_waylandSurfaceCreateInfoKHR.surface);
-		}
-
-		struct wl_surface* surface()
-		{
-			return reinterpret_cast<struct wl_surface*>(m_waylandSurfaceCreateInfoKHR.surface);
-		}
-
-		WaylandSurfaceCreateInfoKHR& surface(struct wl_surface* surface)
-		{
-			m_waylandSurfaceCreateInfoKHR.surface = surface;
+			surface = surface_;
 			return *this;
 		}
 
 		operator const VkWaylandSurfaceCreateInfoKHR&() const
 		{
-			return m_waylandSurfaceCreateInfoKHR;
+			return *reinterpret_cast<const VkWaylandSurfaceCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkWaylandSurfaceCreateInfoKHR m_waylandSurfaceCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		WaylandSurfaceCreateFlagsKHR flags;
+		struct wl_display* display;
+		struct wl_surface* surface;
 	};
 	static_assert(sizeof(WaylandSurfaceCreateInfoKHR) == sizeof(VkWaylandSurfaceCreateInfoKHR), "struct and wrapper have different size!");
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
 
 #ifdef VK_USE_PLATFORM_WIN32_KHR
-	class Win32SurfaceCreateInfoKHR
+	struct Win32SurfaceCreateInfoKHR
 	{
-	public:
 		Win32SurfaceCreateInfoKHR()
 			: Win32SurfaceCreateInfoKHR(Win32SurfaceCreateFlagsKHR(), 0, 0)
 		{}
 
-		Win32SurfaceCreateInfoKHR(Win32SurfaceCreateFlagsKHR flags, HINSTANCE hinstance, HWND hwnd)
+		Win32SurfaceCreateInfoKHR(Win32SurfaceCreateFlagsKHR flags_, HINSTANCE hinstance_, HWND hwnd_)
 		{
-			m_win32SurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-			m_win32SurfaceCreateInfoKHR.pNext = nullptr;
-			m_win32SurfaceCreateInfoKHR.flags = static_cast<VkWin32SurfaceCreateFlagsKHR>(flags);
-			m_win32SurfaceCreateInfoKHR.hinstance = hinstance;
-			m_win32SurfaceCreateInfoKHR.hwnd = hwnd;
+			sType = StructureType::eWin32SurfaceCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			hinstance = hinstance_;
+			hwnd = hwnd_;
 		}
 
 		Win32SurfaceCreateInfoKHR(VkWin32SurfaceCreateInfoKHR const & rhs)
-			: m_win32SurfaceCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(Win32SurfaceCreateInfoKHR));
 		}
 
 		Win32SurfaceCreateInfoKHR& operator=(VkWin32SurfaceCreateInfoKHR const & rhs)
 		{
-			m_win32SurfaceCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(Win32SurfaceCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		Win32SurfaceCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_win32SurfaceCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_win32SurfaceCreateInfoKHR.sType);
-		}
-
-		Win32SurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_win32SurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		Win32SurfaceCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_win32SurfaceCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_win32SurfaceCreateInfoKHR.pNext);
-		}
-
-		Win32SurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_win32SurfaceCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const Win32SurfaceCreateFlagsKHR& flags() const
+		Win32SurfaceCreateInfoKHR& setFlags(Win32SurfaceCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const Win32SurfaceCreateFlagsKHR&>(m_win32SurfaceCreateInfoKHR.flags);
-		}
-
-		Win32SurfaceCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<Win32SurfaceCreateFlagsKHR&>(m_win32SurfaceCreateInfoKHR.flags);
-		}
-
-		Win32SurfaceCreateInfoKHR& flags(Win32SurfaceCreateFlagsKHR flags)
-		{
-			m_win32SurfaceCreateInfoKHR.flags = static_cast<VkWin32SurfaceCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const HINSTANCE& hinstance() const
+		Win32SurfaceCreateInfoKHR& setHinstance(HINSTANCE hinstance_)
 		{
-			return m_win32SurfaceCreateInfoKHR.hinstance;
-		}
-
-		HINSTANCE& hinstance()
-		{
-			return m_win32SurfaceCreateInfoKHR.hinstance;
-		}
-
-		Win32SurfaceCreateInfoKHR& hinstance(HINSTANCE hinstance)
-		{
-			m_win32SurfaceCreateInfoKHR.hinstance = hinstance;
+			hinstance = hinstance_;
 			return *this;
 		}
 
-		const HWND& hwnd() const
+		Win32SurfaceCreateInfoKHR& setHwnd(HWND hwnd_)
 		{
-			return m_win32SurfaceCreateInfoKHR.hwnd;
-		}
-
-		HWND& hwnd()
-		{
-			return m_win32SurfaceCreateInfoKHR.hwnd;
-		}
-
-		Win32SurfaceCreateInfoKHR& hwnd(HWND hwnd)
-		{
-			m_win32SurfaceCreateInfoKHR.hwnd = hwnd;
+			hwnd = hwnd_;
 			return *this;
 		}
 
 		operator const VkWin32SurfaceCreateInfoKHR&() const
 		{
-			return m_win32SurfaceCreateInfoKHR;
+			return *reinterpret_cast<const VkWin32SurfaceCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkWin32SurfaceCreateInfoKHR m_win32SurfaceCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		Win32SurfaceCreateFlagsKHR flags;
+		HINSTANCE hinstance;
+		HWND hwnd;
 	};
 	static_assert(sizeof(Win32SurfaceCreateInfoKHR) == sizeof(VkWin32SurfaceCreateInfoKHR), "struct and wrapper have different size!");
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-	class XlibSurfaceCreateInfoKHR
+	struct XlibSurfaceCreateInfoKHR
 	{
-	public:
 		XlibSurfaceCreateInfoKHR()
 			: XlibSurfaceCreateInfoKHR(XlibSurfaceCreateFlagsKHR(), nullptr, 0)
 		{}
 
-		XlibSurfaceCreateInfoKHR(XlibSurfaceCreateFlagsKHR flags, Display* dpy, Window window)
+		XlibSurfaceCreateInfoKHR(XlibSurfaceCreateFlagsKHR flags_, Display* dpy_, Window window_)
 		{
-			m_xlibSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
-			m_xlibSurfaceCreateInfoKHR.pNext = nullptr;
-			m_xlibSurfaceCreateInfoKHR.flags = static_cast<VkXlibSurfaceCreateFlagsKHR>(flags);
-			m_xlibSurfaceCreateInfoKHR.dpy = dpy;
-			m_xlibSurfaceCreateInfoKHR.window = window;
+			sType = StructureType::eXlibSurfaceCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			dpy = dpy_;
+			window = window_;
 		}
 
 		XlibSurfaceCreateInfoKHR(VkXlibSurfaceCreateInfoKHR const & rhs)
-			: m_xlibSurfaceCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(XlibSurfaceCreateInfoKHR));
 		}
 
 		XlibSurfaceCreateInfoKHR& operator=(VkXlibSurfaceCreateInfoKHR const & rhs)
 		{
-			m_xlibSurfaceCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(XlibSurfaceCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		XlibSurfaceCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_xlibSurfaceCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_xlibSurfaceCreateInfoKHR.sType);
-		}
-
-		XlibSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_xlibSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		XlibSurfaceCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_xlibSurfaceCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_xlibSurfaceCreateInfoKHR.pNext);
-		}
-
-		XlibSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_xlibSurfaceCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const XlibSurfaceCreateFlagsKHR& flags() const
+		XlibSurfaceCreateInfoKHR& setFlags(XlibSurfaceCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const XlibSurfaceCreateFlagsKHR&>(m_xlibSurfaceCreateInfoKHR.flags);
-		}
-
-		XlibSurfaceCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<XlibSurfaceCreateFlagsKHR&>(m_xlibSurfaceCreateInfoKHR.flags);
-		}
-
-		XlibSurfaceCreateInfoKHR& flags(XlibSurfaceCreateFlagsKHR flags)
-		{
-			m_xlibSurfaceCreateInfoKHR.flags = static_cast<VkXlibSurfaceCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Display* dpy() const
+		XlibSurfaceCreateInfoKHR& setDpy(Display* dpy_)
 		{
-			return reinterpret_cast<const Display*>(m_xlibSurfaceCreateInfoKHR.dpy);
-		}
-
-		Display* dpy()
-		{
-			return reinterpret_cast<Display*>(m_xlibSurfaceCreateInfoKHR.dpy);
-		}
-
-		XlibSurfaceCreateInfoKHR& dpy(Display* dpy)
-		{
-			m_xlibSurfaceCreateInfoKHR.dpy = dpy;
+			dpy = dpy_;
 			return *this;
 		}
 
-		const Window& window() const
+		XlibSurfaceCreateInfoKHR& setWindow(Window window_)
 		{
-			return m_xlibSurfaceCreateInfoKHR.window;
-		}
-
-		Window& window()
-		{
-			return m_xlibSurfaceCreateInfoKHR.window;
-		}
-
-		XlibSurfaceCreateInfoKHR& window(Window window)
-		{
-			m_xlibSurfaceCreateInfoKHR.window = window;
+			window = window_;
 			return *this;
 		}
 
 		operator const VkXlibSurfaceCreateInfoKHR&() const
 		{
-			return m_xlibSurfaceCreateInfoKHR;
+			return *reinterpret_cast<const VkXlibSurfaceCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkXlibSurfaceCreateInfoKHR m_xlibSurfaceCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		XlibSurfaceCreateFlagsKHR flags;
+		Display* dpy;
+		Window window;
 	};
 	static_assert(sizeof(XlibSurfaceCreateInfoKHR) == sizeof(VkXlibSurfaceCreateInfoKHR), "struct and wrapper have different size!");
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
-	class XcbSurfaceCreateInfoKHR
+	struct XcbSurfaceCreateInfoKHR
 	{
-	public:
 		XcbSurfaceCreateInfoKHR()
 			: XcbSurfaceCreateInfoKHR(XcbSurfaceCreateFlagsKHR(), nullptr, 0)
 		{}
 
-		XcbSurfaceCreateInfoKHR(XcbSurfaceCreateFlagsKHR flags, xcb_connection_t* connection, xcb_window_t window)
+		XcbSurfaceCreateInfoKHR(XcbSurfaceCreateFlagsKHR flags_, xcb_connection_t* connection_, xcb_window_t window_)
 		{
-			m_xcbSurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
-			m_xcbSurfaceCreateInfoKHR.pNext = nullptr;
-			m_xcbSurfaceCreateInfoKHR.flags = static_cast<VkXcbSurfaceCreateFlagsKHR>(flags);
-			m_xcbSurfaceCreateInfoKHR.connection = connection;
-			m_xcbSurfaceCreateInfoKHR.window = window;
+			sType = StructureType::eXcbSurfaceCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			connection = connection_;
+			window = window_;
 		}
 
 		XcbSurfaceCreateInfoKHR(VkXcbSurfaceCreateInfoKHR const & rhs)
-			: m_xcbSurfaceCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(XcbSurfaceCreateInfoKHR));
 		}
 
 		XcbSurfaceCreateInfoKHR& operator=(VkXcbSurfaceCreateInfoKHR const & rhs)
 		{
-			m_xcbSurfaceCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(XcbSurfaceCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		XcbSurfaceCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_xcbSurfaceCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_xcbSurfaceCreateInfoKHR.sType);
-		}
-
-		XcbSurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_xcbSurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		XcbSurfaceCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_xcbSurfaceCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_xcbSurfaceCreateInfoKHR.pNext);
-		}
-
-		XcbSurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_xcbSurfaceCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const XcbSurfaceCreateFlagsKHR& flags() const
+		XcbSurfaceCreateInfoKHR& setFlags(XcbSurfaceCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const XcbSurfaceCreateFlagsKHR&>(m_xcbSurfaceCreateInfoKHR.flags);
-		}
-
-		XcbSurfaceCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<XcbSurfaceCreateFlagsKHR&>(m_xcbSurfaceCreateInfoKHR.flags);
-		}
-
-		XcbSurfaceCreateInfoKHR& flags(XcbSurfaceCreateFlagsKHR flags)
-		{
-			m_xcbSurfaceCreateInfoKHR.flags = static_cast<VkXcbSurfaceCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const xcb_connection_t* connection() const
+		XcbSurfaceCreateInfoKHR& setConnection(xcb_connection_t* connection_)
 		{
-			return reinterpret_cast<const xcb_connection_t*>(m_xcbSurfaceCreateInfoKHR.connection);
-		}
-
-		xcb_connection_t* connection()
-		{
-			return reinterpret_cast<xcb_connection_t*>(m_xcbSurfaceCreateInfoKHR.connection);
-		}
-
-		XcbSurfaceCreateInfoKHR& connection(xcb_connection_t* connection)
-		{
-			m_xcbSurfaceCreateInfoKHR.connection = connection;
+			connection = connection_;
 			return *this;
 		}
 
-		const xcb_window_t& window() const
+		XcbSurfaceCreateInfoKHR& setWindow(xcb_window_t window_)
 		{
-			return m_xcbSurfaceCreateInfoKHR.window;
-		}
-
-		xcb_window_t& window()
-		{
-			return m_xcbSurfaceCreateInfoKHR.window;
-		}
-
-		XcbSurfaceCreateInfoKHR& window(xcb_window_t window)
-		{
-			m_xcbSurfaceCreateInfoKHR.window = window;
+			window = window_;
 			return *this;
 		}
 
 		operator const VkXcbSurfaceCreateInfoKHR&() const
 		{
-			return m_xcbSurfaceCreateInfoKHR;
+			return *reinterpret_cast<const VkXcbSurfaceCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkXcbSurfaceCreateInfoKHR m_xcbSurfaceCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		XcbSurfaceCreateFlagsKHR flags;
+		xcb_connection_t* connection;
+		xcb_window_t window;
 	};
 	static_assert(sizeof(XcbSurfaceCreateInfoKHR) == sizeof(VkXcbSurfaceCreateInfoKHR), "struct and wrapper have different size!");
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
@@ -10710,171 +7225,96 @@ namespace vk
 		eSecondaryCommandBuffers = VK_SUBPASS_CONTENTS_SECONDARY_COMMAND_BUFFERS
 	};
 
-	class PresentInfoKHR
+	struct PresentInfoKHR
 	{
-	public:
 		PresentInfoKHR()
 			: PresentInfoKHR(0, nullptr, 0, nullptr, nullptr, nullptr)
 		{}
 
-		PresentInfoKHR(uint32_t waitSemaphoreCount, const Semaphore* pWaitSemaphores, uint32_t swapchainCount, const SwapchainKHR* pSwapchains, const uint32_t* pImageIndices, Result* pResults)
+		PresentInfoKHR(uint32_t waitSemaphoreCount_, const Semaphore* pWaitSemaphores_, uint32_t swapchainCount_, const SwapchainKHR* pSwapchains_, const uint32_t* pImageIndices_, Result* pResults_)
 		{
-			m_presentInfoKHR.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-			m_presentInfoKHR.pNext = nullptr;
-			m_presentInfoKHR.waitSemaphoreCount = waitSemaphoreCount;
-			m_presentInfoKHR.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
-			m_presentInfoKHR.swapchainCount = swapchainCount;
-			m_presentInfoKHR.pSwapchains = reinterpret_cast<const VkSwapchainKHR*>(pSwapchains);
-			m_presentInfoKHR.pImageIndices = pImageIndices;
-			m_presentInfoKHR.pResults = reinterpret_cast<VkResult*>(pResults);
+			sType = StructureType::ePresentInfoKHR;
+			pNext = nullptr;
+			waitSemaphoreCount = waitSemaphoreCount_;
+			pWaitSemaphores = pWaitSemaphores_;
+			swapchainCount = swapchainCount_;
+			pSwapchains = pSwapchains_;
+			pImageIndices = pImageIndices_;
+			pResults = pResults_;
 		}
 
 		PresentInfoKHR(VkPresentInfoKHR const & rhs)
-			: m_presentInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PresentInfoKHR));
 		}
 
 		PresentInfoKHR& operator=(VkPresentInfoKHR const & rhs)
 		{
-			m_presentInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(PresentInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PresentInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_presentInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_presentInfoKHR.sType);
-		}
-
-		PresentInfoKHR& sType(StructureType sType)
-		{
-			m_presentInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PresentInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_presentInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_presentInfoKHR.pNext);
-		}
-
-		PresentInfoKHR& pNext(const void* pNext)
-		{
-			m_presentInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const uint32_t& waitSemaphoreCount() const
+		PresentInfoKHR& setWaitSemaphoreCount(uint32_t waitSemaphoreCount_)
 		{
-			return m_presentInfoKHR.waitSemaphoreCount;
-		}
-
-		uint32_t& waitSemaphoreCount()
-		{
-			return m_presentInfoKHR.waitSemaphoreCount;
-		}
-
-		PresentInfoKHR& waitSemaphoreCount(uint32_t waitSemaphoreCount)
-		{
-			m_presentInfoKHR.waitSemaphoreCount = waitSemaphoreCount;
+			waitSemaphoreCount = waitSemaphoreCount_;
 			return *this;
 		}
 
-		const Semaphore* pWaitSemaphores() const
+		PresentInfoKHR& setPWaitSemaphores(const Semaphore* pWaitSemaphores_)
 		{
-			return reinterpret_cast<const Semaphore*>(m_presentInfoKHR.pWaitSemaphores);
-		}
-
-		const Semaphore* pWaitSemaphores()
-		{
-			return reinterpret_cast<const Semaphore*>(m_presentInfoKHR.pWaitSemaphores);
-		}
-
-		PresentInfoKHR& pWaitSemaphores(const Semaphore* pWaitSemaphores)
-		{
-			m_presentInfoKHR.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
+			pWaitSemaphores = pWaitSemaphores_;
 			return *this;
 		}
 
-		const uint32_t& swapchainCount() const
+		PresentInfoKHR& setSwapchainCount(uint32_t swapchainCount_)
 		{
-			return m_presentInfoKHR.swapchainCount;
-		}
-
-		uint32_t& swapchainCount()
-		{
-			return m_presentInfoKHR.swapchainCount;
-		}
-
-		PresentInfoKHR& swapchainCount(uint32_t swapchainCount)
-		{
-			m_presentInfoKHR.swapchainCount = swapchainCount;
+			swapchainCount = swapchainCount_;
 			return *this;
 		}
 
-		const SwapchainKHR* pSwapchains() const
+		PresentInfoKHR& setPSwapchains(const SwapchainKHR* pSwapchains_)
 		{
-			return reinterpret_cast<const SwapchainKHR*>(m_presentInfoKHR.pSwapchains);
-		}
-
-		const SwapchainKHR* pSwapchains()
-		{
-			return reinterpret_cast<const SwapchainKHR*>(m_presentInfoKHR.pSwapchains);
-		}
-
-		PresentInfoKHR& pSwapchains(const SwapchainKHR* pSwapchains)
-		{
-			m_presentInfoKHR.pSwapchains = reinterpret_cast<const VkSwapchainKHR*>(pSwapchains);
+			pSwapchains = pSwapchains_;
 			return *this;
 		}
 
-		const uint32_t* pImageIndices() const
+		PresentInfoKHR& setPImageIndices(const uint32_t* pImageIndices_)
 		{
-			return reinterpret_cast<const uint32_t*>(m_presentInfoKHR.pImageIndices);
-		}
-
-		const uint32_t* pImageIndices()
-		{
-			return reinterpret_cast<const uint32_t*>(m_presentInfoKHR.pImageIndices);
-		}
-
-		PresentInfoKHR& pImageIndices(const uint32_t* pImageIndices)
-		{
-			m_presentInfoKHR.pImageIndices = pImageIndices;
+			pImageIndices = pImageIndices_;
 			return *this;
 		}
 
-		const Result* pResults() const
+		PresentInfoKHR& setPResults(Result* pResults_)
 		{
-			return reinterpret_cast<const Result*>(m_presentInfoKHR.pResults);
-		}
-
-		Result* pResults()
-		{
-			return reinterpret_cast<Result*>(m_presentInfoKHR.pResults);
-		}
-
-		PresentInfoKHR& pResults(Result* pResults)
-		{
-			m_presentInfoKHR.pResults = reinterpret_cast<VkResult*>(pResults);
+			pResults = pResults_;
 			return *this;
 		}
 
 		operator const VkPresentInfoKHR&() const
 		{
-			return m_presentInfoKHR;
+			return *reinterpret_cast<const VkPresentInfoKHR*>(this);
 		}
 
-	private:
-		VkPresentInfoKHR m_presentInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		uint32_t waitSemaphoreCount;
+		const Semaphore* pWaitSemaphores;
+		uint32_t swapchainCount;
+		const SwapchainKHR* pSwapchains;
+		const uint32_t* pImageIndices;
+		Result* pResults;
 	};
 	static_assert(sizeof(PresentInfoKHR) == sizeof(VkPresentInfoKHR), "struct and wrapper have different size!");
 
@@ -10891,120 +7331,72 @@ namespace vk
 		eStencilReference = VK_DYNAMIC_STATE_STENCIL_REFERENCE
 	};
 
-	class PipelineDynamicStateCreateInfo
+	struct PipelineDynamicStateCreateInfo
 	{
-	public:
 		PipelineDynamicStateCreateInfo()
 			: PipelineDynamicStateCreateInfo(PipelineDynamicStateCreateFlags(), 0, nullptr)
 		{}
 
-		PipelineDynamicStateCreateInfo(PipelineDynamicStateCreateFlags flags, uint32_t dynamicStateCount, const DynamicState* pDynamicStates)
+		PipelineDynamicStateCreateInfo(PipelineDynamicStateCreateFlags flags_, uint32_t dynamicStateCount_, const DynamicState* pDynamicStates_)
 		{
-			m_pipelineDynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-			m_pipelineDynamicStateCreateInfo.pNext = nullptr;
-			m_pipelineDynamicStateCreateInfo.flags = static_cast<VkPipelineDynamicStateCreateFlags>(flags);
-			m_pipelineDynamicStateCreateInfo.dynamicStateCount = dynamicStateCount;
-			m_pipelineDynamicStateCreateInfo.pDynamicStates = reinterpret_cast<const VkDynamicState*>(pDynamicStates);
+			sType = StructureType::ePipelineDynamicStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			dynamicStateCount = dynamicStateCount_;
+			pDynamicStates = pDynamicStates_;
 		}
 
 		PipelineDynamicStateCreateInfo(VkPipelineDynamicStateCreateInfo const & rhs)
-			: m_pipelineDynamicStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineDynamicStateCreateInfo));
 		}
 
 		PipelineDynamicStateCreateInfo& operator=(VkPipelineDynamicStateCreateInfo const & rhs)
 		{
-			m_pipelineDynamicStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineDynamicStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineDynamicStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineDynamicStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineDynamicStateCreateInfo.sType);
-		}
-
-		PipelineDynamicStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineDynamicStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineDynamicStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineDynamicStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineDynamicStateCreateInfo.pNext);
-		}
-
-		PipelineDynamicStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineDynamicStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineDynamicStateCreateFlags& flags() const
+		PipelineDynamicStateCreateInfo& setFlags(PipelineDynamicStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineDynamicStateCreateFlags&>(m_pipelineDynamicStateCreateInfo.flags);
-		}
-
-		PipelineDynamicStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineDynamicStateCreateFlags&>(m_pipelineDynamicStateCreateInfo.flags);
-		}
-
-		PipelineDynamicStateCreateInfo& flags(PipelineDynamicStateCreateFlags flags)
-		{
-			m_pipelineDynamicStateCreateInfo.flags = static_cast<VkPipelineDynamicStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& dynamicStateCount() const
+		PipelineDynamicStateCreateInfo& setDynamicStateCount(uint32_t dynamicStateCount_)
 		{
-			return m_pipelineDynamicStateCreateInfo.dynamicStateCount;
-		}
-
-		uint32_t& dynamicStateCount()
-		{
-			return m_pipelineDynamicStateCreateInfo.dynamicStateCount;
-		}
-
-		PipelineDynamicStateCreateInfo& dynamicStateCount(uint32_t dynamicStateCount)
-		{
-			m_pipelineDynamicStateCreateInfo.dynamicStateCount = dynamicStateCount;
+			dynamicStateCount = dynamicStateCount_;
 			return *this;
 		}
 
-		const DynamicState* pDynamicStates() const
+		PipelineDynamicStateCreateInfo& setPDynamicStates(const DynamicState* pDynamicStates_)
 		{
-			return reinterpret_cast<const DynamicState*>(m_pipelineDynamicStateCreateInfo.pDynamicStates);
-		}
-
-		const DynamicState* pDynamicStates()
-		{
-			return reinterpret_cast<const DynamicState*>(m_pipelineDynamicStateCreateInfo.pDynamicStates);
-		}
-
-		PipelineDynamicStateCreateInfo& pDynamicStates(const DynamicState* pDynamicStates)
-		{
-			m_pipelineDynamicStateCreateInfo.pDynamicStates = reinterpret_cast<const VkDynamicState*>(pDynamicStates);
+			pDynamicStates = pDynamicStates_;
 			return *this;
 		}
 
 		operator const VkPipelineDynamicStateCreateInfo&() const
 		{
-			return m_pipelineDynamicStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineDynamicStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineDynamicStateCreateInfo m_pipelineDynamicStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineDynamicStateCreateFlags flags;
+		uint32_t dynamicStateCount;
+		const DynamicState* pDynamicStates;
 	};
 	static_assert(sizeof(PipelineDynamicStateCreateInfo) == sizeof(VkPipelineDynamicStateCreateInfo), "struct and wrapper have different size!");
 
@@ -11016,43 +7408,24 @@ namespace vk
 		eSparseBinding = VK_QUEUE_SPARSE_BINDING_BIT
 	};
 
-	typedef Flags<QueueFlagBits, VkQueueFlags> QueueFlags;
+	using QueueFlags = Flags<QueueFlagBits, VkQueueFlags>;
 
 	inline QueueFlags operator|(QueueFlagBits bit0, QueueFlagBits bit1)
 	{
 		return QueueFlags(bit0) | bit1;
 	}
 
-	class QueueFamilyProperties
+	struct QueueFamilyProperties
 	{
-	public:
-		const QueueFlags& queueFlags() const
-		{
-			return reinterpret_cast<const QueueFlags&>(m_queueFamilyProperties.queueFlags);
-		}
-
-		const uint32_t& queueCount() const
-		{
-			return m_queueFamilyProperties.queueCount;
-		}
-
-		const uint32_t& timestampValidBits() const
-		{
-			return m_queueFamilyProperties.timestampValidBits;
-		}
-
-		const Extent3D& minImageTransferGranularity() const
-		{
-			return reinterpret_cast<const Extent3D&>(m_queueFamilyProperties.minImageTransferGranularity);
-		}
-
 		operator const VkQueueFamilyProperties&() const
 		{
-			return m_queueFamilyProperties;
+			return *reinterpret_cast<const VkQueueFamilyProperties*>(this);
 		}
 
-	private:
-		VkQueueFamilyProperties m_queueFamilyProperties;
+		QueueFlags queueFlags;
+		uint32_t queueCount;
+		uint32_t timestampValidBits;
+		Extent3D minImageTransferGranularity;
 	};
 	static_assert(sizeof(QueueFamilyProperties) == sizeof(VkQueueFamilyProperties), "struct and wrapper have different size!");
 
@@ -11065,33 +7438,22 @@ namespace vk
 		eLazilyAllocated = VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT
 	};
 
-	typedef Flags<MemoryPropertyFlagBits, VkMemoryPropertyFlags> MemoryPropertyFlags;
+	using MemoryPropertyFlags = Flags<MemoryPropertyFlagBits, VkMemoryPropertyFlags>;
 
 	inline MemoryPropertyFlags operator|(MemoryPropertyFlagBits bit0, MemoryPropertyFlagBits bit1)
 	{
 		return MemoryPropertyFlags(bit0) | bit1;
 	}
 
-	class MemoryType
+	struct MemoryType
 	{
-	public:
-		const MemoryPropertyFlags& propertyFlags() const
-		{
-			return reinterpret_cast<const MemoryPropertyFlags&>(m_memoryType.propertyFlags);
-		}
-
-		const uint32_t& heapIndex() const
-		{
-			return m_memoryType.heapIndex;
-		}
-
 		operator const VkMemoryType&() const
 		{
-			return m_memoryType;
+			return *reinterpret_cast<const VkMemoryType*>(this);
 		}
 
-	private:
-		VkMemoryType m_memoryType;
+		MemoryPropertyFlags propertyFlags;
+		uint32_t heapIndex;
 	};
 	static_assert(sizeof(MemoryType) == sizeof(VkMemoryType), "struct and wrapper have different size!");
 
@@ -11100,66 +7462,36 @@ namespace vk
 		eDeviceLocal = VK_MEMORY_HEAP_DEVICE_LOCAL_BIT
 	};
 
-	typedef Flags<MemoryHeapFlagBits, VkMemoryHeapFlags> MemoryHeapFlags;
+	using MemoryHeapFlags = Flags<MemoryHeapFlagBits, VkMemoryHeapFlags>;
 
 	inline MemoryHeapFlags operator|(MemoryHeapFlagBits bit0, MemoryHeapFlagBits bit1)
 	{
 		return MemoryHeapFlags(bit0) | bit1;
 	}
 
-	class MemoryHeap
+	struct MemoryHeap
 	{
-	public:
-		const DeviceSize& size() const
-		{
-			return m_memoryHeap.size;
-		}
-
-		const MemoryHeapFlags& flags() const
-		{
-			return reinterpret_cast<const MemoryHeapFlags&>(m_memoryHeap.flags);
-		}
-
 		operator const VkMemoryHeap&() const
 		{
-			return m_memoryHeap;
+			return *reinterpret_cast<const VkMemoryHeap*>(this);
 		}
 
-	private:
-		VkMemoryHeap m_memoryHeap;
+		DeviceSize size;
+		MemoryHeapFlags flags;
 	};
 	static_assert(sizeof(MemoryHeap) == sizeof(VkMemoryHeap), "struct and wrapper have different size!");
 
-	class PhysicalDeviceMemoryProperties
+	struct PhysicalDeviceMemoryProperties
 	{
-	public:
-		const uint32_t& memoryTypeCount() const
-		{
-			return m_physicalDeviceMemoryProperties.memoryTypeCount;
-		}
-
-		const MemoryType* memoryTypes() const
-		{
-			return reinterpret_cast<const MemoryType*>(m_physicalDeviceMemoryProperties.memoryTypes);
-		}
-
-		const uint32_t& memoryHeapCount() const
-		{
-			return m_physicalDeviceMemoryProperties.memoryHeapCount;
-		}
-
-		const MemoryHeap* memoryHeaps() const
-		{
-			return reinterpret_cast<const MemoryHeap*>(m_physicalDeviceMemoryProperties.memoryHeaps);
-		}
-
 		operator const VkPhysicalDeviceMemoryProperties&() const
 		{
-			return m_physicalDeviceMemoryProperties;
+			return *reinterpret_cast<const VkPhysicalDeviceMemoryProperties*>(this);
 		}
 
-	private:
-		VkPhysicalDeviceMemoryProperties m_physicalDeviceMemoryProperties;
+		uint32_t memoryTypeCount;
+		MemoryType memoryTypes[VK_MAX_MEMORY_TYPES];
+		uint32_t memoryHeapCount;
+		MemoryHeap memoryHeaps[VK_MAX_MEMORY_HEAPS];
 	};
 	static_assert(sizeof(PhysicalDeviceMemoryProperties) == sizeof(VkPhysicalDeviceMemoryProperties), "struct and wrapper have different size!");
 
@@ -11184,295 +7516,172 @@ namespace vk
 		eMemoryWrite = VK_ACCESS_MEMORY_WRITE_BIT
 	};
 
-	typedef Flags<AccessFlagBits, VkAccessFlags> AccessFlags;
+	using AccessFlags = Flags<AccessFlagBits, VkAccessFlags>;
 
 	inline AccessFlags operator|(AccessFlagBits bit0, AccessFlagBits bit1)
 	{
 		return AccessFlags(bit0) | bit1;
 	}
 
-	class MemoryBarrier
+	struct MemoryBarrier
 	{
-	public:
 		MemoryBarrier()
 			: MemoryBarrier(AccessFlags(), AccessFlags())
 		{}
 
-		MemoryBarrier(AccessFlags srcAccessMask, AccessFlags dstAccessMask)
+		MemoryBarrier(AccessFlags srcAccessMask_, AccessFlags dstAccessMask_)
 		{
-			m_memoryBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
-			m_memoryBarrier.pNext = nullptr;
-			m_memoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
-			m_memoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
+			sType = StructureType::eMemoryBarrier;
+			pNext = nullptr;
+			srcAccessMask = srcAccessMask_;
+			dstAccessMask = dstAccessMask_;
 		}
 
 		MemoryBarrier(VkMemoryBarrier const & rhs)
-			: m_memoryBarrier(rhs)
 		{
+			memcpy(this, &rhs, sizeof(MemoryBarrier));
 		}
 
 		MemoryBarrier& operator=(VkMemoryBarrier const & rhs)
 		{
-			m_memoryBarrier = rhs;
+			memcpy(this, &rhs, sizeof(MemoryBarrier));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		MemoryBarrier& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_memoryBarrier.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_memoryBarrier.sType);
-		}
-
-		MemoryBarrier& sType(StructureType sType)
-		{
-			m_memoryBarrier.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		MemoryBarrier& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_memoryBarrier.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_memoryBarrier.pNext);
-		}
-
-		MemoryBarrier& pNext(const void* pNext)
-		{
-			m_memoryBarrier.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const AccessFlags& srcAccessMask() const
+		MemoryBarrier& setSrcAccessMask(AccessFlags srcAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_memoryBarrier.srcAccessMask);
-		}
-
-		AccessFlags& srcAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_memoryBarrier.srcAccessMask);
-		}
-
-		MemoryBarrier& srcAccessMask(AccessFlags srcAccessMask)
-		{
-			m_memoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
+			srcAccessMask = srcAccessMask_;
 			return *this;
 		}
 
-		const AccessFlags& dstAccessMask() const
+		MemoryBarrier& setDstAccessMask(AccessFlags dstAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_memoryBarrier.dstAccessMask);
-		}
-
-		AccessFlags& dstAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_memoryBarrier.dstAccessMask);
-		}
-
-		MemoryBarrier& dstAccessMask(AccessFlags dstAccessMask)
-		{
-			m_memoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
+			dstAccessMask = dstAccessMask_;
 			return *this;
 		}
 
 		operator const VkMemoryBarrier&() const
 		{
-			return m_memoryBarrier;
+			return *reinterpret_cast<const VkMemoryBarrier*>(this);
 		}
 
-	private:
-		VkMemoryBarrier m_memoryBarrier;
+		StructureType sType;
+		const void* pNext;
+		AccessFlags srcAccessMask;
+		AccessFlags dstAccessMask;
 	};
 	static_assert(sizeof(MemoryBarrier) == sizeof(VkMemoryBarrier), "struct and wrapper have different size!");
 
-	class BufferMemoryBarrier
+	struct BufferMemoryBarrier
 	{
-	public:
 		BufferMemoryBarrier()
 			: BufferMemoryBarrier(AccessFlags(), AccessFlags(), 0, 0, Buffer(), 0, 0)
 		{}
 
-		BufferMemoryBarrier(AccessFlags srcAccessMask, AccessFlags dstAccessMask, uint32_t srcQueueFamilyIndex, uint32_t dstQueueFamilyIndex, Buffer buffer, DeviceSize offset, DeviceSize size)
+		BufferMemoryBarrier(AccessFlags srcAccessMask_, AccessFlags dstAccessMask_, uint32_t srcQueueFamilyIndex_, uint32_t dstQueueFamilyIndex_, Buffer buffer_, DeviceSize offset_, DeviceSize size_)
 		{
-			m_bufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
-			m_bufferMemoryBarrier.pNext = nullptr;
-			m_bufferMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
-			m_bufferMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
-			m_bufferMemoryBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex;
-			m_bufferMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
-			m_bufferMemoryBarrier.buffer = static_cast<VkBuffer>(buffer);
-			m_bufferMemoryBarrier.offset = offset;
-			m_bufferMemoryBarrier.size = size;
+			sType = StructureType::eBufferMemoryBarrier;
+			pNext = nullptr;
+			srcAccessMask = srcAccessMask_;
+			dstAccessMask = dstAccessMask_;
+			srcQueueFamilyIndex = srcQueueFamilyIndex_;
+			dstQueueFamilyIndex = dstQueueFamilyIndex_;
+			buffer = buffer_;
+			offset = offset_;
+			size = size_;
 		}
 
 		BufferMemoryBarrier(VkBufferMemoryBarrier const & rhs)
-			: m_bufferMemoryBarrier(rhs)
 		{
+			memcpy(this, &rhs, sizeof(BufferMemoryBarrier));
 		}
 
 		BufferMemoryBarrier& operator=(VkBufferMemoryBarrier const & rhs)
 		{
-			m_bufferMemoryBarrier = rhs;
+			memcpy(this, &rhs, sizeof(BufferMemoryBarrier));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		BufferMemoryBarrier& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_bufferMemoryBarrier.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_bufferMemoryBarrier.sType);
-		}
-
-		BufferMemoryBarrier& sType(StructureType sType)
-		{
-			m_bufferMemoryBarrier.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		BufferMemoryBarrier& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_bufferMemoryBarrier.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_bufferMemoryBarrier.pNext);
-		}
-
-		BufferMemoryBarrier& pNext(const void* pNext)
-		{
-			m_bufferMemoryBarrier.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const AccessFlags& srcAccessMask() const
+		BufferMemoryBarrier& setSrcAccessMask(AccessFlags srcAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_bufferMemoryBarrier.srcAccessMask);
-		}
-
-		AccessFlags& srcAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_bufferMemoryBarrier.srcAccessMask);
-		}
-
-		BufferMemoryBarrier& srcAccessMask(AccessFlags srcAccessMask)
-		{
-			m_bufferMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
+			srcAccessMask = srcAccessMask_;
 			return *this;
 		}
 
-		const AccessFlags& dstAccessMask() const
+		BufferMemoryBarrier& setDstAccessMask(AccessFlags dstAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_bufferMemoryBarrier.dstAccessMask);
-		}
-
-		AccessFlags& dstAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_bufferMemoryBarrier.dstAccessMask);
-		}
-
-		BufferMemoryBarrier& dstAccessMask(AccessFlags dstAccessMask)
-		{
-			m_bufferMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
+			dstAccessMask = dstAccessMask_;
 			return *this;
 		}
 
-		const uint32_t& srcQueueFamilyIndex() const
+		BufferMemoryBarrier& setSrcQueueFamilyIndex(uint32_t srcQueueFamilyIndex_)
 		{
-			return m_bufferMemoryBarrier.srcQueueFamilyIndex;
-		}
-
-		uint32_t& srcQueueFamilyIndex()
-		{
-			return m_bufferMemoryBarrier.srcQueueFamilyIndex;
-		}
-
-		BufferMemoryBarrier& srcQueueFamilyIndex(uint32_t srcQueueFamilyIndex)
-		{
-			m_bufferMemoryBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex;
+			srcQueueFamilyIndex = srcQueueFamilyIndex_;
 			return *this;
 		}
 
-		const uint32_t& dstQueueFamilyIndex() const
+		BufferMemoryBarrier& setDstQueueFamilyIndex(uint32_t dstQueueFamilyIndex_)
 		{
-			return m_bufferMemoryBarrier.dstQueueFamilyIndex;
-		}
-
-		uint32_t& dstQueueFamilyIndex()
-		{
-			return m_bufferMemoryBarrier.dstQueueFamilyIndex;
-		}
-
-		BufferMemoryBarrier& dstQueueFamilyIndex(uint32_t dstQueueFamilyIndex)
-		{
-			m_bufferMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
+			dstQueueFamilyIndex = dstQueueFamilyIndex_;
 			return *this;
 		}
 
-		const Buffer& buffer() const
+		BufferMemoryBarrier& setBuffer(Buffer buffer_)
 		{
-			return reinterpret_cast<const Buffer&>(m_bufferMemoryBarrier.buffer);
-		}
-
-		Buffer& buffer()
-		{
-			return reinterpret_cast<Buffer&>(m_bufferMemoryBarrier.buffer);
-		}
-
-		BufferMemoryBarrier& buffer(Buffer buffer)
-		{
-			m_bufferMemoryBarrier.buffer = static_cast<VkBuffer>(buffer);
+			buffer = buffer_;
 			return *this;
 		}
 
-		const DeviceSize& offset() const
+		BufferMemoryBarrier& setOffset(DeviceSize offset_)
 		{
-			return m_bufferMemoryBarrier.offset;
-		}
-
-		DeviceSize& offset()
-		{
-			return m_bufferMemoryBarrier.offset;
-		}
-
-		BufferMemoryBarrier& offset(DeviceSize offset)
-		{
-			m_bufferMemoryBarrier.offset = offset;
+			offset = offset_;
 			return *this;
 		}
 
-		const DeviceSize& size() const
+		BufferMemoryBarrier& setSize(DeviceSize size_)
 		{
-			return m_bufferMemoryBarrier.size;
-		}
-
-		DeviceSize& size()
-		{
-			return m_bufferMemoryBarrier.size;
-		}
-
-		BufferMemoryBarrier& size(DeviceSize size)
-		{
-			m_bufferMemoryBarrier.size = size;
+			size = size_;
 			return *this;
 		}
 
 		operator const VkBufferMemoryBarrier&() const
 		{
-			return m_bufferMemoryBarrier;
+			return *reinterpret_cast<const VkBufferMemoryBarrier*>(this);
 		}
 
-	private:
-		VkBufferMemoryBarrier m_bufferMemoryBarrier;
+		StructureType sType;
+		const void* pNext;
+		AccessFlags srcAccessMask;
+		AccessFlags dstAccessMask;
+		uint32_t srcQueueFamilyIndex;
+		uint32_t dstQueueFamilyIndex;
+		Buffer buffer;
+		DeviceSize offset;
+		DeviceSize size;
 	};
 	static_assert(sizeof(BufferMemoryBarrier) == sizeof(VkBufferMemoryBarrier), "struct and wrapper have different size!");
 
@@ -11489,7 +7698,7 @@ namespace vk
 		eIndirectBuffer = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT
 	};
 
-	typedef Flags<BufferUsageFlagBits, VkBufferUsageFlags> BufferUsageFlags;
+	using BufferUsageFlags = Flags<BufferUsageFlagBits, VkBufferUsageFlags>;
 
 	inline BufferUsageFlags operator|(BufferUsageFlagBits bit0, BufferUsageFlagBits bit1)
 	{
@@ -11503,178 +7712,103 @@ namespace vk
 		eSparseAliased = VK_BUFFER_CREATE_SPARSE_ALIASED_BIT
 	};
 
-	typedef Flags<BufferCreateFlagBits, VkBufferCreateFlags> BufferCreateFlags;
+	using BufferCreateFlags = Flags<BufferCreateFlagBits, VkBufferCreateFlags>;
 
 	inline BufferCreateFlags operator|(BufferCreateFlagBits bit0, BufferCreateFlagBits bit1)
 	{
 		return BufferCreateFlags(bit0) | bit1;
 	}
 
-	class BufferCreateInfo
+	struct BufferCreateInfo
 	{
-	public:
 		BufferCreateInfo()
 			: BufferCreateInfo(BufferCreateFlags(), 0, BufferUsageFlags(), SharingMode::eExclusive, 0, nullptr)
 		{}
 
-		BufferCreateInfo(BufferCreateFlags flags, DeviceSize size, BufferUsageFlags usage, SharingMode sharingMode, uint32_t queueFamilyIndexCount, const uint32_t* pQueueFamilyIndices)
+		BufferCreateInfo(BufferCreateFlags flags_, DeviceSize size_, BufferUsageFlags usage_, SharingMode sharingMode_, uint32_t queueFamilyIndexCount_, const uint32_t* pQueueFamilyIndices_)
 		{
-			m_bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			m_bufferCreateInfo.pNext = nullptr;
-			m_bufferCreateInfo.flags = static_cast<VkBufferCreateFlags>(flags);
-			m_bufferCreateInfo.size = size;
-			m_bufferCreateInfo.usage = static_cast<VkBufferUsageFlags>(usage);
-			m_bufferCreateInfo.sharingMode = static_cast<VkSharingMode>(sharingMode);
-			m_bufferCreateInfo.queueFamilyIndexCount = queueFamilyIndexCount;
-			m_bufferCreateInfo.pQueueFamilyIndices = pQueueFamilyIndices;
+			sType = StructureType::eBufferCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			size = size_;
+			usage = usage_;
+			sharingMode = sharingMode_;
+			queueFamilyIndexCount = queueFamilyIndexCount_;
+			pQueueFamilyIndices = pQueueFamilyIndices_;
 		}
 
 		BufferCreateInfo(VkBufferCreateInfo const & rhs)
-			: m_bufferCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(BufferCreateInfo));
 		}
 
 		BufferCreateInfo& operator=(VkBufferCreateInfo const & rhs)
 		{
-			m_bufferCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(BufferCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		BufferCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_bufferCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_bufferCreateInfo.sType);
-		}
-
-		BufferCreateInfo& sType(StructureType sType)
-		{
-			m_bufferCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		BufferCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_bufferCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_bufferCreateInfo.pNext);
-		}
-
-		BufferCreateInfo& pNext(const void* pNext)
-		{
-			m_bufferCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const BufferCreateFlags& flags() const
+		BufferCreateInfo& setFlags(BufferCreateFlags flags_)
 		{
-			return reinterpret_cast<const BufferCreateFlags&>(m_bufferCreateInfo.flags);
-		}
-
-		BufferCreateFlags& flags()
-		{
-			return reinterpret_cast<BufferCreateFlags&>(m_bufferCreateInfo.flags);
-		}
-
-		BufferCreateInfo& flags(BufferCreateFlags flags)
-		{
-			m_bufferCreateInfo.flags = static_cast<VkBufferCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const DeviceSize& size() const
+		BufferCreateInfo& setSize(DeviceSize size_)
 		{
-			return m_bufferCreateInfo.size;
-		}
-
-		DeviceSize& size()
-		{
-			return m_bufferCreateInfo.size;
-		}
-
-		BufferCreateInfo& size(DeviceSize size)
-		{
-			m_bufferCreateInfo.size = size;
+			size = size_;
 			return *this;
 		}
 
-		const BufferUsageFlags& usage() const
+		BufferCreateInfo& setUsage(BufferUsageFlags usage_)
 		{
-			return reinterpret_cast<const BufferUsageFlags&>(m_bufferCreateInfo.usage);
-		}
-
-		BufferUsageFlags& usage()
-		{
-			return reinterpret_cast<BufferUsageFlags&>(m_bufferCreateInfo.usage);
-		}
-
-		BufferCreateInfo& usage(BufferUsageFlags usage)
-		{
-			m_bufferCreateInfo.usage = static_cast<VkBufferUsageFlags>(usage);
+			usage = usage_;
 			return *this;
 		}
 
-		const SharingMode& sharingMode() const
+		BufferCreateInfo& setSharingMode(SharingMode sharingMode_)
 		{
-			return reinterpret_cast<const SharingMode&>(m_bufferCreateInfo.sharingMode);
-		}
-
-		SharingMode& sharingMode()
-		{
-			return reinterpret_cast<SharingMode&>(m_bufferCreateInfo.sharingMode);
-		}
-
-		BufferCreateInfo& sharingMode(SharingMode sharingMode)
-		{
-			m_bufferCreateInfo.sharingMode = static_cast<VkSharingMode>(sharingMode);
+			sharingMode = sharingMode_;
 			return *this;
 		}
 
-		const uint32_t& queueFamilyIndexCount() const
+		BufferCreateInfo& setQueueFamilyIndexCount(uint32_t queueFamilyIndexCount_)
 		{
-			return m_bufferCreateInfo.queueFamilyIndexCount;
-		}
-
-		uint32_t& queueFamilyIndexCount()
-		{
-			return m_bufferCreateInfo.queueFamilyIndexCount;
-		}
-
-		BufferCreateInfo& queueFamilyIndexCount(uint32_t queueFamilyIndexCount)
-		{
-			m_bufferCreateInfo.queueFamilyIndexCount = queueFamilyIndexCount;
+			queueFamilyIndexCount = queueFamilyIndexCount_;
 			return *this;
 		}
 
-		const uint32_t* pQueueFamilyIndices() const
+		BufferCreateInfo& setPQueueFamilyIndices(const uint32_t* pQueueFamilyIndices_)
 		{
-			return reinterpret_cast<const uint32_t*>(m_bufferCreateInfo.pQueueFamilyIndices);
-		}
-
-		const uint32_t* pQueueFamilyIndices()
-		{
-			return reinterpret_cast<const uint32_t*>(m_bufferCreateInfo.pQueueFamilyIndices);
-		}
-
-		BufferCreateInfo& pQueueFamilyIndices(const uint32_t* pQueueFamilyIndices)
-		{
-			m_bufferCreateInfo.pQueueFamilyIndices = pQueueFamilyIndices;
+			pQueueFamilyIndices = pQueueFamilyIndices_;
 			return *this;
 		}
 
 		operator const VkBufferCreateInfo&() const
 		{
-			return m_bufferCreateInfo;
+			return *reinterpret_cast<const VkBufferCreateInfo*>(this);
 		}
 
-	private:
-		VkBufferCreateInfo m_bufferCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		BufferCreateFlags flags;
+		DeviceSize size;
+		BufferUsageFlags usage;
+		SharingMode sharingMode;
+		uint32_t queueFamilyIndexCount;
+		const uint32_t* pQueueFamilyIndices;
 	};
 	static_assert(sizeof(BufferCreateInfo) == sizeof(VkBufferCreateInfo), "struct and wrapper have different size!");
 
@@ -11690,629 +7824,371 @@ namespace vk
 		eAll = VK_SHADER_STAGE_ALL
 	};
 
-	typedef Flags<ShaderStageFlagBits, VkShaderStageFlags> ShaderStageFlags;
+	using ShaderStageFlags = Flags<ShaderStageFlagBits, VkShaderStageFlags>;
 
 	inline ShaderStageFlags operator|(ShaderStageFlagBits bit0, ShaderStageFlagBits bit1)
 	{
 		return ShaderStageFlags(bit0) | bit1;
 	}
 
-	class DescriptorSetLayoutBinding
+	struct DescriptorSetLayoutBinding
 	{
-	public:
 		DescriptorSetLayoutBinding()
 			: DescriptorSetLayoutBinding(0, DescriptorType::eSampler, 0, ShaderStageFlags(), nullptr)
 		{}
 
-		DescriptorSetLayoutBinding(uint32_t binding, DescriptorType descriptorType, uint32_t descriptorCount, ShaderStageFlags stageFlags, const Sampler* pImmutableSamplers)
+		DescriptorSetLayoutBinding(uint32_t binding_, DescriptorType descriptorType_, uint32_t descriptorCount_, ShaderStageFlags stageFlags_, const Sampler* pImmutableSamplers_)
 		{
-			m_descriptorSetLayoutBinding.binding = binding;
-			m_descriptorSetLayoutBinding.descriptorType = static_cast<VkDescriptorType>(descriptorType);
-			m_descriptorSetLayoutBinding.descriptorCount = descriptorCount;
-			m_descriptorSetLayoutBinding.stageFlags = static_cast<VkShaderStageFlags>(stageFlags);
-			m_descriptorSetLayoutBinding.pImmutableSamplers = reinterpret_cast<const VkSampler*>(pImmutableSamplers);
+			binding = binding_;
+			descriptorType = descriptorType_;
+			descriptorCount = descriptorCount_;
+			stageFlags = stageFlags_;
+			pImmutableSamplers = pImmutableSamplers_;
 		}
 
 		DescriptorSetLayoutBinding(VkDescriptorSetLayoutBinding const & rhs)
-			: m_descriptorSetLayoutBinding(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DescriptorSetLayoutBinding));
 		}
 
 		DescriptorSetLayoutBinding& operator=(VkDescriptorSetLayoutBinding const & rhs)
 		{
-			m_descriptorSetLayoutBinding = rhs;
+			memcpy(this, &rhs, sizeof(DescriptorSetLayoutBinding));
 			return *this;
 		}
 
-		const uint32_t& binding() const
+		DescriptorSetLayoutBinding& setBinding(uint32_t binding_)
 		{
-			return m_descriptorSetLayoutBinding.binding;
-		}
-
-		uint32_t& binding()
-		{
-			return m_descriptorSetLayoutBinding.binding;
-		}
-
-		DescriptorSetLayoutBinding& binding(uint32_t binding)
-		{
-			m_descriptorSetLayoutBinding.binding = binding;
+			binding = binding_;
 			return *this;
 		}
 
-		const DescriptorType& descriptorType() const
+		DescriptorSetLayoutBinding& setDescriptorType(DescriptorType descriptorType_)
 		{
-			return reinterpret_cast<const DescriptorType&>(m_descriptorSetLayoutBinding.descriptorType);
-		}
-
-		DescriptorType& descriptorType()
-		{
-			return reinterpret_cast<DescriptorType&>(m_descriptorSetLayoutBinding.descriptorType);
-		}
-
-		DescriptorSetLayoutBinding& descriptorType(DescriptorType descriptorType)
-		{
-			m_descriptorSetLayoutBinding.descriptorType = static_cast<VkDescriptorType>(descriptorType);
+			descriptorType = descriptorType_;
 			return *this;
 		}
 
-		const uint32_t& descriptorCount() const
+		DescriptorSetLayoutBinding& setDescriptorCount(uint32_t descriptorCount_)
 		{
-			return m_descriptorSetLayoutBinding.descriptorCount;
-		}
-
-		uint32_t& descriptorCount()
-		{
-			return m_descriptorSetLayoutBinding.descriptorCount;
-		}
-
-		DescriptorSetLayoutBinding& descriptorCount(uint32_t descriptorCount)
-		{
-			m_descriptorSetLayoutBinding.descriptorCount = descriptorCount;
+			descriptorCount = descriptorCount_;
 			return *this;
 		}
 
-		const ShaderStageFlags& stageFlags() const
+		DescriptorSetLayoutBinding& setStageFlags(ShaderStageFlags stageFlags_)
 		{
-			return reinterpret_cast<const ShaderStageFlags&>(m_descriptorSetLayoutBinding.stageFlags);
-		}
-
-		ShaderStageFlags& stageFlags()
-		{
-			return reinterpret_cast<ShaderStageFlags&>(m_descriptorSetLayoutBinding.stageFlags);
-		}
-
-		DescriptorSetLayoutBinding& stageFlags(ShaderStageFlags stageFlags)
-		{
-			m_descriptorSetLayoutBinding.stageFlags = static_cast<VkShaderStageFlags>(stageFlags);
+			stageFlags = stageFlags_;
 			return *this;
 		}
 
-		const Sampler* pImmutableSamplers() const
+		DescriptorSetLayoutBinding& setPImmutableSamplers(const Sampler* pImmutableSamplers_)
 		{
-			return reinterpret_cast<const Sampler*>(m_descriptorSetLayoutBinding.pImmutableSamplers);
-		}
-
-		const Sampler* pImmutableSamplers()
-		{
-			return reinterpret_cast<const Sampler*>(m_descriptorSetLayoutBinding.pImmutableSamplers);
-		}
-
-		DescriptorSetLayoutBinding& pImmutableSamplers(const Sampler* pImmutableSamplers)
-		{
-			m_descriptorSetLayoutBinding.pImmutableSamplers = reinterpret_cast<const VkSampler*>(pImmutableSamplers);
+			pImmutableSamplers = pImmutableSamplers_;
 			return *this;
 		}
 
 		operator const VkDescriptorSetLayoutBinding&() const
 		{
-			return m_descriptorSetLayoutBinding;
+			return *reinterpret_cast<const VkDescriptorSetLayoutBinding*>(this);
 		}
 
-	private:
-		VkDescriptorSetLayoutBinding m_descriptorSetLayoutBinding;
+		uint32_t binding;
+		DescriptorType descriptorType;
+		uint32_t descriptorCount;
+		ShaderStageFlags stageFlags;
+		const Sampler* pImmutableSamplers;
 	};
 	static_assert(sizeof(DescriptorSetLayoutBinding) == sizeof(VkDescriptorSetLayoutBinding), "struct and wrapper have different size!");
 
-	class DescriptorSetLayoutCreateInfo
+	struct DescriptorSetLayoutCreateInfo
 	{
-	public:
 		DescriptorSetLayoutCreateInfo()
 			: DescriptorSetLayoutCreateInfo(DescriptorSetLayoutCreateFlags(), 0, nullptr)
 		{}
 
-		DescriptorSetLayoutCreateInfo(DescriptorSetLayoutCreateFlags flags, uint32_t bindingCount, const DescriptorSetLayoutBinding* pBindings)
+		DescriptorSetLayoutCreateInfo(DescriptorSetLayoutCreateFlags flags_, uint32_t bindingCount_, const DescriptorSetLayoutBinding* pBindings_)
 		{
-			m_descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			m_descriptorSetLayoutCreateInfo.pNext = nullptr;
-			m_descriptorSetLayoutCreateInfo.flags = static_cast<VkDescriptorSetLayoutCreateFlags>(flags);
-			m_descriptorSetLayoutCreateInfo.bindingCount = bindingCount;
-			m_descriptorSetLayoutCreateInfo.pBindings = reinterpret_cast<const VkDescriptorSetLayoutBinding*>(pBindings);
+			sType = StructureType::eDescriptorSetLayoutCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			bindingCount = bindingCount_;
+			pBindings = pBindings_;
 		}
 
 		DescriptorSetLayoutCreateInfo(VkDescriptorSetLayoutCreateInfo const & rhs)
-			: m_descriptorSetLayoutCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DescriptorSetLayoutCreateInfo));
 		}
 
 		DescriptorSetLayoutCreateInfo& operator=(VkDescriptorSetLayoutCreateInfo const & rhs)
 		{
-			m_descriptorSetLayoutCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(DescriptorSetLayoutCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DescriptorSetLayoutCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_descriptorSetLayoutCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_descriptorSetLayoutCreateInfo.sType);
-		}
-
-		DescriptorSetLayoutCreateInfo& sType(StructureType sType)
-		{
-			m_descriptorSetLayoutCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DescriptorSetLayoutCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_descriptorSetLayoutCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_descriptorSetLayoutCreateInfo.pNext);
-		}
-
-		DescriptorSetLayoutCreateInfo& pNext(const void* pNext)
-		{
-			m_descriptorSetLayoutCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DescriptorSetLayoutCreateFlags& flags() const
+		DescriptorSetLayoutCreateInfo& setFlags(DescriptorSetLayoutCreateFlags flags_)
 		{
-			return reinterpret_cast<const DescriptorSetLayoutCreateFlags&>(m_descriptorSetLayoutCreateInfo.flags);
-		}
-
-		DescriptorSetLayoutCreateFlags& flags()
-		{
-			return reinterpret_cast<DescriptorSetLayoutCreateFlags&>(m_descriptorSetLayoutCreateInfo.flags);
-		}
-
-		DescriptorSetLayoutCreateInfo& flags(DescriptorSetLayoutCreateFlags flags)
-		{
-			m_descriptorSetLayoutCreateInfo.flags = static_cast<VkDescriptorSetLayoutCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& bindingCount() const
+		DescriptorSetLayoutCreateInfo& setBindingCount(uint32_t bindingCount_)
 		{
-			return m_descriptorSetLayoutCreateInfo.bindingCount;
-		}
-
-		uint32_t& bindingCount()
-		{
-			return m_descriptorSetLayoutCreateInfo.bindingCount;
-		}
-
-		DescriptorSetLayoutCreateInfo& bindingCount(uint32_t bindingCount)
-		{
-			m_descriptorSetLayoutCreateInfo.bindingCount = bindingCount;
+			bindingCount = bindingCount_;
 			return *this;
 		}
 
-		const DescriptorSetLayoutBinding* pBindings() const
+		DescriptorSetLayoutCreateInfo& setPBindings(const DescriptorSetLayoutBinding* pBindings_)
 		{
-			return reinterpret_cast<const DescriptorSetLayoutBinding*>(m_descriptorSetLayoutCreateInfo.pBindings);
-		}
-
-		const DescriptorSetLayoutBinding* pBindings()
-		{
-			return reinterpret_cast<const DescriptorSetLayoutBinding*>(m_descriptorSetLayoutCreateInfo.pBindings);
-		}
-
-		DescriptorSetLayoutCreateInfo& pBindings(const DescriptorSetLayoutBinding* pBindings)
-		{
-			m_descriptorSetLayoutCreateInfo.pBindings = reinterpret_cast<const VkDescriptorSetLayoutBinding*>(pBindings);
+			pBindings = pBindings_;
 			return *this;
 		}
 
 		operator const VkDescriptorSetLayoutCreateInfo&() const
 		{
-			return m_descriptorSetLayoutCreateInfo;
+			return *reinterpret_cast<const VkDescriptorSetLayoutCreateInfo*>(this);
 		}
 
-	private:
-		VkDescriptorSetLayoutCreateInfo m_descriptorSetLayoutCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		DescriptorSetLayoutCreateFlags flags;
+		uint32_t bindingCount;
+		const DescriptorSetLayoutBinding* pBindings;
 	};
 	static_assert(sizeof(DescriptorSetLayoutCreateInfo) == sizeof(VkDescriptorSetLayoutCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineShaderStageCreateInfo
+	struct PipelineShaderStageCreateInfo
 	{
-	public:
 		PipelineShaderStageCreateInfo()
 			: PipelineShaderStageCreateInfo(PipelineShaderStageCreateFlags(), ShaderStageFlagBits::eVertex, ShaderModule(), nullptr, nullptr)
 		{}
 
-		PipelineShaderStageCreateInfo(PipelineShaderStageCreateFlags flags, ShaderStageFlagBits stage, ShaderModule module, const char* pName, const SpecializationInfo* pSpecializationInfo)
+		PipelineShaderStageCreateInfo(PipelineShaderStageCreateFlags flags_, ShaderStageFlagBits stage_, ShaderModule module_, const char* pName_, const SpecializationInfo* pSpecializationInfo_)
 		{
-			m_pipelineShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-			m_pipelineShaderStageCreateInfo.pNext = nullptr;
-			m_pipelineShaderStageCreateInfo.flags = static_cast<VkPipelineShaderStageCreateFlags>(flags);
-			m_pipelineShaderStageCreateInfo.stage = static_cast<VkShaderStageFlagBits>(stage);
-			m_pipelineShaderStageCreateInfo.module = static_cast<VkShaderModule>(module);
-			m_pipelineShaderStageCreateInfo.pName = pName;
-			m_pipelineShaderStageCreateInfo.pSpecializationInfo = reinterpret_cast<const VkSpecializationInfo*>(pSpecializationInfo);
+			sType = StructureType::ePipelineShaderStageCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			stage = stage_;
+			module = module_;
+			pName = pName_;
+			pSpecializationInfo = pSpecializationInfo_;
 		}
 
 		PipelineShaderStageCreateInfo(VkPipelineShaderStageCreateInfo const & rhs)
-			: m_pipelineShaderStageCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineShaderStageCreateInfo));
 		}
 
 		PipelineShaderStageCreateInfo& operator=(VkPipelineShaderStageCreateInfo const & rhs)
 		{
-			m_pipelineShaderStageCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineShaderStageCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineShaderStageCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineShaderStageCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineShaderStageCreateInfo.sType);
-		}
-
-		PipelineShaderStageCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineShaderStageCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineShaderStageCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineShaderStageCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineShaderStageCreateInfo.pNext);
-		}
-
-		PipelineShaderStageCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineShaderStageCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineShaderStageCreateFlags& flags() const
+		PipelineShaderStageCreateInfo& setFlags(PipelineShaderStageCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineShaderStageCreateFlags&>(m_pipelineShaderStageCreateInfo.flags);
-		}
-
-		PipelineShaderStageCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineShaderStageCreateFlags&>(m_pipelineShaderStageCreateInfo.flags);
-		}
-
-		PipelineShaderStageCreateInfo& flags(PipelineShaderStageCreateFlags flags)
-		{
-			m_pipelineShaderStageCreateInfo.flags = static_cast<VkPipelineShaderStageCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const ShaderStageFlagBits& stage() const
+		PipelineShaderStageCreateInfo& setStage(ShaderStageFlagBits stage_)
 		{
-			return reinterpret_cast<const ShaderStageFlagBits&>(m_pipelineShaderStageCreateInfo.stage);
-		}
-
-		ShaderStageFlagBits& stage()
-		{
-			return reinterpret_cast<ShaderStageFlagBits&>(m_pipelineShaderStageCreateInfo.stage);
-		}
-
-		PipelineShaderStageCreateInfo& stage(ShaderStageFlagBits stage)
-		{
-			m_pipelineShaderStageCreateInfo.stage = static_cast<VkShaderStageFlagBits>(stage);
+			stage = stage_;
 			return *this;
 		}
 
-		const ShaderModule& module() const
+		PipelineShaderStageCreateInfo& setModule(ShaderModule module_)
 		{
-			return reinterpret_cast<const ShaderModule&>(m_pipelineShaderStageCreateInfo.module);
-		}
-
-		ShaderModule& module()
-		{
-			return reinterpret_cast<ShaderModule&>(m_pipelineShaderStageCreateInfo.module);
-		}
-
-		PipelineShaderStageCreateInfo& module(ShaderModule module)
-		{
-			m_pipelineShaderStageCreateInfo.module = static_cast<VkShaderModule>(module);
+			module = module_;
 			return *this;
 		}
 
-		const char* pName() const
+		PipelineShaderStageCreateInfo& setPName(const char* pName_)
 		{
-			return reinterpret_cast<const char*>(m_pipelineShaderStageCreateInfo.pName);
-		}
-
-		const char* pName()
-		{
-			return reinterpret_cast<const char*>(m_pipelineShaderStageCreateInfo.pName);
-		}
-
-		PipelineShaderStageCreateInfo& pName(const char* pName)
-		{
-			m_pipelineShaderStageCreateInfo.pName = pName;
+			pName = pName_;
 			return *this;
 		}
 
-		const SpecializationInfo* pSpecializationInfo() const
+		PipelineShaderStageCreateInfo& setPSpecializationInfo(const SpecializationInfo* pSpecializationInfo_)
 		{
-			return reinterpret_cast<const SpecializationInfo*>(m_pipelineShaderStageCreateInfo.pSpecializationInfo);
-		}
-
-		const SpecializationInfo* pSpecializationInfo()
-		{
-			return reinterpret_cast<const SpecializationInfo*>(m_pipelineShaderStageCreateInfo.pSpecializationInfo);
-		}
-
-		PipelineShaderStageCreateInfo& pSpecializationInfo(const SpecializationInfo* pSpecializationInfo)
-		{
-			m_pipelineShaderStageCreateInfo.pSpecializationInfo = reinterpret_cast<const VkSpecializationInfo*>(pSpecializationInfo);
+			pSpecializationInfo = pSpecializationInfo_;
 			return *this;
 		}
 
 		operator const VkPipelineShaderStageCreateInfo&() const
 		{
-			return m_pipelineShaderStageCreateInfo;
+			return *reinterpret_cast<const VkPipelineShaderStageCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineShaderStageCreateInfo m_pipelineShaderStageCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineShaderStageCreateFlags flags;
+		ShaderStageFlagBits stage;
+		ShaderModule module;
+		const char* pName;
+		const SpecializationInfo* pSpecializationInfo;
 	};
 	static_assert(sizeof(PipelineShaderStageCreateInfo) == sizeof(VkPipelineShaderStageCreateInfo), "struct and wrapper have different size!");
 
-	class PushConstantRange
+	struct PushConstantRange
 	{
-	public:
 		PushConstantRange()
 			: PushConstantRange(ShaderStageFlags(), 0, 0)
 		{}
 
-		PushConstantRange(ShaderStageFlags stageFlags, uint32_t offset, uint32_t size)
+		PushConstantRange(ShaderStageFlags stageFlags_, uint32_t offset_, uint32_t size_)
 		{
-			m_pushConstantRange.stageFlags = static_cast<VkShaderStageFlags>(stageFlags);
-			m_pushConstantRange.offset = offset;
-			m_pushConstantRange.size = size;
+			stageFlags = stageFlags_;
+			offset = offset_;
+			size = size_;
 		}
 
 		PushConstantRange(VkPushConstantRange const & rhs)
-			: m_pushConstantRange(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PushConstantRange));
 		}
 
 		PushConstantRange& operator=(VkPushConstantRange const & rhs)
 		{
-			m_pushConstantRange = rhs;
+			memcpy(this, &rhs, sizeof(PushConstantRange));
 			return *this;
 		}
 
-		const ShaderStageFlags& stageFlags() const
+		PushConstantRange& setStageFlags(ShaderStageFlags stageFlags_)
 		{
-			return reinterpret_cast<const ShaderStageFlags&>(m_pushConstantRange.stageFlags);
-		}
-
-		ShaderStageFlags& stageFlags()
-		{
-			return reinterpret_cast<ShaderStageFlags&>(m_pushConstantRange.stageFlags);
-		}
-
-		PushConstantRange& stageFlags(ShaderStageFlags stageFlags)
-		{
-			m_pushConstantRange.stageFlags = static_cast<VkShaderStageFlags>(stageFlags);
+			stageFlags = stageFlags_;
 			return *this;
 		}
 
-		const uint32_t& offset() const
+		PushConstantRange& setOffset(uint32_t offset_)
 		{
-			return m_pushConstantRange.offset;
-		}
-
-		uint32_t& offset()
-		{
-			return m_pushConstantRange.offset;
-		}
-
-		PushConstantRange& offset(uint32_t offset)
-		{
-			m_pushConstantRange.offset = offset;
+			offset = offset_;
 			return *this;
 		}
 
-		const uint32_t& size() const
+		PushConstantRange& setSize(uint32_t size_)
 		{
-			return m_pushConstantRange.size;
-		}
-
-		uint32_t& size()
-		{
-			return m_pushConstantRange.size;
-		}
-
-		PushConstantRange& size(uint32_t size)
-		{
-			m_pushConstantRange.size = size;
+			size = size_;
 			return *this;
 		}
 
 		operator const VkPushConstantRange&() const
 		{
-			return m_pushConstantRange;
+			return *reinterpret_cast<const VkPushConstantRange*>(this);
 		}
 
-	private:
-		VkPushConstantRange m_pushConstantRange;
+		ShaderStageFlags stageFlags;
+		uint32_t offset;
+		uint32_t size;
 	};
 	static_assert(sizeof(PushConstantRange) == sizeof(VkPushConstantRange), "struct and wrapper have different size!");
 
-	class PipelineLayoutCreateInfo
+	struct PipelineLayoutCreateInfo
 	{
-	public:
 		PipelineLayoutCreateInfo()
 			: PipelineLayoutCreateInfo(PipelineLayoutCreateFlags(), 0, nullptr, 0, nullptr)
 		{}
 
-		PipelineLayoutCreateInfo(PipelineLayoutCreateFlags flags, uint32_t setLayoutCount, const DescriptorSetLayout* pSetLayouts, uint32_t pushConstantRangeCount, const PushConstantRange* pPushConstantRanges)
+		PipelineLayoutCreateInfo(PipelineLayoutCreateFlags flags_, uint32_t setLayoutCount_, const DescriptorSetLayout* pSetLayouts_, uint32_t pushConstantRangeCount_, const PushConstantRange* pPushConstantRanges_)
 		{
-			m_pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-			m_pipelineLayoutCreateInfo.pNext = nullptr;
-			m_pipelineLayoutCreateInfo.flags = static_cast<VkPipelineLayoutCreateFlags>(flags);
-			m_pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
-			m_pipelineLayoutCreateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
-			m_pipelineLayoutCreateInfo.pushConstantRangeCount = pushConstantRangeCount;
-			m_pipelineLayoutCreateInfo.pPushConstantRanges = reinterpret_cast<const VkPushConstantRange*>(pPushConstantRanges);
+			sType = StructureType::ePipelineLayoutCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			setLayoutCount = setLayoutCount_;
+			pSetLayouts = pSetLayouts_;
+			pushConstantRangeCount = pushConstantRangeCount_;
+			pPushConstantRanges = pPushConstantRanges_;
 		}
 
 		PipelineLayoutCreateInfo(VkPipelineLayoutCreateInfo const & rhs)
-			: m_pipelineLayoutCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineLayoutCreateInfo));
 		}
 
 		PipelineLayoutCreateInfo& operator=(VkPipelineLayoutCreateInfo const & rhs)
 		{
-			m_pipelineLayoutCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineLayoutCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineLayoutCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineLayoutCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineLayoutCreateInfo.sType);
-		}
-
-		PipelineLayoutCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineLayoutCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineLayoutCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineLayoutCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineLayoutCreateInfo.pNext);
-		}
-
-		PipelineLayoutCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineLayoutCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineLayoutCreateFlags& flags() const
+		PipelineLayoutCreateInfo& setFlags(PipelineLayoutCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineLayoutCreateFlags&>(m_pipelineLayoutCreateInfo.flags);
-		}
-
-		PipelineLayoutCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineLayoutCreateFlags&>(m_pipelineLayoutCreateInfo.flags);
-		}
-
-		PipelineLayoutCreateInfo& flags(PipelineLayoutCreateFlags flags)
-		{
-			m_pipelineLayoutCreateInfo.flags = static_cast<VkPipelineLayoutCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& setLayoutCount() const
+		PipelineLayoutCreateInfo& setSetLayoutCount(uint32_t setLayoutCount_)
 		{
-			return m_pipelineLayoutCreateInfo.setLayoutCount;
-		}
-
-		uint32_t& setLayoutCount()
-		{
-			return m_pipelineLayoutCreateInfo.setLayoutCount;
-		}
-
-		PipelineLayoutCreateInfo& setLayoutCount(uint32_t setLayoutCount)
-		{
-			m_pipelineLayoutCreateInfo.setLayoutCount = setLayoutCount;
+			setLayoutCount = setLayoutCount_;
 			return *this;
 		}
 
-		const DescriptorSetLayout* pSetLayouts() const
+		PipelineLayoutCreateInfo& setPSetLayouts(const DescriptorSetLayout* pSetLayouts_)
 		{
-			return reinterpret_cast<const DescriptorSetLayout*>(m_pipelineLayoutCreateInfo.pSetLayouts);
-		}
-
-		const DescriptorSetLayout* pSetLayouts()
-		{
-			return reinterpret_cast<const DescriptorSetLayout*>(m_pipelineLayoutCreateInfo.pSetLayouts);
-		}
-
-		PipelineLayoutCreateInfo& pSetLayouts(const DescriptorSetLayout* pSetLayouts)
-		{
-			m_pipelineLayoutCreateInfo.pSetLayouts = reinterpret_cast<const VkDescriptorSetLayout*>(pSetLayouts);
+			pSetLayouts = pSetLayouts_;
 			return *this;
 		}
 
-		const uint32_t& pushConstantRangeCount() const
+		PipelineLayoutCreateInfo& setPushConstantRangeCount(uint32_t pushConstantRangeCount_)
 		{
-			return m_pipelineLayoutCreateInfo.pushConstantRangeCount;
-		}
-
-		uint32_t& pushConstantRangeCount()
-		{
-			return m_pipelineLayoutCreateInfo.pushConstantRangeCount;
-		}
-
-		PipelineLayoutCreateInfo& pushConstantRangeCount(uint32_t pushConstantRangeCount)
-		{
-			m_pipelineLayoutCreateInfo.pushConstantRangeCount = pushConstantRangeCount;
+			pushConstantRangeCount = pushConstantRangeCount_;
 			return *this;
 		}
 
-		const PushConstantRange* pPushConstantRanges() const
+		PipelineLayoutCreateInfo& setPPushConstantRanges(const PushConstantRange* pPushConstantRanges_)
 		{
-			return reinterpret_cast<const PushConstantRange*>(m_pipelineLayoutCreateInfo.pPushConstantRanges);
-		}
-
-		const PushConstantRange* pPushConstantRanges()
-		{
-			return reinterpret_cast<const PushConstantRange*>(m_pipelineLayoutCreateInfo.pPushConstantRanges);
-		}
-
-		PipelineLayoutCreateInfo& pPushConstantRanges(const PushConstantRange* pPushConstantRanges)
-		{
-			m_pipelineLayoutCreateInfo.pPushConstantRanges = reinterpret_cast<const VkPushConstantRange*>(pPushConstantRanges);
+			pPushConstantRanges = pPushConstantRanges_;
 			return *this;
 		}
 
 		operator const VkPipelineLayoutCreateInfo&() const
 		{
-			return m_pipelineLayoutCreateInfo;
+			return *reinterpret_cast<const VkPipelineLayoutCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineLayoutCreateInfo m_pipelineLayoutCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineLayoutCreateFlags flags;
+		uint32_t setLayoutCount;
+		const DescriptorSetLayout* pSetLayouts;
+		uint32_t pushConstantRangeCount;
+		const PushConstantRange* pPushConstantRanges;
 	};
 	static_assert(sizeof(PipelineLayoutCreateInfo) == sizeof(VkPipelineLayoutCreateInfo), "struct and wrapper have different size!");
 
@@ -12328,7 +8204,7 @@ namespace vk
 		eInputAttachment = VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT
 	};
 
-	typedef Flags<ImageUsageFlagBits, VkImageUsageFlags> ImageUsageFlags;
+	using ImageUsageFlags = Flags<ImageUsageFlagBits, VkImageUsageFlags>;
 
 	inline ImageUsageFlags operator|(ImageUsageFlagBits bit0, ImageUsageFlagBits bit1)
 	{
@@ -12344,7 +8220,7 @@ namespace vk
 		eCubeCompatible = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
 	};
 
-	typedef Flags<ImageCreateFlagBits, VkImageCreateFlags> ImageCreateFlags;
+	using ImageCreateFlags = Flags<ImageCreateFlagBits, VkImageCreateFlags>;
 
 	inline ImageCreateFlags operator|(ImageCreateFlagBits bit0, ImageCreateFlagBits bit1)
 	{
@@ -12358,161 +8234,95 @@ namespace vk
 		eDerivative = VK_PIPELINE_CREATE_DERIVATIVE_BIT
 	};
 
-	typedef Flags<PipelineCreateFlagBits, VkPipelineCreateFlags> PipelineCreateFlags;
+	using PipelineCreateFlags = Flags<PipelineCreateFlagBits, VkPipelineCreateFlags>;
 
 	inline PipelineCreateFlags operator|(PipelineCreateFlagBits bit0, PipelineCreateFlagBits bit1)
 	{
 		return PipelineCreateFlags(bit0) | bit1;
 	}
 
-	class ComputePipelineCreateInfo
+	struct ComputePipelineCreateInfo
 	{
-	public:
 		ComputePipelineCreateInfo()
 			: ComputePipelineCreateInfo(PipelineCreateFlags(), PipelineShaderStageCreateInfo(), PipelineLayout(), Pipeline(), 0)
 		{}
 
-		ComputePipelineCreateInfo(PipelineCreateFlags flags, PipelineShaderStageCreateInfo stage, PipelineLayout layout, Pipeline basePipelineHandle, int32_t basePipelineIndex)
+		ComputePipelineCreateInfo(PipelineCreateFlags flags_, PipelineShaderStageCreateInfo stage_, PipelineLayout layout_, Pipeline basePipelineHandle_, int32_t basePipelineIndex_)
 		{
-			m_computePipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
-			m_computePipelineCreateInfo.pNext = nullptr;
-			m_computePipelineCreateInfo.flags = static_cast<VkPipelineCreateFlags>(flags);
-			m_computePipelineCreateInfo.stage = static_cast<VkPipelineShaderStageCreateInfo>(stage);
-			m_computePipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
-			m_computePipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
-			m_computePipelineCreateInfo.basePipelineIndex = basePipelineIndex;
+			sType = StructureType::eComputePipelineCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			stage = stage_;
+			layout = layout_;
+			basePipelineHandle = basePipelineHandle_;
+			basePipelineIndex = basePipelineIndex_;
 		}
 
 		ComputePipelineCreateInfo(VkComputePipelineCreateInfo const & rhs)
-			: m_computePipelineCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ComputePipelineCreateInfo));
 		}
 
 		ComputePipelineCreateInfo& operator=(VkComputePipelineCreateInfo const & rhs)
 		{
-			m_computePipelineCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(ComputePipelineCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		ComputePipelineCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_computePipelineCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_computePipelineCreateInfo.sType);
-		}
-
-		ComputePipelineCreateInfo& sType(StructureType sType)
-		{
-			m_computePipelineCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		ComputePipelineCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_computePipelineCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_computePipelineCreateInfo.pNext);
-		}
-
-		ComputePipelineCreateInfo& pNext(const void* pNext)
-		{
-			m_computePipelineCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineCreateFlags& flags() const
+		ComputePipelineCreateInfo& setFlags(PipelineCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineCreateFlags&>(m_computePipelineCreateInfo.flags);
-		}
-
-		PipelineCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineCreateFlags&>(m_computePipelineCreateInfo.flags);
-		}
-
-		ComputePipelineCreateInfo& flags(PipelineCreateFlags flags)
-		{
-			m_computePipelineCreateInfo.flags = static_cast<VkPipelineCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const PipelineShaderStageCreateInfo& stage() const
+		ComputePipelineCreateInfo& setStage(PipelineShaderStageCreateInfo stage_)
 		{
-			return reinterpret_cast<const PipelineShaderStageCreateInfo&>(m_computePipelineCreateInfo.stage);
-		}
-
-		PipelineShaderStageCreateInfo& stage()
-		{
-			return reinterpret_cast<PipelineShaderStageCreateInfo&>(m_computePipelineCreateInfo.stage);
-		}
-
-		ComputePipelineCreateInfo& stage(PipelineShaderStageCreateInfo stage)
-		{
-			m_computePipelineCreateInfo.stage = static_cast<VkPipelineShaderStageCreateInfo>(stage);
+			stage = stage_;
 			return *this;
 		}
 
-		const PipelineLayout& layout() const
+		ComputePipelineCreateInfo& setLayout(PipelineLayout layout_)
 		{
-			return reinterpret_cast<const PipelineLayout&>(m_computePipelineCreateInfo.layout);
-		}
-
-		PipelineLayout& layout()
-		{
-			return reinterpret_cast<PipelineLayout&>(m_computePipelineCreateInfo.layout);
-		}
-
-		ComputePipelineCreateInfo& layout(PipelineLayout layout)
-		{
-			m_computePipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
+			layout = layout_;
 			return *this;
 		}
 
-		const Pipeline& basePipelineHandle() const
+		ComputePipelineCreateInfo& setBasePipelineHandle(Pipeline basePipelineHandle_)
 		{
-			return reinterpret_cast<const Pipeline&>(m_computePipelineCreateInfo.basePipelineHandle);
-		}
-
-		Pipeline& basePipelineHandle()
-		{
-			return reinterpret_cast<Pipeline&>(m_computePipelineCreateInfo.basePipelineHandle);
-		}
-
-		ComputePipelineCreateInfo& basePipelineHandle(Pipeline basePipelineHandle)
-		{
-			m_computePipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
+			basePipelineHandle = basePipelineHandle_;
 			return *this;
 		}
 
-		const int32_t& basePipelineIndex() const
+		ComputePipelineCreateInfo& setBasePipelineIndex(int32_t basePipelineIndex_)
 		{
-			return m_computePipelineCreateInfo.basePipelineIndex;
-		}
-
-		int32_t& basePipelineIndex()
-		{
-			return m_computePipelineCreateInfo.basePipelineIndex;
-		}
-
-		ComputePipelineCreateInfo& basePipelineIndex(int32_t basePipelineIndex)
-		{
-			m_computePipelineCreateInfo.basePipelineIndex = basePipelineIndex;
+			basePipelineIndex = basePipelineIndex_;
 			return *this;
 		}
 
 		operator const VkComputePipelineCreateInfo&() const
 		{
-			return m_computePipelineCreateInfo;
+			return *reinterpret_cast<const VkComputePipelineCreateInfo*>(this);
 		}
 
-	private:
-		VkComputePipelineCreateInfo m_computePipelineCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineCreateFlags flags;
+		PipelineShaderStageCreateInfo stage;
+		PipelineLayout layout;
+		Pipeline basePipelineHandle;
+		int32_t basePipelineIndex;
 	};
 	static_assert(sizeof(ComputePipelineCreateInfo) == sizeof(VkComputePipelineCreateInfo), "struct and wrapper have different size!");
 
@@ -12524,346 +8334,196 @@ namespace vk
 		eA = VK_COLOR_COMPONENT_A_BIT
 	};
 
-	typedef Flags<ColorComponentFlagBits, VkColorComponentFlags> ColorComponentFlags;
+	using ColorComponentFlags = Flags<ColorComponentFlagBits, VkColorComponentFlags>;
 
 	inline ColorComponentFlags operator|(ColorComponentFlagBits bit0, ColorComponentFlagBits bit1)
 	{
 		return ColorComponentFlags(bit0) | bit1;
 	}
 
-	class PipelineColorBlendAttachmentState
+	struct PipelineColorBlendAttachmentState
 	{
-	public:
 		PipelineColorBlendAttachmentState()
 			: PipelineColorBlendAttachmentState(0, BlendFactor::eZero, BlendFactor::eZero, BlendOp::eAdd, BlendFactor::eZero, BlendFactor::eZero, BlendOp::eAdd, ColorComponentFlags())
 		{}
 
-		PipelineColorBlendAttachmentState(Bool32 blendEnable, BlendFactor srcColorBlendFactor, BlendFactor dstColorBlendFactor, BlendOp colorBlendOp, BlendFactor srcAlphaBlendFactor, BlendFactor dstAlphaBlendFactor, BlendOp alphaBlendOp, ColorComponentFlags colorWriteMask)
+		PipelineColorBlendAttachmentState(Bool32 blendEnable_, BlendFactor srcColorBlendFactor_, BlendFactor dstColorBlendFactor_, BlendOp colorBlendOp_, BlendFactor srcAlphaBlendFactor_, BlendFactor dstAlphaBlendFactor_, BlendOp alphaBlendOp_, ColorComponentFlags colorWriteMask_)
 		{
-			m_pipelineColorBlendAttachmentState.blendEnable = blendEnable;
-			m_pipelineColorBlendAttachmentState.srcColorBlendFactor = static_cast<VkBlendFactor>(srcColorBlendFactor);
-			m_pipelineColorBlendAttachmentState.dstColorBlendFactor = static_cast<VkBlendFactor>(dstColorBlendFactor);
-			m_pipelineColorBlendAttachmentState.colorBlendOp = static_cast<VkBlendOp>(colorBlendOp);
-			m_pipelineColorBlendAttachmentState.srcAlphaBlendFactor = static_cast<VkBlendFactor>(srcAlphaBlendFactor);
-			m_pipelineColorBlendAttachmentState.dstAlphaBlendFactor = static_cast<VkBlendFactor>(dstAlphaBlendFactor);
-			m_pipelineColorBlendAttachmentState.alphaBlendOp = static_cast<VkBlendOp>(alphaBlendOp);
-			m_pipelineColorBlendAttachmentState.colorWriteMask = static_cast<VkColorComponentFlags>(colorWriteMask);
+			blendEnable = blendEnable_;
+			srcColorBlendFactor = srcColorBlendFactor_;
+			dstColorBlendFactor = dstColorBlendFactor_;
+			colorBlendOp = colorBlendOp_;
+			srcAlphaBlendFactor = srcAlphaBlendFactor_;
+			dstAlphaBlendFactor = dstAlphaBlendFactor_;
+			alphaBlendOp = alphaBlendOp_;
+			colorWriteMask = colorWriteMask_;
 		}
 
 		PipelineColorBlendAttachmentState(VkPipelineColorBlendAttachmentState const & rhs)
-			: m_pipelineColorBlendAttachmentState(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineColorBlendAttachmentState));
 		}
 
 		PipelineColorBlendAttachmentState& operator=(VkPipelineColorBlendAttachmentState const & rhs)
 		{
-			m_pipelineColorBlendAttachmentState = rhs;
+			memcpy(this, &rhs, sizeof(PipelineColorBlendAttachmentState));
 			return *this;
 		}
 
-		const Bool32& blendEnable() const
+		PipelineColorBlendAttachmentState& setBlendEnable(Bool32 blendEnable_)
 		{
-			return m_pipelineColorBlendAttachmentState.blendEnable;
-		}
-
-		Bool32& blendEnable()
-		{
-			return m_pipelineColorBlendAttachmentState.blendEnable;
-		}
-
-		PipelineColorBlendAttachmentState& blendEnable(Bool32 blendEnable)
-		{
-			m_pipelineColorBlendAttachmentState.blendEnable = blendEnable;
+			blendEnable = blendEnable_;
 			return *this;
 		}
 
-		const BlendFactor& srcColorBlendFactor() const
+		PipelineColorBlendAttachmentState& setSrcColorBlendFactor(BlendFactor srcColorBlendFactor_)
 		{
-			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.srcColorBlendFactor);
-		}
-
-		BlendFactor& srcColorBlendFactor()
-		{
-			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.srcColorBlendFactor);
-		}
-
-		PipelineColorBlendAttachmentState& srcColorBlendFactor(BlendFactor srcColorBlendFactor)
-		{
-			m_pipelineColorBlendAttachmentState.srcColorBlendFactor = static_cast<VkBlendFactor>(srcColorBlendFactor);
+			srcColorBlendFactor = srcColorBlendFactor_;
 			return *this;
 		}
 
-		const BlendFactor& dstColorBlendFactor() const
+		PipelineColorBlendAttachmentState& setDstColorBlendFactor(BlendFactor dstColorBlendFactor_)
 		{
-			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.dstColorBlendFactor);
-		}
-
-		BlendFactor& dstColorBlendFactor()
-		{
-			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.dstColorBlendFactor);
-		}
-
-		PipelineColorBlendAttachmentState& dstColorBlendFactor(BlendFactor dstColorBlendFactor)
-		{
-			m_pipelineColorBlendAttachmentState.dstColorBlendFactor = static_cast<VkBlendFactor>(dstColorBlendFactor);
+			dstColorBlendFactor = dstColorBlendFactor_;
 			return *this;
 		}
 
-		const BlendOp& colorBlendOp() const
+		PipelineColorBlendAttachmentState& setColorBlendOp(BlendOp colorBlendOp_)
 		{
-			return reinterpret_cast<const BlendOp&>(m_pipelineColorBlendAttachmentState.colorBlendOp);
-		}
-
-		BlendOp& colorBlendOp()
-		{
-			return reinterpret_cast<BlendOp&>(m_pipelineColorBlendAttachmentState.colorBlendOp);
-		}
-
-		PipelineColorBlendAttachmentState& colorBlendOp(BlendOp colorBlendOp)
-		{
-			m_pipelineColorBlendAttachmentState.colorBlendOp = static_cast<VkBlendOp>(colorBlendOp);
+			colorBlendOp = colorBlendOp_;
 			return *this;
 		}
 
-		const BlendFactor& srcAlphaBlendFactor() const
+		PipelineColorBlendAttachmentState& setSrcAlphaBlendFactor(BlendFactor srcAlphaBlendFactor_)
 		{
-			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.srcAlphaBlendFactor);
-		}
-
-		BlendFactor& srcAlphaBlendFactor()
-		{
-			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.srcAlphaBlendFactor);
-		}
-
-		PipelineColorBlendAttachmentState& srcAlphaBlendFactor(BlendFactor srcAlphaBlendFactor)
-		{
-			m_pipelineColorBlendAttachmentState.srcAlphaBlendFactor = static_cast<VkBlendFactor>(srcAlphaBlendFactor);
+			srcAlphaBlendFactor = srcAlphaBlendFactor_;
 			return *this;
 		}
 
-		const BlendFactor& dstAlphaBlendFactor() const
+		PipelineColorBlendAttachmentState& setDstAlphaBlendFactor(BlendFactor dstAlphaBlendFactor_)
 		{
-			return reinterpret_cast<const BlendFactor&>(m_pipelineColorBlendAttachmentState.dstAlphaBlendFactor);
-		}
-
-		BlendFactor& dstAlphaBlendFactor()
-		{
-			return reinterpret_cast<BlendFactor&>(m_pipelineColorBlendAttachmentState.dstAlphaBlendFactor);
-		}
-
-		PipelineColorBlendAttachmentState& dstAlphaBlendFactor(BlendFactor dstAlphaBlendFactor)
-		{
-			m_pipelineColorBlendAttachmentState.dstAlphaBlendFactor = static_cast<VkBlendFactor>(dstAlphaBlendFactor);
+			dstAlphaBlendFactor = dstAlphaBlendFactor_;
 			return *this;
 		}
 
-		const BlendOp& alphaBlendOp() const
+		PipelineColorBlendAttachmentState& setAlphaBlendOp(BlendOp alphaBlendOp_)
 		{
-			return reinterpret_cast<const BlendOp&>(m_pipelineColorBlendAttachmentState.alphaBlendOp);
-		}
-
-		BlendOp& alphaBlendOp()
-		{
-			return reinterpret_cast<BlendOp&>(m_pipelineColorBlendAttachmentState.alphaBlendOp);
-		}
-
-		PipelineColorBlendAttachmentState& alphaBlendOp(BlendOp alphaBlendOp)
-		{
-			m_pipelineColorBlendAttachmentState.alphaBlendOp = static_cast<VkBlendOp>(alphaBlendOp);
+			alphaBlendOp = alphaBlendOp_;
 			return *this;
 		}
 
-		const ColorComponentFlags& colorWriteMask() const
+		PipelineColorBlendAttachmentState& setColorWriteMask(ColorComponentFlags colorWriteMask_)
 		{
-			return reinterpret_cast<const ColorComponentFlags&>(m_pipelineColorBlendAttachmentState.colorWriteMask);
-		}
-
-		ColorComponentFlags& colorWriteMask()
-		{
-			return reinterpret_cast<ColorComponentFlags&>(m_pipelineColorBlendAttachmentState.colorWriteMask);
-		}
-
-		PipelineColorBlendAttachmentState& colorWriteMask(ColorComponentFlags colorWriteMask)
-		{
-			m_pipelineColorBlendAttachmentState.colorWriteMask = static_cast<VkColorComponentFlags>(colorWriteMask);
+			colorWriteMask = colorWriteMask_;
 			return *this;
 		}
 
 		operator const VkPipelineColorBlendAttachmentState&() const
 		{
-			return m_pipelineColorBlendAttachmentState;
+			return *reinterpret_cast<const VkPipelineColorBlendAttachmentState*>(this);
 		}
 
-	private:
-		VkPipelineColorBlendAttachmentState m_pipelineColorBlendAttachmentState;
+		Bool32 blendEnable;
+		BlendFactor srcColorBlendFactor;
+		BlendFactor dstColorBlendFactor;
+		BlendOp colorBlendOp;
+		BlendFactor srcAlphaBlendFactor;
+		BlendFactor dstAlphaBlendFactor;
+		BlendOp alphaBlendOp;
+		ColorComponentFlags colorWriteMask;
 	};
 	static_assert(sizeof(PipelineColorBlendAttachmentState) == sizeof(VkPipelineColorBlendAttachmentState), "struct and wrapper have different size!");
 
-	class PipelineColorBlendStateCreateInfo
+	struct PipelineColorBlendStateCreateInfo
 	{
-	public:
 		PipelineColorBlendStateCreateInfo()
 			: PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags(), 0, LogicOp::eClear, 0, nullptr, { 0 })
 		{}
 
-		PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags flags, Bool32 logicOpEnable, LogicOp logicOp, uint32_t attachmentCount, const PipelineColorBlendAttachmentState* pAttachments, eastl::array<float, 4> const& blendConstants)
+		PipelineColorBlendStateCreateInfo(PipelineColorBlendStateCreateFlags flags_, Bool32 logicOpEnable_, LogicOp logicOp_, uint32_t attachmentCount_, const PipelineColorBlendAttachmentState* pAttachments_, eastl::array<float, 4> const& blendConstants_)
 		{
-			m_pipelineColorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-			m_pipelineColorBlendStateCreateInfo.pNext = nullptr;
-			m_pipelineColorBlendStateCreateInfo.flags = static_cast<VkPipelineColorBlendStateCreateFlags>(flags);
-			m_pipelineColorBlendStateCreateInfo.logicOpEnable = logicOpEnable;
-			m_pipelineColorBlendStateCreateInfo.logicOp = static_cast<VkLogicOp>(logicOp);
-			m_pipelineColorBlendStateCreateInfo.attachmentCount = attachmentCount;
-			m_pipelineColorBlendStateCreateInfo.pAttachments = reinterpret_cast<const VkPipelineColorBlendAttachmentState*>(pAttachments);
-			memcpy(&m_pipelineColorBlendStateCreateInfo.blendConstants, blendConstants.data(), 4 * sizeof(float));
+			sType = StructureType::ePipelineColorBlendStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			logicOpEnable = logicOpEnable_;
+			logicOp = logicOp_;
+			attachmentCount = attachmentCount_;
+			pAttachments = pAttachments_;
+			memcpy(&blendConstants, blendConstants_.data(), 4 * sizeof(float));
 		}
 
 		PipelineColorBlendStateCreateInfo(VkPipelineColorBlendStateCreateInfo const & rhs)
-			: m_pipelineColorBlendStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineColorBlendStateCreateInfo));
 		}
 
 		PipelineColorBlendStateCreateInfo& operator=(VkPipelineColorBlendStateCreateInfo const & rhs)
 		{
-			m_pipelineColorBlendStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineColorBlendStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineColorBlendStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineColorBlendStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineColorBlendStateCreateInfo.sType);
-		}
-
-		PipelineColorBlendStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineColorBlendStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineColorBlendStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineColorBlendStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineColorBlendStateCreateInfo.pNext);
-		}
-
-		PipelineColorBlendStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineColorBlendStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineColorBlendStateCreateFlags& flags() const
+		PipelineColorBlendStateCreateInfo& setFlags(PipelineColorBlendStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineColorBlendStateCreateFlags&>(m_pipelineColorBlendStateCreateInfo.flags);
-		}
-
-		PipelineColorBlendStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineColorBlendStateCreateFlags&>(m_pipelineColorBlendStateCreateInfo.flags);
-		}
-
-		PipelineColorBlendStateCreateInfo& flags(PipelineColorBlendStateCreateFlags flags)
-		{
-			m_pipelineColorBlendStateCreateInfo.flags = static_cast<VkPipelineColorBlendStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Bool32& logicOpEnable() const
+		PipelineColorBlendStateCreateInfo& setLogicOpEnable(Bool32 logicOpEnable_)
 		{
-			return m_pipelineColorBlendStateCreateInfo.logicOpEnable;
-		}
-
-		Bool32& logicOpEnable()
-		{
-			return m_pipelineColorBlendStateCreateInfo.logicOpEnable;
-		}
-
-		PipelineColorBlendStateCreateInfo& logicOpEnable(Bool32 logicOpEnable)
-		{
-			m_pipelineColorBlendStateCreateInfo.logicOpEnable = logicOpEnable;
+			logicOpEnable = logicOpEnable_;
 			return *this;
 		}
 
-		const LogicOp& logicOp() const
+		PipelineColorBlendStateCreateInfo& setLogicOp(LogicOp logicOp_)
 		{
-			return reinterpret_cast<const LogicOp&>(m_pipelineColorBlendStateCreateInfo.logicOp);
-		}
-
-		LogicOp& logicOp()
-		{
-			return reinterpret_cast<LogicOp&>(m_pipelineColorBlendStateCreateInfo.logicOp);
-		}
-
-		PipelineColorBlendStateCreateInfo& logicOp(LogicOp logicOp)
-		{
-			m_pipelineColorBlendStateCreateInfo.logicOp = static_cast<VkLogicOp>(logicOp);
+			logicOp = logicOp_;
 			return *this;
 		}
 
-		const uint32_t& attachmentCount() const
+		PipelineColorBlendStateCreateInfo& setAttachmentCount(uint32_t attachmentCount_)
 		{
-			return m_pipelineColorBlendStateCreateInfo.attachmentCount;
-		}
-
-		uint32_t& attachmentCount()
-		{
-			return m_pipelineColorBlendStateCreateInfo.attachmentCount;
-		}
-
-		PipelineColorBlendStateCreateInfo& attachmentCount(uint32_t attachmentCount)
-		{
-			m_pipelineColorBlendStateCreateInfo.attachmentCount = attachmentCount;
+			attachmentCount = attachmentCount_;
 			return *this;
 		}
 
-		const PipelineColorBlendAttachmentState* pAttachments() const
+		PipelineColorBlendStateCreateInfo& setPAttachments(const PipelineColorBlendAttachmentState* pAttachments_)
 		{
-			return reinterpret_cast<const PipelineColorBlendAttachmentState*>(m_pipelineColorBlendStateCreateInfo.pAttachments);
-		}
-
-		const PipelineColorBlendAttachmentState* pAttachments()
-		{
-			return reinterpret_cast<const PipelineColorBlendAttachmentState*>(m_pipelineColorBlendStateCreateInfo.pAttachments);
-		}
-
-		PipelineColorBlendStateCreateInfo& pAttachments(const PipelineColorBlendAttachmentState* pAttachments)
-		{
-			m_pipelineColorBlendStateCreateInfo.pAttachments = reinterpret_cast<const VkPipelineColorBlendAttachmentState*>(pAttachments);
+			pAttachments = pAttachments_;
 			return *this;
 		}
 
-		const float* blendConstants() const
+		PipelineColorBlendStateCreateInfo& setBlendConstants(eastl::array<float, 4> blendConstants_)
 		{
-			return reinterpret_cast<const float*>(m_pipelineColorBlendStateCreateInfo.blendConstants);
-		}
-
-		float* blendConstants()
-		{
-			return reinterpret_cast<float*>(m_pipelineColorBlendStateCreateInfo.blendConstants);
-		}
-
-		PipelineColorBlendStateCreateInfo& blendConstants(eastl::array<float, 4> blendConstants)
-		{
-			memcpy(&m_pipelineColorBlendStateCreateInfo.blendConstants, blendConstants.data(), 4 * sizeof(float));
+			memcpy(&blendConstants, blendConstants_.data(), 4 * sizeof(float));
 			return *this;
 		}
 
 		operator const VkPipelineColorBlendStateCreateInfo&() const
 		{
-			return m_pipelineColorBlendStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineColorBlendStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineColorBlendStateCreateInfo m_pipelineColorBlendStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineColorBlendStateCreateFlags flags;
+		Bool32 logicOpEnable;
+		LogicOp logicOp;
+		uint32_t attachmentCount;
+		const PipelineColorBlendAttachmentState* pAttachments;
+		float blendConstants[4];
 	};
 	static_assert(sizeof(PipelineColorBlendStateCreateInfo) == sizeof(VkPipelineColorBlendStateCreateInfo), "struct and wrapper have different size!");
 
@@ -12872,93 +8532,63 @@ namespace vk
 		eSignaled = VK_FENCE_CREATE_SIGNALED_BIT
 	};
 
-	typedef Flags<FenceCreateFlagBits, VkFenceCreateFlags> FenceCreateFlags;
+	using FenceCreateFlags = Flags<FenceCreateFlagBits, VkFenceCreateFlags>;
 
 	inline FenceCreateFlags operator|(FenceCreateFlagBits bit0, FenceCreateFlagBits bit1)
 	{
 		return FenceCreateFlags(bit0) | bit1;
 	}
 
-	class FenceCreateInfo
+	struct FenceCreateInfo
 	{
-	public:
 		FenceCreateInfo()
 			: FenceCreateInfo(FenceCreateFlags())
 		{}
 
-		FenceCreateInfo(FenceCreateFlags flags)
+		FenceCreateInfo(FenceCreateFlags flags_)
 		{
-			m_fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			m_fenceCreateInfo.pNext = nullptr;
-			m_fenceCreateInfo.flags = static_cast<VkFenceCreateFlags>(flags);
+			sType = StructureType::eFenceCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
 		}
 
 		FenceCreateInfo(VkFenceCreateInfo const & rhs)
-			: m_fenceCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(FenceCreateInfo));
 		}
 
 		FenceCreateInfo& operator=(VkFenceCreateInfo const & rhs)
 		{
-			m_fenceCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(FenceCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		FenceCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_fenceCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_fenceCreateInfo.sType);
-		}
-
-		FenceCreateInfo& sType(StructureType sType)
-		{
-			m_fenceCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		FenceCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_fenceCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_fenceCreateInfo.pNext);
-		}
-
-		FenceCreateInfo& pNext(const void* pNext)
-		{
-			m_fenceCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const FenceCreateFlags& flags() const
+		FenceCreateInfo& setFlags(FenceCreateFlags flags_)
 		{
-			return reinterpret_cast<const FenceCreateFlags&>(m_fenceCreateInfo.flags);
-		}
-
-		FenceCreateFlags& flags()
-		{
-			return reinterpret_cast<FenceCreateFlags&>(m_fenceCreateInfo.flags);
-		}
-
-		FenceCreateInfo& flags(FenceCreateFlags flags)
-		{
-			m_fenceCreateInfo.flags = static_cast<VkFenceCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
 		operator const VkFenceCreateInfo&() const
 		{
-			return m_fenceCreateInfo;
+			return *reinterpret_cast<const VkFenceCreateInfo*>(this);
 		}
 
-	private:
-		VkFenceCreateInfo m_fenceCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		FenceCreateFlags flags;
 	};
 	static_assert(sizeof(FenceCreateInfo) == sizeof(VkFenceCreateInfo), "struct and wrapper have different size!");
 
@@ -12976,41 +8606,27 @@ namespace vk
 		eDepthStencilAttachment = VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT,
 		eBlitSrc = VK_FORMAT_FEATURE_BLIT_SRC_BIT,
 		eBlitDst = VK_FORMAT_FEATURE_BLIT_DST_BIT,
-		eSampledImageFilterLinear = VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT
+		eSampledImageFilterLinear = VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT,
+		eSampledImageFilterCubicIMG = VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG
 	};
 
-	typedef Flags<FormatFeatureFlagBits, VkFormatFeatureFlags> FormatFeatureFlags;
+	using FormatFeatureFlags = Flags<FormatFeatureFlagBits, VkFormatFeatureFlags>;
 
 	inline FormatFeatureFlags operator|(FormatFeatureFlagBits bit0, FormatFeatureFlagBits bit1)
 	{
 		return FormatFeatureFlags(bit0) | bit1;
 	}
 
-	class FormatProperties
+	struct FormatProperties
 	{
-	public:
-		const FormatFeatureFlags& linearTilingFeatures() const
-		{
-			return reinterpret_cast<const FormatFeatureFlags&>(m_formatProperties.linearTilingFeatures);
-		}
-
-		const FormatFeatureFlags& optimalTilingFeatures() const
-		{
-			return reinterpret_cast<const FormatFeatureFlags&>(m_formatProperties.optimalTilingFeatures);
-		}
-
-		const FormatFeatureFlags& bufferFeatures() const
-		{
-			return reinterpret_cast<const FormatFeatureFlags&>(m_formatProperties.bufferFeatures);
-		}
-
 		operator const VkFormatProperties&() const
 		{
-			return m_formatProperties;
+			return *reinterpret_cast<const VkFormatProperties*>(this);
 		}
 
-	private:
-		VkFormatProperties m_formatProperties;
+		FormatFeatureFlags linearTilingFeatures;
+		FormatFeatureFlags optimalTilingFeatures;
+		FormatFeatureFlags bufferFeatures;
 	};
 	static_assert(sizeof(FormatProperties) == sizeof(VkFormatProperties), "struct and wrapper have different size!");
 
@@ -13019,7 +8635,7 @@ namespace vk
 		ePrecise = VK_QUERY_CONTROL_PRECISE_BIT
 	};
 
-	typedef Flags<QueryControlFlagBits, VkQueryControlFlags> QueryControlFlags;
+	using QueryControlFlags = Flags<QueryControlFlagBits, VkQueryControlFlags>;
 
 	inline QueryControlFlags operator|(QueryControlFlagBits bit0, QueryControlFlagBits bit1)
 	{
@@ -13034,7 +8650,7 @@ namespace vk
 		ePartial = VK_QUERY_RESULT_PARTIAL_BIT
 	};
 
-	typedef Flags<QueryResultFlagBits, VkQueryResultFlags> QueryResultFlags;
+	using QueryResultFlags = Flags<QueryResultFlagBits, VkQueryResultFlags>;
 
 	inline QueryResultFlags operator|(QueryResultFlagBits bit0, QueryResultFlagBits bit1)
 	{
@@ -13048,7 +8664,7 @@ namespace vk
 		eSimultaneousUse = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT
 	};
 
-	typedef Flags<CommandBufferUsageFlagBits, VkCommandBufferUsageFlags> CommandBufferUsageFlags;
+	using CommandBufferUsageFlags = Flags<CommandBufferUsageFlagBits, VkCommandBufferUsageFlags>;
 
 	inline CommandBufferUsageFlags operator|(CommandBufferUsageFlagBits bit0, CommandBufferUsageFlagBits bit1)
 	{
@@ -13070,412 +8686,241 @@ namespace vk
 		eComputeShaderInvocations = VK_QUERY_PIPELINE_STATISTIC_COMPUTE_SHADER_INVOCATIONS_BIT
 	};
 
-	typedef Flags<QueryPipelineStatisticFlagBits, VkQueryPipelineStatisticFlags> QueryPipelineStatisticFlags;
+	using QueryPipelineStatisticFlags = Flags<QueryPipelineStatisticFlagBits, VkQueryPipelineStatisticFlags>;
 
 	inline QueryPipelineStatisticFlags operator|(QueryPipelineStatisticFlagBits bit0, QueryPipelineStatisticFlagBits bit1)
 	{
 		return QueryPipelineStatisticFlags(bit0) | bit1;
 	}
 
-	class CommandBufferInheritanceInfo
+	struct CommandBufferInheritanceInfo
 	{
-	public:
 		CommandBufferInheritanceInfo()
 			: CommandBufferInheritanceInfo(RenderPass(), 0, Framebuffer(), 0, QueryControlFlags(), QueryPipelineStatisticFlags())
 		{}
 
-		CommandBufferInheritanceInfo(RenderPass renderPass, uint32_t subpass, Framebuffer framebuffer, Bool32 occlusionQueryEnable, QueryControlFlags queryFlags, QueryPipelineStatisticFlags pipelineStatistics)
+		CommandBufferInheritanceInfo(RenderPass renderPass_, uint32_t subpass_, Framebuffer framebuffer_, Bool32 occlusionQueryEnable_, QueryControlFlags queryFlags_, QueryPipelineStatisticFlags pipelineStatistics_)
 		{
-			m_commandBufferInheritanceInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO;
-			m_commandBufferInheritanceInfo.pNext = nullptr;
-			m_commandBufferInheritanceInfo.renderPass = static_cast<VkRenderPass>(renderPass);
-			m_commandBufferInheritanceInfo.subpass = subpass;
-			m_commandBufferInheritanceInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
-			m_commandBufferInheritanceInfo.occlusionQueryEnable = occlusionQueryEnable;
-			m_commandBufferInheritanceInfo.queryFlags = static_cast<VkQueryControlFlags>(queryFlags);
-			m_commandBufferInheritanceInfo.pipelineStatistics = static_cast<VkQueryPipelineStatisticFlags>(pipelineStatistics);
+			sType = StructureType::eCommandBufferInheritanceInfo;
+			pNext = nullptr;
+			renderPass = renderPass_;
+			subpass = subpass_;
+			framebuffer = framebuffer_;
+			occlusionQueryEnable = occlusionQueryEnable_;
+			queryFlags = queryFlags_;
+			pipelineStatistics = pipelineStatistics_;
 		}
 
 		CommandBufferInheritanceInfo(VkCommandBufferInheritanceInfo const & rhs)
-			: m_commandBufferInheritanceInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(CommandBufferInheritanceInfo));
 		}
 
 		CommandBufferInheritanceInfo& operator=(VkCommandBufferInheritanceInfo const & rhs)
 		{
-			m_commandBufferInheritanceInfo = rhs;
+			memcpy(this, &rhs, sizeof(CommandBufferInheritanceInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		CommandBufferInheritanceInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_commandBufferInheritanceInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_commandBufferInheritanceInfo.sType);
-		}
-
-		CommandBufferInheritanceInfo& sType(StructureType sType)
-		{
-			m_commandBufferInheritanceInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		CommandBufferInheritanceInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_commandBufferInheritanceInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_commandBufferInheritanceInfo.pNext);
-		}
-
-		CommandBufferInheritanceInfo& pNext(const void* pNext)
-		{
-			m_commandBufferInheritanceInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const RenderPass& renderPass() const
+		CommandBufferInheritanceInfo& setRenderPass(RenderPass renderPass_)
 		{
-			return reinterpret_cast<const RenderPass&>(m_commandBufferInheritanceInfo.renderPass);
-		}
-
-		RenderPass& renderPass()
-		{
-			return reinterpret_cast<RenderPass&>(m_commandBufferInheritanceInfo.renderPass);
-		}
-
-		CommandBufferInheritanceInfo& renderPass(RenderPass renderPass)
-		{
-			m_commandBufferInheritanceInfo.renderPass = static_cast<VkRenderPass>(renderPass);
+			renderPass = renderPass_;
 			return *this;
 		}
 
-		const uint32_t& subpass() const
+		CommandBufferInheritanceInfo& setSubpass(uint32_t subpass_)
 		{
-			return m_commandBufferInheritanceInfo.subpass;
-		}
-
-		uint32_t& subpass()
-		{
-			return m_commandBufferInheritanceInfo.subpass;
-		}
-
-		CommandBufferInheritanceInfo& subpass(uint32_t subpass)
-		{
-			m_commandBufferInheritanceInfo.subpass = subpass;
+			subpass = subpass_;
 			return *this;
 		}
 
-		const Framebuffer& framebuffer() const
+		CommandBufferInheritanceInfo& setFramebuffer(Framebuffer framebuffer_)
 		{
-			return reinterpret_cast<const Framebuffer&>(m_commandBufferInheritanceInfo.framebuffer);
-		}
-
-		Framebuffer& framebuffer()
-		{
-			return reinterpret_cast<Framebuffer&>(m_commandBufferInheritanceInfo.framebuffer);
-		}
-
-		CommandBufferInheritanceInfo& framebuffer(Framebuffer framebuffer)
-		{
-			m_commandBufferInheritanceInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer);
+			framebuffer = framebuffer_;
 			return *this;
 		}
 
-		const Bool32& occlusionQueryEnable() const
+		CommandBufferInheritanceInfo& setOcclusionQueryEnable(Bool32 occlusionQueryEnable_)
 		{
-			return m_commandBufferInheritanceInfo.occlusionQueryEnable;
-		}
-
-		Bool32& occlusionQueryEnable()
-		{
-			return m_commandBufferInheritanceInfo.occlusionQueryEnable;
-		}
-
-		CommandBufferInheritanceInfo& occlusionQueryEnable(Bool32 occlusionQueryEnable)
-		{
-			m_commandBufferInheritanceInfo.occlusionQueryEnable = occlusionQueryEnable;
+			occlusionQueryEnable = occlusionQueryEnable_;
 			return *this;
 		}
 
-		const QueryControlFlags& queryFlags() const
+		CommandBufferInheritanceInfo& setQueryFlags(QueryControlFlags queryFlags_)
 		{
-			return reinterpret_cast<const QueryControlFlags&>(m_commandBufferInheritanceInfo.queryFlags);
-		}
-
-		QueryControlFlags& queryFlags()
-		{
-			return reinterpret_cast<QueryControlFlags&>(m_commandBufferInheritanceInfo.queryFlags);
-		}
-
-		CommandBufferInheritanceInfo& queryFlags(QueryControlFlags queryFlags)
-		{
-			m_commandBufferInheritanceInfo.queryFlags = static_cast<VkQueryControlFlags>(queryFlags);
+			queryFlags = queryFlags_;
 			return *this;
 		}
 
-		const QueryPipelineStatisticFlags& pipelineStatistics() const
+		CommandBufferInheritanceInfo& setPipelineStatistics(QueryPipelineStatisticFlags pipelineStatistics_)
 		{
-			return reinterpret_cast<const QueryPipelineStatisticFlags&>(m_commandBufferInheritanceInfo.pipelineStatistics);
-		}
-
-		QueryPipelineStatisticFlags& pipelineStatistics()
-		{
-			return reinterpret_cast<QueryPipelineStatisticFlags&>(m_commandBufferInheritanceInfo.pipelineStatistics);
-		}
-
-		CommandBufferInheritanceInfo& pipelineStatistics(QueryPipelineStatisticFlags pipelineStatistics)
-		{
-			m_commandBufferInheritanceInfo.pipelineStatistics = static_cast<VkQueryPipelineStatisticFlags>(pipelineStatistics);
+			pipelineStatistics = pipelineStatistics_;
 			return *this;
 		}
 
 		operator const VkCommandBufferInheritanceInfo&() const
 		{
-			return m_commandBufferInheritanceInfo;
+			return *reinterpret_cast<const VkCommandBufferInheritanceInfo*>(this);
 		}
 
-	private:
-		VkCommandBufferInheritanceInfo m_commandBufferInheritanceInfo;
+		StructureType sType;
+		const void* pNext;
+		RenderPass renderPass;
+		uint32_t subpass;
+		Framebuffer framebuffer;
+		Bool32 occlusionQueryEnable;
+		QueryControlFlags queryFlags;
+		QueryPipelineStatisticFlags pipelineStatistics;
 	};
 	static_assert(sizeof(CommandBufferInheritanceInfo) == sizeof(VkCommandBufferInheritanceInfo), "struct and wrapper have different size!");
 
-	class CommandBufferBeginInfo
+	struct CommandBufferBeginInfo
 	{
-	public:
 		CommandBufferBeginInfo()
 			: CommandBufferBeginInfo(CommandBufferUsageFlags(), nullptr)
 		{}
 
-		CommandBufferBeginInfo(CommandBufferUsageFlags flags, const CommandBufferInheritanceInfo* pInheritanceInfo)
+		CommandBufferBeginInfo(CommandBufferUsageFlags flags_, const CommandBufferInheritanceInfo* pInheritanceInfo_)
 		{
-			m_commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			m_commandBufferBeginInfo.pNext = nullptr;
-			m_commandBufferBeginInfo.flags = static_cast<VkCommandBufferUsageFlags>(flags);
-			m_commandBufferBeginInfo.pInheritanceInfo = reinterpret_cast<const VkCommandBufferInheritanceInfo*>(pInheritanceInfo);
+			sType = StructureType::eCommandBufferBeginInfo;
+			pNext = nullptr;
+			flags = flags_;
+			pInheritanceInfo = pInheritanceInfo_;
 		}
 
 		CommandBufferBeginInfo(VkCommandBufferBeginInfo const & rhs)
-			: m_commandBufferBeginInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(CommandBufferBeginInfo));
 		}
 
 		CommandBufferBeginInfo& operator=(VkCommandBufferBeginInfo const & rhs)
 		{
-			m_commandBufferBeginInfo = rhs;
+			memcpy(this, &rhs, sizeof(CommandBufferBeginInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		CommandBufferBeginInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_commandBufferBeginInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_commandBufferBeginInfo.sType);
-		}
-
-		CommandBufferBeginInfo& sType(StructureType sType)
-		{
-			m_commandBufferBeginInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		CommandBufferBeginInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_commandBufferBeginInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_commandBufferBeginInfo.pNext);
-		}
-
-		CommandBufferBeginInfo& pNext(const void* pNext)
-		{
-			m_commandBufferBeginInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const CommandBufferUsageFlags& flags() const
+		CommandBufferBeginInfo& setFlags(CommandBufferUsageFlags flags_)
 		{
-			return reinterpret_cast<const CommandBufferUsageFlags&>(m_commandBufferBeginInfo.flags);
-		}
-
-		CommandBufferUsageFlags& flags()
-		{
-			return reinterpret_cast<CommandBufferUsageFlags&>(m_commandBufferBeginInfo.flags);
-		}
-
-		CommandBufferBeginInfo& flags(CommandBufferUsageFlags flags)
-		{
-			m_commandBufferBeginInfo.flags = static_cast<VkCommandBufferUsageFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const CommandBufferInheritanceInfo* pInheritanceInfo() const
+		CommandBufferBeginInfo& setPInheritanceInfo(const CommandBufferInheritanceInfo* pInheritanceInfo_)
 		{
-			return reinterpret_cast<const CommandBufferInheritanceInfo*>(m_commandBufferBeginInfo.pInheritanceInfo);
-		}
-
-		const CommandBufferInheritanceInfo* pInheritanceInfo()
-		{
-			return reinterpret_cast<const CommandBufferInheritanceInfo*>(m_commandBufferBeginInfo.pInheritanceInfo);
-		}
-
-		CommandBufferBeginInfo& pInheritanceInfo(const CommandBufferInheritanceInfo* pInheritanceInfo)
-		{
-			m_commandBufferBeginInfo.pInheritanceInfo = reinterpret_cast<const VkCommandBufferInheritanceInfo*>(pInheritanceInfo);
+			pInheritanceInfo = pInheritanceInfo_;
 			return *this;
 		}
 
 		operator const VkCommandBufferBeginInfo&() const
 		{
-			return m_commandBufferBeginInfo;
+			return *reinterpret_cast<const VkCommandBufferBeginInfo*>(this);
 		}
 
-	private:
-		VkCommandBufferBeginInfo m_commandBufferBeginInfo;
+		StructureType sType;
+		const void* pNext;
+		CommandBufferUsageFlags flags;
+		const CommandBufferInheritanceInfo* pInheritanceInfo;
 	};
 	static_assert(sizeof(CommandBufferBeginInfo) == sizeof(VkCommandBufferBeginInfo), "struct and wrapper have different size!");
 
-	class QueryPoolCreateInfo
+	struct QueryPoolCreateInfo
 	{
-	public:
 		QueryPoolCreateInfo()
 			: QueryPoolCreateInfo(QueryPoolCreateFlags(), QueryType::eOcclusion, 0, QueryPipelineStatisticFlags())
 		{}
 
-		QueryPoolCreateInfo(QueryPoolCreateFlags flags, QueryType queryType, uint32_t queryCount, QueryPipelineStatisticFlags pipelineStatistics)
+		QueryPoolCreateInfo(QueryPoolCreateFlags flags_, QueryType queryType_, uint32_t queryCount_, QueryPipelineStatisticFlags pipelineStatistics_)
 		{
-			m_queryPoolCreateInfo.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO;
-			m_queryPoolCreateInfo.pNext = nullptr;
-			m_queryPoolCreateInfo.flags = static_cast<VkQueryPoolCreateFlags>(flags);
-			m_queryPoolCreateInfo.queryType = static_cast<VkQueryType>(queryType);
-			m_queryPoolCreateInfo.queryCount = queryCount;
-			m_queryPoolCreateInfo.pipelineStatistics = static_cast<VkQueryPipelineStatisticFlags>(pipelineStatistics);
+			sType = StructureType::eQueryPoolCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			queryType = queryType_;
+			queryCount = queryCount_;
+			pipelineStatistics = pipelineStatistics_;
 		}
 
 		QueryPoolCreateInfo(VkQueryPoolCreateInfo const & rhs)
-			: m_queryPoolCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(QueryPoolCreateInfo));
 		}
 
 		QueryPoolCreateInfo& operator=(VkQueryPoolCreateInfo const & rhs)
 		{
-			m_queryPoolCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(QueryPoolCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		QueryPoolCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_queryPoolCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_queryPoolCreateInfo.sType);
-		}
-
-		QueryPoolCreateInfo& sType(StructureType sType)
-		{
-			m_queryPoolCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		QueryPoolCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_queryPoolCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_queryPoolCreateInfo.pNext);
-		}
-
-		QueryPoolCreateInfo& pNext(const void* pNext)
-		{
-			m_queryPoolCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const QueryPoolCreateFlags& flags() const
+		QueryPoolCreateInfo& setFlags(QueryPoolCreateFlags flags_)
 		{
-			return reinterpret_cast<const QueryPoolCreateFlags&>(m_queryPoolCreateInfo.flags);
-		}
-
-		QueryPoolCreateFlags& flags()
-		{
-			return reinterpret_cast<QueryPoolCreateFlags&>(m_queryPoolCreateInfo.flags);
-		}
-
-		QueryPoolCreateInfo& flags(QueryPoolCreateFlags flags)
-		{
-			m_queryPoolCreateInfo.flags = static_cast<VkQueryPoolCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const QueryType& queryType() const
+		QueryPoolCreateInfo& setQueryType(QueryType queryType_)
 		{
-			return reinterpret_cast<const QueryType&>(m_queryPoolCreateInfo.queryType);
-		}
-
-		QueryType& queryType()
-		{
-			return reinterpret_cast<QueryType&>(m_queryPoolCreateInfo.queryType);
-		}
-
-		QueryPoolCreateInfo& queryType(QueryType queryType)
-		{
-			m_queryPoolCreateInfo.queryType = static_cast<VkQueryType>(queryType);
+			queryType = queryType_;
 			return *this;
 		}
 
-		const uint32_t& queryCount() const
+		QueryPoolCreateInfo& setQueryCount(uint32_t queryCount_)
 		{
-			return m_queryPoolCreateInfo.queryCount;
-		}
-
-		uint32_t& queryCount()
-		{
-			return m_queryPoolCreateInfo.queryCount;
-		}
-
-		QueryPoolCreateInfo& queryCount(uint32_t queryCount)
-		{
-			m_queryPoolCreateInfo.queryCount = queryCount;
+			queryCount = queryCount_;
 			return *this;
 		}
 
-		const QueryPipelineStatisticFlags& pipelineStatistics() const
+		QueryPoolCreateInfo& setPipelineStatistics(QueryPipelineStatisticFlags pipelineStatistics_)
 		{
-			return reinterpret_cast<const QueryPipelineStatisticFlags&>(m_queryPoolCreateInfo.pipelineStatistics);
-		}
-
-		QueryPipelineStatisticFlags& pipelineStatistics()
-		{
-			return reinterpret_cast<QueryPipelineStatisticFlags&>(m_queryPoolCreateInfo.pipelineStatistics);
-		}
-
-		QueryPoolCreateInfo& pipelineStatistics(QueryPipelineStatisticFlags pipelineStatistics)
-		{
-			m_queryPoolCreateInfo.pipelineStatistics = static_cast<VkQueryPipelineStatisticFlags>(pipelineStatistics);
+			pipelineStatistics = pipelineStatistics_;
 			return *this;
 		}
 
 		operator const VkQueryPoolCreateInfo&() const
 		{
-			return m_queryPoolCreateInfo;
+			return *reinterpret_cast<const VkQueryPoolCreateInfo*>(this);
 		}
 
-	private:
-		VkQueryPoolCreateInfo m_queryPoolCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		QueryPoolCreateFlags flags;
+		QueryType queryType;
+		uint32_t queryCount;
+		QueryPipelineStatisticFlags pipelineStatistics;
 	};
 	static_assert(sizeof(QueryPoolCreateInfo) == sizeof(VkQueryPoolCreateInfo), "struct and wrapper have different size!");
 
@@ -13487,1231 +8932,724 @@ namespace vk
 		eMetadata = VK_IMAGE_ASPECT_METADATA_BIT
 	};
 
-	typedef Flags<ImageAspectFlagBits, VkImageAspectFlags> ImageAspectFlags;
+	using ImageAspectFlags = Flags<ImageAspectFlagBits, VkImageAspectFlags>;
 
 	inline ImageAspectFlags operator|(ImageAspectFlagBits bit0, ImageAspectFlagBits bit1)
 	{
 		return ImageAspectFlags(bit0) | bit1;
 	}
 
-	class ImageSubresource
+	struct ImageSubresource
 	{
-	public:
 		ImageSubresource()
 			: ImageSubresource(ImageAspectFlags(), 0, 0)
 		{}
 
-		ImageSubresource(ImageAspectFlags aspectMask, uint32_t mipLevel, uint32_t arrayLayer)
+		ImageSubresource(ImageAspectFlags aspectMask_, uint32_t mipLevel_, uint32_t arrayLayer_)
 		{
-			m_imageSubresource.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
-			m_imageSubresource.mipLevel = mipLevel;
-			m_imageSubresource.arrayLayer = arrayLayer;
+			aspectMask = aspectMask_;
+			mipLevel = mipLevel_;
+			arrayLayer = arrayLayer_;
 		}
 
 		ImageSubresource(VkImageSubresource const & rhs)
-			: m_imageSubresource(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageSubresource));
 		}
 
 		ImageSubresource& operator=(VkImageSubresource const & rhs)
 		{
-			m_imageSubresource = rhs;
+			memcpy(this, &rhs, sizeof(ImageSubresource));
 			return *this;
 		}
 
-		const ImageAspectFlags& aspectMask() const
+		ImageSubresource& setAspectMask(ImageAspectFlags aspectMask_)
 		{
-			return reinterpret_cast<const ImageAspectFlags&>(m_imageSubresource.aspectMask);
-		}
-
-		ImageAspectFlags& aspectMask()
-		{
-			return reinterpret_cast<ImageAspectFlags&>(m_imageSubresource.aspectMask);
-		}
-
-		ImageSubresource& aspectMask(ImageAspectFlags aspectMask)
-		{
-			m_imageSubresource.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
+			aspectMask = aspectMask_;
 			return *this;
 		}
 
-		const uint32_t& mipLevel() const
+		ImageSubresource& setMipLevel(uint32_t mipLevel_)
 		{
-			return m_imageSubresource.mipLevel;
-		}
-
-		uint32_t& mipLevel()
-		{
-			return m_imageSubresource.mipLevel;
-		}
-
-		ImageSubresource& mipLevel(uint32_t mipLevel)
-		{
-			m_imageSubresource.mipLevel = mipLevel;
+			mipLevel = mipLevel_;
 			return *this;
 		}
 
-		const uint32_t& arrayLayer() const
+		ImageSubresource& setArrayLayer(uint32_t arrayLayer_)
 		{
-			return m_imageSubresource.arrayLayer;
-		}
-
-		uint32_t& arrayLayer()
-		{
-			return m_imageSubresource.arrayLayer;
-		}
-
-		ImageSubresource& arrayLayer(uint32_t arrayLayer)
-		{
-			m_imageSubresource.arrayLayer = arrayLayer;
+			arrayLayer = arrayLayer_;
 			return *this;
 		}
 
 		operator const VkImageSubresource&() const
 		{
-			return m_imageSubresource;
+			return *reinterpret_cast<const VkImageSubresource*>(this);
 		}
 
-	private:
-		VkImageSubresource m_imageSubresource;
+		ImageAspectFlags aspectMask;
+		uint32_t mipLevel;
+		uint32_t arrayLayer;
 	};
 	static_assert(sizeof(ImageSubresource) == sizeof(VkImageSubresource), "struct and wrapper have different size!");
 
-	class ImageSubresourceLayers
+	struct ImageSubresourceLayers
 	{
-	public:
 		ImageSubresourceLayers()
 			: ImageSubresourceLayers(ImageAspectFlags(), 0, 0, 0)
 		{}
 
-		ImageSubresourceLayers(ImageAspectFlags aspectMask, uint32_t mipLevel, uint32_t baseArrayLayer, uint32_t layerCount)
+		ImageSubresourceLayers(ImageAspectFlags aspectMask_, uint32_t mipLevel_, uint32_t baseArrayLayer_, uint32_t layerCount_)
 		{
-			m_imageSubresourceLayers.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
-			m_imageSubresourceLayers.mipLevel = mipLevel;
-			m_imageSubresourceLayers.baseArrayLayer = baseArrayLayer;
-			m_imageSubresourceLayers.layerCount = layerCount;
+			aspectMask = aspectMask_;
+			mipLevel = mipLevel_;
+			baseArrayLayer = baseArrayLayer_;
+			layerCount = layerCount_;
 		}
 
 		ImageSubresourceLayers(VkImageSubresourceLayers const & rhs)
-			: m_imageSubresourceLayers(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageSubresourceLayers));
 		}
 
 		ImageSubresourceLayers& operator=(VkImageSubresourceLayers const & rhs)
 		{
-			m_imageSubresourceLayers = rhs;
+			memcpy(this, &rhs, sizeof(ImageSubresourceLayers));
 			return *this;
 		}
 
-		const ImageAspectFlags& aspectMask() const
+		ImageSubresourceLayers& setAspectMask(ImageAspectFlags aspectMask_)
 		{
-			return reinterpret_cast<const ImageAspectFlags&>(m_imageSubresourceLayers.aspectMask);
-		}
-
-		ImageAspectFlags& aspectMask()
-		{
-			return reinterpret_cast<ImageAspectFlags&>(m_imageSubresourceLayers.aspectMask);
-		}
-
-		ImageSubresourceLayers& aspectMask(ImageAspectFlags aspectMask)
-		{
-			m_imageSubresourceLayers.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
+			aspectMask = aspectMask_;
 			return *this;
 		}
 
-		const uint32_t& mipLevel() const
+		ImageSubresourceLayers& setMipLevel(uint32_t mipLevel_)
 		{
-			return m_imageSubresourceLayers.mipLevel;
-		}
-
-		uint32_t& mipLevel()
-		{
-			return m_imageSubresourceLayers.mipLevel;
-		}
-
-		ImageSubresourceLayers& mipLevel(uint32_t mipLevel)
-		{
-			m_imageSubresourceLayers.mipLevel = mipLevel;
+			mipLevel = mipLevel_;
 			return *this;
 		}
 
-		const uint32_t& baseArrayLayer() const
+		ImageSubresourceLayers& setBaseArrayLayer(uint32_t baseArrayLayer_)
 		{
-			return m_imageSubresourceLayers.baseArrayLayer;
-		}
-
-		uint32_t& baseArrayLayer()
-		{
-			return m_imageSubresourceLayers.baseArrayLayer;
-		}
-
-		ImageSubresourceLayers& baseArrayLayer(uint32_t baseArrayLayer)
-		{
-			m_imageSubresourceLayers.baseArrayLayer = baseArrayLayer;
+			baseArrayLayer = baseArrayLayer_;
 			return *this;
 		}
 
-		const uint32_t& layerCount() const
+		ImageSubresourceLayers& setLayerCount(uint32_t layerCount_)
 		{
-			return m_imageSubresourceLayers.layerCount;
-		}
-
-		uint32_t& layerCount()
-		{
-			return m_imageSubresourceLayers.layerCount;
-		}
-
-		ImageSubresourceLayers& layerCount(uint32_t layerCount)
-		{
-			m_imageSubresourceLayers.layerCount = layerCount;
+			layerCount = layerCount_;
 			return *this;
 		}
 
 		operator const VkImageSubresourceLayers&() const
 		{
-			return m_imageSubresourceLayers;
+			return *reinterpret_cast<const VkImageSubresourceLayers*>(this);
 		}
 
-	private:
-		VkImageSubresourceLayers m_imageSubresourceLayers;
+		ImageAspectFlags aspectMask;
+		uint32_t mipLevel;
+		uint32_t baseArrayLayer;
+		uint32_t layerCount;
 	};
 	static_assert(sizeof(ImageSubresourceLayers) == sizeof(VkImageSubresourceLayers), "struct and wrapper have different size!");
 
-	class ImageSubresourceRange
+	struct ImageSubresourceRange
 	{
-	public:
 		ImageSubresourceRange()
 			: ImageSubresourceRange(ImageAspectFlags(), 0, 0, 0, 0)
 		{}
 
-		ImageSubresourceRange(ImageAspectFlags aspectMask, uint32_t baseMipLevel, uint32_t levelCount, uint32_t baseArrayLayer, uint32_t layerCount)
+		ImageSubresourceRange(ImageAspectFlags aspectMask_, uint32_t baseMipLevel_, uint32_t levelCount_, uint32_t baseArrayLayer_, uint32_t layerCount_)
 		{
-			m_imageSubresourceRange.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
-			m_imageSubresourceRange.baseMipLevel = baseMipLevel;
-			m_imageSubresourceRange.levelCount = levelCount;
-			m_imageSubresourceRange.baseArrayLayer = baseArrayLayer;
-			m_imageSubresourceRange.layerCount = layerCount;
+			aspectMask = aspectMask_;
+			baseMipLevel = baseMipLevel_;
+			levelCount = levelCount_;
+			baseArrayLayer = baseArrayLayer_;
+			layerCount = layerCount_;
 		}
 
 		ImageSubresourceRange(VkImageSubresourceRange const & rhs)
-			: m_imageSubresourceRange(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageSubresourceRange));
 		}
 
 		ImageSubresourceRange& operator=(VkImageSubresourceRange const & rhs)
 		{
-			m_imageSubresourceRange = rhs;
+			memcpy(this, &rhs, sizeof(ImageSubresourceRange));
 			return *this;
 		}
 
-		const ImageAspectFlags& aspectMask() const
+		ImageSubresourceRange& setAspectMask(ImageAspectFlags aspectMask_)
 		{
-			return reinterpret_cast<const ImageAspectFlags&>(m_imageSubresourceRange.aspectMask);
-		}
-
-		ImageAspectFlags& aspectMask()
-		{
-			return reinterpret_cast<ImageAspectFlags&>(m_imageSubresourceRange.aspectMask);
-		}
-
-		ImageSubresourceRange& aspectMask(ImageAspectFlags aspectMask)
-		{
-			m_imageSubresourceRange.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
+			aspectMask = aspectMask_;
 			return *this;
 		}
 
-		const uint32_t& baseMipLevel() const
+		ImageSubresourceRange& setBaseMipLevel(uint32_t baseMipLevel_)
 		{
-			return m_imageSubresourceRange.baseMipLevel;
-		}
-
-		uint32_t& baseMipLevel()
-		{
-			return m_imageSubresourceRange.baseMipLevel;
-		}
-
-		ImageSubresourceRange& baseMipLevel(uint32_t baseMipLevel)
-		{
-			m_imageSubresourceRange.baseMipLevel = baseMipLevel;
+			baseMipLevel = baseMipLevel_;
 			return *this;
 		}
 
-		const uint32_t& levelCount() const
+		ImageSubresourceRange& setLevelCount(uint32_t levelCount_)
 		{
-			return m_imageSubresourceRange.levelCount;
-		}
-
-		uint32_t& levelCount()
-		{
-			return m_imageSubresourceRange.levelCount;
-		}
-
-		ImageSubresourceRange& levelCount(uint32_t levelCount)
-		{
-			m_imageSubresourceRange.levelCount = levelCount;
+			levelCount = levelCount_;
 			return *this;
 		}
 
-		const uint32_t& baseArrayLayer() const
+		ImageSubresourceRange& setBaseArrayLayer(uint32_t baseArrayLayer_)
 		{
-			return m_imageSubresourceRange.baseArrayLayer;
-		}
-
-		uint32_t& baseArrayLayer()
-		{
-			return m_imageSubresourceRange.baseArrayLayer;
-		}
-
-		ImageSubresourceRange& baseArrayLayer(uint32_t baseArrayLayer)
-		{
-			m_imageSubresourceRange.baseArrayLayer = baseArrayLayer;
+			baseArrayLayer = baseArrayLayer_;
 			return *this;
 		}
 
-		const uint32_t& layerCount() const
+		ImageSubresourceRange& setLayerCount(uint32_t layerCount_)
 		{
-			return m_imageSubresourceRange.layerCount;
-		}
-
-		uint32_t& layerCount()
-		{
-			return m_imageSubresourceRange.layerCount;
-		}
-
-		ImageSubresourceRange& layerCount(uint32_t layerCount)
-		{
-			m_imageSubresourceRange.layerCount = layerCount;
+			layerCount = layerCount_;
 			return *this;
 		}
 
 		operator const VkImageSubresourceRange&() const
 		{
-			return m_imageSubresourceRange;
+			return *reinterpret_cast<const VkImageSubresourceRange*>(this);
 		}
 
-	private:
-		VkImageSubresourceRange m_imageSubresourceRange;
+		ImageAspectFlags aspectMask;
+		uint32_t baseMipLevel;
+		uint32_t levelCount;
+		uint32_t baseArrayLayer;
+		uint32_t layerCount;
 	};
 	static_assert(sizeof(ImageSubresourceRange) == sizeof(VkImageSubresourceRange), "struct and wrapper have different size!");
 
-	class ImageMemoryBarrier
+	struct ImageMemoryBarrier
 	{
-	public:
 		ImageMemoryBarrier()
 			: ImageMemoryBarrier(AccessFlags(), AccessFlags(), ImageLayout::eUndefined, ImageLayout::eUndefined, 0, 0, Image(), ImageSubresourceRange())
 		{}
 
-		ImageMemoryBarrier(AccessFlags srcAccessMask, AccessFlags dstAccessMask, ImageLayout oldLayout, ImageLayout newLayout, uint32_t srcQueueFamilyIndex, uint32_t dstQueueFamilyIndex, Image image, ImageSubresourceRange subresourceRange)
+		ImageMemoryBarrier(AccessFlags srcAccessMask_, AccessFlags dstAccessMask_, ImageLayout oldLayout_, ImageLayout newLayout_, uint32_t srcQueueFamilyIndex_, uint32_t dstQueueFamilyIndex_, Image image_, ImageSubresourceRange subresourceRange_)
 		{
-			m_imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-			m_imageMemoryBarrier.pNext = nullptr;
-			m_imageMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
-			m_imageMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
-			m_imageMemoryBarrier.oldLayout = static_cast<VkImageLayout>(oldLayout);
-			m_imageMemoryBarrier.newLayout = static_cast<VkImageLayout>(newLayout);
-			m_imageMemoryBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex;
-			m_imageMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
-			m_imageMemoryBarrier.image = static_cast<VkImage>(image);
-			m_imageMemoryBarrier.subresourceRange = static_cast<VkImageSubresourceRange>(subresourceRange);
+			sType = StructureType::eImageMemoryBarrier;
+			pNext = nullptr;
+			srcAccessMask = srcAccessMask_;
+			dstAccessMask = dstAccessMask_;
+			oldLayout = oldLayout_;
+			newLayout = newLayout_;
+			srcQueueFamilyIndex = srcQueueFamilyIndex_;
+			dstQueueFamilyIndex = dstQueueFamilyIndex_;
+			image = image_;
+			subresourceRange = subresourceRange_;
 		}
 
 		ImageMemoryBarrier(VkImageMemoryBarrier const & rhs)
-			: m_imageMemoryBarrier(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageMemoryBarrier));
 		}
 
 		ImageMemoryBarrier& operator=(VkImageMemoryBarrier const & rhs)
 		{
-			m_imageMemoryBarrier = rhs;
+			memcpy(this, &rhs, sizeof(ImageMemoryBarrier));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		ImageMemoryBarrier& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_imageMemoryBarrier.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_imageMemoryBarrier.sType);
-		}
-
-		ImageMemoryBarrier& sType(StructureType sType)
-		{
-			m_imageMemoryBarrier.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		ImageMemoryBarrier& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_imageMemoryBarrier.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_imageMemoryBarrier.pNext);
-		}
-
-		ImageMemoryBarrier& pNext(const void* pNext)
-		{
-			m_imageMemoryBarrier.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const AccessFlags& srcAccessMask() const
+		ImageMemoryBarrier& setSrcAccessMask(AccessFlags srcAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_imageMemoryBarrier.srcAccessMask);
-		}
-
-		AccessFlags& srcAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_imageMemoryBarrier.srcAccessMask);
-		}
-
-		ImageMemoryBarrier& srcAccessMask(AccessFlags srcAccessMask)
-		{
-			m_imageMemoryBarrier.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
+			srcAccessMask = srcAccessMask_;
 			return *this;
 		}
 
-		const AccessFlags& dstAccessMask() const
+		ImageMemoryBarrier& setDstAccessMask(AccessFlags dstAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_imageMemoryBarrier.dstAccessMask);
-		}
-
-		AccessFlags& dstAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_imageMemoryBarrier.dstAccessMask);
-		}
-
-		ImageMemoryBarrier& dstAccessMask(AccessFlags dstAccessMask)
-		{
-			m_imageMemoryBarrier.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
+			dstAccessMask = dstAccessMask_;
 			return *this;
 		}
 
-		const ImageLayout& oldLayout() const
+		ImageMemoryBarrier& setOldLayout(ImageLayout oldLayout_)
 		{
-			return reinterpret_cast<const ImageLayout&>(m_imageMemoryBarrier.oldLayout);
-		}
-
-		ImageLayout& oldLayout()
-		{
-			return reinterpret_cast<ImageLayout&>(m_imageMemoryBarrier.oldLayout);
-		}
-
-		ImageMemoryBarrier& oldLayout(ImageLayout oldLayout)
-		{
-			m_imageMemoryBarrier.oldLayout = static_cast<VkImageLayout>(oldLayout);
+			oldLayout = oldLayout_;
 			return *this;
 		}
 
-		const ImageLayout& newLayout() const
+		ImageMemoryBarrier& setNewLayout(ImageLayout newLayout_)
 		{
-			return reinterpret_cast<const ImageLayout&>(m_imageMemoryBarrier.newLayout);
-		}
-
-		ImageLayout& newLayout()
-		{
-			return reinterpret_cast<ImageLayout&>(m_imageMemoryBarrier.newLayout);
-		}
-
-		ImageMemoryBarrier& newLayout(ImageLayout newLayout)
-		{
-			m_imageMemoryBarrier.newLayout = static_cast<VkImageLayout>(newLayout);
+			newLayout = newLayout_;
 			return *this;
 		}
 
-		const uint32_t& srcQueueFamilyIndex() const
+		ImageMemoryBarrier& setSrcQueueFamilyIndex(uint32_t srcQueueFamilyIndex_)
 		{
-			return m_imageMemoryBarrier.srcQueueFamilyIndex;
-		}
-
-		uint32_t& srcQueueFamilyIndex()
-		{
-			return m_imageMemoryBarrier.srcQueueFamilyIndex;
-		}
-
-		ImageMemoryBarrier& srcQueueFamilyIndex(uint32_t srcQueueFamilyIndex)
-		{
-			m_imageMemoryBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex;
+			srcQueueFamilyIndex = srcQueueFamilyIndex_;
 			return *this;
 		}
 
-		const uint32_t& dstQueueFamilyIndex() const
+		ImageMemoryBarrier& setDstQueueFamilyIndex(uint32_t dstQueueFamilyIndex_)
 		{
-			return m_imageMemoryBarrier.dstQueueFamilyIndex;
-		}
-
-		uint32_t& dstQueueFamilyIndex()
-		{
-			return m_imageMemoryBarrier.dstQueueFamilyIndex;
-		}
-
-		ImageMemoryBarrier& dstQueueFamilyIndex(uint32_t dstQueueFamilyIndex)
-		{
-			m_imageMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
+			dstQueueFamilyIndex = dstQueueFamilyIndex_;
 			return *this;
 		}
 
-		const Image& image() const
+		ImageMemoryBarrier& setImage(Image image_)
 		{
-			return reinterpret_cast<const Image&>(m_imageMemoryBarrier.image);
-		}
-
-		Image& image()
-		{
-			return reinterpret_cast<Image&>(m_imageMemoryBarrier.image);
-		}
-
-		ImageMemoryBarrier& image(Image image)
-		{
-			m_imageMemoryBarrier.image = static_cast<VkImage>(image);
+			image = image_;
 			return *this;
 		}
 
-		const ImageSubresourceRange& subresourceRange() const
+		ImageMemoryBarrier& setSubresourceRange(ImageSubresourceRange subresourceRange_)
 		{
-			return reinterpret_cast<const ImageSubresourceRange&>(m_imageMemoryBarrier.subresourceRange);
-		}
-
-		ImageSubresourceRange& subresourceRange()
-		{
-			return reinterpret_cast<ImageSubresourceRange&>(m_imageMemoryBarrier.subresourceRange);
-		}
-
-		ImageMemoryBarrier& subresourceRange(ImageSubresourceRange subresourceRange)
-		{
-			m_imageMemoryBarrier.subresourceRange = static_cast<VkImageSubresourceRange>(subresourceRange);
+			subresourceRange = subresourceRange_;
 			return *this;
 		}
 
 		operator const VkImageMemoryBarrier&() const
 		{
-			return m_imageMemoryBarrier;
+			return *reinterpret_cast<const VkImageMemoryBarrier*>(this);
 		}
 
-	private:
-		VkImageMemoryBarrier m_imageMemoryBarrier;
+		StructureType sType;
+		const void* pNext;
+		AccessFlags srcAccessMask;
+		AccessFlags dstAccessMask;
+		ImageLayout oldLayout;
+		ImageLayout newLayout;
+		uint32_t srcQueueFamilyIndex;
+		uint32_t dstQueueFamilyIndex;
+		Image image;
+		ImageSubresourceRange subresourceRange;
 	};
 	static_assert(sizeof(ImageMemoryBarrier) == sizeof(VkImageMemoryBarrier), "struct and wrapper have different size!");
 
-	class ImageViewCreateInfo
+	struct ImageViewCreateInfo
 	{
-	public:
 		ImageViewCreateInfo()
 			: ImageViewCreateInfo(ImageViewCreateFlags(), Image(), ImageViewType::e1D, Format::eUndefined, ComponentMapping(), ImageSubresourceRange())
 		{}
 
-		ImageViewCreateInfo(ImageViewCreateFlags flags, Image image, ImageViewType viewType, Format format, ComponentMapping components, ImageSubresourceRange subresourceRange)
+		ImageViewCreateInfo(ImageViewCreateFlags flags_, Image image_, ImageViewType viewType_, Format format_, ComponentMapping components_, ImageSubresourceRange subresourceRange_)
 		{
-			m_imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			m_imageViewCreateInfo.pNext = nullptr;
-			m_imageViewCreateInfo.flags = static_cast<VkImageViewCreateFlags>(flags);
-			m_imageViewCreateInfo.image = static_cast<VkImage>(image);
-			m_imageViewCreateInfo.viewType = static_cast<VkImageViewType>(viewType);
-			m_imageViewCreateInfo.format = static_cast<VkFormat>(format);
-			m_imageViewCreateInfo.components = static_cast<VkComponentMapping>(components);
-			m_imageViewCreateInfo.subresourceRange = static_cast<VkImageSubresourceRange>(subresourceRange);
+			sType = StructureType::eImageViewCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			image = image_;
+			viewType = viewType_;
+			format = format_;
+			components = components_;
+			subresourceRange = subresourceRange_;
 		}
 
 		ImageViewCreateInfo(VkImageViewCreateInfo const & rhs)
-			: m_imageViewCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageViewCreateInfo));
 		}
 
 		ImageViewCreateInfo& operator=(VkImageViewCreateInfo const & rhs)
 		{
-			m_imageViewCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(ImageViewCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		ImageViewCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_imageViewCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_imageViewCreateInfo.sType);
-		}
-
-		ImageViewCreateInfo& sType(StructureType sType)
-		{
-			m_imageViewCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		ImageViewCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_imageViewCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_imageViewCreateInfo.pNext);
-		}
-
-		ImageViewCreateInfo& pNext(const void* pNext)
-		{
-			m_imageViewCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const ImageViewCreateFlags& flags() const
+		ImageViewCreateInfo& setFlags(ImageViewCreateFlags flags_)
 		{
-			return reinterpret_cast<const ImageViewCreateFlags&>(m_imageViewCreateInfo.flags);
-		}
-
-		ImageViewCreateFlags& flags()
-		{
-			return reinterpret_cast<ImageViewCreateFlags&>(m_imageViewCreateInfo.flags);
-		}
-
-		ImageViewCreateInfo& flags(ImageViewCreateFlags flags)
-		{
-			m_imageViewCreateInfo.flags = static_cast<VkImageViewCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Image& image() const
+		ImageViewCreateInfo& setImage(Image image_)
 		{
-			return reinterpret_cast<const Image&>(m_imageViewCreateInfo.image);
-		}
-
-		Image& image()
-		{
-			return reinterpret_cast<Image&>(m_imageViewCreateInfo.image);
-		}
-
-		ImageViewCreateInfo& image(Image image)
-		{
-			m_imageViewCreateInfo.image = static_cast<VkImage>(image);
+			image = image_;
 			return *this;
 		}
 
-		const ImageViewType& viewType() const
+		ImageViewCreateInfo& setViewType(ImageViewType viewType_)
 		{
-			return reinterpret_cast<const ImageViewType&>(m_imageViewCreateInfo.viewType);
-		}
-
-		ImageViewType& viewType()
-		{
-			return reinterpret_cast<ImageViewType&>(m_imageViewCreateInfo.viewType);
-		}
-
-		ImageViewCreateInfo& viewType(ImageViewType viewType)
-		{
-			m_imageViewCreateInfo.viewType = static_cast<VkImageViewType>(viewType);
+			viewType = viewType_;
 			return *this;
 		}
 
-		const Format& format() const
+		ImageViewCreateInfo& setFormat(Format format_)
 		{
-			return reinterpret_cast<const Format&>(m_imageViewCreateInfo.format);
-		}
-
-		Format& format()
-		{
-			return reinterpret_cast<Format&>(m_imageViewCreateInfo.format);
-		}
-
-		ImageViewCreateInfo& format(Format format)
-		{
-			m_imageViewCreateInfo.format = static_cast<VkFormat>(format);
+			format = format_;
 			return *this;
 		}
 
-		const ComponentMapping& components() const
+		ImageViewCreateInfo& setComponents(ComponentMapping components_)
 		{
-			return reinterpret_cast<const ComponentMapping&>(m_imageViewCreateInfo.components);
-		}
-
-		ComponentMapping& components()
-		{
-			return reinterpret_cast<ComponentMapping&>(m_imageViewCreateInfo.components);
-		}
-
-		ImageViewCreateInfo& components(ComponentMapping components)
-		{
-			m_imageViewCreateInfo.components = static_cast<VkComponentMapping>(components);
+			components = components_;
 			return *this;
 		}
 
-		const ImageSubresourceRange& subresourceRange() const
+		ImageViewCreateInfo& setSubresourceRange(ImageSubresourceRange subresourceRange_)
 		{
-			return reinterpret_cast<const ImageSubresourceRange&>(m_imageViewCreateInfo.subresourceRange);
-		}
-
-		ImageSubresourceRange& subresourceRange()
-		{
-			return reinterpret_cast<ImageSubresourceRange&>(m_imageViewCreateInfo.subresourceRange);
-		}
-
-		ImageViewCreateInfo& subresourceRange(ImageSubresourceRange subresourceRange)
-		{
-			m_imageViewCreateInfo.subresourceRange = static_cast<VkImageSubresourceRange>(subresourceRange);
+			subresourceRange = subresourceRange_;
 			return *this;
 		}
 
 		operator const VkImageViewCreateInfo&() const
 		{
-			return m_imageViewCreateInfo;
+			return *reinterpret_cast<const VkImageViewCreateInfo*>(this);
 		}
 
-	private:
-		VkImageViewCreateInfo m_imageViewCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		ImageViewCreateFlags flags;
+		Image image;
+		ImageViewType viewType;
+		Format format;
+		ComponentMapping components;
+		ImageSubresourceRange subresourceRange;
 	};
 	static_assert(sizeof(ImageViewCreateInfo) == sizeof(VkImageViewCreateInfo), "struct and wrapper have different size!");
 
-	class ImageCopy
+	struct ImageCopy
 	{
-	public:
 		ImageCopy()
 			: ImageCopy(ImageSubresourceLayers(), Offset3D(), ImageSubresourceLayers(), Offset3D(), Extent3D())
 		{}
 
-		ImageCopy(ImageSubresourceLayers srcSubresource, Offset3D srcOffset, ImageSubresourceLayers dstSubresource, Offset3D dstOffset, Extent3D extent)
+		ImageCopy(ImageSubresourceLayers srcSubresource_, Offset3D srcOffset_, ImageSubresourceLayers dstSubresource_, Offset3D dstOffset_, Extent3D extent_)
 		{
-			m_imageCopy.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
-			m_imageCopy.srcOffset = static_cast<VkOffset3D>(srcOffset);
-			m_imageCopy.dstSubresource = static_cast<VkImageSubresourceLayers>(dstSubresource);
-			m_imageCopy.dstOffset = static_cast<VkOffset3D>(dstOffset);
-			m_imageCopy.extent = static_cast<VkExtent3D>(extent);
+			srcSubresource = srcSubresource_;
+			srcOffset = srcOffset_;
+			dstSubresource = dstSubresource_;
+			dstOffset = dstOffset_;
+			extent = extent_;
 		}
 
 		ImageCopy(VkImageCopy const & rhs)
-			: m_imageCopy(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageCopy));
 		}
 
 		ImageCopy& operator=(VkImageCopy const & rhs)
 		{
-			m_imageCopy = rhs;
+			memcpy(this, &rhs, sizeof(ImageCopy));
 			return *this;
 		}
 
-		const ImageSubresourceLayers& srcSubresource() const
+		ImageCopy& setSrcSubresource(ImageSubresourceLayers srcSubresource_)
 		{
-			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageCopy.srcSubresource);
-		}
-
-		ImageSubresourceLayers& srcSubresource()
-		{
-			return reinterpret_cast<ImageSubresourceLayers&>(m_imageCopy.srcSubresource);
-		}
-
-		ImageCopy& srcSubresource(ImageSubresourceLayers srcSubresource)
-		{
-			m_imageCopy.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
+			srcSubresource = srcSubresource_;
 			return *this;
 		}
 
-		const Offset3D& srcOffset() const
+		ImageCopy& setSrcOffset(Offset3D srcOffset_)
 		{
-			return reinterpret_cast<const Offset3D&>(m_imageCopy.srcOffset);
-		}
-
-		Offset3D& srcOffset()
-		{
-			return reinterpret_cast<Offset3D&>(m_imageCopy.srcOffset);
-		}
-
-		ImageCopy& srcOffset(Offset3D srcOffset)
-		{
-			m_imageCopy.srcOffset = static_cast<VkOffset3D>(srcOffset);
+			srcOffset = srcOffset_;
 			return *this;
 		}
 
-		const ImageSubresourceLayers& dstSubresource() const
+		ImageCopy& setDstSubresource(ImageSubresourceLayers dstSubresource_)
 		{
-			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageCopy.dstSubresource);
-		}
-
-		ImageSubresourceLayers& dstSubresource()
-		{
-			return reinterpret_cast<ImageSubresourceLayers&>(m_imageCopy.dstSubresource);
-		}
-
-		ImageCopy& dstSubresource(ImageSubresourceLayers dstSubresource)
-		{
-			m_imageCopy.dstSubresource = static_cast<VkImageSubresourceLayers>(dstSubresource);
+			dstSubresource = dstSubresource_;
 			return *this;
 		}
 
-		const Offset3D& dstOffset() const
+		ImageCopy& setDstOffset(Offset3D dstOffset_)
 		{
-			return reinterpret_cast<const Offset3D&>(m_imageCopy.dstOffset);
-		}
-
-		Offset3D& dstOffset()
-		{
-			return reinterpret_cast<Offset3D&>(m_imageCopy.dstOffset);
-		}
-
-		ImageCopy& dstOffset(Offset3D dstOffset)
-		{
-			m_imageCopy.dstOffset = static_cast<VkOffset3D>(dstOffset);
+			dstOffset = dstOffset_;
 			return *this;
 		}
 
-		const Extent3D& extent() const
+		ImageCopy& setExtent(Extent3D extent_)
 		{
-			return reinterpret_cast<const Extent3D&>(m_imageCopy.extent);
-		}
-
-		Extent3D& extent()
-		{
-			return reinterpret_cast<Extent3D&>(m_imageCopy.extent);
-		}
-
-		ImageCopy& extent(Extent3D extent)
-		{
-			m_imageCopy.extent = static_cast<VkExtent3D>(extent);
+			extent = extent_;
 			return *this;
 		}
 
 		operator const VkImageCopy&() const
 		{
-			return m_imageCopy;
+			return *reinterpret_cast<const VkImageCopy*>(this);
 		}
 
-	private:
-		VkImageCopy m_imageCopy;
+		ImageSubresourceLayers srcSubresource;
+		Offset3D srcOffset;
+		ImageSubresourceLayers dstSubresource;
+		Offset3D dstOffset;
+		Extent3D extent;
 	};
 	static_assert(sizeof(ImageCopy) == sizeof(VkImageCopy), "struct and wrapper have different size!");
 
-	class ImageBlit
+	struct ImageBlit
 	{
-	public:
 		ImageBlit()
 			: ImageBlit(ImageSubresourceLayers(), { Offset3D() }, ImageSubresourceLayers(), { Offset3D() })
 		{}
 
-		ImageBlit(ImageSubresourceLayers srcSubresource, eastl::array<Offset3D, 2> const& srcOffsets, ImageSubresourceLayers dstSubresource, eastl::array<Offset3D, 2> const& dstOffsets)
+		ImageBlit(ImageSubresourceLayers srcSubresource_, eastl::array<Offset3D, 2> const& srcOffsets_, ImageSubresourceLayers dstSubresource_, eastl::array<Offset3D, 2> const& dstOffsets_)
 		{
-			m_imageBlit.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
-			memcpy(&m_imageBlit.srcOffsets, srcOffsets.data(), 2 * sizeof(Offset3D));
-			m_imageBlit.dstSubresource = static_cast<VkImageSubresourceLayers>(dstSubresource);
-			memcpy(&m_imageBlit.dstOffsets, dstOffsets.data(), 2 * sizeof(Offset3D));
+			srcSubresource = srcSubresource_;
+			memcpy(&srcOffsets, srcOffsets_.data(), 2 * sizeof(Offset3D));
+			dstSubresource = dstSubresource_;
+			memcpy(&dstOffsets, dstOffsets_.data(), 2 * sizeof(Offset3D));
 		}
 
 		ImageBlit(VkImageBlit const & rhs)
-			: m_imageBlit(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageBlit));
 		}
 
 		ImageBlit& operator=(VkImageBlit const & rhs)
 		{
-			m_imageBlit = rhs;
+			memcpy(this, &rhs, sizeof(ImageBlit));
 			return *this;
 		}
 
-		const ImageSubresourceLayers& srcSubresource() const
+		ImageBlit& setSrcSubresource(ImageSubresourceLayers srcSubresource_)
 		{
-			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageBlit.srcSubresource);
-		}
-
-		ImageSubresourceLayers& srcSubresource()
-		{
-			return reinterpret_cast<ImageSubresourceLayers&>(m_imageBlit.srcSubresource);
-		}
-
-		ImageBlit& srcSubresource(ImageSubresourceLayers srcSubresource)
-		{
-			m_imageBlit.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
+			srcSubresource = srcSubresource_;
 			return *this;
 		}
 
-		const Offset3D* srcOffsets() const
+		ImageBlit& setSrcOffsets(eastl::array<Offset3D, 2> srcOffsets_)
 		{
-			return reinterpret_cast<const Offset3D*>(m_imageBlit.srcOffsets);
-		}
-
-		Offset3D* srcOffsets()
-		{
-			return reinterpret_cast<Offset3D*>(m_imageBlit.srcOffsets);
-		}
-
-		ImageBlit& srcOffsets(eastl::array<Offset3D, 2> srcOffsets)
-		{
-			memcpy(&m_imageBlit.srcOffsets, srcOffsets.data(), 2 * sizeof(Offset3D));
+			memcpy(&srcOffsets, srcOffsets_.data(), 2 * sizeof(Offset3D));
 			return *this;
 		}
 
-		const ImageSubresourceLayers& dstSubresource() const
+		ImageBlit& setDstSubresource(ImageSubresourceLayers dstSubresource_)
 		{
-			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageBlit.dstSubresource);
-		}
-
-		ImageSubresourceLayers& dstSubresource()
-		{
-			return reinterpret_cast<ImageSubresourceLayers&>(m_imageBlit.dstSubresource);
-		}
-
-		ImageBlit& dstSubresource(ImageSubresourceLayers dstSubresource)
-		{
-			m_imageBlit.dstSubresource = static_cast<VkImageSubresourceLayers>(dstSubresource);
+			dstSubresource = dstSubresource_;
 			return *this;
 		}
 
-		const Offset3D* dstOffsets() const
+		ImageBlit& setDstOffsets(eastl::array<Offset3D, 2> dstOffsets_)
 		{
-			return reinterpret_cast<const Offset3D*>(m_imageBlit.dstOffsets);
-		}
-
-		Offset3D* dstOffsets()
-		{
-			return reinterpret_cast<Offset3D*>(m_imageBlit.dstOffsets);
-		}
-
-		ImageBlit& dstOffsets(eastl::array<Offset3D, 2> dstOffsets)
-		{
-			memcpy(&m_imageBlit.dstOffsets, dstOffsets.data(), 2 * sizeof(Offset3D));
+			memcpy(&dstOffsets, dstOffsets_.data(), 2 * sizeof(Offset3D));
 			return *this;
 		}
 
 		operator const VkImageBlit&() const
 		{
-			return m_imageBlit;
+			return *reinterpret_cast<const VkImageBlit*>(this);
 		}
 
-	private:
-		VkImageBlit m_imageBlit;
+		ImageSubresourceLayers srcSubresource;
+		Offset3D srcOffsets[2];
+		ImageSubresourceLayers dstSubresource;
+		Offset3D dstOffsets[2];
 	};
 	static_assert(sizeof(ImageBlit) == sizeof(VkImageBlit), "struct and wrapper have different size!");
 
-	class BufferImageCopy
+	struct BufferImageCopy
 	{
-	public:
 		BufferImageCopy()
 			: BufferImageCopy(0, 0, 0, ImageSubresourceLayers(), Offset3D(), Extent3D())
 		{}
 
-		BufferImageCopy(DeviceSize bufferOffset, uint32_t bufferRowLength, uint32_t bufferImageHeight, ImageSubresourceLayers imageSubresource, Offset3D imageOffset, Extent3D imageExtent)
+		BufferImageCopy(DeviceSize bufferOffset_, uint32_t bufferRowLength_, uint32_t bufferImageHeight_, ImageSubresourceLayers imageSubresource_, Offset3D imageOffset_, Extent3D imageExtent_)
 		{
-			m_bufferImageCopy.bufferOffset = bufferOffset;
-			m_bufferImageCopy.bufferRowLength = bufferRowLength;
-			m_bufferImageCopy.bufferImageHeight = bufferImageHeight;
-			m_bufferImageCopy.imageSubresource = static_cast<VkImageSubresourceLayers>(imageSubresource);
-			m_bufferImageCopy.imageOffset = static_cast<VkOffset3D>(imageOffset);
-			m_bufferImageCopy.imageExtent = static_cast<VkExtent3D>(imageExtent);
+			bufferOffset = bufferOffset_;
+			bufferRowLength = bufferRowLength_;
+			bufferImageHeight = bufferImageHeight_;
+			imageSubresource = imageSubresource_;
+			imageOffset = imageOffset_;
+			imageExtent = imageExtent_;
 		}
 
 		BufferImageCopy(VkBufferImageCopy const & rhs)
-			: m_bufferImageCopy(rhs)
 		{
+			memcpy(this, &rhs, sizeof(BufferImageCopy));
 		}
 
 		BufferImageCopy& operator=(VkBufferImageCopy const & rhs)
 		{
-			m_bufferImageCopy = rhs;
+			memcpy(this, &rhs, sizeof(BufferImageCopy));
 			return *this;
 		}
 
-		const DeviceSize& bufferOffset() const
+		BufferImageCopy& setBufferOffset(DeviceSize bufferOffset_)
 		{
-			return m_bufferImageCopy.bufferOffset;
-		}
-
-		DeviceSize& bufferOffset()
-		{
-			return m_bufferImageCopy.bufferOffset;
-		}
-
-		BufferImageCopy& bufferOffset(DeviceSize bufferOffset)
-		{
-			m_bufferImageCopy.bufferOffset = bufferOffset;
+			bufferOffset = bufferOffset_;
 			return *this;
 		}
 
-		const uint32_t& bufferRowLength() const
+		BufferImageCopy& setBufferRowLength(uint32_t bufferRowLength_)
 		{
-			return m_bufferImageCopy.bufferRowLength;
-		}
-
-		uint32_t& bufferRowLength()
-		{
-			return m_bufferImageCopy.bufferRowLength;
-		}
-
-		BufferImageCopy& bufferRowLength(uint32_t bufferRowLength)
-		{
-			m_bufferImageCopy.bufferRowLength = bufferRowLength;
+			bufferRowLength = bufferRowLength_;
 			return *this;
 		}
 
-		const uint32_t& bufferImageHeight() const
+		BufferImageCopy& setBufferImageHeight(uint32_t bufferImageHeight_)
 		{
-			return m_bufferImageCopy.bufferImageHeight;
-		}
-
-		uint32_t& bufferImageHeight()
-		{
-			return m_bufferImageCopy.bufferImageHeight;
-		}
-
-		BufferImageCopy& bufferImageHeight(uint32_t bufferImageHeight)
-		{
-			m_bufferImageCopy.bufferImageHeight = bufferImageHeight;
+			bufferImageHeight = bufferImageHeight_;
 			return *this;
 		}
 
-		const ImageSubresourceLayers& imageSubresource() const
+		BufferImageCopy& setImageSubresource(ImageSubresourceLayers imageSubresource_)
 		{
-			return reinterpret_cast<const ImageSubresourceLayers&>(m_bufferImageCopy.imageSubresource);
-		}
-
-		ImageSubresourceLayers& imageSubresource()
-		{
-			return reinterpret_cast<ImageSubresourceLayers&>(m_bufferImageCopy.imageSubresource);
-		}
-
-		BufferImageCopy& imageSubresource(ImageSubresourceLayers imageSubresource)
-		{
-			m_bufferImageCopy.imageSubresource = static_cast<VkImageSubresourceLayers>(imageSubresource);
+			imageSubresource = imageSubresource_;
 			return *this;
 		}
 
-		const Offset3D& imageOffset() const
+		BufferImageCopy& setImageOffset(Offset3D imageOffset_)
 		{
-			return reinterpret_cast<const Offset3D&>(m_bufferImageCopy.imageOffset);
-		}
-
-		Offset3D& imageOffset()
-		{
-			return reinterpret_cast<Offset3D&>(m_bufferImageCopy.imageOffset);
-		}
-
-		BufferImageCopy& imageOffset(Offset3D imageOffset)
-		{
-			m_bufferImageCopy.imageOffset = static_cast<VkOffset3D>(imageOffset);
+			imageOffset = imageOffset_;
 			return *this;
 		}
 
-		const Extent3D& imageExtent() const
+		BufferImageCopy& setImageExtent(Extent3D imageExtent_)
 		{
-			return reinterpret_cast<const Extent3D&>(m_bufferImageCopy.imageExtent);
-		}
-
-		Extent3D& imageExtent()
-		{
-			return reinterpret_cast<Extent3D&>(m_bufferImageCopy.imageExtent);
-		}
-
-		BufferImageCopy& imageExtent(Extent3D imageExtent)
-		{
-			m_bufferImageCopy.imageExtent = static_cast<VkExtent3D>(imageExtent);
+			imageExtent = imageExtent_;
 			return *this;
 		}
 
 		operator const VkBufferImageCopy&() const
 		{
-			return m_bufferImageCopy;
+			return *reinterpret_cast<const VkBufferImageCopy*>(this);
 		}
 
-	private:
-		VkBufferImageCopy m_bufferImageCopy;
+		DeviceSize bufferOffset;
+		uint32_t bufferRowLength;
+		uint32_t bufferImageHeight;
+		ImageSubresourceLayers imageSubresource;
+		Offset3D imageOffset;
+		Extent3D imageExtent;
 	};
 	static_assert(sizeof(BufferImageCopy) == sizeof(VkBufferImageCopy), "struct and wrapper have different size!");
 
-	class ImageResolve
+	struct ImageResolve
 	{
-	public:
 		ImageResolve()
 			: ImageResolve(ImageSubresourceLayers(), Offset3D(), ImageSubresourceLayers(), Offset3D(), Extent3D())
 		{}
 
-		ImageResolve(ImageSubresourceLayers srcSubresource, Offset3D srcOffset, ImageSubresourceLayers dstSubresource, Offset3D dstOffset, Extent3D extent)
+		ImageResolve(ImageSubresourceLayers srcSubresource_, Offset3D srcOffset_, ImageSubresourceLayers dstSubresource_, Offset3D dstOffset_, Extent3D extent_)
 		{
-			m_imageResolve.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
-			m_imageResolve.srcOffset = static_cast<VkOffset3D>(srcOffset);
-			m_imageResolve.dstSubresource = static_cast<VkImageSubresourceLayers>(dstSubresource);
-			m_imageResolve.dstOffset = static_cast<VkOffset3D>(dstOffset);
-			m_imageResolve.extent = static_cast<VkExtent3D>(extent);
+			srcSubresource = srcSubresource_;
+			srcOffset = srcOffset_;
+			dstSubresource = dstSubresource_;
+			dstOffset = dstOffset_;
+			extent = extent_;
 		}
 
 		ImageResolve(VkImageResolve const & rhs)
-			: m_imageResolve(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageResolve));
 		}
 
 		ImageResolve& operator=(VkImageResolve const & rhs)
 		{
-			m_imageResolve = rhs;
+			memcpy(this, &rhs, sizeof(ImageResolve));
 			return *this;
 		}
 
-		const ImageSubresourceLayers& srcSubresource() const
+		ImageResolve& setSrcSubresource(ImageSubresourceLayers srcSubresource_)
 		{
-			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageResolve.srcSubresource);
-		}
-
-		ImageSubresourceLayers& srcSubresource()
-		{
-			return reinterpret_cast<ImageSubresourceLayers&>(m_imageResolve.srcSubresource);
-		}
-
-		ImageResolve& srcSubresource(ImageSubresourceLayers srcSubresource)
-		{
-			m_imageResolve.srcSubresource = static_cast<VkImageSubresourceLayers>(srcSubresource);
+			srcSubresource = srcSubresource_;
 			return *this;
 		}
 
-		const Offset3D& srcOffset() const
+		ImageResolve& setSrcOffset(Offset3D srcOffset_)
 		{
-			return reinterpret_cast<const Offset3D&>(m_imageResolve.srcOffset);
-		}
-
-		Offset3D& srcOffset()
-		{
-			return reinterpret_cast<Offset3D&>(m_imageResolve.srcOffset);
-		}
-
-		ImageResolve& srcOffset(Offset3D srcOffset)
-		{
-			m_imageResolve.srcOffset = static_cast<VkOffset3D>(srcOffset);
+			srcOffset = srcOffset_;
 			return *this;
 		}
 
-		const ImageSubresourceLayers& dstSubresource() const
+		ImageResolve& setDstSubresource(ImageSubresourceLayers dstSubresource_)
 		{
-			return reinterpret_cast<const ImageSubresourceLayers&>(m_imageResolve.dstSubresource);
-		}
-
-		ImageSubresourceLayers& dstSubresource()
-		{
-			return reinterpret_cast<ImageSubresourceLayers&>(m_imageResolve.dstSubresource);
-		}
-
-		ImageResolve& dstSubresource(ImageSubresourceLayers dstSubresource)
-		{
-			m_imageResolve.dstSubresource = static_cast<VkImageSubresourceLayers>(dstSubresource);
+			dstSubresource = dstSubresource_;
 			return *this;
 		}
 
-		const Offset3D& dstOffset() const
+		ImageResolve& setDstOffset(Offset3D dstOffset_)
 		{
-			return reinterpret_cast<const Offset3D&>(m_imageResolve.dstOffset);
-		}
-
-		Offset3D& dstOffset()
-		{
-			return reinterpret_cast<Offset3D&>(m_imageResolve.dstOffset);
-		}
-
-		ImageResolve& dstOffset(Offset3D dstOffset)
-		{
-			m_imageResolve.dstOffset = static_cast<VkOffset3D>(dstOffset);
+			dstOffset = dstOffset_;
 			return *this;
 		}
 
-		const Extent3D& extent() const
+		ImageResolve& setExtent(Extent3D extent_)
 		{
-			return reinterpret_cast<const Extent3D&>(m_imageResolve.extent);
-		}
-
-		Extent3D& extent()
-		{
-			return reinterpret_cast<Extent3D&>(m_imageResolve.extent);
-		}
-
-		ImageResolve& extent(Extent3D extent)
-		{
-			m_imageResolve.extent = static_cast<VkExtent3D>(extent);
+			extent = extent_;
 			return *this;
 		}
 
 		operator const VkImageResolve&() const
 		{
-			return m_imageResolve;
+			return *reinterpret_cast<const VkImageResolve*>(this);
 		}
 
-	private:
-		VkImageResolve m_imageResolve;
+		ImageSubresourceLayers srcSubresource;
+		Offset3D srcOffset;
+		ImageSubresourceLayers dstSubresource;
+		Offset3D dstOffset;
+		Extent3D extent;
 	};
 	static_assert(sizeof(ImageResolve) == sizeof(VkImageResolve), "struct and wrapper have different size!");
 
-	class ClearAttachment
+	struct ClearAttachment
 	{
-	public:
 		ClearAttachment()
 			: ClearAttachment(ImageAspectFlags(), 0, ClearValue())
 		{}
 
-		ClearAttachment(ImageAspectFlags aspectMask, uint32_t colorAttachment, ClearValue clearValue)
+		ClearAttachment(ImageAspectFlags aspectMask_, uint32_t colorAttachment_, ClearValue clearValue_)
 		{
-			m_clearAttachment.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
-			m_clearAttachment.colorAttachment = colorAttachment;
-			m_clearAttachment.clearValue = static_cast<VkClearValue>(clearValue);
+			aspectMask = aspectMask_;
+			colorAttachment = colorAttachment_;
+			clearValue = clearValue_;
 		}
 
 		ClearAttachment(VkClearAttachment const & rhs)
-			: m_clearAttachment(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ClearAttachment));
 		}
 
 		ClearAttachment& operator=(VkClearAttachment const & rhs)
 		{
-			m_clearAttachment = rhs;
+			memcpy(this, &rhs, sizeof(ClearAttachment));
 			return *this;
 		}
 
-		const ImageAspectFlags& aspectMask() const
+		ClearAttachment& setAspectMask(ImageAspectFlags aspectMask_)
 		{
-			return reinterpret_cast<const ImageAspectFlags&>(m_clearAttachment.aspectMask);
-		}
-
-		ImageAspectFlags& aspectMask()
-		{
-			return reinterpret_cast<ImageAspectFlags&>(m_clearAttachment.aspectMask);
-		}
-
-		ClearAttachment& aspectMask(ImageAspectFlags aspectMask)
-		{
-			m_clearAttachment.aspectMask = static_cast<VkImageAspectFlags>(aspectMask);
+			aspectMask = aspectMask_;
 			return *this;
 		}
 
-		const uint32_t& colorAttachment() const
+		ClearAttachment& setColorAttachment(uint32_t colorAttachment_)
 		{
-			return m_clearAttachment.colorAttachment;
-		}
-
-		uint32_t& colorAttachment()
-		{
-			return m_clearAttachment.colorAttachment;
-		}
-
-		ClearAttachment& colorAttachment(uint32_t colorAttachment)
-		{
-			m_clearAttachment.colorAttachment = colorAttachment;
+			colorAttachment = colorAttachment_;
 			return *this;
 		}
 
-		const ClearValue& clearValue() const
+		ClearAttachment& setClearValue(ClearValue clearValue_)
 		{
-			return reinterpret_cast<const ClearValue&>(m_clearAttachment.clearValue);
-		}
-
-		ClearValue& clearValue()
-		{
-			return reinterpret_cast<ClearValue&>(m_clearAttachment.clearValue);
-		}
-
-		ClearAttachment& clearValue(ClearValue clearValue)
-		{
-			m_clearAttachment.clearValue = static_cast<VkClearValue>(clearValue);
+			clearValue = clearValue_;
 			return *this;
 		}
 
 		operator const VkClearAttachment&() const
 		{
-			return m_clearAttachment;
+			return *reinterpret_cast<const VkClearAttachment*>(this);
 		}
 
-	private:
-		VkClearAttachment m_clearAttachment;
+		ImageAspectFlags aspectMask;
+		uint32_t colorAttachment;
+		ClearValue clearValue;
 	};
 	static_assert(sizeof(ClearAttachment) == sizeof(VkClearAttachment), "struct and wrapper have different size!");
 
@@ -14722,76 +9660,38 @@ namespace vk
 		eNonstandardBlockSize = VK_SPARSE_IMAGE_FORMAT_NONSTANDARD_BLOCK_SIZE_BIT
 	};
 
-	typedef Flags<SparseImageFormatFlagBits, VkSparseImageFormatFlags> SparseImageFormatFlags;
+	using SparseImageFormatFlags = Flags<SparseImageFormatFlagBits, VkSparseImageFormatFlags>;
 
 	inline SparseImageFormatFlags operator|(SparseImageFormatFlagBits bit0, SparseImageFormatFlagBits bit1)
 	{
 		return SparseImageFormatFlags(bit0) | bit1;
 	}
 
-	class SparseImageFormatProperties
+	struct SparseImageFormatProperties
 	{
-	public:
-		const ImageAspectFlags& aspectMask() const
-		{
-			return reinterpret_cast<const ImageAspectFlags&>(m_sparseImageFormatProperties.aspectMask);
-		}
-
-		const Extent3D& imageGranularity() const
-		{
-			return reinterpret_cast<const Extent3D&>(m_sparseImageFormatProperties.imageGranularity);
-		}
-
-		const SparseImageFormatFlags& flags() const
-		{
-			return reinterpret_cast<const SparseImageFormatFlags&>(m_sparseImageFormatProperties.flags);
-		}
-
 		operator const VkSparseImageFormatProperties&() const
 		{
-			return m_sparseImageFormatProperties;
+			return *reinterpret_cast<const VkSparseImageFormatProperties*>(this);
 		}
 
-	private:
-		VkSparseImageFormatProperties m_sparseImageFormatProperties;
+		ImageAspectFlags aspectMask;
+		Extent3D imageGranularity;
+		SparseImageFormatFlags flags;
 	};
 	static_assert(sizeof(SparseImageFormatProperties) == sizeof(VkSparseImageFormatProperties), "struct and wrapper have different size!");
 
-	class SparseImageMemoryRequirements
+	struct SparseImageMemoryRequirements
 	{
-	public:
-		const SparseImageFormatProperties& formatProperties() const
-		{
-			return reinterpret_cast<const SparseImageFormatProperties&>(m_sparseImageMemoryRequirements.formatProperties);
-		}
-
-		const uint32_t& imageMipTailFirstLod() const
-		{
-			return m_sparseImageMemoryRequirements.imageMipTailFirstLod;
-		}
-
-		const DeviceSize& imageMipTailSize() const
-		{
-			return m_sparseImageMemoryRequirements.imageMipTailSize;
-		}
-
-		const DeviceSize& imageMipTailOffset() const
-		{
-			return m_sparseImageMemoryRequirements.imageMipTailOffset;
-		}
-
-		const DeviceSize& imageMipTailStride() const
-		{
-			return m_sparseImageMemoryRequirements.imageMipTailStride;
-		}
-
 		operator const VkSparseImageMemoryRequirements&() const
 		{
-			return m_sparseImageMemoryRequirements;
+			return *reinterpret_cast<const VkSparseImageMemoryRequirements*>(this);
 		}
 
-	private:
-		VkSparseImageMemoryRequirements m_sparseImageMemoryRequirements;
+		SparseImageFormatProperties formatProperties;
+		uint32_t imageMipTailFirstLod;
+		DeviceSize imageMipTailSize;
+		DeviceSize imageMipTailOffset;
+		DeviceSize imageMipTailStride;
 	};
 	static_assert(sizeof(SparseImageMemoryRequirements) == sizeof(VkSparseImageMemoryRequirements), "struct and wrapper have different size!");
 
@@ -14800,746 +9700,440 @@ namespace vk
 		eMetadata = VK_SPARSE_MEMORY_BIND_METADATA_BIT
 	};
 
-	typedef Flags<SparseMemoryBindFlagBits, VkSparseMemoryBindFlags> SparseMemoryBindFlags;
+	using SparseMemoryBindFlags = Flags<SparseMemoryBindFlagBits, VkSparseMemoryBindFlags>;
 
 	inline SparseMemoryBindFlags operator|(SparseMemoryBindFlagBits bit0, SparseMemoryBindFlagBits bit1)
 	{
 		return SparseMemoryBindFlags(bit0) | bit1;
 	}
 
-	class SparseMemoryBind
+	struct SparseMemoryBind
 	{
-	public:
 		SparseMemoryBind()
 			: SparseMemoryBind(0, 0, DeviceMemory(), 0, SparseMemoryBindFlags())
 		{}
 
-		SparseMemoryBind(DeviceSize resourceOffset, DeviceSize size, DeviceMemory memory, DeviceSize memoryOffset, SparseMemoryBindFlags flags)
+		SparseMemoryBind(DeviceSize resourceOffset_, DeviceSize size_, DeviceMemory memory_, DeviceSize memoryOffset_, SparseMemoryBindFlags flags_)
 		{
-			m_sparseMemoryBind.resourceOffset = resourceOffset;
-			m_sparseMemoryBind.size = size;
-			m_sparseMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
-			m_sparseMemoryBind.memoryOffset = memoryOffset;
-			m_sparseMemoryBind.flags = static_cast<VkSparseMemoryBindFlags>(flags);
+			resourceOffset = resourceOffset_;
+			size = size_;
+			memory = memory_;
+			memoryOffset = memoryOffset_;
+			flags = flags_;
 		}
 
 		SparseMemoryBind(VkSparseMemoryBind const & rhs)
-			: m_sparseMemoryBind(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SparseMemoryBind));
 		}
 
 		SparseMemoryBind& operator=(VkSparseMemoryBind const & rhs)
 		{
-			m_sparseMemoryBind = rhs;
+			memcpy(this, &rhs, sizeof(SparseMemoryBind));
 			return *this;
 		}
 
-		const DeviceSize& resourceOffset() const
+		SparseMemoryBind& setResourceOffset(DeviceSize resourceOffset_)
 		{
-			return m_sparseMemoryBind.resourceOffset;
-		}
-
-		DeviceSize& resourceOffset()
-		{
-			return m_sparseMemoryBind.resourceOffset;
-		}
-
-		SparseMemoryBind& resourceOffset(DeviceSize resourceOffset)
-		{
-			m_sparseMemoryBind.resourceOffset = resourceOffset;
+			resourceOffset = resourceOffset_;
 			return *this;
 		}
 
-		const DeviceSize& size() const
+		SparseMemoryBind& setSize(DeviceSize size_)
 		{
-			return m_sparseMemoryBind.size;
-		}
-
-		DeviceSize& size()
-		{
-			return m_sparseMemoryBind.size;
-		}
-
-		SparseMemoryBind& size(DeviceSize size)
-		{
-			m_sparseMemoryBind.size = size;
+			size = size_;
 			return *this;
 		}
 
-		const DeviceMemory& memory() const
+		SparseMemoryBind& setMemory(DeviceMemory memory_)
 		{
-			return reinterpret_cast<const DeviceMemory&>(m_sparseMemoryBind.memory);
-		}
-
-		DeviceMemory& memory()
-		{
-			return reinterpret_cast<DeviceMemory&>(m_sparseMemoryBind.memory);
-		}
-
-		SparseMemoryBind& memory(DeviceMemory memory)
-		{
-			m_sparseMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
+			memory = memory_;
 			return *this;
 		}
 
-		const DeviceSize& memoryOffset() const
+		SparseMemoryBind& setMemoryOffset(DeviceSize memoryOffset_)
 		{
-			return m_sparseMemoryBind.memoryOffset;
-		}
-
-		DeviceSize& memoryOffset()
-		{
-			return m_sparseMemoryBind.memoryOffset;
-		}
-
-		SparseMemoryBind& memoryOffset(DeviceSize memoryOffset)
-		{
-			m_sparseMemoryBind.memoryOffset = memoryOffset;
+			memoryOffset = memoryOffset_;
 			return *this;
 		}
 
-		const SparseMemoryBindFlags& flags() const
+		SparseMemoryBind& setFlags(SparseMemoryBindFlags flags_)
 		{
-			return reinterpret_cast<const SparseMemoryBindFlags&>(m_sparseMemoryBind.flags);
-		}
-
-		SparseMemoryBindFlags& flags()
-		{
-			return reinterpret_cast<SparseMemoryBindFlags&>(m_sparseMemoryBind.flags);
-		}
-
-		SparseMemoryBind& flags(SparseMemoryBindFlags flags)
-		{
-			m_sparseMemoryBind.flags = static_cast<VkSparseMemoryBindFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
 		operator const VkSparseMemoryBind&() const
 		{
-			return m_sparseMemoryBind;
+			return *reinterpret_cast<const VkSparseMemoryBind*>(this);
 		}
 
-	private:
-		VkSparseMemoryBind m_sparseMemoryBind;
+		DeviceSize resourceOffset;
+		DeviceSize size;
+		DeviceMemory memory;
+		DeviceSize memoryOffset;
+		SparseMemoryBindFlags flags;
 	};
 	static_assert(sizeof(SparseMemoryBind) == sizeof(VkSparseMemoryBind), "struct and wrapper have different size!");
 
-	class SparseImageMemoryBind
+	struct SparseImageMemoryBind
 	{
-	public:
 		SparseImageMemoryBind()
 			: SparseImageMemoryBind(ImageSubresource(), Offset3D(), Extent3D(), DeviceMemory(), 0, SparseMemoryBindFlags())
 		{}
 
-		SparseImageMemoryBind(ImageSubresource subresource, Offset3D offset, Extent3D extent, DeviceMemory memory, DeviceSize memoryOffset, SparseMemoryBindFlags flags)
+		SparseImageMemoryBind(ImageSubresource subresource_, Offset3D offset_, Extent3D extent_, DeviceMemory memory_, DeviceSize memoryOffset_, SparseMemoryBindFlags flags_)
 		{
-			m_sparseImageMemoryBind.subresource = static_cast<VkImageSubresource>(subresource);
-			m_sparseImageMemoryBind.offset = static_cast<VkOffset3D>(offset);
-			m_sparseImageMemoryBind.extent = static_cast<VkExtent3D>(extent);
-			m_sparseImageMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
-			m_sparseImageMemoryBind.memoryOffset = memoryOffset;
-			m_sparseImageMemoryBind.flags = static_cast<VkSparseMemoryBindFlags>(flags);
+			subresource = subresource_;
+			offset = offset_;
+			extent = extent_;
+			memory = memory_;
+			memoryOffset = memoryOffset_;
+			flags = flags_;
 		}
 
 		SparseImageMemoryBind(VkSparseImageMemoryBind const & rhs)
-			: m_sparseImageMemoryBind(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SparseImageMemoryBind));
 		}
 
 		SparseImageMemoryBind& operator=(VkSparseImageMemoryBind const & rhs)
 		{
-			m_sparseImageMemoryBind = rhs;
+			memcpy(this, &rhs, sizeof(SparseImageMemoryBind));
 			return *this;
 		}
 
-		const ImageSubresource& subresource() const
+		SparseImageMemoryBind& setSubresource(ImageSubresource subresource_)
 		{
-			return reinterpret_cast<const ImageSubresource&>(m_sparseImageMemoryBind.subresource);
-		}
-
-		ImageSubresource& subresource()
-		{
-			return reinterpret_cast<ImageSubresource&>(m_sparseImageMemoryBind.subresource);
-		}
-
-		SparseImageMemoryBind& subresource(ImageSubresource subresource)
-		{
-			m_sparseImageMemoryBind.subresource = static_cast<VkImageSubresource>(subresource);
+			subresource = subresource_;
 			return *this;
 		}
 
-		const Offset3D& offset() const
+		SparseImageMemoryBind& setOffset(Offset3D offset_)
 		{
-			return reinterpret_cast<const Offset3D&>(m_sparseImageMemoryBind.offset);
-		}
-
-		Offset3D& offset()
-		{
-			return reinterpret_cast<Offset3D&>(m_sparseImageMemoryBind.offset);
-		}
-
-		SparseImageMemoryBind& offset(Offset3D offset)
-		{
-			m_sparseImageMemoryBind.offset = static_cast<VkOffset3D>(offset);
+			offset = offset_;
 			return *this;
 		}
 
-		const Extent3D& extent() const
+		SparseImageMemoryBind& setExtent(Extent3D extent_)
 		{
-			return reinterpret_cast<const Extent3D&>(m_sparseImageMemoryBind.extent);
-		}
-
-		Extent3D& extent()
-		{
-			return reinterpret_cast<Extent3D&>(m_sparseImageMemoryBind.extent);
-		}
-
-		SparseImageMemoryBind& extent(Extent3D extent)
-		{
-			m_sparseImageMemoryBind.extent = static_cast<VkExtent3D>(extent);
+			extent = extent_;
 			return *this;
 		}
 
-		const DeviceMemory& memory() const
+		SparseImageMemoryBind& setMemory(DeviceMemory memory_)
 		{
-			return reinterpret_cast<const DeviceMemory&>(m_sparseImageMemoryBind.memory);
-		}
-
-		DeviceMemory& memory()
-		{
-			return reinterpret_cast<DeviceMemory&>(m_sparseImageMemoryBind.memory);
-		}
-
-		SparseImageMemoryBind& memory(DeviceMemory memory)
-		{
-			m_sparseImageMemoryBind.memory = static_cast<VkDeviceMemory>(memory);
+			memory = memory_;
 			return *this;
 		}
 
-		const DeviceSize& memoryOffset() const
+		SparseImageMemoryBind& setMemoryOffset(DeviceSize memoryOffset_)
 		{
-			return m_sparseImageMemoryBind.memoryOffset;
-		}
-
-		DeviceSize& memoryOffset()
-		{
-			return m_sparseImageMemoryBind.memoryOffset;
-		}
-
-		SparseImageMemoryBind& memoryOffset(DeviceSize memoryOffset)
-		{
-			m_sparseImageMemoryBind.memoryOffset = memoryOffset;
+			memoryOffset = memoryOffset_;
 			return *this;
 		}
 
-		const SparseMemoryBindFlags& flags() const
+		SparseImageMemoryBind& setFlags(SparseMemoryBindFlags flags_)
 		{
-			return reinterpret_cast<const SparseMemoryBindFlags&>(m_sparseImageMemoryBind.flags);
-		}
-
-		SparseMemoryBindFlags& flags()
-		{
-			return reinterpret_cast<SparseMemoryBindFlags&>(m_sparseImageMemoryBind.flags);
-		}
-
-		SparseImageMemoryBind& flags(SparseMemoryBindFlags flags)
-		{
-			m_sparseImageMemoryBind.flags = static_cast<VkSparseMemoryBindFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
 		operator const VkSparseImageMemoryBind&() const
 		{
-			return m_sparseImageMemoryBind;
+			return *reinterpret_cast<const VkSparseImageMemoryBind*>(this);
 		}
 
-	private:
-		VkSparseImageMemoryBind m_sparseImageMemoryBind;
+		ImageSubresource subresource;
+		Offset3D offset;
+		Extent3D extent;
+		DeviceMemory memory;
+		DeviceSize memoryOffset;
+		SparseMemoryBindFlags flags;
 	};
 	static_assert(sizeof(SparseImageMemoryBind) == sizeof(VkSparseImageMemoryBind), "struct and wrapper have different size!");
 
-	class SparseBufferMemoryBindInfo
+	struct SparseBufferMemoryBindInfo
 	{
-	public:
 		SparseBufferMemoryBindInfo()
 			: SparseBufferMemoryBindInfo(Buffer(), 0, nullptr)
 		{}
 
-		SparseBufferMemoryBindInfo(Buffer buffer, uint32_t bindCount, const SparseMemoryBind* pBinds)
+		SparseBufferMemoryBindInfo(Buffer buffer_, uint32_t bindCount_, const SparseMemoryBind* pBinds_)
 		{
-			m_sparseBufferMemoryBindInfo.buffer = static_cast<VkBuffer>(buffer);
-			m_sparseBufferMemoryBindInfo.bindCount = bindCount;
-			m_sparseBufferMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseMemoryBind*>(pBinds);
+			buffer = buffer_;
+			bindCount = bindCount_;
+			pBinds = pBinds_;
 		}
 
 		SparseBufferMemoryBindInfo(VkSparseBufferMemoryBindInfo const & rhs)
-			: m_sparseBufferMemoryBindInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SparseBufferMemoryBindInfo));
 		}
 
 		SparseBufferMemoryBindInfo& operator=(VkSparseBufferMemoryBindInfo const & rhs)
 		{
-			m_sparseBufferMemoryBindInfo = rhs;
+			memcpy(this, &rhs, sizeof(SparseBufferMemoryBindInfo));
 			return *this;
 		}
 
-		const Buffer& buffer() const
+		SparseBufferMemoryBindInfo& setBuffer(Buffer buffer_)
 		{
-			return reinterpret_cast<const Buffer&>(m_sparseBufferMemoryBindInfo.buffer);
-		}
-
-		Buffer& buffer()
-		{
-			return reinterpret_cast<Buffer&>(m_sparseBufferMemoryBindInfo.buffer);
-		}
-
-		SparseBufferMemoryBindInfo& buffer(Buffer buffer)
-		{
-			m_sparseBufferMemoryBindInfo.buffer = static_cast<VkBuffer>(buffer);
+			buffer = buffer_;
 			return *this;
 		}
 
-		const uint32_t& bindCount() const
+		SparseBufferMemoryBindInfo& setBindCount(uint32_t bindCount_)
 		{
-			return m_sparseBufferMemoryBindInfo.bindCount;
-		}
-
-		uint32_t& bindCount()
-		{
-			return m_sparseBufferMemoryBindInfo.bindCount;
-		}
-
-		SparseBufferMemoryBindInfo& bindCount(uint32_t bindCount)
-		{
-			m_sparseBufferMemoryBindInfo.bindCount = bindCount;
+			bindCount = bindCount_;
 			return *this;
 		}
 
-		const SparseMemoryBind* pBinds() const
+		SparseBufferMemoryBindInfo& setPBinds(const SparseMemoryBind* pBinds_)
 		{
-			return reinterpret_cast<const SparseMemoryBind*>(m_sparseBufferMemoryBindInfo.pBinds);
-		}
-
-		const SparseMemoryBind* pBinds()
-		{
-			return reinterpret_cast<const SparseMemoryBind*>(m_sparseBufferMemoryBindInfo.pBinds);
-		}
-
-		SparseBufferMemoryBindInfo& pBinds(const SparseMemoryBind* pBinds)
-		{
-			m_sparseBufferMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseMemoryBind*>(pBinds);
+			pBinds = pBinds_;
 			return *this;
 		}
 
 		operator const VkSparseBufferMemoryBindInfo&() const
 		{
-			return m_sparseBufferMemoryBindInfo;
+			return *reinterpret_cast<const VkSparseBufferMemoryBindInfo*>(this);
 		}
 
-	private:
-		VkSparseBufferMemoryBindInfo m_sparseBufferMemoryBindInfo;
+		Buffer buffer;
+		uint32_t bindCount;
+		const SparseMemoryBind* pBinds;
 	};
 	static_assert(sizeof(SparseBufferMemoryBindInfo) == sizeof(VkSparseBufferMemoryBindInfo), "struct and wrapper have different size!");
 
-	class SparseImageOpaqueMemoryBindInfo
+	struct SparseImageOpaqueMemoryBindInfo
 	{
-	public:
 		SparseImageOpaqueMemoryBindInfo()
 			: SparseImageOpaqueMemoryBindInfo(Image(), 0, nullptr)
 		{}
 
-		SparseImageOpaqueMemoryBindInfo(Image image, uint32_t bindCount, const SparseMemoryBind* pBinds)
+		SparseImageOpaqueMemoryBindInfo(Image image_, uint32_t bindCount_, const SparseMemoryBind* pBinds_)
 		{
-			m_sparseImageOpaqueMemoryBindInfo.image = static_cast<VkImage>(image);
-			m_sparseImageOpaqueMemoryBindInfo.bindCount = bindCount;
-			m_sparseImageOpaqueMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseMemoryBind*>(pBinds);
+			image = image_;
+			bindCount = bindCount_;
+			pBinds = pBinds_;
 		}
 
 		SparseImageOpaqueMemoryBindInfo(VkSparseImageOpaqueMemoryBindInfo const & rhs)
-			: m_sparseImageOpaqueMemoryBindInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SparseImageOpaqueMemoryBindInfo));
 		}
 
 		SparseImageOpaqueMemoryBindInfo& operator=(VkSparseImageOpaqueMemoryBindInfo const & rhs)
 		{
-			m_sparseImageOpaqueMemoryBindInfo = rhs;
+			memcpy(this, &rhs, sizeof(SparseImageOpaqueMemoryBindInfo));
 			return *this;
 		}
 
-		const Image& image() const
+		SparseImageOpaqueMemoryBindInfo& setImage(Image image_)
 		{
-			return reinterpret_cast<const Image&>(m_sparseImageOpaqueMemoryBindInfo.image);
-		}
-
-		Image& image()
-		{
-			return reinterpret_cast<Image&>(m_sparseImageOpaqueMemoryBindInfo.image);
-		}
-
-		SparseImageOpaqueMemoryBindInfo& image(Image image)
-		{
-			m_sparseImageOpaqueMemoryBindInfo.image = static_cast<VkImage>(image);
+			image = image_;
 			return *this;
 		}
 
-		const uint32_t& bindCount() const
+		SparseImageOpaqueMemoryBindInfo& setBindCount(uint32_t bindCount_)
 		{
-			return m_sparseImageOpaqueMemoryBindInfo.bindCount;
-		}
-
-		uint32_t& bindCount()
-		{
-			return m_sparseImageOpaqueMemoryBindInfo.bindCount;
-		}
-
-		SparseImageOpaqueMemoryBindInfo& bindCount(uint32_t bindCount)
-		{
-			m_sparseImageOpaqueMemoryBindInfo.bindCount = bindCount;
+			bindCount = bindCount_;
 			return *this;
 		}
 
-		const SparseMemoryBind* pBinds() const
+		SparseImageOpaqueMemoryBindInfo& setPBinds(const SparseMemoryBind* pBinds_)
 		{
-			return reinterpret_cast<const SparseMemoryBind*>(m_sparseImageOpaqueMemoryBindInfo.pBinds);
-		}
-
-		const SparseMemoryBind* pBinds()
-		{
-			return reinterpret_cast<const SparseMemoryBind*>(m_sparseImageOpaqueMemoryBindInfo.pBinds);
-		}
-
-		SparseImageOpaqueMemoryBindInfo& pBinds(const SparseMemoryBind* pBinds)
-		{
-			m_sparseImageOpaqueMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseMemoryBind*>(pBinds);
+			pBinds = pBinds_;
 			return *this;
 		}
 
 		operator const VkSparseImageOpaqueMemoryBindInfo&() const
 		{
-			return m_sparseImageOpaqueMemoryBindInfo;
+			return *reinterpret_cast<const VkSparseImageOpaqueMemoryBindInfo*>(this);
 		}
 
-	private:
-		VkSparseImageOpaqueMemoryBindInfo m_sparseImageOpaqueMemoryBindInfo;
+		Image image;
+		uint32_t bindCount;
+		const SparseMemoryBind* pBinds;
 	};
 	static_assert(sizeof(SparseImageOpaqueMemoryBindInfo) == sizeof(VkSparseImageOpaqueMemoryBindInfo), "struct and wrapper have different size!");
 
-	class SparseImageMemoryBindInfo
+	struct SparseImageMemoryBindInfo
 	{
-	public:
 		SparseImageMemoryBindInfo()
 			: SparseImageMemoryBindInfo(Image(), 0, nullptr)
 		{}
 
-		SparseImageMemoryBindInfo(Image image, uint32_t bindCount, const SparseImageMemoryBind* pBinds)
+		SparseImageMemoryBindInfo(Image image_, uint32_t bindCount_, const SparseImageMemoryBind* pBinds_)
 		{
-			m_sparseImageMemoryBindInfo.image = static_cast<VkImage>(image);
-			m_sparseImageMemoryBindInfo.bindCount = bindCount;
-			m_sparseImageMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseImageMemoryBind*>(pBinds);
+			image = image_;
+			bindCount = bindCount_;
+			pBinds = pBinds_;
 		}
 
 		SparseImageMemoryBindInfo(VkSparseImageMemoryBindInfo const & rhs)
-			: m_sparseImageMemoryBindInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SparseImageMemoryBindInfo));
 		}
 
 		SparseImageMemoryBindInfo& operator=(VkSparseImageMemoryBindInfo const & rhs)
 		{
-			m_sparseImageMemoryBindInfo = rhs;
+			memcpy(this, &rhs, sizeof(SparseImageMemoryBindInfo));
 			return *this;
 		}
 
-		const Image& image() const
+		SparseImageMemoryBindInfo& setImage(Image image_)
 		{
-			return reinterpret_cast<const Image&>(m_sparseImageMemoryBindInfo.image);
-		}
-
-		Image& image()
-		{
-			return reinterpret_cast<Image&>(m_sparseImageMemoryBindInfo.image);
-		}
-
-		SparseImageMemoryBindInfo& image(Image image)
-		{
-			m_sparseImageMemoryBindInfo.image = static_cast<VkImage>(image);
+			image = image_;
 			return *this;
 		}
 
-		const uint32_t& bindCount() const
+		SparseImageMemoryBindInfo& setBindCount(uint32_t bindCount_)
 		{
-			return m_sparseImageMemoryBindInfo.bindCount;
-		}
-
-		uint32_t& bindCount()
-		{
-			return m_sparseImageMemoryBindInfo.bindCount;
-		}
-
-		SparseImageMemoryBindInfo& bindCount(uint32_t bindCount)
-		{
-			m_sparseImageMemoryBindInfo.bindCount = bindCount;
+			bindCount = bindCount_;
 			return *this;
 		}
 
-		const SparseImageMemoryBind* pBinds() const
+		SparseImageMemoryBindInfo& setPBinds(const SparseImageMemoryBind* pBinds_)
 		{
-			return reinterpret_cast<const SparseImageMemoryBind*>(m_sparseImageMemoryBindInfo.pBinds);
-		}
-
-		const SparseImageMemoryBind* pBinds()
-		{
-			return reinterpret_cast<const SparseImageMemoryBind*>(m_sparseImageMemoryBindInfo.pBinds);
-		}
-
-		SparseImageMemoryBindInfo& pBinds(const SparseImageMemoryBind* pBinds)
-		{
-			m_sparseImageMemoryBindInfo.pBinds = reinterpret_cast<const VkSparseImageMemoryBind*>(pBinds);
+			pBinds = pBinds_;
 			return *this;
 		}
 
 		operator const VkSparseImageMemoryBindInfo&() const
 		{
-			return m_sparseImageMemoryBindInfo;
+			return *reinterpret_cast<const VkSparseImageMemoryBindInfo*>(this);
 		}
 
-	private:
-		VkSparseImageMemoryBindInfo m_sparseImageMemoryBindInfo;
+		Image image;
+		uint32_t bindCount;
+		const SparseImageMemoryBind* pBinds;
 	};
 	static_assert(sizeof(SparseImageMemoryBindInfo) == sizeof(VkSparseImageMemoryBindInfo), "struct and wrapper have different size!");
 
-	class BindSparseInfo
+	struct BindSparseInfo
 	{
-	public:
 		BindSparseInfo()
 			: BindSparseInfo(0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr, 0, nullptr)
 		{}
 
-		BindSparseInfo(uint32_t waitSemaphoreCount, const Semaphore* pWaitSemaphores, uint32_t bufferBindCount, const SparseBufferMemoryBindInfo* pBufferBinds, uint32_t imageOpaqueBindCount, const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds, uint32_t imageBindCount, const SparseImageMemoryBindInfo* pImageBinds, uint32_t signalSemaphoreCount, const Semaphore* pSignalSemaphores)
+		BindSparseInfo(uint32_t waitSemaphoreCount_, const Semaphore* pWaitSemaphores_, uint32_t bufferBindCount_, const SparseBufferMemoryBindInfo* pBufferBinds_, uint32_t imageOpaqueBindCount_, const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds_, uint32_t imageBindCount_, const SparseImageMemoryBindInfo* pImageBinds_, uint32_t signalSemaphoreCount_, const Semaphore* pSignalSemaphores_)
 		{
-			m_bindSparseInfo.sType = VK_STRUCTURE_TYPE_BIND_SPARSE_INFO;
-			m_bindSparseInfo.pNext = nullptr;
-			m_bindSparseInfo.waitSemaphoreCount = waitSemaphoreCount;
-			m_bindSparseInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
-			m_bindSparseInfo.bufferBindCount = bufferBindCount;
-			m_bindSparseInfo.pBufferBinds = reinterpret_cast<const VkSparseBufferMemoryBindInfo*>(pBufferBinds);
-			m_bindSparseInfo.imageOpaqueBindCount = imageOpaqueBindCount;
-			m_bindSparseInfo.pImageOpaqueBinds = reinterpret_cast<const VkSparseImageOpaqueMemoryBindInfo*>(pImageOpaqueBinds);
-			m_bindSparseInfo.imageBindCount = imageBindCount;
-			m_bindSparseInfo.pImageBinds = reinterpret_cast<const VkSparseImageMemoryBindInfo*>(pImageBinds);
-			m_bindSparseInfo.signalSemaphoreCount = signalSemaphoreCount;
-			m_bindSparseInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
+			sType = StructureType::eBindSparseInfo;
+			pNext = nullptr;
+			waitSemaphoreCount = waitSemaphoreCount_;
+			pWaitSemaphores = pWaitSemaphores_;
+			bufferBindCount = bufferBindCount_;
+			pBufferBinds = pBufferBinds_;
+			imageOpaqueBindCount = imageOpaqueBindCount_;
+			pImageOpaqueBinds = pImageOpaqueBinds_;
+			imageBindCount = imageBindCount_;
+			pImageBinds = pImageBinds_;
+			signalSemaphoreCount = signalSemaphoreCount_;
+			pSignalSemaphores = pSignalSemaphores_;
 		}
 
 		BindSparseInfo(VkBindSparseInfo const & rhs)
-			: m_bindSparseInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(BindSparseInfo));
 		}
 
 		BindSparseInfo& operator=(VkBindSparseInfo const & rhs)
 		{
-			m_bindSparseInfo = rhs;
+			memcpy(this, &rhs, sizeof(BindSparseInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		BindSparseInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_bindSparseInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_bindSparseInfo.sType);
-		}
-
-		BindSparseInfo& sType(StructureType sType)
-		{
-			m_bindSparseInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		BindSparseInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_bindSparseInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_bindSparseInfo.pNext);
-		}
-
-		BindSparseInfo& pNext(const void* pNext)
-		{
-			m_bindSparseInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const uint32_t& waitSemaphoreCount() const
+		BindSparseInfo& setWaitSemaphoreCount(uint32_t waitSemaphoreCount_)
 		{
-			return m_bindSparseInfo.waitSemaphoreCount;
-		}
-
-		uint32_t& waitSemaphoreCount()
-		{
-			return m_bindSparseInfo.waitSemaphoreCount;
-		}
-
-		BindSparseInfo& waitSemaphoreCount(uint32_t waitSemaphoreCount)
-		{
-			m_bindSparseInfo.waitSemaphoreCount = waitSemaphoreCount;
+			waitSemaphoreCount = waitSemaphoreCount_;
 			return *this;
 		}
 
-		const Semaphore* pWaitSemaphores() const
+		BindSparseInfo& setPWaitSemaphores(const Semaphore* pWaitSemaphores_)
 		{
-			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pWaitSemaphores);
-		}
-
-		const Semaphore* pWaitSemaphores()
-		{
-			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pWaitSemaphores);
-		}
-
-		BindSparseInfo& pWaitSemaphores(const Semaphore* pWaitSemaphores)
-		{
-			m_bindSparseInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
+			pWaitSemaphores = pWaitSemaphores_;
 			return *this;
 		}
 
-		const uint32_t& bufferBindCount() const
+		BindSparseInfo& setBufferBindCount(uint32_t bufferBindCount_)
 		{
-			return m_bindSparseInfo.bufferBindCount;
-		}
-
-		uint32_t& bufferBindCount()
-		{
-			return m_bindSparseInfo.bufferBindCount;
-		}
-
-		BindSparseInfo& bufferBindCount(uint32_t bufferBindCount)
-		{
-			m_bindSparseInfo.bufferBindCount = bufferBindCount;
+			bufferBindCount = bufferBindCount_;
 			return *this;
 		}
 
-		const SparseBufferMemoryBindInfo* pBufferBinds() const
+		BindSparseInfo& setPBufferBinds(const SparseBufferMemoryBindInfo* pBufferBinds_)
 		{
-			return reinterpret_cast<const SparseBufferMemoryBindInfo*>(m_bindSparseInfo.pBufferBinds);
-		}
-
-		const SparseBufferMemoryBindInfo* pBufferBinds()
-		{
-			return reinterpret_cast<const SparseBufferMemoryBindInfo*>(m_bindSparseInfo.pBufferBinds);
-		}
-
-		BindSparseInfo& pBufferBinds(const SparseBufferMemoryBindInfo* pBufferBinds)
-		{
-			m_bindSparseInfo.pBufferBinds = reinterpret_cast<const VkSparseBufferMemoryBindInfo*>(pBufferBinds);
+			pBufferBinds = pBufferBinds_;
 			return *this;
 		}
 
-		const uint32_t& imageOpaqueBindCount() const
+		BindSparseInfo& setImageOpaqueBindCount(uint32_t imageOpaqueBindCount_)
 		{
-			return m_bindSparseInfo.imageOpaqueBindCount;
-		}
-
-		uint32_t& imageOpaqueBindCount()
-		{
-			return m_bindSparseInfo.imageOpaqueBindCount;
-		}
-
-		BindSparseInfo& imageOpaqueBindCount(uint32_t imageOpaqueBindCount)
-		{
-			m_bindSparseInfo.imageOpaqueBindCount = imageOpaqueBindCount;
+			imageOpaqueBindCount = imageOpaqueBindCount_;
 			return *this;
 		}
 
-		const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds() const
+		BindSparseInfo& setPImageOpaqueBinds(const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds_)
 		{
-			return reinterpret_cast<const SparseImageOpaqueMemoryBindInfo*>(m_bindSparseInfo.pImageOpaqueBinds);
-		}
-
-		const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds()
-		{
-			return reinterpret_cast<const SparseImageOpaqueMemoryBindInfo*>(m_bindSparseInfo.pImageOpaqueBinds);
-		}
-
-		BindSparseInfo& pImageOpaqueBinds(const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds)
-		{
-			m_bindSparseInfo.pImageOpaqueBinds = reinterpret_cast<const VkSparseImageOpaqueMemoryBindInfo*>(pImageOpaqueBinds);
+			pImageOpaqueBinds = pImageOpaqueBinds_;
 			return *this;
 		}
 
-		const uint32_t& imageBindCount() const
+		BindSparseInfo& setImageBindCount(uint32_t imageBindCount_)
 		{
-			return m_bindSparseInfo.imageBindCount;
-		}
-
-		uint32_t& imageBindCount()
-		{
-			return m_bindSparseInfo.imageBindCount;
-		}
-
-		BindSparseInfo& imageBindCount(uint32_t imageBindCount)
-		{
-			m_bindSparseInfo.imageBindCount = imageBindCount;
+			imageBindCount = imageBindCount_;
 			return *this;
 		}
 
-		const SparseImageMemoryBindInfo* pImageBinds() const
+		BindSparseInfo& setPImageBinds(const SparseImageMemoryBindInfo* pImageBinds_)
 		{
-			return reinterpret_cast<const SparseImageMemoryBindInfo*>(m_bindSparseInfo.pImageBinds);
-		}
-
-		const SparseImageMemoryBindInfo* pImageBinds()
-		{
-			return reinterpret_cast<const SparseImageMemoryBindInfo*>(m_bindSparseInfo.pImageBinds);
-		}
-
-		BindSparseInfo& pImageBinds(const SparseImageMemoryBindInfo* pImageBinds)
-		{
-			m_bindSparseInfo.pImageBinds = reinterpret_cast<const VkSparseImageMemoryBindInfo*>(pImageBinds);
+			pImageBinds = pImageBinds_;
 			return *this;
 		}
 
-		const uint32_t& signalSemaphoreCount() const
+		BindSparseInfo& setSignalSemaphoreCount(uint32_t signalSemaphoreCount_)
 		{
-			return m_bindSparseInfo.signalSemaphoreCount;
-		}
-
-		uint32_t& signalSemaphoreCount()
-		{
-			return m_bindSparseInfo.signalSemaphoreCount;
-		}
-
-		BindSparseInfo& signalSemaphoreCount(uint32_t signalSemaphoreCount)
-		{
-			m_bindSparseInfo.signalSemaphoreCount = signalSemaphoreCount;
+			signalSemaphoreCount = signalSemaphoreCount_;
 			return *this;
 		}
 
-		const Semaphore* pSignalSemaphores() const
+		BindSparseInfo& setPSignalSemaphores(const Semaphore* pSignalSemaphores_)
 		{
-			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pSignalSemaphores);
-		}
-
-		const Semaphore* pSignalSemaphores()
-		{
-			return reinterpret_cast<const Semaphore*>(m_bindSparseInfo.pSignalSemaphores);
-		}
-
-		BindSparseInfo& pSignalSemaphores(const Semaphore* pSignalSemaphores)
-		{
-			m_bindSparseInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
+			pSignalSemaphores = pSignalSemaphores_;
 			return *this;
 		}
 
 		operator const VkBindSparseInfo&() const
 		{
-			return m_bindSparseInfo;
+			return *reinterpret_cast<const VkBindSparseInfo*>(this);
 		}
 
-	private:
-		VkBindSparseInfo m_bindSparseInfo;
+		StructureType sType;
+		const void* pNext;
+		uint32_t waitSemaphoreCount;
+		const Semaphore* pWaitSemaphores;
+		uint32_t bufferBindCount;
+		const SparseBufferMemoryBindInfo* pBufferBinds;
+		uint32_t imageOpaqueBindCount;
+		const SparseImageOpaqueMemoryBindInfo* pImageOpaqueBinds;
+		uint32_t imageBindCount;
+		const SparseImageMemoryBindInfo* pImageBinds;
+		uint32_t signalSemaphoreCount;
+		const Semaphore* pSignalSemaphores;
 	};
 	static_assert(sizeof(BindSparseInfo) == sizeof(VkBindSparseInfo), "struct and wrapper have different size!");
 
@@ -15564,7 +10158,7 @@ namespace vk
 		eAllCommands = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 	};
 
-	typedef Flags<PipelineStageFlagBits, VkPipelineStageFlags> PipelineStageFlags;
+	using PipelineStageFlags = Flags<PipelineStageFlagBits, VkPipelineStageFlags>;
 
 	inline PipelineStageFlags operator|(PipelineStageFlagBits bit0, PipelineStageFlagBits bit1)
 	{
@@ -15577,110 +10171,71 @@ namespace vk
 		eResetCommandBuffer = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT
 	};
 
-	typedef Flags<CommandPoolCreateFlagBits, VkCommandPoolCreateFlags> CommandPoolCreateFlags;
+	using CommandPoolCreateFlags = Flags<CommandPoolCreateFlagBits, VkCommandPoolCreateFlags>;
 
 	inline CommandPoolCreateFlags operator|(CommandPoolCreateFlagBits bit0, CommandPoolCreateFlagBits bit1)
 	{
 		return CommandPoolCreateFlags(bit0) | bit1;
 	}
 
-	class CommandPoolCreateInfo
+	struct CommandPoolCreateInfo
 	{
-	public:
 		CommandPoolCreateInfo()
 			: CommandPoolCreateInfo(CommandPoolCreateFlags(), 0)
 		{}
 
-		CommandPoolCreateInfo(CommandPoolCreateFlags flags, uint32_t queueFamilyIndex)
+		CommandPoolCreateInfo(CommandPoolCreateFlags flags_, uint32_t queueFamilyIndex_)
 		{
-			m_commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			m_commandPoolCreateInfo.pNext = nullptr;
-			m_commandPoolCreateInfo.flags = static_cast<VkCommandPoolCreateFlags>(flags);
-			m_commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndex;
+			sType = StructureType::eCommandPoolCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			queueFamilyIndex = queueFamilyIndex_;
 		}
 
 		CommandPoolCreateInfo(VkCommandPoolCreateInfo const & rhs)
-			: m_commandPoolCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(CommandPoolCreateInfo));
 		}
 
 		CommandPoolCreateInfo& operator=(VkCommandPoolCreateInfo const & rhs)
 		{
-			m_commandPoolCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(CommandPoolCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		CommandPoolCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_commandPoolCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_commandPoolCreateInfo.sType);
-		}
-
-		CommandPoolCreateInfo& sType(StructureType sType)
-		{
-			m_commandPoolCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		CommandPoolCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_commandPoolCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_commandPoolCreateInfo.pNext);
-		}
-
-		CommandPoolCreateInfo& pNext(const void* pNext)
-		{
-			m_commandPoolCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const CommandPoolCreateFlags& flags() const
+		CommandPoolCreateInfo& setFlags(CommandPoolCreateFlags flags_)
 		{
-			return reinterpret_cast<const CommandPoolCreateFlags&>(m_commandPoolCreateInfo.flags);
-		}
-
-		CommandPoolCreateFlags& flags()
-		{
-			return reinterpret_cast<CommandPoolCreateFlags&>(m_commandPoolCreateInfo.flags);
-		}
-
-		CommandPoolCreateInfo& flags(CommandPoolCreateFlags flags)
-		{
-			m_commandPoolCreateInfo.flags = static_cast<VkCommandPoolCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& queueFamilyIndex() const
+		CommandPoolCreateInfo& setQueueFamilyIndex(uint32_t queueFamilyIndex_)
 		{
-			return m_commandPoolCreateInfo.queueFamilyIndex;
-		}
-
-		uint32_t& queueFamilyIndex()
-		{
-			return m_commandPoolCreateInfo.queueFamilyIndex;
-		}
-
-		CommandPoolCreateInfo& queueFamilyIndex(uint32_t queueFamilyIndex)
-		{
-			m_commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndex;
+			queueFamilyIndex = queueFamilyIndex_;
 			return *this;
 		}
 
 		operator const VkCommandPoolCreateInfo&() const
 		{
-			return m_commandPoolCreateInfo;
+			return *reinterpret_cast<const VkCommandPoolCreateInfo*>(this);
 		}
 
-	private:
-		VkCommandPoolCreateInfo m_commandPoolCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		CommandPoolCreateFlags flags;
+		uint32_t queueFamilyIndex;
 	};
 	static_assert(sizeof(CommandPoolCreateInfo) == sizeof(VkCommandPoolCreateInfo), "struct and wrapper have different size!");
 
@@ -15689,7 +10244,7 @@ namespace vk
 		eReleaseResources = VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT
 	};
 
-	typedef Flags<CommandPoolResetFlagBits, VkCommandPoolResetFlags> CommandPoolResetFlags;
+	using CommandPoolResetFlags = Flags<CommandPoolResetFlagBits, VkCommandPoolResetFlags>;
 
 	inline CommandPoolResetFlags operator|(CommandPoolResetFlagBits bit0, CommandPoolResetFlagBits bit1)
 	{
@@ -15701,7 +10256,7 @@ namespace vk
 		eReleaseResources = VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT
 	};
 
-	typedef Flags<CommandBufferResetFlagBits, VkCommandBufferResetFlags> CommandBufferResetFlags;
+	using CommandBufferResetFlags = Flags<CommandBufferResetFlagBits, VkCommandBufferResetFlags>;
 
 	inline CommandBufferResetFlags operator|(CommandBufferResetFlagBits bit0, CommandBufferResetFlagBits bit1)
 	{
@@ -15719,1476 +10274,591 @@ namespace vk
 		e64 = VK_SAMPLE_COUNT_64_BIT
 	};
 
-	typedef Flags<SampleCountFlagBits, VkSampleCountFlags> SampleCountFlags;
+	using SampleCountFlags = Flags<SampleCountFlagBits, VkSampleCountFlags>;
 
 	inline SampleCountFlags operator|(SampleCountFlagBits bit0, SampleCountFlagBits bit1)
 	{
 		return SampleCountFlags(bit0) | bit1;
 	}
 
-	class ImageFormatProperties
+	struct ImageFormatProperties
 	{
-	public:
-		const Extent3D& maxExtent() const
-		{
-			return reinterpret_cast<const Extent3D&>(m_imageFormatProperties.maxExtent);
-		}
-
-		const uint32_t& maxMipLevels() const
-		{
-			return m_imageFormatProperties.maxMipLevels;
-		}
-
-		const uint32_t& maxArrayLayers() const
-		{
-			return m_imageFormatProperties.maxArrayLayers;
-		}
-
-		const SampleCountFlags& sampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_imageFormatProperties.sampleCounts);
-		}
-
-		const DeviceSize& maxResourceSize() const
-		{
-			return m_imageFormatProperties.maxResourceSize;
-		}
-
 		operator const VkImageFormatProperties&() const
 		{
-			return m_imageFormatProperties;
+			return *reinterpret_cast<const VkImageFormatProperties*>(this);
 		}
 
-	private:
-		VkImageFormatProperties m_imageFormatProperties;
+		Extent3D maxExtent;
+		uint32_t maxMipLevels;
+		uint32_t maxArrayLayers;
+		SampleCountFlags sampleCounts;
+		DeviceSize maxResourceSize;
 	};
 	static_assert(sizeof(ImageFormatProperties) == sizeof(VkImageFormatProperties), "struct and wrapper have different size!");
 
-	class ImageCreateInfo
+	struct ImageCreateInfo
 	{
-	public:
 		ImageCreateInfo()
 			: ImageCreateInfo(ImageCreateFlags(), ImageType::e1D, Format::eUndefined, Extent3D(), 0, 0, SampleCountFlagBits::e1, ImageTiling::eOptimal, ImageUsageFlags(), SharingMode::eExclusive, 0, nullptr, ImageLayout::eUndefined)
 		{}
 
-		ImageCreateInfo(ImageCreateFlags flags, ImageType imageType, Format format, Extent3D extent, uint32_t mipLevels, uint32_t arrayLayers, SampleCountFlagBits samples, ImageTiling tiling, ImageUsageFlags usage, SharingMode sharingMode, uint32_t queueFamilyIndexCount, const uint32_t* pQueueFamilyIndices, ImageLayout initialLayout)
+		ImageCreateInfo(ImageCreateFlags flags_, ImageType imageType_, Format format_, Extent3D extent_, uint32_t mipLevels_, uint32_t arrayLayers_, SampleCountFlagBits samples_, ImageTiling tiling_, ImageUsageFlags usage_, SharingMode sharingMode_, uint32_t queueFamilyIndexCount_, const uint32_t* pQueueFamilyIndices_, ImageLayout initialLayout_)
 		{
-			m_imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			m_imageCreateInfo.pNext = nullptr;
-			m_imageCreateInfo.flags = static_cast<VkImageCreateFlags>(flags);
-			m_imageCreateInfo.imageType = static_cast<VkImageType>(imageType);
-			m_imageCreateInfo.format = static_cast<VkFormat>(format);
-			m_imageCreateInfo.extent = static_cast<VkExtent3D>(extent);
-			m_imageCreateInfo.mipLevels = mipLevels;
-			m_imageCreateInfo.arrayLayers = arrayLayers;
-			m_imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(samples);
-			m_imageCreateInfo.tiling = static_cast<VkImageTiling>(tiling);
-			m_imageCreateInfo.usage = static_cast<VkImageUsageFlags>(usage);
-			m_imageCreateInfo.sharingMode = static_cast<VkSharingMode>(sharingMode);
-			m_imageCreateInfo.queueFamilyIndexCount = queueFamilyIndexCount;
-			m_imageCreateInfo.pQueueFamilyIndices = pQueueFamilyIndices;
-			m_imageCreateInfo.initialLayout = static_cast<VkImageLayout>(initialLayout);
+			sType = StructureType::eImageCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			imageType = imageType_;
+			format = format_;
+			extent = extent_;
+			mipLevels = mipLevels_;
+			arrayLayers = arrayLayers_;
+			samples = samples_;
+			tiling = tiling_;
+			usage = usage_;
+			sharingMode = sharingMode_;
+			queueFamilyIndexCount = queueFamilyIndexCount_;
+			pQueueFamilyIndices = pQueueFamilyIndices_;
+			initialLayout = initialLayout_;
 		}
 
 		ImageCreateInfo(VkImageCreateInfo const & rhs)
-			: m_imageCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(ImageCreateInfo));
 		}
 
 		ImageCreateInfo& operator=(VkImageCreateInfo const & rhs)
 		{
-			m_imageCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(ImageCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		ImageCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_imageCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_imageCreateInfo.sType);
-		}
-
-		ImageCreateInfo& sType(StructureType sType)
-		{
-			m_imageCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		ImageCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_imageCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_imageCreateInfo.pNext);
-		}
-
-		ImageCreateInfo& pNext(const void* pNext)
-		{
-			m_imageCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const ImageCreateFlags& flags() const
+		ImageCreateInfo& setFlags(ImageCreateFlags flags_)
 		{
-			return reinterpret_cast<const ImageCreateFlags&>(m_imageCreateInfo.flags);
-		}
-
-		ImageCreateFlags& flags()
-		{
-			return reinterpret_cast<ImageCreateFlags&>(m_imageCreateInfo.flags);
-		}
-
-		ImageCreateInfo& flags(ImageCreateFlags flags)
-		{
-			m_imageCreateInfo.flags = static_cast<VkImageCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const ImageType& imageType() const
+		ImageCreateInfo& setImageType(ImageType imageType_)
 		{
-			return reinterpret_cast<const ImageType&>(m_imageCreateInfo.imageType);
-		}
-
-		ImageType& imageType()
-		{
-			return reinterpret_cast<ImageType&>(m_imageCreateInfo.imageType);
-		}
-
-		ImageCreateInfo& imageType(ImageType imageType)
-		{
-			m_imageCreateInfo.imageType = static_cast<VkImageType>(imageType);
+			imageType = imageType_;
 			return *this;
 		}
 
-		const Format& format() const
+		ImageCreateInfo& setFormat(Format format_)
 		{
-			return reinterpret_cast<const Format&>(m_imageCreateInfo.format);
-		}
-
-		Format& format()
-		{
-			return reinterpret_cast<Format&>(m_imageCreateInfo.format);
-		}
-
-		ImageCreateInfo& format(Format format)
-		{
-			m_imageCreateInfo.format = static_cast<VkFormat>(format);
+			format = format_;
 			return *this;
 		}
 
-		const Extent3D& extent() const
+		ImageCreateInfo& setExtent(Extent3D extent_)
 		{
-			return reinterpret_cast<const Extent3D&>(m_imageCreateInfo.extent);
-		}
-
-		Extent3D& extent()
-		{
-			return reinterpret_cast<Extent3D&>(m_imageCreateInfo.extent);
-		}
-
-		ImageCreateInfo& extent(Extent3D extent)
-		{
-			m_imageCreateInfo.extent = static_cast<VkExtent3D>(extent);
+			extent = extent_;
 			return *this;
 		}
 
-		const uint32_t& mipLevels() const
+		ImageCreateInfo& setMipLevels(uint32_t mipLevels_)
 		{
-			return m_imageCreateInfo.mipLevels;
-		}
-
-		uint32_t& mipLevels()
-		{
-			return m_imageCreateInfo.mipLevels;
-		}
-
-		ImageCreateInfo& mipLevels(uint32_t mipLevels)
-		{
-			m_imageCreateInfo.mipLevels = mipLevels;
+			mipLevels = mipLevels_;
 			return *this;
 		}
 
-		const uint32_t& arrayLayers() const
+		ImageCreateInfo& setArrayLayers(uint32_t arrayLayers_)
 		{
-			return m_imageCreateInfo.arrayLayers;
-		}
-
-		uint32_t& arrayLayers()
-		{
-			return m_imageCreateInfo.arrayLayers;
-		}
-
-		ImageCreateInfo& arrayLayers(uint32_t arrayLayers)
-		{
-			m_imageCreateInfo.arrayLayers = arrayLayers;
+			arrayLayers = arrayLayers_;
 			return *this;
 		}
 
-		const SampleCountFlagBits& samples() const
+		ImageCreateInfo& setSamples(SampleCountFlagBits samples_)
 		{
-			return reinterpret_cast<const SampleCountFlagBits&>(m_imageCreateInfo.samples);
-		}
-
-		SampleCountFlagBits& samples()
-		{
-			return reinterpret_cast<SampleCountFlagBits&>(m_imageCreateInfo.samples);
-		}
-
-		ImageCreateInfo& samples(SampleCountFlagBits samples)
-		{
-			m_imageCreateInfo.samples = static_cast<VkSampleCountFlagBits>(samples);
+			samples = samples_;
 			return *this;
 		}
 
-		const ImageTiling& tiling() const
+		ImageCreateInfo& setTiling(ImageTiling tiling_)
 		{
-			return reinterpret_cast<const ImageTiling&>(m_imageCreateInfo.tiling);
-		}
-
-		ImageTiling& tiling()
-		{
-			return reinterpret_cast<ImageTiling&>(m_imageCreateInfo.tiling);
-		}
-
-		ImageCreateInfo& tiling(ImageTiling tiling)
-		{
-			m_imageCreateInfo.tiling = static_cast<VkImageTiling>(tiling);
+			tiling = tiling_;
 			return *this;
 		}
 
-		const ImageUsageFlags& usage() const
+		ImageCreateInfo& setUsage(ImageUsageFlags usage_)
 		{
-			return reinterpret_cast<const ImageUsageFlags&>(m_imageCreateInfo.usage);
-		}
-
-		ImageUsageFlags& usage()
-		{
-			return reinterpret_cast<ImageUsageFlags&>(m_imageCreateInfo.usage);
-		}
-
-		ImageCreateInfo& usage(ImageUsageFlags usage)
-		{
-			m_imageCreateInfo.usage = static_cast<VkImageUsageFlags>(usage);
+			usage = usage_;
 			return *this;
 		}
 
-		const SharingMode& sharingMode() const
+		ImageCreateInfo& setSharingMode(SharingMode sharingMode_)
 		{
-			return reinterpret_cast<const SharingMode&>(m_imageCreateInfo.sharingMode);
-		}
-
-		SharingMode& sharingMode()
-		{
-			return reinterpret_cast<SharingMode&>(m_imageCreateInfo.sharingMode);
-		}
-
-		ImageCreateInfo& sharingMode(SharingMode sharingMode)
-		{
-			m_imageCreateInfo.sharingMode = static_cast<VkSharingMode>(sharingMode);
+			sharingMode = sharingMode_;
 			return *this;
 		}
 
-		const uint32_t& queueFamilyIndexCount() const
+		ImageCreateInfo& setQueueFamilyIndexCount(uint32_t queueFamilyIndexCount_)
 		{
-			return m_imageCreateInfo.queueFamilyIndexCount;
-		}
-
-		uint32_t& queueFamilyIndexCount()
-		{
-			return m_imageCreateInfo.queueFamilyIndexCount;
-		}
-
-		ImageCreateInfo& queueFamilyIndexCount(uint32_t queueFamilyIndexCount)
-		{
-			m_imageCreateInfo.queueFamilyIndexCount = queueFamilyIndexCount;
+			queueFamilyIndexCount = queueFamilyIndexCount_;
 			return *this;
 		}
 
-		const uint32_t* pQueueFamilyIndices() const
+		ImageCreateInfo& setPQueueFamilyIndices(const uint32_t* pQueueFamilyIndices_)
 		{
-			return reinterpret_cast<const uint32_t*>(m_imageCreateInfo.pQueueFamilyIndices);
-		}
-
-		const uint32_t* pQueueFamilyIndices()
-		{
-			return reinterpret_cast<const uint32_t*>(m_imageCreateInfo.pQueueFamilyIndices);
-		}
-
-		ImageCreateInfo& pQueueFamilyIndices(const uint32_t* pQueueFamilyIndices)
-		{
-			m_imageCreateInfo.pQueueFamilyIndices = pQueueFamilyIndices;
+			pQueueFamilyIndices = pQueueFamilyIndices_;
 			return *this;
 		}
 
-		const ImageLayout& initialLayout() const
+		ImageCreateInfo& setInitialLayout(ImageLayout initialLayout_)
 		{
-			return reinterpret_cast<const ImageLayout&>(m_imageCreateInfo.initialLayout);
-		}
-
-		ImageLayout& initialLayout()
-		{
-			return reinterpret_cast<ImageLayout&>(m_imageCreateInfo.initialLayout);
-		}
-
-		ImageCreateInfo& initialLayout(ImageLayout initialLayout)
-		{
-			m_imageCreateInfo.initialLayout = static_cast<VkImageLayout>(initialLayout);
+			initialLayout = initialLayout_;
 			return *this;
 		}
 
 		operator const VkImageCreateInfo&() const
 		{
-			return m_imageCreateInfo;
+			return *reinterpret_cast<const VkImageCreateInfo*>(this);
 		}
 
-	private:
-		VkImageCreateInfo m_imageCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		ImageCreateFlags flags;
+		ImageType imageType;
+		Format format;
+		Extent3D extent;
+		uint32_t mipLevels;
+		uint32_t arrayLayers;
+		SampleCountFlagBits samples;
+		ImageTiling tiling;
+		ImageUsageFlags usage;
+		SharingMode sharingMode;
+		uint32_t queueFamilyIndexCount;
+		const uint32_t* pQueueFamilyIndices;
+		ImageLayout initialLayout;
 	};
 	static_assert(sizeof(ImageCreateInfo) == sizeof(VkImageCreateInfo), "struct and wrapper have different size!");
 
-	class PipelineMultisampleStateCreateInfo
+	struct PipelineMultisampleStateCreateInfo
 	{
-	public:
 		PipelineMultisampleStateCreateInfo()
 			: PipelineMultisampleStateCreateInfo(PipelineMultisampleStateCreateFlags(), SampleCountFlagBits::e1, 0, 0, nullptr, 0, 0)
 		{}
 
-		PipelineMultisampleStateCreateInfo(PipelineMultisampleStateCreateFlags flags, SampleCountFlagBits rasterizationSamples, Bool32 sampleShadingEnable, float minSampleShading, const SampleMask* pSampleMask, Bool32 alphaToCoverageEnable, Bool32 alphaToOneEnable)
+		PipelineMultisampleStateCreateInfo(PipelineMultisampleStateCreateFlags flags_, SampleCountFlagBits rasterizationSamples_, Bool32 sampleShadingEnable_, float minSampleShading_, const SampleMask* pSampleMask_, Bool32 alphaToCoverageEnable_, Bool32 alphaToOneEnable_)
 		{
-			m_pipelineMultisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-			m_pipelineMultisampleStateCreateInfo.pNext = nullptr;
-			m_pipelineMultisampleStateCreateInfo.flags = static_cast<VkPipelineMultisampleStateCreateFlags>(flags);
-			m_pipelineMultisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(rasterizationSamples);
-			m_pipelineMultisampleStateCreateInfo.sampleShadingEnable = sampleShadingEnable;
-			m_pipelineMultisampleStateCreateInfo.minSampleShading = minSampleShading;
-			m_pipelineMultisampleStateCreateInfo.pSampleMask = pSampleMask;
-			m_pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = alphaToCoverageEnable;
-			m_pipelineMultisampleStateCreateInfo.alphaToOneEnable = alphaToOneEnable;
+			sType = StructureType::ePipelineMultisampleStateCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			rasterizationSamples = rasterizationSamples_;
+			sampleShadingEnable = sampleShadingEnable_;
+			minSampleShading = minSampleShading_;
+			pSampleMask = pSampleMask_;
+			alphaToCoverageEnable = alphaToCoverageEnable_;
+			alphaToOneEnable = alphaToOneEnable_;
 		}
 
 		PipelineMultisampleStateCreateInfo(VkPipelineMultisampleStateCreateInfo const & rhs)
-			: m_pipelineMultisampleStateCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(PipelineMultisampleStateCreateInfo));
 		}
 
 		PipelineMultisampleStateCreateInfo& operator=(VkPipelineMultisampleStateCreateInfo const & rhs)
 		{
-			m_pipelineMultisampleStateCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(PipelineMultisampleStateCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		PipelineMultisampleStateCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_pipelineMultisampleStateCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_pipelineMultisampleStateCreateInfo.sType);
-		}
-
-		PipelineMultisampleStateCreateInfo& sType(StructureType sType)
-		{
-			m_pipelineMultisampleStateCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		PipelineMultisampleStateCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_pipelineMultisampleStateCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_pipelineMultisampleStateCreateInfo.pNext);
-		}
-
-		PipelineMultisampleStateCreateInfo& pNext(const void* pNext)
-		{
-			m_pipelineMultisampleStateCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineMultisampleStateCreateFlags& flags() const
+		PipelineMultisampleStateCreateInfo& setFlags(PipelineMultisampleStateCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineMultisampleStateCreateFlags&>(m_pipelineMultisampleStateCreateInfo.flags);
-		}
-
-		PipelineMultisampleStateCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineMultisampleStateCreateFlags&>(m_pipelineMultisampleStateCreateInfo.flags);
-		}
-
-		PipelineMultisampleStateCreateInfo& flags(PipelineMultisampleStateCreateFlags flags)
-		{
-			m_pipelineMultisampleStateCreateInfo.flags = static_cast<VkPipelineMultisampleStateCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const SampleCountFlagBits& rasterizationSamples() const
+		PipelineMultisampleStateCreateInfo& setRasterizationSamples(SampleCountFlagBits rasterizationSamples_)
 		{
-			return reinterpret_cast<const SampleCountFlagBits&>(m_pipelineMultisampleStateCreateInfo.rasterizationSamples);
-		}
-
-		SampleCountFlagBits& rasterizationSamples()
-		{
-			return reinterpret_cast<SampleCountFlagBits&>(m_pipelineMultisampleStateCreateInfo.rasterizationSamples);
-		}
-
-		PipelineMultisampleStateCreateInfo& rasterizationSamples(SampleCountFlagBits rasterizationSamples)
-		{
-			m_pipelineMultisampleStateCreateInfo.rasterizationSamples = static_cast<VkSampleCountFlagBits>(rasterizationSamples);
+			rasterizationSamples = rasterizationSamples_;
 			return *this;
 		}
 
-		const Bool32& sampleShadingEnable() const
+		PipelineMultisampleStateCreateInfo& setSampleShadingEnable(Bool32 sampleShadingEnable_)
 		{
-			return m_pipelineMultisampleStateCreateInfo.sampleShadingEnable;
-		}
-
-		Bool32& sampleShadingEnable()
-		{
-			return m_pipelineMultisampleStateCreateInfo.sampleShadingEnable;
-		}
-
-		PipelineMultisampleStateCreateInfo& sampleShadingEnable(Bool32 sampleShadingEnable)
-		{
-			m_pipelineMultisampleStateCreateInfo.sampleShadingEnable = sampleShadingEnable;
+			sampleShadingEnable = sampleShadingEnable_;
 			return *this;
 		}
 
-		const float& minSampleShading() const
+		PipelineMultisampleStateCreateInfo& setMinSampleShading(float minSampleShading_)
 		{
-			return m_pipelineMultisampleStateCreateInfo.minSampleShading;
-		}
-
-		float& minSampleShading()
-		{
-			return m_pipelineMultisampleStateCreateInfo.minSampleShading;
-		}
-
-		PipelineMultisampleStateCreateInfo& minSampleShading(float minSampleShading)
-		{
-			m_pipelineMultisampleStateCreateInfo.minSampleShading = minSampleShading;
+			minSampleShading = minSampleShading_;
 			return *this;
 		}
 
-		const SampleMask* pSampleMask() const
+		PipelineMultisampleStateCreateInfo& setPSampleMask(const SampleMask* pSampleMask_)
 		{
-			return reinterpret_cast<const SampleMask*>(m_pipelineMultisampleStateCreateInfo.pSampleMask);
-		}
-
-		const SampleMask* pSampleMask()
-		{
-			return reinterpret_cast<const SampleMask*>(m_pipelineMultisampleStateCreateInfo.pSampleMask);
-		}
-
-		PipelineMultisampleStateCreateInfo& pSampleMask(const SampleMask* pSampleMask)
-		{
-			m_pipelineMultisampleStateCreateInfo.pSampleMask = pSampleMask;
+			pSampleMask = pSampleMask_;
 			return *this;
 		}
 
-		const Bool32& alphaToCoverageEnable() const
+		PipelineMultisampleStateCreateInfo& setAlphaToCoverageEnable(Bool32 alphaToCoverageEnable_)
 		{
-			return m_pipelineMultisampleStateCreateInfo.alphaToCoverageEnable;
-		}
-
-		Bool32& alphaToCoverageEnable()
-		{
-			return m_pipelineMultisampleStateCreateInfo.alphaToCoverageEnable;
-		}
-
-		PipelineMultisampleStateCreateInfo& alphaToCoverageEnable(Bool32 alphaToCoverageEnable)
-		{
-			m_pipelineMultisampleStateCreateInfo.alphaToCoverageEnable = alphaToCoverageEnable;
+			alphaToCoverageEnable = alphaToCoverageEnable_;
 			return *this;
 		}
 
-		const Bool32& alphaToOneEnable() const
+		PipelineMultisampleStateCreateInfo& setAlphaToOneEnable(Bool32 alphaToOneEnable_)
 		{
-			return m_pipelineMultisampleStateCreateInfo.alphaToOneEnable;
-		}
-
-		Bool32& alphaToOneEnable()
-		{
-			return m_pipelineMultisampleStateCreateInfo.alphaToOneEnable;
-		}
-
-		PipelineMultisampleStateCreateInfo& alphaToOneEnable(Bool32 alphaToOneEnable)
-		{
-			m_pipelineMultisampleStateCreateInfo.alphaToOneEnable = alphaToOneEnable;
+			alphaToOneEnable = alphaToOneEnable_;
 			return *this;
 		}
 
 		operator const VkPipelineMultisampleStateCreateInfo&() const
 		{
-			return m_pipelineMultisampleStateCreateInfo;
+			return *reinterpret_cast<const VkPipelineMultisampleStateCreateInfo*>(this);
 		}
 
-	private:
-		VkPipelineMultisampleStateCreateInfo m_pipelineMultisampleStateCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineMultisampleStateCreateFlags flags;
+		SampleCountFlagBits rasterizationSamples;
+		Bool32 sampleShadingEnable;
+		float minSampleShading;
+		const SampleMask* pSampleMask;
+		Bool32 alphaToCoverageEnable;
+		Bool32 alphaToOneEnable;
 	};
 	static_assert(sizeof(PipelineMultisampleStateCreateInfo) == sizeof(VkPipelineMultisampleStateCreateInfo), "struct and wrapper have different size!");
 
-	class GraphicsPipelineCreateInfo
+	struct GraphicsPipelineCreateInfo
 	{
-	public:
 		GraphicsPipelineCreateInfo()
 			: GraphicsPipelineCreateInfo(PipelineCreateFlags(), 0, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, PipelineLayout(), RenderPass(), 0, Pipeline(), 0)
 		{}
 
-		GraphicsPipelineCreateInfo(PipelineCreateFlags flags, uint32_t stageCount, const PipelineShaderStageCreateInfo* pStages, const PipelineVertexInputStateCreateInfo* pVertexInputState, const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState, const PipelineTessellationStateCreateInfo* pTessellationState, const PipelineViewportStateCreateInfo* pViewportState, const PipelineRasterizationStateCreateInfo* pRasterizationState, const PipelineMultisampleStateCreateInfo* pMultisampleState, const PipelineDepthStencilStateCreateInfo* pDepthStencilState, const PipelineColorBlendStateCreateInfo* pColorBlendState, const PipelineDynamicStateCreateInfo* pDynamicState, PipelineLayout layout, RenderPass renderPass, uint32_t subpass, Pipeline basePipelineHandle, int32_t basePipelineIndex)
+		GraphicsPipelineCreateInfo(PipelineCreateFlags flags_, uint32_t stageCount_, const PipelineShaderStageCreateInfo* pStages_, const PipelineVertexInputStateCreateInfo* pVertexInputState_, const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState_, const PipelineTessellationStateCreateInfo* pTessellationState_, const PipelineViewportStateCreateInfo* pViewportState_, const PipelineRasterizationStateCreateInfo* pRasterizationState_, const PipelineMultisampleStateCreateInfo* pMultisampleState_, const PipelineDepthStencilStateCreateInfo* pDepthStencilState_, const PipelineColorBlendStateCreateInfo* pColorBlendState_, const PipelineDynamicStateCreateInfo* pDynamicState_, PipelineLayout layout_, RenderPass renderPass_, uint32_t subpass_, Pipeline basePipelineHandle_, int32_t basePipelineIndex_)
 		{
-			m_graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-			m_graphicsPipelineCreateInfo.pNext = nullptr;
-			m_graphicsPipelineCreateInfo.flags = static_cast<VkPipelineCreateFlags>(flags);
-			m_graphicsPipelineCreateInfo.stageCount = stageCount;
-			m_graphicsPipelineCreateInfo.pStages = reinterpret_cast<const VkPipelineShaderStageCreateInfo*>(pStages);
-			m_graphicsPipelineCreateInfo.pVertexInputState = reinterpret_cast<const VkPipelineVertexInputStateCreateInfo*>(pVertexInputState);
-			m_graphicsPipelineCreateInfo.pInputAssemblyState = reinterpret_cast<const VkPipelineInputAssemblyStateCreateInfo*>(pInputAssemblyState);
-			m_graphicsPipelineCreateInfo.pTessellationState = reinterpret_cast<const VkPipelineTessellationStateCreateInfo*>(pTessellationState);
-			m_graphicsPipelineCreateInfo.pViewportState = reinterpret_cast<const VkPipelineViewportStateCreateInfo*>(pViewportState);
-			m_graphicsPipelineCreateInfo.pRasterizationState = reinterpret_cast<const VkPipelineRasterizationStateCreateInfo*>(pRasterizationState);
-			m_graphicsPipelineCreateInfo.pMultisampleState = reinterpret_cast<const VkPipelineMultisampleStateCreateInfo*>(pMultisampleState);
-			m_graphicsPipelineCreateInfo.pDepthStencilState = reinterpret_cast<const VkPipelineDepthStencilStateCreateInfo*>(pDepthStencilState);
-			m_graphicsPipelineCreateInfo.pColorBlendState = reinterpret_cast<const VkPipelineColorBlendStateCreateInfo*>(pColorBlendState);
-			m_graphicsPipelineCreateInfo.pDynamicState = reinterpret_cast<const VkPipelineDynamicStateCreateInfo*>(pDynamicState);
-			m_graphicsPipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
-			m_graphicsPipelineCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
-			m_graphicsPipelineCreateInfo.subpass = subpass;
-			m_graphicsPipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
-			m_graphicsPipelineCreateInfo.basePipelineIndex = basePipelineIndex;
+			sType = StructureType::eGraphicsPipelineCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			stageCount = stageCount_;
+			pStages = pStages_;
+			pVertexInputState = pVertexInputState_;
+			pInputAssemblyState = pInputAssemblyState_;
+			pTessellationState = pTessellationState_;
+			pViewportState = pViewportState_;
+			pRasterizationState = pRasterizationState_;
+			pMultisampleState = pMultisampleState_;
+			pDepthStencilState = pDepthStencilState_;
+			pColorBlendState = pColorBlendState_;
+			pDynamicState = pDynamicState_;
+			layout = layout_;
+			renderPass = renderPass_;
+			subpass = subpass_;
+			basePipelineHandle = basePipelineHandle_;
+			basePipelineIndex = basePipelineIndex_;
 		}
 
 		GraphicsPipelineCreateInfo(VkGraphicsPipelineCreateInfo const & rhs)
-			: m_graphicsPipelineCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(GraphicsPipelineCreateInfo));
 		}
 
 		GraphicsPipelineCreateInfo& operator=(VkGraphicsPipelineCreateInfo const & rhs)
 		{
-			m_graphicsPipelineCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(GraphicsPipelineCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		GraphicsPipelineCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_graphicsPipelineCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_graphicsPipelineCreateInfo.sType);
-		}
-
-		GraphicsPipelineCreateInfo& sType(StructureType sType)
-		{
-			m_graphicsPipelineCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		GraphicsPipelineCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_graphicsPipelineCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_graphicsPipelineCreateInfo.pNext);
-		}
-
-		GraphicsPipelineCreateInfo& pNext(const void* pNext)
-		{
-			m_graphicsPipelineCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const PipelineCreateFlags& flags() const
+		GraphicsPipelineCreateInfo& setFlags(PipelineCreateFlags flags_)
 		{
-			return reinterpret_cast<const PipelineCreateFlags&>(m_graphicsPipelineCreateInfo.flags);
-		}
-
-		PipelineCreateFlags& flags()
-		{
-			return reinterpret_cast<PipelineCreateFlags&>(m_graphicsPipelineCreateInfo.flags);
-		}
-
-		GraphicsPipelineCreateInfo& flags(PipelineCreateFlags flags)
-		{
-			m_graphicsPipelineCreateInfo.flags = static_cast<VkPipelineCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& stageCount() const
+		GraphicsPipelineCreateInfo& setStageCount(uint32_t stageCount_)
 		{
-			return m_graphicsPipelineCreateInfo.stageCount;
-		}
-
-		uint32_t& stageCount()
-		{
-			return m_graphicsPipelineCreateInfo.stageCount;
-		}
-
-		GraphicsPipelineCreateInfo& stageCount(uint32_t stageCount)
-		{
-			m_graphicsPipelineCreateInfo.stageCount = stageCount;
+			stageCount = stageCount_;
 			return *this;
 		}
 
-		const PipelineShaderStageCreateInfo* pStages() const
+		GraphicsPipelineCreateInfo& setPStages(const PipelineShaderStageCreateInfo* pStages_)
 		{
-			return reinterpret_cast<const PipelineShaderStageCreateInfo*>(m_graphicsPipelineCreateInfo.pStages);
-		}
-
-		const PipelineShaderStageCreateInfo* pStages()
-		{
-			return reinterpret_cast<const PipelineShaderStageCreateInfo*>(m_graphicsPipelineCreateInfo.pStages);
-		}
-
-		GraphicsPipelineCreateInfo& pStages(const PipelineShaderStageCreateInfo* pStages)
-		{
-			m_graphicsPipelineCreateInfo.pStages = reinterpret_cast<const VkPipelineShaderStageCreateInfo*>(pStages);
+			pStages = pStages_;
 			return *this;
 		}
 
-		const PipelineVertexInputStateCreateInfo* pVertexInputState() const
+		GraphicsPipelineCreateInfo& setPVertexInputState(const PipelineVertexInputStateCreateInfo* pVertexInputState_)
 		{
-			return reinterpret_cast<const PipelineVertexInputStateCreateInfo*>(m_graphicsPipelineCreateInfo.pVertexInputState);
-		}
-
-		const PipelineVertexInputStateCreateInfo* pVertexInputState()
-		{
-			return reinterpret_cast<const PipelineVertexInputStateCreateInfo*>(m_graphicsPipelineCreateInfo.pVertexInputState);
-		}
-
-		GraphicsPipelineCreateInfo& pVertexInputState(const PipelineVertexInputStateCreateInfo* pVertexInputState)
-		{
-			m_graphicsPipelineCreateInfo.pVertexInputState = reinterpret_cast<const VkPipelineVertexInputStateCreateInfo*>(pVertexInputState);
+			pVertexInputState = pVertexInputState_;
 			return *this;
 		}
 
-		const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState() const
+		GraphicsPipelineCreateInfo& setPInputAssemblyState(const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState_)
 		{
-			return reinterpret_cast<const PipelineInputAssemblyStateCreateInfo*>(m_graphicsPipelineCreateInfo.pInputAssemblyState);
-		}
-
-		const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState()
-		{
-			return reinterpret_cast<const PipelineInputAssemblyStateCreateInfo*>(m_graphicsPipelineCreateInfo.pInputAssemblyState);
-		}
-
-		GraphicsPipelineCreateInfo& pInputAssemblyState(const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState)
-		{
-			m_graphicsPipelineCreateInfo.pInputAssemblyState = reinterpret_cast<const VkPipelineInputAssemblyStateCreateInfo*>(pInputAssemblyState);
+			pInputAssemblyState = pInputAssemblyState_;
 			return *this;
 		}
 
-		const PipelineTessellationStateCreateInfo* pTessellationState() const
+		GraphicsPipelineCreateInfo& setPTessellationState(const PipelineTessellationStateCreateInfo* pTessellationState_)
 		{
-			return reinterpret_cast<const PipelineTessellationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pTessellationState);
-		}
-
-		const PipelineTessellationStateCreateInfo* pTessellationState()
-		{
-			return reinterpret_cast<const PipelineTessellationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pTessellationState);
-		}
-
-		GraphicsPipelineCreateInfo& pTessellationState(const PipelineTessellationStateCreateInfo* pTessellationState)
-		{
-			m_graphicsPipelineCreateInfo.pTessellationState = reinterpret_cast<const VkPipelineTessellationStateCreateInfo*>(pTessellationState);
+			pTessellationState = pTessellationState_;
 			return *this;
 		}
 
-		const PipelineViewportStateCreateInfo* pViewportState() const
+		GraphicsPipelineCreateInfo& setPViewportState(const PipelineViewportStateCreateInfo* pViewportState_)
 		{
-			return reinterpret_cast<const PipelineViewportStateCreateInfo*>(m_graphicsPipelineCreateInfo.pViewportState);
-		}
-
-		const PipelineViewportStateCreateInfo* pViewportState()
-		{
-			return reinterpret_cast<const PipelineViewportStateCreateInfo*>(m_graphicsPipelineCreateInfo.pViewportState);
-		}
-
-		GraphicsPipelineCreateInfo& pViewportState(const PipelineViewportStateCreateInfo* pViewportState)
-		{
-			m_graphicsPipelineCreateInfo.pViewportState = reinterpret_cast<const VkPipelineViewportStateCreateInfo*>(pViewportState);
+			pViewportState = pViewportState_;
 			return *this;
 		}
 
-		const PipelineRasterizationStateCreateInfo* pRasterizationState() const
+		GraphicsPipelineCreateInfo& setPRasterizationState(const PipelineRasterizationStateCreateInfo* pRasterizationState_)
 		{
-			return reinterpret_cast<const PipelineRasterizationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pRasterizationState);
-		}
-
-		const PipelineRasterizationStateCreateInfo* pRasterizationState()
-		{
-			return reinterpret_cast<const PipelineRasterizationStateCreateInfo*>(m_graphicsPipelineCreateInfo.pRasterizationState);
-		}
-
-		GraphicsPipelineCreateInfo& pRasterizationState(const PipelineRasterizationStateCreateInfo* pRasterizationState)
-		{
-			m_graphicsPipelineCreateInfo.pRasterizationState = reinterpret_cast<const VkPipelineRasterizationStateCreateInfo*>(pRasterizationState);
+			pRasterizationState = pRasterizationState_;
 			return *this;
 		}
 
-		const PipelineMultisampleStateCreateInfo* pMultisampleState() const
+		GraphicsPipelineCreateInfo& setPMultisampleState(const PipelineMultisampleStateCreateInfo* pMultisampleState_)
 		{
-			return reinterpret_cast<const PipelineMultisampleStateCreateInfo*>(m_graphicsPipelineCreateInfo.pMultisampleState);
-		}
-
-		const PipelineMultisampleStateCreateInfo* pMultisampleState()
-		{
-			return reinterpret_cast<const PipelineMultisampleStateCreateInfo*>(m_graphicsPipelineCreateInfo.pMultisampleState);
-		}
-
-		GraphicsPipelineCreateInfo& pMultisampleState(const PipelineMultisampleStateCreateInfo* pMultisampleState)
-		{
-			m_graphicsPipelineCreateInfo.pMultisampleState = reinterpret_cast<const VkPipelineMultisampleStateCreateInfo*>(pMultisampleState);
+			pMultisampleState = pMultisampleState_;
 			return *this;
 		}
 
-		const PipelineDepthStencilStateCreateInfo* pDepthStencilState() const
+		GraphicsPipelineCreateInfo& setPDepthStencilState(const PipelineDepthStencilStateCreateInfo* pDepthStencilState_)
 		{
-			return reinterpret_cast<const PipelineDepthStencilStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDepthStencilState);
-		}
-
-		const PipelineDepthStencilStateCreateInfo* pDepthStencilState()
-		{
-			return reinterpret_cast<const PipelineDepthStencilStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDepthStencilState);
-		}
-
-		GraphicsPipelineCreateInfo& pDepthStencilState(const PipelineDepthStencilStateCreateInfo* pDepthStencilState)
-		{
-			m_graphicsPipelineCreateInfo.pDepthStencilState = reinterpret_cast<const VkPipelineDepthStencilStateCreateInfo*>(pDepthStencilState);
+			pDepthStencilState = pDepthStencilState_;
 			return *this;
 		}
 
-		const PipelineColorBlendStateCreateInfo* pColorBlendState() const
+		GraphicsPipelineCreateInfo& setPColorBlendState(const PipelineColorBlendStateCreateInfo* pColorBlendState_)
 		{
-			return reinterpret_cast<const PipelineColorBlendStateCreateInfo*>(m_graphicsPipelineCreateInfo.pColorBlendState);
-		}
-
-		const PipelineColorBlendStateCreateInfo* pColorBlendState()
-		{
-			return reinterpret_cast<const PipelineColorBlendStateCreateInfo*>(m_graphicsPipelineCreateInfo.pColorBlendState);
-		}
-
-		GraphicsPipelineCreateInfo& pColorBlendState(const PipelineColorBlendStateCreateInfo* pColorBlendState)
-		{
-			m_graphicsPipelineCreateInfo.pColorBlendState = reinterpret_cast<const VkPipelineColorBlendStateCreateInfo*>(pColorBlendState);
+			pColorBlendState = pColorBlendState_;
 			return *this;
 		}
 
-		const PipelineDynamicStateCreateInfo* pDynamicState() const
+		GraphicsPipelineCreateInfo& setPDynamicState(const PipelineDynamicStateCreateInfo* pDynamicState_)
 		{
-			return reinterpret_cast<const PipelineDynamicStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDynamicState);
-		}
-
-		const PipelineDynamicStateCreateInfo* pDynamicState()
-		{
-			return reinterpret_cast<const PipelineDynamicStateCreateInfo*>(m_graphicsPipelineCreateInfo.pDynamicState);
-		}
-
-		GraphicsPipelineCreateInfo& pDynamicState(const PipelineDynamicStateCreateInfo* pDynamicState)
-		{
-			m_graphicsPipelineCreateInfo.pDynamicState = reinterpret_cast<const VkPipelineDynamicStateCreateInfo*>(pDynamicState);
+			pDynamicState = pDynamicState_;
 			return *this;
 		}
 
-		const PipelineLayout& layout() const
+		GraphicsPipelineCreateInfo& setLayout(PipelineLayout layout_)
 		{
-			return reinterpret_cast<const PipelineLayout&>(m_graphicsPipelineCreateInfo.layout);
-		}
-
-		PipelineLayout& layout()
-		{
-			return reinterpret_cast<PipelineLayout&>(m_graphicsPipelineCreateInfo.layout);
-		}
-
-		GraphicsPipelineCreateInfo& layout(PipelineLayout layout)
-		{
-			m_graphicsPipelineCreateInfo.layout = static_cast<VkPipelineLayout>(layout);
+			layout = layout_;
 			return *this;
 		}
 
-		const RenderPass& renderPass() const
+		GraphicsPipelineCreateInfo& setRenderPass(RenderPass renderPass_)
 		{
-			return reinterpret_cast<const RenderPass&>(m_graphicsPipelineCreateInfo.renderPass);
-		}
-
-		RenderPass& renderPass()
-		{
-			return reinterpret_cast<RenderPass&>(m_graphicsPipelineCreateInfo.renderPass);
-		}
-
-		GraphicsPipelineCreateInfo& renderPass(RenderPass renderPass)
-		{
-			m_graphicsPipelineCreateInfo.renderPass = static_cast<VkRenderPass>(renderPass);
+			renderPass = renderPass_;
 			return *this;
 		}
 
-		const uint32_t& subpass() const
+		GraphicsPipelineCreateInfo& setSubpass(uint32_t subpass_)
 		{
-			return m_graphicsPipelineCreateInfo.subpass;
-		}
-
-		uint32_t& subpass()
-		{
-			return m_graphicsPipelineCreateInfo.subpass;
-		}
-
-		GraphicsPipelineCreateInfo& subpass(uint32_t subpass)
-		{
-			m_graphicsPipelineCreateInfo.subpass = subpass;
+			subpass = subpass_;
 			return *this;
 		}
 
-		const Pipeline& basePipelineHandle() const
+		GraphicsPipelineCreateInfo& setBasePipelineHandle(Pipeline basePipelineHandle_)
 		{
-			return reinterpret_cast<const Pipeline&>(m_graphicsPipelineCreateInfo.basePipelineHandle);
-		}
-
-		Pipeline& basePipelineHandle()
-		{
-			return reinterpret_cast<Pipeline&>(m_graphicsPipelineCreateInfo.basePipelineHandle);
-		}
-
-		GraphicsPipelineCreateInfo& basePipelineHandle(Pipeline basePipelineHandle)
-		{
-			m_graphicsPipelineCreateInfo.basePipelineHandle = static_cast<VkPipeline>(basePipelineHandle);
+			basePipelineHandle = basePipelineHandle_;
 			return *this;
 		}
 
-		const int32_t& basePipelineIndex() const
+		GraphicsPipelineCreateInfo& setBasePipelineIndex(int32_t basePipelineIndex_)
 		{
-			return m_graphicsPipelineCreateInfo.basePipelineIndex;
-		}
-
-		int32_t& basePipelineIndex()
-		{
-			return m_graphicsPipelineCreateInfo.basePipelineIndex;
-		}
-
-		GraphicsPipelineCreateInfo& basePipelineIndex(int32_t basePipelineIndex)
-		{
-			m_graphicsPipelineCreateInfo.basePipelineIndex = basePipelineIndex;
+			basePipelineIndex = basePipelineIndex_;
 			return *this;
 		}
 
 		operator const VkGraphicsPipelineCreateInfo&() const
 		{
-			return m_graphicsPipelineCreateInfo;
+			return *reinterpret_cast<const VkGraphicsPipelineCreateInfo*>(this);
 		}
 
-	private:
-		VkGraphicsPipelineCreateInfo m_graphicsPipelineCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		PipelineCreateFlags flags;
+		uint32_t stageCount;
+		const PipelineShaderStageCreateInfo* pStages;
+		const PipelineVertexInputStateCreateInfo* pVertexInputState;
+		const PipelineInputAssemblyStateCreateInfo* pInputAssemblyState;
+		const PipelineTessellationStateCreateInfo* pTessellationState;
+		const PipelineViewportStateCreateInfo* pViewportState;
+		const PipelineRasterizationStateCreateInfo* pRasterizationState;
+		const PipelineMultisampleStateCreateInfo* pMultisampleState;
+		const PipelineDepthStencilStateCreateInfo* pDepthStencilState;
+		const PipelineColorBlendStateCreateInfo* pColorBlendState;
+		const PipelineDynamicStateCreateInfo* pDynamicState;
+		PipelineLayout layout;
+		RenderPass renderPass;
+		uint32_t subpass;
+		Pipeline basePipelineHandle;
+		int32_t basePipelineIndex;
 	};
 	static_assert(sizeof(GraphicsPipelineCreateInfo) == sizeof(VkGraphicsPipelineCreateInfo), "struct and wrapper have different size!");
 
-	class PhysicalDeviceLimits
+	struct PhysicalDeviceLimits
 	{
-	public:
-		const uint32_t& maxImageDimension1D() const
-		{
-			return m_physicalDeviceLimits.maxImageDimension1D;
-		}
-
-		const uint32_t& maxImageDimension2D() const
-		{
-			return m_physicalDeviceLimits.maxImageDimension2D;
-		}
-
-		const uint32_t& maxImageDimension3D() const
-		{
-			return m_physicalDeviceLimits.maxImageDimension3D;
-		}
-
-		const uint32_t& maxImageDimensionCube() const
-		{
-			return m_physicalDeviceLimits.maxImageDimensionCube;
-		}
-
-		const uint32_t& maxImageArrayLayers() const
-		{
-			return m_physicalDeviceLimits.maxImageArrayLayers;
-		}
-
-		const uint32_t& maxTexelBufferElements() const
-		{
-			return m_physicalDeviceLimits.maxTexelBufferElements;
-		}
-
-		const uint32_t& maxUniformBufferRange() const
-		{
-			return m_physicalDeviceLimits.maxUniformBufferRange;
-		}
-
-		const uint32_t& maxStorageBufferRange() const
-		{
-			return m_physicalDeviceLimits.maxStorageBufferRange;
-		}
-
-		const uint32_t& maxPushConstantsSize() const
-		{
-			return m_physicalDeviceLimits.maxPushConstantsSize;
-		}
-
-		const uint32_t& maxMemoryAllocationCount() const
-		{
-			return m_physicalDeviceLimits.maxMemoryAllocationCount;
-		}
-
-		const uint32_t& maxSamplerAllocationCount() const
-		{
-			return m_physicalDeviceLimits.maxSamplerAllocationCount;
-		}
-
-		const DeviceSize& bufferImageGranularity() const
-		{
-			return m_physicalDeviceLimits.bufferImageGranularity;
-		}
-
-		const DeviceSize& sparseAddressSpaceSize() const
-		{
-			return m_physicalDeviceLimits.sparseAddressSpaceSize;
-		}
-
-		const uint32_t& maxBoundDescriptorSets() const
-		{
-			return m_physicalDeviceLimits.maxBoundDescriptorSets;
-		}
-
-		const uint32_t& maxPerStageDescriptorSamplers() const
-		{
-			return m_physicalDeviceLimits.maxPerStageDescriptorSamplers;
-		}
-
-		const uint32_t& maxPerStageDescriptorUniformBuffers() const
-		{
-			return m_physicalDeviceLimits.maxPerStageDescriptorUniformBuffers;
-		}
-
-		const uint32_t& maxPerStageDescriptorStorageBuffers() const
-		{
-			return m_physicalDeviceLimits.maxPerStageDescriptorStorageBuffers;
-		}
-
-		const uint32_t& maxPerStageDescriptorSampledImages() const
-		{
-			return m_physicalDeviceLimits.maxPerStageDescriptorSampledImages;
-		}
-
-		const uint32_t& maxPerStageDescriptorStorageImages() const
-		{
-			return m_physicalDeviceLimits.maxPerStageDescriptorStorageImages;
-		}
-
-		const uint32_t& maxPerStageDescriptorInputAttachments() const
-		{
-			return m_physicalDeviceLimits.maxPerStageDescriptorInputAttachments;
-		}
-
-		const uint32_t& maxPerStageResources() const
-		{
-			return m_physicalDeviceLimits.maxPerStageResources;
-		}
-
-		const uint32_t& maxDescriptorSetSamplers() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetSamplers;
-		}
-
-		const uint32_t& maxDescriptorSetUniformBuffers() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetUniformBuffers;
-		}
-
-		const uint32_t& maxDescriptorSetUniformBuffersDynamic() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetUniformBuffersDynamic;
-		}
-
-		const uint32_t& maxDescriptorSetStorageBuffers() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetStorageBuffers;
-		}
-
-		const uint32_t& maxDescriptorSetStorageBuffersDynamic() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetStorageBuffersDynamic;
-		}
-
-		const uint32_t& maxDescriptorSetSampledImages() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetSampledImages;
-		}
-
-		const uint32_t& maxDescriptorSetStorageImages() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetStorageImages;
-		}
-
-		const uint32_t& maxDescriptorSetInputAttachments() const
-		{
-			return m_physicalDeviceLimits.maxDescriptorSetInputAttachments;
-		}
-
-		const uint32_t& maxVertexInputAttributes() const
-		{
-			return m_physicalDeviceLimits.maxVertexInputAttributes;
-		}
-
-		const uint32_t& maxVertexInputBindings() const
-		{
-			return m_physicalDeviceLimits.maxVertexInputBindings;
-		}
-
-		const uint32_t& maxVertexInputAttributeOffset() const
-		{
-			return m_physicalDeviceLimits.maxVertexInputAttributeOffset;
-		}
-
-		const uint32_t& maxVertexInputBindingStride() const
-		{
-			return m_physicalDeviceLimits.maxVertexInputBindingStride;
-		}
-
-		const uint32_t& maxVertexOutputComponents() const
-		{
-			return m_physicalDeviceLimits.maxVertexOutputComponents;
-		}
-
-		const uint32_t& maxTessellationGenerationLevel() const
-		{
-			return m_physicalDeviceLimits.maxTessellationGenerationLevel;
-		}
-
-		const uint32_t& maxTessellationPatchSize() const
-		{
-			return m_physicalDeviceLimits.maxTessellationPatchSize;
-		}
-
-		const uint32_t& maxTessellationControlPerVertexInputComponents() const
-		{
-			return m_physicalDeviceLimits.maxTessellationControlPerVertexInputComponents;
-		}
-
-		const uint32_t& maxTessellationControlPerVertexOutputComponents() const
-		{
-			return m_physicalDeviceLimits.maxTessellationControlPerVertexOutputComponents;
-		}
-
-		const uint32_t& maxTessellationControlPerPatchOutputComponents() const
-		{
-			return m_physicalDeviceLimits.maxTessellationControlPerPatchOutputComponents;
-		}
-
-		const uint32_t& maxTessellationControlTotalOutputComponents() const
-		{
-			return m_physicalDeviceLimits.maxTessellationControlTotalOutputComponents;
-		}
-
-		const uint32_t& maxTessellationEvaluationInputComponents() const
-		{
-			return m_physicalDeviceLimits.maxTessellationEvaluationInputComponents;
-		}
-
-		const uint32_t& maxTessellationEvaluationOutputComponents() const
-		{
-			return m_physicalDeviceLimits.maxTessellationEvaluationOutputComponents;
-		}
-
-		const uint32_t& maxGeometryShaderInvocations() const
-		{
-			return m_physicalDeviceLimits.maxGeometryShaderInvocations;
-		}
-
-		const uint32_t& maxGeometryInputComponents() const
-		{
-			return m_physicalDeviceLimits.maxGeometryInputComponents;
-		}
-
-		const uint32_t& maxGeometryOutputComponents() const
-		{
-			return m_physicalDeviceLimits.maxGeometryOutputComponents;
-		}
-
-		const uint32_t& maxGeometryOutputVertices() const
-		{
-			return m_physicalDeviceLimits.maxGeometryOutputVertices;
-		}
-
-		const uint32_t& maxGeometryTotalOutputComponents() const
-		{
-			return m_physicalDeviceLimits.maxGeometryTotalOutputComponents;
-		}
-
-		const uint32_t& maxFragmentInputComponents() const
-		{
-			return m_physicalDeviceLimits.maxFragmentInputComponents;
-		}
-
-		const uint32_t& maxFragmentOutputAttachments() const
-		{
-			return m_physicalDeviceLimits.maxFragmentOutputAttachments;
-		}
-
-		const uint32_t& maxFragmentDualSrcAttachments() const
-		{
-			return m_physicalDeviceLimits.maxFragmentDualSrcAttachments;
-		}
-
-		const uint32_t& maxFragmentCombinedOutputResources() const
-		{
-			return m_physicalDeviceLimits.maxFragmentCombinedOutputResources;
-		}
-
-		const uint32_t& maxComputeSharedMemorySize() const
-		{
-			return m_physicalDeviceLimits.maxComputeSharedMemorySize;
-		}
-
-		const uint32_t* maxComputeWorkGroupCount() const
-		{
-			return reinterpret_cast<const uint32_t*>(m_physicalDeviceLimits.maxComputeWorkGroupCount);
-		}
-
-		const uint32_t& maxComputeWorkGroupInvocations() const
-		{
-			return m_physicalDeviceLimits.maxComputeWorkGroupInvocations;
-		}
-
-		const uint32_t* maxComputeWorkGroupSize() const
-		{
-			return reinterpret_cast<const uint32_t*>(m_physicalDeviceLimits.maxComputeWorkGroupSize);
-		}
-
-		const uint32_t& subPixelPrecisionBits() const
-		{
-			return m_physicalDeviceLimits.subPixelPrecisionBits;
-		}
-
-		const uint32_t& subTexelPrecisionBits() const
-		{
-			return m_physicalDeviceLimits.subTexelPrecisionBits;
-		}
-
-		const uint32_t& mipmapPrecisionBits() const
-		{
-			return m_physicalDeviceLimits.mipmapPrecisionBits;
-		}
-
-		const uint32_t& maxDrawIndexedIndexValue() const
-		{
-			return m_physicalDeviceLimits.maxDrawIndexedIndexValue;
-		}
-
-		const uint32_t& maxDrawIndirectCount() const
-		{
-			return m_physicalDeviceLimits.maxDrawIndirectCount;
-		}
-
-		const float& maxSamplerLodBias() const
-		{
-			return m_physicalDeviceLimits.maxSamplerLodBias;
-		}
-
-		const float& maxSamplerAnisotropy() const
-		{
-			return m_physicalDeviceLimits.maxSamplerAnisotropy;
-		}
-
-		const uint32_t& maxViewports() const
-		{
-			return m_physicalDeviceLimits.maxViewports;
-		}
-
-		const uint32_t* maxViewportDimensions() const
-		{
-			return reinterpret_cast<const uint32_t*>(m_physicalDeviceLimits.maxViewportDimensions);
-		}
-
-		const float* viewportBoundsRange() const
-		{
-			return reinterpret_cast<const float*>(m_physicalDeviceLimits.viewportBoundsRange);
-		}
-
-		const uint32_t& viewportSubPixelBits() const
-		{
-			return m_physicalDeviceLimits.viewportSubPixelBits;
-		}
-
-		const size_t& minMemoryMapAlignment() const
-		{
-			return m_physicalDeviceLimits.minMemoryMapAlignment;
-		}
-
-		const DeviceSize& minTexelBufferOffsetAlignment() const
-		{
-			return m_physicalDeviceLimits.minTexelBufferOffsetAlignment;
-		}
-
-		const DeviceSize& minUniformBufferOffsetAlignment() const
-		{
-			return m_physicalDeviceLimits.minUniformBufferOffsetAlignment;
-		}
-
-		const DeviceSize& minStorageBufferOffsetAlignment() const
-		{
-			return m_physicalDeviceLimits.minStorageBufferOffsetAlignment;
-		}
-
-		const int32_t& minTexelOffset() const
-		{
-			return m_physicalDeviceLimits.minTexelOffset;
-		}
-
-		const uint32_t& maxTexelOffset() const
-		{
-			return m_physicalDeviceLimits.maxTexelOffset;
-		}
-
-		const int32_t& minTexelGatherOffset() const
-		{
-			return m_physicalDeviceLimits.minTexelGatherOffset;
-		}
-
-		const uint32_t& maxTexelGatherOffset() const
-		{
-			return m_physicalDeviceLimits.maxTexelGatherOffset;
-		}
-
-		const float& minInterpolationOffset() const
-		{
-			return m_physicalDeviceLimits.minInterpolationOffset;
-		}
-
-		const float& maxInterpolationOffset() const
-		{
-			return m_physicalDeviceLimits.maxInterpolationOffset;
-		}
-
-		const uint32_t& subPixelInterpolationOffsetBits() const
-		{
-			return m_physicalDeviceLimits.subPixelInterpolationOffsetBits;
-		}
-
-		const uint32_t& maxFramebufferWidth() const
-		{
-			return m_physicalDeviceLimits.maxFramebufferWidth;
-		}
-
-		const uint32_t& maxFramebufferHeight() const
-		{
-			return m_physicalDeviceLimits.maxFramebufferHeight;
-		}
-
-		const uint32_t& maxFramebufferLayers() const
-		{
-			return m_physicalDeviceLimits.maxFramebufferLayers;
-		}
-
-		const SampleCountFlags& framebufferColorSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.framebufferColorSampleCounts);
-		}
-
-		const SampleCountFlags& framebufferDepthSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.framebufferDepthSampleCounts);
-		}
-
-		const SampleCountFlags& framebufferStencilSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.framebufferStencilSampleCounts);
-		}
-
-		const SampleCountFlags& framebufferNoAttachmentsSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.framebufferNoAttachmentsSampleCounts);
-		}
-
-		const uint32_t& maxColorAttachments() const
-		{
-			return m_physicalDeviceLimits.maxColorAttachments;
-		}
-
-		const SampleCountFlags& sampledImageColorSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.sampledImageColorSampleCounts);
-		}
-
-		const SampleCountFlags& sampledImageIntegerSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.sampledImageIntegerSampleCounts);
-		}
-
-		const SampleCountFlags& sampledImageDepthSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.sampledImageDepthSampleCounts);
-		}
-
-		const SampleCountFlags& sampledImageStencilSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.sampledImageStencilSampleCounts);
-		}
-
-		const SampleCountFlags& storageImageSampleCounts() const
-		{
-			return reinterpret_cast<const SampleCountFlags&>(m_physicalDeviceLimits.storageImageSampleCounts);
-		}
-
-		const uint32_t& maxSampleMaskWords() const
-		{
-			return m_physicalDeviceLimits.maxSampleMaskWords;
-		}
-
-		const Bool32& timestampComputeAndGraphics() const
-		{
-			return m_physicalDeviceLimits.timestampComputeAndGraphics;
-		}
-
-		const float& timestampPeriod() const
-		{
-			return m_physicalDeviceLimits.timestampPeriod;
-		}
-
-		const uint32_t& maxClipDistances() const
-		{
-			return m_physicalDeviceLimits.maxClipDistances;
-		}
-
-		const uint32_t& maxCullDistances() const
-		{
-			return m_physicalDeviceLimits.maxCullDistances;
-		}
-
-		const uint32_t& maxCombinedClipAndCullDistances() const
-		{
-			return m_physicalDeviceLimits.maxCombinedClipAndCullDistances;
-		}
-
-		const uint32_t& discreteQueuePriorities() const
-		{
-			return m_physicalDeviceLimits.discreteQueuePriorities;
-		}
-
-		const float* pointSizeRange() const
-		{
-			return reinterpret_cast<const float*>(m_physicalDeviceLimits.pointSizeRange);
-		}
-
-		const float* lineWidthRange() const
-		{
-			return reinterpret_cast<const float*>(m_physicalDeviceLimits.lineWidthRange);
-		}
-
-		const float& pointSizeGranularity() const
-		{
-			return m_physicalDeviceLimits.pointSizeGranularity;
-		}
-
-		const float& lineWidthGranularity() const
-		{
-			return m_physicalDeviceLimits.lineWidthGranularity;
-		}
-
-		const Bool32& strictLines() const
-		{
-			return m_physicalDeviceLimits.strictLines;
-		}
-
-		const Bool32& standardSampleLocations() const
-		{
-			return m_physicalDeviceLimits.standardSampleLocations;
-		}
-
-		const DeviceSize& optimalBufferCopyOffsetAlignment() const
-		{
-			return m_physicalDeviceLimits.optimalBufferCopyOffsetAlignment;
-		}
-
-		const DeviceSize& optimalBufferCopyRowPitchAlignment() const
-		{
-			return m_physicalDeviceLimits.optimalBufferCopyRowPitchAlignment;
-		}
-
-		const DeviceSize& nonCoherentAtomSize() const
-		{
-			return m_physicalDeviceLimits.nonCoherentAtomSize;
-		}
-
 		operator const VkPhysicalDeviceLimits&() const
 		{
-			return m_physicalDeviceLimits;
+			return *reinterpret_cast<const VkPhysicalDeviceLimits*>(this);
 		}
 
-	private:
-		VkPhysicalDeviceLimits m_physicalDeviceLimits;
+		uint32_t maxImageDimension1D;
+		uint32_t maxImageDimension2D;
+		uint32_t maxImageDimension3D;
+		uint32_t maxImageDimensionCube;
+		uint32_t maxImageArrayLayers;
+		uint32_t maxTexelBufferElements;
+		uint32_t maxUniformBufferRange;
+		uint32_t maxStorageBufferRange;
+		uint32_t maxPushConstantsSize;
+		uint32_t maxMemoryAllocationCount;
+		uint32_t maxSamplerAllocationCount;
+		DeviceSize bufferImageGranularity;
+		DeviceSize sparseAddressSpaceSize;
+		uint32_t maxBoundDescriptorSets;
+		uint32_t maxPerStageDescriptorSamplers;
+		uint32_t maxPerStageDescriptorUniformBuffers;
+		uint32_t maxPerStageDescriptorStorageBuffers;
+		uint32_t maxPerStageDescriptorSampledImages;
+		uint32_t maxPerStageDescriptorStorageImages;
+		uint32_t maxPerStageDescriptorInputAttachments;
+		uint32_t maxPerStageResources;
+		uint32_t maxDescriptorSetSamplers;
+		uint32_t maxDescriptorSetUniformBuffers;
+		uint32_t maxDescriptorSetUniformBuffersDynamic;
+		uint32_t maxDescriptorSetStorageBuffers;
+		uint32_t maxDescriptorSetStorageBuffersDynamic;
+		uint32_t maxDescriptorSetSampledImages;
+		uint32_t maxDescriptorSetStorageImages;
+		uint32_t maxDescriptorSetInputAttachments;
+		uint32_t maxVertexInputAttributes;
+		uint32_t maxVertexInputBindings;
+		uint32_t maxVertexInputAttributeOffset;
+		uint32_t maxVertexInputBindingStride;
+		uint32_t maxVertexOutputComponents;
+		uint32_t maxTessellationGenerationLevel;
+		uint32_t maxTessellationPatchSize;
+		uint32_t maxTessellationControlPerVertexInputComponents;
+		uint32_t maxTessellationControlPerVertexOutputComponents;
+		uint32_t maxTessellationControlPerPatchOutputComponents;
+		uint32_t maxTessellationControlTotalOutputComponents;
+		uint32_t maxTessellationEvaluationInputComponents;
+		uint32_t maxTessellationEvaluationOutputComponents;
+		uint32_t maxGeometryShaderInvocations;
+		uint32_t maxGeometryInputComponents;
+		uint32_t maxGeometryOutputComponents;
+		uint32_t maxGeometryOutputVertices;
+		uint32_t maxGeometryTotalOutputComponents;
+		uint32_t maxFragmentInputComponents;
+		uint32_t maxFragmentOutputAttachments;
+		uint32_t maxFragmentDualSrcAttachments;
+		uint32_t maxFragmentCombinedOutputResources;
+		uint32_t maxComputeSharedMemorySize;
+		uint32_t maxComputeWorkGroupCount[3];
+		uint32_t maxComputeWorkGroupInvocations;
+		uint32_t maxComputeWorkGroupSize[3];
+		uint32_t subPixelPrecisionBits;
+		uint32_t subTexelPrecisionBits;
+		uint32_t mipmapPrecisionBits;
+		uint32_t maxDrawIndexedIndexValue;
+		uint32_t maxDrawIndirectCount;
+		float maxSamplerLodBias;
+		float maxSamplerAnisotropy;
+		uint32_t maxViewports;
+		uint32_t maxViewportDimensions[2];
+		float viewportBoundsRange[2];
+		uint32_t viewportSubPixelBits;
+		size_t minMemoryMapAlignment;
+		DeviceSize minTexelBufferOffsetAlignment;
+		DeviceSize minUniformBufferOffsetAlignment;
+		DeviceSize minStorageBufferOffsetAlignment;
+		int32_t minTexelOffset;
+		uint32_t maxTexelOffset;
+		int32_t minTexelGatherOffset;
+		uint32_t maxTexelGatherOffset;
+		float minInterpolationOffset;
+		float maxInterpolationOffset;
+		uint32_t subPixelInterpolationOffsetBits;
+		uint32_t maxFramebufferWidth;
+		uint32_t maxFramebufferHeight;
+		uint32_t maxFramebufferLayers;
+		SampleCountFlags framebufferColorSampleCounts;
+		SampleCountFlags framebufferDepthSampleCounts;
+		SampleCountFlags framebufferStencilSampleCounts;
+		SampleCountFlags framebufferNoAttachmentsSampleCounts;
+		uint32_t maxColorAttachments;
+		SampleCountFlags sampledImageColorSampleCounts;
+		SampleCountFlags sampledImageIntegerSampleCounts;
+		SampleCountFlags sampledImageDepthSampleCounts;
+		SampleCountFlags sampledImageStencilSampleCounts;
+		SampleCountFlags storageImageSampleCounts;
+		uint32_t maxSampleMaskWords;
+		Bool32 timestampComputeAndGraphics;
+		float timestampPeriod;
+		uint32_t maxClipDistances;
+		uint32_t maxCullDistances;
+		uint32_t maxCombinedClipAndCullDistances;
+		uint32_t discreteQueuePriorities;
+		float pointSizeRange[2];
+		float lineWidthRange[2];
+		float pointSizeGranularity;
+		float lineWidthGranularity;
+		Bool32 strictLines;
+		Bool32 standardSampleLocations;
+		DeviceSize optimalBufferCopyOffsetAlignment;
+		DeviceSize optimalBufferCopyRowPitchAlignment;
+		DeviceSize nonCoherentAtomSize;
 	};
 	static_assert(sizeof(PhysicalDeviceLimits) == sizeof(VkPhysicalDeviceLimits), "struct and wrapper have different size!");
 
-	class PhysicalDeviceProperties
+	struct PhysicalDeviceProperties
 	{
-	public:
-		const uint32_t& apiVersion() const
-		{
-			return m_physicalDeviceProperties.apiVersion;
-		}
-
-		const uint32_t& driverVersion() const
-		{
-			return m_physicalDeviceProperties.driverVersion;
-		}
-
-		const uint32_t& vendorID() const
-		{
-			return m_physicalDeviceProperties.vendorID;
-		}
-
-		const uint32_t& deviceID() const
-		{
-			return m_physicalDeviceProperties.deviceID;
-		}
-
-		const PhysicalDeviceType& deviceType() const
-		{
-			return reinterpret_cast<const PhysicalDeviceType&>(m_physicalDeviceProperties.deviceType);
-		}
-
-		const char* deviceName() const
-		{
-			return reinterpret_cast<const char*>(m_physicalDeviceProperties.deviceName);
-		}
-
-		const uint8_t* pipelineCacheUUID() const
-		{
-			return reinterpret_cast<const uint8_t*>(m_physicalDeviceProperties.pipelineCacheUUID);
-		}
-
-		const PhysicalDeviceLimits& limits() const
-		{
-			return reinterpret_cast<const PhysicalDeviceLimits&>(m_physicalDeviceProperties.limits);
-		}
-
-		const PhysicalDeviceSparseProperties& sparseProperties() const
-		{
-			return reinterpret_cast<const PhysicalDeviceSparseProperties&>(m_physicalDeviceProperties.sparseProperties);
-		}
-
 		operator const VkPhysicalDeviceProperties&() const
 		{
-			return m_physicalDeviceProperties;
+			return *reinterpret_cast<const VkPhysicalDeviceProperties*>(this);
 		}
 
-	private:
-		VkPhysicalDeviceProperties m_physicalDeviceProperties;
+		uint32_t apiVersion;
+		uint32_t driverVersion;
+		uint32_t vendorID;
+		uint32_t deviceID;
+		PhysicalDeviceType deviceType;
+		char deviceName[VK_MAX_PHYSICAL_DEVICE_NAME_SIZE];
+		uint8_t pipelineCacheUUID[VK_UUID_SIZE];
+		PhysicalDeviceLimits limits;
+		PhysicalDeviceSparseProperties sparseProperties;
 	};
 	static_assert(sizeof(PhysicalDeviceProperties) == sizeof(VkPhysicalDeviceProperties), "struct and wrapper have different size!");
 
@@ -17197,195 +10867,111 @@ namespace vk
 		eMayAlias = VK_ATTACHMENT_DESCRIPTION_MAY_ALIAS_BIT
 	};
 
-	typedef Flags<AttachmentDescriptionFlagBits, VkAttachmentDescriptionFlags> AttachmentDescriptionFlags;
+	using AttachmentDescriptionFlags = Flags<AttachmentDescriptionFlagBits, VkAttachmentDescriptionFlags>;
 
 	inline AttachmentDescriptionFlags operator|(AttachmentDescriptionFlagBits bit0, AttachmentDescriptionFlagBits bit1)
 	{
 		return AttachmentDescriptionFlags(bit0) | bit1;
 	}
 
-	class AttachmentDescription
+	struct AttachmentDescription
 	{
-	public:
 		AttachmentDescription()
 			: AttachmentDescription(AttachmentDescriptionFlags(), Format::eUndefined, SampleCountFlagBits::e1, AttachmentLoadOp::eLoad, AttachmentStoreOp::eStore, AttachmentLoadOp::eLoad, AttachmentStoreOp::eStore, ImageLayout::eUndefined, ImageLayout::eUndefined)
 		{}
 
-		AttachmentDescription(AttachmentDescriptionFlags flags, Format format, SampleCountFlagBits samples, AttachmentLoadOp loadOp, AttachmentStoreOp storeOp, AttachmentLoadOp stencilLoadOp, AttachmentStoreOp stencilStoreOp, ImageLayout initialLayout, ImageLayout finalLayout)
+		AttachmentDescription(AttachmentDescriptionFlags flags_, Format format_, SampleCountFlagBits samples_, AttachmentLoadOp loadOp_, AttachmentStoreOp storeOp_, AttachmentLoadOp stencilLoadOp_, AttachmentStoreOp stencilStoreOp_, ImageLayout initialLayout_, ImageLayout finalLayout_)
 		{
-			m_attachmentDescription.flags = static_cast<VkAttachmentDescriptionFlags>(flags);
-			m_attachmentDescription.format = static_cast<VkFormat>(format);
-			m_attachmentDescription.samples = static_cast<VkSampleCountFlagBits>(samples);
-			m_attachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(loadOp);
-			m_attachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(storeOp);
-			m_attachmentDescription.stencilLoadOp = static_cast<VkAttachmentLoadOp>(stencilLoadOp);
-			m_attachmentDescription.stencilStoreOp = static_cast<VkAttachmentStoreOp>(stencilStoreOp);
-			m_attachmentDescription.initialLayout = static_cast<VkImageLayout>(initialLayout);
-			m_attachmentDescription.finalLayout = static_cast<VkImageLayout>(finalLayout);
+			flags = flags_;
+			format = format_;
+			samples = samples_;
+			loadOp = loadOp_;
+			storeOp = storeOp_;
+			stencilLoadOp = stencilLoadOp_;
+			stencilStoreOp = stencilStoreOp_;
+			initialLayout = initialLayout_;
+			finalLayout = finalLayout_;
 		}
 
 		AttachmentDescription(VkAttachmentDescription const & rhs)
-			: m_attachmentDescription(rhs)
 		{
+			memcpy(this, &rhs, sizeof(AttachmentDescription));
 		}
 
 		AttachmentDescription& operator=(VkAttachmentDescription const & rhs)
 		{
-			m_attachmentDescription = rhs;
+			memcpy(this, &rhs, sizeof(AttachmentDescription));
 			return *this;
 		}
 
-		const AttachmentDescriptionFlags& flags() const
+		AttachmentDescription& setFlags(AttachmentDescriptionFlags flags_)
 		{
-			return reinterpret_cast<const AttachmentDescriptionFlags&>(m_attachmentDescription.flags);
-		}
-
-		AttachmentDescriptionFlags& flags()
-		{
-			return reinterpret_cast<AttachmentDescriptionFlags&>(m_attachmentDescription.flags);
-		}
-
-		AttachmentDescription& flags(AttachmentDescriptionFlags flags)
-		{
-			m_attachmentDescription.flags = static_cast<VkAttachmentDescriptionFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const Format& format() const
+		AttachmentDescription& setFormat(Format format_)
 		{
-			return reinterpret_cast<const Format&>(m_attachmentDescription.format);
-		}
-
-		Format& format()
-		{
-			return reinterpret_cast<Format&>(m_attachmentDescription.format);
-		}
-
-		AttachmentDescription& format(Format format)
-		{
-			m_attachmentDescription.format = static_cast<VkFormat>(format);
+			format = format_;
 			return *this;
 		}
 
-		const SampleCountFlagBits& samples() const
+		AttachmentDescription& setSamples(SampleCountFlagBits samples_)
 		{
-			return reinterpret_cast<const SampleCountFlagBits&>(m_attachmentDescription.samples);
-		}
-
-		SampleCountFlagBits& samples()
-		{
-			return reinterpret_cast<SampleCountFlagBits&>(m_attachmentDescription.samples);
-		}
-
-		AttachmentDescription& samples(SampleCountFlagBits samples)
-		{
-			m_attachmentDescription.samples = static_cast<VkSampleCountFlagBits>(samples);
+			samples = samples_;
 			return *this;
 		}
 
-		const AttachmentLoadOp& loadOp() const
+		AttachmentDescription& setLoadOp(AttachmentLoadOp loadOp_)
 		{
-			return reinterpret_cast<const AttachmentLoadOp&>(m_attachmentDescription.loadOp);
-		}
-
-		AttachmentLoadOp& loadOp()
-		{
-			return reinterpret_cast<AttachmentLoadOp&>(m_attachmentDescription.loadOp);
-		}
-
-		AttachmentDescription& loadOp(AttachmentLoadOp loadOp)
-		{
-			m_attachmentDescription.loadOp = static_cast<VkAttachmentLoadOp>(loadOp);
+			loadOp = loadOp_;
 			return *this;
 		}
 
-		const AttachmentStoreOp& storeOp() const
+		AttachmentDescription& setStoreOp(AttachmentStoreOp storeOp_)
 		{
-			return reinterpret_cast<const AttachmentStoreOp&>(m_attachmentDescription.storeOp);
-		}
-
-		AttachmentStoreOp& storeOp()
-		{
-			return reinterpret_cast<AttachmentStoreOp&>(m_attachmentDescription.storeOp);
-		}
-
-		AttachmentDescription& storeOp(AttachmentStoreOp storeOp)
-		{
-			m_attachmentDescription.storeOp = static_cast<VkAttachmentStoreOp>(storeOp);
+			storeOp = storeOp_;
 			return *this;
 		}
 
-		const AttachmentLoadOp& stencilLoadOp() const
+		AttachmentDescription& setStencilLoadOp(AttachmentLoadOp stencilLoadOp_)
 		{
-			return reinterpret_cast<const AttachmentLoadOp&>(m_attachmentDescription.stencilLoadOp);
-		}
-
-		AttachmentLoadOp& stencilLoadOp()
-		{
-			return reinterpret_cast<AttachmentLoadOp&>(m_attachmentDescription.stencilLoadOp);
-		}
-
-		AttachmentDescription& stencilLoadOp(AttachmentLoadOp stencilLoadOp)
-		{
-			m_attachmentDescription.stencilLoadOp = static_cast<VkAttachmentLoadOp>(stencilLoadOp);
+			stencilLoadOp = stencilLoadOp_;
 			return *this;
 		}
 
-		const AttachmentStoreOp& stencilStoreOp() const
+		AttachmentDescription& setStencilStoreOp(AttachmentStoreOp stencilStoreOp_)
 		{
-			return reinterpret_cast<const AttachmentStoreOp&>(m_attachmentDescription.stencilStoreOp);
-		}
-
-		AttachmentStoreOp& stencilStoreOp()
-		{
-			return reinterpret_cast<AttachmentStoreOp&>(m_attachmentDescription.stencilStoreOp);
-		}
-
-		AttachmentDescription& stencilStoreOp(AttachmentStoreOp stencilStoreOp)
-		{
-			m_attachmentDescription.stencilStoreOp = static_cast<VkAttachmentStoreOp>(stencilStoreOp);
+			stencilStoreOp = stencilStoreOp_;
 			return *this;
 		}
 
-		const ImageLayout& initialLayout() const
+		AttachmentDescription& setInitialLayout(ImageLayout initialLayout_)
 		{
-			return reinterpret_cast<const ImageLayout&>(m_attachmentDescription.initialLayout);
-		}
-
-		ImageLayout& initialLayout()
-		{
-			return reinterpret_cast<ImageLayout&>(m_attachmentDescription.initialLayout);
-		}
-
-		AttachmentDescription& initialLayout(ImageLayout initialLayout)
-		{
-			m_attachmentDescription.initialLayout = static_cast<VkImageLayout>(initialLayout);
+			initialLayout = initialLayout_;
 			return *this;
 		}
 
-		const ImageLayout& finalLayout() const
+		AttachmentDescription& setFinalLayout(ImageLayout finalLayout_)
 		{
-			return reinterpret_cast<const ImageLayout&>(m_attachmentDescription.finalLayout);
-		}
-
-		ImageLayout& finalLayout()
-		{
-			return reinterpret_cast<ImageLayout&>(m_attachmentDescription.finalLayout);
-		}
-
-		AttachmentDescription& finalLayout(ImageLayout finalLayout)
-		{
-			m_attachmentDescription.finalLayout = static_cast<VkImageLayout>(finalLayout);
+			finalLayout = finalLayout_;
 			return *this;
 		}
 
 		operator const VkAttachmentDescription&() const
 		{
-			return m_attachmentDescription;
+			return *reinterpret_cast<const VkAttachmentDescription*>(this);
 		}
 
-	private:
-		VkAttachmentDescription m_attachmentDescription;
+		AttachmentDescriptionFlags flags;
+		Format format;
+		SampleCountFlagBits samples;
+		AttachmentLoadOp loadOp;
+		AttachmentStoreOp storeOp;
+		AttachmentLoadOp stencilLoadOp;
+		AttachmentStoreOp stencilStoreOp;
+		ImageLayout initialLayout;
+		ImageLayout finalLayout;
 	};
 	static_assert(sizeof(AttachmentDescription) == sizeof(VkAttachmentDescription), "struct and wrapper have different size!");
 
@@ -17396,7 +10982,7 @@ namespace vk
 		eVkStencilFrontAndBack = VK_STENCIL_FRONT_AND_BACK
 	};
 
-	typedef Flags<StencilFaceFlagBits, VkStencilFaceFlags> StencilFaceFlags;
+	using StencilFaceFlags = Flags<StencilFaceFlagBits, VkStencilFaceFlags>;
 
 	inline StencilFaceFlags operator|(StencilFaceFlagBits bit0, StencilFaceFlagBits bit1)
 	{
@@ -17408,144 +10994,87 @@ namespace vk
 		eFreeDescriptorSet = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT
 	};
 
-	typedef Flags<DescriptorPoolCreateFlagBits, VkDescriptorPoolCreateFlags> DescriptorPoolCreateFlags;
+	using DescriptorPoolCreateFlags = Flags<DescriptorPoolCreateFlagBits, VkDescriptorPoolCreateFlags>;
 
 	inline DescriptorPoolCreateFlags operator|(DescriptorPoolCreateFlagBits bit0, DescriptorPoolCreateFlagBits bit1)
 	{
 		return DescriptorPoolCreateFlags(bit0) | bit1;
 	}
 
-	class DescriptorPoolCreateInfo
+	struct DescriptorPoolCreateInfo
 	{
-	public:
 		DescriptorPoolCreateInfo()
 			: DescriptorPoolCreateInfo(DescriptorPoolCreateFlags(), 0, 0, nullptr)
 		{}
 
-		DescriptorPoolCreateInfo(DescriptorPoolCreateFlags flags, uint32_t maxSets, uint32_t poolSizeCount, const DescriptorPoolSize* pPoolSizes)
+		DescriptorPoolCreateInfo(DescriptorPoolCreateFlags flags_, uint32_t maxSets_, uint32_t poolSizeCount_, const DescriptorPoolSize* pPoolSizes_)
 		{
-			m_descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-			m_descriptorPoolCreateInfo.pNext = nullptr;
-			m_descriptorPoolCreateInfo.flags = static_cast<VkDescriptorPoolCreateFlags>(flags);
-			m_descriptorPoolCreateInfo.maxSets = maxSets;
-			m_descriptorPoolCreateInfo.poolSizeCount = poolSizeCount;
-			m_descriptorPoolCreateInfo.pPoolSizes = reinterpret_cast<const VkDescriptorPoolSize*>(pPoolSizes);
+			sType = StructureType::eDescriptorPoolCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			maxSets = maxSets_;
+			poolSizeCount = poolSizeCount_;
+			pPoolSizes = pPoolSizes_;
 		}
 
 		DescriptorPoolCreateInfo(VkDescriptorPoolCreateInfo const & rhs)
-			: m_descriptorPoolCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DescriptorPoolCreateInfo));
 		}
 
 		DescriptorPoolCreateInfo& operator=(VkDescriptorPoolCreateInfo const & rhs)
 		{
-			m_descriptorPoolCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(DescriptorPoolCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DescriptorPoolCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_descriptorPoolCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_descriptorPoolCreateInfo.sType);
-		}
-
-		DescriptorPoolCreateInfo& sType(StructureType sType)
-		{
-			m_descriptorPoolCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DescriptorPoolCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_descriptorPoolCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_descriptorPoolCreateInfo.pNext);
-		}
-
-		DescriptorPoolCreateInfo& pNext(const void* pNext)
-		{
-			m_descriptorPoolCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DescriptorPoolCreateFlags& flags() const
+		DescriptorPoolCreateInfo& setFlags(DescriptorPoolCreateFlags flags_)
 		{
-			return reinterpret_cast<const DescriptorPoolCreateFlags&>(m_descriptorPoolCreateInfo.flags);
-		}
-
-		DescriptorPoolCreateFlags& flags()
-		{
-			return reinterpret_cast<DescriptorPoolCreateFlags&>(m_descriptorPoolCreateInfo.flags);
-		}
-
-		DescriptorPoolCreateInfo& flags(DescriptorPoolCreateFlags flags)
-		{
-			m_descriptorPoolCreateInfo.flags = static_cast<VkDescriptorPoolCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& maxSets() const
+		DescriptorPoolCreateInfo& setMaxSets(uint32_t maxSets_)
 		{
-			return m_descriptorPoolCreateInfo.maxSets;
-		}
-
-		uint32_t& maxSets()
-		{
-			return m_descriptorPoolCreateInfo.maxSets;
-		}
-
-		DescriptorPoolCreateInfo& maxSets(uint32_t maxSets)
-		{
-			m_descriptorPoolCreateInfo.maxSets = maxSets;
+			maxSets = maxSets_;
 			return *this;
 		}
 
-		const uint32_t& poolSizeCount() const
+		DescriptorPoolCreateInfo& setPoolSizeCount(uint32_t poolSizeCount_)
 		{
-			return m_descriptorPoolCreateInfo.poolSizeCount;
-		}
-
-		uint32_t& poolSizeCount()
-		{
-			return m_descriptorPoolCreateInfo.poolSizeCount;
-		}
-
-		DescriptorPoolCreateInfo& poolSizeCount(uint32_t poolSizeCount)
-		{
-			m_descriptorPoolCreateInfo.poolSizeCount = poolSizeCount;
+			poolSizeCount = poolSizeCount_;
 			return *this;
 		}
 
-		const DescriptorPoolSize* pPoolSizes() const
+		DescriptorPoolCreateInfo& setPPoolSizes(const DescriptorPoolSize* pPoolSizes_)
 		{
-			return reinterpret_cast<const DescriptorPoolSize*>(m_descriptorPoolCreateInfo.pPoolSizes);
-		}
-
-		const DescriptorPoolSize* pPoolSizes()
-		{
-			return reinterpret_cast<const DescriptorPoolSize*>(m_descriptorPoolCreateInfo.pPoolSizes);
-		}
-
-		DescriptorPoolCreateInfo& pPoolSizes(const DescriptorPoolSize* pPoolSizes)
-		{
-			m_descriptorPoolCreateInfo.pPoolSizes = reinterpret_cast<const VkDescriptorPoolSize*>(pPoolSizes);
+			pPoolSizes = pPoolSizes_;
 			return *this;
 		}
 
 		operator const VkDescriptorPoolCreateInfo&() const
 		{
-			return m_descriptorPoolCreateInfo;
+			return *reinterpret_cast<const VkDescriptorPoolCreateInfo*>(this);
 		}
 
-	private:
-		VkDescriptorPoolCreateInfo m_descriptorPoolCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		DescriptorPoolCreateFlags flags;
+		uint32_t maxSets;
+		uint32_t poolSizeCount;
+		const DescriptorPoolSize* pPoolSizes;
 	};
 	static_assert(sizeof(DescriptorPoolCreateInfo) == sizeof(VkDescriptorPoolCreateInfo), "struct and wrapper have different size!");
 
@@ -17554,7 +11083,7 @@ namespace vk
 		eByRegion = VK_DEPENDENCY_BY_REGION_BIT
 	};
 
-	typedef Flags<DependencyFlagBits, VkDependencyFlags> DependencyFlags;
+	using DependencyFlags = Flags<DependencyFlagBits, VkDependencyFlags>;
 
 	inline DependencyFlags operator|(DependencyFlagBits bit0, DependencyFlagBits bit1)
 	{
@@ -17585,7 +11114,7 @@ namespace vk
 			return static_cast<Result>(vkBeginCommandBuffer(m_commandBuffer, reinterpret_cast<const VkCommandBufferBeginInfo*>(pBeginInfo)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void begin(const CommandBufferBeginInfo & beginInfo) const
 		{
 			Result result = static_cast<Result>(vkBeginCommandBuffer(m_commandBuffer, reinterpret_cast<const VkCommandBufferBeginInfo*>(&beginInfo)));
@@ -17594,16 +11123,16 @@ namespace vk
 				throw std::system_error(result, "vk::CommandBuffer::begin");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result end() const
 		{
 			return static_cast<Result>(vkEndCommandBuffer(m_commandBuffer));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void end() const
 		{
 			Result result = static_cast<Result>(vkEndCommandBuffer(m_commandBuffer));
@@ -17612,16 +11141,16 @@ namespace vk
 				throw std::system_error(result, "vk::CommandBuffer::end");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result reset(CommandBufferResetFlags flags) const
 		{
 			return static_cast<Result>(vkResetCommandBuffer(m_commandBuffer, static_cast<VkCommandBufferResetFlags>(flags)));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void reset(CommandBufferResetFlags flags) const
 		{
 			Result result = static_cast<Result>(vkResetCommandBuffer(m_commandBuffer, static_cast<VkCommandBufferResetFlags>(flags)));
@@ -17630,591 +11159,592 @@ namespace vk
 				throw std::system_error(result, "vk::CommandBuffer::reset");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void bindPipeline(PipelineBindPoint pipelineBindPoint, Pipeline pipeline) const
 		{
 			vkCmdBindPipeline(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipeline>(pipeline));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void bindPipeline(PipelineBindPoint pipelineBindPoint, Pipeline pipeline) const
 		{
 			vkCmdBindPipeline(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipeline>(pipeline));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void setViewport(uint32_t firstViewport, uint32_t viewportCount, const Viewport* pViewports) const
 		{
 			vkCmdSetViewport(m_commandBuffer, firstViewport, viewportCount, reinterpret_cast<const VkViewport*>(pViewports));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void setViewport(uint32_t firstViewport, eastl::vector<Viewport> const & viewports) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void setViewport(uint32_t firstViewport, ArrayProxy<const Viewport> viewports) const
 		{
-			vkCmdSetViewport(m_commandBuffer, firstViewport, static_cast<uint32_t>(viewports.size()), reinterpret_cast<const VkViewport*>(viewports.data()));
+			vkCmdSetViewport(m_commandBuffer, firstViewport, viewports.size(), reinterpret_cast<const VkViewport*>(viewports.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void setScissor(uint32_t firstScissor, uint32_t scissorCount, const Rect2D* pScissors) const
 		{
 			vkCmdSetScissor(m_commandBuffer, firstScissor, scissorCount, reinterpret_cast<const VkRect2D*>(pScissors));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void setScissor(uint32_t firstScissor, eastl::vector<Rect2D> const & scissors) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void setScissor(uint32_t firstScissor, ArrayProxy<const Rect2D> scissors) const
 		{
-			vkCmdSetScissor(m_commandBuffer, firstScissor, static_cast<uint32_t>(scissors.size()), reinterpret_cast<const VkRect2D*>(scissors.data()));
+			vkCmdSetScissor(m_commandBuffer, firstScissor, scissors.size(), reinterpret_cast<const VkRect2D*>(scissors.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setLineWidth(float lineWidth) const
 		{
 			vkCmdSetLineWidth(m_commandBuffer, lineWidth);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setLineWidth(float lineWidth) const
 		{
 			vkCmdSetLineWidth(m_commandBuffer, lineWidth);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) const
 		{
 			vkCmdSetDepthBias(m_commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setDepthBias(float depthBiasConstantFactor, float depthBiasClamp, float depthBiasSlopeFactor) const
 		{
 			vkCmdSetDepthBias(m_commandBuffer, depthBiasConstantFactor, depthBiasClamp, depthBiasSlopeFactor);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setBlendConstants(const float blendConstants[4]) const
 		{
 			vkCmdSetBlendConstants(m_commandBuffer, blendConstants);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setBlendConstants(const float blendConstants[4]) const
 		{
 			vkCmdSetBlendConstants(m_commandBuffer, blendConstants);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setDepthBounds(float minDepthBounds, float maxDepthBounds) const
 		{
 			vkCmdSetDepthBounds(m_commandBuffer, minDepthBounds, maxDepthBounds);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setDepthBounds(float minDepthBounds, float maxDepthBounds) const
 		{
 			vkCmdSetDepthBounds(m_commandBuffer, minDepthBounds, maxDepthBounds);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setStencilCompareMask(StencilFaceFlags faceMask, uint32_t compareMask) const
 		{
 			vkCmdSetStencilCompareMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), compareMask);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setStencilCompareMask(StencilFaceFlags faceMask, uint32_t compareMask) const
 		{
 			vkCmdSetStencilCompareMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), compareMask);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setStencilWriteMask(StencilFaceFlags faceMask, uint32_t writeMask) const
 		{
 			vkCmdSetStencilWriteMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), writeMask);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setStencilWriteMask(StencilFaceFlags faceMask, uint32_t writeMask) const
 		{
 			vkCmdSetStencilWriteMask(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), writeMask);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setStencilReference(StencilFaceFlags faceMask, uint32_t reference) const
 		{
 			vkCmdSetStencilReference(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), reference);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setStencilReference(StencilFaceFlags faceMask, uint32_t reference) const
 		{
 			vkCmdSetStencilReference(m_commandBuffer, static_cast<VkStencilFaceFlags>(faceMask), reference);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void bindDescriptorSets(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, uint32_t firstSet, uint32_t descriptorSetCount, const DescriptorSet* pDescriptorSets, uint32_t dynamicOffsetCount, const uint32_t* pDynamicOffsets) const
 		{
 			vkCmdBindDescriptorSets(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipelineLayout>(layout), firstSet, descriptorSetCount, reinterpret_cast<const VkDescriptorSet*>(pDescriptorSets), dynamicOffsetCount, pDynamicOffsets);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void bindDescriptorSets(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, uint32_t firstSet, eastl::vector<DescriptorSet> const & descriptorSets, eastl::vector<uint32_t> const & dynamicOffsets) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void bindDescriptorSets(PipelineBindPoint pipelineBindPoint, PipelineLayout layout, uint32_t firstSet, ArrayProxy<const DescriptorSet> descriptorSets, ArrayProxy<const uint32_t> dynamicOffsets) const
 		{
-			vkCmdBindDescriptorSets(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipelineLayout>(layout), firstSet, static_cast<uint32_t>(descriptorSets.size()), reinterpret_cast<const VkDescriptorSet*>(descriptorSets.data()), static_cast<uint32_t>(dynamicOffsets.size()), dynamicOffsets.data());
+			vkCmdBindDescriptorSets(m_commandBuffer, static_cast<VkPipelineBindPoint>(pipelineBindPoint), static_cast<VkPipelineLayout>(layout), firstSet, descriptorSets.size(), reinterpret_cast<const VkDescriptorSet*>(descriptorSets.data()), dynamicOffsets.size(), dynamicOffsets.data());
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void bindIndexBuffer(Buffer buffer, DeviceSize offset, IndexType indexType) const
 		{
 			vkCmdBindIndexBuffer(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, static_cast<VkIndexType>(indexType));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void bindIndexBuffer(Buffer buffer, DeviceSize offset, IndexType indexType) const
 		{
 			vkCmdBindIndexBuffer(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, static_cast<VkIndexType>(indexType));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void bindVertexBuffers(uint32_t firstBinding, uint32_t bindingCount, const Buffer* pBuffers, const DeviceSize* pOffsets) const
 		{
 			vkCmdBindVertexBuffers(m_commandBuffer, firstBinding, bindingCount, reinterpret_cast<const VkBuffer*>(pBuffers), pOffsets);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void bindVertexBuffers(uint32_t firstBinding, eastl::vector<Buffer> const & buffers, eastl::vector<DeviceSize> const & offsets) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void bindVertexBuffers(uint32_t firstBinding, ArrayProxy<const Buffer> buffers, ArrayProxy<const DeviceSize> offsets) const
 		{
 			if (buffers.size() != offsets.size())
 			{
 				throw std::logic_error("vk::CommandBuffer::bindVertexBuffers: buffers.size() != offsets.size()");
 			}
-			vkCmdBindVertexBuffers(m_commandBuffer, firstBinding, static_cast<uint32_t>(buffers.size()), reinterpret_cast<const VkBuffer*>(buffers.data()), offsets.data());
+			vkCmdBindVertexBuffers(m_commandBuffer, firstBinding, buffers.size(), reinterpret_cast<const VkBuffer*>(buffers.data()), offsets.data());
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
 		{
 			vkCmdDraw(m_commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) const
 		{
 			vkCmdDraw(m_commandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) const
 		{
 			vkCmdDrawIndexed(m_commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void drawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) const
 		{
 			vkCmdDrawIndexed(m_commandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void drawIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
 		{
 			vkCmdDrawIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void drawIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
 		{
 			vkCmdDrawIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void drawIndexedIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
 		{
 			vkCmdDrawIndexedIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void drawIndexedIndirect(Buffer buffer, DeviceSize offset, uint32_t drawCount, uint32_t stride) const
 		{
 			vkCmdDrawIndexedIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset, drawCount, stride);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void dispatch(uint32_t x, uint32_t y, uint32_t z) const
 		{
 			vkCmdDispatch(m_commandBuffer, x, y, z);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void dispatch(uint32_t x, uint32_t y, uint32_t z) const
 		{
 			vkCmdDispatch(m_commandBuffer, x, y, z);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void dispatchIndirect(Buffer buffer, DeviceSize offset) const
 		{
 			vkCmdDispatchIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void dispatchIndirect(Buffer buffer, DeviceSize offset) const
 		{
 			vkCmdDispatchIndirect(m_commandBuffer, static_cast<VkBuffer>(buffer), offset);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void copyBuffer(Buffer srcBuffer, Buffer dstBuffer, uint32_t regionCount, const BufferCopy* pRegions) const
 		{
 			vkCmdCopyBuffer(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkBuffer>(dstBuffer), regionCount, reinterpret_cast<const VkBufferCopy*>(pRegions));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void copyBuffer(Buffer srcBuffer, Buffer dstBuffer, eastl::vector<BufferCopy> const & regions) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void copyBuffer(Buffer srcBuffer, Buffer dstBuffer, ArrayProxy<const BufferCopy> regions) const
 		{
-			vkCmdCopyBuffer(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkBuffer>(dstBuffer), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkBufferCopy*>(regions.data()));
+			vkCmdCopyBuffer(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkBuffer>(dstBuffer), regions.size(), reinterpret_cast<const VkBufferCopy*>(regions.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void copyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageCopy* pRegions) const
 		{
 			vkCmdCopyImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageCopy*>(pRegions));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void copyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageCopy> const & regions) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void copyImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ArrayProxy<const ImageCopy> regions) const
 		{
-			vkCmdCopyImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkImageCopy*>(regions.data()));
+			vkCmdCopyImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regions.size(), reinterpret_cast<const VkImageCopy*>(regions.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void blitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageBlit* pRegions, Filter filter) const
 		{
 			vkCmdBlitImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageBlit*>(pRegions), static_cast<VkFilter>(filter));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void blitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageBlit> const & regions, Filter filter) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void blitImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ArrayProxy<const ImageBlit> regions, Filter filter) const
 		{
-			vkCmdBlitImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkImageBlit*>(regions.data()), static_cast<VkFilter>(filter));
+			vkCmdBlitImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regions.size(), reinterpret_cast<const VkImageBlit*>(regions.data()), static_cast<VkFilter>(filter));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void copyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const BufferImageCopy* pRegions) const
 		{
 			vkCmdCopyBufferToImage(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkBufferImageCopy*>(pRegions));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void copyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, eastl::vector<BufferImageCopy> const & regions) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void copyBufferToImage(Buffer srcBuffer, Image dstImage, ImageLayout dstImageLayout, ArrayProxy<const BufferImageCopy> regions) const
 		{
-			vkCmdCopyBufferToImage(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkBufferImageCopy*>(regions.data()));
+			vkCmdCopyBufferToImage(m_commandBuffer, static_cast<VkBuffer>(srcBuffer), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regions.size(), reinterpret_cast<const VkBufferImageCopy*>(regions.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void copyImageToBuffer(Image srcImage, ImageLayout srcImageLayout, Buffer dstBuffer, uint32_t regionCount, const BufferImageCopy* pRegions) const
 		{
 			vkCmdCopyImageToBuffer(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkBuffer>(dstBuffer), regionCount, reinterpret_cast<const VkBufferImageCopy*>(pRegions));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void copyImageToBuffer(Image srcImage, ImageLayout srcImageLayout, Buffer dstBuffer, eastl::vector<BufferImageCopy> const & regions) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void copyImageToBuffer(Image srcImage, ImageLayout srcImageLayout, Buffer dstBuffer, ArrayProxy<const BufferImageCopy> regions) const
 		{
-			vkCmdCopyImageToBuffer(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkBuffer>(dstBuffer), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkBufferImageCopy*>(regions.data()));
+			vkCmdCopyImageToBuffer(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkBuffer>(dstBuffer), regions.size(), reinterpret_cast<const VkBufferImageCopy*>(regions.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void updateBuffer(Buffer dstBuffer, DeviceSize dstOffset, DeviceSize dataSize, const uint32_t* pData) const
 		{
 			vkCmdUpdateBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, dataSize, pData);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		template <typename T>
-		void updateBuffer(Buffer dstBuffer, DeviceSize dstOffset, eastl::vector<T> const & data) const
+		void updateBuffer(Buffer dstBuffer, DeviceSize dstOffset, ArrayProxy<const T> data) const
 		{
 			static_assert(sizeof(T) % sizeof(uint32_t) == 0, "wrong size of template type T");
-			vkCmdUpdateBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, static_cast<DeviceSize>(data.size() * sizeof(T)), reinterpret_cast<const uint32_t*>(data.data()));
+			vkCmdUpdateBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, data.size() * sizeof(T), reinterpret_cast<const uint32_t*>(data.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void fillBuffer(Buffer dstBuffer, DeviceSize dstOffset, DeviceSize size, uint32_t data) const
 		{
 			vkCmdFillBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, size, data);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void fillBuffer(Buffer dstBuffer, DeviceSize dstOffset, DeviceSize size, uint32_t data) const
 		{
 			vkCmdFillBuffer(m_commandBuffer, static_cast<VkBuffer>(dstBuffer), dstOffset, size, data);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void clearColorImage(Image image, ImageLayout imageLayout, const ClearColorValue* pColor, uint32_t rangeCount, const ImageSubresourceRange* pRanges) const
 		{
 			vkCmdClearColorImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearColorValue*>(pColor), rangeCount, reinterpret_cast<const VkImageSubresourceRange*>(pRanges));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void clearColorImage(Image image, ImageLayout imageLayout, const ClearColorValue & color, eastl::vector<ImageSubresourceRange> const & ranges) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void clearColorImage(Image image, ImageLayout imageLayout, const ClearColorValue & color, ArrayProxy<const ImageSubresourceRange> ranges) const
 		{
-			vkCmdClearColorImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearColorValue*>(&color), static_cast<uint32_t>(ranges.size()), reinterpret_cast<const VkImageSubresourceRange*>(ranges.data()));
+			vkCmdClearColorImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearColorValue*>(&color), ranges.size(), reinterpret_cast<const VkImageSubresourceRange*>(ranges.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void clearDepthStencilImage(Image image, ImageLayout imageLayout, const ClearDepthStencilValue* pDepthStencil, uint32_t rangeCount, const ImageSubresourceRange* pRanges) const
 		{
 			vkCmdClearDepthStencilImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearDepthStencilValue*>(pDepthStencil), rangeCount, reinterpret_cast<const VkImageSubresourceRange*>(pRanges));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void clearDepthStencilImage(Image image, ImageLayout imageLayout, const ClearDepthStencilValue & depthStencil, eastl::vector<ImageSubresourceRange> const & ranges) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void clearDepthStencilImage(Image image, ImageLayout imageLayout, const ClearDepthStencilValue & depthStencil, ArrayProxy<const ImageSubresourceRange> ranges) const
 		{
-			vkCmdClearDepthStencilImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearDepthStencilValue*>(&depthStencil), static_cast<uint32_t>(ranges.size()), reinterpret_cast<const VkImageSubresourceRange*>(ranges.data()));
+			vkCmdClearDepthStencilImage(m_commandBuffer, static_cast<VkImage>(image), static_cast<VkImageLayout>(imageLayout), reinterpret_cast<const VkClearDepthStencilValue*>(&depthStencil), ranges.size(), reinterpret_cast<const VkImageSubresourceRange*>(ranges.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void clearAttachments(uint32_t attachmentCount, const ClearAttachment* pAttachments, uint32_t rectCount, const ClearRect* pRects) const
 		{
 			vkCmdClearAttachments(m_commandBuffer, attachmentCount, reinterpret_cast<const VkClearAttachment*>(pAttachments), rectCount, reinterpret_cast<const VkClearRect*>(pRects));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void clearAttachments(eastl::vector<ClearAttachment> const & attachments, eastl::vector<ClearRect> const & rects) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void clearAttachments(ArrayProxy<const ClearAttachment> attachments, ArrayProxy<const ClearRect> rects) const
 		{
-			vkCmdClearAttachments(m_commandBuffer, static_cast<uint32_t>(attachments.size()), reinterpret_cast<const VkClearAttachment*>(attachments.data()), static_cast<uint32_t>(rects.size()), reinterpret_cast<const VkClearRect*>(rects.data()));
+			vkCmdClearAttachments(m_commandBuffer, attachments.size(), reinterpret_cast<const VkClearAttachment*>(attachments.data()), rects.size(), reinterpret_cast<const VkClearRect*>(rects.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void resolveImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, uint32_t regionCount, const ImageResolve* pRegions) const
 		{
 			vkCmdResolveImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regionCount, reinterpret_cast<const VkImageResolve*>(pRegions));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void resolveImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, eastl::vector<ImageResolve> const & regions) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void resolveImage(Image srcImage, ImageLayout srcImageLayout, Image dstImage, ImageLayout dstImageLayout, ArrayProxy<const ImageResolve> regions) const
 		{
-			vkCmdResolveImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), static_cast<uint32_t>(regions.size()), reinterpret_cast<const VkImageResolve*>(regions.data()));
+			vkCmdResolveImage(m_commandBuffer, static_cast<VkImage>(srcImage), static_cast<VkImageLayout>(srcImageLayout), static_cast<VkImage>(dstImage), static_cast<VkImageLayout>(dstImageLayout), regions.size(), reinterpret_cast<const VkImageResolve*>(regions.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void setEvent(Event event, PipelineStageFlags stageMask) const
 		{
 			vkCmdSetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setEvent(Event event, PipelineStageFlags stageMask) const
 		{
 			vkCmdSetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void resetEvent(Event event, PipelineStageFlags stageMask) const
 		{
 			vkCmdResetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void resetEvent(Event event, PipelineStageFlags stageMask) const
 		{
 			vkCmdResetEvent(m_commandBuffer, static_cast<VkEvent>(event), static_cast<VkPipelineStageFlags>(stageMask));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void waitEvents(uint32_t eventCount, const Event* pEvents, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, uint32_t memoryBarrierCount, const MemoryBarrier* pMemoryBarriers, uint32_t bufferMemoryBarrierCount, const BufferMemoryBarrier* pBufferMemoryBarriers, uint32_t imageMemoryBarrierCount, const ImageMemoryBarrier* pImageMemoryBarriers) const
 		{
 			vkCmdWaitEvents(m_commandBuffer, eventCount, reinterpret_cast<const VkEvent*>(pEvents), static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), memoryBarrierCount, reinterpret_cast<const VkMemoryBarrier*>(pMemoryBarriers), bufferMemoryBarrierCount, reinterpret_cast<const VkBufferMemoryBarrier*>(pBufferMemoryBarriers), imageMemoryBarrierCount, reinterpret_cast<const VkImageMemoryBarrier*>(pImageMemoryBarriers));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void waitEvents(eastl::vector<Event> const & events, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, eastl::vector<MemoryBarrier> const & memoryBarriers, eastl::vector<BufferMemoryBarrier> const & bufferMemoryBarriers, eastl::vector<ImageMemoryBarrier> const & imageMemoryBarriers) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void waitEvents(ArrayProxy<const Event> events, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, ArrayProxy<const MemoryBarrier> memoryBarriers, ArrayProxy<const BufferMemoryBarrier> bufferMemoryBarriers, ArrayProxy<const ImageMemoryBarrier> imageMemoryBarriers) const
 		{
-			vkCmdWaitEvents(m_commandBuffer, static_cast<uint32_t>(events.size()), reinterpret_cast<const VkEvent*>(events.data()), static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<uint32_t>(memoryBarriers.size()), reinterpret_cast<const VkMemoryBarrier*>(memoryBarriers.data()), static_cast<uint32_t>(bufferMemoryBarriers.size()), reinterpret_cast<const VkBufferMemoryBarrier*>(bufferMemoryBarriers.data()), static_cast<uint32_t>(imageMemoryBarriers.size()), reinterpret_cast<const VkImageMemoryBarrier*>(imageMemoryBarriers.data()));
+			vkCmdWaitEvents(m_commandBuffer, events.size(), reinterpret_cast<const VkEvent*>(events.data()), static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), memoryBarriers.size(), reinterpret_cast<const VkMemoryBarrier*>(memoryBarriers.data()), bufferMemoryBarriers.size(), reinterpret_cast<const VkBufferMemoryBarrier*>(bufferMemoryBarriers.data()), imageMemoryBarriers.size(), reinterpret_cast<const VkImageMemoryBarrier*>(imageMemoryBarriers.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void pipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags, uint32_t memoryBarrierCount, const MemoryBarrier* pMemoryBarriers, uint32_t bufferMemoryBarrierCount, const BufferMemoryBarrier* pBufferMemoryBarriers, uint32_t imageMemoryBarrierCount, const ImageMemoryBarrier* pImageMemoryBarriers) const
 		{
 			vkCmdPipelineBarrier(m_commandBuffer, static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<VkDependencyFlags>(dependencyFlags), memoryBarrierCount, reinterpret_cast<const VkMemoryBarrier*>(pMemoryBarriers), bufferMemoryBarrierCount, reinterpret_cast<const VkBufferMemoryBarrier*>(pBufferMemoryBarriers), imageMemoryBarrierCount, reinterpret_cast<const VkImageMemoryBarrier*>(pImageMemoryBarriers));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void pipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags, eastl::vector<MemoryBarrier> const & memoryBarriers, eastl::vector<BufferMemoryBarrier> const & bufferMemoryBarriers, eastl::vector<ImageMemoryBarrier> const & imageMemoryBarriers) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void pipelineBarrier(PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, DependencyFlags dependencyFlags, ArrayProxy<const MemoryBarrier> memoryBarriers, ArrayProxy<const BufferMemoryBarrier> bufferMemoryBarriers, ArrayProxy<const ImageMemoryBarrier> imageMemoryBarriers) const
 		{
-			vkCmdPipelineBarrier(m_commandBuffer, static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<VkDependencyFlags>(dependencyFlags), static_cast<uint32_t>(memoryBarriers.size()), reinterpret_cast<const VkMemoryBarrier*>(memoryBarriers.data()), static_cast<uint32_t>(bufferMemoryBarriers.size()), reinterpret_cast<const VkBufferMemoryBarrier*>(bufferMemoryBarriers.data()), static_cast<uint32_t>(imageMemoryBarriers.size()), reinterpret_cast<const VkImageMemoryBarrier*>(imageMemoryBarriers.data()));
+			vkCmdPipelineBarrier(m_commandBuffer, static_cast<VkPipelineStageFlags>(srcStageMask), static_cast<VkPipelineStageFlags>(dstStageMask), static_cast<VkDependencyFlags>(dependencyFlags), memoryBarriers.size(), reinterpret_cast<const VkMemoryBarrier*>(memoryBarriers.data()), bufferMemoryBarriers.size(), reinterpret_cast<const VkBufferMemoryBarrier*>(bufferMemoryBarriers.data()), imageMemoryBarriers.size(), reinterpret_cast<const VkImageMemoryBarrier*>(imageMemoryBarriers.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void beginQuery(QueryPool queryPool, uint32_t query, QueryControlFlags flags) const
 		{
 			vkCmdBeginQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query, static_cast<VkQueryControlFlags>(flags));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void beginQuery(QueryPool queryPool, uint32_t query, QueryControlFlags flags) const
 		{
 			vkCmdBeginQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query, static_cast<VkQueryControlFlags>(flags));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void endQuery(QueryPool queryPool, uint32_t query) const
 		{
 			vkCmdEndQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void endQuery(QueryPool queryPool, uint32_t query) const
 		{
 			vkCmdEndQuery(m_commandBuffer, static_cast<VkQueryPool>(queryPool), query);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void resetQueryPool(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount) const
 		{
 			vkCmdResetQueryPool(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void resetQueryPool(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount) const
 		{
 			vkCmdResetQueryPool(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void writeTimestamp(PipelineStageFlagBits pipelineStage, QueryPool queryPool, uint32_t query) const
 		{
 			vkCmdWriteTimestamp(m_commandBuffer, static_cast<VkPipelineStageFlagBits>(pipelineStage), static_cast<VkQueryPool>(queryPool), query);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void writeTimestamp(PipelineStageFlagBits pipelineStage, QueryPool queryPool, uint32_t query) const
 		{
 			vkCmdWriteTimestamp(m_commandBuffer, static_cast<VkPipelineStageFlagBits>(pipelineStage), static_cast<VkQueryPool>(queryPool), query);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void copyQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize stride, QueryResultFlags flags) const
 		{
 			vkCmdCopyQueryPoolResults(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, static_cast<VkBuffer>(dstBuffer), dstOffset, stride, static_cast<VkQueryResultFlags>(flags));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void copyQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, Buffer dstBuffer, DeviceSize dstOffset, DeviceSize stride, QueryResultFlags flags) const
 		{
 			vkCmdCopyQueryPoolResults(m_commandBuffer, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, static_cast<VkBuffer>(dstBuffer), dstOffset, stride, static_cast<VkQueryResultFlags>(flags));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void pushConstants(PipelineLayout layout, ShaderStageFlags stageFlags, uint32_t offset, uint32_t size, const void* pValues) const
 		{
 			vkCmdPushConstants(m_commandBuffer, static_cast<VkPipelineLayout>(layout), static_cast<VkShaderStageFlags>(stageFlags), offset, size, pValues);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void pushConstants(PipelineLayout layout, ShaderStageFlags stageFlags, uint32_t offset, eastl::vector<uint8_t> const & values) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename T>
+		void pushConstants(PipelineLayout layout, ShaderStageFlags stageFlags, uint32_t offset, ArrayProxy<const T> values) const
 		{
-			vkCmdPushConstants(m_commandBuffer, static_cast<VkPipelineLayout>(layout), static_cast<VkShaderStageFlags>(stageFlags), offset, static_cast<uint32_t>(values.size()), values.data());
+			vkCmdPushConstants(m_commandBuffer, static_cast<VkPipelineLayout>(layout), static_cast<VkShaderStageFlags>(stageFlags), offset, values.size() * sizeof(T), reinterpret_cast<const void*>(values.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void beginRenderPass(const RenderPassBeginInfo* pRenderPassBegin, SubpassContents contents) const
 		{
 			vkCmdBeginRenderPass(m_commandBuffer, reinterpret_cast<const VkRenderPassBeginInfo*>(pRenderPassBegin), static_cast<VkSubpassContents>(contents));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void beginRenderPass(const RenderPassBeginInfo & renderPassBegin, SubpassContents contents) const
 		{
 			vkCmdBeginRenderPass(m_commandBuffer, reinterpret_cast<const VkRenderPassBeginInfo*>(&renderPassBegin), static_cast<VkSubpassContents>(contents));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void nextSubpass(SubpassContents contents) const
 		{
 			vkCmdNextSubpass(m_commandBuffer, static_cast<VkSubpassContents>(contents));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void nextSubpass(SubpassContents contents) const
 		{
 			vkCmdNextSubpass(m_commandBuffer, static_cast<VkSubpassContents>(contents));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void endRenderPass() const
 		{
 			vkCmdEndRenderPass(m_commandBuffer);
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void endRenderPass() const
 		{
 			vkCmdEndRenderPass(m_commandBuffer);
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void executeCommands(uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers) const
 		{
 			vkCmdExecuteCommands(m_commandBuffer, commandBufferCount, reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void executeCommands(eastl::vector<CommandBuffer> const & commandBuffers) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void executeCommands(ArrayProxy<const CommandBuffer> commandBuffers) const
 		{
-			vkCmdExecuteCommands(m_commandBuffer, static_cast<uint32_t>(commandBuffers.size()), reinterpret_cast<const VkCommandBuffer*>(commandBuffers.data()));
+			vkCmdExecuteCommands(m_commandBuffer, commandBuffers.size(), reinterpret_cast<const VkCommandBuffer*>(commandBuffers.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #if !defined(VK_CPP_TYPESAFE_CONVERSION)
 		explicit
@@ -18239,524 +11769,290 @@ namespace vk
 	};
 	static_assert(sizeof(CommandBuffer) == sizeof(VkCommandBuffer), "handle and wrapper have different size!");
 
-	class SubpassDependency
+	struct SubpassDependency
 	{
-	public:
 		SubpassDependency()
 			: SubpassDependency(0, 0, PipelineStageFlags(), PipelineStageFlags(), AccessFlags(), AccessFlags(), DependencyFlags())
 		{}
 
-		SubpassDependency(uint32_t srcSubpass, uint32_t dstSubpass, PipelineStageFlags srcStageMask, PipelineStageFlags dstStageMask, AccessFlags srcAccessMask, AccessFlags dstAccessMask, DependencyFlags dependencyFlags)
+		SubpassDependency(uint32_t srcSubpass_, uint32_t dstSubpass_, PipelineStageFlags srcStageMask_, PipelineStageFlags dstStageMask_, AccessFlags srcAccessMask_, AccessFlags dstAccessMask_, DependencyFlags dependencyFlags_)
 		{
-			m_subpassDependency.srcSubpass = srcSubpass;
-			m_subpassDependency.dstSubpass = dstSubpass;
-			m_subpassDependency.srcStageMask = static_cast<VkPipelineStageFlags>(srcStageMask);
-			m_subpassDependency.dstStageMask = static_cast<VkPipelineStageFlags>(dstStageMask);
-			m_subpassDependency.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
-			m_subpassDependency.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
-			m_subpassDependency.dependencyFlags = static_cast<VkDependencyFlags>(dependencyFlags);
+			srcSubpass = srcSubpass_;
+			dstSubpass = dstSubpass_;
+			srcStageMask = srcStageMask_;
+			dstStageMask = dstStageMask_;
+			srcAccessMask = srcAccessMask_;
+			dstAccessMask = dstAccessMask_;
+			dependencyFlags = dependencyFlags_;
 		}
 
 		SubpassDependency(VkSubpassDependency const & rhs)
-			: m_subpassDependency(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SubpassDependency));
 		}
 
 		SubpassDependency& operator=(VkSubpassDependency const & rhs)
 		{
-			m_subpassDependency = rhs;
+			memcpy(this, &rhs, sizeof(SubpassDependency));
 			return *this;
 		}
 
-		const uint32_t& srcSubpass() const
+		SubpassDependency& setSrcSubpass(uint32_t srcSubpass_)
 		{
-			return m_subpassDependency.srcSubpass;
-		}
-
-		uint32_t& srcSubpass()
-		{
-			return m_subpassDependency.srcSubpass;
-		}
-
-		SubpassDependency& srcSubpass(uint32_t srcSubpass)
-		{
-			m_subpassDependency.srcSubpass = srcSubpass;
+			srcSubpass = srcSubpass_;
 			return *this;
 		}
 
-		const uint32_t& dstSubpass() const
+		SubpassDependency& setDstSubpass(uint32_t dstSubpass_)
 		{
-			return m_subpassDependency.dstSubpass;
-		}
-
-		uint32_t& dstSubpass()
-		{
-			return m_subpassDependency.dstSubpass;
-		}
-
-		SubpassDependency& dstSubpass(uint32_t dstSubpass)
-		{
-			m_subpassDependency.dstSubpass = dstSubpass;
+			dstSubpass = dstSubpass_;
 			return *this;
 		}
 
-		const PipelineStageFlags& srcStageMask() const
+		SubpassDependency& setSrcStageMask(PipelineStageFlags srcStageMask_)
 		{
-			return reinterpret_cast<const PipelineStageFlags&>(m_subpassDependency.srcStageMask);
-		}
-
-		PipelineStageFlags& srcStageMask()
-		{
-			return reinterpret_cast<PipelineStageFlags&>(m_subpassDependency.srcStageMask);
-		}
-
-		SubpassDependency& srcStageMask(PipelineStageFlags srcStageMask)
-		{
-			m_subpassDependency.srcStageMask = static_cast<VkPipelineStageFlags>(srcStageMask);
+			srcStageMask = srcStageMask_;
 			return *this;
 		}
 
-		const PipelineStageFlags& dstStageMask() const
+		SubpassDependency& setDstStageMask(PipelineStageFlags dstStageMask_)
 		{
-			return reinterpret_cast<const PipelineStageFlags&>(m_subpassDependency.dstStageMask);
-		}
-
-		PipelineStageFlags& dstStageMask()
-		{
-			return reinterpret_cast<PipelineStageFlags&>(m_subpassDependency.dstStageMask);
-		}
-
-		SubpassDependency& dstStageMask(PipelineStageFlags dstStageMask)
-		{
-			m_subpassDependency.dstStageMask = static_cast<VkPipelineStageFlags>(dstStageMask);
+			dstStageMask = dstStageMask_;
 			return *this;
 		}
 
-		const AccessFlags& srcAccessMask() const
+		SubpassDependency& setSrcAccessMask(AccessFlags srcAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_subpassDependency.srcAccessMask);
-		}
-
-		AccessFlags& srcAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_subpassDependency.srcAccessMask);
-		}
-
-		SubpassDependency& srcAccessMask(AccessFlags srcAccessMask)
-		{
-			m_subpassDependency.srcAccessMask = static_cast<VkAccessFlags>(srcAccessMask);
+			srcAccessMask = srcAccessMask_;
 			return *this;
 		}
 
-		const AccessFlags& dstAccessMask() const
+		SubpassDependency& setDstAccessMask(AccessFlags dstAccessMask_)
 		{
-			return reinterpret_cast<const AccessFlags&>(m_subpassDependency.dstAccessMask);
-		}
-
-		AccessFlags& dstAccessMask()
-		{
-			return reinterpret_cast<AccessFlags&>(m_subpassDependency.dstAccessMask);
-		}
-
-		SubpassDependency& dstAccessMask(AccessFlags dstAccessMask)
-		{
-			m_subpassDependency.dstAccessMask = static_cast<VkAccessFlags>(dstAccessMask);
+			dstAccessMask = dstAccessMask_;
 			return *this;
 		}
 
-		const DependencyFlags& dependencyFlags() const
+		SubpassDependency& setDependencyFlags(DependencyFlags dependencyFlags_)
 		{
-			return reinterpret_cast<const DependencyFlags&>(m_subpassDependency.dependencyFlags);
-		}
-
-		DependencyFlags& dependencyFlags()
-		{
-			return reinterpret_cast<DependencyFlags&>(m_subpassDependency.dependencyFlags);
-		}
-
-		SubpassDependency& dependencyFlags(DependencyFlags dependencyFlags)
-		{
-			m_subpassDependency.dependencyFlags = static_cast<VkDependencyFlags>(dependencyFlags);
+			dependencyFlags = dependencyFlags_;
 			return *this;
 		}
 
 		operator const VkSubpassDependency&() const
 		{
-			return m_subpassDependency;
+			return *reinterpret_cast<const VkSubpassDependency*>(this);
 		}
 
-	private:
-		VkSubpassDependency m_subpassDependency;
+		uint32_t srcSubpass;
+		uint32_t dstSubpass;
+		PipelineStageFlags srcStageMask;
+		PipelineStageFlags dstStageMask;
+		AccessFlags srcAccessMask;
+		AccessFlags dstAccessMask;
+		DependencyFlags dependencyFlags;
 	};
 	static_assert(sizeof(SubpassDependency) == sizeof(VkSubpassDependency), "struct and wrapper have different size!");
 
-	class RenderPassCreateInfo
+	struct RenderPassCreateInfo
 	{
-	public:
 		RenderPassCreateInfo()
 			: RenderPassCreateInfo(RenderPassCreateFlags(), 0, nullptr, 0, nullptr, 0, nullptr)
 		{}
 
-		RenderPassCreateInfo(RenderPassCreateFlags flags, uint32_t attachmentCount, const AttachmentDescription* pAttachments, uint32_t subpassCount, const SubpassDescription* pSubpasses, uint32_t dependencyCount, const SubpassDependency* pDependencies)
+		RenderPassCreateInfo(RenderPassCreateFlags flags_, uint32_t attachmentCount_, const AttachmentDescription* pAttachments_, uint32_t subpassCount_, const SubpassDescription* pSubpasses_, uint32_t dependencyCount_, const SubpassDependency* pDependencies_)
 		{
-			m_renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-			m_renderPassCreateInfo.pNext = nullptr;
-			m_renderPassCreateInfo.flags = static_cast<VkRenderPassCreateFlags>(flags);
-			m_renderPassCreateInfo.attachmentCount = attachmentCount;
-			m_renderPassCreateInfo.pAttachments = reinterpret_cast<const VkAttachmentDescription*>(pAttachments);
-			m_renderPassCreateInfo.subpassCount = subpassCount;
-			m_renderPassCreateInfo.pSubpasses = reinterpret_cast<const VkSubpassDescription*>(pSubpasses);
-			m_renderPassCreateInfo.dependencyCount = dependencyCount;
-			m_renderPassCreateInfo.pDependencies = reinterpret_cast<const VkSubpassDependency*>(pDependencies);
+			sType = StructureType::eRenderPassCreateInfo;
+			pNext = nullptr;
+			flags = flags_;
+			attachmentCount = attachmentCount_;
+			pAttachments = pAttachments_;
+			subpassCount = subpassCount_;
+			pSubpasses = pSubpasses_;
+			dependencyCount = dependencyCount_;
+			pDependencies = pDependencies_;
 		}
 
 		RenderPassCreateInfo(VkRenderPassCreateInfo const & rhs)
-			: m_renderPassCreateInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(RenderPassCreateInfo));
 		}
 
 		RenderPassCreateInfo& operator=(VkRenderPassCreateInfo const & rhs)
 		{
-			m_renderPassCreateInfo = rhs;
+			memcpy(this, &rhs, sizeof(RenderPassCreateInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		RenderPassCreateInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_renderPassCreateInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_renderPassCreateInfo.sType);
-		}
-
-		RenderPassCreateInfo& sType(StructureType sType)
-		{
-			m_renderPassCreateInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		RenderPassCreateInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_renderPassCreateInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_renderPassCreateInfo.pNext);
-		}
-
-		RenderPassCreateInfo& pNext(const void* pNext)
-		{
-			m_renderPassCreateInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const RenderPassCreateFlags& flags() const
+		RenderPassCreateInfo& setFlags(RenderPassCreateFlags flags_)
 		{
-			return reinterpret_cast<const RenderPassCreateFlags&>(m_renderPassCreateInfo.flags);
-		}
-
-		RenderPassCreateFlags& flags()
-		{
-			return reinterpret_cast<RenderPassCreateFlags&>(m_renderPassCreateInfo.flags);
-		}
-
-		RenderPassCreateInfo& flags(RenderPassCreateFlags flags)
-		{
-			m_renderPassCreateInfo.flags = static_cast<VkRenderPassCreateFlags>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const uint32_t& attachmentCount() const
+		RenderPassCreateInfo& setAttachmentCount(uint32_t attachmentCount_)
 		{
-			return m_renderPassCreateInfo.attachmentCount;
-		}
-
-		uint32_t& attachmentCount()
-		{
-			return m_renderPassCreateInfo.attachmentCount;
-		}
-
-		RenderPassCreateInfo& attachmentCount(uint32_t attachmentCount)
-		{
-			m_renderPassCreateInfo.attachmentCount = attachmentCount;
+			attachmentCount = attachmentCount_;
 			return *this;
 		}
 
-		const AttachmentDescription* pAttachments() const
+		RenderPassCreateInfo& setPAttachments(const AttachmentDescription* pAttachments_)
 		{
-			return reinterpret_cast<const AttachmentDescription*>(m_renderPassCreateInfo.pAttachments);
-		}
-
-		const AttachmentDescription* pAttachments()
-		{
-			return reinterpret_cast<const AttachmentDescription*>(m_renderPassCreateInfo.pAttachments);
-		}
-
-		RenderPassCreateInfo& pAttachments(const AttachmentDescription* pAttachments)
-		{
-			m_renderPassCreateInfo.pAttachments = reinterpret_cast<const VkAttachmentDescription*>(pAttachments);
+			pAttachments = pAttachments_;
 			return *this;
 		}
 
-		const uint32_t& subpassCount() const
+		RenderPassCreateInfo& setSubpassCount(uint32_t subpassCount_)
 		{
-			return m_renderPassCreateInfo.subpassCount;
-		}
-
-		uint32_t& subpassCount()
-		{
-			return m_renderPassCreateInfo.subpassCount;
-		}
-
-		RenderPassCreateInfo& subpassCount(uint32_t subpassCount)
-		{
-			m_renderPassCreateInfo.subpassCount = subpassCount;
+			subpassCount = subpassCount_;
 			return *this;
 		}
 
-		const SubpassDescription* pSubpasses() const
+		RenderPassCreateInfo& setPSubpasses(const SubpassDescription* pSubpasses_)
 		{
-			return reinterpret_cast<const SubpassDescription*>(m_renderPassCreateInfo.pSubpasses);
-		}
-
-		const SubpassDescription* pSubpasses()
-		{
-			return reinterpret_cast<const SubpassDescription*>(m_renderPassCreateInfo.pSubpasses);
-		}
-
-		RenderPassCreateInfo& pSubpasses(const SubpassDescription* pSubpasses)
-		{
-			m_renderPassCreateInfo.pSubpasses = reinterpret_cast<const VkSubpassDescription*>(pSubpasses);
+			pSubpasses = pSubpasses_;
 			return *this;
 		}
 
-		const uint32_t& dependencyCount() const
+		RenderPassCreateInfo& setDependencyCount(uint32_t dependencyCount_)
 		{
-			return m_renderPassCreateInfo.dependencyCount;
-		}
-
-		uint32_t& dependencyCount()
-		{
-			return m_renderPassCreateInfo.dependencyCount;
-		}
-
-		RenderPassCreateInfo& dependencyCount(uint32_t dependencyCount)
-		{
-			m_renderPassCreateInfo.dependencyCount = dependencyCount;
+			dependencyCount = dependencyCount_;
 			return *this;
 		}
 
-		const SubpassDependency* pDependencies() const
+		RenderPassCreateInfo& setPDependencies(const SubpassDependency* pDependencies_)
 		{
-			return reinterpret_cast<const SubpassDependency*>(m_renderPassCreateInfo.pDependencies);
-		}
-
-		const SubpassDependency* pDependencies()
-		{
-			return reinterpret_cast<const SubpassDependency*>(m_renderPassCreateInfo.pDependencies);
-		}
-
-		RenderPassCreateInfo& pDependencies(const SubpassDependency* pDependencies)
-		{
-			m_renderPassCreateInfo.pDependencies = reinterpret_cast<const VkSubpassDependency*>(pDependencies);
+			pDependencies = pDependencies_;
 			return *this;
 		}
 
 		operator const VkRenderPassCreateInfo&() const
 		{
-			return m_renderPassCreateInfo;
+			return *reinterpret_cast<const VkRenderPassCreateInfo*>(this);
 		}
 
-	private:
-		VkRenderPassCreateInfo m_renderPassCreateInfo;
+		StructureType sType;
+		const void* pNext;
+		RenderPassCreateFlags flags;
+		uint32_t attachmentCount;
+		const AttachmentDescription* pAttachments;
+		uint32_t subpassCount;
+		const SubpassDescription* pSubpasses;
+		uint32_t dependencyCount;
+		const SubpassDependency* pDependencies;
 	};
 	static_assert(sizeof(RenderPassCreateInfo) == sizeof(VkRenderPassCreateInfo), "struct and wrapper have different size!");
 
-	class SubmitInfo
+	struct SubmitInfo
 	{
-	public:
 		SubmitInfo()
 			: SubmitInfo(0, nullptr, nullptr, 0, nullptr, 0, nullptr)
 		{}
 
-		SubmitInfo(uint32_t waitSemaphoreCount, const Semaphore* pWaitSemaphores, const PipelineStageFlags* pWaitDstStageMask, uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers, uint32_t signalSemaphoreCount, const Semaphore* pSignalSemaphores)
+		SubmitInfo(uint32_t waitSemaphoreCount_, const Semaphore* pWaitSemaphores_, const PipelineStageFlags* pWaitDstStageMask_, uint32_t commandBufferCount_, const CommandBuffer* pCommandBuffers_, uint32_t signalSemaphoreCount_, const Semaphore* pSignalSemaphores_)
 		{
-			m_submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			m_submitInfo.pNext = nullptr;
-			m_submitInfo.waitSemaphoreCount = waitSemaphoreCount;
-			m_submitInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
-			m_submitInfo.pWaitDstStageMask = reinterpret_cast<const VkPipelineStageFlags*>(pWaitDstStageMask);
-			m_submitInfo.commandBufferCount = commandBufferCount;
-			m_submitInfo.pCommandBuffers = reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers);
-			m_submitInfo.signalSemaphoreCount = signalSemaphoreCount;
-			m_submitInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
+			sType = StructureType::eSubmitInfo;
+			pNext = nullptr;
+			waitSemaphoreCount = waitSemaphoreCount_;
+			pWaitSemaphores = pWaitSemaphores_;
+			pWaitDstStageMask = pWaitDstStageMask_;
+			commandBufferCount = commandBufferCount_;
+			pCommandBuffers = pCommandBuffers_;
+			signalSemaphoreCount = signalSemaphoreCount_;
+			pSignalSemaphores = pSignalSemaphores_;
 		}
 
 		SubmitInfo(VkSubmitInfo const & rhs)
-			: m_submitInfo(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SubmitInfo));
 		}
 
 		SubmitInfo& operator=(VkSubmitInfo const & rhs)
 		{
-			m_submitInfo = rhs;
+			memcpy(this, &rhs, sizeof(SubmitInfo));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		SubmitInfo& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_submitInfo.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_submitInfo.sType);
-		}
-
-		SubmitInfo& sType(StructureType sType)
-		{
-			m_submitInfo.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		SubmitInfo& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_submitInfo.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_submitInfo.pNext);
-		}
-
-		SubmitInfo& pNext(const void* pNext)
-		{
-			m_submitInfo.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const uint32_t& waitSemaphoreCount() const
+		SubmitInfo& setWaitSemaphoreCount(uint32_t waitSemaphoreCount_)
 		{
-			return m_submitInfo.waitSemaphoreCount;
-		}
-
-		uint32_t& waitSemaphoreCount()
-		{
-			return m_submitInfo.waitSemaphoreCount;
-		}
-
-		SubmitInfo& waitSemaphoreCount(uint32_t waitSemaphoreCount)
-		{
-			m_submitInfo.waitSemaphoreCount = waitSemaphoreCount;
+			waitSemaphoreCount = waitSemaphoreCount_;
 			return *this;
 		}
 
-		const Semaphore* pWaitSemaphores() const
+		SubmitInfo& setPWaitSemaphores(const Semaphore* pWaitSemaphores_)
 		{
-			return reinterpret_cast<const Semaphore*>(m_submitInfo.pWaitSemaphores);
-		}
-
-		const Semaphore* pWaitSemaphores()
-		{
-			return reinterpret_cast<const Semaphore*>(m_submitInfo.pWaitSemaphores);
-		}
-
-		SubmitInfo& pWaitSemaphores(const Semaphore* pWaitSemaphores)
-		{
-			m_submitInfo.pWaitSemaphores = reinterpret_cast<const VkSemaphore*>(pWaitSemaphores);
+			pWaitSemaphores = pWaitSemaphores_;
 			return *this;
 		}
 
-		const PipelineStageFlags* pWaitDstStageMask() const
+		SubmitInfo& setPWaitDstStageMask(const PipelineStageFlags* pWaitDstStageMask_)
 		{
-			return reinterpret_cast<const PipelineStageFlags*>(m_submitInfo.pWaitDstStageMask);
-		}
-
-		const PipelineStageFlags* pWaitDstStageMask()
-		{
-			return reinterpret_cast<const PipelineStageFlags*>(m_submitInfo.pWaitDstStageMask);
-		}
-
-		SubmitInfo& pWaitDstStageMask(const PipelineStageFlags* pWaitDstStageMask)
-		{
-			m_submitInfo.pWaitDstStageMask = reinterpret_cast<const VkPipelineStageFlags*>(pWaitDstStageMask);
+			pWaitDstStageMask = pWaitDstStageMask_;
 			return *this;
 		}
 
-		const uint32_t& commandBufferCount() const
+		SubmitInfo& setCommandBufferCount(uint32_t commandBufferCount_)
 		{
-			return m_submitInfo.commandBufferCount;
-		}
-
-		uint32_t& commandBufferCount()
-		{
-			return m_submitInfo.commandBufferCount;
-		}
-
-		SubmitInfo& commandBufferCount(uint32_t commandBufferCount)
-		{
-			m_submitInfo.commandBufferCount = commandBufferCount;
+			commandBufferCount = commandBufferCount_;
 			return *this;
 		}
 
-		const CommandBuffer* pCommandBuffers() const
+		SubmitInfo& setPCommandBuffers(const CommandBuffer* pCommandBuffers_)
 		{
-			return reinterpret_cast<const CommandBuffer*>(m_submitInfo.pCommandBuffers);
-		}
-
-		const CommandBuffer* pCommandBuffers()
-		{
-			return reinterpret_cast<const CommandBuffer*>(m_submitInfo.pCommandBuffers);
-		}
-
-		SubmitInfo& pCommandBuffers(const CommandBuffer* pCommandBuffers)
-		{
-			m_submitInfo.pCommandBuffers = reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers);
+			pCommandBuffers = pCommandBuffers_;
 			return *this;
 		}
 
-		const uint32_t& signalSemaphoreCount() const
+		SubmitInfo& setSignalSemaphoreCount(uint32_t signalSemaphoreCount_)
 		{
-			return m_submitInfo.signalSemaphoreCount;
-		}
-
-		uint32_t& signalSemaphoreCount()
-		{
-			return m_submitInfo.signalSemaphoreCount;
-		}
-
-		SubmitInfo& signalSemaphoreCount(uint32_t signalSemaphoreCount)
-		{
-			m_submitInfo.signalSemaphoreCount = signalSemaphoreCount;
+			signalSemaphoreCount = signalSemaphoreCount_;
 			return *this;
 		}
 
-		const Semaphore* pSignalSemaphores() const
+		SubmitInfo& setPSignalSemaphores(const Semaphore* pSignalSemaphores_)
 		{
-			return reinterpret_cast<const Semaphore*>(m_submitInfo.pSignalSemaphores);
-		}
-
-		const Semaphore* pSignalSemaphores()
-		{
-			return reinterpret_cast<const Semaphore*>(m_submitInfo.pSignalSemaphores);
-		}
-
-		SubmitInfo& pSignalSemaphores(const Semaphore* pSignalSemaphores)
-		{
-			m_submitInfo.pSignalSemaphores = reinterpret_cast<const VkSemaphore*>(pSignalSemaphores);
+			pSignalSemaphores = pSignalSemaphores_;
 			return *this;
 		}
 
 		operator const VkSubmitInfo&() const
 		{
-			return m_submitInfo;
+			return *reinterpret_cast<const VkSubmitInfo*>(this);
 		}
 
-	private:
-		VkSubmitInfo m_submitInfo;
+		StructureType sType;
+		const void* pNext;
+		uint32_t waitSemaphoreCount;
+		const Semaphore* pWaitSemaphores;
+		const PipelineStageFlags* pWaitDstStageMask;
+		uint32_t commandBufferCount;
+		const CommandBuffer* pCommandBuffers;
+		uint32_t signalSemaphoreCount;
+		const Semaphore* pSignalSemaphores;
 	};
 	static_assert(sizeof(SubmitInfo) == sizeof(VkSubmitInfo), "struct and wrapper have different size!");
 
@@ -18784,25 +12080,25 @@ namespace vk
 			return static_cast<Result>(vkQueueSubmit(m_queue, submitCount, reinterpret_cast<const VkSubmitInfo*>(pSubmits), static_cast<VkFence>(fence)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void submit(eastl::vector<SubmitInfo> const & submits, Fence fence) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void submit(ArrayProxy<const SubmitInfo> submits, Fence fence) const
 		{
-			Result result = static_cast<Result>(vkQueueSubmit(m_queue, static_cast<uint32_t>(submits.size()), reinterpret_cast<const VkSubmitInfo*>(submits.data()), static_cast<VkFence>(fence)));
+			Result result = static_cast<Result>(vkQueueSubmit(m_queue, submits.size(), reinterpret_cast<const VkSubmitInfo*>(submits.data()), static_cast<VkFence>(fence)));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Queue::submit");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result waitIdle() const
 		{
 			return static_cast<Result>(vkQueueWaitIdle(m_queue));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void waitIdle() const
 		{
 			Result result = static_cast<Result>(vkQueueWaitIdle(m_queue));
@@ -18811,30 +12107,30 @@ namespace vk
 				throw std::system_error(result, "vk::Queue::waitIdle");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result bindSparse(uint32_t bindInfoCount, const BindSparseInfo* pBindInfo, Fence fence) const
 		{
 			return static_cast<Result>(vkQueueBindSparse(m_queue, bindInfoCount, reinterpret_cast<const VkBindSparseInfo*>(pBindInfo), static_cast<VkFence>(fence)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void bindSparse(eastl::vector<BindSparseInfo> const & bindInfo, Fence fence) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void bindSparse(ArrayProxy<const BindSparseInfo> bindInfo, Fence fence) const
 		{
-			Result result = static_cast<Result>(vkQueueBindSparse(m_queue, static_cast<uint32_t>(bindInfo.size()), reinterpret_cast<const VkBindSparseInfo*>(bindInfo.data()), static_cast<VkFence>(fence)));
+			Result result = static_cast<Result>(vkQueueBindSparse(m_queue, bindInfo.size(), reinterpret_cast<const VkBindSparseInfo*>(bindInfo.data()), static_cast<VkFence>(fence)));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Queue::bindSparse");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result presentKHR(const PresentInfoKHR* pPresentInfo) const
 		{
 			return static_cast<Result>(vkQueuePresentKHR(m_queue, reinterpret_cast<const VkPresentInfoKHR*>(pPresentInfo)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Result presentKHR(const PresentInfoKHR & presentInfo) const
 		{
 			Result result = static_cast<Result>(vkQueuePresentKHR(m_queue, reinterpret_cast<const VkPresentInfoKHR*>(&presentInfo)));
@@ -18844,7 +12140,7 @@ namespace vk
 			}
 			return result;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #if !defined(VK_CPP_TYPESAFE_CONVERSION)
 		explicit
@@ -18871,80 +12167,59 @@ namespace vk
 
 	enum class PresentModeKHR
 	{
-		eImmediateKHR = VK_PRESENT_MODE_IMMEDIATE_KHR,
-		eMailboxKHR = VK_PRESENT_MODE_MAILBOX_KHR,
-		eFifoKHR = VK_PRESENT_MODE_FIFO_KHR,
-		eFifoRelaxedKHR = VK_PRESENT_MODE_FIFO_RELAXED_KHR
+		eImmediate = VK_PRESENT_MODE_IMMEDIATE_KHR,
+		eMailbox = VK_PRESENT_MODE_MAILBOX_KHR,
+		eFifo = VK_PRESENT_MODE_FIFO_KHR,
+		eFifoRelaxed = VK_PRESENT_MODE_FIFO_RELAXED_KHR
 	};
 
 	enum class ColorSpaceKHR
 	{
-		eVkColorspaceSrgbNonlinearKHR = VK_COLORSPACE_SRGB_NONLINEAR_KHR
+		eVkColorspaceSrgbNonlinear = VK_COLORSPACE_SRGB_NONLINEAR_KHR
 	};
 
-	class SurfaceFormatKHR
+	struct SurfaceFormatKHR
 	{
-	public:
 		SurfaceFormatKHR()
-			: SurfaceFormatKHR(Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinearKHR)
+			: SurfaceFormatKHR(Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinear)
 		{}
 
-		SurfaceFormatKHR(Format format, ColorSpaceKHR colorSpace)
+		SurfaceFormatKHR(Format format_, ColorSpaceKHR colorSpace_)
 		{
-			m_surfaceFormatKHR.format = static_cast<VkFormat>(format);
-			m_surfaceFormatKHR.colorSpace = static_cast<VkColorSpaceKHR>(colorSpace);
+			format = format_;
+			colorSpace = colorSpace_;
 		}
 
 		SurfaceFormatKHR(VkSurfaceFormatKHR const & rhs)
-			: m_surfaceFormatKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SurfaceFormatKHR));
 		}
 
 		SurfaceFormatKHR& operator=(VkSurfaceFormatKHR const & rhs)
 		{
-			m_surfaceFormatKHR = rhs;
+			memcpy(this, &rhs, sizeof(SurfaceFormatKHR));
 			return *this;
 		}
 
-		const Format& format() const
+		SurfaceFormatKHR& setFormat(Format format_)
 		{
-			return reinterpret_cast<const Format&>(m_surfaceFormatKHR.format);
-		}
-
-		Format& format()
-		{
-			return reinterpret_cast<Format&>(m_surfaceFormatKHR.format);
-		}
-
-		SurfaceFormatKHR& format(Format format)
-		{
-			m_surfaceFormatKHR.format = static_cast<VkFormat>(format);
+			format = format_;
 			return *this;
 		}
 
-		const ColorSpaceKHR& colorSpace() const
+		SurfaceFormatKHR& setColorSpace(ColorSpaceKHR colorSpace_)
 		{
-			return reinterpret_cast<const ColorSpaceKHR&>(m_surfaceFormatKHR.colorSpace);
-		}
-
-		ColorSpaceKHR& colorSpace()
-		{
-			return reinterpret_cast<ColorSpaceKHR&>(m_surfaceFormatKHR.colorSpace);
-		}
-
-		SurfaceFormatKHR& colorSpace(ColorSpaceKHR colorSpace)
-		{
-			m_surfaceFormatKHR.colorSpace = static_cast<VkColorSpaceKHR>(colorSpace);
+			colorSpace = colorSpace_;
 			return *this;
 		}
 
 		operator const VkSurfaceFormatKHR&() const
 		{
-			return m_surfaceFormatKHR;
+			return *reinterpret_cast<const VkSurfaceFormatKHR*>(this);
 		}
 
-	private:
-		VkSurfaceFormatKHR m_surfaceFormatKHR;
+		Format format;
+		ColorSpaceKHR colorSpace;
 	};
 	static_assert(sizeof(SurfaceFormatKHR) == sizeof(VkSurfaceFormatKHR), "struct and wrapper have different size!");
 
@@ -18956,195 +12231,111 @@ namespace vk
 		ePerPixelPremultiplied = VK_DISPLAY_PLANE_ALPHA_PER_PIXEL_PREMULTIPLIED_BIT_KHR
 	};
 
-	typedef Flags<DisplayPlaneAlphaFlagBitsKHR, VkDisplayPlaneAlphaFlagsKHR> DisplayPlaneAlphaFlagsKHR;
+	using DisplayPlaneAlphaFlagsKHR = Flags<DisplayPlaneAlphaFlagBitsKHR, VkDisplayPlaneAlphaFlagsKHR>;
 
 	inline DisplayPlaneAlphaFlagsKHR operator|(DisplayPlaneAlphaFlagBitsKHR bit0, DisplayPlaneAlphaFlagBitsKHR bit1)
 	{
 		return DisplayPlaneAlphaFlagsKHR(bit0) | bit1;
 	}
 
-	class DisplayPlaneCapabilitiesKHR
+	struct DisplayPlaneCapabilitiesKHR
 	{
-	public:
 		DisplayPlaneCapabilitiesKHR()
 			: DisplayPlaneCapabilitiesKHR(DisplayPlaneAlphaFlagsKHR(), Offset2D(), Offset2D(), Extent2D(), Extent2D(), Offset2D(), Offset2D(), Extent2D(), Extent2D())
 		{}
 
-		DisplayPlaneCapabilitiesKHR(DisplayPlaneAlphaFlagsKHR supportedAlpha, Offset2D minSrcPosition, Offset2D maxSrcPosition, Extent2D minSrcExtent, Extent2D maxSrcExtent, Offset2D minDstPosition, Offset2D maxDstPosition, Extent2D minDstExtent, Extent2D maxDstExtent)
+		DisplayPlaneCapabilitiesKHR(DisplayPlaneAlphaFlagsKHR supportedAlpha_, Offset2D minSrcPosition_, Offset2D maxSrcPosition_, Extent2D minSrcExtent_, Extent2D maxSrcExtent_, Offset2D minDstPosition_, Offset2D maxDstPosition_, Extent2D minDstExtent_, Extent2D maxDstExtent_)
 		{
-			m_displayPlaneCapabilitiesKHR.supportedAlpha = static_cast<VkDisplayPlaneAlphaFlagsKHR>(supportedAlpha);
-			m_displayPlaneCapabilitiesKHR.minSrcPosition = static_cast<VkOffset2D>(minSrcPosition);
-			m_displayPlaneCapabilitiesKHR.maxSrcPosition = static_cast<VkOffset2D>(maxSrcPosition);
-			m_displayPlaneCapabilitiesKHR.minSrcExtent = static_cast<VkExtent2D>(minSrcExtent);
-			m_displayPlaneCapabilitiesKHR.maxSrcExtent = static_cast<VkExtent2D>(maxSrcExtent);
-			m_displayPlaneCapabilitiesKHR.minDstPosition = static_cast<VkOffset2D>(minDstPosition);
-			m_displayPlaneCapabilitiesKHR.maxDstPosition = static_cast<VkOffset2D>(maxDstPosition);
-			m_displayPlaneCapabilitiesKHR.minDstExtent = static_cast<VkExtent2D>(minDstExtent);
-			m_displayPlaneCapabilitiesKHR.maxDstExtent = static_cast<VkExtent2D>(maxDstExtent);
+			supportedAlpha = supportedAlpha_;
+			minSrcPosition = minSrcPosition_;
+			maxSrcPosition = maxSrcPosition_;
+			minSrcExtent = minSrcExtent_;
+			maxSrcExtent = maxSrcExtent_;
+			minDstPosition = minDstPosition_;
+			maxDstPosition = maxDstPosition_;
+			minDstExtent = minDstExtent_;
+			maxDstExtent = maxDstExtent_;
 		}
 
 		DisplayPlaneCapabilitiesKHR(VkDisplayPlaneCapabilitiesKHR const & rhs)
-			: m_displayPlaneCapabilitiesKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplayPlaneCapabilitiesKHR));
 		}
 
 		DisplayPlaneCapabilitiesKHR& operator=(VkDisplayPlaneCapabilitiesKHR const & rhs)
 		{
-			m_displayPlaneCapabilitiesKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplayPlaneCapabilitiesKHR));
 			return *this;
 		}
 
-		const DisplayPlaneAlphaFlagsKHR& supportedAlpha() const
+		DisplayPlaneCapabilitiesKHR& setSupportedAlpha(DisplayPlaneAlphaFlagsKHR supportedAlpha_)
 		{
-			return reinterpret_cast<const DisplayPlaneAlphaFlagsKHR&>(m_displayPlaneCapabilitiesKHR.supportedAlpha);
-		}
-
-		DisplayPlaneAlphaFlagsKHR& supportedAlpha()
-		{
-			return reinterpret_cast<DisplayPlaneAlphaFlagsKHR&>(m_displayPlaneCapabilitiesKHR.supportedAlpha);
-		}
-
-		DisplayPlaneCapabilitiesKHR& supportedAlpha(DisplayPlaneAlphaFlagsKHR supportedAlpha)
-		{
-			m_displayPlaneCapabilitiesKHR.supportedAlpha = static_cast<VkDisplayPlaneAlphaFlagsKHR>(supportedAlpha);
+			supportedAlpha = supportedAlpha_;
 			return *this;
 		}
 
-		const Offset2D& minSrcPosition() const
+		DisplayPlaneCapabilitiesKHR& setMinSrcPosition(Offset2D minSrcPosition_)
 		{
-			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.minSrcPosition);
-		}
-
-		Offset2D& minSrcPosition()
-		{
-			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.minSrcPosition);
-		}
-
-		DisplayPlaneCapabilitiesKHR& minSrcPosition(Offset2D minSrcPosition)
-		{
-			m_displayPlaneCapabilitiesKHR.minSrcPosition = static_cast<VkOffset2D>(minSrcPosition);
+			minSrcPosition = minSrcPosition_;
 			return *this;
 		}
 
-		const Offset2D& maxSrcPosition() const
+		DisplayPlaneCapabilitiesKHR& setMaxSrcPosition(Offset2D maxSrcPosition_)
 		{
-			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.maxSrcPosition);
-		}
-
-		Offset2D& maxSrcPosition()
-		{
-			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.maxSrcPosition);
-		}
-
-		DisplayPlaneCapabilitiesKHR& maxSrcPosition(Offset2D maxSrcPosition)
-		{
-			m_displayPlaneCapabilitiesKHR.maxSrcPosition = static_cast<VkOffset2D>(maxSrcPosition);
+			maxSrcPosition = maxSrcPosition_;
 			return *this;
 		}
 
-		const Extent2D& minSrcExtent() const
+		DisplayPlaneCapabilitiesKHR& setMinSrcExtent(Extent2D minSrcExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.minSrcExtent);
-		}
-
-		Extent2D& minSrcExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.minSrcExtent);
-		}
-
-		DisplayPlaneCapabilitiesKHR& minSrcExtent(Extent2D minSrcExtent)
-		{
-			m_displayPlaneCapabilitiesKHR.minSrcExtent = static_cast<VkExtent2D>(minSrcExtent);
+			minSrcExtent = minSrcExtent_;
 			return *this;
 		}
 
-		const Extent2D& maxSrcExtent() const
+		DisplayPlaneCapabilitiesKHR& setMaxSrcExtent(Extent2D maxSrcExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.maxSrcExtent);
-		}
-
-		Extent2D& maxSrcExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.maxSrcExtent);
-		}
-
-		DisplayPlaneCapabilitiesKHR& maxSrcExtent(Extent2D maxSrcExtent)
-		{
-			m_displayPlaneCapabilitiesKHR.maxSrcExtent = static_cast<VkExtent2D>(maxSrcExtent);
+			maxSrcExtent = maxSrcExtent_;
 			return *this;
 		}
 
-		const Offset2D& minDstPosition() const
+		DisplayPlaneCapabilitiesKHR& setMinDstPosition(Offset2D minDstPosition_)
 		{
-			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.minDstPosition);
-		}
-
-		Offset2D& minDstPosition()
-		{
-			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.minDstPosition);
-		}
-
-		DisplayPlaneCapabilitiesKHR& minDstPosition(Offset2D minDstPosition)
-		{
-			m_displayPlaneCapabilitiesKHR.minDstPosition = static_cast<VkOffset2D>(minDstPosition);
+			minDstPosition = minDstPosition_;
 			return *this;
 		}
 
-		const Offset2D& maxDstPosition() const
+		DisplayPlaneCapabilitiesKHR& setMaxDstPosition(Offset2D maxDstPosition_)
 		{
-			return reinterpret_cast<const Offset2D&>(m_displayPlaneCapabilitiesKHR.maxDstPosition);
-		}
-
-		Offset2D& maxDstPosition()
-		{
-			return reinterpret_cast<Offset2D&>(m_displayPlaneCapabilitiesKHR.maxDstPosition);
-		}
-
-		DisplayPlaneCapabilitiesKHR& maxDstPosition(Offset2D maxDstPosition)
-		{
-			m_displayPlaneCapabilitiesKHR.maxDstPosition = static_cast<VkOffset2D>(maxDstPosition);
+			maxDstPosition = maxDstPosition_;
 			return *this;
 		}
 
-		const Extent2D& minDstExtent() const
+		DisplayPlaneCapabilitiesKHR& setMinDstExtent(Extent2D minDstExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.minDstExtent);
-		}
-
-		Extent2D& minDstExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.minDstExtent);
-		}
-
-		DisplayPlaneCapabilitiesKHR& minDstExtent(Extent2D minDstExtent)
-		{
-			m_displayPlaneCapabilitiesKHR.minDstExtent = static_cast<VkExtent2D>(minDstExtent);
+			minDstExtent = minDstExtent_;
 			return *this;
 		}
 
-		const Extent2D& maxDstExtent() const
+		DisplayPlaneCapabilitiesKHR& setMaxDstExtent(Extent2D maxDstExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displayPlaneCapabilitiesKHR.maxDstExtent);
-		}
-
-		Extent2D& maxDstExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_displayPlaneCapabilitiesKHR.maxDstExtent);
-		}
-
-		DisplayPlaneCapabilitiesKHR& maxDstExtent(Extent2D maxDstExtent)
-		{
-			m_displayPlaneCapabilitiesKHR.maxDstExtent = static_cast<VkExtent2D>(maxDstExtent);
+			maxDstExtent = maxDstExtent_;
 			return *this;
 		}
 
 		operator const VkDisplayPlaneCapabilitiesKHR&() const
 		{
-			return m_displayPlaneCapabilitiesKHR;
+			return *reinterpret_cast<const VkDisplayPlaneCapabilitiesKHR*>(this);
 		}
 
-	private:
-		VkDisplayPlaneCapabilitiesKHR m_displayPlaneCapabilitiesKHR;
+		DisplayPlaneAlphaFlagsKHR supportedAlpha;
+		Offset2D minSrcPosition;
+		Offset2D maxSrcPosition;
+		Extent2D minSrcExtent;
+		Extent2D maxSrcExtent;
+		Offset2D minDstPosition;
+		Offset2D maxDstPosition;
+		Extent2D minDstExtent;
+		Extent2D maxDstExtent;
 	};
 	static_assert(sizeof(DisplayPlaneCapabilitiesKHR) == sizeof(VkDisplayPlaneCapabilitiesKHR), "struct and wrapper have different size!");
 
@@ -19156,7 +12347,7 @@ namespace vk
 		eInherit = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
 	};
 
-	typedef Flags<CompositeAlphaFlagBitsKHR, VkCompositeAlphaFlagsKHR> CompositeAlphaFlagsKHR;
+	using CompositeAlphaFlagsKHR = Flags<CompositeAlphaFlagBitsKHR, VkCompositeAlphaFlagsKHR>;
 
 	inline CompositeAlphaFlagsKHR operator|(CompositeAlphaFlagBitsKHR bit0, CompositeAlphaFlagBitsKHR bit1)
 	{
@@ -19176,903 +12367,486 @@ namespace vk
 		eInherit = VK_SURFACE_TRANSFORM_INHERIT_BIT_KHR
 	};
 
-	typedef Flags<SurfaceTransformFlagBitsKHR, VkSurfaceTransformFlagsKHR> SurfaceTransformFlagsKHR;
+	using SurfaceTransformFlagsKHR = Flags<SurfaceTransformFlagBitsKHR, VkSurfaceTransformFlagsKHR>;
 
 	inline SurfaceTransformFlagsKHR operator|(SurfaceTransformFlagBitsKHR bit0, SurfaceTransformFlagBitsKHR bit1)
 	{
 		return SurfaceTransformFlagsKHR(bit0) | bit1;
 	}
 
-	class DisplayPropertiesKHR
+	struct DisplayPropertiesKHR
 	{
-	public:
 		DisplayPropertiesKHR()
 			: DisplayPropertiesKHR(DisplayKHR(), nullptr, Extent2D(), Extent2D(), SurfaceTransformFlagsKHR(), 0, 0)
 		{}
 
-		DisplayPropertiesKHR(DisplayKHR display, const char* displayName, Extent2D physicalDimensions, Extent2D physicalResolution, SurfaceTransformFlagsKHR supportedTransforms, Bool32 planeReorderPossible, Bool32 persistentContent)
+		DisplayPropertiesKHR(DisplayKHR display_, const char* displayName_, Extent2D physicalDimensions_, Extent2D physicalResolution_, SurfaceTransformFlagsKHR supportedTransforms_, Bool32 planeReorderPossible_, Bool32 persistentContent_)
 		{
-			m_displayPropertiesKHR.display = static_cast<VkDisplayKHR>(display);
-			m_displayPropertiesKHR.displayName = displayName;
-			m_displayPropertiesKHR.physicalDimensions = static_cast<VkExtent2D>(physicalDimensions);
-			m_displayPropertiesKHR.physicalResolution = static_cast<VkExtent2D>(physicalResolution);
-			m_displayPropertiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
-			m_displayPropertiesKHR.planeReorderPossible = planeReorderPossible;
-			m_displayPropertiesKHR.persistentContent = persistentContent;
+			display = display_;
+			displayName = displayName_;
+			physicalDimensions = physicalDimensions_;
+			physicalResolution = physicalResolution_;
+			supportedTransforms = supportedTransforms_;
+			planeReorderPossible = planeReorderPossible_;
+			persistentContent = persistentContent_;
 		}
 
 		DisplayPropertiesKHR(VkDisplayPropertiesKHR const & rhs)
-			: m_displayPropertiesKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplayPropertiesKHR));
 		}
 
 		DisplayPropertiesKHR& operator=(VkDisplayPropertiesKHR const & rhs)
 		{
-			m_displayPropertiesKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplayPropertiesKHR));
 			return *this;
 		}
 
-		const DisplayKHR& display() const
+		DisplayPropertiesKHR& setDisplay(DisplayKHR display_)
 		{
-			return reinterpret_cast<const DisplayKHR&>(m_displayPropertiesKHR.display);
-		}
-
-		DisplayKHR& display()
-		{
-			return reinterpret_cast<DisplayKHR&>(m_displayPropertiesKHR.display);
-		}
-
-		DisplayPropertiesKHR& display(DisplayKHR display)
-		{
-			m_displayPropertiesKHR.display = static_cast<VkDisplayKHR>(display);
+			display = display_;
 			return *this;
 		}
 
-		const char* displayName() const
+		DisplayPropertiesKHR& setDisplayName(const char* displayName_)
 		{
-			return reinterpret_cast<const char*>(m_displayPropertiesKHR.displayName);
-		}
-
-		const char* displayName()
-		{
-			return reinterpret_cast<const char*>(m_displayPropertiesKHR.displayName);
-		}
-
-		DisplayPropertiesKHR& displayName(const char* displayName)
-		{
-			m_displayPropertiesKHR.displayName = displayName;
+			displayName = displayName_;
 			return *this;
 		}
 
-		const Extent2D& physicalDimensions() const
+		DisplayPropertiesKHR& setPhysicalDimensions(Extent2D physicalDimensions_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displayPropertiesKHR.physicalDimensions);
-		}
-
-		Extent2D& physicalDimensions()
-		{
-			return reinterpret_cast<Extent2D&>(m_displayPropertiesKHR.physicalDimensions);
-		}
-
-		DisplayPropertiesKHR& physicalDimensions(Extent2D physicalDimensions)
-		{
-			m_displayPropertiesKHR.physicalDimensions = static_cast<VkExtent2D>(physicalDimensions);
+			physicalDimensions = physicalDimensions_;
 			return *this;
 		}
 
-		const Extent2D& physicalResolution() const
+		DisplayPropertiesKHR& setPhysicalResolution(Extent2D physicalResolution_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displayPropertiesKHR.physicalResolution);
-		}
-
-		Extent2D& physicalResolution()
-		{
-			return reinterpret_cast<Extent2D&>(m_displayPropertiesKHR.physicalResolution);
-		}
-
-		DisplayPropertiesKHR& physicalResolution(Extent2D physicalResolution)
-		{
-			m_displayPropertiesKHR.physicalResolution = static_cast<VkExtent2D>(physicalResolution);
+			physicalResolution = physicalResolution_;
 			return *this;
 		}
 
-		const SurfaceTransformFlagsKHR& supportedTransforms() const
+		DisplayPropertiesKHR& setSupportedTransforms(SurfaceTransformFlagsKHR supportedTransforms_)
 		{
-			return reinterpret_cast<const SurfaceTransformFlagsKHR&>(m_displayPropertiesKHR.supportedTransforms);
-		}
-
-		SurfaceTransformFlagsKHR& supportedTransforms()
-		{
-			return reinterpret_cast<SurfaceTransformFlagsKHR&>(m_displayPropertiesKHR.supportedTransforms);
-		}
-
-		DisplayPropertiesKHR& supportedTransforms(SurfaceTransformFlagsKHR supportedTransforms)
-		{
-			m_displayPropertiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
+			supportedTransforms = supportedTransforms_;
 			return *this;
 		}
 
-		const Bool32& planeReorderPossible() const
+		DisplayPropertiesKHR& setPlaneReorderPossible(Bool32 planeReorderPossible_)
 		{
-			return m_displayPropertiesKHR.planeReorderPossible;
-		}
-
-		Bool32& planeReorderPossible()
-		{
-			return m_displayPropertiesKHR.planeReorderPossible;
-		}
-
-		DisplayPropertiesKHR& planeReorderPossible(Bool32 planeReorderPossible)
-		{
-			m_displayPropertiesKHR.planeReorderPossible = planeReorderPossible;
+			planeReorderPossible = planeReorderPossible_;
 			return *this;
 		}
 
-		const Bool32& persistentContent() const
+		DisplayPropertiesKHR& setPersistentContent(Bool32 persistentContent_)
 		{
-			return m_displayPropertiesKHR.persistentContent;
-		}
-
-		Bool32& persistentContent()
-		{
-			return m_displayPropertiesKHR.persistentContent;
-		}
-
-		DisplayPropertiesKHR& persistentContent(Bool32 persistentContent)
-		{
-			m_displayPropertiesKHR.persistentContent = persistentContent;
+			persistentContent = persistentContent_;
 			return *this;
 		}
 
 		operator const VkDisplayPropertiesKHR&() const
 		{
-			return m_displayPropertiesKHR;
+			return *reinterpret_cast<const VkDisplayPropertiesKHR*>(this);
 		}
 
-	private:
-		VkDisplayPropertiesKHR m_displayPropertiesKHR;
+		DisplayKHR display;
+		const char* displayName;
+		Extent2D physicalDimensions;
+		Extent2D physicalResolution;
+		SurfaceTransformFlagsKHR supportedTransforms;
+		Bool32 planeReorderPossible;
+		Bool32 persistentContent;
 	};
 	static_assert(sizeof(DisplayPropertiesKHR) == sizeof(VkDisplayPropertiesKHR), "struct and wrapper have different size!");
 
-	class DisplaySurfaceCreateInfoKHR
+	struct DisplaySurfaceCreateInfoKHR
 	{
-	public:
 		DisplaySurfaceCreateInfoKHR()
 			: DisplaySurfaceCreateInfoKHR(DisplaySurfaceCreateFlagsKHR(), DisplayModeKHR(), 0, 0, SurfaceTransformFlagBitsKHR::eIdentity, 0, DisplayPlaneAlphaFlagBitsKHR::eOpaque, Extent2D())
 		{}
 
-		DisplaySurfaceCreateInfoKHR(DisplaySurfaceCreateFlagsKHR flags, DisplayModeKHR displayMode, uint32_t planeIndex, uint32_t planeStackIndex, SurfaceTransformFlagBitsKHR transform, float globalAlpha, DisplayPlaneAlphaFlagBitsKHR alphaMode, Extent2D imageExtent)
+		DisplaySurfaceCreateInfoKHR(DisplaySurfaceCreateFlagsKHR flags_, DisplayModeKHR displayMode_, uint32_t planeIndex_, uint32_t planeStackIndex_, SurfaceTransformFlagBitsKHR transform_, float globalAlpha_, DisplayPlaneAlphaFlagBitsKHR alphaMode_, Extent2D imageExtent_)
 		{
-			m_displaySurfaceCreateInfoKHR.sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR;
-			m_displaySurfaceCreateInfoKHR.pNext = nullptr;
-			m_displaySurfaceCreateInfoKHR.flags = static_cast<VkDisplaySurfaceCreateFlagsKHR>(flags);
-			m_displaySurfaceCreateInfoKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
-			m_displaySurfaceCreateInfoKHR.planeIndex = planeIndex;
-			m_displaySurfaceCreateInfoKHR.planeStackIndex = planeStackIndex;
-			m_displaySurfaceCreateInfoKHR.transform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform);
-			m_displaySurfaceCreateInfoKHR.globalAlpha = globalAlpha;
-			m_displaySurfaceCreateInfoKHR.alphaMode = static_cast<VkDisplayPlaneAlphaFlagBitsKHR>(alphaMode);
-			m_displaySurfaceCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
+			sType = StructureType::eDisplaySurfaceCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			displayMode = displayMode_;
+			planeIndex = planeIndex_;
+			planeStackIndex = planeStackIndex_;
+			transform = transform_;
+			globalAlpha = globalAlpha_;
+			alphaMode = alphaMode_;
+			imageExtent = imageExtent_;
 		}
 
 		DisplaySurfaceCreateInfoKHR(VkDisplaySurfaceCreateInfoKHR const & rhs)
-			: m_displaySurfaceCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DisplaySurfaceCreateInfoKHR));
 		}
 
 		DisplaySurfaceCreateInfoKHR& operator=(VkDisplaySurfaceCreateInfoKHR const & rhs)
 		{
-			m_displaySurfaceCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(DisplaySurfaceCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DisplaySurfaceCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_displaySurfaceCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_displaySurfaceCreateInfoKHR.sType);
-		}
-
-		DisplaySurfaceCreateInfoKHR& sType(StructureType sType)
-		{
-			m_displaySurfaceCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DisplaySurfaceCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_displaySurfaceCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_displaySurfaceCreateInfoKHR.pNext);
-		}
-
-		DisplaySurfaceCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_displaySurfaceCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DisplaySurfaceCreateFlagsKHR& flags() const
+		DisplaySurfaceCreateInfoKHR& setFlags(DisplaySurfaceCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const DisplaySurfaceCreateFlagsKHR&>(m_displaySurfaceCreateInfoKHR.flags);
-		}
-
-		DisplaySurfaceCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<DisplaySurfaceCreateFlagsKHR&>(m_displaySurfaceCreateInfoKHR.flags);
-		}
-
-		DisplaySurfaceCreateInfoKHR& flags(DisplaySurfaceCreateFlagsKHR flags)
-		{
-			m_displaySurfaceCreateInfoKHR.flags = static_cast<VkDisplaySurfaceCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const DisplayModeKHR& displayMode() const
+		DisplaySurfaceCreateInfoKHR& setDisplayMode(DisplayModeKHR displayMode_)
 		{
-			return reinterpret_cast<const DisplayModeKHR&>(m_displaySurfaceCreateInfoKHR.displayMode);
-		}
-
-		DisplayModeKHR& displayMode()
-		{
-			return reinterpret_cast<DisplayModeKHR&>(m_displaySurfaceCreateInfoKHR.displayMode);
-		}
-
-		DisplaySurfaceCreateInfoKHR& displayMode(DisplayModeKHR displayMode)
-		{
-			m_displaySurfaceCreateInfoKHR.displayMode = static_cast<VkDisplayModeKHR>(displayMode);
+			displayMode = displayMode_;
 			return *this;
 		}
 
-		const uint32_t& planeIndex() const
+		DisplaySurfaceCreateInfoKHR& setPlaneIndex(uint32_t planeIndex_)
 		{
-			return m_displaySurfaceCreateInfoKHR.planeIndex;
-		}
-
-		uint32_t& planeIndex()
-		{
-			return m_displaySurfaceCreateInfoKHR.planeIndex;
-		}
-
-		DisplaySurfaceCreateInfoKHR& planeIndex(uint32_t planeIndex)
-		{
-			m_displaySurfaceCreateInfoKHR.planeIndex = planeIndex;
+			planeIndex = planeIndex_;
 			return *this;
 		}
 
-		const uint32_t& planeStackIndex() const
+		DisplaySurfaceCreateInfoKHR& setPlaneStackIndex(uint32_t planeStackIndex_)
 		{
-			return m_displaySurfaceCreateInfoKHR.planeStackIndex;
-		}
-
-		uint32_t& planeStackIndex()
-		{
-			return m_displaySurfaceCreateInfoKHR.planeStackIndex;
-		}
-
-		DisplaySurfaceCreateInfoKHR& planeStackIndex(uint32_t planeStackIndex)
-		{
-			m_displaySurfaceCreateInfoKHR.planeStackIndex = planeStackIndex;
+			planeStackIndex = planeStackIndex_;
 			return *this;
 		}
 
-		const SurfaceTransformFlagBitsKHR& transform() const
+		DisplaySurfaceCreateInfoKHR& setTransform(SurfaceTransformFlagBitsKHR transform_)
 		{
-			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.transform);
-		}
-
-		SurfaceTransformFlagBitsKHR& transform()
-		{
-			return reinterpret_cast<SurfaceTransformFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.transform);
-		}
-
-		DisplaySurfaceCreateInfoKHR& transform(SurfaceTransformFlagBitsKHR transform)
-		{
-			m_displaySurfaceCreateInfoKHR.transform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform);
+			transform = transform_;
 			return *this;
 		}
 
-		const float& globalAlpha() const
+		DisplaySurfaceCreateInfoKHR& setGlobalAlpha(float globalAlpha_)
 		{
-			return m_displaySurfaceCreateInfoKHR.globalAlpha;
-		}
-
-		float& globalAlpha()
-		{
-			return m_displaySurfaceCreateInfoKHR.globalAlpha;
-		}
-
-		DisplaySurfaceCreateInfoKHR& globalAlpha(float globalAlpha)
-		{
-			m_displaySurfaceCreateInfoKHR.globalAlpha = globalAlpha;
+			globalAlpha = globalAlpha_;
 			return *this;
 		}
 
-		const DisplayPlaneAlphaFlagBitsKHR& alphaMode() const
+		DisplaySurfaceCreateInfoKHR& setAlphaMode(DisplayPlaneAlphaFlagBitsKHR alphaMode_)
 		{
-			return reinterpret_cast<const DisplayPlaneAlphaFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.alphaMode);
-		}
-
-		DisplayPlaneAlphaFlagBitsKHR& alphaMode()
-		{
-			return reinterpret_cast<DisplayPlaneAlphaFlagBitsKHR&>(m_displaySurfaceCreateInfoKHR.alphaMode);
-		}
-
-		DisplaySurfaceCreateInfoKHR& alphaMode(DisplayPlaneAlphaFlagBitsKHR alphaMode)
-		{
-			m_displaySurfaceCreateInfoKHR.alphaMode = static_cast<VkDisplayPlaneAlphaFlagBitsKHR>(alphaMode);
+			alphaMode = alphaMode_;
 			return *this;
 		}
 
-		const Extent2D& imageExtent() const
+		DisplaySurfaceCreateInfoKHR& setImageExtent(Extent2D imageExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_displaySurfaceCreateInfoKHR.imageExtent);
-		}
-
-		Extent2D& imageExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_displaySurfaceCreateInfoKHR.imageExtent);
-		}
-
-		DisplaySurfaceCreateInfoKHR& imageExtent(Extent2D imageExtent)
-		{
-			m_displaySurfaceCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
+			imageExtent = imageExtent_;
 			return *this;
 		}
 
 		operator const VkDisplaySurfaceCreateInfoKHR&() const
 		{
-			return m_displaySurfaceCreateInfoKHR;
+			return *reinterpret_cast<const VkDisplaySurfaceCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkDisplaySurfaceCreateInfoKHR m_displaySurfaceCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		DisplaySurfaceCreateFlagsKHR flags;
+		DisplayModeKHR displayMode;
+		uint32_t planeIndex;
+		uint32_t planeStackIndex;
+		SurfaceTransformFlagBitsKHR transform;
+		float globalAlpha;
+		DisplayPlaneAlphaFlagBitsKHR alphaMode;
+		Extent2D imageExtent;
 	};
 	static_assert(sizeof(DisplaySurfaceCreateInfoKHR) == sizeof(VkDisplaySurfaceCreateInfoKHR), "struct and wrapper have different size!");
 
-	class SurfaceCapabilitiesKHR
+	struct SurfaceCapabilitiesKHR
 	{
-	public:
 		SurfaceCapabilitiesKHR()
 			: SurfaceCapabilitiesKHR(0, 0, Extent2D(), Extent2D(), Extent2D(), 0, SurfaceTransformFlagsKHR(), SurfaceTransformFlagBitsKHR::eIdentity, CompositeAlphaFlagsKHR(), ImageUsageFlags())
 		{}
 
-		SurfaceCapabilitiesKHR(uint32_t minImageCount, uint32_t maxImageCount, Extent2D currentExtent, Extent2D minImageExtent, Extent2D maxImageExtent, uint32_t maxImageArrayLayers, SurfaceTransformFlagsKHR supportedTransforms, SurfaceTransformFlagBitsKHR currentTransform, CompositeAlphaFlagsKHR supportedCompositeAlpha, ImageUsageFlags supportedUsageFlags)
+		SurfaceCapabilitiesKHR(uint32_t minImageCount_, uint32_t maxImageCount_, Extent2D currentExtent_, Extent2D minImageExtent_, Extent2D maxImageExtent_, uint32_t maxImageArrayLayers_, SurfaceTransformFlagsKHR supportedTransforms_, SurfaceTransformFlagBitsKHR currentTransform_, CompositeAlphaFlagsKHR supportedCompositeAlpha_, ImageUsageFlags supportedUsageFlags_)
 		{
-			m_surfaceCapabilitiesKHR.minImageCount = minImageCount;
-			m_surfaceCapabilitiesKHR.maxImageCount = maxImageCount;
-			m_surfaceCapabilitiesKHR.currentExtent = static_cast<VkExtent2D>(currentExtent);
-			m_surfaceCapabilitiesKHR.minImageExtent = static_cast<VkExtent2D>(minImageExtent);
-			m_surfaceCapabilitiesKHR.maxImageExtent = static_cast<VkExtent2D>(maxImageExtent);
-			m_surfaceCapabilitiesKHR.maxImageArrayLayers = maxImageArrayLayers;
-			m_surfaceCapabilitiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
-			m_surfaceCapabilitiesKHR.currentTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(currentTransform);
-			m_surfaceCapabilitiesKHR.supportedCompositeAlpha = static_cast<VkCompositeAlphaFlagsKHR>(supportedCompositeAlpha);
-			m_surfaceCapabilitiesKHR.supportedUsageFlags = static_cast<VkImageUsageFlags>(supportedUsageFlags);
+			minImageCount = minImageCount_;
+			maxImageCount = maxImageCount_;
+			currentExtent = currentExtent_;
+			minImageExtent = minImageExtent_;
+			maxImageExtent = maxImageExtent_;
+			maxImageArrayLayers = maxImageArrayLayers_;
+			supportedTransforms = supportedTransforms_;
+			currentTransform = currentTransform_;
+			supportedCompositeAlpha = supportedCompositeAlpha_;
+			supportedUsageFlags = supportedUsageFlags_;
 		}
 
 		SurfaceCapabilitiesKHR(VkSurfaceCapabilitiesKHR const & rhs)
-			: m_surfaceCapabilitiesKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SurfaceCapabilitiesKHR));
 		}
 
 		SurfaceCapabilitiesKHR& operator=(VkSurfaceCapabilitiesKHR const & rhs)
 		{
-			m_surfaceCapabilitiesKHR = rhs;
+			memcpy(this, &rhs, sizeof(SurfaceCapabilitiesKHR));
 			return *this;
 		}
 
-		const uint32_t& minImageCount() const
+		SurfaceCapabilitiesKHR& setMinImageCount(uint32_t minImageCount_)
 		{
-			return m_surfaceCapabilitiesKHR.minImageCount;
-		}
-
-		uint32_t& minImageCount()
-		{
-			return m_surfaceCapabilitiesKHR.minImageCount;
-		}
-
-		SurfaceCapabilitiesKHR& minImageCount(uint32_t minImageCount)
-		{
-			m_surfaceCapabilitiesKHR.minImageCount = minImageCount;
+			minImageCount = minImageCount_;
 			return *this;
 		}
 
-		const uint32_t& maxImageCount() const
+		SurfaceCapabilitiesKHR& setMaxImageCount(uint32_t maxImageCount_)
 		{
-			return m_surfaceCapabilitiesKHR.maxImageCount;
-		}
-
-		uint32_t& maxImageCount()
-		{
-			return m_surfaceCapabilitiesKHR.maxImageCount;
-		}
-
-		SurfaceCapabilitiesKHR& maxImageCount(uint32_t maxImageCount)
-		{
-			m_surfaceCapabilitiesKHR.maxImageCount = maxImageCount;
+			maxImageCount = maxImageCount_;
 			return *this;
 		}
 
-		const Extent2D& currentExtent() const
+		SurfaceCapabilitiesKHR& setCurrentExtent(Extent2D currentExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.currentExtent);
-		}
-
-		Extent2D& currentExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_surfaceCapabilitiesKHR.currentExtent);
-		}
-
-		SurfaceCapabilitiesKHR& currentExtent(Extent2D currentExtent)
-		{
-			m_surfaceCapabilitiesKHR.currentExtent = static_cast<VkExtent2D>(currentExtent);
+			currentExtent = currentExtent_;
 			return *this;
 		}
 
-		const Extent2D& minImageExtent() const
+		SurfaceCapabilitiesKHR& setMinImageExtent(Extent2D minImageExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.minImageExtent);
-		}
-
-		Extent2D& minImageExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_surfaceCapabilitiesKHR.minImageExtent);
-		}
-
-		SurfaceCapabilitiesKHR& minImageExtent(Extent2D minImageExtent)
-		{
-			m_surfaceCapabilitiesKHR.minImageExtent = static_cast<VkExtent2D>(minImageExtent);
+			minImageExtent = minImageExtent_;
 			return *this;
 		}
 
-		const Extent2D& maxImageExtent() const
+		SurfaceCapabilitiesKHR& setMaxImageExtent(Extent2D maxImageExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_surfaceCapabilitiesKHR.maxImageExtent);
-		}
-
-		Extent2D& maxImageExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_surfaceCapabilitiesKHR.maxImageExtent);
-		}
-
-		SurfaceCapabilitiesKHR& maxImageExtent(Extent2D maxImageExtent)
-		{
-			m_surfaceCapabilitiesKHR.maxImageExtent = static_cast<VkExtent2D>(maxImageExtent);
+			maxImageExtent = maxImageExtent_;
 			return *this;
 		}
 
-		const uint32_t& maxImageArrayLayers() const
+		SurfaceCapabilitiesKHR& setMaxImageArrayLayers(uint32_t maxImageArrayLayers_)
 		{
-			return m_surfaceCapabilitiesKHR.maxImageArrayLayers;
-		}
-
-		uint32_t& maxImageArrayLayers()
-		{
-			return m_surfaceCapabilitiesKHR.maxImageArrayLayers;
-		}
-
-		SurfaceCapabilitiesKHR& maxImageArrayLayers(uint32_t maxImageArrayLayers)
-		{
-			m_surfaceCapabilitiesKHR.maxImageArrayLayers = maxImageArrayLayers;
+			maxImageArrayLayers = maxImageArrayLayers_;
 			return *this;
 		}
 
-		const SurfaceTransformFlagsKHR& supportedTransforms() const
+		SurfaceCapabilitiesKHR& setSupportedTransforms(SurfaceTransformFlagsKHR supportedTransforms_)
 		{
-			return reinterpret_cast<const SurfaceTransformFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedTransforms);
-		}
-
-		SurfaceTransformFlagsKHR& supportedTransforms()
-		{
-			return reinterpret_cast<SurfaceTransformFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedTransforms);
-		}
-
-		SurfaceCapabilitiesKHR& supportedTransforms(SurfaceTransformFlagsKHR supportedTransforms)
-		{
-			m_surfaceCapabilitiesKHR.supportedTransforms = static_cast<VkSurfaceTransformFlagsKHR>(supportedTransforms);
+			supportedTransforms = supportedTransforms_;
 			return *this;
 		}
 
-		const SurfaceTransformFlagBitsKHR& currentTransform() const
+		SurfaceCapabilitiesKHR& setCurrentTransform(SurfaceTransformFlagBitsKHR currentTransform_)
 		{
-			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_surfaceCapabilitiesKHR.currentTransform);
-		}
-
-		SurfaceTransformFlagBitsKHR& currentTransform()
-		{
-			return reinterpret_cast<SurfaceTransformFlagBitsKHR&>(m_surfaceCapabilitiesKHR.currentTransform);
-		}
-
-		SurfaceCapabilitiesKHR& currentTransform(SurfaceTransformFlagBitsKHR currentTransform)
-		{
-			m_surfaceCapabilitiesKHR.currentTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(currentTransform);
+			currentTransform = currentTransform_;
 			return *this;
 		}
 
-		const CompositeAlphaFlagsKHR& supportedCompositeAlpha() const
+		SurfaceCapabilitiesKHR& setSupportedCompositeAlpha(CompositeAlphaFlagsKHR supportedCompositeAlpha_)
 		{
-			return reinterpret_cast<const CompositeAlphaFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedCompositeAlpha);
-		}
-
-		CompositeAlphaFlagsKHR& supportedCompositeAlpha()
-		{
-			return reinterpret_cast<CompositeAlphaFlagsKHR&>(m_surfaceCapabilitiesKHR.supportedCompositeAlpha);
-		}
-
-		SurfaceCapabilitiesKHR& supportedCompositeAlpha(CompositeAlphaFlagsKHR supportedCompositeAlpha)
-		{
-			m_surfaceCapabilitiesKHR.supportedCompositeAlpha = static_cast<VkCompositeAlphaFlagsKHR>(supportedCompositeAlpha);
+			supportedCompositeAlpha = supportedCompositeAlpha_;
 			return *this;
 		}
 
-		const ImageUsageFlags& supportedUsageFlags() const
+		SurfaceCapabilitiesKHR& setSupportedUsageFlags(ImageUsageFlags supportedUsageFlags_)
 		{
-			return reinterpret_cast<const ImageUsageFlags&>(m_surfaceCapabilitiesKHR.supportedUsageFlags);
-		}
-
-		ImageUsageFlags& supportedUsageFlags()
-		{
-			return reinterpret_cast<ImageUsageFlags&>(m_surfaceCapabilitiesKHR.supportedUsageFlags);
-		}
-
-		SurfaceCapabilitiesKHR& supportedUsageFlags(ImageUsageFlags supportedUsageFlags)
-		{
-			m_surfaceCapabilitiesKHR.supportedUsageFlags = static_cast<VkImageUsageFlags>(supportedUsageFlags);
+			supportedUsageFlags = supportedUsageFlags_;
 			return *this;
 		}
 
 		operator const VkSurfaceCapabilitiesKHR&() const
 		{
-			return m_surfaceCapabilitiesKHR;
+			return *reinterpret_cast<const VkSurfaceCapabilitiesKHR*>(this);
 		}
 
-	private:
-		VkSurfaceCapabilitiesKHR m_surfaceCapabilitiesKHR;
+		uint32_t minImageCount;
+		uint32_t maxImageCount;
+		Extent2D currentExtent;
+		Extent2D minImageExtent;
+		Extent2D maxImageExtent;
+		uint32_t maxImageArrayLayers;
+		SurfaceTransformFlagsKHR supportedTransforms;
+		SurfaceTransformFlagBitsKHR currentTransform;
+		CompositeAlphaFlagsKHR supportedCompositeAlpha;
+		ImageUsageFlags supportedUsageFlags;
 	};
 	static_assert(sizeof(SurfaceCapabilitiesKHR) == sizeof(VkSurfaceCapabilitiesKHR), "struct and wrapper have different size!");
 
-	class SwapchainCreateInfoKHR
+	struct SwapchainCreateInfoKHR
 	{
-	public:
 		SwapchainCreateInfoKHR()
-			: SwapchainCreateInfoKHR(SwapchainCreateFlagsKHR(), SurfaceKHR(), 0, Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinearKHR, Extent2D(), 0, ImageUsageFlags(), SharingMode::eExclusive, 0, nullptr, SurfaceTransformFlagBitsKHR::eIdentity, CompositeAlphaFlagBitsKHR::eOpaque, PresentModeKHR::eImmediateKHR, 0, SwapchainKHR())
+			: SwapchainCreateInfoKHR(SwapchainCreateFlagsKHR(), SurfaceKHR(), 0, Format::eUndefined, ColorSpaceKHR::eVkColorspaceSrgbNonlinear, Extent2D(), 0, ImageUsageFlags(), SharingMode::eExclusive, 0, nullptr, SurfaceTransformFlagBitsKHR::eIdentity, CompositeAlphaFlagBitsKHR::eOpaque, PresentModeKHR::eImmediate, 0, SwapchainKHR())
 		{}
 
-		SwapchainCreateInfoKHR(SwapchainCreateFlagsKHR flags, SurfaceKHR surface, uint32_t minImageCount, Format imageFormat, ColorSpaceKHR imageColorSpace, Extent2D imageExtent, uint32_t imageArrayLayers, ImageUsageFlags imageUsage, SharingMode imageSharingMode, uint32_t queueFamilyIndexCount, const uint32_t* pQueueFamilyIndices, SurfaceTransformFlagBitsKHR preTransform, CompositeAlphaFlagBitsKHR compositeAlpha, PresentModeKHR presentMode, Bool32 clipped, SwapchainKHR oldSwapchain)
+		SwapchainCreateInfoKHR(SwapchainCreateFlagsKHR flags_, SurfaceKHR surface_, uint32_t minImageCount_, Format imageFormat_, ColorSpaceKHR imageColorSpace_, Extent2D imageExtent_, uint32_t imageArrayLayers_, ImageUsageFlags imageUsage_, SharingMode imageSharingMode_, uint32_t queueFamilyIndexCount_, const uint32_t* pQueueFamilyIndices_, SurfaceTransformFlagBitsKHR preTransform_, CompositeAlphaFlagBitsKHR compositeAlpha_, PresentModeKHR presentMode_, Bool32 clipped_, SwapchainKHR oldSwapchain_)
 		{
-			m_swapchainCreateInfoKHR.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-			m_swapchainCreateInfoKHR.pNext = nullptr;
-			m_swapchainCreateInfoKHR.flags = static_cast<VkSwapchainCreateFlagsKHR>(flags);
-			m_swapchainCreateInfoKHR.surface = static_cast<VkSurfaceKHR>(surface);
-			m_swapchainCreateInfoKHR.minImageCount = minImageCount;
-			m_swapchainCreateInfoKHR.imageFormat = static_cast<VkFormat>(imageFormat);
-			m_swapchainCreateInfoKHR.imageColorSpace = static_cast<VkColorSpaceKHR>(imageColorSpace);
-			m_swapchainCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
-			m_swapchainCreateInfoKHR.imageArrayLayers = imageArrayLayers;
-			m_swapchainCreateInfoKHR.imageUsage = static_cast<VkImageUsageFlags>(imageUsage);
-			m_swapchainCreateInfoKHR.imageSharingMode = static_cast<VkSharingMode>(imageSharingMode);
-			m_swapchainCreateInfoKHR.queueFamilyIndexCount = queueFamilyIndexCount;
-			m_swapchainCreateInfoKHR.pQueueFamilyIndices = pQueueFamilyIndices;
-			m_swapchainCreateInfoKHR.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
-			m_swapchainCreateInfoKHR.compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(compositeAlpha);
-			m_swapchainCreateInfoKHR.presentMode = static_cast<VkPresentModeKHR>(presentMode);
-			m_swapchainCreateInfoKHR.clipped = clipped;
-			m_swapchainCreateInfoKHR.oldSwapchain = static_cast<VkSwapchainKHR>(oldSwapchain);
+			sType = StructureType::eSwapchainCreateInfoKHR;
+			pNext = nullptr;
+			flags = flags_;
+			surface = surface_;
+			minImageCount = minImageCount_;
+			imageFormat = imageFormat_;
+			imageColorSpace = imageColorSpace_;
+			imageExtent = imageExtent_;
+			imageArrayLayers = imageArrayLayers_;
+			imageUsage = imageUsage_;
+			imageSharingMode = imageSharingMode_;
+			queueFamilyIndexCount = queueFamilyIndexCount_;
+			pQueueFamilyIndices = pQueueFamilyIndices_;
+			preTransform = preTransform_;
+			compositeAlpha = compositeAlpha_;
+			presentMode = presentMode_;
+			clipped = clipped_;
+			oldSwapchain = oldSwapchain_;
 		}
 
 		SwapchainCreateInfoKHR(VkSwapchainCreateInfoKHR const & rhs)
-			: m_swapchainCreateInfoKHR(rhs)
 		{
+			memcpy(this, &rhs, sizeof(SwapchainCreateInfoKHR));
 		}
 
 		SwapchainCreateInfoKHR& operator=(VkSwapchainCreateInfoKHR const & rhs)
 		{
-			m_swapchainCreateInfoKHR = rhs;
+			memcpy(this, &rhs, sizeof(SwapchainCreateInfoKHR));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		SwapchainCreateInfoKHR& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_swapchainCreateInfoKHR.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_swapchainCreateInfoKHR.sType);
-		}
-
-		SwapchainCreateInfoKHR& sType(StructureType sType)
-		{
-			m_swapchainCreateInfoKHR.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		SwapchainCreateInfoKHR& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_swapchainCreateInfoKHR.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_swapchainCreateInfoKHR.pNext);
-		}
-
-		SwapchainCreateInfoKHR& pNext(const void* pNext)
-		{
-			m_swapchainCreateInfoKHR.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const SwapchainCreateFlagsKHR& flags() const
+		SwapchainCreateInfoKHR& setFlags(SwapchainCreateFlagsKHR flags_)
 		{
-			return reinterpret_cast<const SwapchainCreateFlagsKHR&>(m_swapchainCreateInfoKHR.flags);
-		}
-
-		SwapchainCreateFlagsKHR& flags()
-		{
-			return reinterpret_cast<SwapchainCreateFlagsKHR&>(m_swapchainCreateInfoKHR.flags);
-		}
-
-		SwapchainCreateInfoKHR& flags(SwapchainCreateFlagsKHR flags)
-		{
-			m_swapchainCreateInfoKHR.flags = static_cast<VkSwapchainCreateFlagsKHR>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const SurfaceKHR& surface() const
+		SwapchainCreateInfoKHR& setSurface(SurfaceKHR surface_)
 		{
-			return reinterpret_cast<const SurfaceKHR&>(m_swapchainCreateInfoKHR.surface);
-		}
-
-		SurfaceKHR& surface()
-		{
-			return reinterpret_cast<SurfaceKHR&>(m_swapchainCreateInfoKHR.surface);
-		}
-
-		SwapchainCreateInfoKHR& surface(SurfaceKHR surface)
-		{
-			m_swapchainCreateInfoKHR.surface = static_cast<VkSurfaceKHR>(surface);
+			surface = surface_;
 			return *this;
 		}
 
-		const uint32_t& minImageCount() const
+		SwapchainCreateInfoKHR& setMinImageCount(uint32_t minImageCount_)
 		{
-			return m_swapchainCreateInfoKHR.minImageCount;
-		}
-
-		uint32_t& minImageCount()
-		{
-			return m_swapchainCreateInfoKHR.minImageCount;
-		}
-
-		SwapchainCreateInfoKHR& minImageCount(uint32_t minImageCount)
-		{
-			m_swapchainCreateInfoKHR.minImageCount = minImageCount;
+			minImageCount = minImageCount_;
 			return *this;
 		}
 
-		const Format& imageFormat() const
+		SwapchainCreateInfoKHR& setImageFormat(Format imageFormat_)
 		{
-			return reinterpret_cast<const Format&>(m_swapchainCreateInfoKHR.imageFormat);
-		}
-
-		Format& imageFormat()
-		{
-			return reinterpret_cast<Format&>(m_swapchainCreateInfoKHR.imageFormat);
-		}
-
-		SwapchainCreateInfoKHR& imageFormat(Format imageFormat)
-		{
-			m_swapchainCreateInfoKHR.imageFormat = static_cast<VkFormat>(imageFormat);
+			imageFormat = imageFormat_;
 			return *this;
 		}
 
-		const ColorSpaceKHR& imageColorSpace() const
+		SwapchainCreateInfoKHR& setImageColorSpace(ColorSpaceKHR imageColorSpace_)
 		{
-			return reinterpret_cast<const ColorSpaceKHR&>(m_swapchainCreateInfoKHR.imageColorSpace);
-		}
-
-		ColorSpaceKHR& imageColorSpace()
-		{
-			return reinterpret_cast<ColorSpaceKHR&>(m_swapchainCreateInfoKHR.imageColorSpace);
-		}
-
-		SwapchainCreateInfoKHR& imageColorSpace(ColorSpaceKHR imageColorSpace)
-		{
-			m_swapchainCreateInfoKHR.imageColorSpace = static_cast<VkColorSpaceKHR>(imageColorSpace);
+			imageColorSpace = imageColorSpace_;
 			return *this;
 		}
 
-		const Extent2D& imageExtent() const
+		SwapchainCreateInfoKHR& setImageExtent(Extent2D imageExtent_)
 		{
-			return reinterpret_cast<const Extent2D&>(m_swapchainCreateInfoKHR.imageExtent);
-		}
-
-		Extent2D& imageExtent()
-		{
-			return reinterpret_cast<Extent2D&>(m_swapchainCreateInfoKHR.imageExtent);
-		}
-
-		SwapchainCreateInfoKHR& imageExtent(Extent2D imageExtent)
-		{
-			m_swapchainCreateInfoKHR.imageExtent = static_cast<VkExtent2D>(imageExtent);
+			imageExtent = imageExtent_;
 			return *this;
 		}
 
-		const uint32_t& imageArrayLayers() const
+		SwapchainCreateInfoKHR& setImageArrayLayers(uint32_t imageArrayLayers_)
 		{
-			return m_swapchainCreateInfoKHR.imageArrayLayers;
-		}
-
-		uint32_t& imageArrayLayers()
-		{
-			return m_swapchainCreateInfoKHR.imageArrayLayers;
-		}
-
-		SwapchainCreateInfoKHR& imageArrayLayers(uint32_t imageArrayLayers)
-		{
-			m_swapchainCreateInfoKHR.imageArrayLayers = imageArrayLayers;
+			imageArrayLayers = imageArrayLayers_;
 			return *this;
 		}
 
-		const ImageUsageFlags& imageUsage() const
+		SwapchainCreateInfoKHR& setImageUsage(ImageUsageFlags imageUsage_)
 		{
-			return reinterpret_cast<const ImageUsageFlags&>(m_swapchainCreateInfoKHR.imageUsage);
-		}
-
-		ImageUsageFlags& imageUsage()
-		{
-			return reinterpret_cast<ImageUsageFlags&>(m_swapchainCreateInfoKHR.imageUsage);
-		}
-
-		SwapchainCreateInfoKHR& imageUsage(ImageUsageFlags imageUsage)
-		{
-			m_swapchainCreateInfoKHR.imageUsage = static_cast<VkImageUsageFlags>(imageUsage);
+			imageUsage = imageUsage_;
 			return *this;
 		}
 
-		const SharingMode& imageSharingMode() const
+		SwapchainCreateInfoKHR& setImageSharingMode(SharingMode imageSharingMode_)
 		{
-			return reinterpret_cast<const SharingMode&>(m_swapchainCreateInfoKHR.imageSharingMode);
-		}
-
-		SharingMode& imageSharingMode()
-		{
-			return reinterpret_cast<SharingMode&>(m_swapchainCreateInfoKHR.imageSharingMode);
-		}
-
-		SwapchainCreateInfoKHR& imageSharingMode(SharingMode imageSharingMode)
-		{
-			m_swapchainCreateInfoKHR.imageSharingMode = static_cast<VkSharingMode>(imageSharingMode);
+			imageSharingMode = imageSharingMode_;
 			return *this;
 		}
 
-		const uint32_t& queueFamilyIndexCount() const
+		SwapchainCreateInfoKHR& setQueueFamilyIndexCount(uint32_t queueFamilyIndexCount_)
 		{
-			return m_swapchainCreateInfoKHR.queueFamilyIndexCount;
-		}
-
-		uint32_t& queueFamilyIndexCount()
-		{
-			return m_swapchainCreateInfoKHR.queueFamilyIndexCount;
-		}
-
-		SwapchainCreateInfoKHR& queueFamilyIndexCount(uint32_t queueFamilyIndexCount)
-		{
-			m_swapchainCreateInfoKHR.queueFamilyIndexCount = queueFamilyIndexCount;
+			queueFamilyIndexCount = queueFamilyIndexCount_;
 			return *this;
 		}
 
-		const uint32_t* pQueueFamilyIndices() const
+		SwapchainCreateInfoKHR& setPQueueFamilyIndices(const uint32_t* pQueueFamilyIndices_)
 		{
-			return reinterpret_cast<const uint32_t*>(m_swapchainCreateInfoKHR.pQueueFamilyIndices);
-		}
-
-		const uint32_t* pQueueFamilyIndices()
-		{
-			return reinterpret_cast<const uint32_t*>(m_swapchainCreateInfoKHR.pQueueFamilyIndices);
-		}
-
-		SwapchainCreateInfoKHR& pQueueFamilyIndices(const uint32_t* pQueueFamilyIndices)
-		{
-			m_swapchainCreateInfoKHR.pQueueFamilyIndices = pQueueFamilyIndices;
+			pQueueFamilyIndices = pQueueFamilyIndices_;
 			return *this;
 		}
 
-		const SurfaceTransformFlagBitsKHR& preTransform() const
+		SwapchainCreateInfoKHR& setPreTransform(SurfaceTransformFlagBitsKHR preTransform_)
 		{
-			return reinterpret_cast<const SurfaceTransformFlagBitsKHR&>(m_swapchainCreateInfoKHR.preTransform);
-		}
-
-		SurfaceTransformFlagBitsKHR& preTransform()
-		{
-			return reinterpret_cast<SurfaceTransformFlagBitsKHR&>(m_swapchainCreateInfoKHR.preTransform);
-		}
-
-		SwapchainCreateInfoKHR& preTransform(SurfaceTransformFlagBitsKHR preTransform)
-		{
-			m_swapchainCreateInfoKHR.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(preTransform);
+			preTransform = preTransform_;
 			return *this;
 		}
 
-		const CompositeAlphaFlagBitsKHR& compositeAlpha() const
+		SwapchainCreateInfoKHR& setCompositeAlpha(CompositeAlphaFlagBitsKHR compositeAlpha_)
 		{
-			return reinterpret_cast<const CompositeAlphaFlagBitsKHR&>(m_swapchainCreateInfoKHR.compositeAlpha);
-		}
-
-		CompositeAlphaFlagBitsKHR& compositeAlpha()
-		{
-			return reinterpret_cast<CompositeAlphaFlagBitsKHR&>(m_swapchainCreateInfoKHR.compositeAlpha);
-		}
-
-		SwapchainCreateInfoKHR& compositeAlpha(CompositeAlphaFlagBitsKHR compositeAlpha)
-		{
-			m_swapchainCreateInfoKHR.compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(compositeAlpha);
+			compositeAlpha = compositeAlpha_;
 			return *this;
 		}
 
-		const PresentModeKHR& presentMode() const
+		SwapchainCreateInfoKHR& setPresentMode(PresentModeKHR presentMode_)
 		{
-			return reinterpret_cast<const PresentModeKHR&>(m_swapchainCreateInfoKHR.presentMode);
-		}
-
-		PresentModeKHR& presentMode()
-		{
-			return reinterpret_cast<PresentModeKHR&>(m_swapchainCreateInfoKHR.presentMode);
-		}
-
-		SwapchainCreateInfoKHR& presentMode(PresentModeKHR presentMode)
-		{
-			m_swapchainCreateInfoKHR.presentMode = static_cast<VkPresentModeKHR>(presentMode);
+			presentMode = presentMode_;
 			return *this;
 		}
 
-		const Bool32& clipped() const
+		SwapchainCreateInfoKHR& setClipped(Bool32 clipped_)
 		{
-			return m_swapchainCreateInfoKHR.clipped;
-		}
-
-		Bool32& clipped()
-		{
-			return m_swapchainCreateInfoKHR.clipped;
-		}
-
-		SwapchainCreateInfoKHR& clipped(Bool32 clipped)
-		{
-			m_swapchainCreateInfoKHR.clipped = clipped;
+			clipped = clipped_;
 			return *this;
 		}
 
-		const SwapchainKHR& oldSwapchain() const
+		SwapchainCreateInfoKHR& setOldSwapchain(SwapchainKHR oldSwapchain_)
 		{
-			return reinterpret_cast<const SwapchainKHR&>(m_swapchainCreateInfoKHR.oldSwapchain);
-		}
-
-		SwapchainKHR& oldSwapchain()
-		{
-			return reinterpret_cast<SwapchainKHR&>(m_swapchainCreateInfoKHR.oldSwapchain);
-		}
-
-		SwapchainCreateInfoKHR& oldSwapchain(SwapchainKHR oldSwapchain)
-		{
-			m_swapchainCreateInfoKHR.oldSwapchain = static_cast<VkSwapchainKHR>(oldSwapchain);
+			oldSwapchain = oldSwapchain_;
 			return *this;
 		}
 
 		operator const VkSwapchainCreateInfoKHR&() const
 		{
-			return m_swapchainCreateInfoKHR;
+			return *reinterpret_cast<const VkSwapchainCreateInfoKHR*>(this);
 		}
 
-	private:
-		VkSwapchainCreateInfoKHR m_swapchainCreateInfoKHR;
+		StructureType sType;
+		const void* pNext;
+		SwapchainCreateFlagsKHR flags;
+		SurfaceKHR surface;
+		uint32_t minImageCount;
+		Format imageFormat;
+		ColorSpaceKHR imageColorSpace;
+		Extent2D imageExtent;
+		uint32_t imageArrayLayers;
+		ImageUsageFlags imageUsage;
+		SharingMode imageSharingMode;
+		uint32_t queueFamilyIndexCount;
+		const uint32_t* pQueueFamilyIndices;
+		SurfaceTransformFlagBitsKHR preTransform;
+		CompositeAlphaFlagBitsKHR compositeAlpha;
+		PresentModeKHR presentMode;
+		Bool32 clipped;
+		SwapchainKHR oldSwapchain;
 	};
 	static_assert(sizeof(SwapchainCreateInfoKHR) == sizeof(VkSwapchainCreateInfoKHR), "struct and wrapper have different size!");
 
@@ -20100,47 +12874,47 @@ namespace vk
 			return vkGetDeviceProcAddr(m_device, pName);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		PFN_vkVoidFunction getProcAddr(eastl::string const & name) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		PFN_vkVoidFunction getProcAddr(const std::string & name) const
 		{
 			return vkGetDeviceProcAddr(m_device, name.c_str());
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroy(const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyDevice(m_device, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroy(vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroy(Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyDevice(m_device, reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex, Queue* pQueue) const
 		{
 			vkGetDeviceQueue(m_device, queueFamilyIndex, queueIndex, reinterpret_cast<VkQueue*>(pQueue));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Queue getQueue(uint32_t queueFamilyIndex, uint32_t queueIndex) const
 		{
 			Queue queue;
 			vkGetDeviceQueue(m_device, queueFamilyIndex, queueIndex, reinterpret_cast<VkQueue*>(&queue));
 			return queue;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result waitIdle() const
 		{
 			return static_cast<Result>(vkDeviceWaitIdle(m_device));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void waitIdle() const
 		{
 			Result result = static_cast<Result>(vkDeviceWaitIdle(m_device));
@@ -20149,15 +12923,15 @@ namespace vk
 				throw std::system_error(result, "vk::Device::waitIdle");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result allocateMemory(const MemoryAllocateInfo* pAllocateInfo, const AllocationCallbacks* pAllocator, DeviceMemory* pMemory) const
 		{
 			return static_cast<Result>(vkAllocateMemory(m_device, reinterpret_cast<const VkMemoryAllocateInfo*>(pAllocateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDeviceMemory*>(pMemory)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		DeviceMemory allocateMemory(const MemoryAllocateInfo & allocateInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		DeviceMemory allocateMemory(const MemoryAllocateInfo & allocateInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			DeviceMemory memory;
 			Result result = static_cast<Result>(vkAllocateMemory(m_device, reinterpret_cast<const VkMemoryAllocateInfo*>(&allocateInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDeviceMemory*>(&memory)));
@@ -20167,28 +12941,28 @@ namespace vk
 			}
 			return memory;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void freeMemory(DeviceMemory memory, const AllocationCallbacks* pAllocator) const
 		{
 			vkFreeMemory(m_device, static_cast<VkDeviceMemory>(memory), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void freeMemory(DeviceMemory memory, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void freeMemory(DeviceMemory memory, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkFreeMemory(m_device, static_cast<VkDeviceMemory>(memory), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result mapMemory(DeviceMemory memory, DeviceSize offset, DeviceSize size, MemoryMapFlags flags, void** ppData) const
 		{
 			return static_cast<Result>(vkMapMemory(m_device, static_cast<VkDeviceMemory>(memory), offset, size, static_cast<VkMemoryMapFlags>(flags), ppData));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void* mapMemory(DeviceMemory memory, DeviceSize offset, DeviceSize size, MemoryMapFlags flags) const
 		{
 			void* pData;
@@ -20199,90 +12973,90 @@ namespace vk
 			}
 			return pData;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		void unmapMemory(DeviceMemory memory) const
 		{
 			vkUnmapMemory(m_device, static_cast<VkDeviceMemory>(memory));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void unmapMemory(DeviceMemory memory) const
 		{
 			vkUnmapMemory(m_device, static_cast<VkDeviceMemory>(memory));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result flushMappedMemoryRanges(uint32_t memoryRangeCount, const MappedMemoryRange* pMemoryRanges) const
 		{
 			return static_cast<Result>(vkFlushMappedMemoryRanges(m_device, memoryRangeCount, reinterpret_cast<const VkMappedMemoryRange*>(pMemoryRanges)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void flushMappedMemoryRanges(eastl::vector<MappedMemoryRange> const & memoryRanges) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void flushMappedMemoryRanges(ArrayProxy<const MappedMemoryRange> memoryRanges) const
 		{
-			Result result = static_cast<Result>(vkFlushMappedMemoryRanges(m_device, static_cast<uint32_t>(memoryRanges.size()), reinterpret_cast<const VkMappedMemoryRange*>(memoryRanges.data())));
+			Result result = static_cast<Result>(vkFlushMappedMemoryRanges(m_device, memoryRanges.size(), reinterpret_cast<const VkMappedMemoryRange*>(memoryRanges.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::flushMappedMemoryRanges");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result invalidateMappedMemoryRanges(uint32_t memoryRangeCount, const MappedMemoryRange* pMemoryRanges) const
 		{
 			return static_cast<Result>(vkInvalidateMappedMemoryRanges(m_device, memoryRangeCount, reinterpret_cast<const VkMappedMemoryRange*>(pMemoryRanges)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void invalidateMappedMemoryRanges(eastl::vector<MappedMemoryRange> const & memoryRanges) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void invalidateMappedMemoryRanges(ArrayProxy<const MappedMemoryRange> memoryRanges) const
 		{
-			Result result = static_cast<Result>(vkInvalidateMappedMemoryRanges(m_device, static_cast<uint32_t>(memoryRanges.size()), reinterpret_cast<const VkMappedMemoryRange*>(memoryRanges.data())));
+			Result result = static_cast<Result>(vkInvalidateMappedMemoryRanges(m_device, memoryRanges.size(), reinterpret_cast<const VkMappedMemoryRange*>(memoryRanges.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::invalidateMappedMemoryRanges");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getMemoryCommitment(DeviceMemory memory, DeviceSize* pCommittedMemoryInBytes) const
 		{
 			vkGetDeviceMemoryCommitment(m_device, static_cast<VkDeviceMemory>(memory), pCommittedMemoryInBytes);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		DeviceSize getMemoryCommitment(DeviceMemory memory) const
 		{
 			DeviceSize committedMemoryInBytes;
 			vkGetDeviceMemoryCommitment(m_device, static_cast<VkDeviceMemory>(memory), &committedMemoryInBytes);
 			return committedMemoryInBytes;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getBufferMemoryRequirements(Buffer buffer, MemoryRequirements* pMemoryRequirements) const
 		{
 			vkGetBufferMemoryRequirements(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		MemoryRequirements getBufferMemoryRequirements(Buffer buffer) const
 		{
 			MemoryRequirements memoryRequirements;
 			vkGetBufferMemoryRequirements(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<VkMemoryRequirements*>(&memoryRequirements));
 			return memoryRequirements;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result bindBufferMemory(Buffer buffer, DeviceMemory memory, DeviceSize memoryOffset) const
 		{
 			return static_cast<Result>(vkBindBufferMemory(m_device, static_cast<VkBuffer>(buffer), static_cast<VkDeviceMemory>(memory), memoryOffset));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void bindBufferMemory(Buffer buffer, DeviceMemory memory, DeviceSize memoryOffset) const
 		{
 			Result result = static_cast<Result>(vkBindBufferMemory(m_device, static_cast<VkBuffer>(buffer), static_cast<VkDeviceMemory>(memory), memoryOffset));
@@ -20291,30 +13065,30 @@ namespace vk
 				throw std::system_error(result, "vk::Device::bindBufferMemory");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getImageMemoryRequirements(Image image, MemoryRequirements* pMemoryRequirements) const
 		{
 			vkGetImageMemoryRequirements(m_device, static_cast<VkImage>(image), reinterpret_cast<VkMemoryRequirements*>(pMemoryRequirements));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		MemoryRequirements getImageMemoryRequirements(Image image) const
 		{
 			MemoryRequirements memoryRequirements;
 			vkGetImageMemoryRequirements(m_device, static_cast<VkImage>(image), reinterpret_cast<VkMemoryRequirements*>(&memoryRequirements));
 			return memoryRequirements;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result bindImageMemory(Image image, DeviceMemory memory, DeviceSize memoryOffset) const
 		{
 			return static_cast<Result>(vkBindImageMemory(m_device, static_cast<VkImage>(image), static_cast<VkDeviceMemory>(memory), memoryOffset));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void bindImageMemory(Image image, DeviceMemory memory, DeviceSize memoryOffset) const
 		{
 			Result result = static_cast<Result>(vkBindImageMemory(m_device, static_cast<VkImage>(image), static_cast<VkDeviceMemory>(memory), memoryOffset));
@@ -20323,32 +13097,33 @@ namespace vk
 				throw std::system_error(result, "vk::Device::bindImageMemory");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getImageSparseMemoryRequirements(Image image, uint32_t* pSparseMemoryRequirementCount, SparseImageMemoryRequirements* pSparseMemoryRequirements) const
 		{
 			vkGetImageSparseMemoryRequirements(m_device, static_cast<VkImage>(image), pSparseMemoryRequirementCount, reinterpret_cast<VkSparseImageMemoryRequirements*>(pSparseMemoryRequirements));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<SparseImageMemoryRequirements> getImageSparseMemoryRequirements(Image image) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<SparseImageMemoryRequirements>>
+		eastl::vector<SparseImageMemoryRequirements, Allocator> getImageSparseMemoryRequirements(Image image) const
 		{
-			eastl::vector<SparseImageMemoryRequirements> sparseMemoryRequirements;
+			eastl::vector<SparseImageMemoryRequirements, Allocator> sparseMemoryRequirements;
 			uint32_t sparseMemoryRequirementCount;
 			vkGetImageSparseMemoryRequirements(m_device, static_cast<VkImage>(image), &sparseMemoryRequirementCount, nullptr);
 			sparseMemoryRequirements.resize(sparseMemoryRequirementCount);
 			vkGetImageSparseMemoryRequirements(m_device, static_cast<VkImage>(image), &sparseMemoryRequirementCount, reinterpret_cast<VkSparseImageMemoryRequirements*>(sparseMemoryRequirements.data()));
 			return sparseMemoryRequirements;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createFence(const FenceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Fence* pFence) const
 		{
 			return static_cast<Result>(vkCreateFence(m_device, reinterpret_cast<const VkFenceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkFence*>(pFence)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Fence createFence(const FenceCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Fence createFence(const FenceCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Fence fence;
 			Result result = static_cast<Result>(vkCreateFence(m_device, reinterpret_cast<const VkFenceCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkFence*>(&fence)));
@@ -20358,44 +13133,44 @@ namespace vk
 			}
 			return fence;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyFence(Fence fence, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyFence(m_device, static_cast<VkFence>(fence), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyFence(Fence fence, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyFence(Fence fence, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyFence(m_device, static_cast<VkFence>(fence), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result resetFences(uint32_t fenceCount, const Fence* pFences) const
 		{
 			return static_cast<Result>(vkResetFences(m_device, fenceCount, reinterpret_cast<const VkFence*>(pFences)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void resetFences(eastl::vector<Fence> const & fences) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void resetFences(ArrayProxy<const Fence> fences) const
 		{
-			Result result = static_cast<Result>(vkResetFences(m_device, static_cast<uint32_t>(fences.size()), reinterpret_cast<const VkFence*>(fences.data())));
+			Result result = static_cast<Result>(vkResetFences(m_device, fences.size(), reinterpret_cast<const VkFence*>(fences.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::resetFences");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result getFenceStatus(Fence fence) const
 		{
 			return static_cast<Result>(vkGetFenceStatus(m_device, static_cast<VkFence>(fence)));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Result getFenceStatus(Fence fence) const
 		{
 			Result result = static_cast<Result>(vkGetFenceStatus(m_device, static_cast<VkFence>(fence)));
@@ -20405,32 +13180,32 @@ namespace vk
 			}
 			return result;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result waitForFences(uint32_t fenceCount, const Fence* pFences, Bool32 waitAll, uint64_t timeout) const
 		{
 			return static_cast<Result>(vkWaitForFences(m_device, fenceCount, reinterpret_cast<const VkFence*>(pFences), waitAll, timeout));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result waitForFences(eastl::vector<Fence> const & fences, Bool32 waitAll, uint64_t timeout) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Result waitForFences(ArrayProxy<const Fence> fences, Bool32 waitAll, uint64_t timeout) const
 		{
-			Result result = static_cast<Result>(vkWaitForFences(m_device, static_cast<uint32_t>(fences.size()), reinterpret_cast<const VkFence*>(fences.data()), waitAll, timeout));
+			Result result = static_cast<Result>(vkWaitForFences(m_device, fences.size(), reinterpret_cast<const VkFence*>(fences.data()), waitAll, timeout));
 			if ((result != Result::eSuccess) && (result != Result::eTimeout))
 			{
 				throw std::system_error(result, "vk::Device::waitForFences");
 			}
 			return result;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createSemaphore(const SemaphoreCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Semaphore* pSemaphore) const
 		{
 			return static_cast<Result>(vkCreateSemaphore(m_device, reinterpret_cast<const VkSemaphoreCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSemaphore*>(pSemaphore)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Semaphore createSemaphore(const SemaphoreCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Semaphore createSemaphore(const SemaphoreCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Semaphore semaphore;
 			Result result = static_cast<Result>(vkCreateSemaphore(m_device, reinterpret_cast<const VkSemaphoreCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSemaphore*>(&semaphore)));
@@ -20440,27 +13215,27 @@ namespace vk
 			}
 			return semaphore;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroySemaphore(Semaphore semaphore, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroySemaphore(m_device, static_cast<VkSemaphore>(semaphore), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroySemaphore(Semaphore semaphore, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroySemaphore(Semaphore semaphore, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroySemaphore(m_device, static_cast<VkSemaphore>(semaphore), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createEvent(const EventCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Event* pEvent) const
 		{
 			return static_cast<Result>(vkCreateEvent(m_device, reinterpret_cast<const VkEventCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkEvent*>(pEvent)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Event createEvent(const EventCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Event createEvent(const EventCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Event event;
 			Result result = static_cast<Result>(vkCreateEvent(m_device, reinterpret_cast<const VkEventCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkEvent*>(&event)));
@@ -20470,28 +13245,28 @@ namespace vk
 			}
 			return event;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyEvent(Event event, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyEvent(m_device, static_cast<VkEvent>(event), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyEvent(Event event, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyEvent(Event event, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyEvent(m_device, static_cast<VkEvent>(event), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result getEventStatus(Event event) const
 		{
 			return static_cast<Result>(vkGetEventStatus(m_device, static_cast<VkEvent>(event)));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Result getEventStatus(Event event) const
 		{
 			Result result = static_cast<Result>(vkGetEventStatus(m_device, static_cast<VkEvent>(event)));
@@ -20501,16 +13276,16 @@ namespace vk
 			}
 			return result;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result setEvent(Event event) const
 		{
 			return static_cast<Result>(vkSetEvent(m_device, static_cast<VkEvent>(event)));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void setEvent(Event event) const
 		{
 			Result result = static_cast<Result>(vkSetEvent(m_device, static_cast<VkEvent>(event)));
@@ -20519,16 +13294,16 @@ namespace vk
 				throw std::system_error(result, "vk::Device::setEvent");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result resetEvent(Event event) const
 		{
 			return static_cast<Result>(vkResetEvent(m_device, static_cast<VkEvent>(event)));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void resetEvent(Event event) const
 		{
 			Result result = static_cast<Result>(vkResetEvent(m_device, static_cast<VkEvent>(event)));
@@ -20537,15 +13312,15 @@ namespace vk
 				throw std::system_error(result, "vk::Device::resetEvent");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createQueryPool(const QueryPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, QueryPool* pQueryPool) const
 		{
 			return static_cast<Result>(vkCreateQueryPool(m_device, reinterpret_cast<const VkQueryPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkQueryPool*>(pQueryPool)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		QueryPool createQueryPool(const QueryPoolCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		QueryPool createQueryPool(const QueryPoolCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			QueryPool queryPool;
 			Result result = static_cast<Result>(vkCreateQueryPool(m_device, reinterpret_cast<const VkQueryPoolCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkQueryPool*>(&queryPool)));
@@ -20555,45 +13330,45 @@ namespace vk
 			}
 			return queryPool;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyQueryPool(QueryPool queryPool, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyQueryPool(m_device, static_cast<VkQueryPool>(queryPool), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyQueryPool(QueryPool queryPool, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyQueryPool(QueryPool queryPool, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyQueryPool(m_device, static_cast<VkQueryPool>(queryPool), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, size_t dataSize, void* pData, DeviceSize stride, QueryResultFlags flags) const
 		{
 			return static_cast<Result>(vkGetQueryPoolResults(m_device, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, dataSize, pData, stride, static_cast<VkQueryResultFlags>(flags)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		template <typename T>
-		Result getQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, eastl::vector<T> & data, DeviceSize stride, QueryResultFlags flags) const
+		Result getQueryPoolResults(QueryPool queryPool, uint32_t firstQuery, uint32_t queryCount, ArrayProxy<T> data, DeviceSize stride, QueryResultFlags flags) const
 		{
-			Result result = static_cast<Result>(vkGetQueryPoolResults(m_device, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, static_cast<size_t>(data.size() * sizeof(T)), reinterpret_cast<void*>(data.data()), stride, static_cast<VkQueryResultFlags>(flags)));
+			Result result = static_cast<Result>(vkGetQueryPoolResults(m_device, static_cast<VkQueryPool>(queryPool), firstQuery, queryCount, data.size() * sizeof(T), reinterpret_cast<void*>(data.data()), stride, static_cast<VkQueryResultFlags>(flags)));
 			if ((result != Result::eSuccess) && (result != Result::eNotReady))
 			{
 				throw std::system_error(result, "vk::Device::getQueryPoolResults");
 			}
 			return result;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createBuffer(const BufferCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Buffer* pBuffer) const
 		{
 			return static_cast<Result>(vkCreateBuffer(m_device, reinterpret_cast<const VkBufferCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkBuffer*>(pBuffer)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Buffer createBuffer(const BufferCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Buffer createBuffer(const BufferCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Buffer buffer;
 			Result result = static_cast<Result>(vkCreateBuffer(m_device, reinterpret_cast<const VkBufferCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkBuffer*>(&buffer)));
@@ -20603,27 +13378,27 @@ namespace vk
 			}
 			return buffer;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyBuffer(Buffer buffer, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyBuffer(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyBuffer(Buffer buffer, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyBuffer(Buffer buffer, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyBuffer(m_device, static_cast<VkBuffer>(buffer), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createBufferView(const BufferViewCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, BufferView* pView) const
 		{
 			return static_cast<Result>(vkCreateBufferView(m_device, reinterpret_cast<const VkBufferViewCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkBufferView*>(pView)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		BufferView createBufferView(const BufferViewCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		BufferView createBufferView(const BufferViewCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			BufferView view;
 			Result result = static_cast<Result>(vkCreateBufferView(m_device, reinterpret_cast<const VkBufferViewCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkBufferView*>(&view)));
@@ -20633,27 +13408,27 @@ namespace vk
 			}
 			return view;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyBufferView(BufferView bufferView, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyBufferView(m_device, static_cast<VkBufferView>(bufferView), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyBufferView(BufferView bufferView, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyBufferView(BufferView bufferView, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyBufferView(m_device, static_cast<VkBufferView>(bufferView), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createImage(const ImageCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Image* pImage) const
 		{
 			return static_cast<Result>(vkCreateImage(m_device, reinterpret_cast<const VkImageCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkImage*>(pImage)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Image createImage(const ImageCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Image createImage(const ImageCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Image image;
 			Result result = static_cast<Result>(vkCreateImage(m_device, reinterpret_cast<const VkImageCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkImage*>(&image)));
@@ -20663,41 +13438,41 @@ namespace vk
 			}
 			return image;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyImage(Image image, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyImage(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyImage(Image image, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyImage(Image image, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyImage(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getImageSubresourceLayout(Image image, const ImageSubresource* pSubresource, SubresourceLayout* pLayout) const
 		{
 			vkGetImageSubresourceLayout(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkImageSubresource*>(pSubresource), reinterpret_cast<VkSubresourceLayout*>(pLayout));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		SubresourceLayout getImageSubresourceLayout(Image image, const ImageSubresource & subresource) const
 		{
 			SubresourceLayout layout;
 			vkGetImageSubresourceLayout(m_device, static_cast<VkImage>(image), reinterpret_cast<const VkImageSubresource*>(&subresource), reinterpret_cast<VkSubresourceLayout*>(&layout));
 			return layout;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createImageView(const ImageViewCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, ImageView* pView) const
 		{
 			return static_cast<Result>(vkCreateImageView(m_device, reinterpret_cast<const VkImageViewCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkImageView*>(pView)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		ImageView createImageView(const ImageViewCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		ImageView createImageView(const ImageViewCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			ImageView view;
 			Result result = static_cast<Result>(vkCreateImageView(m_device, reinterpret_cast<const VkImageViewCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkImageView*>(&view)));
@@ -20707,27 +13482,27 @@ namespace vk
 			}
 			return view;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyImageView(ImageView imageView, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyImageView(m_device, static_cast<VkImageView>(imageView), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyImageView(ImageView imageView, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyImageView(ImageView imageView, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyImageView(m_device, static_cast<VkImageView>(imageView), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createShaderModule(const ShaderModuleCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, ShaderModule* pShaderModule) const
 		{
 			return static_cast<Result>(vkCreateShaderModule(m_device, reinterpret_cast<const VkShaderModuleCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkShaderModule*>(pShaderModule)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		ShaderModule createShaderModule(const ShaderModuleCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		ShaderModule createShaderModule(const ShaderModuleCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			ShaderModule shaderModule;
 			Result result = static_cast<Result>(vkCreateShaderModule(m_device, reinterpret_cast<const VkShaderModuleCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkShaderModule*>(&shaderModule)));
@@ -20737,27 +13512,27 @@ namespace vk
 			}
 			return shaderModule;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyShaderModule(ShaderModule shaderModule, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyShaderModule(m_device, static_cast<VkShaderModule>(shaderModule), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyShaderModule(ShaderModule shaderModule, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyShaderModule(ShaderModule shaderModule, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyShaderModule(m_device, static_cast<VkShaderModule>(shaderModule), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createPipelineCache(const PipelineCacheCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, PipelineCache* pPipelineCache) const
 		{
 			return static_cast<Result>(vkCreatePipelineCache(m_device, reinterpret_cast<const VkPipelineCacheCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipelineCache*>(pPipelineCache)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		PipelineCache createPipelineCache(const PipelineCacheCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		PipelineCache createPipelineCache(const PipelineCacheCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			PipelineCache pipelineCache;
 			Result result = static_cast<Result>(vkCreatePipelineCache(m_device, reinterpret_cast<const VkPipelineCacheCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipelineCache*>(&pipelineCache)));
@@ -20767,116 +13542,118 @@ namespace vk
 			}
 			return pipelineCache;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyPipelineCache(PipelineCache pipelineCache, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyPipelineCache(m_device, static_cast<VkPipelineCache>(pipelineCache), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyPipelineCache(PipelineCache pipelineCache, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyPipelineCache(PipelineCache pipelineCache, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyPipelineCache(m_device, static_cast<VkPipelineCache>(pipelineCache), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getPipelineCacheData(PipelineCache pipelineCache, size_t* pDataSize, void* pData) const
 		{
 			return static_cast<Result>(vkGetPipelineCacheData(m_device, static_cast<VkPipelineCache>(pipelineCache), pDataSize, pData));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<uint8_t> getPipelineCacheData(PipelineCache pipelineCache) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<uint8_t>>
+		eastl::vector<uint8_t, Allocator> getPipelineCacheData(PipelineCache pipelineCache) const
 		{
-			eastl::vector<uint8_t> data;
+			eastl::vector<uint8_t, Allocator> data;
 			size_t dataSize;
 			Result result = static_cast<Result>(vkGetPipelineCacheData(m_device, static_cast<VkPipelineCache>(pipelineCache), &dataSize, nullptr));
-			if (result != Result::eSuccess)
+			if ((result == Result::eSuccess) && dataSize)
 			{
-				throw std::system_error(result, "vk::Device::getPipelineCacheData");
+				data.resize(dataSize);
+				result = static_cast<Result>(vkGetPipelineCacheData(m_device, static_cast<VkPipelineCache>(pipelineCache), &dataSize, reinterpret_cast<void*>(data.data())));
 			}
-			data.resize(dataSize);
-			result = static_cast<Result>(vkGetPipelineCacheData(m_device, static_cast<VkPipelineCache>(pipelineCache), &dataSize, reinterpret_cast<void*>(data.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::getPipelineCacheData");
 			}
 			return data;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result mergePipelineCaches(PipelineCache dstCache, uint32_t srcCacheCount, const PipelineCache* pSrcCaches) const
 		{
 			return static_cast<Result>(vkMergePipelineCaches(m_device, static_cast<VkPipelineCache>(dstCache), srcCacheCount, reinterpret_cast<const VkPipelineCache*>(pSrcCaches)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void mergePipelineCaches(PipelineCache dstCache, eastl::vector<PipelineCache> const & srcCaches) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void mergePipelineCaches(PipelineCache dstCache, ArrayProxy<const PipelineCache> srcCaches) const
 		{
-			Result result = static_cast<Result>(vkMergePipelineCaches(m_device, static_cast<VkPipelineCache>(dstCache), static_cast<uint32_t>(srcCaches.size()), reinterpret_cast<const VkPipelineCache*>(srcCaches.data())));
+			Result result = static_cast<Result>(vkMergePipelineCaches(m_device, static_cast<VkPipelineCache>(dstCache), srcCaches.size(), reinterpret_cast<const VkPipelineCache*>(srcCaches.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::mergePipelineCaches");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createGraphicsPipelines(PipelineCache pipelineCache, uint32_t createInfoCount, const GraphicsPipelineCreateInfo* pCreateInfos, const AllocationCallbacks* pAllocator, Pipeline* pPipelines) const
 		{
 			return static_cast<Result>(vkCreateGraphicsPipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), createInfoCount, reinterpret_cast<const VkGraphicsPipelineCreateInfo*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipeline*>(pPipelines)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<Pipeline> createGraphicsPipelines(PipelineCache pipelineCache, eastl::vector<GraphicsPipelineCreateInfo> const & createInfos, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<Pipeline>>
+		eastl::vector<Pipeline, Allocator> createGraphicsPipelines(PipelineCache pipelineCache, ArrayProxy<const GraphicsPipelineCreateInfo> createInfos, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
-			eastl::vector<Pipeline> pipelines(createInfos.size());
-			Result result = static_cast<Result>(vkCreateGraphicsPipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), static_cast<uint32_t>(createInfos.size()), reinterpret_cast<const VkGraphicsPipelineCreateInfo*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipeline*>(pipelines.data())));
+			eastl::vector<Pipeline, Allocator> pipelines(createInfos.size());
+			Result result = static_cast<Result>(vkCreateGraphicsPipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), createInfos.size(), reinterpret_cast<const VkGraphicsPipelineCreateInfo*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipeline*>(pipelines.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::createGraphicsPipelines");
 			}
 			return pipelines;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createComputePipelines(PipelineCache pipelineCache, uint32_t createInfoCount, const ComputePipelineCreateInfo* pCreateInfos, const AllocationCallbacks* pAllocator, Pipeline* pPipelines) const
 		{
 			return static_cast<Result>(vkCreateComputePipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), createInfoCount, reinterpret_cast<const VkComputePipelineCreateInfo*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipeline*>(pPipelines)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<Pipeline> createComputePipelines(PipelineCache pipelineCache, eastl::vector<ComputePipelineCreateInfo> const & createInfos, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<Pipeline>>
+		eastl::vector<Pipeline, Allocator> createComputePipelines(PipelineCache pipelineCache, ArrayProxy<const ComputePipelineCreateInfo> createInfos, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
-			eastl::vector<Pipeline> pipelines(createInfos.size());
-			Result result = static_cast<Result>(vkCreateComputePipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), static_cast<uint32_t>(createInfos.size()), reinterpret_cast<const VkComputePipelineCreateInfo*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipeline*>(pipelines.data())));
+			eastl::vector<Pipeline, Allocator> pipelines(createInfos.size());
+			Result result = static_cast<Result>(vkCreateComputePipelines(m_device, static_cast<VkPipelineCache>(pipelineCache), createInfos.size(), reinterpret_cast<const VkComputePipelineCreateInfo*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipeline*>(pipelines.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::createComputePipelines");
 			}
 			return pipelines;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyPipeline(Pipeline pipeline, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyPipeline(m_device, static_cast<VkPipeline>(pipeline), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyPipeline(Pipeline pipeline, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyPipeline(Pipeline pipeline, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyPipeline(m_device, static_cast<VkPipeline>(pipeline), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createPipelineLayout(const PipelineLayoutCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, PipelineLayout* pPipelineLayout) const
 		{
 			return static_cast<Result>(vkCreatePipelineLayout(m_device, reinterpret_cast<const VkPipelineLayoutCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkPipelineLayout*>(pPipelineLayout)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		PipelineLayout createPipelineLayout(const PipelineLayoutCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		PipelineLayout createPipelineLayout(const PipelineLayoutCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			PipelineLayout pipelineLayout;
 			Result result = static_cast<Result>(vkCreatePipelineLayout(m_device, reinterpret_cast<const VkPipelineLayoutCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkPipelineLayout*>(&pipelineLayout)));
@@ -20886,27 +13663,27 @@ namespace vk
 			}
 			return pipelineLayout;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyPipelineLayout(PipelineLayout pipelineLayout, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyPipelineLayout(m_device, static_cast<VkPipelineLayout>(pipelineLayout), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyPipelineLayout(PipelineLayout pipelineLayout, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyPipelineLayout(PipelineLayout pipelineLayout, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyPipelineLayout(m_device, static_cast<VkPipelineLayout>(pipelineLayout), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createSampler(const SamplerCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Sampler* pSampler) const
 		{
 			return static_cast<Result>(vkCreateSampler(m_device, reinterpret_cast<const VkSamplerCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSampler*>(pSampler)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Sampler createSampler(const SamplerCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Sampler createSampler(const SamplerCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Sampler sampler;
 			Result result = static_cast<Result>(vkCreateSampler(m_device, reinterpret_cast<const VkSamplerCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSampler*>(&sampler)));
@@ -20916,27 +13693,27 @@ namespace vk
 			}
 			return sampler;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroySampler(Sampler sampler, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroySampler(m_device, static_cast<VkSampler>(sampler), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroySampler(Sampler sampler, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroySampler(Sampler sampler, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroySampler(m_device, static_cast<VkSampler>(sampler), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createDescriptorSetLayout(const DescriptorSetLayoutCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, DescriptorSetLayout* pSetLayout) const
 		{
 			return static_cast<Result>(vkCreateDescriptorSetLayout(m_device, reinterpret_cast<const VkDescriptorSetLayoutCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDescriptorSetLayout*>(pSetLayout)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		DescriptorSetLayout createDescriptorSetLayout(const DescriptorSetLayoutCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		DescriptorSetLayout createDescriptorSetLayout(const DescriptorSetLayoutCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			DescriptorSetLayout setLayout;
 			Result result = static_cast<Result>(vkCreateDescriptorSetLayout(m_device, reinterpret_cast<const VkDescriptorSetLayoutCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDescriptorSetLayout*>(&setLayout)));
@@ -20946,27 +13723,27 @@ namespace vk
 			}
 			return setLayout;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyDescriptorSetLayout(DescriptorSetLayout descriptorSetLayout, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyDescriptorSetLayout(m_device, static_cast<VkDescriptorSetLayout>(descriptorSetLayout), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyDescriptorSetLayout(DescriptorSetLayout descriptorSetLayout, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyDescriptorSetLayout(DescriptorSetLayout descriptorSetLayout, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyDescriptorSetLayout(m_device, static_cast<VkDescriptorSetLayout>(descriptorSetLayout), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createDescriptorPool(const DescriptorPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, DescriptorPool* pDescriptorPool) const
 		{
 			return static_cast<Result>(vkCreateDescriptorPool(m_device, reinterpret_cast<const VkDescriptorPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDescriptorPool*>(pDescriptorPool)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		DescriptorPool createDescriptorPool(const DescriptorPoolCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		DescriptorPool createDescriptorPool(const DescriptorPoolCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			DescriptorPool descriptorPool;
 			Result result = static_cast<Result>(vkCreateDescriptorPool(m_device, reinterpret_cast<const VkDescriptorPoolCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDescriptorPool*>(&descriptorPool)));
@@ -20976,28 +13753,28 @@ namespace vk
 			}
 			return descriptorPool;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyDescriptorPool(DescriptorPool descriptorPool, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyDescriptorPool(DescriptorPool descriptorPool, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyDescriptorPool(DescriptorPool descriptorPool, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result resetDescriptorPool(DescriptorPool descriptorPool, DescriptorPoolResetFlags flags) const
 		{
 			return static_cast<Result>(vkResetDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), static_cast<VkDescriptorPoolResetFlags>(flags)));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void resetDescriptorPool(DescriptorPool descriptorPool, DescriptorPoolResetFlags flags) const
 		{
 			Result result = static_cast<Result>(vkResetDescriptorPool(m_device, static_cast<VkDescriptorPool>(descriptorPool), static_cast<VkDescriptorPoolResetFlags>(flags)));
@@ -21006,17 +13783,18 @@ namespace vk
 				throw std::system_error(result, "vk::Device::resetDescriptorPool");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result allocateDescriptorSets(const DescriptorSetAllocateInfo* pAllocateInfo, DescriptorSet* pDescriptorSets) const
 		{
 			return static_cast<Result>(vkAllocateDescriptorSets(m_device, reinterpret_cast<const VkDescriptorSetAllocateInfo*>(pAllocateInfo), reinterpret_cast<VkDescriptorSet*>(pDescriptorSets)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<DescriptorSet> allocateDescriptorSets(const DescriptorSetAllocateInfo & allocateInfo) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<DescriptorSet>>
+		eastl::vector<DescriptorSet, Allocator> allocateDescriptorSets(const DescriptorSetAllocateInfo & allocateInfo) const
 		{
-			eastl::vector<DescriptorSet> descriptorSets(allocateInfo.descriptorSetCount());
+			eastl::vector<DescriptorSet, Allocator> descriptorSets(allocateInfo.descriptorSetCount);
 			Result result = static_cast<Result>(vkAllocateDescriptorSets(m_device, reinterpret_cast<const VkDescriptorSetAllocateInfo*>(&allocateInfo), reinterpret_cast<VkDescriptorSet*>(descriptorSets.data())));
 			if (result != Result::eSuccess)
 			{
@@ -21024,43 +13802,43 @@ namespace vk
 			}
 			return descriptorSets;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result freeDescriptorSets(DescriptorPool descriptorPool, uint32_t descriptorSetCount, const DescriptorSet* pDescriptorSets) const
 		{
 			return static_cast<Result>(vkFreeDescriptorSets(m_device, static_cast<VkDescriptorPool>(descriptorPool), descriptorSetCount, reinterpret_cast<const VkDescriptorSet*>(pDescriptorSets)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void freeDescriptorSets(DescriptorPool descriptorPool, eastl::vector<DescriptorSet> const & descriptorSets) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void freeDescriptorSets(DescriptorPool descriptorPool, ArrayProxy<const DescriptorSet> descriptorSets) const
 		{
-			Result result = static_cast<Result>(vkFreeDescriptorSets(m_device, static_cast<VkDescriptorPool>(descriptorPool), static_cast<uint32_t>(descriptorSets.size()), reinterpret_cast<const VkDescriptorSet*>(descriptorSets.data())));
+			Result result = static_cast<Result>(vkFreeDescriptorSets(m_device, static_cast<VkDescriptorPool>(descriptorPool), descriptorSets.size(), reinterpret_cast<const VkDescriptorSet*>(descriptorSets.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::freeDescriptorSets");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void updateDescriptorSets(uint32_t descriptorWriteCount, const WriteDescriptorSet* pDescriptorWrites, uint32_t descriptorCopyCount, const CopyDescriptorSet* pDescriptorCopies) const
 		{
 			vkUpdateDescriptorSets(m_device, descriptorWriteCount, reinterpret_cast<const VkWriteDescriptorSet*>(pDescriptorWrites), descriptorCopyCount, reinterpret_cast<const VkCopyDescriptorSet*>(pDescriptorCopies));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void updateDescriptorSets(eastl::vector<WriteDescriptorSet> const & descriptorWrites, eastl::vector<CopyDescriptorSet> const & descriptorCopies) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void updateDescriptorSets(ArrayProxy<const WriteDescriptorSet> descriptorWrites, ArrayProxy<const CopyDescriptorSet> descriptorCopies) const
 		{
-			vkUpdateDescriptorSets(m_device, static_cast<uint32_t>(descriptorWrites.size()), reinterpret_cast<const VkWriteDescriptorSet*>(descriptorWrites.data()), static_cast<uint32_t>(descriptorCopies.size()), reinterpret_cast<const VkCopyDescriptorSet*>(descriptorCopies.data()));
+			vkUpdateDescriptorSets(m_device, descriptorWrites.size(), reinterpret_cast<const VkWriteDescriptorSet*>(descriptorWrites.data()), descriptorCopies.size(), reinterpret_cast<const VkCopyDescriptorSet*>(descriptorCopies.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createFramebuffer(const FramebufferCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Framebuffer* pFramebuffer) const
 		{
 			return static_cast<Result>(vkCreateFramebuffer(m_device, reinterpret_cast<const VkFramebufferCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkFramebuffer*>(pFramebuffer)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Framebuffer createFramebuffer(const FramebufferCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Framebuffer createFramebuffer(const FramebufferCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Framebuffer framebuffer;
 			Result result = static_cast<Result>(vkCreateFramebuffer(m_device, reinterpret_cast<const VkFramebufferCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkFramebuffer*>(&framebuffer)));
@@ -21070,27 +13848,27 @@ namespace vk
 			}
 			return framebuffer;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyFramebuffer(Framebuffer framebuffer, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyFramebuffer(m_device, static_cast<VkFramebuffer>(framebuffer), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyFramebuffer(Framebuffer framebuffer, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyFramebuffer(Framebuffer framebuffer, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyFramebuffer(m_device, static_cast<VkFramebuffer>(framebuffer), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createRenderPass(const RenderPassCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, RenderPass* pRenderPass) const
 		{
 			return static_cast<Result>(vkCreateRenderPass(m_device, reinterpret_cast<const VkRenderPassCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkRenderPass*>(pRenderPass)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		RenderPass createRenderPass(const RenderPassCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		RenderPass createRenderPass(const RenderPassCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			RenderPass renderPass;
 			Result result = static_cast<Result>(vkCreateRenderPass(m_device, reinterpret_cast<const VkRenderPassCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkRenderPass*>(&renderPass)));
@@ -21100,41 +13878,41 @@ namespace vk
 			}
 			return renderPass;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyRenderPass(RenderPass renderPass, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyRenderPass(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyRenderPass(RenderPass renderPass, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyRenderPass(RenderPass renderPass, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyRenderPass(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getRenderAreaGranularity(RenderPass renderPass, Extent2D* pGranularity) const
 		{
 			vkGetRenderAreaGranularity(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<VkExtent2D*>(pGranularity));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Extent2D getRenderAreaGranularity(RenderPass renderPass) const
 		{
 			Extent2D granularity;
 			vkGetRenderAreaGranularity(m_device, static_cast<VkRenderPass>(renderPass), reinterpret_cast<VkExtent2D*>(&granularity));
 			return granularity;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createCommandPool(const CommandPoolCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, CommandPool* pCommandPool) const
 		{
 			return static_cast<Result>(vkCreateCommandPool(m_device, reinterpret_cast<const VkCommandPoolCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkCommandPool*>(pCommandPool)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		CommandPool createCommandPool(const CommandPoolCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		CommandPool createCommandPool(const CommandPoolCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			CommandPool commandPool;
 			Result result = static_cast<Result>(vkCreateCommandPool(m_device, reinterpret_cast<const VkCommandPoolCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkCommandPool*>(&commandPool)));
@@ -21144,28 +13922,28 @@ namespace vk
 			}
 			return commandPool;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyCommandPool(CommandPool commandPool, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyCommandPool(m_device, static_cast<VkCommandPool>(commandPool), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyCommandPool(CommandPool commandPool, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyCommandPool(CommandPool commandPool, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyCommandPool(m_device, static_cast<VkCommandPool>(commandPool), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 		Result resetCommandPool(CommandPool commandPool, CommandPoolResetFlags flags) const
 		{
 			return static_cast<Result>(vkResetCommandPool(m_device, static_cast<VkCommandPool>(commandPool), static_cast<VkCommandPoolResetFlags>(flags)));
 		}
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		void resetCommandPool(CommandPool commandPool, CommandPoolResetFlags flags) const
 		{
 			Result result = static_cast<Result>(vkResetCommandPool(m_device, static_cast<VkCommandPool>(commandPool), static_cast<VkCommandPoolResetFlags>(flags)));
@@ -21174,17 +13952,18 @@ namespace vk
 				throw std::system_error(result, "vk::Device::resetCommandPool");
 			}
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result allocateCommandBuffers(const CommandBufferAllocateInfo* pAllocateInfo, CommandBuffer* pCommandBuffers) const
 		{
 			return static_cast<Result>(vkAllocateCommandBuffers(m_device, reinterpret_cast<const VkCommandBufferAllocateInfo*>(pAllocateInfo), reinterpret_cast<VkCommandBuffer*>(pCommandBuffers)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<CommandBuffer> allocateCommandBuffers(const CommandBufferAllocateInfo & allocateInfo) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<CommandBuffer>>
+		eastl::vector<CommandBuffer, Allocator> allocateCommandBuffers(const CommandBufferAllocateInfo & allocateInfo) const
 		{
-			eastl::vector<CommandBuffer> commandBuffers(allocateInfo.commandBufferCount());
+			eastl::vector<CommandBuffer, Allocator> commandBuffers(allocateInfo.commandBufferCount);
 			Result result = static_cast<Result>(vkAllocateCommandBuffers(m_device, reinterpret_cast<const VkCommandBufferAllocateInfo*>(&allocateInfo), reinterpret_cast<VkCommandBuffer*>(commandBuffers.data())));
 			if (result != Result::eSuccess)
 			{
@@ -21192,45 +13971,46 @@ namespace vk
 			}
 			return commandBuffers;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void freeCommandBuffers(CommandPool commandPool, uint32_t commandBufferCount, const CommandBuffer* pCommandBuffers) const
 		{
 			vkFreeCommandBuffers(m_device, static_cast<VkCommandPool>(commandPool), commandBufferCount, reinterpret_cast<const VkCommandBuffer*>(pCommandBuffers));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void freeCommandBuffers(CommandPool commandPool, eastl::vector<CommandBuffer> const & commandBuffers) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void freeCommandBuffers(CommandPool commandPool, ArrayProxy<const CommandBuffer> commandBuffers) const
 		{
-			vkFreeCommandBuffers(m_device, static_cast<VkCommandPool>(commandPool), static_cast<uint32_t>(commandBuffers.size()), reinterpret_cast<const VkCommandBuffer*>(commandBuffers.data()));
+			vkFreeCommandBuffers(m_device, static_cast<VkCommandPool>(commandPool), commandBuffers.size(), reinterpret_cast<const VkCommandBuffer*>(commandBuffers.data()));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createSharedSwapchainsKHR(uint32_t swapchainCount, const SwapchainCreateInfoKHR* pCreateInfos, const AllocationCallbacks* pAllocator, SwapchainKHR* pSwapchains) const
 		{
 			return static_cast<Result>(vkCreateSharedSwapchainsKHR(m_device, swapchainCount, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(pCreateInfos), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSwapchainKHR*>(pSwapchains)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<SwapchainKHR> createSharedSwapchainsKHR(eastl::vector<SwapchainCreateInfoKHR> const & createInfos, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<SwapchainKHR>>
+		eastl::vector<SwapchainKHR, Allocator> createSharedSwapchainsKHR(ArrayProxy<const SwapchainCreateInfoKHR> createInfos, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
-			eastl::vector<SwapchainKHR> swapchains(createInfos.size());
-			Result result = static_cast<Result>(vkCreateSharedSwapchainsKHR(m_device, static_cast<uint32_t>(createInfos.size()), reinterpret_cast<const VkSwapchainCreateInfoKHR*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSwapchainKHR*>(swapchains.data())));
+			eastl::vector<SwapchainKHR, Allocator> swapchains(createInfos.size());
+			Result result = static_cast<Result>(vkCreateSharedSwapchainsKHR(m_device, createInfos.size(), reinterpret_cast<const VkSwapchainCreateInfoKHR*>(createInfos.data()), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSwapchainKHR*>(swapchains.data())));
 			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::createSharedSwapchainsKHR");
 			}
 			return swapchains;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createSwapchainKHR(const SwapchainCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SwapchainKHR* pSwapchain) const
 		{
 			return static_cast<Result>(vkCreateSwapchainKHR(m_device, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSwapchainKHR*>(pSwapchain)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		SwapchainKHR createSwapchainKHR(const SwapchainCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		SwapchainKHR createSwapchainKHR(const SwapchainCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SwapchainKHR swapchain;
 			Result result = static_cast<Result>(vkCreateSwapchainKHR(m_device, reinterpret_cast<const VkSwapchainCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSwapchainKHR*>(&swapchain)));
@@ -21240,60 +14020,65 @@ namespace vk
 			}
 			return swapchain;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroySwapchainKHR(SwapchainKHR swapchain, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroySwapchainKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroySwapchainKHR(SwapchainKHR swapchain, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroySwapchainKHR(SwapchainKHR swapchain, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroySwapchainKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getSwapchainImagesKHR(SwapchainKHR swapchain, uint32_t* pSwapchainImageCount, Image* pSwapchainImages) const
 		{
 			return static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), pSwapchainImageCount, reinterpret_cast<VkImage*>(pSwapchainImages)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result getSwapchainImagesKHR(SwapchainKHR swapchain, eastl::vector<Image> & swapchainImages) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<Image>>
+		eastl::vector<Image, Allocator> getSwapchainImagesKHR(SwapchainKHR swapchain) const
 		{
+			eastl::vector<Image, Allocator> swapchainImages;
 			uint32_t swapchainImageCount;
-			Result result = static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), &swapchainImageCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), &swapchainImageCount, nullptr));
+				if ((result == Result::eSuccess) && swapchainImageCount)
+				{
+					swapchainImages.resize(swapchainImageCount);
+					result = static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), &swapchainImageCount, reinterpret_cast<VkImage*>(swapchainImages.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Device::getSwapchainImagesKHR");
 			}
-			swapchainImages.resize(swapchainImageCount);
-			result = static_cast<Result>(vkGetSwapchainImagesKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), &swapchainImageCount, reinterpret_cast<VkImage*>(swapchainImages.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::Device::getSwapchainImagesKHR");
-			}
-			return result;
+			return swapchainImages;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result acquireNextImageKHR(SwapchainKHR swapchain, uint64_t timeout, Semaphore semaphore, Fence fence, uint32_t* pImageIndex) const
 		{
 			return static_cast<Result>(vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), timeout, static_cast<VkSemaphore>(semaphore), static_cast<VkFence>(fence), pImageIndex));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Result acquireNextImageKHR(SwapchainKHR swapchain, uint64_t timeout, Semaphore semaphore, Fence fence, uint32_t & imageIndex) const
 		{
 			Result result = static_cast<Result>(vkAcquireNextImageKHR(m_device, static_cast<VkSwapchainKHR>(swapchain), timeout, static_cast<VkSemaphore>(semaphore), static_cast<VkFence>(fence), &imageIndex));
-			if ((result != Result::eSuccess) && (result != Result::eSuboptimalKHR))
+			if ((result != Result::eSuccess) && (result != Result::eTimeout) && (result != Result::eNotReady) && (result != Result::eSuboptimalKHR))
 			{
 				throw std::system_error(result, "vk::Device::acquireNextImageKHR");
 			}
 			return result;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #if !defined(VK_CPP_TYPESAFE_CONVERSION)
 		explicit
@@ -21342,80 +14127,81 @@ namespace vk
 			vkGetPhysicalDeviceProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceProperties*>(pProperties));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		PhysicalDeviceProperties getProperties() const
 		{
 			PhysicalDeviceProperties properties;
 			vkGetPhysicalDeviceProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceProperties*>(&properties));
 			return properties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getQueueFamilyProperties(uint32_t* pQueueFamilyPropertyCount, QueueFamilyProperties* pQueueFamilyProperties) const
 		{
 			vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, pQueueFamilyPropertyCount, reinterpret_cast<VkQueueFamilyProperties*>(pQueueFamilyProperties));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<QueueFamilyProperties> getQueueFamilyProperties() const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<QueueFamilyProperties>>
+		eastl::vector<QueueFamilyProperties, Allocator> getQueueFamilyProperties() const
 		{
-			eastl::vector<QueueFamilyProperties> queueFamilyProperties;
+			eastl::vector<QueueFamilyProperties, Allocator> queueFamilyProperties;
 			uint32_t queueFamilyPropertyCount;
 			vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, &queueFamilyPropertyCount, nullptr);
 			queueFamilyProperties.resize(queueFamilyPropertyCount);
 			vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, &queueFamilyPropertyCount, reinterpret_cast<VkQueueFamilyProperties*>(queueFamilyProperties.data()));
 			return queueFamilyProperties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getMemoryProperties(PhysicalDeviceMemoryProperties* pMemoryProperties) const
 		{
 			vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceMemoryProperties*>(pMemoryProperties));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		PhysicalDeviceMemoryProperties getMemoryProperties() const
 		{
 			PhysicalDeviceMemoryProperties memoryProperties;
 			vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceMemoryProperties*>(&memoryProperties));
 			return memoryProperties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getFeatures(PhysicalDeviceFeatures* pFeatures) const
 		{
 			vkGetPhysicalDeviceFeatures(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceFeatures*>(pFeatures));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		PhysicalDeviceFeatures getFeatures() const
 		{
 			PhysicalDeviceFeatures features;
 			vkGetPhysicalDeviceFeatures(m_physicalDevice, reinterpret_cast<VkPhysicalDeviceFeatures*>(&features));
 			return features;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getFormatProperties(Format format, FormatProperties* pFormatProperties) const
 		{
 			vkGetPhysicalDeviceFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), reinterpret_cast<VkFormatProperties*>(pFormatProperties));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		FormatProperties getFormatProperties(Format format) const
 		{
 			FormatProperties formatProperties;
 			vkGetPhysicalDeviceFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), reinterpret_cast<VkFormatProperties*>(&formatProperties));
 			return formatProperties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getImageFormatProperties(Format format, ImageType type, ImageTiling tiling, ImageUsageFlags usage, ImageCreateFlags flags, ImageFormatProperties* pImageFormatProperties) const
 		{
 			return static_cast<Result>(vkGetPhysicalDeviceImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkImageTiling>(tiling), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageCreateFlags>(flags), reinterpret_cast<VkImageFormatProperties*>(pImageFormatProperties)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		ImageFormatProperties getImageFormatProperties(Format format, ImageType type, ImageTiling tiling, ImageUsageFlags usage, ImageCreateFlags flags) const
 		{
 			ImageFormatProperties imageFormatProperties;
@@ -21426,15 +14212,15 @@ namespace vk
 			}
 			return imageFormatProperties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createDevice(const DeviceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Device* pDevice) const
 		{
 			return static_cast<Result>(vkCreateDevice(m_physicalDevice, reinterpret_cast<const VkDeviceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDevice*>(pDevice)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Device createDevice(const DeviceCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		Device createDevice(const DeviceCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			Device device;
 			Result result = static_cast<Result>(vkCreateDevice(m_physicalDevice, reinterpret_cast<const VkDeviceCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDevice*>(&device)));
@@ -21444,176 +14230,207 @@ namespace vk
 			}
 			return device;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result enumerateDeviceLayerProperties(uint32_t* pPropertyCount, LayerProperties* pProperties) const
 		{
 			return static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, pPropertyCount, reinterpret_cast<VkLayerProperties*>(pProperties)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result enumerateDeviceLayerProperties(eastl::vector<LayerProperties> & properties) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<LayerProperties>>
+		eastl::vector<LayerProperties, Allocator> enumerateDeviceLayerProperties() const
 		{
+			eastl::vector<LayerProperties, Allocator> properties;
 			uint32_t propertyCount;
-			Result result = static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, &propertyCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, &propertyCount, nullptr));
+				if ((result == Result::eSuccess) && propertyCount)
+				{
+					properties.resize(propertyCount);
+					result = static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, &propertyCount, reinterpret_cast<VkLayerProperties*>(properties.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceLayerProperties");
 			}
-			properties.resize(propertyCount);
-			result = static_cast<Result>(vkEnumerateDeviceLayerProperties(m_physicalDevice, &propertyCount, reinterpret_cast<VkLayerProperties*>(properties.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceLayerProperties");
-			}
-			return result;
+			return properties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result enumerateDeviceExtensionProperties(const char* pLayerName, uint32_t* pPropertyCount, ExtensionProperties* pProperties) const
 		{
 			return static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, pLayerName, pPropertyCount, reinterpret_cast<VkExtensionProperties*>(pProperties)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result enumerateDeviceExtensionProperties(vk::Optional<eastl::string const> const & layerName, eastl::vector<ExtensionProperties> & properties) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<ExtensionProperties>>
+		eastl::vector<ExtensionProperties, Allocator> enumerateDeviceExtensionProperties(Optional<const std::string> layerName = nullptr) const
 		{
+			eastl::vector<ExtensionProperties, Allocator> properties;
 			uint32_t propertyCount;
-			Result result = static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, layerName ? layerName->c_str() : nullptr, &propertyCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, layerName ? layerName->c_str() : nullptr, &propertyCount, nullptr));
+				if ((result == Result::eSuccess) && propertyCount)
+				{
+					properties.resize(propertyCount);
+					result = static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, layerName ? layerName->c_str() : nullptr, &propertyCount, reinterpret_cast<VkExtensionProperties*>(properties.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceExtensionProperties");
 			}
-			properties.resize(propertyCount);
-			result = static_cast<Result>(vkEnumerateDeviceExtensionProperties(m_physicalDevice, layerName ? layerName->c_str() : nullptr, &propertyCount, reinterpret_cast<VkExtensionProperties*>(properties.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::enumerateDeviceExtensionProperties");
-			}
-			return result;
+			return properties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void getSparseImageFormatProperties(Format format, ImageType type, SampleCountFlagBits samples, ImageUsageFlags usage, ImageTiling tiling, uint32_t* pPropertyCount, SparseImageFormatProperties* pProperties) const
 		{
 			vkGetPhysicalDeviceSparseImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkSampleCountFlagBits>(samples), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageTiling>(tiling), pPropertyCount, reinterpret_cast<VkSparseImageFormatProperties*>(pProperties));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		eastl::vector<SparseImageFormatProperties> getSparseImageFormatProperties(Format format, ImageType type, SampleCountFlagBits samples, ImageUsageFlags usage, ImageTiling tiling) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<SparseImageFormatProperties>>
+		eastl::vector<SparseImageFormatProperties, Allocator> getSparseImageFormatProperties(Format format, ImageType type, SampleCountFlagBits samples, ImageUsageFlags usage, ImageTiling tiling) const
 		{
-			eastl::vector<SparseImageFormatProperties> properties;
+			eastl::vector<SparseImageFormatProperties, Allocator> properties;
 			uint32_t propertyCount;
 			vkGetPhysicalDeviceSparseImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkSampleCountFlagBits>(samples), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageTiling>(tiling), &propertyCount, nullptr);
 			properties.resize(propertyCount);
 			vkGetPhysicalDeviceSparseImageFormatProperties(m_physicalDevice, static_cast<VkFormat>(format), static_cast<VkImageType>(type), static_cast<VkSampleCountFlagBits>(samples), static_cast<VkImageUsageFlags>(usage), static_cast<VkImageTiling>(tiling), &propertyCount, reinterpret_cast<VkSparseImageFormatProperties*>(properties.data()));
 			return properties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getDisplayPropertiesKHR(uint32_t* pPropertyCount, DisplayPropertiesKHR* pProperties) const
 		{
 			return static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, pPropertyCount, reinterpret_cast<VkDisplayPropertiesKHR*>(pProperties)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result getDisplayPropertiesKHR(eastl::vector<DisplayPropertiesKHR> & properties) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<DisplayPropertiesKHR>>
+		eastl::vector<DisplayPropertiesKHR, Allocator> getDisplayPropertiesKHR() const
 		{
+			eastl::vector<DisplayPropertiesKHR, Allocator> properties;
 			uint32_t propertyCount;
-			Result result = static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, &propertyCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, &propertyCount, nullptr));
+				if ((result == Result::eSuccess) && propertyCount)
+				{
+					properties.resize(propertyCount);
+					result = static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, &propertyCount, reinterpret_cast<VkDisplayPropertiesKHR*>(properties.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPropertiesKHR");
 			}
-			properties.resize(propertyCount);
-			result = static_cast<Result>(vkGetPhysicalDeviceDisplayPropertiesKHR(m_physicalDevice, &propertyCount, reinterpret_cast<VkDisplayPropertiesKHR*>(properties.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPropertiesKHR");
-			}
-			return result;
+			return properties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getDisplayPlanePropertiesKHR(uint32_t* pPropertyCount, DisplayPlanePropertiesKHR* pProperties) const
 		{
 			return static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, pPropertyCount, reinterpret_cast<VkDisplayPlanePropertiesKHR*>(pProperties)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result getDisplayPlanePropertiesKHR(eastl::vector<DisplayPlanePropertiesKHR> & properties) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<DisplayPlanePropertiesKHR>>
+		eastl::vector<DisplayPlanePropertiesKHR, Allocator> getDisplayPlanePropertiesKHR() const
 		{
+			eastl::vector<DisplayPlanePropertiesKHR, Allocator> properties;
 			uint32_t propertyCount;
-			Result result = static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, &propertyCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, &propertyCount, nullptr));
+				if ((result == Result::eSuccess) && propertyCount)
+				{
+					properties.resize(propertyCount);
+					result = static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, &propertyCount, reinterpret_cast<VkDisplayPlanePropertiesKHR*>(properties.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlanePropertiesKHR");
 			}
-			properties.resize(propertyCount);
-			result = static_cast<Result>(vkGetPhysicalDeviceDisplayPlanePropertiesKHR(m_physicalDevice, &propertyCount, reinterpret_cast<VkDisplayPlanePropertiesKHR*>(properties.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlanePropertiesKHR");
-			}
-			return result;
+			return properties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getDisplayPlaneSupportedDisplaysKHR(uint32_t planeIndex, uint32_t* pDisplayCount, DisplayKHR* pDisplays) const
 		{
 			return static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, pDisplayCount, reinterpret_cast<VkDisplayKHR*>(pDisplays)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result getDisplayPlaneSupportedDisplaysKHR(uint32_t planeIndex, eastl::vector<DisplayKHR> & displays) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<DisplayKHR>>
+		eastl::vector<DisplayKHR, Allocator> getDisplayPlaneSupportedDisplaysKHR(uint32_t planeIndex) const
 		{
+			eastl::vector<DisplayKHR, Allocator> displays;
 			uint32_t displayCount;
-			Result result = static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, &displayCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, &displayCount, nullptr));
+				if ((result == Result::eSuccess) && displayCount)
+				{
+					displays.resize(displayCount);
+					result = static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, &displayCount, reinterpret_cast<VkDisplayKHR*>(displays.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlaneSupportedDisplaysKHR");
 			}
-			displays.resize(displayCount);
-			result = static_cast<Result>(vkGetDisplayPlaneSupportedDisplaysKHR(m_physicalDevice, planeIndex, &displayCount, reinterpret_cast<VkDisplayKHR*>(displays.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::getDisplayPlaneSupportedDisplaysKHR");
-			}
-			return result;
+			return displays;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getDisplayModePropertiesKHR(DisplayKHR display, uint32_t* pPropertyCount, DisplayModePropertiesKHR* pProperties) const
 		{
 			return static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), pPropertyCount, reinterpret_cast<VkDisplayModePropertiesKHR*>(pProperties)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result getDisplayModePropertiesKHR(DisplayKHR display, eastl::vector<DisplayModePropertiesKHR> & properties) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<DisplayModePropertiesKHR>>
+		eastl::vector<DisplayModePropertiesKHR, Allocator> getDisplayModePropertiesKHR(DisplayKHR display) const
 		{
+			eastl::vector<DisplayModePropertiesKHR, Allocator> properties;
 			uint32_t propertyCount;
-			Result result = static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), &propertyCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), &propertyCount, nullptr));
+				if ((result == Result::eSuccess) && propertyCount)
+				{
+					properties.resize(propertyCount);
+					result = static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), &propertyCount, reinterpret_cast<VkDisplayModePropertiesKHR*>(properties.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::getDisplayModePropertiesKHR");
 			}
-			properties.resize(propertyCount);
-			result = static_cast<Result>(vkGetDisplayModePropertiesKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), &propertyCount, reinterpret_cast<VkDisplayModePropertiesKHR*>(properties.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::getDisplayModePropertiesKHR");
-			}
-			return result;
+			return properties;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createDisplayModeKHR(DisplayKHR display, const DisplayModeCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, DisplayModeKHR* pMode) const
 		{
 			return static_cast<Result>(vkCreateDisplayModeKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), reinterpret_cast<const VkDisplayModeCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDisplayModeKHR*>(pMode)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		DisplayModeKHR createDisplayModeKHR(DisplayKHR display, const DisplayModeCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		DisplayModeKHR createDisplayModeKHR(DisplayKHR display, const DisplayModeCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			DisplayModeKHR mode;
 			Result result = static_cast<Result>(vkCreateDisplayModeKHR(m_physicalDevice, static_cast<VkDisplayKHR>(display), reinterpret_cast<const VkDisplayModeCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDisplayModeKHR*>(&mode)));
@@ -21623,14 +14440,14 @@ namespace vk
 			}
 			return mode;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getDisplayPlaneCapabilitiesKHR(DisplayModeKHR mode, uint32_t planeIndex, DisplayPlaneCapabilitiesKHR* pCapabilities) const
 		{
 			return static_cast<Result>(vkGetDisplayPlaneCapabilitiesKHR(m_physicalDevice, static_cast<VkDisplayModeKHR>(mode), planeIndex, reinterpret_cast<VkDisplayPlaneCapabilitiesKHR*>(pCapabilities)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		DisplayPlaneCapabilitiesKHR getDisplayPlaneCapabilitiesKHR(DisplayModeKHR mode, uint32_t planeIndex) const
 		{
 			DisplayPlaneCapabilitiesKHR capabilities;
@@ -21641,7 +14458,7 @@ namespace vk
 			}
 			return capabilities;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_MIR_KHR
 		Bool32 getMirPresentationSupportKHR(uint32_t queueFamilyIndex, MirConnection* connection) const
@@ -21650,21 +14467,21 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_MIR_KHR
 		Bool32 getMirPresentationSupportKHR(uint32_t queueFamilyIndex, MirConnection & connection) const
 		{
 			return vkGetPhysicalDeviceMirPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &connection);
 		}
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getSurfaceSupportKHR(uint32_t queueFamilyIndex, SurfaceKHR surface, Bool32* pSupported) const
 		{
 			return static_cast<Result>(vkGetPhysicalDeviceSurfaceSupportKHR(m_physicalDevice, queueFamilyIndex, static_cast<VkSurfaceKHR>(surface), pSupported));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Bool32 getSurfaceSupportKHR(uint32_t queueFamilyIndex, SurfaceKHR surface) const
 		{
 			Bool32 supported;
@@ -21675,14 +14492,14 @@ namespace vk
 			}
 			return supported;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getSurfaceCapabilitiesKHR(SurfaceKHR surface, SurfaceCapabilitiesKHR* pSurfaceCapabilities) const
 		{
 			return static_cast<Result>(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<VkSurfaceCapabilitiesKHR*>(pSurfaceCapabilities)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 		Result getSurfaceCapabilitiesKHR(SurfaceKHR surface, SurfaceCapabilitiesKHR & surfaceCapabilities) const
 		{
 			Result result = static_cast<Result>(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<VkSurfaceCapabilitiesKHR*>(&surfaceCapabilities)));
@@ -21692,55 +14509,65 @@ namespace vk
 			}
 			return result;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getSurfaceFormatsKHR(SurfaceKHR surface, uint32_t* pSurfaceFormatCount, SurfaceFormatKHR* pSurfaceFormats) const
 		{
 			return static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), pSurfaceFormatCount, reinterpret_cast<VkSurfaceFormatKHR*>(pSurfaceFormats)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result getSurfaceFormatsKHR(SurfaceKHR surface, eastl::vector<SurfaceFormatKHR> & surfaceFormats) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<SurfaceFormatKHR>>
+		eastl::vector<SurfaceFormatKHR, Allocator> getSurfaceFormatsKHR(SurfaceKHR surface) const
 		{
+			eastl::vector<SurfaceFormatKHR, Allocator> surfaceFormats;
 			uint32_t surfaceFormatCount;
-			Result result = static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &surfaceFormatCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &surfaceFormatCount, nullptr));
+				if ((result == Result::eSuccess) && surfaceFormatCount)
+				{
+					surfaceFormats.resize(surfaceFormatCount);
+					result = static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &surfaceFormatCount, reinterpret_cast<VkSurfaceFormatKHR*>(surfaceFormats.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::getSurfaceFormatsKHR");
 			}
-			surfaceFormats.resize(surfaceFormatCount);
-			result = static_cast<Result>(vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &surfaceFormatCount, reinterpret_cast<VkSurfaceFormatKHR*>(surfaceFormats.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::getSurfaceFormatsKHR");
-			}
-			return result;
+			return surfaceFormats;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result getSurfacePresentModesKHR(SurfaceKHR surface, uint32_t* pPresentModeCount, PresentModeKHR* pPresentModes) const
 		{
 			return static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), pPresentModeCount, reinterpret_cast<VkPresentModeKHR*>(pPresentModes)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result getSurfacePresentModesKHR(SurfaceKHR surface, eastl::vector<PresentModeKHR> & presentModes) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<PresentModeKHR>>
+		eastl::vector<PresentModeKHR, Allocator> getSurfacePresentModesKHR(SurfaceKHR surface) const
 		{
+			eastl::vector<PresentModeKHR, Allocator> presentModes;
 			uint32_t presentModeCount;
-			Result result = static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &presentModeCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &presentModeCount, nullptr));
+				if ((result == Result::eSuccess) && presentModeCount)
+				{
+					presentModes.resize(presentModeCount);
+					result = static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &presentModeCount, reinterpret_cast<VkPresentModeKHR*>(presentModes.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::PhysicalDevice::getSurfacePresentModesKHR");
 			}
-			presentModes.resize(presentModeCount);
-			result = static_cast<Result>(vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, static_cast<VkSurfaceKHR>(surface), &presentModeCount, reinterpret_cast<VkPresentModeKHR*>(presentModes.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::PhysicalDevice::getSurfacePresentModesKHR");
-			}
-			return result;
+			return presentModes;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
 		Bool32 getWaylandPresentationSupportKHR(uint32_t queueFamilyIndex, struct wl_display* display) const
@@ -21749,32 +14576,32 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
 		Bool32 getWaylandPresentationSupportKHR(uint32_t queueFamilyIndex, struct wl_display & display) const
 		{
 			return vkGetPhysicalDeviceWaylandPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &display);
 		}
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifndef VKCPP_ENHANCED_MODE
+#ifdef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 		Bool32 getWin32PresentationSupportKHR(uint32_t queueFamilyIndex) const
 		{
 			return vkGetPhysicalDeviceWin32PresentationSupportKHR(m_physicalDevice, queueFamilyIndex);
 		}
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
-#endif /*!VKCPP_ENHANCED_MODE*/
+#endif /*!VKCPP_DISABLE_ENHANCED_MODE*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 		Bool32 getWin32PresentationSupportKHR(uint32_t queueFamilyIndex) const
 		{
 			return vkGetPhysicalDeviceWin32PresentationSupportKHR(m_physicalDevice, queueFamilyIndex);
 		}
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
 		Bool32 getXlibPresentationSupportKHR(uint32_t queueFamilyIndex, Display* dpy, VisualID visualID) const
@@ -21783,14 +14610,14 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_XLIB_KHR
 		Bool32 getXlibPresentationSupportKHR(uint32_t queueFamilyIndex, Display & dpy, VisualID visualID) const
 		{
 			return vkGetPhysicalDeviceXlibPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &dpy, visualID);
 		}
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
 		Bool32 getXcbPresentationSupportKHR(uint32_t queueFamilyIndex, xcb_connection_t* connection, xcb_visualid_t visual_id) const
@@ -21799,14 +14626,14 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_XCB_KHR
 		Bool32 getXcbPresentationSupportKHR(uint32_t queueFamilyIndex, xcb_connection_t & connection, xcb_visualid_t visual_id) const
 		{
 			return vkGetPhysicalDeviceXcbPresentationSupportKHR(m_physicalDevice, queueFamilyIndex, &connection, visual_id);
 		}
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #if !defined(VK_CPP_TYPESAFE_CONVERSION)
 		explicit
@@ -21840,157 +14667,109 @@ namespace vk
 		eDebug = VK_DEBUG_REPORT_DEBUG_BIT_EXT
 	};
 
-	typedef Flags<DebugReportFlagBitsEXT, VkDebugReportFlagsEXT> DebugReportFlagsEXT;
+	using DebugReportFlagsEXT = Flags<DebugReportFlagBitsEXT, VkDebugReportFlagsEXT>;
 
 	inline DebugReportFlagsEXT operator|(DebugReportFlagBitsEXT bit0, DebugReportFlagBitsEXT bit1)
 	{
 		return DebugReportFlagsEXT(bit0) | bit1;
 	}
 
-	class DebugReportCallbackCreateInfoEXT
+	struct DebugReportCallbackCreateInfoEXT
 	{
-	public:
-		DebugReportCallbackCreateInfoEXT(DebugReportFlagsEXT flags, PFN_vkDebugReportCallbackEXT pfnCallback, void* pUserData)
+		DebugReportCallbackCreateInfoEXT(DebugReportFlagsEXT flags_, PFN_vkDebugReportCallbackEXT pfnCallback_, void* pUserData_)
 		{
-			m_debugReportCallbackCreateInfoEXT.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT;
-			m_debugReportCallbackCreateInfoEXT.pNext = nullptr;
-			m_debugReportCallbackCreateInfoEXT.flags = static_cast<VkDebugReportFlagsEXT>(flags);
-			m_debugReportCallbackCreateInfoEXT.pfnCallback = pfnCallback;
-			m_debugReportCallbackCreateInfoEXT.pUserData = pUserData;
+			sType = StructureType::eDebugReportCallbackCreateInfoEXT;
+			pNext = nullptr;
+			flags = flags_;
+			pfnCallback = pfnCallback_;
+			pUserData = pUserData_;
 		}
 
 		DebugReportCallbackCreateInfoEXT(VkDebugReportCallbackCreateInfoEXT const & rhs)
-			: m_debugReportCallbackCreateInfoEXT(rhs)
 		{
+			memcpy(this, &rhs, sizeof(DebugReportCallbackCreateInfoEXT));
 		}
 
 		DebugReportCallbackCreateInfoEXT& operator=(VkDebugReportCallbackCreateInfoEXT const & rhs)
 		{
-			m_debugReportCallbackCreateInfoEXT = rhs;
+			memcpy(this, &rhs, sizeof(DebugReportCallbackCreateInfoEXT));
 			return *this;
 		}
 
-		const StructureType& sType() const
+		DebugReportCallbackCreateInfoEXT& setSType(StructureType sType_)
 		{
-			return reinterpret_cast<const StructureType&>(m_debugReportCallbackCreateInfoEXT.sType);
-		}
-
-		StructureType& sType()
-		{
-			return reinterpret_cast<StructureType&>(m_debugReportCallbackCreateInfoEXT.sType);
-		}
-
-		DebugReportCallbackCreateInfoEXT& sType(StructureType sType)
-		{
-			m_debugReportCallbackCreateInfoEXT.sType = static_cast<VkStructureType>(sType);
+			sType = sType_;
 			return *this;
 		}
 
-		const void* pNext() const
+		DebugReportCallbackCreateInfoEXT& setPNext(const void* pNext_)
 		{
-			return reinterpret_cast<const void*>(m_debugReportCallbackCreateInfoEXT.pNext);
-		}
-
-		const void* pNext()
-		{
-			return reinterpret_cast<const void*>(m_debugReportCallbackCreateInfoEXT.pNext);
-		}
-
-		DebugReportCallbackCreateInfoEXT& pNext(const void* pNext)
-		{
-			m_debugReportCallbackCreateInfoEXT.pNext = pNext;
+			pNext = pNext_;
 			return *this;
 		}
 
-		const DebugReportFlagsEXT& flags() const
+		DebugReportCallbackCreateInfoEXT& setFlags(DebugReportFlagsEXT flags_)
 		{
-			return reinterpret_cast<const DebugReportFlagsEXT&>(m_debugReportCallbackCreateInfoEXT.flags);
-		}
-
-		DebugReportFlagsEXT& flags()
-		{
-			return reinterpret_cast<DebugReportFlagsEXT&>(m_debugReportCallbackCreateInfoEXT.flags);
-		}
-
-		DebugReportCallbackCreateInfoEXT& flags(DebugReportFlagsEXT flags)
-		{
-			m_debugReportCallbackCreateInfoEXT.flags = static_cast<VkDebugReportFlagsEXT>(flags);
+			flags = flags_;
 			return *this;
 		}
 
-		const PFN_vkDebugReportCallbackEXT& pfnCallback() const
+		DebugReportCallbackCreateInfoEXT& setPfnCallback(PFN_vkDebugReportCallbackEXT pfnCallback_)
 		{
-			return m_debugReportCallbackCreateInfoEXT.pfnCallback;
-		}
-
-		PFN_vkDebugReportCallbackEXT& pfnCallback()
-		{
-			return m_debugReportCallbackCreateInfoEXT.pfnCallback;
-		}
-
-		DebugReportCallbackCreateInfoEXT& pfnCallback(PFN_vkDebugReportCallbackEXT pfnCallback)
-		{
-			m_debugReportCallbackCreateInfoEXT.pfnCallback = pfnCallback;
+			pfnCallback = pfnCallback_;
 			return *this;
 		}
 
-		const void* pUserData() const
+		DebugReportCallbackCreateInfoEXT& setPUserData(void* pUserData_)
 		{
-			return reinterpret_cast<const void*>(m_debugReportCallbackCreateInfoEXT.pUserData);
-		}
-
-		void* pUserData()
-		{
-			return reinterpret_cast<void*>(m_debugReportCallbackCreateInfoEXT.pUserData);
-		}
-
-		DebugReportCallbackCreateInfoEXT& pUserData(void* pUserData)
-		{
-			m_debugReportCallbackCreateInfoEXT.pUserData = pUserData;
+			pUserData = pUserData_;
 			return *this;
 		}
 
 		operator const VkDebugReportCallbackCreateInfoEXT&() const
 		{
-			return m_debugReportCallbackCreateInfoEXT;
+			return *reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(this);
 		}
 
-	private:
-		VkDebugReportCallbackCreateInfoEXT m_debugReportCallbackCreateInfoEXT;
+		StructureType sType;
+		const void* pNext;
+		DebugReportFlagsEXT flags;
+		PFN_vkDebugReportCallbackEXT pfnCallback;
+		void* pUserData;
 	};
 	static_assert(sizeof(DebugReportCallbackCreateInfoEXT) == sizeof(VkDebugReportCallbackCreateInfoEXT), "struct and wrapper have different size!");
 
 	enum class DebugReportObjectTypeEXT
 	{
-		eUnknownEXT = VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT,
-		eInstanceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT,
-		ePhysicalDeviceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT,
-		eDeviceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT,
-		eQueueEXT = VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT,
-		eSemaphoreEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT,
-		eCommandBufferEXT = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
-		eFenceEXT = VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT,
-		eDeviceMemoryEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT,
-		eBufferEXT = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT,
-		eImageEXT = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
-		eEventEXT = VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT,
-		eQueryPoolEXT = VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT,
-		eBufferViewEXT = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT,
-		eImageViewEXT = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT,
-		eShaderModuleEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT,
-		ePipelineCacheEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT,
-		ePipelineLayoutEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT,
-		eRenderPassEXT = VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
-		ePipelineEXT = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
-		eDescriptorSetLayoutEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT,
-		eSamplerEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT,
-		eDescriptorPoolEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT,
-		eDescriptorSetEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT,
-		eFramebufferEXT = VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT,
-		eCommandPoolEXT = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT,
-		eSurfaceKhrEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT,
-		eSwapchainKhrEXT = VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT,
-		eDebugReportEXT = VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_EXT
+		eUnknown = VK_DEBUG_REPORT_OBJECT_TYPE_UNKNOWN_EXT,
+		eInstance = VK_DEBUG_REPORT_OBJECT_TYPE_INSTANCE_EXT,
+		ePhysicalDevice = VK_DEBUG_REPORT_OBJECT_TYPE_PHYSICAL_DEVICE_EXT,
+		eDevice = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_EXT,
+		eQueue = VK_DEBUG_REPORT_OBJECT_TYPE_QUEUE_EXT,
+		eSemaphore = VK_DEBUG_REPORT_OBJECT_TYPE_SEMAPHORE_EXT,
+		eCommandBuffer = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_BUFFER_EXT,
+		eFence = VK_DEBUG_REPORT_OBJECT_TYPE_FENCE_EXT,
+		eDeviceMemory = VK_DEBUG_REPORT_OBJECT_TYPE_DEVICE_MEMORY_EXT,
+		eBuffer = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_EXT,
+		eImage = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT,
+		eEvent = VK_DEBUG_REPORT_OBJECT_TYPE_EVENT_EXT,
+		eQueryPool = VK_DEBUG_REPORT_OBJECT_TYPE_QUERY_POOL_EXT,
+		eBufferView = VK_DEBUG_REPORT_OBJECT_TYPE_BUFFER_VIEW_EXT,
+		eImageView = VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_VIEW_EXT,
+		eShaderModule = VK_DEBUG_REPORT_OBJECT_TYPE_SHADER_MODULE_EXT,
+		ePipelineCache = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_CACHE_EXT,
+		ePipelineLayout = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_LAYOUT_EXT,
+		eRenderPass = VK_DEBUG_REPORT_OBJECT_TYPE_RENDER_PASS_EXT,
+		ePipeline = VK_DEBUG_REPORT_OBJECT_TYPE_PIPELINE_EXT,
+		eDescriptorSetLayout = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT_EXT,
+		eSampler = VK_DEBUG_REPORT_OBJECT_TYPE_SAMPLER_EXT,
+		eDescriptorPool = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_POOL_EXT,
+		eDescriptorSet = VK_DEBUG_REPORT_OBJECT_TYPE_DESCRIPTOR_SET_EXT,
+		eFramebuffer = VK_DEBUG_REPORT_OBJECT_TYPE_FRAMEBUFFER_EXT,
+		eCommandPool = VK_DEBUG_REPORT_OBJECT_TYPE_COMMAND_POOL_EXT,
+		eSurfaceKhr = VK_DEBUG_REPORT_OBJECT_TYPE_SURFACE_KHR_EXT,
+		eSwapchainKhr = VK_DEBUG_REPORT_OBJECT_TYPE_SWAPCHAIN_KHR_EXT,
+		eDebugReport = VK_DEBUG_REPORT_OBJECT_TYPE_DEBUG_REPORT_EXT
 	};
 
 	class Instance
@@ -22017,48 +14796,53 @@ namespace vk
 			vkDestroyInstance(m_instance, reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroy(vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroy(Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyInstance(m_instance, reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result enumeratePhysicalDevices(uint32_t* pPhysicalDeviceCount, PhysicalDevice* pPhysicalDevices) const
 		{
 			return static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, pPhysicalDeviceCount, reinterpret_cast<VkPhysicalDevice*>(pPhysicalDevices)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		Result enumeratePhysicalDevices(eastl::vector<PhysicalDevice> & physicalDevices) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		template <typename Allocator = eastl::allocator<PhysicalDevice>>
+		eastl::vector<PhysicalDevice, Allocator> enumeratePhysicalDevices() const
 		{
+			eastl::vector<PhysicalDevice, Allocator> physicalDevices;
 			uint32_t physicalDeviceCount;
-			Result result = static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, nullptr));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+			Result result;
+			do
+			{
+				result = static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, nullptr));
+				if ((result == Result::eSuccess) && physicalDeviceCount)
+				{
+					physicalDevices.resize(physicalDeviceCount);
+					result = static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, reinterpret_cast<VkPhysicalDevice*>(physicalDevices.data())));
+				}
+			} while (result == Result::eIncomplete);
+			if (result != Result::eSuccess)
 			{
 				throw std::system_error(result, "vk::Instance::enumeratePhysicalDevices");
 			}
-			physicalDevices.resize(physicalDeviceCount);
-			result = static_cast<Result>(vkEnumeratePhysicalDevices(m_instance, &physicalDeviceCount, reinterpret_cast<VkPhysicalDevice*>(physicalDevices.data())));
-			if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-			{
-				throw std::system_error(result, "vk::Instance::enumeratePhysicalDevices");
-			}
-			return result;
+			return physicalDevices;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		PFN_vkVoidFunction getProcAddr(const char* pName) const
 		{
 			return vkGetInstanceProcAddr(m_instance, pName);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		PFN_vkVoidFunction getProcAddr(eastl::string const & name) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		PFN_vkVoidFunction getProcAddr(const std::string & name) const
 		{
 			return vkGetInstanceProcAddr(m_instance, name.c_str());
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
 		Result createAndroidSurfaceKHR(const AndroidSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
@@ -22067,9 +14851,9 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_ANDROID_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-		SurfaceKHR createAndroidSurfaceKHR(const AndroidSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		SurfaceKHR createAndroidSurfaceKHR(const AndroidSurfaceCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SurfaceKHR surface;
 			Result result = static_cast<Result>(vkCreateAndroidSurfaceKHR(m_instance, reinterpret_cast<const VkAndroidSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
@@ -22080,15 +14864,15 @@ namespace vk
 			return surface;
 		}
 #endif /*VK_USE_PLATFORM_ANDROID_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createDisplayPlaneSurfaceKHR(const DisplaySurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
 		{
 			return static_cast<Result>(vkCreateDisplayPlaneSurfaceKHR(m_instance, reinterpret_cast<const VkDisplaySurfaceCreateInfoKHR*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkSurfaceKHR*>(pSurface)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		SurfaceKHR createDisplayPlaneSurfaceKHR(const DisplaySurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		SurfaceKHR createDisplayPlaneSurfaceKHR(const DisplaySurfaceCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SurfaceKHR surface;
 			Result result = static_cast<Result>(vkCreateDisplayPlaneSurfaceKHR(m_instance, reinterpret_cast<const VkDisplaySurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
@@ -22098,7 +14882,7 @@ namespace vk
 			}
 			return surface;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_MIR_KHR
 		Result createMirSurfaceKHR(const MirSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
@@ -22107,9 +14891,9 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_MIR_KHR
-		SurfaceKHR createMirSurfaceKHR(const MirSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		SurfaceKHR createMirSurfaceKHR(const MirSurfaceCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SurfaceKHR surface;
 			Result result = static_cast<Result>(vkCreateMirSurfaceKHR(m_instance, reinterpret_cast<const VkMirSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
@@ -22120,19 +14904,19 @@ namespace vk
 			return surface;
 		}
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroySurfaceKHR(SurfaceKHR surface, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroySurfaceKHR(m_instance, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroySurfaceKHR(SurfaceKHR surface, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroySurfaceKHR(SurfaceKHR surface, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroySurfaceKHR(m_instance, static_cast<VkSurfaceKHR>(surface), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
 		Result createWaylandSurfaceKHR(const WaylandSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
@@ -22141,9 +14925,9 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
-		SurfaceKHR createWaylandSurfaceKHR(const WaylandSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		SurfaceKHR createWaylandSurfaceKHR(const WaylandSurfaceCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SurfaceKHR surface;
 			Result result = static_cast<Result>(vkCreateWaylandSurfaceKHR(m_instance, reinterpret_cast<const VkWaylandSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
@@ -22154,7 +14938,7 @@ namespace vk
 			return surface;
 		}
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 		Result createWin32SurfaceKHR(const Win32SurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
@@ -22163,9 +14947,9 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_WIN32_KHR
-		SurfaceKHR createWin32SurfaceKHR(const Win32SurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		SurfaceKHR createWin32SurfaceKHR(const Win32SurfaceCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SurfaceKHR surface;
 			Result result = static_cast<Result>(vkCreateWin32SurfaceKHR(m_instance, reinterpret_cast<const VkWin32SurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
@@ -22176,7 +14960,7 @@ namespace vk
 			return surface;
 		}
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
 		Result createXlibSurfaceKHR(const XlibSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
@@ -22185,9 +14969,9 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-		SurfaceKHR createXlibSurfaceKHR(const XlibSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		SurfaceKHR createXlibSurfaceKHR(const XlibSurfaceCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SurfaceKHR surface;
 			Result result = static_cast<Result>(vkCreateXlibSurfaceKHR(m_instance, reinterpret_cast<const VkXlibSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
@@ -22198,7 +14982,7 @@ namespace vk
 			return surface;
 		}
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
 		Result createXcbSurfaceKHR(const XcbSurfaceCreateInfoKHR* pCreateInfo, const AllocationCallbacks* pAllocator, SurfaceKHR* pSurface) const
@@ -22207,9 +14991,9 @@ namespace vk
 		}
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
 
-#ifdef VKCPP_ENHANCED_MODE
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
 #ifdef VK_USE_PLATFORM_XCB_KHR
-		SurfaceKHR createXcbSurfaceKHR(const XcbSurfaceCreateInfoKHR & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+		SurfaceKHR createXcbSurfaceKHR(const XcbSurfaceCreateInfoKHR & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			SurfaceKHR surface;
 			Result result = static_cast<Result>(vkCreateXcbSurfaceKHR(m_instance, reinterpret_cast<const VkXcbSurfaceCreateInfoKHR*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkSurfaceKHR*>(&surface)));
@@ -22220,15 +15004,15 @@ namespace vk
 			return surface;
 		}
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		Result createDebugReportCallbackEXT(const DebugReportCallbackCreateInfoEXT* pCreateInfo, const AllocationCallbacks* pAllocator, DebugReportCallbackEXT* pCallback) const
 		{
 			return static_cast<Result>(vkCreateDebugReportCallbackEXT(m_instance, reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkDebugReportCallbackEXT*>(pCallback)));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		DebugReportCallbackEXT createDebugReportCallbackEXT(const DebugReportCallbackCreateInfoEXT & createInfo, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		DebugReportCallbackEXT createDebugReportCallbackEXT(const DebugReportCallbackCreateInfoEXT & createInfo, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			DebugReportCallbackEXT callback;
 			Result result = static_cast<Result>(vkCreateDebugReportCallbackEXT(m_instance, reinterpret_cast<const VkDebugReportCallbackCreateInfoEXT*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkDebugReportCallbackEXT*>(&callback)));
@@ -22238,31 +15022,31 @@ namespace vk
 			}
 			return callback;
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void destroyDebugReportCallbackEXT(DebugReportCallbackEXT callback, const AllocationCallbacks* pAllocator) const
 		{
 			vkDestroyDebugReportCallbackEXT(m_instance, static_cast<VkDebugReportCallbackEXT>(callback), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator));
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void destroyDebugReportCallbackEXT(DebugReportCallbackEXT callback, vk::Optional<const AllocationCallbacks> const & allocator) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void destroyDebugReportCallbackEXT(DebugReportCallbackEXT callback, Optional<const AllocationCallbacks> allocator = nullptr) const
 		{
 			vkDestroyDebugReportCallbackEXT(m_instance, static_cast<VkDebugReportCallbackEXT>(callback), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)));
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 		void debugReportMessageEXT(DebugReportFlagsEXT flags, DebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const char* pLayerPrefix, const char* pMessage) const
 		{
 			vkDebugReportMessageEXT(m_instance, static_cast<VkDebugReportFlagsEXT>(flags), static_cast<VkDebugReportObjectTypeEXT>(objectType), object, location, messageCode, pLayerPrefix, pMessage);
 		}
 
-#ifdef VKCPP_ENHANCED_MODE
-		void debugReportMessageEXT(DebugReportFlagsEXT flags, DebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, eastl::string const & layerPrefix, eastl::string const & message) const
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+		void debugReportMessageEXT(DebugReportFlagsEXT flags, DebugReportObjectTypeEXT objectType, uint64_t object, size_t location, int32_t messageCode, const std::string & layerPrefix, const std::string & message) const
 		{
 			vkDebugReportMessageEXT(m_instance, static_cast<VkDebugReportFlagsEXT>(flags), static_cast<VkDebugReportObjectTypeEXT>(objectType), object, location, messageCode, layerPrefix.c_str(), message.c_str());
 		}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 #if !defined(VK_CPP_TYPESAFE_CONVERSION)
 		explicit
@@ -22289,8 +15073,8 @@ namespace vk
 
 	enum class DebugReportErrorEXT
 	{
-		eNoneEXT = VK_DEBUG_REPORT_ERROR_NONE_EXT,
-		eCallbackRefEXT = VK_DEBUG_REPORT_ERROR_CALLBACK_REF_EXT
+		eNone = VK_DEBUG_REPORT_ERROR_NONE_EXT,
+		eCallbackRef = VK_DEBUG_REPORT_ERROR_CALLBACK_REF_EXT
 	};
 
 	inline Result createInstance(const InstanceCreateInfo* pCreateInfo, const AllocationCallbacks* pAllocator, Instance* pInstance)
@@ -22298,8 +15082,8 @@ namespace vk
 		return static_cast<Result>(vkCreateInstance(reinterpret_cast<const VkInstanceCreateInfo*>(pCreateInfo), reinterpret_cast<const VkAllocationCallbacks*>(pAllocator), reinterpret_cast<VkInstance*>(pInstance)));
 	}
 
-#ifdef VKCPP_ENHANCED_MODE
-	inline Instance createInstance(const InstanceCreateInfo & createInfo, vk::Optional<const AllocationCallbacks> const & allocator)
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+	inline Instance createInstance(const InstanceCreateInfo & createInfo, Optional<const AllocationCallbacks> allocator = nullptr)
 	{
 		Instance instance;
 		Result result = static_cast<Result>(vkCreateInstance(reinterpret_cast<const VkInstanceCreateInfo*>(&createInfo), reinterpret_cast<const VkAllocationCallbacks*>(static_cast<const AllocationCallbacks*>(allocator)), reinterpret_cast<VkInstance*>(&instance)));
@@ -22309,451 +15093,461 @@ namespace vk
 		}
 		return instance;
 	}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 	inline Result enumerateInstanceLayerProperties(uint32_t* pPropertyCount, LayerProperties* pProperties)
 	{
 		return static_cast<Result>(vkEnumerateInstanceLayerProperties(pPropertyCount, reinterpret_cast<VkLayerProperties*>(pProperties)));
 	}
 
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result enumerateInstanceLayerProperties(eastl::vector<LayerProperties> & properties)
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+	template <typename Allocator = eastl::allocator<LayerProperties>>
+	eastl::vector<LayerProperties, Allocator> enumerateInstanceLayerProperties()
 	{
+		eastl::vector<LayerProperties, Allocator> properties;
 		uint32_t propertyCount;
-		Result result = static_cast<Result>(vkEnumerateInstanceLayerProperties(&propertyCount, nullptr));
-		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+		Result result;
+		do
+		{
+			result = static_cast<Result>(vkEnumerateInstanceLayerProperties(&propertyCount, nullptr));
+			if ((result == Result::eSuccess) && propertyCount)
+			{
+				properties.resize(propertyCount);
+				result = static_cast<Result>(vkEnumerateInstanceLayerProperties(&propertyCount, reinterpret_cast<VkLayerProperties*>(properties.data())));
+			}
+		} while (result == Result::eIncomplete);
+		if (result != Result::eSuccess)
 		{
 			throw std::system_error(result, "vk::enumerateInstanceLayerProperties");
 		}
-		properties.resize(propertyCount);
-		result = static_cast<Result>(vkEnumerateInstanceLayerProperties(&propertyCount, reinterpret_cast<VkLayerProperties*>(properties.data())));
-		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-		{
-			throw std::system_error(result, "vk::enumerateInstanceLayerProperties");
-		}
-		return result;
+		return properties;
 	}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
 	inline Result enumerateInstanceExtensionProperties(const char* pLayerName, uint32_t* pPropertyCount, ExtensionProperties* pProperties)
 	{
 		return static_cast<Result>(vkEnumerateInstanceExtensionProperties(pLayerName, pPropertyCount, reinterpret_cast<VkExtensionProperties*>(pProperties)));
 	}
 
-#ifdef VKCPP_ENHANCED_MODE
-	inline Result enumerateInstanceExtensionProperties(vk::Optional<eastl::string const> const & layerName, eastl::vector<ExtensionProperties> & properties)
+#ifndef VKCPP_DISABLE_ENHANCED_MODE
+	template <typename Allocator = eastl::allocator<ExtensionProperties>>
+	eastl::vector<ExtensionProperties, Allocator> enumerateInstanceExtensionProperties(Optional<const std::string> layerName = nullptr)
 	{
+		eastl::vector<ExtensionProperties, Allocator> properties;
 		uint32_t propertyCount;
-		Result result = static_cast<Result>(vkEnumerateInstanceExtensionProperties(layerName ? layerName->c_str() : nullptr, &propertyCount, nullptr));
-		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
+		Result result;
+		do
+		{
+			result = static_cast<Result>(vkEnumerateInstanceExtensionProperties(layerName ? layerName->c_str() : nullptr, &propertyCount, nullptr));
+			if ((result == Result::eSuccess) && propertyCount)
+			{
+				properties.resize(propertyCount);
+				result = static_cast<Result>(vkEnumerateInstanceExtensionProperties(layerName ? layerName->c_str() : nullptr, &propertyCount, reinterpret_cast<VkExtensionProperties*>(properties.data())));
+			}
+		} while (result == Result::eIncomplete);
+		if (result != Result::eSuccess)
 		{
 			throw std::system_error(result, "vk::enumerateInstanceExtensionProperties");
 		}
-		properties.resize(propertyCount);
-		result = static_cast<Result>(vkEnumerateInstanceExtensionProperties(layerName ? layerName->c_str() : nullptr, &propertyCount, reinterpret_cast<VkExtensionProperties*>(properties.data())));
-		if ((result != Result::eSuccess) && (result != Result::eIncomplete))
-		{
-			throw std::system_error(result, "vk::enumerateInstanceExtensionProperties");
-		}
-		return result;
+		return properties;
 	}
-#endif /*VKCPP_ENHANCED_MODE*/
+#endif /*VKCPP_DISABLE_ENHANCED_MODE*/
 
-	inline eastl::string to_string(FramebufferCreateFlagBits)
+	inline std::string to_string(FramebufferCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(FramebufferCreateFlags)
+	inline std::string to_string(FramebufferCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(QueryPoolCreateFlagBits)
+	inline std::string to_string(QueryPoolCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(QueryPoolCreateFlags)
+	inline std::string to_string(QueryPoolCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(RenderPassCreateFlagBits)
+	inline std::string to_string(RenderPassCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(RenderPassCreateFlags)
+	inline std::string to_string(RenderPassCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(SamplerCreateFlagBits)
+	inline std::string to_string(SamplerCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(SamplerCreateFlags)
+	inline std::string to_string(SamplerCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineLayoutCreateFlagBits)
+	inline std::string to_string(PipelineLayoutCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineLayoutCreateFlags)
+	inline std::string to_string(PipelineLayoutCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineCacheCreateFlagBits)
+	inline std::string to_string(PipelineCacheCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineCacheCreateFlags)
+	inline std::string to_string(PipelineCacheCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineDepthStencilStateCreateFlagBits)
+	inline std::string to_string(PipelineDepthStencilStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineDepthStencilStateCreateFlags)
+	inline std::string to_string(PipelineDepthStencilStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineDynamicStateCreateFlagBits)
+	inline std::string to_string(PipelineDynamicStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineDynamicStateCreateFlags)
+	inline std::string to_string(PipelineDynamicStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineColorBlendStateCreateFlagBits)
+	inline std::string to_string(PipelineColorBlendStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineColorBlendStateCreateFlags)
+	inline std::string to_string(PipelineColorBlendStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineMultisampleStateCreateFlagBits)
+	inline std::string to_string(PipelineMultisampleStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineMultisampleStateCreateFlags)
+	inline std::string to_string(PipelineMultisampleStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineRasterizationStateCreateFlagBits)
+	inline std::string to_string(PipelineRasterizationStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineRasterizationStateCreateFlags)
+	inline std::string to_string(PipelineRasterizationStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineViewportStateCreateFlagBits)
+	inline std::string to_string(PipelineViewportStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineViewportStateCreateFlags)
+	inline std::string to_string(PipelineViewportStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineTessellationStateCreateFlagBits)
+	inline std::string to_string(PipelineTessellationStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineTessellationStateCreateFlags)
+	inline std::string to_string(PipelineTessellationStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineInputAssemblyStateCreateFlagBits)
+	inline std::string to_string(PipelineInputAssemblyStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineInputAssemblyStateCreateFlags)
+	inline std::string to_string(PipelineInputAssemblyStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineVertexInputStateCreateFlagBits)
+	inline std::string to_string(PipelineVertexInputStateCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineVertexInputStateCreateFlags)
+	inline std::string to_string(PipelineVertexInputStateCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(PipelineShaderStageCreateFlagBits)
+	inline std::string to_string(PipelineShaderStageCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(PipelineShaderStageCreateFlags)
+	inline std::string to_string(PipelineShaderStageCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(DescriptorSetLayoutCreateFlagBits)
+	inline std::string to_string(DescriptorSetLayoutCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(DescriptorSetLayoutCreateFlags)
+	inline std::string to_string(DescriptorSetLayoutCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(BufferViewCreateFlagBits)
+	inline std::string to_string(BufferViewCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(BufferViewCreateFlags)
+	inline std::string to_string(BufferViewCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(InstanceCreateFlagBits)
+	inline std::string to_string(InstanceCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(InstanceCreateFlags)
+	inline std::string to_string(InstanceCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(DeviceCreateFlagBits)
+	inline std::string to_string(DeviceCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(DeviceCreateFlags)
+	inline std::string to_string(DeviceCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(DeviceQueueCreateFlagBits)
+	inline std::string to_string(DeviceQueueCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(DeviceQueueCreateFlags)
+	inline std::string to_string(DeviceQueueCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(ImageViewCreateFlagBits)
+	inline std::string to_string(ImageViewCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(ImageViewCreateFlags)
+	inline std::string to_string(ImageViewCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(SemaphoreCreateFlagBits)
+	inline std::string to_string(SemaphoreCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(SemaphoreCreateFlags)
+	inline std::string to_string(SemaphoreCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(ShaderModuleCreateFlagBits)
+	inline std::string to_string(ShaderModuleCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(ShaderModuleCreateFlags)
+	inline std::string to_string(ShaderModuleCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(EventCreateFlagBits)
+	inline std::string to_string(EventCreateFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(EventCreateFlags)
+	inline std::string to_string(EventCreateFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(MemoryMapFlagBits)
+	inline std::string to_string(MemoryMapFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(MemoryMapFlags)
+	inline std::string to_string(MemoryMapFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(SubpassDescriptionFlagBits)
+	inline std::string to_string(SubpassDescriptionFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(SubpassDescriptionFlags)
+	inline std::string to_string(SubpassDescriptionFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(DescriptorPoolResetFlagBits)
+	inline std::string to_string(DescriptorPoolResetFlagBits)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(DescriptorPoolResetFlags)
+	inline std::string to_string(DescriptorPoolResetFlags)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(SwapchainCreateFlagBitsKHR)
+	inline std::string to_string(SwapchainCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(SwapchainCreateFlagsKHR)
+	inline std::string to_string(SwapchainCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(DisplayModeCreateFlagBitsKHR)
+	inline std::string to_string(DisplayModeCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(DisplayModeCreateFlagsKHR)
+	inline std::string to_string(DisplayModeCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
-	inline eastl::string to_string(DisplaySurfaceCreateFlagBitsKHR)
+	inline std::string to_string(DisplaySurfaceCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 
-	inline eastl::string to_string(DisplaySurfaceCreateFlagsKHR)
+	inline std::string to_string(DisplaySurfaceCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-	inline eastl::string to_string(AndroidSurfaceCreateFlagBitsKHR)
+	inline std::string to_string(AndroidSurfaceCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 #endif /*VK_USE_PLATFORM_ANDROID_KHR*/
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-	inline eastl::string to_string(AndroidSurfaceCreateFlagsKHR)
+	inline std::string to_string(AndroidSurfaceCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 #endif /*VK_USE_PLATFORM_ANDROID_KHR*/
 
 #ifdef VK_USE_PLATFORM_MIR_KHR
-	inline eastl::string to_string(MirSurfaceCreateFlagBitsKHR)
+	inline std::string to_string(MirSurfaceCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
 
 #ifdef VK_USE_PLATFORM_MIR_KHR
-	inline eastl::string to_string(MirSurfaceCreateFlagsKHR)
+	inline std::string to_string(MirSurfaceCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 #endif /*VK_USE_PLATFORM_MIR_KHR*/
 
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
-	inline eastl::string to_string(WaylandSurfaceCreateFlagBitsKHR)
+	inline std::string to_string(WaylandSurfaceCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
 
 #ifdef VK_USE_PLATFORM_WAYLAND_KHR
-	inline eastl::string to_string(WaylandSurfaceCreateFlagsKHR)
+	inline std::string to_string(WaylandSurfaceCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 #endif /*VK_USE_PLATFORM_WAYLAND_KHR*/
 
 #ifdef VK_USE_PLATFORM_WIN32_KHR
-	inline eastl::string to_string(Win32SurfaceCreateFlagBitsKHR)
+	inline std::string to_string(Win32SurfaceCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
 
 #ifdef VK_USE_PLATFORM_WIN32_KHR
-	inline eastl::string to_string(Win32SurfaceCreateFlagsKHR)
+	inline std::string to_string(Win32SurfaceCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 #endif /*VK_USE_PLATFORM_WIN32_KHR*/
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-	inline eastl::string to_string(XlibSurfaceCreateFlagBitsKHR)
+	inline std::string to_string(XlibSurfaceCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
 
 #ifdef VK_USE_PLATFORM_XLIB_KHR
-	inline eastl::string to_string(XlibSurfaceCreateFlagsKHR)
+	inline std::string to_string(XlibSurfaceCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 #endif /*VK_USE_PLATFORM_XLIB_KHR*/
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
-	inline eastl::string to_string(XcbSurfaceCreateFlagBitsKHR)
+	inline std::string to_string(XcbSurfaceCreateFlagBitsKHR)
 	{
-		return eastl::string();
+		return "(void)";
 	}
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
 
 #ifdef VK_USE_PLATFORM_XCB_KHR
-	inline eastl::string to_string(XcbSurfaceCreateFlagsKHR)
+	inline std::string to_string(XcbSurfaceCreateFlagsKHR)
 	{
-		return eastl::string();
+		return "{}";
 	}
 #endif /*VK_USE_PLATFORM_XCB_KHR*/
 
-	inline eastl::string to_string(ImageLayout value)
+	inline std::string to_string(ImageLayout value)
 	{
 		switch (value)
 		{
@@ -22767,53 +15561,53 @@ namespace vk
 		case ImageLayout::eTransferDstOptimal: return "TransferDstOptimal";
 		case ImageLayout::ePreinitialized: return "Preinitialized";
 		case ImageLayout::ePresentSrcKHR: return "PresentSrcKHR";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(AttachmentLoadOp value)
+	inline std::string to_string(AttachmentLoadOp value)
 	{
 		switch (value)
 		{
 		case AttachmentLoadOp::eLoad: return "Load";
 		case AttachmentLoadOp::eClear: return "Clear";
 		case AttachmentLoadOp::eDontCare: return "DontCare";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(AttachmentStoreOp value)
+	inline std::string to_string(AttachmentStoreOp value)
 	{
 		switch (value)
 		{
 		case AttachmentStoreOp::eStore: return "Store";
 		case AttachmentStoreOp::eDontCare: return "DontCare";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ImageType value)
+	inline std::string to_string(ImageType value)
 	{
 		switch (value)
 		{
 		case ImageType::e1D: return "1D";
 		case ImageType::e2D: return "2D";
 		case ImageType::e3D: return "3D";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ImageTiling value)
+	inline std::string to_string(ImageTiling value)
 	{
 		switch (value)
 		{
 		case ImageTiling::eOptimal: return "Optimal";
 		case ImageTiling::eLinear: return "Linear";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ImageViewType value)
+	inline std::string to_string(ImageViewType value)
 	{
 		switch (value)
 		{
@@ -22824,21 +15618,21 @@ namespace vk
 		case ImageViewType::e1DArray: return "1DArray";
 		case ImageViewType::e2DArray: return "2DArray";
 		case ImageViewType::eCubeArray: return "CubeArray";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CommandBufferLevel value)
+	inline std::string to_string(CommandBufferLevel value)
 	{
 		switch (value)
 		{
 		case CommandBufferLevel::ePrimary: return "Primary";
 		case CommandBufferLevel::eSecondary: return "Secondary";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ComponentSwizzle value)
+	inline std::string to_string(ComponentSwizzle value)
 	{
 		switch (value)
 		{
@@ -22849,11 +15643,11 @@ namespace vk
 		case ComponentSwizzle::eG: return "G";
 		case ComponentSwizzle::eB: return "B";
 		case ComponentSwizzle::eA: return "A";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DescriptorType value)
+	inline std::string to_string(DescriptorType value)
 	{
 		switch (value)
 		{
@@ -22868,22 +15662,22 @@ namespace vk
 		case DescriptorType::eUniformBufferDynamic: return "UniformBufferDynamic";
 		case DescriptorType::eStorageBufferDynamic: return "StorageBufferDynamic";
 		case DescriptorType::eInputAttachment: return "InputAttachment";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(QueryType value)
+	inline std::string to_string(QueryType value)
 	{
 		switch (value)
 		{
 		case QueryType::eOcclusion: return "Occlusion";
 		case QueryType::ePipelineStatistics: return "PipelineStatistics";
 		case QueryType::eTimestamp: return "Timestamp";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(BorderColor value)
+	inline std::string to_string(BorderColor value)
 	{
 		switch (value)
 		{
@@ -22893,30 +15687,30 @@ namespace vk
 		case BorderColor::eIntOpaqueBlack: return "IntOpaqueBlack";
 		case BorderColor::eFloatOpaqueWhite: return "FloatOpaqueWhite";
 		case BorderColor::eIntOpaqueWhite: return "IntOpaqueWhite";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(PipelineBindPoint value)
+	inline std::string to_string(PipelineBindPoint value)
 	{
 		switch (value)
 		{
 		case PipelineBindPoint::eGraphics: return "Graphics";
 		case PipelineBindPoint::eCompute: return "Compute";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(PipelineCacheHeaderVersion value)
+	inline std::string to_string(PipelineCacheHeaderVersion value)
 	{
 		switch (value)
 		{
 		case PipelineCacheHeaderVersion::eOne: return "One";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(PrimitiveTopology value)
+	inline std::string to_string(PrimitiveTopology value)
 	{
 		switch (value)
 		{
@@ -22931,51 +15725,52 @@ namespace vk
 		case PrimitiveTopology::eTriangleListWithAdjacency: return "TriangleListWithAdjacency";
 		case PrimitiveTopology::eTriangleStripWithAdjacency: return "TriangleStripWithAdjacency";
 		case PrimitiveTopology::ePatchList: return "PatchList";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SharingMode value)
+	inline std::string to_string(SharingMode value)
 	{
 		switch (value)
 		{
 		case SharingMode::eExclusive: return "Exclusive";
 		case SharingMode::eConcurrent: return "Concurrent";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(IndexType value)
+	inline std::string to_string(IndexType value)
 	{
 		switch (value)
 		{
 		case IndexType::eUint16: return "Uint16";
 		case IndexType::eUint32: return "Uint32";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(Filter value)
+	inline std::string to_string(Filter value)
 	{
 		switch (value)
 		{
 		case Filter::eNearest: return "Nearest";
 		case Filter::eLinear: return "Linear";
-		default: return "unknown";
+		case Filter::eCubicIMG: return "CubicIMG";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SamplerMipmapMode value)
+	inline std::string to_string(SamplerMipmapMode value)
 	{
 		switch (value)
 		{
 		case SamplerMipmapMode::eNearest: return "Nearest";
 		case SamplerMipmapMode::eLinear: return "Linear";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SamplerAddressMode value)
+	inline std::string to_string(SamplerAddressMode value)
 	{
 		switch (value)
 		{
@@ -22984,11 +15779,11 @@ namespace vk
 		case SamplerAddressMode::eClampToEdge: return "ClampToEdge";
 		case SamplerAddressMode::eClampToBorder: return "ClampToBorder";
 		case SamplerAddressMode::eMirrorClampToEdge: return "MirrorClampToEdge";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CompareOp value)
+	inline std::string to_string(CompareOp value)
 	{
 		switch (value)
 		{
@@ -23000,22 +15795,22 @@ namespace vk
 		case CompareOp::eNotEqual: return "NotEqual";
 		case CompareOp::eGreaterOrEqual: return "GreaterOrEqual";
 		case CompareOp::eAlways: return "Always";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(PolygonMode value)
+	inline std::string to_string(PolygonMode value)
 	{
 		switch (value)
 		{
 		case PolygonMode::eFill: return "Fill";
 		case PolygonMode::eLine: return "Line";
 		case PolygonMode::ePoint: return "Point";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CullModeFlagBits value)
+	inline std::string to_string(CullModeFlagBits value)
 	{
 		switch (value)
 		{
@@ -23023,32 +15818,32 @@ namespace vk
 		case CullModeFlagBits::eFront: return "Front";
 		case CullModeFlagBits::eBack: return "Back";
 		case CullModeFlagBits::eFrontAndBack: return "FrontAndBack";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CullModeFlags value)
+	inline std::string to_string(CullModeFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::CullModeFlagBits::eNone) result += "None | ";
-		if (value & vk::CullModeFlagBits::eFront) result += "Front | ";
-		if (value & vk::CullModeFlagBits::eBack) result += "Back | ";
-		if (value & vk::CullModeFlagBits::eFrontAndBack) result += "FrontAndBack | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & CullModeFlagBits::eNone) result += "None | ";
+		if (value & CullModeFlagBits::eFront) result += "Front | ";
+		if (value & CullModeFlagBits::eBack) result += "Back | ";
+		if (value & CullModeFlagBits::eFrontAndBack) result += "FrontAndBack | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(FrontFace value)
+	inline std::string to_string(FrontFace value)
 	{
 		switch (value)
 		{
 		case FrontFace::eCounterClockwise: return "CounterClockwise";
 		case FrontFace::eClockwise: return "Clockwise";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(BlendFactor value)
+	inline std::string to_string(BlendFactor value)
 	{
 		switch (value)
 		{
@@ -23071,11 +15866,11 @@ namespace vk
 		case BlendFactor::eOneMinusSrc1Color: return "OneMinusSrc1Color";
 		case BlendFactor::eSrc1Alpha: return "Src1Alpha";
 		case BlendFactor::eOneMinusSrc1Alpha: return "OneMinusSrc1Alpha";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(BlendOp value)
+	inline std::string to_string(BlendOp value)
 	{
 		switch (value)
 		{
@@ -23084,11 +15879,11 @@ namespace vk
 		case BlendOp::eReverseSubtract: return "ReverseSubtract";
 		case BlendOp::eMin: return "Min";
 		case BlendOp::eMax: return "Max";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(StencilOp value)
+	inline std::string to_string(StencilOp value)
 	{
 		switch (value)
 		{
@@ -23100,11 +15895,11 @@ namespace vk
 		case StencilOp::eInvert: return "Invert";
 		case StencilOp::eIncrementAndWrap: return "IncrementAndWrap";
 		case StencilOp::eDecrementAndWrap: return "DecrementAndWrap";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(LogicOp value)
+	inline std::string to_string(LogicOp value)
 	{
 		switch (value)
 		{
@@ -23124,20 +15919,20 @@ namespace vk
 		case LogicOp::eOrInverted: return "OrInverted";
 		case LogicOp::eNand: return "Nand";
 		case LogicOp::eSet: return "Set";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(InternalAllocationType value)
+	inline std::string to_string(InternalAllocationType value)
 	{
 		switch (value)
 		{
 		case InternalAllocationType::eExecutable: return "Executable";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SystemAllocationScope value)
+	inline std::string to_string(SystemAllocationScope value)
 	{
 		switch (value)
 		{
@@ -23146,11 +15941,11 @@ namespace vk
 		case SystemAllocationScope::eCache: return "Cache";
 		case SystemAllocationScope::eDevice: return "Device";
 		case SystemAllocationScope::eInstance: return "Instance";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(PhysicalDeviceType value)
+	inline std::string to_string(PhysicalDeviceType value)
 	{
 		switch (value)
 		{
@@ -23159,21 +15954,21 @@ namespace vk
 		case PhysicalDeviceType::eDiscreteGpu: return "DiscreteGpu";
 		case PhysicalDeviceType::eVirtualGpu: return "VirtualGpu";
 		case PhysicalDeviceType::eCpu: return "Cpu";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(VertexInputRate value)
+	inline std::string to_string(VertexInputRate value)
 	{
 		switch (value)
 		{
 		case VertexInputRate::eVertex: return "Vertex";
 		case VertexInputRate::eInstance: return "Instance";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(Format value)
+	inline std::string to_string(Format value)
 	{
 		switch (value)
 		{
@@ -23362,11 +16157,11 @@ namespace vk
 		case Format::eAstc12x10SrgbBlock: return "Astc12x10SrgbBlock";
 		case Format::eAstc12x12UnormBlock: return "Astc12x12UnormBlock";
 		case Format::eAstc12x12SrgbBlock: return "Astc12x12SrgbBlock";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(StructureType value)
+	inline std::string to_string(StructureType value)
 	{
 		switch (value)
 		{
@@ -23431,21 +16226,21 @@ namespace vk
 		case StructureType::eAndroidSurfaceCreateInfoKHR: return "AndroidSurfaceCreateInfoKHR";
 		case StructureType::eWin32SurfaceCreateInfoKHR: return "Win32SurfaceCreateInfoKHR";
 		case StructureType::eDebugReportCallbackCreateInfoEXT: return "DebugReportCallbackCreateInfoEXT";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SubpassContents value)
+	inline std::string to_string(SubpassContents value)
 	{
 		switch (value)
 		{
 		case SubpassContents::eInline: return "Inline";
 		case SubpassContents::eSecondaryCommandBuffers: return "SecondaryCommandBuffers";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DynamicState value)
+	inline std::string to_string(DynamicState value)
 	{
 		switch (value)
 		{
@@ -23458,11 +16253,11 @@ namespace vk
 		case DynamicState::eStencilCompareMask: return "StencilCompareMask";
 		case DynamicState::eStencilWriteMask: return "StencilWriteMask";
 		case DynamicState::eStencilReference: return "StencilReference";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(QueueFlagBits value)
+	inline std::string to_string(QueueFlagBits value)
 	{
 		switch (value)
 		{
@@ -23470,22 +16265,22 @@ namespace vk
 		case QueueFlagBits::eCompute: return "Compute";
 		case QueueFlagBits::eTransfer: return "Transfer";
 		case QueueFlagBits::eSparseBinding: return "SparseBinding";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(QueueFlags value)
+	inline std::string to_string(QueueFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::QueueFlagBits::eGraphics) result += "Graphics | ";
-		if (value & vk::QueueFlagBits::eCompute) result += "Compute | ";
-		if (value & vk::QueueFlagBits::eTransfer) result += "Transfer | ";
-		if (value & vk::QueueFlagBits::eSparseBinding) result += "SparseBinding | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & QueueFlagBits::eGraphics) result += "Graphics | ";
+		if (value & QueueFlagBits::eCompute) result += "Compute | ";
+		if (value & QueueFlagBits::eTransfer) result += "Transfer | ";
+		if (value & QueueFlagBits::eSparseBinding) result += "SparseBinding | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(MemoryPropertyFlagBits value)
+	inline std::string to_string(MemoryPropertyFlagBits value)
 	{
 		switch (value)
 		{
@@ -23494,40 +16289,40 @@ namespace vk
 		case MemoryPropertyFlagBits::eHostCoherent: return "HostCoherent";
 		case MemoryPropertyFlagBits::eHostCached: return "HostCached";
 		case MemoryPropertyFlagBits::eLazilyAllocated: return "LazilyAllocated";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(MemoryPropertyFlags value)
+	inline std::string to_string(MemoryPropertyFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::MemoryPropertyFlagBits::eDeviceLocal) result += "DeviceLocal | ";
-		if (value & vk::MemoryPropertyFlagBits::eHostVisible) result += "HostVisible | ";
-		if (value & vk::MemoryPropertyFlagBits::eHostCoherent) result += "HostCoherent | ";
-		if (value & vk::MemoryPropertyFlagBits::eHostCached) result += "HostCached | ";
-		if (value & vk::MemoryPropertyFlagBits::eLazilyAllocated) result += "LazilyAllocated | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & MemoryPropertyFlagBits::eDeviceLocal) result += "DeviceLocal | ";
+		if (value & MemoryPropertyFlagBits::eHostVisible) result += "HostVisible | ";
+		if (value & MemoryPropertyFlagBits::eHostCoherent) result += "HostCoherent | ";
+		if (value & MemoryPropertyFlagBits::eHostCached) result += "HostCached | ";
+		if (value & MemoryPropertyFlagBits::eLazilyAllocated) result += "LazilyAllocated | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(MemoryHeapFlagBits value)
+	inline std::string to_string(MemoryHeapFlagBits value)
 	{
 		switch (value)
 		{
 		case MemoryHeapFlagBits::eDeviceLocal: return "DeviceLocal";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(MemoryHeapFlags value)
+	inline std::string to_string(MemoryHeapFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::MemoryHeapFlagBits::eDeviceLocal) result += "DeviceLocal | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & MemoryHeapFlagBits::eDeviceLocal) result += "DeviceLocal | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(AccessFlagBits value)
+	inline std::string to_string(AccessFlagBits value)
 	{
 		switch (value)
 		{
@@ -23548,35 +16343,35 @@ namespace vk
 		case AccessFlagBits::eHostWrite: return "HostWrite";
 		case AccessFlagBits::eMemoryRead: return "MemoryRead";
 		case AccessFlagBits::eMemoryWrite: return "MemoryWrite";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(AccessFlags value)
+	inline std::string to_string(AccessFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::AccessFlagBits::eIndirectCommandRead) result += "IndirectCommandRead | ";
-		if (value & vk::AccessFlagBits::eIndexRead) result += "IndexRead | ";
-		if (value & vk::AccessFlagBits::eVertexAttributeRead) result += "VertexAttributeRead | ";
-		if (value & vk::AccessFlagBits::eUniformRead) result += "UniformRead | ";
-		if (value & vk::AccessFlagBits::eInputAttachmentRead) result += "InputAttachmentRead | ";
-		if (value & vk::AccessFlagBits::eShaderRead) result += "ShaderRead | ";
-		if (value & vk::AccessFlagBits::eShaderWrite) result += "ShaderWrite | ";
-		if (value & vk::AccessFlagBits::eColorAttachmentRead) result += "ColorAttachmentRead | ";
-		if (value & vk::AccessFlagBits::eColorAttachmentWrite) result += "ColorAttachmentWrite | ";
-		if (value & vk::AccessFlagBits::eDepthStencilAttachmentRead) result += "DepthStencilAttachmentRead | ";
-		if (value & vk::AccessFlagBits::eDepthStencilAttachmentWrite) result += "DepthStencilAttachmentWrite | ";
-		if (value & vk::AccessFlagBits::eTransferRead) result += "TransferRead | ";
-		if (value & vk::AccessFlagBits::eTransferWrite) result += "TransferWrite | ";
-		if (value & vk::AccessFlagBits::eHostRead) result += "HostRead | ";
-		if (value & vk::AccessFlagBits::eHostWrite) result += "HostWrite | ";
-		if (value & vk::AccessFlagBits::eMemoryRead) result += "MemoryRead | ";
-		if (value & vk::AccessFlagBits::eMemoryWrite) result += "MemoryWrite | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & AccessFlagBits::eIndirectCommandRead) result += "IndirectCommandRead | ";
+		if (value & AccessFlagBits::eIndexRead) result += "IndexRead | ";
+		if (value & AccessFlagBits::eVertexAttributeRead) result += "VertexAttributeRead | ";
+		if (value & AccessFlagBits::eUniformRead) result += "UniformRead | ";
+		if (value & AccessFlagBits::eInputAttachmentRead) result += "InputAttachmentRead | ";
+		if (value & AccessFlagBits::eShaderRead) result += "ShaderRead | ";
+		if (value & AccessFlagBits::eShaderWrite) result += "ShaderWrite | ";
+		if (value & AccessFlagBits::eColorAttachmentRead) result += "ColorAttachmentRead | ";
+		if (value & AccessFlagBits::eColorAttachmentWrite) result += "ColorAttachmentWrite | ";
+		if (value & AccessFlagBits::eDepthStencilAttachmentRead) result += "DepthStencilAttachmentRead | ";
+		if (value & AccessFlagBits::eDepthStencilAttachmentWrite) result += "DepthStencilAttachmentWrite | ";
+		if (value & AccessFlagBits::eTransferRead) result += "TransferRead | ";
+		if (value & AccessFlagBits::eTransferWrite) result += "TransferWrite | ";
+		if (value & AccessFlagBits::eHostRead) result += "HostRead | ";
+		if (value & AccessFlagBits::eHostWrite) result += "HostWrite | ";
+		if (value & AccessFlagBits::eMemoryRead) result += "MemoryRead | ";
+		if (value & AccessFlagBits::eMemoryWrite) result += "MemoryWrite | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(BufferUsageFlagBits value)
+	inline std::string to_string(BufferUsageFlagBits value)
 	{
 		switch (value)
 		{
@@ -23589,48 +16384,48 @@ namespace vk
 		case BufferUsageFlagBits::eIndexBuffer: return "IndexBuffer";
 		case BufferUsageFlagBits::eVertexBuffer: return "VertexBuffer";
 		case BufferUsageFlagBits::eIndirectBuffer: return "IndirectBuffer";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(BufferUsageFlags value)
+	inline std::string to_string(BufferUsageFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::BufferUsageFlagBits::eTransferSrc) result += "TransferSrc | ";
-		if (value & vk::BufferUsageFlagBits::eTransferDst) result += "TransferDst | ";
-		if (value & vk::BufferUsageFlagBits::eUniformTexelBuffer) result += "UniformTexelBuffer | ";
-		if (value & vk::BufferUsageFlagBits::eStorageTexelBuffer) result += "StorageTexelBuffer | ";
-		if (value & vk::BufferUsageFlagBits::eUniformBuffer) result += "UniformBuffer | ";
-		if (value & vk::BufferUsageFlagBits::eStorageBuffer) result += "StorageBuffer | ";
-		if (value & vk::BufferUsageFlagBits::eIndexBuffer) result += "IndexBuffer | ";
-		if (value & vk::BufferUsageFlagBits::eVertexBuffer) result += "VertexBuffer | ";
-		if (value & vk::BufferUsageFlagBits::eIndirectBuffer) result += "IndirectBuffer | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & BufferUsageFlagBits::eTransferSrc) result += "TransferSrc | ";
+		if (value & BufferUsageFlagBits::eTransferDst) result += "TransferDst | ";
+		if (value & BufferUsageFlagBits::eUniformTexelBuffer) result += "UniformTexelBuffer | ";
+		if (value & BufferUsageFlagBits::eStorageTexelBuffer) result += "StorageTexelBuffer | ";
+		if (value & BufferUsageFlagBits::eUniformBuffer) result += "UniformBuffer | ";
+		if (value & BufferUsageFlagBits::eStorageBuffer) result += "StorageBuffer | ";
+		if (value & BufferUsageFlagBits::eIndexBuffer) result += "IndexBuffer | ";
+		if (value & BufferUsageFlagBits::eVertexBuffer) result += "VertexBuffer | ";
+		if (value & BufferUsageFlagBits::eIndirectBuffer) result += "IndirectBuffer | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(BufferCreateFlagBits value)
+	inline std::string to_string(BufferCreateFlagBits value)
 	{
 		switch (value)
 		{
 		case BufferCreateFlagBits::eSparseBinding: return "SparseBinding";
 		case BufferCreateFlagBits::eSparseResidency: return "SparseResidency";
 		case BufferCreateFlagBits::eSparseAliased: return "SparseAliased";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(BufferCreateFlags value)
+	inline std::string to_string(BufferCreateFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::BufferCreateFlagBits::eSparseBinding) result += "SparseBinding | ";
-		if (value & vk::BufferCreateFlagBits::eSparseResidency) result += "SparseResidency | ";
-		if (value & vk::BufferCreateFlagBits::eSparseAliased) result += "SparseAliased | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & BufferCreateFlagBits::eSparseBinding) result += "SparseBinding | ";
+		if (value & BufferCreateFlagBits::eSparseResidency) result += "SparseResidency | ";
+		if (value & BufferCreateFlagBits::eSparseAliased) result += "SparseAliased | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(ShaderStageFlagBits value)
+	inline std::string to_string(ShaderStageFlagBits value)
 	{
 		switch (value)
 		{
@@ -23642,26 +16437,26 @@ namespace vk
 		case ShaderStageFlagBits::eCompute: return "Compute";
 		case ShaderStageFlagBits::eAllGraphics: return "AllGraphics";
 		case ShaderStageFlagBits::eAll: return "All";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ShaderStageFlags value)
+	inline std::string to_string(ShaderStageFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::ShaderStageFlagBits::eVertex) result += "Vertex | ";
-		if (value & vk::ShaderStageFlagBits::eTessellationControl) result += "TessellationControl | ";
-		if (value & vk::ShaderStageFlagBits::eTessellationEvaluation) result += "TessellationEvaluation | ";
-		if (value & vk::ShaderStageFlagBits::eGeometry) result += "Geometry | ";
-		if (value & vk::ShaderStageFlagBits::eFragment) result += "Fragment | ";
-		if (value & vk::ShaderStageFlagBits::eCompute) result += "Compute | ";
-		if (value & vk::ShaderStageFlagBits::eAllGraphics) result += "AllGraphics | ";
-		if (value & vk::ShaderStageFlagBits::eAll) result += "All | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & ShaderStageFlagBits::eVertex) result += "Vertex | ";
+		if (value & ShaderStageFlagBits::eTessellationControl) result += "TessellationControl | ";
+		if (value & ShaderStageFlagBits::eTessellationEvaluation) result += "TessellationEvaluation | ";
+		if (value & ShaderStageFlagBits::eGeometry) result += "Geometry | ";
+		if (value & ShaderStageFlagBits::eFragment) result += "Fragment | ";
+		if (value & ShaderStageFlagBits::eCompute) result += "Compute | ";
+		if (value & ShaderStageFlagBits::eAllGraphics) result += "AllGraphics | ";
+		if (value & ShaderStageFlagBits::eAll) result += "All | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(ImageUsageFlagBits value)
+	inline std::string to_string(ImageUsageFlagBits value)
 	{
 		switch (value)
 		{
@@ -23673,26 +16468,26 @@ namespace vk
 		case ImageUsageFlagBits::eDepthStencilAttachment: return "DepthStencilAttachment";
 		case ImageUsageFlagBits::eTransientAttachment: return "TransientAttachment";
 		case ImageUsageFlagBits::eInputAttachment: return "InputAttachment";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ImageUsageFlags value)
+	inline std::string to_string(ImageUsageFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::ImageUsageFlagBits::eTransferSrc) result += "TransferSrc | ";
-		if (value & vk::ImageUsageFlagBits::eTransferDst) result += "TransferDst | ";
-		if (value & vk::ImageUsageFlagBits::eSampled) result += "Sampled | ";
-		if (value & vk::ImageUsageFlagBits::eStorage) result += "Storage | ";
-		if (value & vk::ImageUsageFlagBits::eColorAttachment) result += "ColorAttachment | ";
-		if (value & vk::ImageUsageFlagBits::eDepthStencilAttachment) result += "DepthStencilAttachment | ";
-		if (value & vk::ImageUsageFlagBits::eTransientAttachment) result += "TransientAttachment | ";
-		if (value & vk::ImageUsageFlagBits::eInputAttachment) result += "InputAttachment | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & ImageUsageFlagBits::eTransferSrc) result += "TransferSrc | ";
+		if (value & ImageUsageFlagBits::eTransferDst) result += "TransferDst | ";
+		if (value & ImageUsageFlagBits::eSampled) result += "Sampled | ";
+		if (value & ImageUsageFlagBits::eStorage) result += "Storage | ";
+		if (value & ImageUsageFlagBits::eColorAttachment) result += "ColorAttachment | ";
+		if (value & ImageUsageFlagBits::eDepthStencilAttachment) result += "DepthStencilAttachment | ";
+		if (value & ImageUsageFlagBits::eTransientAttachment) result += "TransientAttachment | ";
+		if (value & ImageUsageFlagBits::eInputAttachment) result += "InputAttachment | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(ImageCreateFlagBits value)
+	inline std::string to_string(ImageCreateFlagBits value)
 	{
 		switch (value)
 		{
@@ -23701,44 +16496,44 @@ namespace vk
 		case ImageCreateFlagBits::eSparseAliased: return "SparseAliased";
 		case ImageCreateFlagBits::eMutableFormat: return "MutableFormat";
 		case ImageCreateFlagBits::eCubeCompatible: return "CubeCompatible";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ImageCreateFlags value)
+	inline std::string to_string(ImageCreateFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::ImageCreateFlagBits::eSparseBinding) result += "SparseBinding | ";
-		if (value & vk::ImageCreateFlagBits::eSparseResidency) result += "SparseResidency | ";
-		if (value & vk::ImageCreateFlagBits::eSparseAliased) result += "SparseAliased | ";
-		if (value & vk::ImageCreateFlagBits::eMutableFormat) result += "MutableFormat | ";
-		if (value & vk::ImageCreateFlagBits::eCubeCompatible) result += "CubeCompatible | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & ImageCreateFlagBits::eSparseBinding) result += "SparseBinding | ";
+		if (value & ImageCreateFlagBits::eSparseResidency) result += "SparseResidency | ";
+		if (value & ImageCreateFlagBits::eSparseAliased) result += "SparseAliased | ";
+		if (value & ImageCreateFlagBits::eMutableFormat) result += "MutableFormat | ";
+		if (value & ImageCreateFlagBits::eCubeCompatible) result += "CubeCompatible | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(PipelineCreateFlagBits value)
+	inline std::string to_string(PipelineCreateFlagBits value)
 	{
 		switch (value)
 		{
 		case PipelineCreateFlagBits::eDisableOptimization: return "DisableOptimization";
 		case PipelineCreateFlagBits::eAllowDerivatives: return "AllowDerivatives";
 		case PipelineCreateFlagBits::eDerivative: return "Derivative";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(PipelineCreateFlags value)
+	inline std::string to_string(PipelineCreateFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::PipelineCreateFlagBits::eDisableOptimization) result += "DisableOptimization | ";
-		if (value & vk::PipelineCreateFlagBits::eAllowDerivatives) result += "AllowDerivatives | ";
-		if (value & vk::PipelineCreateFlagBits::eDerivative) result += "Derivative | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & PipelineCreateFlagBits::eDisableOptimization) result += "DisableOptimization | ";
+		if (value & PipelineCreateFlagBits::eAllowDerivatives) result += "AllowDerivatives | ";
+		if (value & PipelineCreateFlagBits::eDerivative) result += "Derivative | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(ColorComponentFlagBits value)
+	inline std::string to_string(ColorComponentFlagBits value)
 	{
 		switch (value)
 		{
@@ -23746,39 +16541,39 @@ namespace vk
 		case ColorComponentFlagBits::eG: return "G";
 		case ColorComponentFlagBits::eB: return "B";
 		case ColorComponentFlagBits::eA: return "A";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ColorComponentFlags value)
+	inline std::string to_string(ColorComponentFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::ColorComponentFlagBits::eR) result += "R | ";
-		if (value & vk::ColorComponentFlagBits::eG) result += "G | ";
-		if (value & vk::ColorComponentFlagBits::eB) result += "B | ";
-		if (value & vk::ColorComponentFlagBits::eA) result += "A | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & ColorComponentFlagBits::eR) result += "R | ";
+		if (value & ColorComponentFlagBits::eG) result += "G | ";
+		if (value & ColorComponentFlagBits::eB) result += "B | ";
+		if (value & ColorComponentFlagBits::eA) result += "A | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(FenceCreateFlagBits value)
+	inline std::string to_string(FenceCreateFlagBits value)
 	{
 		switch (value)
 		{
 		case FenceCreateFlagBits::eSignaled: return "Signaled";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(FenceCreateFlags value)
+	inline std::string to_string(FenceCreateFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::FenceCreateFlagBits::eSignaled) result += "Signaled | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & FenceCreateFlagBits::eSignaled) result += "Signaled | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(FormatFeatureFlagBits value)
+	inline std::string to_string(FormatFeatureFlagBits value)
 	{
 		switch (value)
 		{
@@ -23795,48 +16590,50 @@ namespace vk
 		case FormatFeatureFlagBits::eBlitSrc: return "BlitSrc";
 		case FormatFeatureFlagBits::eBlitDst: return "BlitDst";
 		case FormatFeatureFlagBits::eSampledImageFilterLinear: return "SampledImageFilterLinear";
-		default: return "unknown";
+		case FormatFeatureFlagBits::eSampledImageFilterCubicIMG: return "SampledImageFilterCubicIMG";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(FormatFeatureFlags value)
+	inline std::string to_string(FormatFeatureFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::FormatFeatureFlagBits::eSampledImage) result += "SampledImage | ";
-		if (value & vk::FormatFeatureFlagBits::eStorageImage) result += "StorageImage | ";
-		if (value & vk::FormatFeatureFlagBits::eStorageImageAtomic) result += "StorageImageAtomic | ";
-		if (value & vk::FormatFeatureFlagBits::eUniformTexelBuffer) result += "UniformTexelBuffer | ";
-		if (value & vk::FormatFeatureFlagBits::eStorageTexelBuffer) result += "StorageTexelBuffer | ";
-		if (value & vk::FormatFeatureFlagBits::eStorageTexelBufferAtomic) result += "StorageTexelBufferAtomic | ";
-		if (value & vk::FormatFeatureFlagBits::eVertexBuffer) result += "VertexBuffer | ";
-		if (value & vk::FormatFeatureFlagBits::eColorAttachment) result += "ColorAttachment | ";
-		if (value & vk::FormatFeatureFlagBits::eColorAttachmentBlend) result += "ColorAttachmentBlend | ";
-		if (value & vk::FormatFeatureFlagBits::eDepthStencilAttachment) result += "DepthStencilAttachment | ";
-		if (value & vk::FormatFeatureFlagBits::eBlitSrc) result += "BlitSrc | ";
-		if (value & vk::FormatFeatureFlagBits::eBlitDst) result += "BlitDst | ";
-		if (value & vk::FormatFeatureFlagBits::eSampledImageFilterLinear) result += "SampledImageFilterLinear | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & FormatFeatureFlagBits::eSampledImage) result += "SampledImage | ";
+		if (value & FormatFeatureFlagBits::eStorageImage) result += "StorageImage | ";
+		if (value & FormatFeatureFlagBits::eStorageImageAtomic) result += "StorageImageAtomic | ";
+		if (value & FormatFeatureFlagBits::eUniformTexelBuffer) result += "UniformTexelBuffer | ";
+		if (value & FormatFeatureFlagBits::eStorageTexelBuffer) result += "StorageTexelBuffer | ";
+		if (value & FormatFeatureFlagBits::eStorageTexelBufferAtomic) result += "StorageTexelBufferAtomic | ";
+		if (value & FormatFeatureFlagBits::eVertexBuffer) result += "VertexBuffer | ";
+		if (value & FormatFeatureFlagBits::eColorAttachment) result += "ColorAttachment | ";
+		if (value & FormatFeatureFlagBits::eColorAttachmentBlend) result += "ColorAttachmentBlend | ";
+		if (value & FormatFeatureFlagBits::eDepthStencilAttachment) result += "DepthStencilAttachment | ";
+		if (value & FormatFeatureFlagBits::eBlitSrc) result += "BlitSrc | ";
+		if (value & FormatFeatureFlagBits::eBlitDst) result += "BlitDst | ";
+		if (value & FormatFeatureFlagBits::eSampledImageFilterLinear) result += "SampledImageFilterLinear | ";
+		if (value & FormatFeatureFlagBits::eSampledImageFilterCubicIMG) result += "SampledImageFilterCubicIMG | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(QueryControlFlagBits value)
+	inline std::string to_string(QueryControlFlagBits value)
 	{
 		switch (value)
 		{
 		case QueryControlFlagBits::ePrecise: return "Precise";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(QueryControlFlags value)
+	inline std::string to_string(QueryControlFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::QueryControlFlagBits::ePrecise) result += "Precise | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & QueryControlFlagBits::ePrecise) result += "Precise | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(QueryResultFlagBits value)
+	inline std::string to_string(QueryResultFlagBits value)
 	{
 		switch (value)
 		{
@@ -23844,43 +16641,43 @@ namespace vk
 		case QueryResultFlagBits::eWait: return "Wait";
 		case QueryResultFlagBits::eWithAvailability: return "WithAvailability";
 		case QueryResultFlagBits::ePartial: return "Partial";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(QueryResultFlags value)
+	inline std::string to_string(QueryResultFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::QueryResultFlagBits::e64) result += "64 | ";
-		if (value & vk::QueryResultFlagBits::eWait) result += "Wait | ";
-		if (value & vk::QueryResultFlagBits::eWithAvailability) result += "WithAvailability | ";
-		if (value & vk::QueryResultFlagBits::ePartial) result += "Partial | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & QueryResultFlagBits::e64) result += "64 | ";
+		if (value & QueryResultFlagBits::eWait) result += "Wait | ";
+		if (value & QueryResultFlagBits::eWithAvailability) result += "WithAvailability | ";
+		if (value & QueryResultFlagBits::ePartial) result += "Partial | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(CommandBufferUsageFlagBits value)
+	inline std::string to_string(CommandBufferUsageFlagBits value)
 	{
 		switch (value)
 		{
 		case CommandBufferUsageFlagBits::eOneTimeSubmit: return "OneTimeSubmit";
 		case CommandBufferUsageFlagBits::eRenderPassContinue: return "RenderPassContinue";
 		case CommandBufferUsageFlagBits::eSimultaneousUse: return "SimultaneousUse";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CommandBufferUsageFlags value)
+	inline std::string to_string(CommandBufferUsageFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::CommandBufferUsageFlagBits::eOneTimeSubmit) result += "OneTimeSubmit | ";
-		if (value & vk::CommandBufferUsageFlagBits::eRenderPassContinue) result += "RenderPassContinue | ";
-		if (value & vk::CommandBufferUsageFlagBits::eSimultaneousUse) result += "SimultaneousUse | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & CommandBufferUsageFlagBits::eOneTimeSubmit) result += "OneTimeSubmit | ";
+		if (value & CommandBufferUsageFlagBits::eRenderPassContinue) result += "RenderPassContinue | ";
+		if (value & CommandBufferUsageFlagBits::eSimultaneousUse) result += "SimultaneousUse | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(QueryPipelineStatisticFlagBits value)
+	inline std::string to_string(QueryPipelineStatisticFlagBits value)
 	{
 		switch (value)
 		{
@@ -23895,29 +16692,29 @@ namespace vk
 		case QueryPipelineStatisticFlagBits::eTessellationControlShaderPatches: return "TessellationControlShaderPatches";
 		case QueryPipelineStatisticFlagBits::eTessellationEvaluationShaderInvocations: return "TessellationEvaluationShaderInvocations";
 		case QueryPipelineStatisticFlagBits::eComputeShaderInvocations: return "ComputeShaderInvocations";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(QueryPipelineStatisticFlags value)
+	inline std::string to_string(QueryPipelineStatisticFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::QueryPipelineStatisticFlagBits::eInputAssemblyVertices) result += "InputAssemblyVertices | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eInputAssemblyPrimitives) result += "InputAssemblyPrimitives | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eVertexShaderInvocations) result += "VertexShaderInvocations | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eGeometryShaderInvocations) result += "GeometryShaderInvocations | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eGeometryShaderPrimitives) result += "GeometryShaderPrimitives | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eClippingInvocations) result += "ClippingInvocations | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eClippingPrimitives) result += "ClippingPrimitives | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eFragmentShaderInvocations) result += "FragmentShaderInvocations | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eTessellationControlShaderPatches) result += "TessellationControlShaderPatches | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eTessellationEvaluationShaderInvocations) result += "TessellationEvaluationShaderInvocations | ";
-		if (value & vk::QueryPipelineStatisticFlagBits::eComputeShaderInvocations) result += "ComputeShaderInvocations | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & QueryPipelineStatisticFlagBits::eInputAssemblyVertices) result += "InputAssemblyVertices | ";
+		if (value & QueryPipelineStatisticFlagBits::eInputAssemblyPrimitives) result += "InputAssemblyPrimitives | ";
+		if (value & QueryPipelineStatisticFlagBits::eVertexShaderInvocations) result += "VertexShaderInvocations | ";
+		if (value & QueryPipelineStatisticFlagBits::eGeometryShaderInvocations) result += "GeometryShaderInvocations | ";
+		if (value & QueryPipelineStatisticFlagBits::eGeometryShaderPrimitives) result += "GeometryShaderPrimitives | ";
+		if (value & QueryPipelineStatisticFlagBits::eClippingInvocations) result += "ClippingInvocations | ";
+		if (value & QueryPipelineStatisticFlagBits::eClippingPrimitives) result += "ClippingPrimitives | ";
+		if (value & QueryPipelineStatisticFlagBits::eFragmentShaderInvocations) result += "FragmentShaderInvocations | ";
+		if (value & QueryPipelineStatisticFlagBits::eTessellationControlShaderPatches) result += "TessellationControlShaderPatches | ";
+		if (value & QueryPipelineStatisticFlagBits::eTessellationEvaluationShaderInvocations) result += "TessellationEvaluationShaderInvocations | ";
+		if (value & QueryPipelineStatisticFlagBits::eComputeShaderInvocations) result += "ComputeShaderInvocations | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(ImageAspectFlagBits value)
+	inline std::string to_string(ImageAspectFlagBits value)
 	{
 		switch (value)
 		{
@@ -23925,60 +16722,60 @@ namespace vk
 		case ImageAspectFlagBits::eDepth: return "Depth";
 		case ImageAspectFlagBits::eStencil: return "Stencil";
 		case ImageAspectFlagBits::eMetadata: return "Metadata";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(ImageAspectFlags value)
+	inline std::string to_string(ImageAspectFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::ImageAspectFlagBits::eColor) result += "Color | ";
-		if (value & vk::ImageAspectFlagBits::eDepth) result += "Depth | ";
-		if (value & vk::ImageAspectFlagBits::eStencil) result += "Stencil | ";
-		if (value & vk::ImageAspectFlagBits::eMetadata) result += "Metadata | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & ImageAspectFlagBits::eColor) result += "Color | ";
+		if (value & ImageAspectFlagBits::eDepth) result += "Depth | ";
+		if (value & ImageAspectFlagBits::eStencil) result += "Stencil | ";
+		if (value & ImageAspectFlagBits::eMetadata) result += "Metadata | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(SparseImageFormatFlagBits value)
+	inline std::string to_string(SparseImageFormatFlagBits value)
 	{
 		switch (value)
 		{
 		case SparseImageFormatFlagBits::eSingleMiptail: return "SingleMiptail";
 		case SparseImageFormatFlagBits::eAlignedMipSize: return "AlignedMipSize";
 		case SparseImageFormatFlagBits::eNonstandardBlockSize: return "NonstandardBlockSize";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SparseImageFormatFlags value)
+	inline std::string to_string(SparseImageFormatFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::SparseImageFormatFlagBits::eSingleMiptail) result += "SingleMiptail | ";
-		if (value & vk::SparseImageFormatFlagBits::eAlignedMipSize) result += "AlignedMipSize | ";
-		if (value & vk::SparseImageFormatFlagBits::eNonstandardBlockSize) result += "NonstandardBlockSize | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & SparseImageFormatFlagBits::eSingleMiptail) result += "SingleMiptail | ";
+		if (value & SparseImageFormatFlagBits::eAlignedMipSize) result += "AlignedMipSize | ";
+		if (value & SparseImageFormatFlagBits::eNonstandardBlockSize) result += "NonstandardBlockSize | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(SparseMemoryBindFlagBits value)
+	inline std::string to_string(SparseMemoryBindFlagBits value)
 	{
 		switch (value)
 		{
 		case SparseMemoryBindFlagBits::eMetadata: return "Metadata";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SparseMemoryBindFlags value)
+	inline std::string to_string(SparseMemoryBindFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::SparseMemoryBindFlagBits::eMetadata) result += "Metadata | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & SparseMemoryBindFlagBits::eMetadata) result += "Metadata | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(PipelineStageFlagBits value)
+	inline std::string to_string(PipelineStageFlagBits value)
 	{
 		switch (value)
 		{
@@ -23999,88 +16796,88 @@ namespace vk
 		case PipelineStageFlagBits::eHost: return "Host";
 		case PipelineStageFlagBits::eAllGraphics: return "AllGraphics";
 		case PipelineStageFlagBits::eAllCommands: return "AllCommands";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(PipelineStageFlags value)
+	inline std::string to_string(PipelineStageFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::PipelineStageFlagBits::eTopOfPipe) result += "TopOfPipe | ";
-		if (value & vk::PipelineStageFlagBits::eDrawIndirect) result += "DrawIndirect | ";
-		if (value & vk::PipelineStageFlagBits::eVertexInput) result += "VertexInput | ";
-		if (value & vk::PipelineStageFlagBits::eVertexShader) result += "VertexShader | ";
-		if (value & vk::PipelineStageFlagBits::eTessellationControlShader) result += "TessellationControlShader | ";
-		if (value & vk::PipelineStageFlagBits::eTessellationEvaluationShader) result += "TessellationEvaluationShader | ";
-		if (value & vk::PipelineStageFlagBits::eGeometryShader) result += "GeometryShader | ";
-		if (value & vk::PipelineStageFlagBits::eFragmentShader) result += "FragmentShader | ";
-		if (value & vk::PipelineStageFlagBits::eEarlyFragmentTests) result += "EarlyFragmentTests | ";
-		if (value & vk::PipelineStageFlagBits::eLateFragmentTests) result += "LateFragmentTests | ";
-		if (value & vk::PipelineStageFlagBits::eColorAttachmentOutput) result += "ColorAttachmentOutput | ";
-		if (value & vk::PipelineStageFlagBits::eComputeShader) result += "ComputeShader | ";
-		if (value & vk::PipelineStageFlagBits::eTransfer) result += "Transfer | ";
-		if (value & vk::PipelineStageFlagBits::eBottomOfPipe) result += "BottomOfPipe | ";
-		if (value & vk::PipelineStageFlagBits::eHost) result += "Host | ";
-		if (value & vk::PipelineStageFlagBits::eAllGraphics) result += "AllGraphics | ";
-		if (value & vk::PipelineStageFlagBits::eAllCommands) result += "AllCommands | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & PipelineStageFlagBits::eTopOfPipe) result += "TopOfPipe | ";
+		if (value & PipelineStageFlagBits::eDrawIndirect) result += "DrawIndirect | ";
+		if (value & PipelineStageFlagBits::eVertexInput) result += "VertexInput | ";
+		if (value & PipelineStageFlagBits::eVertexShader) result += "VertexShader | ";
+		if (value & PipelineStageFlagBits::eTessellationControlShader) result += "TessellationControlShader | ";
+		if (value & PipelineStageFlagBits::eTessellationEvaluationShader) result += "TessellationEvaluationShader | ";
+		if (value & PipelineStageFlagBits::eGeometryShader) result += "GeometryShader | ";
+		if (value & PipelineStageFlagBits::eFragmentShader) result += "FragmentShader | ";
+		if (value & PipelineStageFlagBits::eEarlyFragmentTests) result += "EarlyFragmentTests | ";
+		if (value & PipelineStageFlagBits::eLateFragmentTests) result += "LateFragmentTests | ";
+		if (value & PipelineStageFlagBits::eColorAttachmentOutput) result += "ColorAttachmentOutput | ";
+		if (value & PipelineStageFlagBits::eComputeShader) result += "ComputeShader | ";
+		if (value & PipelineStageFlagBits::eTransfer) result += "Transfer | ";
+		if (value & PipelineStageFlagBits::eBottomOfPipe) result += "BottomOfPipe | ";
+		if (value & PipelineStageFlagBits::eHost) result += "Host | ";
+		if (value & PipelineStageFlagBits::eAllGraphics) result += "AllGraphics | ";
+		if (value & PipelineStageFlagBits::eAllCommands) result += "AllCommands | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(CommandPoolCreateFlagBits value)
+	inline std::string to_string(CommandPoolCreateFlagBits value)
 	{
 		switch (value)
 		{
 		case CommandPoolCreateFlagBits::eTransient: return "Transient";
 		case CommandPoolCreateFlagBits::eResetCommandBuffer: return "ResetCommandBuffer";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CommandPoolCreateFlags value)
+	inline std::string to_string(CommandPoolCreateFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::CommandPoolCreateFlagBits::eTransient) result += "Transient | ";
-		if (value & vk::CommandPoolCreateFlagBits::eResetCommandBuffer) result += "ResetCommandBuffer | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & CommandPoolCreateFlagBits::eTransient) result += "Transient | ";
+		if (value & CommandPoolCreateFlagBits::eResetCommandBuffer) result += "ResetCommandBuffer | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(CommandPoolResetFlagBits value)
+	inline std::string to_string(CommandPoolResetFlagBits value)
 	{
 		switch (value)
 		{
 		case CommandPoolResetFlagBits::eReleaseResources: return "ReleaseResources";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CommandPoolResetFlags value)
+	inline std::string to_string(CommandPoolResetFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::CommandPoolResetFlagBits::eReleaseResources) result += "ReleaseResources | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & CommandPoolResetFlagBits::eReleaseResources) result += "ReleaseResources | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(CommandBufferResetFlagBits value)
+	inline std::string to_string(CommandBufferResetFlagBits value)
 	{
 		switch (value)
 		{
 		case CommandBufferResetFlagBits::eReleaseResources: return "ReleaseResources";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CommandBufferResetFlags value)
+	inline std::string to_string(CommandBufferResetFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::CommandBufferResetFlagBits::eReleaseResources) result += "ReleaseResources | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & CommandBufferResetFlagBits::eReleaseResources) result += "ReleaseResources | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(SampleCountFlagBits value)
+	inline std::string to_string(SampleCountFlagBits value)
 	{
 		switch (value)
 		{
@@ -24091,118 +16888,118 @@ namespace vk
 		case SampleCountFlagBits::e16: return "16";
 		case SampleCountFlagBits::e32: return "32";
 		case SampleCountFlagBits::e64: return "64";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SampleCountFlags value)
+	inline std::string to_string(SampleCountFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::SampleCountFlagBits::e1) result += "1 | ";
-		if (value & vk::SampleCountFlagBits::e2) result += "2 | ";
-		if (value & vk::SampleCountFlagBits::e4) result += "4 | ";
-		if (value & vk::SampleCountFlagBits::e8) result += "8 | ";
-		if (value & vk::SampleCountFlagBits::e16) result += "16 | ";
-		if (value & vk::SampleCountFlagBits::e32) result += "32 | ";
-		if (value & vk::SampleCountFlagBits::e64) result += "64 | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & SampleCountFlagBits::e1) result += "1 | ";
+		if (value & SampleCountFlagBits::e2) result += "2 | ";
+		if (value & SampleCountFlagBits::e4) result += "4 | ";
+		if (value & SampleCountFlagBits::e8) result += "8 | ";
+		if (value & SampleCountFlagBits::e16) result += "16 | ";
+		if (value & SampleCountFlagBits::e32) result += "32 | ";
+		if (value & SampleCountFlagBits::e64) result += "64 | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(AttachmentDescriptionFlagBits value)
+	inline std::string to_string(AttachmentDescriptionFlagBits value)
 	{
 		switch (value)
 		{
 		case AttachmentDescriptionFlagBits::eMayAlias: return "MayAlias";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(AttachmentDescriptionFlags value)
+	inline std::string to_string(AttachmentDescriptionFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::AttachmentDescriptionFlagBits::eMayAlias) result += "MayAlias | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & AttachmentDescriptionFlagBits::eMayAlias) result += "MayAlias | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(StencilFaceFlagBits value)
+	inline std::string to_string(StencilFaceFlagBits value)
 	{
 		switch (value)
 		{
 		case StencilFaceFlagBits::eFront: return "Front";
 		case StencilFaceFlagBits::eBack: return "Back";
 		case StencilFaceFlagBits::eVkStencilFrontAndBack: return "VkStencilFrontAndBack";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(StencilFaceFlags value)
+	inline std::string to_string(StencilFaceFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::StencilFaceFlagBits::eFront) result += "Front | ";
-		if (value & vk::StencilFaceFlagBits::eBack) result += "Back | ";
-		if (value & vk::StencilFaceFlagBits::eVkStencilFrontAndBack) result += "VkStencilFrontAndBack | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & StencilFaceFlagBits::eFront) result += "Front | ";
+		if (value & StencilFaceFlagBits::eBack) result += "Back | ";
+		if (value & StencilFaceFlagBits::eVkStencilFrontAndBack) result += "VkStencilFrontAndBack | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(DescriptorPoolCreateFlagBits value)
+	inline std::string to_string(DescriptorPoolCreateFlagBits value)
 	{
 		switch (value)
 		{
 		case DescriptorPoolCreateFlagBits::eFreeDescriptorSet: return "FreeDescriptorSet";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DescriptorPoolCreateFlags value)
+	inline std::string to_string(DescriptorPoolCreateFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet) result += "FreeDescriptorSet | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & DescriptorPoolCreateFlagBits::eFreeDescriptorSet) result += "FreeDescriptorSet | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(DependencyFlagBits value)
+	inline std::string to_string(DependencyFlagBits value)
 	{
 		switch (value)
 		{
 		case DependencyFlagBits::eByRegion: return "ByRegion";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DependencyFlags value)
+	inline std::string to_string(DependencyFlags value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::DependencyFlagBits::eByRegion) result += "ByRegion | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & DependencyFlagBits::eByRegion) result += "ByRegion | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(PresentModeKHR value)
-	{
-		switch (value)
-		{
-		case PresentModeKHR::eImmediateKHR: return "ImmediateKHR";
-		case PresentModeKHR::eMailboxKHR: return "MailboxKHR";
-		case PresentModeKHR::eFifoKHR: return "FifoKHR";
-		case PresentModeKHR::eFifoRelaxedKHR: return "FifoRelaxedKHR";
-		default: return "unknown";
-		}
-	}
-
-	inline eastl::string to_string(ColorSpaceKHR value)
+	inline std::string to_string(PresentModeKHR value)
 	{
 		switch (value)
 		{
-		case ColorSpaceKHR::eVkColorspaceSrgbNonlinearKHR: return "VkColorspaceSrgbNonlinearKHR";
-		default: return "unknown";
+		case PresentModeKHR::eImmediate: return "Immediate";
+		case PresentModeKHR::eMailbox: return "Mailbox";
+		case PresentModeKHR::eFifo: return "Fifo";
+		case PresentModeKHR::eFifoRelaxed: return "FifoRelaxed";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DisplayPlaneAlphaFlagBitsKHR value)
+	inline std::string to_string(ColorSpaceKHR value)
+	{
+		switch (value)
+		{
+		case ColorSpaceKHR::eVkColorspaceSrgbNonlinear: return "VkColorspaceSrgbNonlinear";
+		default: return "invalid";
+		}
+	}
+
+	inline std::string to_string(DisplayPlaneAlphaFlagBitsKHR value)
 	{
 		switch (value)
 		{
@@ -24210,22 +17007,22 @@ namespace vk
 		case DisplayPlaneAlphaFlagBitsKHR::eGlobal: return "Global";
 		case DisplayPlaneAlphaFlagBitsKHR::ePerPixel: return "PerPixel";
 		case DisplayPlaneAlphaFlagBitsKHR::ePerPixelPremultiplied: return "PerPixelPremultiplied";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DisplayPlaneAlphaFlagsKHR value)
+	inline std::string to_string(DisplayPlaneAlphaFlagsKHR value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::eOpaque) result += "Opaque | ";
-		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::eGlobal) result += "Global | ";
-		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::ePerPixel) result += "PerPixel | ";
-		if (value & vk::DisplayPlaneAlphaFlagBitsKHR::ePerPixelPremultiplied) result += "PerPixelPremultiplied | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & DisplayPlaneAlphaFlagBitsKHR::eOpaque) result += "Opaque | ";
+		if (value & DisplayPlaneAlphaFlagBitsKHR::eGlobal) result += "Global | ";
+		if (value & DisplayPlaneAlphaFlagBitsKHR::ePerPixel) result += "PerPixel | ";
+		if (value & DisplayPlaneAlphaFlagBitsKHR::ePerPixelPremultiplied) result += "PerPixelPremultiplied | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(CompositeAlphaFlagBitsKHR value)
+	inline std::string to_string(CompositeAlphaFlagBitsKHR value)
 	{
 		switch (value)
 		{
@@ -24233,22 +17030,22 @@ namespace vk
 		case CompositeAlphaFlagBitsKHR::ePreMultiplied: return "PreMultiplied";
 		case CompositeAlphaFlagBitsKHR::ePostMultiplied: return "PostMultiplied";
 		case CompositeAlphaFlagBitsKHR::eInherit: return "Inherit";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(CompositeAlphaFlagsKHR value)
+	inline std::string to_string(CompositeAlphaFlagsKHR value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::CompositeAlphaFlagBitsKHR::eOpaque) result += "Opaque | ";
-		if (value & vk::CompositeAlphaFlagBitsKHR::ePreMultiplied) result += "PreMultiplied | ";
-		if (value & vk::CompositeAlphaFlagBitsKHR::ePostMultiplied) result += "PostMultiplied | ";
-		if (value & vk::CompositeAlphaFlagBitsKHR::eInherit) result += "Inherit | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & CompositeAlphaFlagBitsKHR::eOpaque) result += "Opaque | ";
+		if (value & CompositeAlphaFlagBitsKHR::ePreMultiplied) result += "PreMultiplied | ";
+		if (value & CompositeAlphaFlagBitsKHR::ePostMultiplied) result += "PostMultiplied | ";
+		if (value & CompositeAlphaFlagBitsKHR::eInherit) result += "Inherit | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(SurfaceTransformFlagBitsKHR value)
+	inline std::string to_string(SurfaceTransformFlagBitsKHR value)
 	{
 		switch (value)
 		{
@@ -24261,27 +17058,27 @@ namespace vk
 		case SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180: return "HorizontalMirrorRotate180";
 		case SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270: return "HorizontalMirrorRotate270";
 		case SurfaceTransformFlagBitsKHR::eInherit: return "Inherit";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(SurfaceTransformFlagsKHR value)
+	inline std::string to_string(SurfaceTransformFlagsKHR value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::SurfaceTransformFlagBitsKHR::eIdentity) result += "Identity | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eRotate90) result += "Rotate90 | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eRotate180) result += "Rotate180 | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eRotate270) result += "Rotate270 | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirror) result += "HorizontalMirror | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate90) result += "HorizontalMirrorRotate90 | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180) result += "HorizontalMirrorRotate180 | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270) result += "HorizontalMirrorRotate270 | ";
-		if (value & vk::SurfaceTransformFlagBitsKHR::eInherit) result += "Inherit | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & SurfaceTransformFlagBitsKHR::eIdentity) result += "Identity | ";
+		if (value & SurfaceTransformFlagBitsKHR::eRotate90) result += "Rotate90 | ";
+		if (value & SurfaceTransformFlagBitsKHR::eRotate180) result += "Rotate180 | ";
+		if (value & SurfaceTransformFlagBitsKHR::eRotate270) result += "Rotate270 | ";
+		if (value & SurfaceTransformFlagBitsKHR::eHorizontalMirror) result += "HorizontalMirror | ";
+		if (value & SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate90) result += "HorizontalMirrorRotate90 | ";
+		if (value & SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180) result += "HorizontalMirrorRotate180 | ";
+		if (value & SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270) result += "HorizontalMirrorRotate270 | ";
+		if (value & SurfaceTransformFlagBitsKHR::eInherit) result += "Inherit | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(DebugReportFlagBitsEXT value)
+	inline std::string to_string(DebugReportFlagBitsEXT value)
 	{
 		switch (value)
 		{
@@ -24290,66 +17087,66 @@ namespace vk
 		case DebugReportFlagBitsEXT::ePerformanceWarning: return "PerformanceWarning";
 		case DebugReportFlagBitsEXT::eError: return "Error";
 		case DebugReportFlagBitsEXT::eDebug: return "Debug";
-		default: return "unknown";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DebugReportFlagsEXT value)
+	inline std::string to_string(DebugReportFlagsEXT value)
 	{
-		if (!value) return eastl::string();
-		eastl::string result;
-		if (value & vk::DebugReportFlagBitsEXT::eInformation) result += "Information | ";
-		if (value & vk::DebugReportFlagBitsEXT::eWarning) result += "Warning | ";
-		if (value & vk::DebugReportFlagBitsEXT::ePerformanceWarning) result += "PerformanceWarning | ";
-		if (value & vk::DebugReportFlagBitsEXT::eError) result += "Error | ";
-		if (value & vk::DebugReportFlagBitsEXT::eDebug) result += "Debug | ";
-		return result.substr(0, result.size() - 3);
+		if (!value) return "{}";
+		std::string result;
+		if (value & DebugReportFlagBitsEXT::eInformation) result += "Information | ";
+		if (value & DebugReportFlagBitsEXT::eWarning) result += "Warning | ";
+		if (value & DebugReportFlagBitsEXT::ePerformanceWarning) result += "PerformanceWarning | ";
+		if (value & DebugReportFlagBitsEXT::eError) result += "Error | ";
+		if (value & DebugReportFlagBitsEXT::eDebug) result += "Debug | ";
+		return "{" + result.substr(0, result.size() - 3) + "}";
 	}
 
-	inline eastl::string to_string(DebugReportObjectTypeEXT value)
+	inline std::string to_string(DebugReportObjectTypeEXT value)
 	{
 		switch (value)
 		{
-		case DebugReportObjectTypeEXT::eUnknownEXT: return "UnknownEXT";
-		case DebugReportObjectTypeEXT::eInstanceEXT: return "InstanceEXT";
-		case DebugReportObjectTypeEXT::ePhysicalDeviceEXT: return "PhysicalDeviceEXT";
-		case DebugReportObjectTypeEXT::eDeviceEXT: return "DeviceEXT";
-		case DebugReportObjectTypeEXT::eQueueEXT: return "QueueEXT";
-		case DebugReportObjectTypeEXT::eSemaphoreEXT: return "SemaphoreEXT";
-		case DebugReportObjectTypeEXT::eCommandBufferEXT: return "CommandBufferEXT";
-		case DebugReportObjectTypeEXT::eFenceEXT: return "FenceEXT";
-		case DebugReportObjectTypeEXT::eDeviceMemoryEXT: return "DeviceMemoryEXT";
-		case DebugReportObjectTypeEXT::eBufferEXT: return "BufferEXT";
-		case DebugReportObjectTypeEXT::eImageEXT: return "ImageEXT";
-		case DebugReportObjectTypeEXT::eEventEXT: return "EventEXT";
-		case DebugReportObjectTypeEXT::eQueryPoolEXT: return "QueryPoolEXT";
-		case DebugReportObjectTypeEXT::eBufferViewEXT: return "BufferViewEXT";
-		case DebugReportObjectTypeEXT::eImageViewEXT: return "ImageViewEXT";
-		case DebugReportObjectTypeEXT::eShaderModuleEXT: return "ShaderModuleEXT";
-		case DebugReportObjectTypeEXT::ePipelineCacheEXT: return "PipelineCacheEXT";
-		case DebugReportObjectTypeEXT::ePipelineLayoutEXT: return "PipelineLayoutEXT";
-		case DebugReportObjectTypeEXT::eRenderPassEXT: return "RenderPassEXT";
-		case DebugReportObjectTypeEXT::ePipelineEXT: return "PipelineEXT";
-		case DebugReportObjectTypeEXT::eDescriptorSetLayoutEXT: return "DescriptorSetLayoutEXT";
-		case DebugReportObjectTypeEXT::eSamplerEXT: return "SamplerEXT";
-		case DebugReportObjectTypeEXT::eDescriptorPoolEXT: return "DescriptorPoolEXT";
-		case DebugReportObjectTypeEXT::eDescriptorSetEXT: return "DescriptorSetEXT";
-		case DebugReportObjectTypeEXT::eFramebufferEXT: return "FramebufferEXT";
-		case DebugReportObjectTypeEXT::eCommandPoolEXT: return "CommandPoolEXT";
-		case DebugReportObjectTypeEXT::eSurfaceKhrEXT: return "SurfaceKhrEXT";
-		case DebugReportObjectTypeEXT::eSwapchainKhrEXT: return "SwapchainKhrEXT";
-		case DebugReportObjectTypeEXT::eDebugReportEXT: return "DebugReportEXT";
-		default: return "unknown";
+		case DebugReportObjectTypeEXT::eUnknown: return "Unknown";
+		case DebugReportObjectTypeEXT::eInstance: return "Instance";
+		case DebugReportObjectTypeEXT::ePhysicalDevice: return "PhysicalDevice";
+		case DebugReportObjectTypeEXT::eDevice: return "Device";
+		case DebugReportObjectTypeEXT::eQueue: return "Queue";
+		case DebugReportObjectTypeEXT::eSemaphore: return "Semaphore";
+		case DebugReportObjectTypeEXT::eCommandBuffer: return "CommandBuffer";
+		case DebugReportObjectTypeEXT::eFence: return "Fence";
+		case DebugReportObjectTypeEXT::eDeviceMemory: return "DeviceMemory";
+		case DebugReportObjectTypeEXT::eBuffer: return "Buffer";
+		case DebugReportObjectTypeEXT::eImage: return "Image";
+		case DebugReportObjectTypeEXT::eEvent: return "Event";
+		case DebugReportObjectTypeEXT::eQueryPool: return "QueryPool";
+		case DebugReportObjectTypeEXT::eBufferView: return "BufferView";
+		case DebugReportObjectTypeEXT::eImageView: return "ImageView";
+		case DebugReportObjectTypeEXT::eShaderModule: return "ShaderModule";
+		case DebugReportObjectTypeEXT::ePipelineCache: return "PipelineCache";
+		case DebugReportObjectTypeEXT::ePipelineLayout: return "PipelineLayout";
+		case DebugReportObjectTypeEXT::eRenderPass: return "RenderPass";
+		case DebugReportObjectTypeEXT::ePipeline: return "Pipeline";
+		case DebugReportObjectTypeEXT::eDescriptorSetLayout: return "DescriptorSetLayout";
+		case DebugReportObjectTypeEXT::eSampler: return "Sampler";
+		case DebugReportObjectTypeEXT::eDescriptorPool: return "DescriptorPool";
+		case DebugReportObjectTypeEXT::eDescriptorSet: return "DescriptorSet";
+		case DebugReportObjectTypeEXT::eFramebuffer: return "Framebuffer";
+		case DebugReportObjectTypeEXT::eCommandPool: return "CommandPool";
+		case DebugReportObjectTypeEXT::eSurfaceKhr: return "SurfaceKhr";
+		case DebugReportObjectTypeEXT::eSwapchainKhr: return "SwapchainKhr";
+		case DebugReportObjectTypeEXT::eDebugReport: return "DebugReport";
+		default: return "invalid";
 		}
 	}
 
-	inline eastl::string to_string(DebugReportErrorEXT value)
+	inline std::string to_string(DebugReportErrorEXT value)
 	{
 		switch (value)
 		{
-		case DebugReportErrorEXT::eNoneEXT: return "NoneEXT";
-		case DebugReportErrorEXT::eCallbackRefEXT: return "CallbackRefEXT";
-		default: return "unknown";
+		case DebugReportErrorEXT::eNone: return "None";
+		case DebugReportErrorEXT::eCallbackRef: return "CallbackRef";
+		default: return "invalid";
 		}
 	}
 

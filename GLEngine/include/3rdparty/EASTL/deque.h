@@ -348,7 +348,7 @@ namespace eastl
 	/// we will leave it as-is. It can probably be solved by adding some extra code to
 	/// the Do* functions and adding good comments explaining the situation.
 	/// 
-	template <typename T, typename Allocator = EASTLAllocatorType, unsigned kDequeSubarraySize = DEQUE_DEFAULT_SUBARRAY_SIZE(T)>
+	template <typename T, typename Allocator = EASTLAllocatorType<T>, unsigned kDequeSubarraySize = DEQUE_DEFAULT_SUBARRAY_SIZE(T)>
 	class deque : public DequeBase<T, Allocator, kDequeSubarraySize>
 	{
 	public:

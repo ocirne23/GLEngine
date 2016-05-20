@@ -4,6 +4,8 @@
 #include "Input/Input.h"
 #include "Utils/ThreadManager.h"
 
+#include "Graphics/Vulkan/VKContext.h"
+
 #include <SDL/SDL.h>
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -18,7 +20,6 @@ owner<Graphics*> GLEngine::graphics             = NULL;
 bool GLEngine::s_shutdown                       = false;
 owner<ThreadManager*> GLEngine::s_threadManager = NULL;
 
-#include "Graphics/Vulkan/Test/triangle.h"
 void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height, EWindowMode a_windowMode)
 {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
@@ -39,8 +40,8 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 	input = new Input();
 	s_threadManager = new ThreadManager();
 
-	print("vktest..");
-	triangleTest();
+	print("vktest..\n");
+	VKContext::test();
 	print("done\n");
 }
 

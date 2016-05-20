@@ -51,6 +51,7 @@ namespace eastl
 	/// the eastl containers are compatible with such allocators (i.e. nothing unexpected
 	/// will happen).
 	///
+	template <typename T>
 	class EASTL_API allocator
 	{
 	public:
@@ -73,8 +74,10 @@ namespace eastl
 		#endif
 	};
 
-	bool operator==(const allocator& a, const allocator& b);
-	bool operator!=(const allocator& a, const allocator& b);
+	template<typename T>
+	bool operator==(const allocator<T>& a, const allocator<T>& b);
+	template<typename T>
+	bool operator!=(const allocator<T>& a, const allocator<T>& b);
 
 
 
@@ -110,8 +113,10 @@ namespace eastl
 	/// Currently this Default Allocator applies only to CoreAllocatorAdapter.
 	/// To consider: This naming of this function is too similar to get_default_allocator
 	/// and instead should be named something like GetStaticDefaultAllocator.
-	EASTL_API allocator* GetDefaultAllocator();
-	EASTL_API allocator* SetDefaultAllocator(allocator* pAllocator);
+	template <typename T>
+	EASTL_API allocator<T>* GetDefaultAllocator();
+	template <typename T>
+	EASTL_API allocator<T>* SetDefaultAllocator(allocator<T>* pAllocator);
 
 
 	/// get_default_allocator
@@ -134,7 +139,8 @@ namespace eastl
 	template <typename Allocator>
 	Allocator* get_default_allocator(const Allocator*);
 
-	EASTLAllocatorType* get_default_allocator(const EASTLAllocatorType*);
+	template <typename T>
+	EASTLAllocatorType<T>* get_default_allocator(const EASTLAllocatorType<T>*);
 
 
 	/// default_allocfreemethod
@@ -184,31 +190,32 @@ namespace eastl
 
 	namespace eastl
 	{
-		inline allocator::allocator(const char* EASTL_NAME(pName))
+		template <typename T>
+		inline allocator<T>::allocator(const char* EASTL_NAME(pName))
 		{
 			#if EASTL_NAME_ENABLED
 				mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
 			#endif
 		}
 
-
-		inline allocator::allocator(const allocator& EASTL_NAME(alloc))
+		template <typename T>
+		inline allocator<T>::allocator(const allocator& EASTL_NAME(alloc))
 		{
 			#if EASTL_NAME_ENABLED
 				mpName = alloc.mpName;
 			#endif
 		}
 
-
-		inline allocator::allocator(const allocator&, const char* EASTL_NAME(pName))
+		template <typename T>
+		inline allocator<T>::allocator(const allocator&, const char* EASTL_NAME(pName))
 		{
 			#if EASTL_NAME_ENABLED
 				mpName = pName ? pName : EASTL_ALLOCATOR_DEFAULT_NAME;
 			#endif
 		}
 
-
-		inline allocator& allocator::operator=(const allocator& EASTL_NAME(alloc))
+		template <typename T>
+		inline allocator<T>& allocator<T>::operator=(const allocator<T>& EASTL_NAME(alloc))
 		{
 			#if EASTL_NAME_ENABLED
 				mpName = alloc.mpName;
@@ -216,8 +223,8 @@ namespace eastl
 			return *this;
 		}
 
-
-		inline const char* allocator::get_name() const
+		template <typename T>
+		inline const char* allocator<T>::get_name() const
 		{
 			#if EASTL_NAME_ENABLED
 				return mpName;
@@ -226,16 +233,16 @@ namespace eastl
 			#endif
 		}
 
-
-		inline void allocator::set_name(const char* EASTL_NAME(pName))
+		template <typename T>
+		inline void allocator<T>::set_name(const char* EASTL_NAME(pName))
 		{
 			#if EASTL_NAME_ENABLED
 				mpName = pName;
 			#endif
 		}
 
-
-		inline void* allocator::allocate(size_t n, int flags)
+		template <typename T>
+		inline void* allocator<T>::allocate(size_t n, int flags)
 		{
 			#if EASTL_NAME_ENABLED
 				#define pName mpName
@@ -254,8 +261,8 @@ namespace eastl
 			#endif
 		}
 
-
-		inline void* allocator::allocate(size_t n, size_t alignment, size_t offset, int flags)
+		template <typename T>
+		inline void* allocator<T>::allocate(size_t n, size_t alignment, size_t offset, int flags)
 		{
 			#if EASTL_DLL
 				// We currently have no support for implementing flags when 
@@ -287,8 +294,8 @@ namespace eastl
 			#undef pName  // See above for the definition of this.
 		}
 
-
-		inline void allocator::deallocate(void* p, size_t)
+		template <typename T>
+		inline void allocator<T>::deallocate(void* p, size_t)
 		{
 			#if EASTL_DLL
 				if (p != nullptr)
@@ -301,14 +308,14 @@ namespace eastl
 			#endif
 		}
 
-
-		inline bool operator==(const allocator&, const allocator&)
+		template <typename T>
+		inline bool operator==(const allocator<T>&, const allocator<T>&)
 		{
 			return true; // All allocators are considered equal, as they merely use global new/delete.
 		}
 
-
-		inline bool operator!=(const allocator&, const allocator&)
+		template <typename T>
+		inline bool operator!=(const allocator<T>&, const allocator<T>&)
 		{
 			return false; // All allocators are considered equal, as they merely use global new/delete.
 		}
@@ -331,15 +338,16 @@ namespace eastl
 	}
 
 
-	inline EASTLAllocatorType* get_default_allocator(const EASTLAllocatorType*)
+	template <typename T>
+	inline EASTLAllocatorType<T>* get_default_allocator(const EASTLAllocatorType<T>*)
 	{
 		return EASTLAllocatorDefault(); // For the built-in allocator EASTLAllocatorType, we happen to already have a function for returning the default allocator instance, so we provide it.
 	}
 
-
+	template <typename T>
 	inline void* default_allocfreemethod(size_t n, void* pBuffer, void* /*pContext*/)
 	{
-		EASTLAllocatorType* const pAllocator = EASTLAllocatorDefault();
+		EASTLAllocatorType<T>* const pAllocator = EASTLAllocatorDefault();
 
 		if(pBuffer) // If freeing...
 		{

@@ -57,7 +57,7 @@ namespace eastl
 	/// a vector or string pop_front would be inefficient and could lead to 
 	/// silently poor performance.
 	///
-	template <typename T, typename Container = eastl::deque<T, EASTLAllocatorType, DEQUE_DEFAULT_SUBARRAY_SIZE(T)> >
+	template <typename T, typename Container = eastl::deque<T, EASTLAllocatorType<T>, DEQUE_DEFAULT_SUBARRAY_SIZE(T)> >
 	class queue
 	{
 	public:

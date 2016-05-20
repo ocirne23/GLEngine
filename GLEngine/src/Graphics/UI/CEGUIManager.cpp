@@ -2,7 +2,7 @@
 
 #include "Graphics/GL/GL.h"
 
-#define NOMINMAX
+// #define NOMINMAX
 
 #include <CEGUI/DefaultResourceProvider.h>
 #include <CEGUI/FontManager.h>

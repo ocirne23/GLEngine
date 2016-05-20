@@ -85,6 +85,7 @@ namespace eastl
 	///     IntList     intList;
 	///     intList.get_allocator().init(buffer, sizeof(buffer), sizeof(IntListNode), __alignof(IntListNode));
 	///
+	template <typename T>
 	class EASTL_API fixed_allocator : public fixed_pool_base
 	{
 	public:
@@ -218,9 +219,10 @@ namespace eastl
 		}
 
 	}; // fixed_allocator
-
-	bool operator==(const fixed_allocator& a, const fixed_allocator& b);
-	bool operator!=(const fixed_allocator& a, const fixed_allocator& b);
+	template <typename T>
+	bool operator==(const fixed_allocator<T>& a, const fixed_allocator<T>& b);
+	template <typename T>
+	bool operator!=(const fixed_allocator<T>& a, const fixed_allocator<T>& b);
 
 
 
@@ -263,6 +265,7 @@ namespace eastl
 	///     IntList     intList;
 	///     intList.get_allocator().init(buffer, sizeof(buffer), sizeof(IntListNode), __alignof(IntListNode));
 	///
+	template <typename T>
 	class EASTL_API fixed_allocator_with_overflow : public fixed_pool_base
 	{
 	public:
@@ -395,15 +398,16 @@ namespace eastl
 		}
 
 	protected:
-		EASTLAllocatorType mOverflowAllocator;  // To consider: Allow the user to define the type of this, presumably via a template parameter.
+		EASTLAllocatorType<T> mOverflowAllocator;  // To consider: Allow the user to define the type of this, presumably via a template parameter.
 		void*              mpPoolBegin;         // To consider: We have these member variables and ideally we shouldn't need them. The problem is that 
 		void*              mpPoolEnd;           //              the information about the pool buffer and object size is stored in the owning container 
 		eastl_size_t       mnNodeSize;          //              and we can't have access to it without increasing the amount of code we need and by templating 
 												//              more code. It may turn out that simply storing data here is smaller in the end.
 	}; // fixed_allocator_with_overflow         //              Granted, this class is usually used for debugging purposes, but perhaps there is an elegant solution.
-
-	bool operator==(const fixed_allocator_with_overflow& a, const fixed_allocator_with_overflow& b);
-	bool operator!=(const fixed_allocator_with_overflow& a, const fixed_allocator_with_overflow& b);
+	template <typename T>
+	bool operator==(const fixed_allocator_with_overflow<T>& a, const fixed_allocator_with_overflow<T>& b);
+	template <typename T>
+	bool operator!=(const fixed_allocator_with_overflow<T>& a, const fixed_allocator_with_overflow<T>& b);
 
 
 
@@ -413,23 +417,23 @@ namespace eastl
 	///////////////////////////////////////////////////////////////////////
 	// global operators
 	///////////////////////////////////////////////////////////////////////
-
-	inline bool operator==(const fixed_allocator&, const fixed_allocator&)
+	template <typename T>
+	inline bool operator==(const fixed_allocator<T>&, const fixed_allocator<T>&)
 	{
 		return false;
 	}
-
-	inline bool operator!=(const fixed_allocator&, const fixed_allocator&)
+	template <typename T>
+	inline bool operator!=(const fixed_allocator<T>&, const fixed_allocator<T>&)
 	{
 		return false;
 	}
-
-	inline bool operator==(const fixed_allocator_with_overflow&, const fixed_allocator_with_overflow&)
+	template <typename T>
+	inline bool operator==(const fixed_allocator_with_overflow<T>&, const fixed_allocator_with_overflow<T>&)
 	{
 		return false;
 	}
-
-	inline bool operator!=(const fixed_allocator_with_overflow&, const fixed_allocator_with_overflow&)
+	template <typename T>
+	inline bool operator!=(const fixed_allocator_with_overflow<T>&, const fixed_allocator_with_overflow<T>&)
 	{
 		return false;
 	}

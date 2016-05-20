@@ -1,12 +1,29 @@
 #include "Graphics\Vulkan\Utils\VKUtils.h"
 
+#include "Utils/FileHandle.h"
+
+vk::ShaderModule VKUtils::loadShaderModule(const char* a_fileName, vk::Device a_device)
+{
+	FileHandle file(a_fileName);
+	assert(file.exists());
+	uint64 size = file.getFileSize();
+	eastl::vector<char> data;
+	data.reserve(size);
+	file.readBytes(&data[0], size, 0);
+
+	vk::ShaderModuleCreateInfo moduleCreateInfo = vk::ShaderModuleCreateInfo()
+		.setCodeSize(size)
+		.setPCode(rcast<const uint32_t*>(&data[0]));
+	return a_device.createShaderModule(moduleCreateInfo, NULL);
+}
+
 uint VKUtils::getMemoryType(vk::PhysicalDeviceMemoryProperties a_physDevMemProps, uint a_typeBits, vk::MemoryPropertyFlagBits a_properties)
 {
 	for (uint i = 0; i < 32; ++i)
 	{
 		if ((a_typeBits & 1) == 1)
 		{
-			if ((a_physDevMemProps.memoryTypes()[i].propertyFlags() & a_properties) == a_properties)
+			if ((a_physDevMemProps.memoryTypes[i].propertyFlags & a_properties) == a_properties)
 				return i;
 		}
 		a_typeBits >>= 1;
@@ -19,16 +36,16 @@ void VKUtils::setImageLayout(vk::CommandBuffer cmdbuffer, vk::Image image, vk::I
 {
 	// Create an image barrier object
 	vk::ImageMemoryBarrier imageMemoryBarrier = vk::ImageMemoryBarrier()
-		.srcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-		.dstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-		.oldLayout(oldImageLayout)
-		.newLayout(newImageLayout)
-		.image(image)
-		.subresourceRange(vk::ImageSubresourceRange()
-			.aspectMask(aspectMask)
-			.baseMipLevel(0)
-			.levelCount(1)
-			.layerCount(1));
+		.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+		.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+		.setOldLayout(oldImageLayout)
+		.setNewLayout(newImageLayout)
+		.setImage(image)
+		.setSubresourceRange(vk::ImageSubresourceRange()
+			.setAspectMask(aspectMask)
+			.setBaseMipLevel(0)
+			.setLevelCount(1)
+			.setLayerCount(1));
 
 	// Source layouts (old)
 
@@ -37,28 +54,28 @@ void VKUtils::setImageLayout(vk::CommandBuffer cmdbuffer, vk::Image image, vk::I
 	// Make sure any writes to the image have been finished
 	if (oldImageLayout == vk::ImageLayout::eUndefined)
 	{
-		imageMemoryBarrier.srcAccessMask(vk::AccessFlagBits::eHostWrite | vk::AccessFlagBits::eTransferWrite);
+		//imageMemoryBarrier.setSrcAccessMask(vk::AccessFlagBits::eHostWrite | vk::AccessFlagBits::eTransferWrite);
 	}
 
 	// Old layout is color attachment
 	// Make sure any writes to the color buffer have been finished
 	if (oldImageLayout == vk::ImageLayout::eColorAttachmentOptimal)
 	{
-		imageMemoryBarrier.srcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
+		imageMemoryBarrier.setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
 	}
 
 	// Old layout is transfer source
 	// Make sure any reads from the image have been finished
 	if (oldImageLayout == vk::ImageLayout::eTransferSrcOptimal)
 	{
-		imageMemoryBarrier.srcAccessMask(vk::AccessFlagBits::eTransferRead);
+		imageMemoryBarrier.setSrcAccessMask(vk::AccessFlagBits::eTransferRead);
 	}
 
 	// Old layout is shader read (sampler, input attachment)
 	// Make sure any shader reads from the image have been finished
 	if (oldImageLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
 	{
-		imageMemoryBarrier.srcAccessMask(vk::AccessFlagBits::eShaderRead);
+		imageMemoryBarrier.setSrcAccessMask(vk::AccessFlagBits::eShaderRead);
 	}
 
 	// Target layouts (new)
@@ -67,38 +84,38 @@ void VKUtils::setImageLayout(vk::CommandBuffer cmdbuffer, vk::Image image, vk::I
 	// Make sure any copyies to the image have been finished
 	if (newImageLayout == vk::ImageLayout::eTransferDstOptimal)
 	{
-		imageMemoryBarrier.dstAccessMask(vk::AccessFlagBits::eTransferWrite);
+		imageMemoryBarrier.setDstAccessMask(vk::AccessFlagBits::eTransferWrite);
 	}
 
 	// New layout is transfer source (copy, blit)
 	// Make sure any reads from and writes to the image have been finished
 	if (newImageLayout == vk::ImageLayout::eTransferSrcOptimal)
 	{
-		imageMemoryBarrier.srcAccessMask(imageMemoryBarrier.srcAccessMask() | vk::AccessFlagBits::eTransferRead);
-		imageMemoryBarrier.dstAccessMask(vk::AccessFlagBits::eTransferRead);
+		imageMemoryBarrier.setSrcAccessMask(imageMemoryBarrier.srcAccessMask | vk::AccessFlagBits::eTransferRead);
+		imageMemoryBarrier.setDstAccessMask(vk::AccessFlagBits::eTransferRead);
 	}
 
 	// New layout is color attachment
 	// Make sure any writes to the color buffer hav been finished
 	if (newImageLayout == vk::ImageLayout::eColorAttachmentOptimal)
 	{
-		imageMemoryBarrier.dstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
-		imageMemoryBarrier.srcAccessMask(vk::AccessFlagBits::eTransferRead);
+		imageMemoryBarrier.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite);
+		imageMemoryBarrier.setSrcAccessMask(vk::AccessFlagBits::eTransferRead);
 	}
 
 	// New layout is depth attachment
 	// Make sure any writes to depth/stencil buffer have been finished
 	if (newImageLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
 	{
-		imageMemoryBarrier.dstAccessMask(imageMemoryBarrier.dstAccessMask() | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
+		imageMemoryBarrier.setDstAccessMask(imageMemoryBarrier.dstAccessMask | vk::AccessFlagBits::eDepthStencilAttachmentWrite);
 	}
 
 	// New layout is shader read (sampler, input attachment)
 	// Make sure any writes to the image have been finished
 	if (newImageLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
 	{
-		imageMemoryBarrier.srcAccessMask(vk::AccessFlagBits::eHostWrite | vk::AccessFlagBits::eTransferWrite);
-		imageMemoryBarrier.dstAccessMask(vk::AccessFlagBits::eShaderRead);
+		imageMemoryBarrier.setSrcAccessMask(vk::AccessFlagBits::eHostWrite | vk::AccessFlagBits::eTransferWrite);
+		imageMemoryBarrier.setDstAccessMask(vk::AccessFlagBits::eShaderRead);
 	}
 
 	// Put barrier on top

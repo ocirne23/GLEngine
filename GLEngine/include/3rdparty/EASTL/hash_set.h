@@ -97,7 +97,7 @@ namespace eastl
 	///     i = hashSet.find_as("hello", hash<char*>(), equal_to_2<string, char*>());
 	///
 	template <typename Value, typename Hash = eastl::hash<Value>, typename Predicate = eastl::equal_to<Value>, 
-			  typename Allocator = EASTLAllocatorType, bool bCacheHashCode = false>
+			  typename Allocator = EASTLAllocatorType<Value>, bool bCacheHashCode = false>
 	class hash_set
 		: public hashtable<Value, Value, Allocator, eastl::use_self<Value>, Predicate,
 						   Hash, mod_range_hashing, default_ranged_hash, 
@@ -219,7 +219,7 @@ namespace eastl
 	/// for hash_set for details.
 	///
 	template <typename Value, typename Hash = eastl::hash<Value>, typename Predicate = eastl::equal_to<Value>, 
-			  typename Allocator = EASTLAllocatorType, bool bCacheHashCode = false>
+			  typename Allocator = EASTLAllocatorType<Value>, bool bCacheHashCode = false>
 	class hash_multiset
 		: public hashtable<Value, Value, Allocator, eastl::use_self<Value>, Predicate,
 						   Hash, mod_range_hashing, default_ranged_hash,

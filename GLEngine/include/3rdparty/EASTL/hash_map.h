@@ -97,7 +97,7 @@ namespace eastl
 	///     i = hashMap.find_as("hello", hash<char*>(), equal_to_2<string, char*>());
 	///
 	template <typename Key, typename T, typename Hash = eastl::hash<Key>, typename Predicate = eastl::equal_to<Key>, 
-			  typename Allocator = EASTLAllocatorType, bool bCacheHashCode = false>
+			  typename Allocator = EASTLAllocatorType<T>, bool bCacheHashCode = false>
 	class hash_map
 		: public hashtable<Key, eastl::pair<const Key, T>, Allocator, eastl::use_first<eastl::pair<const Key, T> >, Predicate,
 							Hash, mod_range_hashing, default_ranged_hash, prime_rehash_policy, bCacheHashCode, true, true>
@@ -270,7 +270,7 @@ namespace eastl
 	/// documentation for hash_set for details.
 	///
 	template <typename Key, typename T, typename Hash = eastl::hash<Key>, typename Predicate = eastl::equal_to<Key>,
-			  typename Allocator = EASTLAllocatorType, bool bCacheHashCode = false>
+			  typename Allocator = EASTLAllocatorType<T>, bool bCacheHashCode = false>
 	class hash_multimap
 		: public hashtable<Key, eastl::pair<const Key, T>, Allocator, eastl::use_first<eastl::pair<const Key, T> >, Predicate,
 						   Hash, mod_range_hashing, default_ranged_hash, prime_rehash_policy, bCacheHashCode, true, false>

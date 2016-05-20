@@ -17,7 +17,7 @@
 Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHeight, uint a_screenXPos, uint a_screenYPos, const EWindowMode& a_windowMode)
 {
 	uint flags = SDL_WINDOW_SHOWN;
-	/*
+	
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -32,6 +32,7 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
 	}
 	*/
+	
 	if (a_windowMode == EWindowMode::BORDERLESS)
 		flags |= SDL_WINDOW_BORDERLESS;
 	else if (a_windowMode == EWindowMode::FULLSCREEN)
@@ -41,6 +42,9 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 
 	m_windowWidth = a_screenWidth;
 	m_windowHeight = a_screenHeight;
+
+	m_viewportWidth = a_screenWidth;
+	m_viewportHeight = a_screenHeight;
 
 	SDL_SysWMinfo winInfo;
 	SDL_GetVersion(&winInfo.version);
@@ -62,10 +66,9 @@ Graphics::~Graphics()
 
 void Graphics::createGLContext()
 {	
-	glewExperimental = GL_TRUE;
-	
-	// Create a temporary context for GLEW
+	// Create a temporary context to initialize GLEW
 	SDL_GLContext context = SDL_GL_CreateContext(m_window);
+	glewExperimental = GL_TRUE;
 	const GLenum res = glewInit();
 	if (res != GLEW_OK)
 	{
@@ -75,6 +78,7 @@ void Graphics::createGLContext()
 	SDL_GL_DeleteContext(context);
 
 	m_context = new GLContext();
+
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError()) 
 	{
 		print("GLEW error: %s\n", glewGetErrorString(glErr));

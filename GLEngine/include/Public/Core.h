@@ -6,7 +6,7 @@
 #define NULL nullptr
 
 template <typename T>
-void SAFE_DELETE(owner<T*> owner)
+void SAFE_DELETE(owner<T*>& owner)
 {
 	if (owner)
 	{
@@ -16,7 +16,7 @@ void SAFE_DELETE(owner<T*> owner)
 }
 
 template <typename T>
-void SAFE_DELETE_ARRAY(owner<T*> owner)
+void SAFE_DELETE_ARRAY(owner<T*>& owner)
 {
 	if (owner)
 	{

@@ -308,7 +308,7 @@ namespace eastl
 	///     and result in exceptions during assignments that theoretically can't
 	///     occur with std containers.
 	///
-	template <typename T, typename Allocator = EASTLAllocatorType>
+	template <typename T, typename Allocator = EASTLAllocatorType<T>>
 	class basic_string
 	{
 	public:

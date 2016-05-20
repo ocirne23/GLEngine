@@ -271,7 +271,7 @@ namespace eastl
 	///     MemoryPool myPool(sizeof(WidgetList::node_type), 100); // Make a pool of 100 Widget nodes.
 	///     WidgetList myList(&myPool);                            // Create a list that uses the pool.
 	///
-	template <typename T, typename Allocator = EASTLAllocatorType>
+	template <typename T, typename Allocator = EASTLAllocatorType<T>>
 	class list : public ListBase<T, Allocator>
 	{
 		typedef ListBase<T, Allocator>                  base_type;

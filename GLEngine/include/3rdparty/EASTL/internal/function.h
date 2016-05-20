@@ -717,7 +717,7 @@ public:
 
 	template<typename T>
 	function(T functor,
-			typename eastl::enable_if<detail::is_valid_function_argument<T, Result (Arguments...)>::value, detail::empty_struct>::type = detail::empty_struct()) FUNC_TEMPLATE_NOEXCEPT(T, EASTLAllocatorType) 
+			typename eastl::enable_if<detail::is_valid_function_argument<T, Result (Arguments...)>::value, detail::empty_struct>::type = detail::empty_struct()) FUNC_TEMPLATE_NOEXCEPT(T, EASTLAllocatorType<T>) 
 	{
 		if (detail::is_null(functor))
 		{
