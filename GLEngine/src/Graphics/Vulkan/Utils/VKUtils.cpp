@@ -17,6 +17,14 @@ vk::ShaderModule VKUtils::loadShaderModule(const char* a_fileName, vk::Device a_
 	return a_device.createShaderModule(moduleCreateInfo, NULL);
 }
 
+/*
+* Vulkan examples debug wrapper
+*
+* Copyright (C) 2016 by Sascha Willems - www.saschawillems.de
+*
+* This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+*/
+
 uint VKUtils::getMemoryType(vk::PhysicalDeviceMemoryProperties a_physDevMemProps, uint a_typeBits, vk::MemoryPropertyFlagBits a_properties)
 {
 	for (uint i = 0; i < 32; ++i)
