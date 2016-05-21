@@ -81,7 +81,7 @@ void PerspectiveCamera::updateMatrices()
 	const glm::vec3 side = glm::cross(m_direction, UP);
 	m_up = glm::cross(side, m_direction);
 	if (m_projection == EProjection::PERSPECTIVE)
-		m_projectionMatrix = glm::perspective(m_vFieldOfView, m_viewportWidth / m_viewportHeight, m_near, m_far);
+		m_projectionMatrix = glm::perspective(glm::radians(m_vFieldOfView), m_viewportWidth / m_viewportHeight, m_near, m_far);
 	else if (m_projection == EProjection::ORTHOGRAPHIC)
 		m_projectionMatrix = glm::ortho(m_viewportWidth / 2, -m_viewportWidth / 2, -m_viewportHeight / 2, m_viewportHeight / 2, m_near, m_far);
 	m_viewMatrix = glm::lookAt(m_position, m_position + m_direction, m_up);

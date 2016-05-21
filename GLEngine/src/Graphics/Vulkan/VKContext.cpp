@@ -4,6 +4,15 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/Vulkan/Utils/VKDebug.h"
 #include "Graphics/Vulkan/Utils/VKUtils.h"
+#include "Graphics/Vulkan/Wrappers/VKBuffer.h"
+#include "Graphics/Vulkan/Wrappers/VKPipelineDescription.h"
+
+
+#include "Utils/DeltaTimeMeasurer.h"
+#include "Utils/FPSMeasurer.h"
+
+#include "Database/AssetDatabase.h"
+#include "Database/Assets/DBScene.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -47,15 +56,15 @@ vk::PipelineCache VKContext::pipelineCache = NULL;
 
 vk::RenderPass VKContext::renderPass = NULL;
 eastl::vector<vk::Framebuffer> VKContext::framebuffers;
+uint VKContext::currentBuffer = 0;
 
-vk::DescriptorSetLayout VKContext::descriptorSetLayout;
 vk::PipelineLayout VKContext::pipelineLayout;
 
 vk::Pipeline VKContext::pipeline = NULL;
 vk::DescriptorPool VKContext::descriptorPool = NULL;
-vk::DescriptorSet VKContext::descriptorSet;
+vk::DescriptorSet VKContext::descriptorSet = NULL;
 
-void VKContext::test()
+void VKContext::initialize()
 {
 	uint windowWidth = GLEngine::graphics->getWindowWidth();
 	uint windowHeight = GLEngine::graphics->getWindowHeight();
@@ -77,9 +86,13 @@ void VKContext::test()
 	vk::InstanceCreateInfo instanceCreateInfo = vk::InstanceCreateInfo()
 		.setPApplicationInfo(&appInfo)
 		.setEnabledExtensionCount(uint(instanceExtensions.size()))
-		.setPpEnabledExtensionNames(instanceExtensions.data())
-		.setEnabledLayerCount(VKDebug::VALIDATION_LAYER_COUNT)
-		.setPpEnabledLayerNames(VKDebug::VALIDATION_LAYER_NAMES);
+		.setPpEnabledExtensionNames(instanceExtensions.data());
+	if (VKDebug::VALIDATION_ENABLED)
+	{
+		instanceCreateInfo.setEnabledLayerCount(VKDebug::VALIDATION_LAYER_COUNT);
+		instanceCreateInfo.setPpEnabledLayerNames(VKDebug::VALIDATION_LAYER_NAMES);
+	}
+
 	instance = vk::createInstance(instanceCreateInfo);
 
 	/* Get physdevice */
@@ -203,7 +216,7 @@ void VKContext::test()
 	{
 		swapchainExtent = surfaceCapabilities.currentExtent;
 		// TODO: handle resolution change
-		assert(windowWidth == swapchainExtent.width && windowHeight == swapchainExtent.height); 
+		assert(windowWidth == swapchainExtent.width && windowHeight == swapchainExtent.height);
 	}
 
 	vk::PresentModeKHR swapchainPresentMode = vk::PresentModeKHR::eFifo;
@@ -316,23 +329,23 @@ void VKContext::test()
 	/* Setup renderpass */
 	vk::AttachmentDescription attachments[2] = {
 		vk::AttachmentDescription()
-		.setFormat(colorFormat)
-		.setSamples(vk::SampleCountFlagBits::e1)
-		.setLoadOp(vk::AttachmentLoadOp::eClear)
-		.setStoreOp(vk::AttachmentStoreOp::eStore)
-		.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-		.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-		.setInitialLayout(vk::ImageLayout::eColorAttachmentOptimal)
-		.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal),
+			.setFormat(colorFormat)
+			.setSamples(vk::SampleCountFlagBits::e1)
+			.setLoadOp(vk::AttachmentLoadOp::eClear)
+			.setStoreOp(vk::AttachmentStoreOp::eStore)
+			.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+			.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+			.setInitialLayout(vk::ImageLayout::eColorAttachmentOptimal)
+			.setFinalLayout(vk::ImageLayout::eColorAttachmentOptimal),
 		vk::AttachmentDescription()
-		.setFormat(depthFormat)
-		.setSamples(vk::SampleCountFlagBits::e1)
-		.setLoadOp(vk::AttachmentLoadOp::eClear)
-		.setStoreOp(vk::AttachmentStoreOp::eStore)
-		.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-		.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-		.setInitialLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
-		.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
+			.setFormat(depthFormat)
+			.setSamples(vk::SampleCountFlagBits::e1)
+			.setLoadOp(vk::AttachmentLoadOp::eClear)
+			.setStoreOp(vk::AttachmentStoreOp::eStore)
+			.setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+			.setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+			.setInitialLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
+			.setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal)
 	};
 	vk::AttachmentReference colorReference = vk::AttachmentReference()
 		.setAttachment(0)
@@ -384,91 +397,57 @@ void VKContext::test()
 
 	/* Flush setup commandbuffer*/
 	setupCommandBuffer.end();
-	
+
 	vk::SubmitInfo submitInfo = vk::SubmitInfo()
 		.setCommandBufferCount(1)
 		.setPCommandBuffers(&setupCommandBuffer);
 	queue.submit(submitInfo, NULL);
 	queue.waitIdle();
+}
+
+void VKContext::test()
+{
+	initialize();
+
+	AssetDatabase db;
+	db.openExisting("assets/OBJ-DB.da");
+	DBScene* scene = dcast<DBScene*>(db.loadAsset("palace.obj", EAssetType::SCENE));
+	scene->mergeMeshes();
+	DBMesh& mesh = scene->getMeshes()[0];
 
 	/* Create vertex & indice buffers */
-	struct Vertex {
-		float pos[3];
-		float col[3];
-	};
-	eastl::vector<Vertex> vertexData = {
-		{ { 1.0f,  1.0f, 0.0f },{ 1.0f, 0.0f, 0.0f } },
-		{ { -1.0f,  1.0f, 0.0f },{ 0.0f, 1.0f, 0.0f } },
-		{ { 0.0f, -1.0f, 0.0f },{ 0.0f, 0.0f, 1.0f } }
-	};
-	eastl::vector<uint> indexData = { 0, 1, 2 };
-	uint vertexBufferSize = uint(vertexData.size()) * sizeof(Vertex);
-	uint indexBufferSize = uint(indexData.size()) * sizeof(uint);
+	eastl::vector<DBMesh::Vertex> vertexData = mesh.getVertices();
+	eastl::vector<uint> indexData = mesh.getIndices();
+	uint64 vertexBufferSize = vertexData.size_bytes();
+	uint64 indexBufferSize = indexData.size_bytes();
 
-	// Vertex staging buffer
-	vk::BufferCreateInfo vertexStagingBufferCreateInfo = vk::BufferCreateInfo()
-		.setSize(vertexBufferSize)
-		.setUsage(vk::BufferUsageFlagBits::eTransferSrc); // Buffer is used as the copy source
-	vk::Buffer vertexStagingBuffer = device.createBuffer(vertexStagingBufferCreateInfo, NULL);
-
-	vk::MemoryRequirements vertexStagingBufferMemReqs = device.getBufferMemoryRequirements(vertexStagingBuffer);
-	vk::MemoryAllocateInfo vertexStagingBufferMemAllocInfo = vk::MemoryAllocateInfo()
-		.setAllocationSize(vertexStagingBufferMemReqs.size)
-		.setMemoryTypeIndex(VKUtils::getMemoryType(physDeviceMemoryProperties, vertexStagingBufferMemReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible));
-	vk::DeviceMemory vertexStagingBufferMemory = device.allocateMemory(vertexStagingBufferMemAllocInfo, NULL);
-
-	// Map and copy
-	void* vertexStagingBufferMapping = device.mapMemory(vertexStagingBufferMemory, 0, vertexStagingBufferMemAllocInfo.allocationSize, vk::MemoryMapFlags());
+	// Vertex buffer
+	VKBuffer vertexStagingBuffer;
+	vertexStagingBuffer.initialize(vertexBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible);
+	
+	void* vertexStagingBufferMapping = vertexStagingBuffer.mapMemory();
 	memcpy(vertexStagingBufferMapping, vertexData.data(), vertexBufferSize);
-	device.unmapMemory(vertexStagingBufferMemory);
-	device.bindBufferMemory(vertexStagingBuffer, vertexStagingBufferMemory, 0);
+	vertexStagingBuffer.unmapMemory();
 
-	// Vertex destination buffer
-	vk::BufferCreateInfo vertexDestinationBufferCreateInfo = vk::BufferCreateInfo()
-		.setSize(vertexBufferSize)
-		.setUsage(vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst);
-	vk::Buffer vertexDestinationBuffer = device.createBuffer(vertexDestinationBufferCreateInfo, NULL);
+	VKBuffer vertexDestinationBuffer;
+	vertexDestinationBuffer.initialize(vertexBufferSize, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal);
 
-	vk::MemoryRequirements vertexDestinationBufferMemReqs = device.getBufferMemoryRequirements(vertexDestinationBuffer);
-	vk::MemoryAllocateInfo vertexDestinationBufferMemAllocInfo = vk::MemoryAllocateInfo()
-		.setAllocationSize(vertexDestinationBufferMemReqs.size)
-		.setMemoryTypeIndex(VKUtils::getMemoryType(physDeviceMemoryProperties, vertexDestinationBufferMemReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal));
-	vk::DeviceMemory vertexDestinationBufferMemory = device.allocateMemory(vertexDestinationBufferMemAllocInfo, NULL);
-	device.bindBufferMemory(vertexDestinationBuffer, vertexDestinationBufferMemory, 0);
+	// Index buffer
+	VKBuffer indexStagingBuffer;
+	indexStagingBuffer.initialize(indexBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible);
 
-	// Index staging buffer
-	vk::BufferCreateInfo indexStagingBufferCreateInfo = vk::BufferCreateInfo()
-		.setSize(indexBufferSize)
-		.setUsage(vk::BufferUsageFlagBits::eTransferSrc); // Buffer is used as the copy source
-	vk::Buffer indexStagingBuffer = device.createBuffer(indexStagingBufferCreateInfo, NULL);
-
-	vk::MemoryRequirements indexStagingBufferMemReqs = device.getBufferMemoryRequirements(indexStagingBuffer);
-	vk::MemoryAllocateInfo indexStagingBufferMemAllocInfo = vk::MemoryAllocateInfo()
-		.setAllocationSize(indexStagingBufferMemReqs.size)
-		.setMemoryTypeIndex(VKUtils::getMemoryType(physDeviceMemoryProperties, indexStagingBufferMemReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible));
-	vk::DeviceMemory indexStagingBufferMemory = device.allocateMemory(indexStagingBufferMemAllocInfo, NULL);
-
-	// Map and copy
-	void* indexStagingBufferMapping = device.mapMemory(indexStagingBufferMemory, 0, indexStagingBufferMemAllocInfo.allocationSize, vk::MemoryMapFlags());
+	void* indexStagingBufferMapping = indexStagingBuffer.mapMemory();
 	memcpy(indexStagingBufferMapping, indexData.data(), indexBufferSize);
-	device.unmapMemory(indexStagingBufferMemory);
-	device.bindBufferMemory(indexStagingBuffer, indexStagingBufferMemory, 0);
+	indexStagingBuffer.unmapMemory();
 
-	// Index destination buffer
-	vk::BufferCreateInfo indexDestinationBufferCreateInfo = vk::BufferCreateInfo()
-		.setSize(indexBufferSize)
-		.setUsage(vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst);
-	vk::Buffer indexDestinationBuffer = device.createBuffer(indexDestinationBufferCreateInfo, NULL);
-
-	vk::MemoryRequirements indexDestinationBufferMemReqs = device.getBufferMemoryRequirements(indexDestinationBuffer);
-	vk::MemoryAllocateInfo indexDestinationBufferMemAllocInfo = vk::MemoryAllocateInfo()
-		.setAllocationSize(indexDestinationBufferMemReqs.size)
-		.setMemoryTypeIndex(VKUtils::getMemoryType(physDeviceMemoryProperties, indexDestinationBufferMemReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal));
-	vk::DeviceMemory indexDestinationBufferMemory = device.allocateMemory(indexDestinationBufferMemAllocInfo, NULL);
-	device.bindBufferMemory(indexDestinationBuffer, indexDestinationBufferMemory, 0);
+	VKBuffer indexDestinationBuffer;
+	indexDestinationBuffer.initialize(indexBufferSize, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal);
 
 	// Copy staging buffers to destination buffers
-	
+	vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
+		.setCommandBufferCount(1)
+		.setLevel(vk::CommandBufferLevel::ePrimary)
+		.setCommandPool(commandPool);
 	vk::CommandBuffer copyCommandBuffer = device.allocateCommandBuffers(commandBufferAllocateInfo)[0];
 	copyCommandBuffer.begin(vk::CommandBufferBeginInfo());
 
@@ -486,209 +465,86 @@ void VKContext::test()
 	queue.waitIdle();
 
 	device.freeCommandBuffers(commandPool, copyCommandBuffer);
-	device.destroyBuffer(vertexStagingBuffer);
-	device.freeMemory(vertexStagingBufferMemory);
-	device.destroyBuffer(indexStagingBuffer);
-	device.freeMemory(indexStagingBufferMemory);
-
-	/////
-	vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo;
-	eastl::vector<vk::VertexInputBindingDescription> bindingDescriptions;
-	eastl::vector<vk::VertexInputAttributeDescription> attributeDescriptions;
-
-	bindingDescriptions = {
-		vk::VertexInputBindingDescription()
-		.setBinding(VERTEX_BUFFER_BIND_ID)
-		.setStride(sizeof(Vertex))
-		.setInputRate(vk::VertexInputRate::eVertex)
-	};
-	attributeDescriptions = {
-		vk::VertexInputAttributeDescription()
-		.setBinding(VERTEX_BUFFER_BIND_ID)
-		.setLocation(0)
-		.setFormat(vk::Format::eR32G32B32Sfloat)
-		.setOffset(0),
-		vk::VertexInputAttributeDescription()
-		.setBinding(VERTEX_BUFFER_BIND_ID)
-		.setLocation(1)
-		.setFormat(vk::Format::eR32G32B32Sfloat)
-		.setOffset(sizeof(float) * 3)
-	};
-	vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
-		.setVertexBindingDescriptionCount(uint(bindingDescriptions.size()))
-		.setPVertexBindingDescriptions(bindingDescriptions.data())
-		.setVertexAttributeDescriptionCount(uint(attributeDescriptions.size()))
-		.setPVertexAttributeDescriptions(attributeDescriptions.data());
-
-
+	vertexStagingBuffer.cleanup();
+	indexStagingBuffer.cleanup();
 
 	/* Prepare uniform buffer */
 	struct UniformData {
-		glm::mat4 projectionMatrix;
-		glm::mat4 modelMatrix;
-		glm::mat4 viewMatrix;
+		glm::mat4 mvpMatrix;
+	} uniformData;
+
+	uint windowWidth = GLEngine::graphics->getWindowWidth();
+	uint windowHeight = GLEngine::graphics->getWindowHeight();
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 256.0f);
+	glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 8.0f, -16.0f), glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(0, -1, 0));
+	glm::mat4 modelMatrix = glm::mat4();
+	uniformData.mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+
+	VKBuffer uniformBuffer;
+	{
+		uniformBuffer.initialize(sizeof(uniformData), vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible);
+		void* uniformBufferMapping = uniformBuffer.mapMemory();
+		memcpy(uniformBufferMapping, &uniformData, sizeof(uniformData));
+		uniformBuffer.unmapMemory();
+	}
+
+	/////
+	VKPipelineDescription pipelineDescription;
+
+	pipelineDescription.bindingDescriptions = {
+		vk::VertexInputBindingDescription()
+			.setBinding(VERTEX_BUFFER_BIND_ID)
+			.setStride(sizeof(vertexData[0]))
+			.setInputRate(vk::VertexInputRate::eVertex)
+	};
+	pipelineDescription.attributeDescriptions = {
+		vk::VertexInputAttributeDescription() // Position
+			.setBinding(VERTEX_BUFFER_BIND_ID)
+			.setLocation(0)
+			.setFormat(vk::Format::eR32G32B32Sfloat)
+			.setOffset(0),
+		vk::VertexInputAttributeDescription() // Texcoord
+			.setBinding(VERTEX_BUFFER_BIND_ID)
+			.setLocation(1)
+			.setFormat(vk::Format::eR32G32Sfloat)
+			.setOffset(sizeof(glm::vec3)),
+		vk::VertexInputAttributeDescription() // Normal
+			.setBinding(VERTEX_BUFFER_BIND_ID)
+			.setLocation(2)
+			.setFormat(vk::Format::eR32G32B32Sfloat)
+			.setOffset(sizeof(glm::vec3) + sizeof(glm::vec2)),
+		vk::VertexInputAttributeDescription() // MaterialID
+			.setBinding(VERTEX_BUFFER_BIND_ID)
+			.setLocation(3)
+			.setFormat(vk::Format::eR32Uint)
+			.setOffset(sizeof(glm::vec3) + sizeof(glm::vec2) + sizeof(glm::vec3))
+	};
+	pipelineDescription.descriptors = 
+	{	// buffer, type, stage, size, offset, binding
+		{ &uniformBuffer, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eVertex, sizeof(uniformData), 0, 0 }, // u_mvpMatrix UBO
 	};
 
-	vk::BufferCreateInfo uniformBufferCreateInfo = vk::BufferCreateInfo()
-		.setSize(sizeof(UniformData))
-		.setUsage(vk::BufferUsageFlagBits::eUniformBuffer);
-	vk::Buffer uniformBuffer = device.createBuffer(uniformBufferCreateInfo);
-	vk::MemoryRequirements uniformBufferMemoryRequirements = device.getBufferMemoryRequirements(uniformBuffer);
-	vk::MemoryAllocateInfo uniformBufferAllocateInfo = vk::MemoryAllocateInfo()
-		.setAllocationSize(uniformBufferMemoryRequirements.size)
-		.setMemoryTypeIndex(VKUtils::getMemoryType(physDeviceMemoryProperties, uniformBufferMemoryRequirements.memoryTypeBits, vk::MemoryPropertyFlagBits::eHostVisible));
-	vk::DeviceMemory uniformBufferMemory = device.allocateMemory(uniformBufferAllocateInfo);
-	device.bindBufferMemory(uniformBuffer, uniformBufferMemory, 0);
+	setupPipeline(pipelineDescription);
+	buildCommandBuffers(vertexDestinationBuffer, indexDestinationBuffer, uint(indexData.size()), vk::IndexType::eUint32);
 
-	vk::DescriptorBufferInfo uniformBufferDescriptor = vk::DescriptorBufferInfo()
-		.setBuffer(uniformBuffer)
-		.setOffset(0)
-		.setRange(sizeof(UniformData));
+	FPSMeasurer fpsMeasurer;
+	DeltaTimeMeasurer timer;
+	fpsMeasurer.setLogFunction(5.0f, [&]() {
+		print("FPS: %i, MS:%f\n", fpsMeasurer.getAvgFps(), fpsMeasurer.getAvgMsPerFrame());
+	});
 
-	/* Update uniform buffer */
-	float zoom = -2.5f;
-	glm::vec3 rotation = glm::vec3();
+	/* Render loop */
+	while (!GLEngine::isShutdown())
+	{
+		render();
+		fpsMeasurer.tickFrame(timer.calcDeltaSec(GLEngine::getTimeMs()));
+	}
+}
 
-	UniformData uniformData;
-	uniformData.projectionMatrix = glm::perspective(glm::radians(60.0f), float(windowWidth) / float(windowHeight), 0.1f, 256.0f);
-	uniformData.viewMatrix = glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, zoom));
-	uniformData.modelMatrix = glm::mat4();
-	uniformData.modelMatrix = glm::rotate(uniformData.modelMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-	uniformData.modelMatrix = glm::rotate(uniformData.modelMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-	uniformData.modelMatrix = glm::rotate(uniformData.modelMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-	void* uniformBufferMapping = device.mapMemory(uniformBufferMemory, 0, sizeof(UniformData), vk::MemoryMapFlags());
-	memcpy(uniformBufferMapping, &uniformData, sizeof(UniformData));
-	device.unmapMemory(uniformBufferMemory);
-
-	/* Setup descriptor set layout */
-	vk::DescriptorSetLayoutBinding layoutBinding = vk::DescriptorSetLayoutBinding()
-		.setDescriptorType(vk::DescriptorType::eUniformBuffer)
-		.setDescriptorCount(1)
-		.setStageFlags(vk::ShaderStageFlagBits::eVertex);
-	vk::DescriptorSetLayoutCreateInfo descriptorLayout = vk::DescriptorSetLayoutCreateInfo()
-		.setBindingCount(1)
-		.setPBindings(&layoutBinding);
-	descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayout, NULL);
-
-	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
-		.setSetLayoutCount(1)
-		.setPSetLayouts(&descriptorSetLayout);
-	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo, NULL);
-
-	/* Prepare pipelines */
-	vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo()
-		.setSType(vk::StructureType::ePipelineInputAssemblyStateCreateInfo)
-		.setTopology(vk::PrimitiveTopology::eTriangleList);
-
-	vk::PipelineRasterizationStateCreateInfo rasterizationState = vk::PipelineRasterizationStateCreateInfo()
-		.setPolygonMode(vk::PolygonMode::eFill)
-		.setCullMode(vk::CullModeFlagBits::eNone)
-		.setFrontFace(vk::FrontFace::eCounterClockwise)
-		.setDepthClampEnable(VK_FALSE)
-		.setRasterizerDiscardEnable(VK_FALSE)
-		.setDepthBiasEnable(VK_FALSE)
-		.setLineWidth(1.0f);
-
-	vk::PipelineColorBlendAttachmentState blendAttachmentState[1] = {};
-	blendAttachmentState[0] = vk::PipelineColorBlendAttachmentState()
-		.setColorWriteMask(
-			vk::ColorComponentFlagBits::eR |
-			vk::ColorComponentFlagBits::eG |
-			vk::ColorComponentFlagBits::eB |
-			vk::ColorComponentFlagBits::eA)
-		.setBlendEnable(VK_FALSE);
-
-	vk::PipelineColorBlendStateCreateInfo colorBlendState = vk::PipelineColorBlendStateCreateInfo()
-		.setAttachmentCount(1)
-		.setPAttachments(blendAttachmentState);
-
-	vk::PipelineViewportStateCreateInfo viewportState = vk::PipelineViewportStateCreateInfo()
-		.setViewportCount(1)
-		.setScissorCount(1);
-
-	vk::DynamicState dynamicStates[] = {
-		vk::DynamicState::eViewport,
-		vk::DynamicState::eScissor
-	};
-	vk::PipelineDynamicStateCreateInfo dynamicState = vk::PipelineDynamicStateCreateInfo()
-		.setDynamicStateCount(ARRAY_SIZE(dynamicStates))
-		.setPDynamicStates(dynamicStates);
-
-	vk::PipelineDepthStencilStateCreateInfo depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
-		.setDepthTestEnable(VK_TRUE)
-		.setDepthWriteEnable(VK_TRUE)
-		.setDepthCompareOp(vk::CompareOp::eLessOrEqual)
-		.setDepthBoundsTestEnable(VK_FALSE)
-		.setBack(vk::StencilOpState()
-			.setFailOp(vk::StencilOp::eKeep)
-			.setPassOp(vk::StencilOp::eKeep)
-			.setCompareOp(vk::CompareOp::eAlways))
-		.setStencilTestEnable(VK_FALSE)
-		.setFront(vk::StencilOpState()
-			.setFailOp(vk::StencilOp::eKeep)
-			.setPassOp(vk::StencilOp::eKeep)
-			.setCompareOp(vk::CompareOp::eAlways));
-
-	vk::PipelineMultisampleStateCreateInfo multisampleState = vk::PipelineMultisampleStateCreateInfo()
-		.setRasterizationSamples(vk::SampleCountFlagBits::e1);
-
-	vk::PipelineShaderStageCreateInfo shaderStages[2] = { {},{} };
-	shaderStages[0] = vk::PipelineShaderStageCreateInfo()
-		.setStage(vk::ShaderStageFlagBits::eVertex)
-		.setModule(VKUtils::loadShaderModule("Shaders/Vulkan/triangle.vert.spv", device))
-		.setPName("main");
-	shaderStages[1] = vk::PipelineShaderStageCreateInfo()
-		.setStage(vk::ShaderStageFlagBits::eFragment)
-		.setModule(VKUtils::loadShaderModule("Shaders/Vulkan/triangle.frag.spv", device))
-		.setPName("main");
-
-	vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
-		.setLayout(pipelineLayout)
-		.setPVertexInputState(&vertexInputStateCreateInfo)
-		.setPInputAssemblyState(&inputAssemblyState)
-		.setPRasterizationState(&rasterizationState)
-		.setPColorBlendState(&colorBlendState)
-		.setPMultisampleState(&multisampleState)
-		.setPViewportState(&viewportState)
-		.setPDepthStencilState(&depthStencilState)
-		.setStageCount(ARRAY_SIZE(shaderStages))
-		.setPStages(shaderStages)
-		.setRenderPass(renderPass)
-		.setPDynamicState(&dynamicState);
-
-	pipeline = device.createGraphicsPipelines(pipelineCache, { pipelineCreateInfo }, NULL)[0];
-
-	/* Setup descriptor pool */
-	vk::DescriptorPoolSize typeCounts[] = {
-		vk::DescriptorPoolSize()
-			.setType(vk::DescriptorType::eUniformBuffer)
-			.setDescriptorCount(1),
-		vk::DescriptorPoolSize()
-			.setType(vk::DescriptorType::eSampler)
-			.setDescriptorCount(1)
-	};
-
-	vk::DescriptorPoolCreateInfo descriptorPoolInfo = vk::DescriptorPoolCreateInfo()
-		.setPoolSizeCount(ARRAY_SIZE(typeCounts))
-		.setPPoolSizes(typeCounts)
-		.setMaxSets(1);
-	descriptorPool = device.createDescriptorPool(descriptorPoolInfo, NULL);
-
-	/* Setup descriptor set */
-	vk::DescriptorSetAllocateInfo allocInfo = vk::DescriptorSetAllocateInfo()
-		.setDescriptorPool(descriptorPool)
-		.setDescriptorSetCount(1)
-		.setPSetLayouts(&descriptorSetLayout);
-	descriptorSet = device.allocateDescriptorSets(allocInfo)[0];
-
-	vk::WriteDescriptorSet writeDescriptorSet = vk::WriteDescriptorSet()
-		.setDstSet(descriptorSet)
-		.setDescriptorCount(1)
-		.setDescriptorType(vk::DescriptorType::eUniformBuffer)
-		.setPBufferInfo(&uniformBufferDescriptor)
-		.setDstBinding(0);
-	device.updateDescriptorSets({ writeDescriptorSet }, {});
+void VKContext::buildCommandBuffers(VKBuffer& vertexBuffer, VKBuffer& indexBuffer, uint numIndices, vk::IndexType indexType)
+{
+	uint windowWidth = GLEngine::graphics->getWindowWidth();
+	uint windowHeight = GLEngine::graphics->getWindowHeight();
 
 	/* Build command buffers */
 	vk::ClearValue clearValues[2] = {
@@ -720,11 +576,11 @@ void VKContext::test()
 		commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 		commandBuffer.setViewport(0, viewport);
 		commandBuffer.setScissor(0, scissor);
-		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, descriptorSet, {});
+		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, { descriptorSet }, {});
 		commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
-		commandBuffer.bindVertexBuffers(VERTEX_BUFFER_BIND_ID, vertexDestinationBuffer, vk::DeviceSize(0));
-		commandBuffer.bindIndexBuffer(indexDestinationBuffer, 0, vk::IndexType::eUint32);
-		commandBuffer.drawIndexed(uint(indexData.size()), 1, 0, 0, 1);
+		commandBuffer.bindVertexBuffers(VERTEX_BUFFER_BIND_ID, { vertexBuffer }, vk::DeviceSize(0));
+		commandBuffer.bindIndexBuffer(indexBuffer, vk::DeviceSize(0), indexType);
+		commandBuffer.drawIndexed(numIndices, 1, 0, 0, 1);
 		commandBuffer.endRenderPass();
 
 		vk::ImageMemoryBarrier prePresentBarrier = vk::ImageMemoryBarrier()
@@ -751,66 +607,215 @@ void VKContext::test()
 			eastl::vector<vk::ImageMemoryBarrier>{prePresentBarrier});
 		commandBuffer.end();
 	}
+}
 
-	/* Render loop */
-	uint currentBuffer = 0;
-	while (!GLEngine::isShutdown())
+void VKContext::setupPipeline(VKPipelineDescription& pipelineDescription)
+{
+	/* Setup descriptor set layout */
+	eastl::vector<vk::DescriptorBufferInfo> descriptorBufferInfos;
+	eastl::vector<vk::DescriptorSetLayoutBinding> descriptorSetLayoutBindings;
+	for (auto& descriptor : pipelineDescription.descriptors)
 	{
-		device.waitIdle();
-
-		device.acquireNextImageKHR(swapchain, UINT64_MAX, presentCompleteSemaphore, NULL, currentBuffer);
-
-		vk::ImageMemoryBarrier postPresentBarrier = vk::ImageMemoryBarrier()
-			.setSrcAccessMask(vk::AccessFlags())
-			.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
-			.setOldLayout(vk::ImageLayout::ePresentSrcKHR)
-			.setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
-			.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-			.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-			.setSubresourceRange(vk::ImageSubresourceRange()
-				.setAspectMask(vk::ImageAspectFlagBits::eColor)
-				.setBaseMipLevel(0)
-				.setLevelCount(1)
-				.setBaseArrayLayer(0)
-				.setLayerCount(1))
-			.setImage(swapchainImages[currentBuffer]);
-
-		postPresentCommandBuffer.begin(vk::CommandBufferBeginInfo());
-		postPresentCommandBuffer.pipelineBarrier(
-			vk::PipelineStageFlagBits::eAllCommands,
-			vk::PipelineStageFlagBits::eTopOfPipe,
-			vk::DependencyFlags(),
-			eastl::vector<vk::MemoryBarrier>{},
-			eastl::vector<vk::BufferMemoryBarrier>{},
-			eastl::vector<vk::ImageMemoryBarrier>{postPresentBarrier});
-		postPresentCommandBuffer.end();
-
-		vk::SubmitInfo postPresentCommandBufferSubmitInfo = vk::SubmitInfo()
-			.setCommandBufferCount(1)
-			.setPCommandBuffers(&postPresentCommandBuffer);
-		queue.submit(postPresentCommandBufferSubmitInfo, VK_NULL_HANDLE);
-		queue.waitIdle();
-
-		vk::PipelineStageFlags pipelineStages = vk::PipelineStageFlagBits::eBottomOfPipe;
-		vk::SubmitInfo drawCommandBufferSubmitInfo = vk::SubmitInfo()
-			.setPWaitDstStageMask(&pipelineStages)
-			.setWaitSemaphoreCount(1)
-			.setPWaitSemaphores(&presentCompleteSemaphore)
-			.setCommandBufferCount(1)
-			.setPCommandBuffers(&drawCommandBuffers[currentBuffer])
-			.setSignalSemaphoreCount(1)
-			.setPSignalSemaphores(&renderCompleteSemaphore);
-		queue.submit(drawCommandBufferSubmitInfo, VK_NULL_HANDLE);
-		queue.waitIdle();
-
-		vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
-			.setSwapchainCount(1)
-			.setPSwapchains(&swapchain)
-			.setPImageIndices(&currentBuffer)
-			.setWaitSemaphoreCount(1)
-			.setPWaitSemaphores(&renderCompleteSemaphore);
-		queue.presentKHR(presentInfo);
-
-		device.waitIdle();
+		descriptorBufferInfos.push_back(vk::DescriptorBufferInfo()
+			.setBuffer(*descriptor.buffer)
+			.setOffset(descriptor.offset)
+			.setRange(descriptor.size));
+		vk::DescriptorSetLayoutBinding layoutBinding = vk::DescriptorSetLayoutBinding()
+			.setDescriptorType(descriptor.type)
+			.setDescriptorCount(1)
+			.setStageFlags(descriptor.stage)
+			.setBinding(descriptor.binding);
+		descriptorSetLayoutBindings.push_back(layoutBinding);
 	}
+	vk::DescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
+		.setBindingCount(uint(descriptorSetLayoutBindings.size()))
+		.setPBindings(descriptorSetLayoutBindings.data());
+	vk::DescriptorSetLayout descriptorSetLayout = device.createDescriptorSetLayout(descriptorLayoutCreateInfo, NULL);
+
+	vk::PipelineLayoutCreateInfo pPipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo()
+		.setSetLayoutCount(1)
+		.setPSetLayouts(&descriptorSetLayout);
+	pipelineLayout = device.createPipelineLayout(pPipelineLayoutCreateInfo, NULL);
+
+	/* Setup descriptor pool */
+	eastl::vector<vk::DescriptorPoolSize> typeCounts;
+	auto makeDescriptorPoolType = [&](vk::DescriptorType a_type)
+	{
+		uint numDescriptorsWithType = std::accumulate(pipelineDescription.descriptors.begin(), pipelineDescription.descriptors.end(), 0, [&](uint a_accum, VKPipelineDescription::Descriptor& a_item)
+		{
+			return a_accum + (a_type == a_item.type ? 1 : 0);
+		});
+		if (numDescriptorsWithType) typeCounts.push_back(vk::DescriptorPoolSize().setType(a_type).setDescriptorCount(numDescriptorsWithType));
+	};
+	for (uint i = uint(vk::DescriptorType::eSampler); i != uint(vk::DescriptorType::eInputAttachment); ++i)
+		makeDescriptorPoolType(vk::DescriptorType(i));
+
+	vk::DescriptorPoolCreateInfo descriptorPoolInfo = vk::DescriptorPoolCreateInfo()
+		.setPoolSizeCount(uint(typeCounts.size()))
+		.setPPoolSizes(typeCounts.data())
+		// Count the total number of descriptors
+		.setMaxSets(std::accumulate(typeCounts.begin(), typeCounts.end(), 0, [](uint accum, vk::DescriptorPoolSize& item) { return accum + item.descriptorCount; }));
+	descriptorPool = device.createDescriptorPool(descriptorPoolInfo, NULL);
+
+	/* Setup descriptor set */
+	vk::DescriptorSetAllocateInfo allocInfo = vk::DescriptorSetAllocateInfo()
+		.setDescriptorPool(descriptorPool)
+		.setDescriptorSetCount(uint(1))
+		.setPSetLayouts(&descriptorSetLayout);
+	descriptorSet = device.allocateDescriptorSets(allocInfo)[0];
+
+	eastl::vector<vk::WriteDescriptorSet> writeDescriptorSets;
+	for (uint i = 0; i < uint(descriptorBufferInfos.size()); ++i)
+	{
+		writeDescriptorSets.push_back(vk::WriteDescriptorSet()
+			.setDescriptorCount(1)
+			.setDstSet(descriptorSet)
+			.setDescriptorType(descriptorSetLayoutBindings[i].descriptorType)
+			.setPBufferInfo(&descriptorBufferInfos[i])
+			.setDstBinding(descriptorSetLayoutBindings[i].binding));
+	}
+	device.updateDescriptorSets(writeDescriptorSets, {});
+
+	/* Prepare pipelines */
+	vk::PipelineInputAssemblyStateCreateInfo inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo()
+		.setTopology(pipelineDescription.topology);
+
+	vk::PipelineRasterizationStateCreateInfo rasterizationState = vk::PipelineRasterizationStateCreateInfo()
+		.setPolygonMode(pipelineDescription.polygonMode)
+		.setCullMode(pipelineDescription.cullFace)
+		.setFrontFace(vk::FrontFace::eClockwise)
+		.setDepthClampEnable(VK_FALSE)
+		.setRasterizerDiscardEnable(VK_FALSE)
+		.setDepthBiasEnable(VK_FALSE)
+		.setLineWidth(pipelineDescription.lineWidth);
+
+	vk::PipelineColorBlendAttachmentState blendAttachmentState[1] = {};
+	blendAttachmentState[0] = vk::PipelineColorBlendAttachmentState()
+		.setColorWriteMask(pipelineDescription.colorWriteMask)
+		.setBlendEnable(pipelineDescription.blendingEnabled);
+
+	vk::PipelineColorBlendStateCreateInfo colorBlendState = vk::PipelineColorBlendStateCreateInfo()
+		.setAttachmentCount(1)
+		.setPAttachments(blendAttachmentState);
+
+	vk::PipelineViewportStateCreateInfo viewportState = vk::PipelineViewportStateCreateInfo()
+		.setViewportCount(1)
+		.setScissorCount(1);
+
+	vk::DynamicState dynamicStates[] = {
+		vk::DynamicState::eViewport,
+		vk::DynamicState::eScissor
+	};
+	vk::PipelineDynamicStateCreateInfo dynamicState = vk::PipelineDynamicStateCreateInfo()
+		.setDynamicStateCount(ARRAY_SIZE(dynamicStates))
+		.setPDynamicStates(dynamicStates);
+
+	vk::PipelineDepthStencilStateCreateInfo depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
+		.setDepthTestEnable(pipelineDescription.depthTestEnabled)
+		.setDepthWriteEnable(pipelineDescription.depthWriteEnabled)
+		.setDepthCompareOp(pipelineDescription.depthCompareOp)
+		.setDepthBoundsTestEnable(pipelineDescription.depthBoundTestEnabled)
+		.setBack(vk::StencilOpState()
+			.setFailOp(vk::StencilOp::eKeep)
+			.setPassOp(vk::StencilOp::eKeep)
+			.setCompareOp(vk::CompareOp::eAlways))
+		.setStencilTestEnable(pipelineDescription.stencilTestEnabled)
+		.setFront(vk::StencilOpState()
+			.setFailOp(vk::StencilOp::eKeep)
+			.setPassOp(vk::StencilOp::eKeep)
+			.setCompareOp(vk::CompareOp::eAlways));
+
+	vk::PipelineMultisampleStateCreateInfo multisampleState = vk::PipelineMultisampleStateCreateInfo()
+		.setRasterizationSamples(pipelineDescription.multisamples);
+
+	vk::PipelineShaderStageCreateInfo shaderStages[2] = { {},{} };
+	shaderStages[0] = vk::PipelineShaderStageCreateInfo()
+		.setStage(vk::ShaderStageFlagBits::eVertex)
+		.setModule(VKUtils::loadShaderModule(pipelineDescription.vertexShaderPath.c_str(), device))
+		.setPName("main");
+	shaderStages[1] = vk::PipelineShaderStageCreateInfo()
+		.setStage(vk::ShaderStageFlagBits::eFragment)
+		.setModule(VKUtils::loadShaderModule(pipelineDescription.fragmentShaderPath.c_str(), device))
+		.setPName("main");
+
+	vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo()
+		.setVertexBindingDescriptionCount(uint(pipelineDescription.bindingDescriptions.size()))
+		.setPVertexBindingDescriptions(pipelineDescription.bindingDescriptions.data())
+		.setVertexAttributeDescriptionCount(uint(pipelineDescription.attributeDescriptions.size()))
+		.setPVertexAttributeDescriptions(pipelineDescription.attributeDescriptions.data());
+
+	vk::GraphicsPipelineCreateInfo pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
+		.setLayout(pipelineLayout)
+		.setPVertexInputState(&vertexInputStateCreateInfo)
+		.setPInputAssemblyState(&inputAssemblyState)
+		.setPRasterizationState(&rasterizationState)
+		.setPColorBlendState(&colorBlendState)
+		.setPMultisampleState(&multisampleState)
+		.setPViewportState(&viewportState)
+		.setPDepthStencilState(&depthStencilState)
+		.setStageCount(ARRAY_SIZE(shaderStages))
+		.setPStages(shaderStages)
+		.setRenderPass(renderPass)
+		.setPDynamicState(&dynamicState);
+	pipeline = device.createGraphicsPipelines(pipelineCache, { pipelineCreateInfo }, NULL)[0];
+}
+
+void VKContext::render()
+{
+	device.waitIdle();
+
+	device.acquireNextImageKHR(swapchain, UINT64_MAX, presentCompleteSemaphore, NULL, currentBuffer);
+
+	vk::ImageMemoryBarrier postPresentBarrier = vk::ImageMemoryBarrier()
+		.setSrcAccessMask(vk::AccessFlags())
+		.setDstAccessMask(vk::AccessFlagBits::eColorAttachmentWrite)
+		.setOldLayout(vk::ImageLayout::ePresentSrcKHR)
+		.setNewLayout(vk::ImageLayout::eColorAttachmentOptimal)
+		.setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+		.setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+		.setSubresourceRange(vk::ImageSubresourceRange()
+			.setAspectMask(vk::ImageAspectFlagBits::eColor)
+			.setBaseMipLevel(0)
+			.setLevelCount(1)
+			.setBaseArrayLayer(0)
+			.setLayerCount(1))
+		.setImage(swapchainImages[currentBuffer]);
+
+	postPresentCommandBuffer.begin(vk::CommandBufferBeginInfo());
+	postPresentCommandBuffer.pipelineBarrier(
+		vk::PipelineStageFlagBits::eAllCommands,
+		vk::PipelineStageFlagBits::eTopOfPipe,
+		vk::DependencyFlags(),
+		eastl::vector<vk::MemoryBarrier>{},
+		eastl::vector<vk::BufferMemoryBarrier>{},
+		eastl::vector<vk::ImageMemoryBarrier>{postPresentBarrier});
+	postPresentCommandBuffer.end();
+
+	vk::SubmitInfo postPresentCommandBufferSubmitInfo = vk::SubmitInfo()
+		.setCommandBufferCount(1)
+		.setPCommandBuffers(&postPresentCommandBuffer);
+	queue.submit(postPresentCommandBufferSubmitInfo, VK_NULL_HANDLE);
+	queue.waitIdle();
+
+	vk::PipelineStageFlags pipelineStages = vk::PipelineStageFlagBits::eBottomOfPipe;
+	vk::SubmitInfo drawCommandBufferSubmitInfo = vk::SubmitInfo()
+		.setPWaitDstStageMask(&pipelineStages)
+		.setWaitSemaphoreCount(1)
+		.setPWaitSemaphores(&presentCompleteSemaphore)
+		.setCommandBufferCount(1)
+		.setPCommandBuffers(&drawCommandBuffers[currentBuffer])
+		.setSignalSemaphoreCount(1)
+		.setPSignalSemaphores(&renderCompleteSemaphore);
+	queue.submit(drawCommandBufferSubmitInfo, VK_NULL_HANDLE);
+	queue.waitIdle();
+
+	vk::PresentInfoKHR presentInfo = vk::PresentInfoKHR()
+		.setSwapchainCount(1)
+		.setPSwapchains(&swapchain)
+		.setPImageIndices(&currentBuffer)
+		.setWaitSemaphoreCount(1)
+		.setPWaitSemaphores(&renderCompleteSemaphore);
+	queue.presentKHR(presentInfo);
+
+	device.waitIdle();
 }

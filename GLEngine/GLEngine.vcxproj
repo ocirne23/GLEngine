@@ -78,6 +78,7 @@
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\VKContext.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
@@ -593,6 +594,8 @@
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\VKContext.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPipelineDescription.h" />
     <ClInclude Include="include\Public\Utils\StringUtils.h" />
     <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
     <ClInclude Include="include\3rdparty\EASTL\utility.h" />

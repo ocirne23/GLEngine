@@ -1,10 +1,13 @@
 #include "TestScreen.h"
 
+#include "Database/Assets/DBScene.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Utils/StringUtils.h"
-#include "Database/Assets/DBScene.h"
+
+#include "Graphics/Vulkan/VKContext.h"
+
 #include <CEGUI/EventArgs.h>
 #include <CEGUI/Window.h>
 #include <CEGUI/WindowManager.h>
@@ -14,6 +17,8 @@
 
 TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 {
+	VKContext::test();
+
 	uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	uint viewportHeight = GLEngine::graphics->getViewportHeight();
 	m_camera.initialize(float(viewportWidth), float(viewportHeight), 90.0f, 0.1f, 1000.0f);

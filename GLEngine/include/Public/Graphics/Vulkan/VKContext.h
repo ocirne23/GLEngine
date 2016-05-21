@@ -1,12 +1,23 @@
 #pragma once
 
 #include "Graphics/Vulkan/vk_cpp.h"
+#include "Graphics/Vulkan/Wrappers/VKPipelineDescription.h"
 
 class VKContext
 {
 public:
 
+
 	static void test();
+
+
+
+private:
+
+	static void initialize();
+	static void setupPipeline(VKPipelineDescription& pipelineDescription);
+	static void buildCommandBuffers(VKBuffer & vertexBuffer, VKBuffer & indexBuffer, uint numIndices, vk::IndexType indexType);
+	static void render();
 
 public:
 
@@ -47,8 +58,8 @@ public:
 
 	static vk::RenderPass renderPass;
 	static eastl::vector<vk::Framebuffer> framebuffers;
+	static uint currentBuffer;
 
-	static vk::DescriptorSetLayout descriptorSetLayout;
 	static vk::PipelineLayout pipelineLayout;
 
 	static vk::Pipeline pipeline;

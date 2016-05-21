@@ -49,8 +49,8 @@ void FPSCameraController::update(PerspectiveCamera& a_camera, float a_deltaSec, 
 	if (!GLEngine::input->isMousePressed(EMouseButton::LEFT))
 		mouseMovement = glm::ivec2(0);
 
-	float xLookRotation = mouseMovement.x * m_mouseLookSensitivity;
-	float yLookRotation = mouseMovement.y * m_mouseLookSensitivity;
+	float xLookRotation = glm::radians(mouseMovement.x * m_mouseLookSensitivity);
+	float yLookRotation = glm::radians(mouseMovement.y * m_mouseLookSensitivity);
 
 	glm::vec3 position = a_camera.getPosition();
 	glm::vec3 direction(a_camera.getDirection());

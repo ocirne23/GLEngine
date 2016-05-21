@@ -84,6 +84,7 @@
     <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
     <ClCompile Include="include\3rdparty\gli\core\dummy.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\VKContext.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -995,6 +996,8 @@
     <ClInclude Include="include\3rdparty\gli\type.hpp" />
     <ClInclude Include="include\3rdparty\gli\view.hpp" />
     <ClInclude Include="include\Public\Graphics\Vulkan\VKContext.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPipelineDescription.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />
