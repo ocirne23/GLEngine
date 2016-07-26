@@ -42,6 +42,7 @@ namespace eastl
 						BOOL result = InitializeCriticalSectionEx((CRITICAL_SECTION*)mMutexBuffer, 10, 0);
 						EASTL_ASSERT(result != 0); EA_UNUSED(result);
 					#else
+#pragma warning (suppress:28193)
 						BOOL result = InitializeCriticalSectionAndSpinCount((CRITICAL_SECTION*)mMutexBuffer, 10);
 						EASTL_ASSERT(result != 0); EA_UNUSED(result);
 					#endif

@@ -6,7 +6,7 @@
 #include "Graphics/Vulkan/Utils/VKUtils.h"
 #include "Graphics/Vulkan/Wrappers/VKBuffer.h"
 #include "Graphics/Vulkan/Wrappers/VKPipelineDescription.h"
-
+#include "Input/Input.h"
 
 #include "Utils/DeltaTimeMeasurer.h"
 #include "Utils/FPSMeasurer.h"
@@ -40,7 +40,6 @@ eastl::vector<vk::ImageView> VKContext::swapchainImageViews;
 
 vk::Semaphore VKContext::presentCompleteSemaphore = NULL;
 vk::Semaphore VKContext::renderCompleteSemaphore = NULL;
-vk::Semaphore VKContext::textOverlayCompleteSemaphore = NULL;
 
 vk::SubmitInfo VKContext::submitInfo;
 
@@ -155,7 +154,6 @@ void VKContext::initialize()
 	/* Create semaphores */
 	presentCompleteSemaphore = device.createSemaphore(vk::SemaphoreCreateInfo());
 	renderCompleteSemaphore = device.createSemaphore(vk::SemaphoreCreateInfo());
-	textOverlayCompleteSemaphore = device.createSemaphore(vk::SemaphoreCreateInfo());
 
 	/* Setup submitinfo */
 	vk::PipelineStageFlags submitPipelineStages = vk::PipelineStageFlagBits::eBottomOfPipe;
@@ -413,35 +411,26 @@ void VKContext::test()
 	db.openExisting("assets/OBJ-DB.da");
 	DBScene* scene = dcast<DBScene*>(db.loadAsset("palace.obj", EAssetType::SCENE));
 	scene->mergeMeshes();
-	DBMesh& mesh = scene->getMeshes()[0];
+	const DBMesh& mesh = scene->getMeshes()[0];
 
 	/* Create vertex & indice buffers */
-	eastl::vector<DBMesh::Vertex> vertexData = mesh.getVertices();
-	eastl::vector<uint> indexData = mesh.getIndices();
-	uint64 vertexBufferSize = vertexData.size_bytes();
-	uint64 indexBufferSize = indexData.size_bytes();
+	const eastl::vector<DBMesh::Vertex> vertexData = mesh.getVertices();
+	const eastl::vector<uint> indexData = mesh.getIndices();
+	const uint64 vertexBufferSize = vertexData.size_bytes();
+	const uint64 indexBufferSize = indexData.size_bytes();
+	const uint numIndices = uint(indexData.size());
 
-	// Vertex buffer
-	VKBuffer vertexStagingBuffer;
-	vertexStagingBuffer.initialize(vertexBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible);
-	
-	void* vertexStagingBufferMapping = vertexStagingBuffer.mapMemory();
-	memcpy(vertexStagingBufferMapping, vertexData.data(), vertexBufferSize);
-	vertexStagingBuffer.unmapMemory();
+	VKBuffer vertexBuffer;
+	vertexBuffer.initialize(vertexBufferSize, vk::BufferUsageFlagBits::eVertexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, VKBuffer::EUseStagingBuffer::YES);
+	void* vertexBufferMapping = vertexBuffer.mapMemory();
+	memcpy(vertexBufferMapping, vertexData.data(), vertexBufferSize);
+	vertexBuffer.unmapMemory();
 
-	VKBuffer vertexDestinationBuffer;
-	vertexDestinationBuffer.initialize(vertexBufferSize, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal);
-
-	// Index buffer
-	VKBuffer indexStagingBuffer;
-	indexStagingBuffer.initialize(indexBufferSize, vk::BufferUsageFlagBits::eTransferSrc, vk::MemoryPropertyFlagBits::eHostVisible);
-
-	void* indexStagingBufferMapping = indexStagingBuffer.mapMemory();
-	memcpy(indexStagingBufferMapping, indexData.data(), indexBufferSize);
-	indexStagingBuffer.unmapMemory();
-
-	VKBuffer indexDestinationBuffer;
-	indexDestinationBuffer.initialize(indexBufferSize, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst, vk::MemoryPropertyFlagBits::eDeviceLocal);
+	VKBuffer indexBuffer;
+	indexBuffer.initialize(vertexBufferSize, vk::BufferUsageFlagBits::eIndexBuffer, vk::MemoryPropertyFlagBits::eDeviceLocal, VKBuffer::EUseStagingBuffer::YES);
+	void* indexBufferMapping = indexBuffer.mapMemory();
+	memcpy(indexBufferMapping, indexData.data(), indexBufferSize);
+	indexBuffer.unmapMemory();
 
 	// Copy staging buffers to destination buffers
 	vk::CommandBufferAllocateInfo commandBufferAllocateInfo = vk::CommandBufferAllocateInfo()
@@ -451,22 +440,21 @@ void VKContext::test()
 	vk::CommandBuffer copyCommandBuffer = device.allocateCommandBuffers(commandBufferAllocateInfo)[0];
 	copyCommandBuffer.begin(vk::CommandBufferBeginInfo());
 
-	vk::BufferCopy copyRegion = vk::BufferCopy()
-		.setSize(vertexBufferSize);
-	copyCommandBuffer.copyBuffer(vertexStagingBuffer, vertexDestinationBuffer, 1, &copyRegion);
-	copyRegion.setSize(indexBufferSize);
-	copyCommandBuffer.copyBuffer(indexStagingBuffer, indexDestinationBuffer, 1, &copyRegion);
+	vertexBuffer.uploadWithStaging(copyCommandBuffer);
+	indexBuffer.uploadWithStaging(copyCommandBuffer);
 
 	copyCommandBuffer.end();
+
 	vk::SubmitInfo copyCommandBufferSubmitInfo = vk::SubmitInfo()
 		.setCommandBufferCount(1)
 		.setPCommandBuffers(&copyCommandBuffer);
 	queue.submit(copyCommandBufferSubmitInfo, NULL);
 	queue.waitIdle();
-
 	device.freeCommandBuffers(commandPool, copyCommandBuffer);
-	vertexStagingBuffer.cleanup();
-	indexStagingBuffer.cleanup();
+
+	vertexBuffer.cleanupStagingBuffer();
+	indexBuffer.cleanupStagingBuffer();
+
 
 	/* Prepare uniform buffer */
 	struct UniformData {
@@ -482,7 +470,7 @@ void VKContext::test()
 
 	VKBuffer uniformBuffer;
 	{
-		uniformBuffer.initialize(sizeof(uniformData), vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible);
+		uniformBuffer.initialize(sizeof(uniformData), vk::BufferUsageFlagBits::eUniformBuffer, vk::MemoryPropertyFlagBits::eHostVisible, VKBuffer::EUseStagingBuffer::NO);
 		void* uniformBufferMapping = uniformBuffer.mapMemory();
 		memcpy(uniformBufferMapping, &uniformData, sizeof(uniformData));
 		uniformBuffer.unmapMemory();
@@ -525,7 +513,7 @@ void VKContext::test()
 	};
 
 	setupPipeline(pipelineDescription);
-	buildCommandBuffers(vertexDestinationBuffer, indexDestinationBuffer, uint(indexData.size()), vk::IndexType::eUint32);
+	buildCommandBuffers(vertexBuffer, indexBuffer, uint(indexData.size()), vk::IndexType::eUint32);
 
 	FPSMeasurer fpsMeasurer;
 	DeltaTimeMeasurer timer;
@@ -534,8 +522,9 @@ void VKContext::test()
 	});
 
 	/* Render loop */
-	while (!GLEngine::isShutdown())
+	while (!GLEngine::input->isKeyPressed(EKey::Q))
 	{
+		GLEngine::doEngineTick();
 		render();
 		fpsMeasurer.tickFrame(timer.calcDeltaSec(GLEngine::getTimeMs()));
 	}
@@ -602,9 +591,9 @@ void VKContext::buildCommandBuffers(VKBuffer& vertexBuffer, VKBuffer& indexBuffe
 			vk::PipelineStageFlagBits::eAllCommands,
 			vk::PipelineStageFlagBits::eTopOfPipe,
 			vk::DependencyFlags(),
-			eastl::vector<vk::MemoryBarrier>{},
-			eastl::vector<vk::BufferMemoryBarrier>{},
-			eastl::vector<vk::ImageMemoryBarrier>{prePresentBarrier});
+			{},
+			{},
+			{prePresentBarrier});
 		commandBuffer.end();
 	}
 }
@@ -786,9 +775,9 @@ void VKContext::render()
 		vk::PipelineStageFlagBits::eAllCommands,
 		vk::PipelineStageFlagBits::eTopOfPipe,
 		vk::DependencyFlags(),
-		eastl::vector<vk::MemoryBarrier>{},
-		eastl::vector<vk::BufferMemoryBarrier>{},
-		eastl::vector<vk::ImageMemoryBarrier>{postPresentBarrier});
+		{},
+		{},
+		{postPresentBarrier});
 	postPresentCommandBuffer.end();
 
 	vk::SubmitInfo postPresentCommandBufferSubmitInfo = vk::SubmitInfo()

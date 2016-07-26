@@ -30,8 +30,8 @@ FileModificationListener::FileModificationListener(const eastl::string& a_filePa
 
 void FileModificationListener::update()
 {
-	WriteTime currWriteTime = getWriteTime(m_fullFilePath);
-	bool changed = (m_lastWriteTime.dwLowDateTime != currWriteTime.dwLowDateTime || m_lastWriteTime.dwHighDateTime != currWriteTime.dwHighDateTime);
+	const WriteTime currWriteTime = getWriteTime(m_fullFilePath);
+	const bool changed = (m_lastWriteTime.dwLowDateTime != currWriteTime.dwLowDateTime || m_lastWriteTime.dwHighDateTime != currWriteTime.dwHighDateTime);
 	if (changed)
 		m_lastWriteTime = currWriteTime;
 	for (auto it = m_callbackList.begin(); it != m_callbackList.end(); )

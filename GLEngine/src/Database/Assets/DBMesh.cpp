@@ -9,8 +9,8 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 	const uint numVertices = a_assimpMesh.mNumVertices;
 	const uint numFaces = a_assimpMesh.mNumFaces;
 	const uint numIndices = numFaces * 3;
-	bool hasTextureCoords = a_assimpMesh.HasTextureCoords(0);
-	//bool hasTangentsAndBitangents = a_assimpMesh.HasTangentsAndBitangents();
+	const bool hasTextureCoords = a_assimpMesh.HasTextureCoords(0);
+	//const bool hasTangentsAndBitangents = a_assimpMesh.HasTangentsAndBitangents();
 
 	m_indices.resize(numIndices);
 	m_vertices.resize(numVertices);
@@ -39,10 +39,10 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 void DBMesh::merge(const DBMesh& a_mesh, const glm::mat4& a_transform)
 {
 	m_name += ":MERGED:" + a_mesh.getName();
-	uint numIndices = uint(a_mesh.getIndices().size());
-	uint numVertices = uint(a_mesh.getVertices().size());
-	uint baseIdx = uint(m_indices.size());
-	uint baseVertex = uint(m_vertices.size());
+	const uint numIndices = uint(a_mesh.getIndices().size());
+	const uint numVertices = uint(a_mesh.getVertices().size());
+	const uint baseIdx = uint(m_indices.size());
+	const uint baseVertex = uint(m_vertices.size());
 	m_indices.resize(m_indices.size() + numIndices);
 	m_vertices.resize(m_vertices.size() + numVertices);
 

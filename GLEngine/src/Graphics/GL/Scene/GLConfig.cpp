@@ -8,13 +8,14 @@
 #include "Graphics/GL/Tech/HBAO.h"
 #include "Utils/StringUtils.h"
 
-eastl::vector<eastl::string>    GLConfig::defines;
-uint                            GLConfig::textureBindingPoints[uint(ETextures::NUM_BINDING_POINTS)];
-GLConstantBuffer::Config        GLConfig::uboConfigs[uint(EUBOs::NUM_UBOS)];
-GLVertexBuffer::Config          GLConfig::vboConfigs[uint(EVBOs::NUM_VBOS)];
-uint                            GLConfig::maxMaterials    = 200;
-uint                            GLConfig::maxLights       = 100;
+uint                            GLConfig::maxMaterials = 200;
+uint                            GLConfig::maxLights = 100;
 GLFramebuffer::EMultiSampleType GLConfig::multisampleType = GLFramebuffer::EMultiSampleType::NONE;
+
+eastl::vector<eastl::string> GLConfig::defines;
+uint                         GLConfig::textureBindingPoints[uint(ETextures::NUM_BINDING_POINTS)];
+GLConstantBuffer::Config     GLConfig::uboConfigs[uint(EUBOs::NUM_UBOS)];
+GLVertexBuffer::Config       GLConfig::vboConfigs[uint(EVBOs::NUM_VBOS)];
 
 void GLConfig::initialize()
 {

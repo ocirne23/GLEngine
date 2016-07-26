@@ -81,21 +81,10 @@ void ClusteredShading::update(const PerspectiveCamera& a_camera, const LightMana
 		                                                                             m_screenWidth, m_screenHeight, 
 		                                                                             m_pixelsPerTileW, m_pixelsPerTileH, 
 		                                                                             m_recLogSD1);
-		for (int x = bounds3D.min.x; x < bounds3D.max.x; ++x)
-		{
-			for (int y = bounds3D.min.y; y < bounds3D.max.y; ++y)
-			{
-				for (int z = bounds3D.min.z; z < bounds3D.max.z; ++z)
-				{
-					const uint gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
-					m_tileLightIndices[gridIdx].push_back(i);
-					if (lightIndiceCtr++ > m_maxNumLightIndices)
-						goto breakLoop;
-				}
-			}
-		}
+		lightIndiceCtr += writeLightIndices(bounds3D, i);
+		if (lightIndiceCtr > m_maxNumLightIndices)
+			break;
 	}
-breakLoop:
 
 	m_lightPositionRangesUBO.unmapBuffer();
 	m_lightColorIntensitiesUBO.upload(numLights * sizeof(glm::vec4), &a_lightManager.getLightColorIntensities()[0]);
@@ -120,9 +109,24 @@ breakLoop:
 	m_lightGridTextureBuffer.unmapBuffer();
 }
 
+uint ClusteredShading::writeLightIndices(const IBounds3D& a_lightBounds, ushort a_lightIdx)
+{
+	for (int x = a_lightBounds.min.x; x < a_lightBounds.max.x; ++x)
+	{
+		for (int y = a_lightBounds.min.y; y < a_lightBounds.max.y; ++y)
+		{
+			for (int z = a_lightBounds.min.z; z < a_lightBounds.max.z; ++z)
+			{
+				const uint gridIdx = (x * m_gridHeight + y) * m_gridDepth + z;
+				m_tileLightIndices[gridIdx].push_back(a_lightIdx);
+			}
+		}
+	}
+	return a_lightBounds.volume();
+}
+
 void ClusteredShading::bindTextureBuffers()
 {
 	m_lightIndiceTextureBuffer.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::ClusteredLightIndice));
 	m_lightGridTextureBuffer.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::ClusteredLightGrid));
 }
-

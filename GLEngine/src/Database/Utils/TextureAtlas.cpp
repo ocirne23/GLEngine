@@ -2,11 +2,6 @@
 
 #include <assert.h>
 
-TextureAtlas::TextureAtlas(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps, uint a_atlasIndex)
-{
-	initialize(a_width, a_height, a_numComponents, a_numMipMaps, a_atlasIndex);
-}
-
 void TextureAtlas::initialize(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps, uint a_atlasIndex)
 {
 	assert(a_width % 2 == 0 && a_height % 2 == 0 && "Atlas width and height must be divideable by 2");

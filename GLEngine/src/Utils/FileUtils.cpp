@@ -10,7 +10,7 @@
 
 eastl::string FileUtils::getFileExtension(const eastl::string& a_filePath)
 {
-	auto dotIdx = a_filePath.find_last_of('.');
+	const auto dotIdx = a_filePath.find_last_of('.');
 	if (dotIdx != eastl::string::npos)
 		return a_filePath.substr(dotIdx + 1);
 	else
@@ -19,7 +19,7 @@ eastl::string FileUtils::getFileExtension(const eastl::string& a_filePath)
 
 eastl::string FileUtils::getFolderPathForFile(const eastl::string& a_filePath)
 {
-	auto dirIdx = std::min(a_filePath.find_last_of('/'), a_filePath.find_last_of('\\'));
+	const auto dirIdx = std::min(a_filePath.find_last_of('/'), a_filePath.find_last_of('\\'));
 	if (dirIdx != eastl::string::npos)
 		return a_filePath.substr(0, dirIdx).append("\\");
 	else
@@ -37,7 +37,7 @@ eastl::string FileUtils::getFileNameFromPath(const eastl::string& a_filePath)
 
 eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 {
-	LPCWSTR filePath = eastl::wstring(a_filePath.c_str()).c_str();
+	const LPCWSTR filePath = eastl::wstring(a_filePath.c_str()).c_str();
 
 	WIN32_FILE_ATTRIBUTE_DATA fileAttrData = {0};
 	GetFileAttributesExW(filePath, GetFileExInfoStandard, &fileAttrData);
@@ -106,7 +106,7 @@ eastl::vector<eastl::string> FileUtils::listFiles(const eastl::string& a_path, c
 
 eastl::string FileUtils::getExtensionForFilePath(const eastl::string& a_path)
 {
-	const eastl::string::size_type extIdx = a_path.find_last_of('.');
+	const auto extIdx = a_path.find_last_of('.');
 	if (extIdx == eastl::string::npos)
 		return "";
 	eastl::string extension = a_path.substr(extIdx + 1, a_path.length() - extIdx - 1);
@@ -116,7 +116,7 @@ eastl::string FileUtils::getExtensionForFilePath(const eastl::string& a_path)
 
 void FileUtils::createDirectoryForFile(const eastl::string& a_filePath)
 {
-	eastl::string directory = a_filePath.substr(0, a_filePath.find_last_of("\\"));
+	const eastl::string directory = a_filePath.substr(0, a_filePath.find_last_of("\\"));
 
 	eastl::string::size_type from = 0;
 	while (from != eastl::string::npos)
@@ -131,7 +131,7 @@ bool FileUtils::fileExists(const eastl::string& a_filePath)
 {
 	std::fstream file;
 	file.open(a_filePath.c_str(), std::fstream::in); // prolly not the right way to check for exists
-	bool exists = file.is_open();
+	const bool exists = file.is_open();
 	if (exists)
 		file.close();
 	return exists;

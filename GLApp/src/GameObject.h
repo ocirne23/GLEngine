@@ -17,6 +17,10 @@ public:
 	void setPosition(const glm::vec3& a_position)              { m_position = a_position; m_dirty = true; }
 	void setScale(float a_scale)                               { m_scale = a_scale; m_dirty = true; }
 	void setRotation(const glm::vec3& a_axis, float a_degrees) { m_axisRotation = glm::vec4(a_axis, a_degrees); m_dirty = true; }
+
+	const glm::vec3& getPosition() const { return m_position; }
+	const glm::vec4& getAxisRotation() const { return m_axisRotation; }
+	float getScale() const { return m_scale; }
 	
 private:
 	

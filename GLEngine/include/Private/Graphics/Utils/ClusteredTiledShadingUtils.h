@@ -35,6 +35,14 @@ struct IBounds3D
 		min = glm::clamp(min, a_min, a_max);
 		max = glm::clamp(max, a_min, a_max);
 	}
+
+	uint volume() const
+	{
+		const uint width  = max.x - min.x;
+		const uint height = max.y - min.y;
+		const uint depth  = max.z - min.z;
+		return width * height * depth;
+	}
 };
 
 class ClusteredTiledShadingUtils

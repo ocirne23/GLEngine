@@ -16,7 +16,7 @@ enum {
 	ATLAS_NUM_COMPONENTS = 3, 
 	ATLAS_START_WIDTH    = 64, 
 	ATLAS_START_HEIGHT   = 64,
-	ATLAS_INCREMENT      = 64,
+	ATLAS_INCREMENT      = 32,
 	ATLAS_NUM_MIPMAPS    = 4 
 };
 
@@ -72,16 +72,18 @@ bool getNextAtlasSize(uint& width, uint& height)
 	return true;
 }
 
-void increaseAtlasesSize(eastl::vector<owner<TextureAtlas*>>& a_atlases)
+void increaseAtlasesSize(eastl::vector<std::unique_ptr<TextureAtlas>>& a_atlases)
 {
 	if (!a_atlases.size())
 	{
-		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, 0));
+		auto atlas = std::make_unique<TextureAtlas>();
+		atlas->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, 0);
+		a_atlases.push_back(std::move(atlas));
 		return;
 	}
 	uint width = a_atlases[0]->getWidth();
 	uint height = a_atlases[0]->getHeight();
-	bool canIncrement = getNextAtlasSize(width, height);
+	const bool canIncrement = getNextAtlasSize(width, height);
 	if (canIncrement)
 	{	// resize all atlases to the new size
 		for (uint i = 0; i < a_atlases.size(); ++i)
@@ -89,25 +91,25 @@ void increaseAtlasesSize(eastl::vector<owner<TextureAtlas*>>& a_atlases)
 	}
 	else
 	{	// Add one new atlas and reset all atlas sizes back to smallest (not efficient)
-		a_atlases.push_back(new TextureAtlas(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, (uint) a_atlases.size()));
+		a_atlases.push_back(std::make_unique<TextureAtlas>());
 		for (uint i = 0; i < a_atlases.size(); ++i)
 			a_atlases[i]->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, i);
 	}
 }
 
 /* Returns if the AltasRegions fit in the TextureAtlases, sets the AltasPosition of each AltasRegion */
-bool containTexturesInAtlases(eastl::hash_map<eastl::string, DBAtlasRegion>& a_regions, eastl::vector<TextureAtlas*>& a_atlases)
+bool containTexturesInAtlases(eastl::hash_map<eastl::string, DBAtlasRegion>& a_regions, eastl::vector<std::unique_ptr<TextureAtlas>>& a_atlases)
 {
 	if (!a_atlases.size())
 		return false;
-	for (TextureAtlas* a : a_atlases)
+	for (std::unique_ptr<TextureAtlas>& a : a_atlases)
 		a->clear();
 
 	for (auto& pair: a_regions)
 	{
 		DBAtlasRegion& reg = pair.second;
 		bool contained = false;
-		for (TextureAtlas* atlas : a_atlases)
+		for (std::unique_ptr<TextureAtlas>& atlas : a_atlases)
 		{
 			AtlasPosition pos = atlas->getRegion(reg.m_texWidth, reg.m_texHeight);
 			if (pos.isValid())
@@ -151,12 +153,14 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 	}
 	
 	// Then we fit these textures into atlases (not the image data, just fitting rectangles)
-	eastl::vector<owner<TextureAtlas*>> atlases;
+	eastl::vector<std::unique_ptr<TextureAtlas>> atlases;
 	if (uniqueRegions.size() == 1)
 	{
 		auto& pair = *uniqueRegions.begin();
 		const DBAtlasRegion& reg = pair.second;
-		atlases.push_back(new TextureAtlas(reg.m_texWidth, reg.m_texHeight, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, 0));
+		auto atlas = std::make_unique<TextureAtlas>();
+		atlas->initialize(reg.m_texWidth, reg.m_texHeight, reg.m_numComp, ATLAS_NUM_MIPMAPS, 0);
+		atlases.push_back(std::move(atlas));
 	}
 	while (!containTexturesInAtlases(uniqueRegions, atlases))
 		increaseAtlasesSize(atlases);
@@ -164,11 +168,8 @@ eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMateri
 	// Create AtlasTexture objects out of the TextureAtlases (which are IAssets)
 	eastl::vector<DBAtlasTexture> atlasTextures;
 	atlasTextures.reserve(atlases.size());
-	for (owner<TextureAtlas*> atlas : atlases)
-	{
+	for (std::unique_ptr<TextureAtlas>& atlas : atlases)
 		atlasTextures.emplace_back(atlas->getWidth(), atlas->getHeight(), atlas->getNumComponents(), atlas->getNumMipmaps());
-		SAFE_DELETE(atlas);
-	}
 	atlases.clear();
 
 	for (auto& pair : uniqueRegions)

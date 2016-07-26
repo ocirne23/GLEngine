@@ -61,7 +61,9 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_lightningGlobalsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::LightingGlobals));
 	m_settingsGlobalsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::SettingsGlobals));
 
-	m_dfvTexture.initialize(DBTexture(DFV_TEX_PATH, DBTexture::EFormat::FLOAT), 0, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR);
+	DBTexture dfvDBTexture;
+	dfvDBTexture.loadFromFile(DFV_TEX_PATH, DBTexture::EFormat::FLOAT);
+	m_dfvTexture.initialize(dfvDBTexture, 0, GLTexture::ETextureMinFilter::LINEAR, GLTexture::ETextureMagFilter::LINEAR);
 
 	updateSettingsGlobalsUBO();
 

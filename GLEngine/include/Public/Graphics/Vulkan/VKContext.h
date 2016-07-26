@@ -7,10 +7,7 @@ class VKContext
 {
 public:
 
-
 	static void test();
-
-
 
 private:
 
@@ -42,7 +39,6 @@ public:
 
 	static vk::Semaphore presentCompleteSemaphore;
 	static vk::Semaphore renderCompleteSemaphore;
-	static vk::Semaphore textOverlayCompleteSemaphore;
 
 	static vk::SubmitInfo submitInfo;
 

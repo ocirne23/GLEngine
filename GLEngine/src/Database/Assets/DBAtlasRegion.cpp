@@ -1,6 +1,6 @@
 #include "Database/Assets/DBAtlasRegion.h"
 
-#include "Database/Utils/stb_image.h"
+#include "stbi/stb_image.h"
 
 uint64 DBAtlasRegion::getByteSize() const 
 {
@@ -39,7 +39,7 @@ void DBAtlasRegion::read(AssetDatabaseEntry& entry)
 
 void DBAtlasRegion::loadInfo(const eastl::string& a_filePath)
 {
-	int result = stbi_info(a_filePath.c_str(), (int*) &m_texWidth, (int*) &m_texHeight, (int*) &m_numComp);
+	const int result = stbi_info(a_filePath.c_str(), (int*) &m_texWidth, (int*) &m_texHeight, (int*) &m_numComp);
 	if (result)
 		m_filePath = a_filePath;
 	else

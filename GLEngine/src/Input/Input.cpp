@@ -17,9 +17,9 @@ void Input::pollEvents()
 void Input::processEvents()
 {
 	m_eventQueue.block();
-	for (Event& e : m_eventQueue.getBackingQueue())
+	for (const Event& e : m_eventQueue.getBackingQueue())
 	{
-		SDL_Event& event = rcast<SDL_Event&>(e);
+		const SDL_Event& event = rcast<const SDL_Event&>(e);
 		switch (event.type)
 		{
 		case SDL_WINDOWEVENT:
@@ -68,54 +68,54 @@ bool Input::isMousePressed(EMouseButton a_button)
 
 void Input::keyDown(EKey a_key, bool a_isRepeat)
 {
-	for (KeyDownListener* l : m_keyDownListeners)
+	for (auto l : m_keyDownListeners)
 		l->call(a_key, a_isRepeat);
 }
 
 void Input::keyUp(EKey a_key)
 {
-	for (KeyUpListener* l : m_keyUpListeners)
+	for (auto l : m_keyUpListeners)
 		l->call(a_key);
 }
 
 void Input::mouseDown(EMouseButton a_button, uint a_xPos, uint a_yPos)
 {
-	for (MouseDownListener* l : m_mouseDownListeners)
+	for (auto l : m_mouseDownListeners)
 		l->call(a_button, a_xPos, a_yPos);
 }
 
 void Input::mouseUp(EMouseButton a_button, uint a_xPos, uint a_yPos)
 {
-	for (MouseUpListener* l : m_mouseUpListeners)
+	for (auto l : m_mouseUpListeners)
 		l->call(a_button, a_xPos, a_yPos);
 }
 
 void Input::mouseMoved(uint a_xPos, uint a_yPos, int a_deltaX, int a_deltaY)
 {
-	for (MouseMovedListener* l : m_mouseMovedListeners)
+	for (auto* l : m_mouseMovedListeners)
 		l->call(a_xPos, a_yPos, a_deltaX, a_deltaY);
 }
 
 void Input::mouseScrolled(int a_amount)
 {
-	for (MouseScrolledListener* l : m_mouseScrolledListeners)
+	for (auto l : m_mouseScrolledListeners)
 		l->call(a_amount);
 }
 
 void Input::windowResized(uint a_width, uint a_height)
 {
-	for (WindowResizedListener* l : m_windowResizedListeners)
+	for (auto l : m_windowResizedListeners)
 		l->call(a_width, a_height);
 }
 
 void Input::textInput(const char* a_text)
 {
-	for (TextInputListener* l : m_textInputListeners)
+	for (auto l : m_textInputListeners)
 		l->call(a_text);
 }
 
 void Input::windowQuit()
 {
-	for (WindowQuitListener* l : m_windowQuitListeners)
+	for (auto l : m_windowQuitListeners)
 		l->call();
 }

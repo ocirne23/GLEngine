@@ -25,6 +25,7 @@ Graphics::Graphics(const char* a_windowName, uint a_screenWidth, uint a_screenHe
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	flags |= SDL_WINDOW_OPENGL;
+	
 	/* Does not seem to be required?
 	if (GLConfig::getMultisampleType() != GLFramebuffer::EMultiSampleType::NONE)
 	{

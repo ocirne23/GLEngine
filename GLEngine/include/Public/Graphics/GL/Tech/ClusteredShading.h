@@ -7,6 +7,7 @@
 
 class PerspectiveCamera;
 class LightManager;
+struct IBounds3D;
 
 class ClusteredShading
 {
@@ -25,6 +26,7 @@ public:
 	};
 
 public:
+
 	ClusteredShading() {}
 	ClusteredShading(const ClusteredShading& copy) = delete;
 	~ClusteredShading();
@@ -39,6 +41,10 @@ public:
 	uint getGridHeight() const { return m_gridHeight; }
 	uint getGridDepth() const  { return m_gridDepth; }
 	uint getGridSize() const   { return m_gridSize; }
+
+private:
+
+	uint writeLightIndices(const IBounds3D& lightBounds, ushort lightIdx);
 
 private:
 
@@ -61,6 +67,7 @@ private:
 	{
 		ushort count;
 		ushort indices[MAX_NUM_INDICES_PER_TILE];
+
 		inline void push_back(ushort val)
 		{
 			if (count < MAX_NUM_INDICES_PER_TILE)

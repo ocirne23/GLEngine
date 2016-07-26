@@ -5,8 +5,9 @@
 #include <assert.h>
 
 DBAtlasTexture::DBAtlasTexture(uint a_width, uint a_height, uint a_numComponents, uint a_numMipMaps)
-	: m_numMipMaps(a_numMipMaps), m_texture(a_width, a_height, a_numComponents, DBTexture::EFormat::BYTE)
+	: m_numMipMaps(a_numMipMaps)
 {
+	m_texture.createNew(a_width, a_height, a_numComponents, DBTexture::EFormat::BYTE);
 	byte red[] = {255, 0, 0, 255};
 	// Initialize atlas color to red
 	for (uint x = 0; x < m_texture.getWidth(); ++x)
@@ -16,22 +17,23 @@ DBAtlasTexture::DBAtlasTexture(uint a_width, uint a_height, uint a_numComponents
 
 void DBAtlasTexture::writeRegionTexture(const DBAtlasRegion& region)
 {
-	uint regionXPos = region.m_atlasPosition.xPos;
-	uint regionYPos = region.m_atlasPosition.yPos;
-	uint regionWidth = region.m_atlasPosition.width;
-	uint regionHeight = region.m_atlasPosition.height;
-	uint padding = m_numMipMaps * m_numMipMaps;
+	const uint regionXPos = region.m_atlasPosition.xPos;
+	const uint regionYPos = region.m_atlasPosition.yPos;
+	const uint regionWidth = region.m_atlasPosition.width;
+	const uint regionHeight = region.m_atlasPosition.height;
+	const uint padding = m_numMipMaps * m_numMipMaps;
 
 	// If the region fills the entire atlas, just load that image into the atlas.
 	if (regionWidth == m_texture.getWidth() && regionHeight == m_texture.getHeight())
 	{
 		assert(regionXPos == 0 && regionYPos == 0);
-		m_texture.loadImage(region.m_filePath, DBTexture::EFormat::BYTE, m_texture.getNumComponents());
+		m_texture.loadFromFile(region.m_filePath, DBTexture::EFormat::BYTE, m_texture.getNumComponents());
 		return;
 	}
 
 	// Load the texture and write the pixels into the atlas
-	DBTexture regionTexture(region.m_filePath, DBTexture::EFormat::BYTE, m_texture.getNumComponents());
+	DBTexture regionTexture;
+	regionTexture.loadFromFile(region.m_filePath, DBTexture::EFormat::BYTE, m_texture.getNumComponents());
 	assert(regionTexture.getWidth() == regionWidth);
 	assert(regionTexture.getHeight() == regionHeight);
 	assert(regionXPos < m_texture.getWidth());

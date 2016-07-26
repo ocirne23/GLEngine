@@ -29,6 +29,7 @@
     <ClCompile Include="src\3rdparty\EASTL\red_black_tree.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\string.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\thread_support.cpp" />
+    <ClCompile Include="src\3rdparty\stbi\stb_image_write.c" />
     <ClCompile Include="src\Database\AssetDatabase.cpp" />
     <ClCompile Include="src\Database\Assets\DBTexture.cpp" />
     <ClCompile Include="src\Database\Assets\DBAtlasRegion.cpp" />
@@ -38,6 +39,7 @@
     <ClCompile Include="src\Database\Assets\DBNode.cpp" />
     <ClCompile Include="src\Database\Assets\DBScene.cpp" />
     <ClCompile Include="src\Database\Assets\IAsset.cpp" />
+    <ClCompile Include="src\Database\Utils\MaxRectsPacker.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLConfig.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLMaterial.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLRenderer.cpp" />
@@ -101,7 +103,7 @@
     <ClCompile Include="src\Utils\JobScheduler.cpp" />
     <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp" />
     <ClCompile Include="src\Utils\Semaphore.cpp" />
-    <ClCompile Include="src\Database\Utils\stb_image.c" />
+    <ClCompile Include="src\3rdparty\stbi\stb_image.c" />
     <ClCompile Include="src\Database\Utils\TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -584,6 +586,8 @@
     <ClInclude Include="include\3rdparty\gsl\gsl_util.h" />
     <ClInclude Include="include\3rdparty\gsl\span.h" />
     <ClInclude Include="include\3rdparty\gsl\string_span.h" />
+    <ClInclude Include="include\3rdparty\stbi\stb_image_write.h" />
+    <ClInclude Include="include\Public\Database\Utils\MaxRectsPacker.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKDebug.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKUtils.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\vk_cpp.h" />
@@ -700,7 +704,7 @@
     <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
     <ClInclude Include="include\Public\Utils\Semaphore.h" />
     <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h" />
-    <ClInclude Include="include\Public\Database\Utils\stb_image.h" />
+    <ClInclude Include="include\3rdparty\stbi\stb_image.h" />
     <ClInclude Include="include\Public\Database\Utils\TextureAtlas.h" />
     <ClInclude Include="include\Public\Utils\Vec.h" />
     <ClInclude Include="include\Public\Utils\VecForward.h" />

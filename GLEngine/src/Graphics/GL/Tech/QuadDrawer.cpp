@@ -46,7 +46,7 @@ void QuadDrawer::drawQuad(GLShader& a_shader)
 
 void QuadDrawer::initBuffers()
 {
-	float quad[] =
+	const float quad[] =
 	{// Position				Texcoords
 		-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,
 		1.0f, -1.0f, 0.0f,		1.0f, 0.0f,
@@ -54,13 +54,13 @@ void QuadDrawer::initBuffers()
 		-1.0f, 1.0f, 0.0f,		0.0f, 1.0f
 	};
 
-	short indices[] =
+	const short indices[] =
 	{
 		0, 1, 2,
 		0, 2, 3
 	};
 
-	VertexAttribute attributes[] =
+	const VertexAttribute attributes[] =
 	{
 		{0, VertexAttribute::EFormat::FLOAT, 3}, // Position
 		{1, VertexAttribute::EFormat::FLOAT, 2}  // Texcoords

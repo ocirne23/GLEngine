@@ -81,6 +81,7 @@ static inline bool InRange(double d, T min, U max) {
  */
 static inline char* duplicateStringValue(const char* value,
                                          size_t length) {
+
   // Avoid an integer overflow in the call to malloc below by limiting length
   // to a sane value.
   if (length >= (size_t)Value::maxInt)
@@ -92,7 +93,11 @@ static inline char* duplicateStringValue(const char* value,
         "in Json::Value::duplicateStringValue(): "
         "Failed to allocate string value buffer");
   }
+#pragma warning (suppress:6387)
   memcpy(newString, value, length);
+#pragma warning (suppress:6386)
+#pragma warning (suppress:6011)
+
   newString[length] = 0;
   return newString;
 }
@@ -109,12 +114,14 @@ static inline char* duplicateAndPrefixStringValue(
                       "in Json::Value::duplicateAndPrefixStringValue(): "
                       "length too big for prefixing");
   unsigned actualLength = length + sizeof(unsigned) + 1U;
+#pragma warning (suppress:6011)
   char* newString = static_cast<char*>(malloc(actualLength));
   if (newString == 0) {
     throwRuntimeError(
         "in Json::Value::duplicateAndPrefixStringValue(): "
         "Failed to allocate string value buffer");
   }
+#pragma warning (suppress:6011)
   *reinterpret_cast<unsigned*>(newString) = length;
   memcpy(newString + sizeof(unsigned), value, length);
   newString[actualLength - 1U] = 0; // to avoid buffer over-run accidents by users later
@@ -209,11 +216,13 @@ Value::CommentInfo::~CommentInfo() {
 }
 
 void Value::CommentInfo::setComment(const char* text, size_t len) {
+#pragma warning (suppress:6011)
   if (comment_) {
     releaseStringValue(comment_);
     comment_ = 0;
   }
   JSON_ASSERT(text != 0);
+#pragma warning (suppress:6011)
   JSON_ASSERT_MESSAGE(
       text[0] == '\0' || text[0] == '/',
       "in Json::Value::setComment(): Comments must start with /");

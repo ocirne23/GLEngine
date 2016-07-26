@@ -5,6 +5,8 @@
 
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 
@@ -49,37 +51,29 @@ void FPSCameraController::update(PerspectiveCamera& a_camera, float a_deltaSec, 
 	if (!GLEngine::input->isMousePressed(EMouseButton::LEFT))
 		mouseMovement = glm::ivec2(0);
 
-	float xLookRotation = glm::radians(mouseMovement.x * m_mouseLookSensitivity);
-	float yLookRotation = glm::radians(mouseMovement.y * m_mouseLookSensitivity);
+	const float xLookRotation = (mouseMovement.x * m_mouseLookSensitivity);
+	const float yLookRotation = (mouseMovement.y * m_mouseLookSensitivity);
 
-	glm::vec3 position = a_camera.getPosition();
-	glm::vec3 direction(a_camera.getDirection());
+	glm::vec3 direction = a_camera.getDirection();
+	const glm::vec3 tmp = direction;
+	const glm::vec3 side = glm::cross(direction, UP);
+	const glm::vec3 up = glm::cross(side, direction);
+	const glm::quat yaw = glm::angleAxis(glm::radians(xLookRotation), up);
 
-	// Rotate horizontally
-	direction = glm::rotate(direction, xLookRotation, UP);
-	float xzAngle = std::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
-
-	// Rotate vertically
-	glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));
-	glm::vec3 tmp = direction;
-	direction = glm::rotate(direction, yLookRotation, yRotAxis);
-
-	// Limit vertical look movement
-	if (direction.y > 0.99f || direction.y < -0.99f)
+	const float xzAngle = std::atan2(direction.x, direction.z); //calculate axis to rotate vertically on
+	const glm::vec3 yRotAxis(-glm::cos(xzAngle), 0.0f, glm::sin(xzAngle));
+	const glm::quat pitch = glm::angleAxis(glm::radians(yLookRotation), yRotAxis);
+	const glm::quat orientation = glm::normalize(glm::cross(pitch, yaw));
+	direction = glm::rotate(orientation, direction);
+	
+	const float newXZ = std::atan2(direction.x, direction.z);
+	const float xzDiff = glm::abs(xzAngle - newXZ);
+	if (xzDiff > 2.0f && xzDiff < 4.0f) // flip protection
+	{
 		direction = tmp;
-
-	glm::vec3 movement = getLocalSpaceMovementVector();
-
-	// Rotate xz movement based on direction
-	float xTrans = movement.x * glm::cos(xzAngle) + movement.z * glm::sin(xzAngle);
-	float zTrans = movement.z * glm::cos(xzAngle) - movement.x * glm::sin(xzAngle);
-
-	float speed = m_cameraSpeed * a_deltaSec;
-	position.x += -xTrans * speed;
-	position.z += -zTrans * speed;
-	position.y += movement.y * speed;
+	}
 
 	a_camera.lookAtDir(direction);
-	a_camera.setPosition(position);
+	a_camera.translateRelative(getLocalSpaceMovementVector() * m_cameraSpeed * a_deltaSec);
 	a_camera.updateMatrices();
 }

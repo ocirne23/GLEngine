@@ -76,15 +76,16 @@ void GLVertexBuffer::setVertexAttributes(span<const VertexAttribute> a_attribute
 	for (uint i = 0; i < a_attributes.size(); ++i)
 	{
 		const VertexAttribute& attribute = a_attributes[i];
+		const bool isFloatType = (attribute.format == VertexAttribute::EFormat::FLOAT) || attribute.normalize;
+		const uint dataSize = ((attribute.format == VertexAttribute::EFormat::UNSIGNED_BYTE) ? 1 : 4) * attribute.numElements;
 
-		bool isFloatType = (attribute.format == VertexAttribute::EFormat::FLOAT) || attribute.normalize;
-		uint dataSize = (attribute.format == VertexAttribute::EFormat::UNSIGNED_BYTE) ? 1 : 4;
-		dataSize *= attribute.numElements;
 		glBindBuffer(GLenum(m_bufferType), m_id);
+
 		if (isFloatType)
 			glVertexAttribPointer(attribute.attributeIndex, attribute.numElements, GLenum(attribute.format), attribute.normalize, stride, rcast<GLvoid*>(offset));
 		else
 			glVertexAttribIPointer(attribute.attributeIndex, attribute.numElements, GLenum(attribute.format), stride, rcast<GLvoid*>(offset));
+
 		glEnableVertexAttribArray(attribute.attributeIndex);
 		offset += dataSize;
 	}

@@ -127,6 +127,8 @@ class ProtoSignal<R(Args...), Collector> : private CollectorInvocation<
       return false;
     }
     bool remove_sibling(size_t id) {
+#pragma warning (suppress:6011)
+
       for (SignalLink *link = this->next ? this->next : this; link != this;
            link = link->next)
         if (id == size_t(link)) {

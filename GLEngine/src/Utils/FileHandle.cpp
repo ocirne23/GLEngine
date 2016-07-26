@@ -29,7 +29,6 @@ void FileHandle::initialize(const char* a_filePath, EFileMode a_fileMode)
 	char fullPath[_MAX_PATH];
 	if (!_fullpath(fullPath, a_filePath, _MAX_PATH))
 		print("Could not construct full path %s \n", a_filePath);
-	
 	m_filePath = fullPath;
 
 	const char* fileModeStr;

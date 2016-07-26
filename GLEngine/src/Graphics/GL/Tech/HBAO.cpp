@@ -36,32 +36,35 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	m_hbaoResultFBO.initialize(GLConfig::getMultisampleType());
 	m_hbaoResultFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::R8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 
-	uint noiseTexWidth = NOISE_TEXTURE_RES;
-	uint noiseTexHeight = NOISE_TEXTURE_RES;
+	const uint noiseTexWidth = NOISE_TEXTURE_RES;
+	const uint noiseTexHeight = NOISE_TEXTURE_RES;
 	float *noise = new float[noiseTexWidth * noiseTexHeight * 4];
 	for (uint y = 0; y < noiseTexHeight; ++y)
 	{
 		for (uint x = 0; x < noiseTexWidth; ++x)
 		{
-			glm::vec2 xy = glm::circularRand(1.0f);
-			float z = glm::linearRand(0.0f, 1.0f);
-			float w = glm::linearRand(0.0f, 1.0f);
+			const glm::vec2 xy = glm::circularRand(1.0f);
+			const float z = glm::linearRand(0.0f, 1.0f);
+			const float w = glm::linearRand(0.0f, 1.0f);
 
-			int offset = 4 * (y * noiseTexWidth + x);
-			noise[offset + 0] = xy[0];
-			noise[offset + 1] = xy[1];
+			const int offset = 4 * (y * noiseTexWidth + x);
+			noise[offset + 0] = xy.x;
+			noise[offset + 1] = xy.y;
 			noise[offset + 2] = z;
 			noise[offset + 3] = w;
 		}
 	}
 	
-	m_noiseTexture.initialize(DBTexture(noiseTexWidth, noiseTexHeight, 4, DBTexture::EFormat::FLOAT, (byte*) noise), 0,
+	DBTexture noiseDBTex;
+	noiseDBTex.createNew(noiseTexWidth, noiseTexHeight, 4, DBTexture::EFormat::FLOAT, rcast<byte*>(noise));
+	m_noiseTexture.initialize(noiseDBTex,
+	                          0,
 	                          GLTexture::ETextureMinFilter::NEAREST, GLTexture::ETextureMagFilter::NEAREST,
 	                          GLTexture::ETextureWrap::REPEAT, GLTexture::ETextureWrap::REPEAT);
 
-	float fovRad = glm::radians(a_camera.getVFov());
-	float near = a_camera.getNear();
-	float far = a_camera.getFar();
+	const float fovRad = glm::radians(a_camera.getVFov());
+	const float near = a_camera.getNear();
+	const float far = a_camera.getFar();
 
 	GlobalsUBO globals;
 	globals.fullResolution    = glm::vec2(screenWidth, screenHeight);

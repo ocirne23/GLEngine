@@ -14,6 +14,7 @@
 #include <CEGUI/widgets/All.h>
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 {
@@ -33,6 +34,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 			m_scenes[EGameObjects_PALACE].initialize(m_objectNames[EGameObjects_PALACE], m_objDB);
 			m_gameObjects[EGameObjects_PALACE].initialize(&m_scenes[EGameObjects_PALACE]);
 			m_gameObjects[EGameObjects_PALACE].setPosition(glm::vec3(0.0f, -1.5f, 20.0f));
+			m_gameObjects[EGameObjects_PALACE].setRotation(glm::vec3(0, 1, 0), 90.0f);
 			m_gameObjects[EGameObjects_PALACE].setScale(0.5f);
 			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_PALACE]);
 		}
@@ -43,6 +45,8 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 			m_renderer.addSkybox(&m_gameObjects[EGameObjects_SKYSPHERE]);
 		}
 	}
+	m_camera.lookAtPoint(m_gameObjects[EGameObjects_PALACE].getPosition());
+
 
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { 
 		GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); 
@@ -69,6 +73,7 @@ void TestScreen::render(float a_deltaSec)
 		m_timeAccum = 0.0f;
 	//	setSunRotation(m_sunRotation);
 		m_sunRotation += 1.0f;
+	//	print(glm::to_string(m_camera.getPosition()).c_str());
 	}
 
 	m_fpsMeasurer.tickFrame(a_deltaSec);

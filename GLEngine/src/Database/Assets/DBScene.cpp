@@ -12,7 +12,7 @@ BEGIN_UNNAMED_NAMESPACE()
 
 uint processNodes(eastl::vector<DBNode>& a_nodes, const aiNode* a_assimpNode, uint a_parentIdx)
 {
-	uint idx = (uint) a_nodes.size();
+	const uint idx = uint(a_nodes.size());
 	a_nodes.push_back(DBNode(*a_assimpNode, a_parentIdx));
 	if (idx != a_parentIdx)
 		a_nodes[a_parentIdx].addChild(idx);
@@ -76,7 +76,7 @@ void DBScene::mergeMeshes()
 
 void DBScene::mergeMeshes(DBMesh& mergedMesh, DBNode& node, const glm::mat4& parentTransform)
 {
-	glm::mat4 transform = parentTransform * node.getTransform();
+	const glm::mat4 transform = parentTransform * node.getTransform();
 	for (uint meshIdx : node.getMeshIndices())
 		mergedMesh.merge(m_meshes[meshIdx], transform);
 	for (uint childIdx : node.getChildIndices())

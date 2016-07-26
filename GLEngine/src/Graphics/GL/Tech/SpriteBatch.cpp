@@ -15,7 +15,7 @@ void SpriteBatch::initialize(uint a_size)
 {
 	m_size = a_size;
 
-	VertexAttribute attributes[] =
+	const VertexAttribute attributes[] =
 	{
 		VertexAttribute(0, VertexAttribute::EFormat::FLOAT, 2), // Position
 		VertexAttribute(1, VertexAttribute::EFormat::FLOAT, 2), // Texcoords

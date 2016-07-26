@@ -21,9 +21,6 @@ public:
 
 public:
 
-	TextureAtlas(uint width, uint height, uint numComponents, uint numMipMaps, uint atlasIndex);
-	TextureAtlas(const TextureAtlas&) = delete;
-
 	void initialize(uint width, uint height, uint numComponents, uint numMipMaps, uint atlasIndex);
 	AtlasPosition getRegion(uint width, uint height);
 	void clear();

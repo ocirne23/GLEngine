@@ -22,7 +22,7 @@
 /****************************************************************************/
 #pragma once
 
-void outputFailure(const char *file, const int line, const char *conditionString);
+#include "Core.h"
 
 #ifdef _WIN32
 #define DBG_BREAK() __debugbreak()
@@ -43,13 +43,16 @@ void outputFailure(const char *file, const int line, const char *conditionString
 * example usage: glClear(GL_COLOR_BUFFER_BIT); CHECK_GL_ERROR(); // this will check for errors in this (and any previous statements)
 */
 #ifdef _DEBUG
-#define CHECK_GL_ERROR() { checkGLError(__FILE__, __LINE__) && (DBG_BREAK(), 1); }
+#define CHECK_GL_ERROR() { GLError::checkGLError(__FILE__, __LINE__) && (DBG_BREAK(), 1); }
 #else // !_DEBUG
 #define CHECK_GL_ERROR() {  }
 //#define CHECK_GL_ERROR() { checkGLError(__FILE__, __LINE__) && (DBG_BREAK(), 1); }
 #endif // _DEBUG
 
-/**
-* Internal function used by macro CHECK_GL_ERROR, use that instead.
-*/
+
+BEGIN_NAMESPACE(GLError)
+
 bool checkGLError(const char *file, int a_line);
+
+END_NAMESPACE(GLERrror)
+

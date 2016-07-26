@@ -15,26 +15,20 @@ enum class EWindowMode { WINDOWED, BORDERLESS, FULLSCREEN, NONE };
 Main class providing basic functions and static access to input and graphics
 
 *** Usage examples ***
-Setup and main loop:
-
-#include "GLEngine.h"
-int main()
+GLEngine::initialize();
+GLEngine::createThread("RenderThread", [&]()
 {
-	GLEngine::initialize();
-	GLEngine::createThread("RenderThread", [&]()
-	{
-		GLEngine::createGLContext();
-		while (!GLEngine::isShutdown())
-		{
-			GLEngine::doRenderThreadTick();
-			// render stuff
-		}
-		GLEngine::destroyGLContext();
-	});
+	GLEngine::createGLContext();
 	while (!GLEngine::isShutdown())
-		GLEngine::doMainThreadTick()
-	GLEngine::finish();
-}
+	{
+		GLEngine::doRenderThreadTick();
+		// render stuff
+	}
+	GLEngine::destroyGLContext();
+});
+while (!GLEngine::isShutdown())
+	GLEngine::doMainThreadTick()
+GLEngine::finish();
 **********************/
 class GLEngine
 {

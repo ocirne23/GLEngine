@@ -18,16 +18,16 @@ vec3 rotateNormal(vec3 normal)
 {
 	normal = normal * 2.0 - 1.0;
 	vec3 N = v_normal;
-    vec3 dp1 = dFdx(v_position);
-    vec3 dp2 = dFdy(v_position);
-    vec2 duv1 = dFdx(v_texcoord);
-    vec2 duv2 = dFdy(v_texcoord);
-    vec3 dp2perp = cross(dp2, N);
-    vec3 dp1perp = cross(N, dp1);
-    vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
-    vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
-    float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
-    mat3 rotMat = mat3(T * invmax, B * invmax, N);
+	vec3 dp1 = dFdx(v_position);
+	vec3 dp2 = dFdy(v_position);
+	vec2 duv1 = dFdx(v_texcoord);
+	vec2 duv2 = dFdy(v_texcoord);
+	vec3 dp2perp = cross(dp2, N);
+	vec3 dp1perp = cross(N, dp1);
+	vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+	vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+	float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
+	mat3 rotMat = mat3(T * invmax, B * invmax, N);
 	return normalize(rotMat * normal);
 }
 
@@ -116,5 +116,5 @@ void main()
 	}
 	lightAccum += diffuse * u_ambient;
 	out_color = vec3(lightAccum);
+	out_color = texture(u_textureAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas
 }
-// out_color = texture(u_textureAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas

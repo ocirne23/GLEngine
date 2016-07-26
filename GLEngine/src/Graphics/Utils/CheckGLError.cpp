@@ -25,6 +25,8 @@
 #include "Core.h"
 #include "Graphics/GL/GL.h"
 
+BEGIN_NAMESPACE(GLError)
+
 bool checkGLError(const char *a_file, int a_line)
 {
 	bool error = false;
@@ -42,3 +44,5 @@ bool checkGLError(const char *a_file, int a_line)
 
 	return error;
 }
+
+END_NAMESPACE(GLError)

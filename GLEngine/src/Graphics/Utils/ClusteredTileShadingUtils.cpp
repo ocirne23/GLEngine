@@ -29,8 +29,8 @@ BEGIN_UNNAMED_NAMESPACE()
 
 void updateClipRegionRoot(float a_nc, float lc, float lz, float lightRadius, float cameraScale, float &clipMin, float &clipMax)
 {
-	float nz = (lightRadius - a_nc * lc) / lz;
-	float pz = (lc * lc + lz * lz - lightRadius * lightRadius) / (lz - (nz / a_nc) * lc);
+	const float nz = (lightRadius - a_nc * lc) / lz;
+	const float pz = (lc * lc + lz * lz - lightRadius * lightRadius) / (lz - (nz / a_nc) * lc);
 
 	if (pz < 0.0f)
 	{
@@ -48,16 +48,16 @@ void updateClipRegionRoot(float a_nc, float lc, float lz, float lightRadius, flo
 
 void updateClipRegion(float a_lc, float a_lz, float a_lightRadius, float a_cameraScale, float &a_clipMin, float &a_clipMax)
 {
-	float rSq = a_lightRadius * a_lightRadius;
-	float lcSqPluslzSq = a_lc * a_lc + a_lz * a_lz;
-	float d = rSq * a_lc * a_lc - lcSqPluslzSq * (rSq - a_lz * a_lz);
+	const float rSq = a_lightRadius * a_lightRadius;
+	const float lcSqPluslzSq = a_lc * a_lc + a_lz * a_lz;
+	const float d = rSq * a_lc * a_lc - lcSqPluslzSq * (rSq - a_lz * a_lz);
 
 	if (d >= 0.0f)
 	{
-		float a = a_lightRadius * a_lc;
-		float b = sqrt(d);
-		float nx0 = (a + b) / lcSqPluslzSq;
-		float nx1 = (a - b) / lcSqPluslzSq;
+		const float a = a_lightRadius * a_lc;
+		const float b = sqrt(d);
+		const float nx0 = (a + b) / lcSqPluslzSq;
+		const float nx1 = (a - b) / lcSqPluslzSq;
 
 		updateClipRegionRoot(nx0, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
 		updateClipRegionRoot(nx1, a_lc, a_lz, a_lightRadius, a_cameraScale, a_clipMin, a_clipMax);
@@ -83,7 +83,7 @@ glm::vec4 computeClipRegion(const glm::vec3& a_lightPosView, float a_lightRadius
 
 inline void swap(float& a_a, float& a_b)
 {
-	float tmp = a_a;
+	const float tmp = a_a;
 	a_a = a_b;
 	a_b = tmp;
 }
@@ -120,13 +120,13 @@ IBounds3D ClusteredTiledShadingUtils::sphereToScreenSpaceBounds3D(
 	const PerspectiveCamera& a_camera, const glm::vec3& a_lightPosViewSpace, float a_lightRadius, uint a_screenWidth, uint a_screenHeight, 
 	uint a_pixelsPerTileW, uint a_pixelsPerTileH, float a_recLogSD1)
 {
-	IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, a_lightPosViewSpace, a_lightRadius, a_screenWidth, a_screenHeight);
-	float recNear = 1.0f / a_camera.getNear();
+	const IBounds2D bounds2D = sphereToScreenSpaceBounds2D(a_camera, a_lightPosViewSpace, a_lightRadius, a_screenWidth, a_screenHeight);
+	const float recNear = 1.0f / a_camera.getNear();
 
-	int minZ = glm::max(int(calcClusterZ(a_lightPosViewSpace.z + a_lightRadius, recNear, a_recLogSD1)), 0);
-	int maxZ = glm::max(int(ceilf(calcClusterZ(a_lightPosViewSpace.z - a_lightRadius, recNear, a_recLogSD1)) + 0.5f), 0);
+	const int minZ = glm::max(int(calcClusterZ(a_lightPosViewSpace.z + a_lightRadius, recNear, a_recLogSD1)), 0);
+	const int maxZ = glm::max(int(ceilf(calcClusterZ(a_lightPosViewSpace.z - a_lightRadius, recNear, a_recLogSD1)) + 0.5f), 0);
 
-	glm::ivec2 tileSizePx = glm::ivec2(a_pixelsPerTileW, a_pixelsPerTileH);
+	const glm::ivec2 tileSizePx = glm::ivec2(a_pixelsPerTileW, a_pixelsPerTileH);
 
 	IBounds3D bounds3D;
 	bounds3D.min = glm::ivec3(bounds2D.min / tileSizePx, minZ);

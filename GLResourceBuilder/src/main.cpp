@@ -12,20 +12,10 @@ int main()
 
 	SceneProcessor sceneProcessor;
 	AssetDatabase objDB;
-	/*
-	ResourceBuilder::ResourceProcessorMap ifcProcessors;
-	ifcProcessors.insert({"ifc", &sceneProcessor});
-	AssetDatabase ifcDB;
-	ifcDB.createNew("..\\GLApp\\assets\\IFC-DB.da");
-	ResourceBuilder::buildResourcesDB(ifcProcessors, "..\\GLApp\\assets-source\\Models", ifcDB);
-	ifcDB.writeAndClose();
-	*/
-	ResourceBuilder::ResourceProcessorMap objProcessors;
-	objProcessors.insert({"obj", &sceneProcessor});
-	//objProcessors.insert({"ifc", &sceneProcessor});
 
+	ResourceBuilder::ResourceProcessorMap processors = {{"obj", &sceneProcessor}};
 	objDB.createNew("..\\GLApp\\assets\\OBJ-DB.da");
-	ResourceBuilder::buildResourcesDB(objProcessors, "..\\GLApp\\assets\\Models", objDB);
+	ResourceBuilder::buildResourcesDB(processors, "..\\GLApp\\assets\\Models", objDB);
 	objDB.writeAndClose();
 
 	print("Press enter to exit\n");
