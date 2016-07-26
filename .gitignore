@@ -16,6 +16,7 @@
 *.opensdf
 *.ilk
 *.pdb
+GLEngine.VC.db
 thumbs.db
 
 ipch/
