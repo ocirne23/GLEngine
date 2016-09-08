@@ -12,7 +12,7 @@ public:
 
 	void initialize(GLScene* a_scene) { m_scene = a_scene; }
 
-	virtual void render(const GLRenderer& renderer, GLConstantBuffer& modelMatrixUBO, bool depthOnly) override;
+	virtual void render(GLRenderer& renderer, bool depthOnly) override;
 
 	void setPosition(const glm::vec3& a_position)              { m_position = a_position; m_dirty = true; }
 	void setScale(float a_scale)                               { m_scale = a_scale; m_dirty = true; }

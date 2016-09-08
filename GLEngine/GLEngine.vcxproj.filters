@@ -79,14 +79,15 @@
     <ClCompile Include="src\3rdparty\EASTL\numeric_limits.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\intrusive_list.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\allocator_eastl.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
     <ClCompile Include="include\3rdparty\gli\core\dummy.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\VKContext.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
     <ClCompile Include="src\3rdparty\stbi\stb_image.c" />
     <ClCompile Include="src\3rdparty\stbi\stb_image_write.c" />
     <ClCompile Include="src\Database\Utils\MaxRectsPacker.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanContext.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanDebug.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanExampleBase.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanTools.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\common.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -961,10 +962,6 @@
     <ClInclude Include="include\3rdparty\EASTL\bonus\intrusive_sdlist.h" />
     <ClInclude Include="include\3rdparty\EASTL\bonus\intrusive_slist.h" />
     <ClInclude Include="include\3rdparty\EASTL\bonus\list_map.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\vk_cpp.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKUtils.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKDebug.h" />
     <ClInclude Include="include\3rdparty\gli\core\fetch.hpp" />
     <ClInclude Include="include\3rdparty\gli\core\flip.hpp" />
     <ClInclude Include="include\3rdparty\gli\core\generate_mipmaps.hpp" />
@@ -996,12 +993,23 @@
     <ClInclude Include="include\3rdparty\gli\texture3d.hpp" />
     <ClInclude Include="include\3rdparty\gli\type.hpp" />
     <ClInclude Include="include\3rdparty\gli\view.hpp" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\VKContext.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPipelineDescription.h" />
     <ClInclude Include="include\3rdparty\stbi\stb_image.h" />
     <ClInclude Include="include\3rdparty\stbi\stb_image_write.h" />
     <ClInclude Include="include\Public\Database\Utils\MaxRectsPacker.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanExampleBase.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\common.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\camera.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTools.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanDebug.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanShaders.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanFramebuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanContext.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanSwapChain.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextureLoader.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanMeshLoader.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextOverlay.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\pipelinesExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\triangleRevisitedExample.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

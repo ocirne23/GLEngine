@@ -3,6 +3,7 @@
 #include "Core.h"
 #include "gsl/gsl.h"
 #include "Database/Utils/AtlasPosition.h"
+#include <glm/glm.hpp>
 
 class TextureAtlas
 {
@@ -22,7 +23,7 @@ public:
 public:
 
 	void initialize(uint width, uint height, uint numComponents, uint numMipMaps, uint atlasIndex);
-	AtlasPosition getRegion(uint width, uint height);
+	glm::uvec4 getRegion(uint width, uint height);
 	void clear();
 
 	uint getWidth() const         { return m_width; }

@@ -77,10 +77,11 @@
     <ClCompile Include="src\Graphics\Utils\LightManager.cpp" />
     <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Utils\VKDebug.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Utils\VKUtils.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\VKContext.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Wrappers\VKBuffer.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\common.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanContext.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanDebug.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanExampleBase.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanTools.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
@@ -588,18 +589,25 @@
     <ClInclude Include="include\3rdparty\gsl\string_span.h" />
     <ClInclude Include="include\3rdparty\stbi\stb_image_write.h" />
     <ClInclude Include="include\Public\Database\Utils\MaxRectsPacker.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKDebug.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKUtils.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\vk_cpp.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\CubeMapGen.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLCubeMap.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLDrawCall.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderObject.h" />
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Utils\VKVerifier.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\VKContext.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKBuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Wrappers\VKPipelineDescription.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\camera.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\common.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\pipelinesExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\triangleRevisitedExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanContext.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanDebug.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanExampleBase.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanFramebuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanMeshLoader.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanShaders.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanSwapChain.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextOverlay.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextureLoader.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTools.h" />
     <ClInclude Include="include\Public\Utils\StringUtils.h" />
     <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
     <ClInclude Include="include\3rdparty\EASTL\utility.h" />
@@ -1144,7 +1152,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
@@ -1169,7 +1177,7 @@
       </ForcedIncludeFiles>
       <AdditionalOptions>
       </AdditionalOptions>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
@@ -1192,7 +1200,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
@@ -1216,7 +1224,7 @@
       <SDLCheck>true</SDLCheck>
       <ForcedIncludeFiles>
       </ForcedIncludeFiles>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>

@@ -17,10 +17,10 @@ DBAtlasTexture::DBAtlasTexture(uint a_width, uint a_height, uint a_numComponents
 
 void DBAtlasTexture::writeRegionTexture(const DBAtlasRegion& region)
 {
-	const uint regionXPos = region.m_atlasPosition.xPos;
-	const uint regionYPos = region.m_atlasPosition.yPos;
-	const uint regionWidth = region.m_atlasPosition.width;
-	const uint regionHeight = region.m_atlasPosition.height;
+	const uint regionXPos = region.m_atlasPosition.x;
+	const uint regionYPos = region.m_atlasPosition.y;
+	const uint regionWidth = region.m_atlasPosition.z;
+	const uint regionHeight = region.m_atlasPosition.w;
 	const uint padding = m_numMipMaps * m_numMipMaps;
 
 	// If the region fills the entire atlas, just load that image into the atlas.
@@ -52,6 +52,7 @@ void DBAtlasTexture::writeRegionTexture(const DBAtlasRegion& region)
 			m_texture.setPixel(regionXPos + x, regionYPos + y, pixel);
 		}
 	}
+
 	// All the loops below stretch out the color of the border of the image for padding amount of pixels
 	// top
 	for (uint x = 0; x < regionWidth; ++x)

@@ -5,14 +5,16 @@
 #include "Database/Assets/DBMaterial.h"
 #include "Database/Utils/AtlasPosition.h"
 #include "Database/Utils/TextureAtlas.h"
+#include "Database/Utils/MaxRectsPacker.h"
 #include "EASTL/algorithm.h"
 #include "EASTL/hash_map.h"
+#include "EASTL/hash_set.h"
 
 BEGIN_UNNAMED_NAMESPACE()
 
 enum { 
-	ATLAS_MAX_WIDTH      = 4096, 
-	ATLAS_MAX_HEIGHT     = 4096, 
+	ATLAS_MAX_WIDTH      = 8192, 
+	ATLAS_MAX_HEIGHT     = 8192, 
 	ATLAS_NUM_COMPONENTS = 3, 
 	ATLAS_START_WIDTH    = 64, 
 	ATLAS_START_HEIGHT   = 64,
@@ -20,171 +22,92 @@ enum {
 	ATLAS_NUM_MIPMAPS    = 4 
 };
 
-glm::vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const AtlasPosition& a_atlasPos)
+glm::vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const glm::vec4& a_atlasPos)
 {
-	const float xOffset = a_atlasPos.xPos / float(a_atlasWidth);
-	const float yOffset = a_atlasPos.yPos / float(a_atlasHeight);
-	const float width = a_atlasPos.width / float(a_atlasWidth);
-	const float height = a_atlasPos.height / float(a_atlasHeight);
+	const float xOffset = a_atlasPos.x / float(a_atlasWidth);
+	const float yOffset = a_atlasPos.y / float(a_atlasHeight);
+	const float width = a_atlasPos.z / float(a_atlasWidth);
+	const float height = a_atlasPos.w / float(a_atlasHeight);
 	return glm::vec4(xOffset, yOffset, width, height);
-}
-
-bool isPowerOfTwo(uint x)
-{
-	return ((x != 0) && !(x & (x - 1)));
-}
-
-// if i is already PoT, return the next higher PoT.
-uint getNextPOT(uint i)
-{
-	if (!isPowerOfTwo(i))
-		i--;
-	i |= i >> 1;
-	i |= i >> 2;
-	i |= i >> 4;
-	i |= i >> 8;
-	i |= i >> 16;
-	i++;
-	return i;
-}
-
-/* Increment the width/height, returns if incrementing was possible (not at max size) */
-bool getNextAtlasSize(uint& width, uint& height)
-{
-	if (width >= ATLAS_MAX_WIDTH && height >= ATLAS_MAX_HEIGHT)
-		return false;
-
-#if ATLAS_POT
-	if (width < height)
-		width = getNextPOT(width);
-	else
-		height = getNextPOT(height);
-#else
-	if (width < height)
-		width += ATLAS_INCREMENT;
-	else
-		height += ATLAS_INCREMENT;
-#endif
-
-	width = eastl::min(int(width), int(ATLAS_MAX_WIDTH));
-	height = eastl::min(int(height), int(ATLAS_MAX_HEIGHT));
-	
-	return true;
-}
-
-void increaseAtlasesSize(eastl::vector<std::unique_ptr<TextureAtlas>>& a_atlases)
-{
-	if (!a_atlases.size())
-	{
-		auto atlas = std::make_unique<TextureAtlas>();
-		atlas->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, 0);
-		a_atlases.push_back(std::move(atlas));
-		return;
-	}
-	uint width = a_atlases[0]->getWidth();
-	uint height = a_atlases[0]->getHeight();
-	const bool canIncrement = getNextAtlasSize(width, height);
-	if (canIncrement)
-	{	// resize all atlases to the new size
-		for (uint i = 0; i < a_atlases.size(); ++i)
-			a_atlases[i]->initialize(width, height, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, i);
-	}
-	else
-	{	// Add one new atlas and reset all atlas sizes back to smallest (not efficient)
-		a_atlases.push_back(std::make_unique<TextureAtlas>());
-		for (uint i = 0; i < a_atlases.size(); ++i)
-			a_atlases[i]->initialize(ATLAS_START_WIDTH, ATLAS_START_HEIGHT, ATLAS_NUM_COMPONENTS, ATLAS_NUM_MIPMAPS, i);
-	}
-}
-
-/* Returns if the AltasRegions fit in the TextureAtlases, sets the AltasPosition of each AltasRegion */
-bool containTexturesInAtlases(eastl::hash_map<eastl::string, DBAtlasRegion>& a_regions, eastl::vector<std::unique_ptr<TextureAtlas>>& a_atlases)
-{
-	if (!a_atlases.size())
-		return false;
-	for (std::unique_ptr<TextureAtlas>& a : a_atlases)
-		a->clear();
-
-	for (auto& pair: a_regions)
-	{
-		DBAtlasRegion& reg = pair.second;
-		bool contained = false;
-		for (std::unique_ptr<TextureAtlas>& atlas : a_atlases)
-		{
-			AtlasPosition pos = atlas->getRegion(reg.m_texWidth, reg.m_texHeight);
-			if (pos.isValid())
-			{
-				reg.m_atlasPosition = pos;
-				reg.m_atlasMapping = getTextureMapping(atlas->getWidth(), atlas->getHeight(), pos);
-				reg.m_atlasIdx = atlas->getAtlasIdx();
-				contained = true;
-				break;
-			}
-		}
-		if (!contained)
-			return false;
-	}
-	return true;
 }
 
 END_UNNAMED_NAMESPACE()
 
-eastl::vector<DBAtlasTexture> AtlasBuilder::createAtlases(eastl::vector<DBMaterial>& a_materials, const eastl::string& a_baseAssetPath)
+/** Packs all the textures of the given set of materials into atlases, different texture types are in different atlasses, there can be more than one atlas page per type. */
+eastl::array<eastl::vector<DBAtlasTexture>, DBMaterial::ETexTypes_COUNT> AtlasBuilder::createAtlases(eastl::vector<DBMaterial>& a_materials, const eastl::string& a_baseAssetPath)
 {
-	// First we create an unique set of regions so we don't have multiple AtlasRegions for the same texture
-	eastl::hash_map<eastl::string, DBAtlasRegion> uniqueRegions;
-	for (const DBMaterial& mat : a_materials) 
-	{
-		const eastl::string& diffuseFilePath = mat.getDiffuseTexturePath();
-		if (diffuseFilePath.length() && uniqueRegions.find(diffuseFilePath) == uniqueRegions.end())
-		{
-			DBAtlasRegion reg;
-			reg.loadInfo(a_baseAssetPath + diffuseFilePath);
-			uniqueRegions.insert({diffuseFilePath, reg});
-		}
+	eastl::hash_set<eastl::string> texFiles[DBMaterial::ETexTypes_COUNT];
+	DBAtlasRegion reg;
 
-		const eastl::string& normalFilePath = mat.getNormalTexturePath();
-		if (normalFilePath.length() && uniqueRegions.find(normalFilePath) == uniqueRegions.end())
-		{
-			DBAtlasRegion reg;
-			reg.loadInfo(a_baseAssetPath + normalFilePath);
-			uniqueRegions.insert({normalFilePath, reg});
-		}
-	}
+	for (const DBMaterial& mat : a_materials)
+		for (DBMaterial::ETexTypes i = DBMaterial::ETexTypes_Diffuse; i < DBMaterial::ETexTypes_COUNT; i = DBMaterial::ETexTypes(i + 1))
+			if (mat.hasTexture(i)) texFiles[i].insert(mat.getTexturePath(i));
 	
-	// Then we fit these textures into atlases (not the image data, just fitting rectangles)
-	eastl::vector<std::unique_ptr<TextureAtlas>> atlases;
-	if (uniqueRegions.size() == 1)
-	{
-		auto& pair = *uniqueRegions.begin();
-		const DBAtlasRegion& reg = pair.second;
-		auto atlas = std::make_unique<TextureAtlas>();
-		atlas->initialize(reg.m_texWidth, reg.m_texHeight, reg.m_numComp, ATLAS_NUM_MIPMAPS, 0);
-		atlases.push_back(std::move(atlas));
-	}
-	while (!containTexturesInAtlases(uniqueRegions, atlases))
-		increaseAtlasesSize(atlases);
+	eastl::vector<Rect> rects[DBMaterial::ETexTypes_COUNT];
+	eastl::vector<DBAtlasRegion> regions[DBMaterial::ETexTypes_COUNT];
 
-	// Create AtlasTexture objects out of the TextureAtlases (which are IAssets)
-	eastl::vector<DBAtlasTexture> atlasTextures;
-	atlasTextures.reserve(atlases.size());
-	for (std::unique_ptr<TextureAtlas>& atlas : atlases)
-		atlasTextures.emplace_back(atlas->getWidth(), atlas->getHeight(), atlas->getNumComponents(), atlas->getNumMipmaps());
-	atlases.clear();
-
-	for (auto& pair : uniqueRegions)
+	for (DBMaterial::ETexTypes i = DBMaterial::ETexTypes_Diffuse; i < DBMaterial::ETexTypes_COUNT; i = DBMaterial::ETexTypes(i + 1))
 	{
-		const DBAtlasRegion& reg = pair.second;
-		// Write the image data of every region into the atlas textures
-		atlasTextures[reg.m_atlasIdx].writeRegionTexture(reg);
-		// Update the region in each material with the correct atlasposition
-		for (DBMaterial& mat : a_materials)
+		uint rectIdx = 0;
+		for (const eastl::string& tex : texFiles[i])
 		{
-			if (mat.getDiffuseTexturePath() == pair.first)
-				mat.setDiffuseRegion(reg);
-			if (mat.getNormalTexturePath() == pair.first)
-				mat.setNormalRegion(reg);
+			DBAtlasRegion reg;
+			reg.loadInfo(a_baseAssetPath + tex);
+			regions[i].push_back(reg);
+			rects[i].push_back(Rect(rectIdx++, 0, 0, reg.m_texWidth, reg.m_texHeight));
 		}
 	}
-	return atlasTextures; // rvo
+
+	eastl::array<eastl::vector<DBAtlasTexture>, DBMaterial::ETexTypes_COUNT> atlasTextures;
+	const uint numComponentsForType[DBMaterial::ETexTypes_COUNT] = {
+		3, // Diffuse
+		3, // Normal
+		1, // Metalness
+		1, // Roughness
+		1  // Opacity
+	};
+
+	MaxRectsPacker::Settings packerSettings;
+	packerSettings.maxWidth = ATLAS_MAX_WIDTH;
+	packerSettings.maxHeight = ATLAS_MAX_HEIGHT;
+	packerSettings.paddingPx = ATLAS_NUM_MIPMAPS * ATLAS_NUM_MIPMAPS;
+	MaxRectsPacker packer(packerSettings);
+
+	for (DBMaterial::ETexTypes i = DBMaterial::ETexTypes_Diffuse; i < DBMaterial::ETexTypes_COUNT; i = DBMaterial::ETexTypes(i + 1))
+	{
+		if (rects[i].empty())
+			continue;
+
+		eastl::vector<Page> pages = packer.pack(rects[i]);
+		print("type: %i, numPages: %i\n", i, pages.size());
+		for (Page& page : pages) 
+			print("numImages: %i, size: %i - %i\n", page.rects.size(), page.width, page.height);
+
+		atlasTextures[i].reserve(pages.size());
+		const uint atlasWidth = pages[0].width;
+		const uint atlasHeight = pages[0].height;
+
+		for (uint j = 0; j < pages.size(); ++j)
+		{
+			const Page& page = pages[j];
+			uint numComponents = numComponentsForType[i];
+			atlasTextures[i].emplace_back(atlasWidth, atlasHeight, numComponents, ATLAS_NUM_MIPMAPS);
+			DBAtlasTexture& tex = atlasTextures[i].back();
+
+			for (const Rect& rect : page.rects)
+			{
+				DBAtlasRegion& region = regions[i][rect.id];
+				region.m_atlasPosition = glm::uvec4(rect.x, rect.y, rect.width, rect.height);
+				region.m_atlasMapping = getTextureMapping(atlasWidth, atlasHeight, region.m_atlasPosition);
+				region.m_atlasIdx = j;
+				tex.writeRegionTexture(region);
+
+				for (DBMaterial& mat : a_materials)
+					if (a_baseAssetPath + mat.getTexturePath(i) == region.m_filePath)
+						mat.setRegion(i, region);
+			}
+		}
+	}
+
+	return atlasTextures;
 }

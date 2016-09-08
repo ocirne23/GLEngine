@@ -22,16 +22,16 @@ class GLRenderer
 {
 public:
 
-	struct ModelMatrixData
+	struct ModelData
 	{
 		glm::mat4 u_modelMatrix;
+		glm::mat4 u_normalMatrix;
 	};
 
 	struct CameraVarsData
 	{
 		glm::mat4 u_vpMatrix;
 		glm::mat4 u_viewMatrix;
-		glm::mat4 u_normalMatrix;
 		glm::vec3 u_eyePos;
 		float u_camNear;
 		float u_camFar;
@@ -88,6 +88,8 @@ public:
 
 	const PerspectiveCamera* getSceneCamera() const { return m_sceneCamera; }
 
+	void setModelDataUBO(const ModelData& modelData);
+
 private:
 
 	void updateLightingGlobalsUBO(const PerspectiveCamera& camera);
@@ -124,7 +126,7 @@ private:
 
 	GLTexture m_dfvTexture;
 
-	GLConstantBuffer m_modelMatrixUBO;
+	GLConstantBuffer m_modelDataUBO;
 	GLConstantBuffer m_cameraVarsUBO;
 	GLConstantBuffer m_lightningGlobalsUBO;
 	GLConstantBuffer m_settingsGlobalsUBO;

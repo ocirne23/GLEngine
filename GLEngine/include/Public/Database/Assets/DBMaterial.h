@@ -3,6 +3,7 @@
 #include "Database/Assets/IAsset.h"
 #include "Database/Assets/DBAtlasRegion.h"
 #include "EASTL/string.h"
+#include "EASTL/array.h"
 
 #include <glm/glm.hpp>
 
@@ -11,6 +12,8 @@ struct aiMaterial;
 class DBMaterial : public IAsset
 {
 public:
+
+	enum ETexTypes { ETexTypes_Diffuse = 0, ETexTypes_Normal, ETexTypes_Metalness, ETexTypes_Roughness, ETexTypes_Opacity, ETexTypes_COUNT};
 
 	DBMaterial() {}
 	DBMaterial(const aiMaterial& assimpMaterial);
@@ -21,27 +24,22 @@ public:
 	virtual void write(AssetDatabaseEntry& entry) override;
 	virtual void read(AssetDatabaseEntry& entry) override;
 
-	void setDiffuseRegion(const DBAtlasRegion& region);
-	void setNormalRegion(const DBAtlasRegion& region);
+	void setRegion(ETexTypes type, const DBAtlasRegion& region) { m_atlasRegions[type] = region; }
+	const DBAtlasRegion& getRegion(ETexTypes type) const        { return m_atlasRegions[type]; }
+	const eastl::string& getTexturePath(ETexTypes type) const   { return m_atlasRegions[type].m_filePath; }
+	bool hasTexture(ETexTypes type) const                       { return !m_atlasRegions[type].m_filePath.empty(); }
 
 	void setSmoothness(float a_smoothness) { m_smoothness = a_smoothness; }
 	void setMetalness(float a_metalness)   { m_metalness = a_metalness; }
-	
-	const DBAtlasRegion& getDiffuseRegion() const { return m_diffuseRegion; }
-	const DBAtlasRegion& getNormalRegion() const  { return m_normalRegion; }
-	const glm::vec4& getMaterialColor() const     { return m_materialColor; }
-	const glm::vec4& getSpecularColor() const     { return m_specColor; }
-	float getSmoothness() const                   { return m_smoothness; }
-	float getMetalness() const                    { return m_metalness; }
-	float getOpacity() const                      { return m_opacity; }
-	const eastl::string& getName() const          { return m_name; }
-	const eastl::string& getDiffuseTexturePath() const;
-	const eastl::string& getNormalTexturePath() const;
 
-private:
-
-	void setDiffuseTexturePath(const eastl::string& filePath);
-	void setNormalTexturePath(const eastl::string& filePath);
+	const glm::vec4& getMaterialColor() const { return m_materialColor; }
+	const glm::vec4& getSpecularColor() const { return m_specColor; }
+	/*rip--*/
+	float getSmoothness() const               { return m_smoothness; }
+	float getMetalness() const                { return m_metalness; }
+	float getOpacity() const                  { return m_opacity; }
+	/*--rip*/
+	const eastl::string& getName() const      { return m_name; }
 
 private:
 	/*	
@@ -58,20 +56,10 @@ private:
 private:
 
 	eastl::string m_name;
-	DBAtlasRegion m_diffuseRegion;
-	DBAtlasRegion m_normalRegion;
+	eastl::array<DBAtlasRegion, ETexTypes_COUNT> m_atlasRegions;
 	glm::vec4 m_materialColor;
 	glm::vec4 m_specColor;
 	float m_smoothness = -1.0f;
 	float m_metalness  = -1.0f;
 	float m_opacity    = 1.0f;
-
-	/*
-	EBlendMode m_blendmode;
-	EShadingMode m_shadingmode;
-	ETextureFlags m_textureFlag;
-	ETextureWrap m_textureWrap;
-	ETextureMapping m_textureMapping;
-	ETextureOp m_textureOp;
-	*/
 };

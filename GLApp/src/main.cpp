@@ -9,6 +9,8 @@ int main()
 	
 	GLEngine::createThread("RenderThread", [&]()
 	{
+		//GLEngine::test();
+
 		GLEngine::createGLContext();
 		{
 			TestScreen testScreen;

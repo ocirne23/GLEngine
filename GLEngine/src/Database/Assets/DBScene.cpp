@@ -99,9 +99,12 @@ uint64 DBScene::getByteSize() const
 	for (uint i = 0; i < m_materials.size(); ++i)
 		totalSize += m_materials[i].getByteSize();
 	
-	totalSize += AssetDatabaseEntry::getValWriteSize(uint(m_atlasTextures.size()));
-	for (uint i = 0; i < m_atlasTextures.size(); ++i)
-		totalSize += m_atlasTextures[i].getByteSize();
+	for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
+	{
+		totalSize += AssetDatabaseEntry::getValWriteSize(uint(m_atlasTextures[i].size()));
+		for (uint j = 0; j < m_atlasTextures[i].size(); ++j)
+			totalSize += m_atlasTextures[i][j].getByteSize();
+	}
 	
 	return totalSize;
 }
@@ -119,10 +122,13 @@ void DBScene::write(AssetDatabaseEntry& entry)
 	entry.writeVal(uint(m_materials.size()));
 	for (uint i = 0; i < m_materials.size(); ++i)
 		m_materials[i].write(entry);
-	
-	entry.writeVal(uint(m_atlasTextures.size()));
-	for (uint i = 0; i < m_atlasTextures.size(); ++i)
-		m_atlasTextures[i].write(entry);
+
+	for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
+	{
+		entry.writeVal(uint(m_atlasTextures[i].size()));
+		for (uint j = 0; j < m_atlasTextures[i].size(); ++j)
+			m_atlasTextures[i][j].write(entry);
+	}
 }
 
 void DBScene::read(AssetDatabaseEntry& entry)
@@ -145,9 +151,12 @@ void DBScene::read(AssetDatabaseEntry& entry)
 	for (uint i = 0; i < numMaterials; ++i)
 		m_materials[i].read(entry);
 
-	uint numAtlasTextures = 0;
-	entry.readVal(numAtlasTextures);
-	m_atlasTextures.resize(numAtlasTextures);
-	for (uint i = 0; i < numAtlasTextures; ++i)
-		m_atlasTextures[i].read(entry);
+	for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
+	{
+		uint numAtlasTextures = 0;
+		entry.readVal(numAtlasTextures);
+		m_atlasTextures[i].resize(numAtlasTextures);
+		for (uint j = 0; j < numAtlasTextures; ++j)
+			m_atlasTextures[i][j].read(entry);
+	}
 }

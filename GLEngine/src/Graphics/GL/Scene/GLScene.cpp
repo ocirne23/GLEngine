@@ -4,6 +4,7 @@
 #include "Database/Assets/DBScene.h"
 #include "Graphics/GL/Scene/GLMaterial.h"
 #include "Graphics/GL/Scene/GLConfig.h"
+#include "Graphics/GL/Scene/GLRenderer.h"
 
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
@@ -24,41 +25,50 @@ void GLScene::initialize(const DBScene& a_dbScene)
 	m_materialBuffer.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::MaterialProperties));
 	updateMaterialBuffer();
 
-	if (a_dbScene.numAtlasTextures())
+	for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
 	{
-		const eastl::vector<DBAtlasTexture>& atlasTextures = a_dbScene.getAtlasTextures();
+		const eastl::vector<DBAtlasTexture>& atlasTextures = a_dbScene.getAtlasTextures(DBMaterial::ETexTypes(i));
+		if (atlasTextures.empty())
+			continue;
+
 		// Use info from the first texture since all textures use the same format.
 		const DBTexture& tex = atlasTextures[0].getTexture();
-		m_textureArray.startInit(tex.getWidth(), tex.getHeight(), uint(atlasTextures.size()), tex.getNumComponents(), 
+		m_textureArrays[i].startInit(tex.getWidth(), tex.getHeight(), uint(atlasTextures.size()), tex.getNumComponents(),
 			(tex.getFormat() == DBTexture::EFormat::FLOAT), atlasTextures[0].getNumMipmaps());
-		
+
 		for (const DBAtlasTexture& atlasTexture : atlasTextures)
-			m_textureArray.addTexture(atlasTexture.getTexture());
-		m_textureArray.finishInit();
+			m_textureArrays[i].addTexture(atlasTexture.getTexture());
+		m_textureArrays[i].finishInit();
 	}
 }
 
-void GLScene::render(const glm::mat4& a_transform, GLConstantBuffer& a_modelMatrixUBO, bool a_depthOnly)
+void GLScene::render(GLRenderer& a_renderer, const glm::mat4& a_transform, bool a_depthOnly)
 {
 	if (!a_depthOnly)
 	{
 		m_materialBuffer.bind();
-		if (m_textureArray.getNumTexturesAdded())
-			m_textureArray.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::TextureAtlasArray));
-		else
-			m_textureArray.unbind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::TextureAtlasArray));
+		for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
+		{
+			if (m_textureArrays[i].getNumComponents())
+				m_textureArrays[i].bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
+			else
+				m_textureArrays[i].unbind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
+		}
 	}
-	renderNode(m_nodes[0], a_transform, a_modelMatrixUBO);
+	renderNode(m_nodes[0], a_renderer, a_transform);
 }
 
-void GLScene::renderNode(const DBNode& a_node, const glm::mat4& a_parentTransform, GLConstantBuffer& a_modelMatrixUBO)
+void GLScene::renderNode(const DBNode& a_node, GLRenderer& a_renderer, const glm::mat4& a_parentTransform)
 {
-	const glm::mat4 transform = a_parentTransform * a_node.getTransform();
-	a_modelMatrixUBO.upload(sizeof(transform), &transform);
+	GLRenderer::ModelData data;
+	data.u_modelMatrix = a_parentTransform * a_node.getTransform();
+	data.u_normalMatrix = glm::inverse(glm::transpose(data.u_modelMatrix * a_renderer.getSceneCamera()->getViewMatrix()));
+	a_renderer.setModelDataUBO(data);
+
 	for (uint i : a_node.getMeshIndices())
 		m_meshes[i].render();
 	for (uint i : a_node.getChildIndices())
-		renderNode(m_nodes[i], transform, a_modelMatrixUBO);
+		renderNode(m_nodes[i], a_renderer, data.u_modelMatrix);
 }
 
 void GLScene::updateMaterialBuffer()

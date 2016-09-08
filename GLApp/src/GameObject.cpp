@@ -2,11 +2,11 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-void GameObject::render(const GLRenderer& renderer, GLConstantBuffer& modelMatrixUBO, bool depthOnly)
+void GameObject::render(GLRenderer& a_renderer, bool a_depthOnly)
 {
 	if (m_dirty) 
 		updateTransform();
-	m_scene->render(m_transform, modelMatrixUBO, depthOnly);
+	m_scene->render(a_renderer, m_transform, a_depthOnly);
 }
 
 void GameObject::updateTransform()

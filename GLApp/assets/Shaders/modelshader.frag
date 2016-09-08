@@ -7,6 +7,8 @@ in vec3 v_rawPos;
 in vec3 v_position;
 in vec2 v_texcoord;
 in vec3 v_normal;
+in vec3 v_tangent;
+in vec3 v_bitangent;
 flat in uint v_materialID;
 in vec4 v_shadowCoord;
 
@@ -16,19 +18,11 @@ layout (binding = DFV_TEXTURE_BINDING_POINT) uniform sampler2D u_dfvTexture;
 
 vec3 rotateNormal(vec3 normal)
 {
-	normal = normal * 2.0 - 1.0;
-	vec3 N = v_normal;
-	vec3 dp1 = dFdx(v_position);
-	vec3 dp2 = dFdy(v_position);
-	vec2 duv1 = dFdx(v_texcoord);
-	vec2 duv2 = dFdy(v_texcoord);
-	vec3 dp2perp = cross(dp2, N);
-	vec3 dp1perp = cross(N, dp1);
-	vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
-	vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
-	float invmax = inversesqrt( max( dot(T,T), dot(B,B) ) );
-	mat3 rotMat = mat3(T * invmax, B * invmax, N);
-	return normalize(rotMat * normal);
+	normal = normalize(normal * 2.0 - 1.0);
+	normal.y = -normal.y;
+	mat3 TBN = mat3(v_tangent, v_bitangent, v_normal);
+	normal = TBN * normal;
+	return normal;
 }
 
 float inverseSquareFalloff(float lightDistance, float lightRange)
@@ -81,23 +75,35 @@ vec3 doLight(vec3 lightContrib, vec3 L, vec3 N, vec3 V, float NdotV, float F0, v
 	float specularContrib = specularGGX(smoothness, F0, NdotH, HdotL, NdotL);
 	return lightContrib * diffuseContrib + lightContrib * specularContrib;
 }
-
+vec3 applyFog(vec3 rgb, float distance, vec3 rayOri, vec3 rayDir) 
+{
+	float c = 0.3;
+	float b = 0.02;
+	vec3 fogColor = u_sunColorIntensity.rgb;//vec3(0.5, 0.6, 0.7);
+	float fogAmount = clamp(c * exp(-rayOri.y * b) * (1.0 - exp(-distance * rayDir.y * b)) / rayDir.y, 0.0, 1.0);
+	return mix(rgb, fogColor, fogAmount);
+}
 void main()
 {
 	MaterialProperty material = getMaterial(v_materialID);
-	if (material.color.a < 0.4 && material.color.a > 0.1) // Hacky transparency for IFC demo
-		discard;
+	
+	if (hasOpacityTexture(material))
+	{
+		float opacity = getOpacitySample(material, v_texcoord);
+		if (opacity < 0.5f)
+			discard;
+	}
 
-	vec3 diffuse = hasDiffuseTexture(material) ? getDiffuseSample(material, v_texcoord).rgb : material.color.rgb;
-	vec3 N       = hasNormalTexture(material) ?  rotateNormal(getNormalSample(material, v_texcoord).rgb) : v_normal;
+	vec3 diffuse     = hasDiffuseTexture(material) ? getDiffuseSample(material, v_texcoord) : vec3(0.8, 0.2, 0.8);
+	vec3 N           = hasNormalTexture(material) ? rotateNormal(getNormalSample(material, v_texcoord)) : v_normal;
+	float smoothness = 1.0 - (hasRoughnessTexture(material) ? getRoughnessSample(material, v_texcoord) : 0.0);
+	float metalness  = hasMetalnessTexture(material) ? getMetalnessSample(material, v_texcoord) : 0.0;
+	
+	float albedo = (diffuse.r + diffuse.g + diffuse.b) / 3.0;
+	float F0     = mix(0.035, albedo, metalness);
 	vec3 V       = normalize(u_eyePos - v_position);
 	float NdotV  = clamp(dot(N, V), 0.0, 1.0);
-
-	float smoothness = material.smoothness;
-	float metalness  = material.metalness;
-	float albedo     = (diffuse.r + diffuse.g + diffuse.b) / 3.0;
-	float F0         = mix(0.035, albedo, metalness);
-
+	
 	vec3 lightAccum = vec3(0.0);
 	FOR_LIGHT_ITERATOR(light, v_position.z)
 	{
@@ -115,6 +121,14 @@ void main()
 		lightAccum += visibility * doLight(sunContrib, u_sunDir, N, V, NdotV, F0, diffuse, smoothness, metalness);
 	}
 	lightAccum += diffuse * u_ambient;
-	out_color = vec3(lightAccum);
-	out_color = texture(u_textureAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas
+	vec3 fog = applyFog(lightAccum, length(u_eyePos - v_position), u_eyePos, V);
+
+	out_color = vec3(fog);
+	//out_color = texture(u_diffuseAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas
 }
+
+// u_diffuseAtlasArray
+// u_normalAtlasArray
+// u_metalnessAtlasArray
+// u_roughnessAtlasArray
+// u_opacityAtlasArray

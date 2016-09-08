@@ -33,15 +33,15 @@
 	#define sampleFBO texture
 	#define singleSampleFBO texture
 #endif
-layout (std140, binding = MODEL_MATRIX_BINDING_POINT) uniform ModelMatrix
+layout (std140, binding = MODEL_DATA_BINDING_POINT) uniform ModelData
 {
 	mat4 u_modelMatrix;
+	mat4 u_normalMatrix;
 };
 layout (std140, binding = CAMERA_VARS_BINDING_POINT) uniform CameraVars
 {
 	mat4 u_vpMatrix;
 	mat4 u_viewMatrix;
-	mat4 u_normalMatrix;
 	vec3 u_eyePos;
 	float u_camNear;
 	float u_camFar;
@@ -59,11 +59,19 @@ struct MaterialProperty
 {
 	vec4 diffuseTexMapping;
 	vec4 normalTexMapping;
+	vec4 metalnessTexMapping;
+	vec4 roughnessTexMapping;
+	vec4 opacityTexMapping;
+	
 	int diffuseAtlasNr;
 	int normalAtlasNr;
-	float smoothness;
-	float metalness;
-	vec4 color;
+	int metalnessAtlasNr;
+	int roughnessAtlasNr;
+	
+	int opacityAtlasNr;
+	int padding0;
+	int padding1;
+	int padding2;
 };
 layout (std140, binding = MATERIAL_PROPERTIES_BINDING_POINT) uniform MaterialProperties
 {

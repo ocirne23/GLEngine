@@ -26,7 +26,7 @@ void TextureAtlas::clear()
 	initialize(m_width, m_height, m_numComponents, m_numMipMaps, m_atlasIndex);
 }
 
-AtlasPosition TextureAtlas::getRegion(uint width, uint height)
+glm::uvec4 TextureAtlas::getRegion(uint width, uint height)
 {
 	if (width > m_width || height > m_height)
 		return {0, 0, 0, 0};

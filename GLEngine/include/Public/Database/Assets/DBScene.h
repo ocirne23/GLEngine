@@ -8,6 +8,7 @@
 #include "Database/Assets/DBNode.h"
 #include "EASTL/string.h"
 #include "EASTL/vector.h"
+#include "EASTL/array.h"
 
 struct aiScene;
 struct aiNode;
@@ -34,19 +35,13 @@ public:
 	virtual void read(AssetDatabaseEntry& entry) override;
 
 	const eastl::vector<DBNode>& getNodes() const                 { return m_nodes; }
-	const eastl::vector<DBMesh>& getMeshes() const                { return m_meshes; }
+	const eastl::vector<DBMesh>& getMeshes() const               { return m_meshes; }
 	const eastl::vector<DBMaterial>& getMaterials() const         { return m_materials; }
-	const eastl::vector<DBAtlasTexture>& getAtlasTextures() const { return m_atlasTextures; }
-
-	eastl::vector<DBNode>& getNodes()                 { return m_nodes; }
-	eastl::vector<DBMesh>& getMeshes()                { return m_meshes; }
-	eastl::vector<DBMaterial>& getMaterials()         { return m_materials; }
-	eastl::vector<DBAtlasTexture>& getAtlasTextures() { return m_atlasTextures; }
+	const eastl::vector<DBAtlasTexture>& getAtlasTextures(DBMaterial::ETexTypes type) const { return m_atlasTextures[type]; }
 
 	uint numNodes() const         { return uint(m_nodes.size()); }
 	uint numMeshes() const        { return uint(m_meshes.size()); }
 	uint numMaterials() const     { return uint(m_materials.size()); }
-	uint numAtlasTextures() const { return uint(m_atlasTextures.size()); }
 
 private:
 
@@ -61,5 +56,5 @@ private:
 	// Material/texture info
 	eastl::vector<DBMaterial> m_materials;
 	// Multiple atlas textures containing all textures in the scene
-	eastl::vector<DBAtlasTexture> m_atlasTextures;
+	eastl::array<eastl::vector<DBAtlasTexture>, DBMaterial::ETexTypes_COUNT> m_atlasTextures;
 };

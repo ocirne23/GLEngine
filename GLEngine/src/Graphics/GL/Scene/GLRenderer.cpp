@@ -56,7 +56,7 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_bloom.initialize(screenWidth, screenHeight);
 	m_fxaa.initialize(FXAA::EQuality::EXTREME, screenWidth, screenHeight);
 
-	m_modelMatrixUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::ModelMatrix));
+	m_modelDataUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::ModelData));
 	m_cameraVarsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::CameraVars));
 	m_lightningGlobalsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::LightingGlobals));
 	m_settingsGlobalsUBO.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::SettingsGlobals));
@@ -83,6 +83,7 @@ void GLRenderer::reloadShaders()
 
 void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a_lightManager)
 {
+	m_sceneCamera = &a_camera;
 	uint screenWidth = GLEngine::graphics->getViewportWidth();
 	uint screenHeight = GLEngine::graphics->getViewportHeight();
 	
@@ -108,7 +109,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 		GLEngine::graphics->clearDepthOnly();
 		m_depthPrepassShader.begin();
 		for (GLRenderObject* renderObject : m_renderObjects)
-			renderObject->render(*this, m_modelMatrixUBO, true);
+			renderObject->render(*this, true);
 		m_depthPrepassShader.end();
 		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::BACK);
 		m_shadowFBO.end();
@@ -122,7 +123,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	
 	// MAIN SCENE //
 	m_sceneFBO.begin();
-	GLEngine::graphics->clear(glm::vec4(0.2f, 0.2f, 0.2f, 1.0));
+	GLEngine::graphics->clear(glm::vec4(0.2f, 0.2f, 0.7f, 1.0));
 	updateCameraDataUBO(a_camera);
 	GLEngine::graphics->setViewportSize(screenWidth, screenHeight);
 
@@ -131,7 +132,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	{
 		m_depthPrepassShader.begin();
 		for (GLRenderObject* renderObject : m_renderObjects)
-			renderObject->render(*this, m_modelMatrixUBO, true);
+			renderObject->render(*this, true);
 		m_depthPrepassShader.end();
 	}
 
@@ -142,7 +143,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	// RENDER SKYBOXES //
 	m_skyboxShader.begin();
 	for (GLRenderObject* renderObject : m_skyboxObjects)
-		renderObject->render(*this, m_modelMatrixUBO, false);
+		renderObject->render(*this, false);
 	m_skyboxShader.end();
 
 	if (!m_depthPrepassEnabled)
@@ -152,7 +153,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	m_modelShader.begin();
 	m_shadowFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::SunShadow));
 	for (GLRenderObject* renderObject : m_renderObjects)
-		renderObject->render(*this, m_modelMatrixUBO, false);
+		renderObject->render(*this, false);
 	m_modelShader.end();
 	
 	m_sceneFBO.end();
@@ -186,6 +187,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 		m_fxaa.endAndRender();
 	
 	GLEngine::graphics->setDepthTest(true);
+	m_sceneCamera = NULL;
 }
 
 void GLRenderer::addRenderObject(GLRenderObject* a_renderObject)
@@ -235,9 +237,15 @@ void GLRenderer::setSun(const glm::vec3& a_direction, const glm::vec3& a_color, 
 	m_sunDir = a_direction;
 	m_sunColorIntensity = glm::vec4(a_color, a_intensity);
 
+	// TODO: more efficient camera positioning
 	m_shadowCamera.setPosition(glm::vec3(a_direction * SUN_DISTANCE));
 	m_shadowCamera.lookAtPoint(glm::vec3(0));
 	m_shadowCamera.updateMatrices();
+}
+
+void GLRenderer::setModelDataUBO(const ModelData& a_modelData)
+{
+	m_modelDataUBO.upload(sizeof(ModelData), &a_modelData);
 }
 
 void GLRenderer::updateLightingGlobalsUBO(const PerspectiveCamera& a_camera)
@@ -261,7 +269,6 @@ void GLRenderer::updateCameraDataUBO(const PerspectiveCamera& a_camera)
 	CameraVarsData* cameraVars = rcast<CameraVarsData*>(m_cameraVarsUBO.mapBuffer());
 	cameraVars->u_vpMatrix     = a_camera.getCombinedMatrix();
 	cameraVars->u_viewMatrix   = a_camera.getViewMatrix();
-	cameraVars->u_normalMatrix = glm::inverse(glm::transpose(a_camera.getViewMatrix()));
 	cameraVars->u_eyePos       = glm::vec3(a_camera.getViewMatrix() * glm::vec4(a_camera.getPosition(), 1.0));
 	cameraVars->u_camNear      = a_camera.getNear();
 	cameraVars->u_camFar       = a_camera.getFar();

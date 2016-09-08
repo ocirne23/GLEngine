@@ -10,7 +10,11 @@ class GLConfig
 public:
 
 	enum class ETextures {
-		TextureAtlasArray,
+		DiffuseAtlasArray,
+		NormalAtlasArray,
+		MetalnessAtlasArray,
+		RoughnessAtlasArray,
+		OpacityAtlasArray,
 		DFVTexture,
 		ClusteredLightGrid,
 		ClusteredLightIndice,
@@ -24,7 +28,7 @@ public:
 		NUM_BINDING_POINTS
 	};
 	enum class EUBOs {
-		ModelMatrix,
+		ModelData,
 		CameraVars,
 		LightingGlobals,
 		MaterialProperties,

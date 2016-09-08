@@ -27,7 +27,7 @@ public:
 	uint m_texHeight = 0;
 	uint m_numComp   = 0;
 
-	AtlasPosition m_atlasPosition; // position in pixels
+	glm::uvec4 m_atlasPosition;     // position in pixels
 	glm::vec4 m_atlasMapping;      // position in texture space (floats)
 	int m_atlasIdx = -1;           // idx of the atlas the texture is located in in the scene.
 };

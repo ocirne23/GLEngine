@@ -10,7 +10,11 @@
 * to sample a texture of the material at the texture coordionate
 */
 
-layout (binding = TEXTURE_ATLAS_ARRAY_BINDING_POINT) uniform sampler2DArray u_textureAtlasArray;
+layout (binding = DIFFUSE_ARRAY_BINDING_POINT) uniform sampler2DArray u_diffuseAtlasArray;
+layout (binding = NORMAL_ARRAY_BINDING_POINT) uniform sampler2DArray u_normalAtlasArray;
+layout (binding = METALNESS_ARRAY_BINDING_POINT) uniform sampler2DArray u_metalnessAtlasArray;
+layout (binding = ROUGHNESS_ARRAY_BINDING_POINT) uniform sampler2DArray u_roughnessAtlasArray;
+layout (binding = OPACITY_ARRAY_BINDING_POINT) uniform sampler2DArray u_opacityAtlasArray;
 
 float _getMipMapLevel(vec2 texCoord)
 {
@@ -46,13 +50,44 @@ bool hasNormalTexture(MaterialProperty material)
 	return material.normalAtlasNr != -1;
 }
 
-vec4 getDiffuseSample(MaterialProperty material, vec2 texcoord)
+bool hasMetalnessTexture(MaterialProperty material)
 {
-	return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.diffuseAtlasNr), material.diffuseTexMapping);
+	return material.metalnessAtlasNr != -1;
 }
 
-vec4 getNormalSample(MaterialProperty material, vec2 texcoord)
+bool hasRoughnessTexture(MaterialProperty material)
 {
-	return _sampleAtlasArray(u_textureAtlasArray, vec3(texcoord, material.normalAtlasNr), material.normalTexMapping);
+	return material.roughnessAtlasNr != -1;
 }
+
+bool hasOpacityTexture(MaterialProperty material)
+{
+	return material.opacityAtlasNr != -1;
+}
+
+vec3 getDiffuseSample(MaterialProperty material, vec2 texcoord)
+{
+	return _sampleAtlasArray(u_diffuseAtlasArray, vec3(texcoord, material.diffuseAtlasNr), material.diffuseTexMapping).rgb;
+}
+
+vec3 getNormalSample(MaterialProperty material, vec2 texcoord)
+{
+	return _sampleAtlasArray(u_normalAtlasArray, vec3(texcoord, material.normalAtlasNr), material.normalTexMapping).rgb;
+}
+
+float getMetalnessSample(MaterialProperty material, vec2 texcoord)
+{
+	return _sampleAtlasArray(u_metalnessAtlasArray, vec3(texcoord, material.metalnessAtlasNr), material.metalnessTexMapping).r;
+}
+
+float getRoughnessSample(MaterialProperty material, vec2 texcoord)
+{
+	return _sampleAtlasArray(u_roughnessAtlasArray, vec3(texcoord, material.roughnessAtlasNr), material.roughnessTexMapping).r;
+}
+
+float getOpacitySample(MaterialProperty material, vec2 texcoord)
+{
+	return _sampleAtlasArray(u_opacityAtlasArray, vec3(texcoord, material.opacityAtlasNr), material.opacityTexMapping).r;
+}
+
 #endif // MATERIAL_LIGHTING

@@ -12,6 +12,7 @@
 
 class AssetDatabase;
 class DBScene;
+class GLRenderer;
 
 class GLScene
 {
@@ -23,7 +24,7 @@ public:
 	void initialize(const eastl::string& assetName, AssetDatabase& database);
 
 	void initialize(const DBScene& dbScene);
-	void render(const glm::mat4& transform, GLConstantBuffer& modelMatrixUBO, bool depthOnly = false);
+	void render(GLRenderer& a_renderer, const glm::mat4& transform, bool depthOnly = false);
 
 protected:
 
@@ -32,7 +33,7 @@ protected:
 
 private:
 
-	void renderNode(const DBNode& node, const glm::mat4& parentTransform, GLConstantBuffer& modelMatrixUBO);
+	void renderNode(const DBNode& node, GLRenderer& a_renderer, const glm::mat4& parentTransform);
 
 protected:
 
@@ -40,5 +41,5 @@ protected:
 	eastl::vector<DBMaterial> m_materials;
 	eastl::vector<GLMesh> m_meshes;
 	GLConstantBuffer m_materialBuffer;
-	GLTextureArray m_textureArray;
+	GLTextureArray m_textureArrays[DBMaterial::ETexTypes_COUNT];
 };

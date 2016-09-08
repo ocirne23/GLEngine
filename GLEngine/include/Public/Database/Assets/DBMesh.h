@@ -19,8 +19,8 @@ public:
 		glm::vec3 position;
 		glm::vec2 texcoords;
 		glm::vec3 normal;
-		//glm::vec3 tangents;
-		//glm::vec3 bitangents;
+		glm::vec3 tangents;
+		glm::vec3 bitangents;
 		uint materialID;
 	};
 

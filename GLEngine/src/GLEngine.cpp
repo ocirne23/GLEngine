@@ -4,8 +4,6 @@
 #include "Input/Input.h"
 #include "Utils/ThreadManager.h"
 
-#include "Graphics/Vulkan/VKContext.h"
-
 #include <SDL/SDL.h>
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -83,4 +81,26 @@ void GLEngine::finish()
 	SAFE_DELETE(graphics);
 	SAFE_DELETE(s_threadManager);
 	SDL_Quit();
+}
+
+#include "Graphics/Vulkan/Examples/pipelinesExample.h"
+
+void GLEngine::test()
+{
+	VulkanExample test;
+
+	Input::MouseMovedListener mouseMovedListener([&](uint a_x, uint a_y, int a_deltaX, int a_deltaY) {
+		test.mouseMoved(glm::vec2(a_x, a_y));
+	});
+	Input::MouseScrolledListener mouseScrolledListener([&](int a_amount) {
+		test.mouseScrolled(float(a_amount));
+	});
+	Input::KeyDownListener keyDownListener([&](EKey a_key, bool a_isRepeat) {
+		if (!a_isRepeat) test.keyPressed(uint(a_key));
+	});
+	Input::WindowResizedListener windowResizedListener([&](uint a_width, uint a_height) {
+		test.windowResize(glm::uvec2(a_width, a_height));
+	});
+
+	test.run();
 }

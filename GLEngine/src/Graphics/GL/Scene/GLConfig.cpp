@@ -19,19 +19,23 @@ GLVertexBuffer::Config       GLConfig::vboConfigs[uint(EVBOs::NUM_VBOS)];
 
 void GLConfig::initialize()
 {
-	textureBindingPoints[uint(ETextures::TextureAtlasArray)]    = 1;
-	textureBindingPoints[uint(ETextures::DFVTexture)]           = 2;
-	textureBindingPoints[uint(ETextures::ClusteredLightGrid)]   = 3;
-	textureBindingPoints[uint(ETextures::ClusteredLightIndice)] = 4;
-	textureBindingPoints[uint(ETextures::SunShadow)]            = 5;
-	textureBindingPoints[uint(ETextures::Color)]                = 1;
+	textureBindingPoints[uint(ETextures::DiffuseAtlasArray)]    = 1;
+	textureBindingPoints[uint(ETextures::NormalAtlasArray)]     = 2;
+	textureBindingPoints[uint(ETextures::MetalnessAtlasArray)]  = 3;
+	textureBindingPoints[uint(ETextures::RoughnessAtlasArray)]  = 4;
+	textureBindingPoints[uint(ETextures::OpacityAtlasArray)]    = 5;
+	textureBindingPoints[uint(ETextures::DFVTexture)]           = 6;
+	textureBindingPoints[uint(ETextures::ClusteredLightGrid)]   = 7;
+	textureBindingPoints[uint(ETextures::ClusteredLightIndice)] = 8;
+	textureBindingPoints[uint(ETextures::SunShadow)]            = 9;
+	textureBindingPoints[uint(ETextures::Color)]                = 10;
 	textureBindingPoints[uint(ETextures::Depth)]                = 2;
 	textureBindingPoints[uint(ETextures::HBAONoise)]            = 3;
 	textureBindingPoints[uint(ETextures::Blur)]                 = 3;
 	textureBindingPoints[uint(ETextures::HBAOResult)]           = 4;
 	textureBindingPoints[uint(ETextures::BloomResult)]          = 5;
 
-	uboConfigs[uint(EUBOs::ModelMatrix)] =                    { 0, "ModelMatrix",             GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::ModelMatrixData) };
+	uboConfigs[uint(EUBOs::ModelData)] =                      { 0, "ModelData",               GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::ModelData) };
 	uboConfigs[uint(EUBOs::CameraVars)] =                     { 1, "CameraVars",              GLConstantBuffer::EDrawUsage::STREAM, sizeof(GLRenderer::CameraVarsData) };
 	uboConfigs[uint(EUBOs::LightingGlobals)] =                { 2, "LightingGlobals",         GLConstantBuffer::EDrawUsage::STATIC, sizeof(GLRenderer::LightingGlobalsData) };
 	uboConfigs[uint(EUBOs::MaterialProperties)] =             { 3, "MaterialProperties",      GLConstantBuffer::EDrawUsage::STATIC, sizeof(GLMaterial) * maxMaterials };
@@ -45,9 +49,9 @@ void GLConfig::initialize()
 		VertexAttribute(0, VertexAttribute::EFormat::FLOAT, 3),       // Position
 		VertexAttribute(1, VertexAttribute::EFormat::FLOAT, 2),       // Texcoord
 		VertexAttribute(2, VertexAttribute::EFormat::FLOAT, 3),       // Normals
-		// VertexAttribute(3, VertexAttribute::EFormat::FLOAT, 3),       // Tangents
-		// VertexAttribute(4, VertexAttribute::EFormat::FLOAT, 3),       // Bitangents
-		VertexAttribute(3, VertexAttribute::EFormat::UNSIGNED_INT, 1) // MaterialID
+		VertexAttribute(3, VertexAttribute::EFormat::FLOAT, 3),       // Tangents
+		VertexAttribute(4, VertexAttribute::EFormat::FLOAT, 3),       // Bitangents
+		VertexAttribute(5, VertexAttribute::EFormat::UNSIGNED_INT, 1) // MaterialID
 	};
 	vboConfigs[uint(EVBOs::GLMeshVertex)] = {
 		GLVertexBuffer::EBufferType::ARRAY,
@@ -108,7 +112,12 @@ void GLConfig::initializeDefines()
 	defines.push_back("MAX_LIGHTS "       + StringUtils::to_string(GLConfig::maxLights));
 	defines.push_back("NUM_MULTISAMPLES " + StringUtils::to_string(uint(GLConfig::multisampleType)));
 
-	defines.push_back("TEXTURE_ATLAS_ARRAY_BINDING_POINT "  + TEX_BINDING_POINT_STR(ETextures::TextureAtlasArray));
+	defines.push_back("DIFFUSE_ARRAY_BINDING_POINT "   + TEX_BINDING_POINT_STR(ETextures::DiffuseAtlasArray));
+	defines.push_back("NORMAL_ARRAY_BINDING_POINT "    + TEX_BINDING_POINT_STR(ETextures::NormalAtlasArray));
+	defines.push_back("METALNESS_ARRAY_BINDING_POINT " + TEX_BINDING_POINT_STR(ETextures::MetalnessAtlasArray));
+	defines.push_back("ROUGHNESS_ARRAY_BINDING_POINT " + TEX_BINDING_POINT_STR(ETextures::RoughnessAtlasArray));
+	defines.push_back("OPACITY_ARRAY_BINDING_POINT "   + TEX_BINDING_POINT_STR(ETextures::OpacityAtlasArray));
+
 	defines.push_back("DFV_TEXTURE_BINDING_POINT "          + TEX_BINDING_POINT_STR(ETextures::DFVTexture));
 	defines.push_back("LIGHT_GRID_TEXTURE_BINDING_POINT "   + TEX_BINDING_POINT_STR(ETextures::ClusteredLightGrid));
 	defines.push_back("LIGHT_INDICE_TEXTURE_BINDING_POINT " + TEX_BINDING_POINT_STR(ETextures::ClusteredLightIndice));
@@ -120,7 +129,7 @@ void GLConfig::initializeDefines()
 	defines.push_back("AO_RESULT_TEXTURE_BINDING_POINT "    + TEX_BINDING_POINT_STR(ETextures::HBAOResult));
 	defines.push_back("BLOOM_RESULT_TEXTURE_BINDING_POINT " + TEX_BINDING_POINT_STR(ETextures::BloomResult));
 
-	defines.push_back("MODEL_MATRIX_BINDING_POINT "	             + UBO_BINDING_POINT_STR(EUBOs::ModelMatrix));
+	defines.push_back("MODEL_DATA_BINDING_POINT "	             + UBO_BINDING_POINT_STR(EUBOs::ModelData));
 	defines.push_back("CAMERA_VARS_BINDING_POINT "               + UBO_BINDING_POINT_STR(EUBOs::CameraVars));
 	defines.push_back("LIGHTING_GLOBALS_BINDING_POINT "          + UBO_BINDING_POINT_STR(EUBOs::LightingGlobals));
 	defines.push_back("MATERIAL_PROPERTIES_BINDING_POINT "       + UBO_BINDING_POINT_STR(EUBOs::MaterialProperties));

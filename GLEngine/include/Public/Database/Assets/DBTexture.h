@@ -3,6 +3,7 @@
 #include "Database/Assets/IAsset.h"
 #include "EASTL/string.h"
 #include "EASTL/vector.h"
+#include <glm/glm.hpp>
 
 class DBTexture : public IAsset
 {
@@ -30,6 +31,8 @@ public:
 
 	inline void setPixel(uint a_x, uint a_y, const byte* a_pixelData)
 	{	// Should assert arguments but slows stuff down too much
+		a_x = glm::clamp(a_x, 0u, m_width - 1);
+		a_y = glm::clamp(a_y, 0u, m_height - 1);
 		memcpy(m_rawData.data() + ((m_width * a_y) + a_x) * m_numComp * m_pixColSize, a_pixelData, m_numComp * m_pixColSize);
 		m_compressedDataUpToDate = false;
 	}

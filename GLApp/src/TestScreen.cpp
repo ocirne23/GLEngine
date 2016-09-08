@@ -1,12 +1,9 @@
 #include "TestScreen.h"
 
-#include "Database/Assets/DBScene.h"
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Utils/StringUtils.h"
-
-#include "Graphics/Vulkan/VKContext.h"
 
 #include <CEGUI/EventArgs.h>
 #include <CEGUI/Window.h>
@@ -18,42 +15,36 @@
 
 TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 {
-	VKContext::test();
-
 	uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	uint viewportHeight = GLEngine::graphics->getViewportHeight();
 	m_camera.initialize(float(viewportWidth), float(viewportHeight), 90.0f, 0.1f, 1000.0f);
-	m_camera.lookAtPoint(glm::vec3(0.0f, 0.0f, 20.0f));
 	m_renderer.initialize(m_camera);
 	m_cameraController.setCameraSpeed(5.0f);
 
 	if (m_objDB.openExisting("assets/OBJ-DB.da"))
 	{
-		if (m_objDB.hasAsset(m_objectNames[EGameObjects_PALACE]))
-		{
-			m_scenes[EGameObjects_PALACE].initialize(m_objectNames[EGameObjects_PALACE], m_objDB);
-			m_gameObjects[EGameObjects_PALACE].initialize(&m_scenes[EGameObjects_PALACE]);
-			m_gameObjects[EGameObjects_PALACE].setPosition(glm::vec3(0.0f, -1.5f, 20.0f));
-			m_gameObjects[EGameObjects_PALACE].setRotation(glm::vec3(0, 1, 0), 90.0f);
-			m_gameObjects[EGameObjects_PALACE].setScale(0.5f);
-			m_renderer.addRenderObject(&m_gameObjects[EGameObjects_PALACE]);
-		}
-		if (m_objDB.hasAsset(m_objectNames[EGameObjects_SKYSPHERE]))
-		{
-			m_scenes[EGameObjects_SKYSPHERE].initialize(m_objectNames[EGameObjects_SKYSPHERE], m_objDB);
-			m_gameObjects[EGameObjects_SKYSPHERE].initialize(&m_scenes[EGameObjects_SKYSPHERE]);
-			m_renderer.addSkybox(&m_gameObjects[EGameObjects_SKYSPHERE]);
-		}
-	}
-	m_camera.lookAtPoint(m_gameObjects[EGameObjects_PALACE].getPosition());
+		m_sponzaScene.initialize("sponza.obj", m_objDB);
+		m_skysphereScene.initialize("skysphere.obj", m_objDB);
+		m_sunScene.initialize("sphere.obj", m_objDB);
+		
+		m_sponza.initialize(&m_sponzaScene);
+		m_sponza.setPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+		m_sponza.setScale(0.01f);
+		m_renderer.addRenderObject(&m_sponza);
 
+		m_skysphere.initialize(&m_skysphereScene);
+		m_renderer.addSkybox(&m_skysphere);
+
+		m_sun.initialize(&m_sunScene);
+		m_sun.setScale(30.0f);
+		m_renderer.addRenderObject(&m_sun);
+	}
+
+	setSunDirection(glm::normalize(glm::vec3(0.0f, 1.0f, 0.0f)));
 
 	m_fpsMeasurer.setLogFunction(1.0f, [this]() { 
 		GLEngine::graphics->setWindowTitle(("GLApp FPS: " + StringUtils::to_string(m_fpsMeasurer.getAvgFps())).c_str()); 
 	});
-	setSunRotation(m_sunRotation);
-
-	m_guiManager.initialize();
 
 	initializeGUI();
 	initializeInputListeners();
@@ -61,8 +52,6 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 
 TestScreen::~TestScreen()
 {
-	for (owner<CEGUI::ListboxItem*> item : m_objectListItems)
-		delete item;
 }
 
 void TestScreen::render(float a_deltaSec)
@@ -71,10 +60,9 @@ void TestScreen::render(float a_deltaSec)
 	if (m_timeAccum > 1.0f)
 	{
 		m_timeAccum = 0.0f;
-	//	setSunRotation(m_sunRotation);
-		m_sunRotation += 1.0f;
-	//	print(glm::to_string(m_camera.getPosition()).c_str());
+		setSunDirection(glm::rotate(m_sunDir, glm::abs(m_sunDir.y) > 0.60f ? 0.02f : -1.8f, glm::normalize(glm::vec3(0.250f, 0.0f, 0.25f))));
 	}
+	m_sun.setPosition(m_camera.getPosition() + m_sunDir * 900.0f);
 
 	m_fpsMeasurer.tickFrame(a_deltaSec);
 	m_cameraController.update(m_camera, a_deltaSec, !m_guiManager.isFocused());
@@ -84,33 +72,15 @@ void TestScreen::render(float a_deltaSec)
 	GLEngine::graphics->swap();
 }
 
-void TestScreen::setSunRotation(float a_angle)
-{	// Values based on skysphere
-	const glm::vec3 baseSunDir = glm::normalize(glm::vec3(0.597, 0.537, 0.597));
-	const glm::vec3 sunColor = glm::vec3(0.75f, 0.7f, 0.66f);
-	const glm::mat4 sunRot = glm::rotate(a_angle, glm::vec3(0, 1, 0));
-	const glm::vec3 sunPos = glm::mat3(sunRot) * baseSunDir;
-	const float skyboxAngleOffset = 140.0f;
-
-	m_renderer.setSun(sunPos, sunColor, 1.0f);
-	m_gameObjects[EGameObjects_SKYSPHERE].setRotation(glm::vec3(0, 1, 0), a_angle - skyboxAngleOffset);
+void TestScreen::setSunDirection(glm::vec3 a_direction)
+{
+	m_sunDir = a_direction;
+	m_renderer.setSun(m_sunDir, glm::vec3(0.75f, 0.7f, 0.66f), 1.0f);
 }
 
 void TestScreen::initializeGUI()
 {
-	{
-		CEGUI::FrameWindow* objectListFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/ObjectListFrameWindow.layout"));
-		CEGUI::Listbox* objectListBox = scast<CEGUI::Listbox*>(objectListFrameWindow->getChild("ObjectListBox"));
-		
-		for (uint i = 0; i < EGameObjects_NUM_GAMEOBJECTS; ++i)
-		{
-			m_objectListItems[i] = new CEGUI::ListboxTextItem(m_objectNames[i].c_str());
-			objectListBox->addItem(m_objectListItems[i]);
-		}
-		objectListFrameWindow->setDragMovingEnabled(false);
-		objectListFrameWindow->setRolledup(true);
-		addWindow(objectListFrameWindow);
-	}
+	m_guiManager.initialize();
 	{
 		CEGUI::FrameWindow* optionsFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/OptionsFrameWindow.layout"));
 		{
@@ -190,6 +160,7 @@ void TestScreen::initializeInputListeners()
 		case EKey::KP_PLUS:  m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 1.2f); break;
 		case EKey::KP_MINUS: m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 0.8f); break;
 		case EKey::Y:        m_lightManager.deleteLights(); break;
+		case EKey::U:        setSunDirection(m_camera.getDirection()); break;
 		case EKey::T:
 		{
 			glm::vec3 position = m_camera.getPosition();
