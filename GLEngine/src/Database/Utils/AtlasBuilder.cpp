@@ -3,11 +3,8 @@
 #include "Database/Assets/DBAtlasRegion.h"
 #include "Database/Assets/DBAtlasTexture.h"
 #include "Database/Assets/DBMaterial.h"
-#include "Database/Utils/AtlasPosition.h"
-#include "Database/Utils/TextureAtlas.h"
 #include "Database/Utils/MaxRectsPacker.h"
 #include "EASTL/algorithm.h"
-#include "EASTL/hash_map.h"
 #include "EASTL/hash_set.h"
 
 BEGIN_UNNAMED_NAMESPACE()
@@ -15,11 +12,7 @@ BEGIN_UNNAMED_NAMESPACE()
 enum { 
 	ATLAS_MAX_WIDTH      = 8192, 
 	ATLAS_MAX_HEIGHT     = 8192, 
-	ATLAS_NUM_COMPONENTS = 3, 
-	ATLAS_START_WIDTH    = 64, 
-	ATLAS_START_HEIGHT   = 64,
-	ATLAS_INCREMENT      = 32,
-	ATLAS_NUM_MIPMAPS    = 4 
+	ATLAS_NUM_MIPMAPS    = 4
 };
 
 glm::vec4 getTextureMapping(uint a_atlasWidth, uint a_atlasHeight, const glm::vec4& a_atlasPos)

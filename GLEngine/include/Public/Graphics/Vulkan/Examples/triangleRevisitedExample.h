@@ -12,7 +12,7 @@
 */
 #pragma once
 
-#include "vulkanExampleBase.h"
+#include "base/vulkanExampleBase.h"
 
 class VulkanExample : public vkx::ExampleBase {
 	// Moved to base class

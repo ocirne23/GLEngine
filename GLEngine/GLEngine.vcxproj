@@ -77,11 +77,14 @@
     <ClCompile Include="src\Graphics\Utils\LightManager.cpp" />
     <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\common.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanContext.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanDebug.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanExampleBase.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanTools.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\common.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\shapes.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanContext.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanDebug.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanExampleBase.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanGear.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanShaders.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanTools.cpp" />
     <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
     <ClCompile Include="src\3rdparty\json\json_value.cpp" />
@@ -105,9 +108,9 @@
     <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp" />
     <ClCompile Include="src\Utils\Semaphore.cpp" />
     <ClCompile Include="src\3rdparty\stbi\stb_image.c" />
-    <ClCompile Include="src\Database\Utils\TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Downloads\Vulkan-cpp\base\vulkanShapes.hpp" />
     <ClInclude Include="include\3rdparty\CEGUI\Affector.h" />
     <ClInclude Include="include\3rdparty\CEGUI\Animation.h" />
     <ClInclude Include="include\3rdparty\CEGUI\AnimationInstance.h" />
@@ -594,20 +597,27 @@
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLDrawCall.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderObject.h" />
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\camera.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\common.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\camera.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\common.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\easings.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\frustum.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\json.hpp" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\pipelinesExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\shapes.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\threadPool.hpp" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\triangleRevisitedExample.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanContext.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanDebug.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanExampleBase.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanFramebuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanMeshLoader.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanShaders.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanSwapChain.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextOverlay.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextureLoader.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTools.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanContext.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanDebug.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanExampleBase.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanFramebuffer.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanGear.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanMeshLoader.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanShaders.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanShapes.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanSwapChain.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanTextOverlay.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanTextureLoader.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanTools.h" />
     <ClInclude Include="include\Public\Utils\StringUtils.h" />
     <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
     <ClInclude Include="include\3rdparty\EASTL\utility.h" />
@@ -696,7 +706,6 @@
     <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h" />
     <ClInclude Include="include\Public\Graphics\UI\Font.h" />
     <ClInclude Include="include\Public\Database\Utils\AtlasBuilder.h" />
-    <ClInclude Include="include\Public\Database\Utils\AtlasPosition.h" />
     <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
     <ClInclude Include="include\Public\Database\Utils\CRC64.h" />
     <ClInclude Include="include\Public\Utils\DeltaTimeMeasurer.h" />
@@ -713,7 +722,6 @@
     <ClInclude Include="include\Public\Utils\Semaphore.h" />
     <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h" />
     <ClInclude Include="include\3rdparty\stbi\stb_image.h" />
-    <ClInclude Include="include\Public\Database\Utils\TextureAtlas.h" />
     <ClInclude Include="include\Public\Utils\Vec.h" />
     <ClInclude Include="include\Public\Utils\VecForward.h" />
     <ClInclude Include="src\3rdparty\CEGUI\implementations\mac\macPlugins.h" />
@@ -1185,7 +1193,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib;glslangd.lib;HLSLd.lib;OGLCompilerd.lib;SPIRVd.lib;SPVRemapperd.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -1236,7 +1244,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib;glslang.lib;HLSL.lib;OGLCompiler.lib;SPIRV.lib;SPVRemapper.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />

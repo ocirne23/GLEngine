@@ -16,7 +16,6 @@
     <ClCompile Include="src\Database\Assets\DBScene.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
     <ClCompile Include="src\Graphics\GL\Scene\GLMaterial.cpp" />
-    <ClCompile Include="src\Database\Utils\TextureAtlas.cpp" />
     <ClCompile Include="src\Database\Utils\CRC64.cpp" />
     <ClCompile Include="src\Database\Utils\AtlasBuilder.cpp" />
     <ClCompile Include="src\Database\Assets\IAsset.cpp" />
@@ -83,11 +82,14 @@
     <ClCompile Include="src\3rdparty\stbi\stb_image.c" />
     <ClCompile Include="src\3rdparty\stbi\stb_image_write.c" />
     <ClCompile Include="src\Database\Utils\MaxRectsPacker.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanContext.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanDebug.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanExampleBase.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\vulkanTools.cpp" />
-    <ClCompile Include="src\Graphics\Vulkan\Examples\common.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanTools.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\common.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanContext.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanDebug.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanExampleBase.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanShaders.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\vulkanGear.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Examples\base\shapes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -136,7 +138,6 @@
     <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
     <ClInclude Include="include\Public\Database\Assets\EAssetType.h" />
     <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
-    <ClInclude Include="include\Public\Database\Utils\TextureAtlas.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLScene.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
@@ -150,7 +151,6 @@
     <ClInclude Include="include\Public\Database\AssetDatabase.h" />
     <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
     <ClInclude Include="include\Public\Database\Utils\AtlasBuilder.h" />
-    <ClInclude Include="include\Public\Database\Utils\AtlasPosition.h" />
     <ClInclude Include="include\3rdparty\json\autolink.h" />
     <ClInclude Include="include\3rdparty\EASTL\bitset.h" />
     <ClInclude Include="include\Public\Database\Processors\ByteImageProcessor.h" />
@@ -996,18 +996,26 @@
     <ClInclude Include="include\3rdparty\stbi\stb_image.h" />
     <ClInclude Include="include\3rdparty\stbi\stb_image_write.h" />
     <ClInclude Include="include\Public\Database\Utils\MaxRectsPacker.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanExampleBase.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\common.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\camera.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTools.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanDebug.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanShaders.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanFramebuffer.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanContext.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanSwapChain.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextureLoader.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanMeshLoader.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanTextOverlay.h" />
+    <ClInclude Include="..\..\..\..\Downloads\Vulkan-cpp\base\vulkanShapes.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanTools.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\camera.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\common.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\easings.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\frustum.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\json.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\shapes.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\threadPool.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanContext.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanDebug.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanExampleBase.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanFramebuffer.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanMeshLoader.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanShaders.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanShapes.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanSwapChain.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanTextOverlay.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanTextureLoader.hpp" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanGear.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\pipelinesExample.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\triangleRevisitedExample.h" />
   </ItemGroup>

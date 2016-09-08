@@ -21,7 +21,7 @@ GLEngine::createThread("RenderThread", [&]()
 	GLEngine::createGLContext();
 	while (!GLEngine::isShutdown())
 	{
-		GLEngine::doRenderThreadTick();
+		GLEngine::doEngineTick();
 		// render stuff
 	}
 	GLEngine::destroyGLContext();
@@ -44,7 +44,7 @@ public:
 
 	/** Should be called continuously on the main thread to receive input events from the OS */
 	static void doMainThreadTick();
-	/** Should be called on the users logic thread to trigger input listeners */
+	/** Should be called on the logic thread to trigger input listeners */
 	static void doEngineTick();
 
 	static void sleep(uint timeMs);

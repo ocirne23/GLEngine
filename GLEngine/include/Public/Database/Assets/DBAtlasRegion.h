@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Database/Assets/IAsset.h"
-#include "Database/Utils/AtlasPosition.h"
 #include "EASTL/string.h"
 
 #include <glm/glm.hpp>

@@ -68,8 +68,6 @@ void DBTexture::loadFromFile(const eastl::string& a_filePath, EFormat a_format, 
 		return;
 	}
 
-	
-
 	m_format = a_format;
 	m_pixColSize = getPixColSize(m_format);
 	m_width = uint(w);

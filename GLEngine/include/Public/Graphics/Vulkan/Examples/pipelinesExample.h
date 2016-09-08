@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "vulkanExampleBase.h"
+#include "base/vulkanExampleBase.h"
 
 
 // Vertex layout for this example
