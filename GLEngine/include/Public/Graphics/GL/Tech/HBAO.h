@@ -16,9 +16,6 @@ public:
 
 	struct GlobalsUBO
 	{
-		glm::vec2 fullResolution;
-		glm::vec2 invFullResolution;
-
 		glm::vec2 aoResolution;
 		glm::vec2 invAOResolution;
 
@@ -47,15 +44,18 @@ public:
 	HBAO() {}
 	~HBAO() {}
 
-	void initialize(const PerspectiveCamera& camera, uint xRes, uint yRes);
+	void initialize(const PerspectiveCamera& camera, uint screenWidth, uint screenHeight);
 	void reloadShader();
-	GLFramebuffer& getHBAOResultFBO(GLFramebuffer& sceneFBO);
+	GLFramebuffer& getHBAOResultFBO(GLFramebuffer& a_sceneFBO);
 
 private:
 
 	bool m_initialized = false;
 
+	glm::ivec2 m_screenRes;
+	GLShader m_downsampleDepthShader;
 	GLShader m_hbaoFullShader;
+	GLFramebuffer m_downsampleDepthFBO;
 	GLFramebuffer m_hbaoResultFBO;
 	GLConstantBuffer m_hbaoGlobalsBuffer;
 	GLTexture m_noiseTexture;

@@ -29,16 +29,6 @@ public:
 	const eastl::string& getTexturePath(ETexTypes type) const   { return m_atlasRegions[type].m_filePath; }
 	bool hasTexture(ETexTypes type) const                       { return !m_atlasRegions[type].m_filePath.empty(); }
 
-	void setSmoothness(float a_smoothness) { m_smoothness = a_smoothness; }
-	void setMetalness(float a_metalness)   { m_metalness = a_metalness; }
-
-	const glm::vec4& getMaterialColor() const { return m_materialColor; }
-	const glm::vec4& getSpecularColor() const { return m_specColor; }
-	/*rip--*/
-	float getSmoothness() const               { return m_smoothness; }
-	float getMetalness() const                { return m_metalness; }
-	float getOpacity() const                  { return m_opacity; }
-	/*--rip*/
 	const eastl::string& getName() const      { return m_name; }
 
 private:
@@ -57,9 +47,4 @@ private:
 
 	eastl::string m_name;
 	eastl::array<DBAtlasRegion, ETexTypes_COUNT> m_atlasRegions;
-	glm::vec4 m_materialColor;
-	glm::vec4 m_specColor;
-	float m_smoothness = -1.0f;
-	float m_metalness  = -1.0f;
-	float m_opacity    = 1.0f;
 };

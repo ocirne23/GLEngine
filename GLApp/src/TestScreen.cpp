@@ -18,6 +18,8 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 	uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	uint viewportHeight = GLEngine::graphics->getViewportHeight();
 	m_camera.initialize(float(viewportWidth), float(viewportHeight), 90.0f, 0.1f, 1000.0f);
+	m_camera.setPosition(glm::vec3(0.0f, 2.0f, 2.0f));
+
 	m_renderer.initialize(m_camera);
 	m_cameraController.setCameraSpeed(5.0f);
 
@@ -26,10 +28,11 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 		m_sponzaScene.initialize("sponza.obj", m_objDB);
 		m_skysphereScene.initialize("skysphere.obj", m_objDB);
 		m_sunScene.initialize("sphere.obj", m_objDB);
-		
+		m_sunScene.setAsSkybox(true);
+		m_skysphereScene.setAsSkybox(true);
+
 		m_sponza.initialize(&m_sponzaScene);
 		m_sponza.setPosition(glm::vec3(0.0f, 0.0f, 2.0f));
-		m_sponza.setScale(0.01f);
 		m_renderer.addRenderObject(&m_sponza);
 
 		m_skysphere.initialize(&m_skysphereScene);
@@ -160,7 +163,12 @@ void TestScreen::initializeInputListeners()
 		case EKey::KP_PLUS:  m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 1.2f); break;
 		case EKey::KP_MINUS: m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 0.8f); break;
 		case EKey::Y:        m_lightManager.deleteLights(); break;
-		case EKey::U:        setSunDirection(m_camera.getDirection()); break;
+		case EKey::U:        setSunDirection(-m_camera.getDirection()); break;
+		case EKey::F:        
+		{
+			m_sun.setPosition(m_camera.getPosition());
+			m_renderer.renderCubeMap(); break;
+		}
 		case EKey::T:
 		{
 			glm::vec3 position = m_camera.getPosition();

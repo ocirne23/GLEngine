@@ -17,7 +17,7 @@ public:
 
 	void initialize(float viewportWidth, float viewportHeight, float horizontalFov, float near, float far, EProjection projection = EProjection::PERSPECTIVE);
 
-	void updateMatrices();
+	void updateMatrices(glm::vec3 worldUpVector = glm::vec3(0, 1, 0));
 
 	void resize(int width, int height);
 	void setNearFar(float near, float a_far);

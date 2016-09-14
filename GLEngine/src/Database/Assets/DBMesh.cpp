@@ -27,13 +27,22 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 	for (uint i = 0; i < numVertices; ++i)
 	{
 		Vertex& v = m_vertices[i];
-		v.position =                               *rcast<glm::vec3*>(&a_assimpMesh.mVertices[i]);
-		v.texcoords =          (hasTextureCoords ? *rcast<glm::vec2*>(&a_assimpMesh.mTextureCoords[0][i]) : glm::vec2(0));
-		v.normal =                                 *rcast<glm::vec3*>(&a_assimpMesh.mNormals[i]);
-		v.tangents =   (hasTangentsAndBitangents ? *rcast<glm::vec3*>(&a_assimpMesh.mTangents[i]) : glm::vec3(0));
-		v.bitangents = (hasTangentsAndBitangents ? *rcast<glm::vec3*>(&a_assimpMesh.mBitangents[i]) : glm::vec3(0));
+		v.position =                      *rcast<glm::vec3*>(&a_assimpMesh.mVertices[i]);
+		v.texcoords = (hasTextureCoords ? *rcast<glm::vec2*>(&a_assimpMesh.mTextureCoords[0][i]) : glm::vec2(0));
+		v.normal =                        *rcast<glm::vec3*>(&a_assimpMesh.mNormals[i]);
+		if (hasTangentsAndBitangents)
+		{
+			glm::vec3 tangent = *rcast<glm::vec3*>(&a_assimpMesh.mTangents[i]);
+			glm::vec3 bitangent = *rcast<glm::vec3*>(&a_assimpMesh.mBitangents[i]);
+			float handedness = glm::dot(v.normal, glm::cross(tangent, bitangent)) >= 0.0f ? 1.0f : -1.0f;
+			v.tangents = glm::vec4(tangent, handedness);
+		}
 		v.materialID = a_assimpMesh.mMaterialIndex;
+
+		m_boundsMin = glm::min(m_boundsMin, v.position);
+		m_boundsMax = glm::max(m_boundsMax, v.position);
 	}
+	//print("mesh min: %f, %f, %f max: %f, %f, %f\n", m_boundsMin.x, m_boundsMin.y, m_boundsMin.z, m_boundsMax.x, m_boundsMax.y, m_boundsMax.z);
 }
 
 void DBMesh::merge(const DBMesh& a_mesh, const glm::mat4& a_transform)
@@ -60,7 +69,10 @@ void DBMesh::merge(const DBMesh& a_mesh, const glm::mat4& a_transform)
 		v.position = glm::vec3(a_transform * glm::vec4(v.position, 1.0));
 		v.normal = glm::normalize(glm::vec3(normalTransform * glm::vec4(v.normal, 1.0)));
 		m_vertices[baseVertex + i] = v;
-	}
+
+		m_boundsMin = glm::min(m_boundsMin, v.position);
+		m_boundsMax = glm::max(m_boundsMax, v.position);
+	}	
 }
 
 uint64 DBMesh::getByteSize() const
@@ -69,6 +81,8 @@ uint64 DBMesh::getByteSize() const
 	totalSize += AssetDatabaseEntry::getStringWriteSize(m_name);
 	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_vertices);
 	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_indices);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_boundsMin);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_boundsMax);
 	return totalSize;
 }
 
@@ -77,6 +91,8 @@ void DBMesh::write(AssetDatabaseEntry& entry)
 	entry.writeString(m_name);
 	entry.writeVector(m_vertices);
 	entry.writeVector(m_indices);
+	entry.writeVal(m_boundsMin);
+	entry.writeVal(m_boundsMax);
 }
 
 void DBMesh::read(AssetDatabaseEntry& entry)
@@ -84,4 +100,6 @@ void DBMesh::read(AssetDatabaseEntry& entry)
 	entry.readString(m_name);
 	entry.readVector(m_vertices);
 	entry.readVector(m_indices);
+	entry.readVal(m_boundsMin);
+	entry.readVal(m_boundsMax);
 }

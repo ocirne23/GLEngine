@@ -3,12 +3,10 @@
 #include "Shaders/material.glsl"
 #include "Shaders/Shadow/pcf.glsl"
 
-in vec3 v_rawPos;
 in vec3 v_position;
 in vec2 v_texcoord;
 in vec3 v_normal;
-in vec3 v_tangent;
-in vec3 v_bitangent;
+in vec4 v_tangent;
 flat in uint v_materialID;
 in vec4 v_shadowCoord;
 
@@ -20,7 +18,8 @@ vec3 rotateNormal(vec3 normal)
 {
 	normal = normalize(normal * 2.0 - 1.0);
 	normal.y = -normal.y;
-	mat3 TBN = mat3(v_tangent, v_bitangent, v_normal);
+	vec3 bitangent = cross(v_normal, v_tangent.xyz) * v_tangent.w;
+	mat3 TBN = mat3(v_tangent.xyz, bitangent, v_normal);
 	normal = TBN * normal;
 	return normal;
 }
@@ -67,11 +66,7 @@ vec3 doLight(vec3 lightContrib, vec3 L, vec3 N, vec3 V, float NdotV, float F0, v
 	float NdotH = clamp(dot(N, H), 0.0, 1.0);
 	float HdotL = clamp(dot(H, L), 0.0, 1.0);
 	float VdotH = clamp(dot(V, H), 0.0, 1.0);
-#if 1
 	vec3 diffuseContrib = diffuseOrenNayar(diffuse, smoothness, NdotV, NdotL, VdotH);
-#else
-	vec3 diffuseContrib = diffuseBurley(diffuse, smoothness, NdotV, NdotL, VdotH);
-#endif
 	float specularContrib = specularGGX(smoothness, F0, NdotH, HdotL, NdotL);
 	return lightContrib * diffuseContrib + lightContrib * specularContrib;
 }
@@ -79,7 +74,7 @@ vec3 applyFog(vec3 rgb, float distance, vec3 rayOri, vec3 rayDir)
 {
 	float c = 0.3;
 	float b = 0.02;
-	vec3 fogColor = u_sunColorIntensity.rgb;//vec3(0.5, 0.6, 0.7);
+	vec3 fogColor = u_sunColorIntensity.rgb; //vec3(0.5, 0.6, 0.7);
 	float fogAmount = clamp(c * exp(-rayOri.y * b) * (1.0 - exp(-distance * rayDir.y * b)) / rayDir.y, 0.0, 1.0);
 	return mix(rgb, fogColor, fogAmount);
 }
@@ -126,9 +121,3 @@ void main()
 	out_color = vec3(fog);
 	//out_color = texture(u_diffuseAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas
 }
-
-// u_diffuseAtlasArray
-// u_normalAtlasArray
-// u_metalnessAtlasArray
-// u_roughnessAtlasArray
-// u_opacityAtlasArray

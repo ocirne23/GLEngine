@@ -7,12 +7,14 @@
 */
 #pragma once
 
-#include "Graphics/Vulkan/Examples/base/vulkanExampleBase.h"
+#include "Graphics/Vulkan/Examples/vulkanExampleBase.h"
 
 #include "GLEngine.h"
 #include "Input/Input.h"
 #include "Graphics/Graphics.h"
 #include "Utils/DeltaTimeMeasurer.h"
+#include "Utils/FPSMeasurer.h"
+#include "Utils/StringUtils.h"
 
 using namespace vkx;
 
@@ -117,12 +119,21 @@ void ExampleBase::initVulkan(bool enableValidation) {
 void ExampleBase::renderLoop() 
 {
 	DeltaTimeMeasurer timer;
+	FPSMeasurer fpsMeasurer;
+	fpsMeasurer.setLogFunction(1.0f, [&]() {
+		const eastl::string windowTitle = 
+			"VulkanExample FPS: " + StringUtils::to_string(fpsMeasurer.getAvgFps()) + 
+			" MS: " + StringUtils::to_string(fpsMeasurer.getAvgMsPerFrame());
+		GLEngine::graphics->setWindowTitle(windowTitle.c_str());
+	});
+	
 	while (!GLEngine::input->isKeyPressed(EKey::Q))
 	{
 		GLEngine::doEngineTick();
-
+		float deltaSec = timer.calcDeltaSec(GLEngine::getTimeMs());
+		fpsMeasurer.tickFrame(deltaSec);
 		render();
-		update(timer.calcDeltaSec(GLEngine::getTimeMs()));
+		update(deltaSec);
 	}
 }
 

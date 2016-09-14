@@ -8,6 +8,9 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
 #include "Graphics/Utils/LightManager.h"
+#include "Database/Assets/DBScene.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 
@@ -36,6 +39,7 @@ const float SUN_DISTANCE = 50.0f;
 
 END_UNNAMED_NAMESPACE()
 
+
 void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 {
 	uint screenWidth = GLEngine::graphics->getViewportWidth();
@@ -48,8 +52,6 @@ void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 	m_shadowFBO.initialize();
 	m_shadowFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH32, SHADOW_MAP_RES.x, SHADOW_MAP_RES.y, GLFramebuffer::ETextureMagFilter::LINEAR, GLFramebuffer::ETextureMinFilter::LINEAR);
 	m_shadowCamera.initialize(SHADOW_VIEW_RANGE, SHADOW_VIEW_RANGE, 90.0f, 0.1f, SHADOW_VIEW_RANGE, PerspectiveCamera::EProjection::ORTHOGRAPHIC);
-
-	//m_cubeMapGenerator.initialize(CUBE_MAP_RES.x, CUBE_MAP_RES.y);
 
 	m_clusteredShading.initialize(a_camera, screenWidth, screenHeight);
 	m_hbao.initialize(a_camera, screenWidth, screenHeight);
@@ -76,6 +78,7 @@ void GLRenderer::reloadShaders()
 	m_modelShader.initialize(MODEL_VERT_SHADER_PATH, MODEL_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_skyboxShader.initialize(SKYBOX_VERT_SHADER_PATH, SKYBOX_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_combineShader.initialize(COMBINE_VERT_SHADER_PATH, COMBINE_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
+
 	m_hbao.reloadShader();
 	m_bloom.reloadShader();
 	QuadDrawer::reloadShader();
@@ -92,17 +95,18 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	m_dfvTexture.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::DFVTexture));
 
 	updateLightingGlobalsUBO(a_camera);
-	
+
 	// Shadows and depth prepass first
 	GLEngine::graphics->setDepthWrite(true);
-	GLEngine::graphics->setColorWrite(false); 
+	GLEngine::graphics->setColorWrite(false);
 	GLEngine::graphics->setDepthTest(true);
 	GLEngine::graphics->setDepthFunc(Graphics::EDepthFunc::LESS);
-
+	
 	// SUN SHADOW MAP GENERATION //
 	if (m_shadowsEnabled)
 	{
 		m_shadowFBO.begin();
+		m_sceneCamera = &m_shadowCamera;
 		updateCameraDataUBO(m_shadowCamera);
 		GLEngine::graphics->setViewportSize(SHADOW_MAP_RES.x, SHADOW_MAP_RES.y);
 		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::FRONT);
@@ -112,6 +116,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 			renderObject->render(*this, true);
 		m_depthPrepassShader.end();
 		GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::BACK);
+		m_sceneCamera = &a_camera;
 		m_shadowFBO.end();
 	}
 	else
@@ -123,54 +128,54 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	
 	// MAIN SCENE //
 	m_sceneFBO.begin();
-	GLEngine::graphics->clear(glm::vec4(0.2f, 0.2f, 0.7f, 1.0));
-	updateCameraDataUBO(a_camera);
 	GLEngine::graphics->setViewportSize(screenWidth, screenHeight);
+	GLEngine::graphics->clearDepthOnly();
+	updateCameraDataUBO(a_camera);
 
 	// DEPTH PREPASS //
-	if (m_depthPrepassEnabled)
-	{
-		m_depthPrepassShader.begin();
-		for (GLRenderObject* renderObject : m_renderObjects)
-			renderObject->render(*this, true);
-		m_depthPrepassShader.end();
-	}
-
+	m_depthPrepassShader.begin();
+	for (GLRenderObject* renderObject : m_renderObjects)
+		renderObject->render(*this, true);
+	m_depthPrepassShader.end();
+	
+	GLEngine::graphics->setDepthFunc(Graphics::EDepthFunc::LEQUAL);
 	GLEngine::graphics->setDepthWrite(false);
 	GLEngine::graphics->setColorWrite(true);
-	GLEngine::graphics->setDepthFunc(Graphics::EDepthFunc::LEQUAL);
 
-	// RENDER SKYBOXES //
+	// RENDER SKYBOXES // TODO: render skyboxes last with depth test to reduce fillrate
+	GLEngine::graphics->setDepthTest(false);
 	m_skyboxShader.begin();
 	for (GLRenderObject* renderObject : m_skyboxObjects)
 		renderObject->render(*this, false);
 	m_skyboxShader.end();
-
-	if (!m_depthPrepassEnabled)
-		GLEngine::graphics->setDepthWrite(true);
 	
 	// RENDER MODELS //
+	GLEngine::graphics->setDepthTest(true);
 	m_modelShader.begin();
 	m_shadowFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::SunShadow));
 	for (GLRenderObject* renderObject : m_renderObjects)
 		renderObject->render(*this, false);
 	m_modelShader.end();
-	
+
 	m_sceneFBO.end();
+	m_sceneFBO.bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::Color));
 
 	GLEngine::graphics->setDepthTest(false);
+	m_combineShader.begin();
+	QuadDrawer::drawQuad(m_combineShader);
+	m_combineShader.end();
 
 	// APPLY HBAO //
 	GLFramebuffer* hbaoResult = NULL;
 	if (m_hbaoEnabled)
 		hbaoResult = &m_hbao.getHBAOResultFBO(m_sceneFBO);
+
 	// APPLY BLOOM // 
 	GLFramebuffer* bloomResult = NULL;
 	if (m_bloomEnabled)
 		bloomResult = &m_bloom.getBloomResultFBO(m_sceneFBO);
 
 	// BIND RESULT TEXTURES OF ALL PASSES // 
-	m_sceneFBO.bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::Color));
 	if (m_hbaoEnabled)
 		hbaoResult->bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::HBAOResult));
 
@@ -185,6 +190,7 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	m_combineShader.end();
 	if (m_fxaaEnabled)
 		m_fxaa.endAndRender();
+
 	
 	GLEngine::graphics->setDepthTest(true);
 	m_sceneCamera = NULL;
@@ -248,18 +254,39 @@ void GLRenderer::setModelDataUBO(const ModelData& a_modelData)
 	m_modelDataUBO.upload(sizeof(ModelData), &a_modelData);
 }
 
+void GLRenderer::drawDebugSphere(const glm::vec3& position, float radius)
+{
+	if (!m_debugSphere.isInitialized())
+		m_debugSphere.initialize(DBScene("assets/Models/sphere/sphere.obj"));
+	/*
+	debugSphere.m_materialBuffer.bind();
+	for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
+	{
+		debugSphere.m_textureArrays[i].bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
+	}
+	*/
+	ModelData data;
+	data.u_modelMatrix = glm::translate(glm::mat4(), position);
+	data.u_modelMatrix = glm::scale(data.u_modelMatrix, glm::vec3(radius));
+	data.u_normalMatrix = glm::inverse(glm::transpose(data.u_modelMatrix * m_sceneCamera->getViewMatrix()));
+
+
+	setModelDataUBO(data);
+	m_debugSphere.m_meshes[0].render();
+}
+
 void GLRenderer::updateLightingGlobalsUBO(const PerspectiveCamera& a_camera)
 {
 	LightingGlobalsData* lightingGlobals = rcast<LightingGlobalsData*>(m_lightningGlobalsUBO.mapBuffer());
 	lightingGlobals->u_ambient = AMBIENT;
 	lightingGlobals->u_sunDir = glm::normalize(glm::mat3(a_camera.getViewMatrix()) * m_sunDir);
 	lightingGlobals->u_sunColorIntensity = m_sunColorIntensity;
+	lightingGlobals->u_cubemapPos = m_cubeMap ? m_cubeMap->getPosition() : glm::vec3(0);
 	static const glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
 		0.0, 0.0, 0.5, 0.0,
 		0.5, 0.5, 0.5, 1.0);
-
 	lightingGlobals->u_shadowMat = biasMatrix * m_shadowCamera.getCombinedMatrix();
 	m_lightningGlobalsUBO.unmapBuffer();
 }
@@ -270,6 +297,7 @@ void GLRenderer::updateCameraDataUBO(const PerspectiveCamera& a_camera)
 	cameraVars->u_vpMatrix     = a_camera.getCombinedMatrix();
 	cameraVars->u_viewMatrix   = a_camera.getViewMatrix();
 	cameraVars->u_eyePos       = glm::vec3(a_camera.getViewMatrix() * glm::vec4(a_camera.getPosition(), 1.0));
+	cameraVars->u_wsEyePos     = a_camera.getPosition();
 	cameraVars->u_camNear      = a_camera.getNear();
 	cameraVars->u_camFar       = a_camera.getFar();
 	m_cameraVarsUBO.unmapBuffer();
@@ -283,3 +311,40 @@ void GLRenderer::updateSettingsGlobalsUBO()
 	settings->u_shadowsEnabled    = m_shadowsEnabled;
 	m_settingsGlobalsUBO.unmapBuffer();
 }
+
+/*
+if (!m_cubeMapGenerated)
+{
+GLEngine::graphics->setDepthFunc(Graphics::EDepthFunc::LESS);
+GLEngine::graphics->setFaceCulling(Graphics::EFaceCulling::BACK);
+
+for (uint i = 0; i < 6; ++i)
+{
+const PerspectiveCamera& cam = m_cubeMapGenerator.beginRenderCubeMapFace(a_camera.getPosition(), CubeMapGen::ECubeMapFace(i));
+updateLightingGlobalsUBO(cam);
+updateCameraDataUBO(cam);
+
+GLEngine::graphics->setDepthWrite(false);
+GLEngine::graphics->setDepthTest(false);
+
+m_skyboxShader.begin();
+for (GLRenderObject* renderObject : m_skyboxObjects)
+renderObject->render(*this, false);
+m_skyboxShader.end();
+
+GLEngine::graphics->setDepthWrite(true);
+GLEngine::graphics->setDepthTest(true);
+GLEngine::graphics->clearDepthOnly();
+
+m_modelShader.begin();
+m_shadowFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::SunShadow));
+for (GLRenderObject* renderObject : m_renderObjects)
+renderObject->render(*this, false);
+m_modelShader.end();
+
+m_cubeMapGenerator.endRenderCubeMapFace();
+}
+m_cubeMap = &m_cubeMapGenerator.getCubeMap();
+m_cubeMap->bind(12);
+m_cubeMapGenerated = true;
+}*/

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Graphics/Utils/Plane.h"
+
 #include <glm/glm.hpp>
 
 class PerspectiveCamera;
@@ -8,26 +10,28 @@ class Frustum
 {
 public:
 
+	enum FrustumPlane
+	{
+		FRUSTUM_PLANE_NEAR = 0,
+		FRUSTUM_PLANE_FAR = 1,
+		FRUSTUM_PLANE_LEFT = 2,
+		FRUSTUM_PLANE_RIGHT = 3,
+		FRUSTUM_PLANE_TOP = 4,
+		FRUSTUM_PLANE_BOTTOM = 5
+	};
+
+public:
+
 	Frustum() {}
 	~Frustum() {}
 	Frustum(const Frustum& copy) = delete;
 
-	void calculateFrustum(const glm::mat4& mvp);
+	void calculateFrustum(const glm::mat4& vpMatrix);
 	bool pointInFrustum(const glm::vec3& point) const;
 	bool sphereInFrustum(const glm::vec3& point, float radius) const;
+	bool aabbInFrustum(const glm::vec3& min, const glm::vec3& max) const;
 
 public:
 
-	static bool aabbInFrustum(const glm::vec3& point, const glm::vec3& extents, const glm::mat4& frustumMatrix);
-	
-	struct Corners
-	{
-		enum { NTL = 0, NTR, NBL, NBR, FTL, FTR, FBL, FBR, NUM_CORNERS };
-		glm::vec3 corners[NUM_CORNERS];
-	};
-	static Corners calculateCorners(const PerspectiveCamera& camera);
-
-public:
-
-	glm::vec4 m_planes[6];
+	Plane m_planes[6];
 };

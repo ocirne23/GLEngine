@@ -19,8 +19,7 @@ public:
 		glm::vec3 position;
 		glm::vec2 texcoords;
 		glm::vec3 normal;
-		glm::vec3 tangents;
-		glm::vec3 bitangents;
+		glm::vec4 tangents;
 		uint materialID;
 	};
 
@@ -40,10 +39,14 @@ public:
 	const eastl::string& getName() const             { return m_name; }
 	const eastl::vector<Vertex>& getVertices() const { return m_vertices; }
 	const eastl::vector<uint>& getIndices() const    { return m_indices; }
+	const glm::vec3& getBoundsMin() const            { return m_boundsMin; }
+	const glm::vec3& getBoundsMax() const            { return m_boundsMax; }
 
 private:
 
 	eastl::string m_name;
 	eastl::vector<Vertex> m_vertices;
 	eastl::vector<uint> m_indices;
+	glm::vec3 m_boundsMin = glm::vec3(FLT_MAX);
+	glm::vec3 m_boundsMax = glm::vec3(FLT_MIN);
 };

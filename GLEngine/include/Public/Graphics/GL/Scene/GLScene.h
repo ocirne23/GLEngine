@@ -17,6 +17,7 @@ class GLRenderer;
 class GLScene
 {
 public:
+	friend class GLRenderer;
 
 	GLScene() {}
 	virtual ~GLScene() {}
@@ -25,6 +26,8 @@ public:
 
 	void initialize(const DBScene& dbScene);
 	void render(GLRenderer& a_renderer, const glm::mat4& transform, bool depthOnly = false);
+	bool isInitialized() const { return m_initialized; }
+	void setAsSkybox(bool isSkybox);
 
 protected:
 
@@ -37,6 +40,8 @@ private:
 
 protected:
 
+	bool m_initialized = false;
+	bool m_isSkybox = false;
 	eastl::vector<DBNode> m_nodes;
 	eastl::vector<DBMaterial> m_materials;
 	eastl::vector<GLMesh> m_meshes;

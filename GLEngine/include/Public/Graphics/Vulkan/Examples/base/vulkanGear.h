@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "vulkanExampleBase.h"
+#include "../vulkanExampleBase.h"
 
 struct Vertex
 {

@@ -49,9 +49,8 @@ void GLConfig::initialize()
 		VertexAttribute(0, VertexAttribute::EFormat::FLOAT, 3),       // Position
 		VertexAttribute(1, VertexAttribute::EFormat::FLOAT, 2),       // Texcoord
 		VertexAttribute(2, VertexAttribute::EFormat::FLOAT, 3),       // Normals
-		VertexAttribute(3, VertexAttribute::EFormat::FLOAT, 3),       // Tangents
-		VertexAttribute(4, VertexAttribute::EFormat::FLOAT, 3),       // Bitangents
-		VertexAttribute(5, VertexAttribute::EFormat::UNSIGNED_INT, 1) // MaterialID
+		VertexAttribute(3, VertexAttribute::EFormat::FLOAT, 4),       // Tangents
+		VertexAttribute(4, VertexAttribute::EFormat::UNSIGNED_INT, 1) // MaterialID
 	};
 	vboConfigs[uint(EVBOs::GLMeshVertex)] = {
 		GLVertexBuffer::EBufferType::ARRAY,
@@ -63,7 +62,7 @@ void GLConfig::initialize()
 		GLVertexBuffer::EDrawUsage::STATIC
 	};
 
-	initializeDefines();
+	initializeShaderDefines();
 }
 
 uint GLConfig::getTextureBindingPoint(ETextures a_texture)
@@ -104,7 +103,7 @@ void GLConfig::setMultisampleType(GLFramebuffer::EMultiSampleType a_multisampleT
 #define TEX_BINDING_POINT_STR(X) StringUtils::to_string(textureBindingPoints[uint(X)])
 #define UBO_BINDING_POINT_STR(X) StringUtils::to_string(uboConfigs[uint(X)].bindingPoint)
 
-void GLConfig::initializeDefines()
+void GLConfig::initializeShaderDefines()
 {
 	defines.clear();
 

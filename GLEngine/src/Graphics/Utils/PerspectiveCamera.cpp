@@ -76,9 +76,9 @@ void PerspectiveCamera::rotateRelative(float a_xRot, float a_yRot)
 	rotate(a_yRot, glm::vec3(glm::cos(angle), 0.0f, glm::sin(angle))); //rotate y component
 }
 
-void PerspectiveCamera::updateMatrices()
+void PerspectiveCamera::updateMatrices(glm::vec3 a_worldUpVector)
 {
-	const glm::vec3 side = glm::cross(m_direction, UP);
+	const glm::vec3 side = glm::cross(m_direction, a_worldUpVector);
 	m_up = glm::cross(side, m_direction);
 	if (m_projection == EProjection::PERSPECTIVE)
 		m_projectionMatrix = glm::perspective(glm::radians(m_vFieldOfView), m_viewportWidth / m_viewportHeight, m_near, m_far);

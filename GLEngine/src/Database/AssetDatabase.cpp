@@ -105,6 +105,7 @@ void AssetDatabase::writeLoadedAssets()
 
 	for (auto& pair : m_loadedAssets)
 	{	// Create db entry to hold the asset
+		print("Writing %s\n", pair.first.c_str());
 		uint64 size = pair.second->getByteSize();
 		AssetDatabaseEntry entry(m_file, m_assetWritePos, size);
 		m_assetWritePos += size;
@@ -114,6 +115,7 @@ void AssetDatabase::writeLoadedAssets()
 		assert(entry.validateWritten());
 		SAFE_DELETE(pair.second);
 		m_writtenAssets.insert({pair.first, entry});
+		print("Done writing %s\n", pair.first.c_str());
 	}
 	m_loadedAssets.clear();
 }

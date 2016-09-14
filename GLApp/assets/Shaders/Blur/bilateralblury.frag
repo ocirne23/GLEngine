@@ -2,6 +2,7 @@
 
 /* REQUIRED DEFINES /* !NOT IN GLOBAL DEFINES!
 BLUR_KERNEL_RADIUS (float)
+SHARPNESS    (float)
 VALTYPE      (e.g: vec2)
 VALACCESSOR  (e.g: rg)
 */
@@ -11,11 +12,13 @@ in vec2 v_texcoord;
 layout(binding = BLUR_TEXTURE_BINDING_POINT) uniform FBOSampler u_blurTex;
 layout(binding = DEPTH_TEXTURE_BINDING_POINT) uniform FBOSampler u_depthTex;
 
-layout(location = 0) out VALTYPE out_val;
+layout(location = 0) out float out_val;
+
+uniform vec2 u_invScreenSize;
 
 vec2 getSamplePos(vec2 a_pxOffset)
 {
-	return v_texcoord + a_pxOffset * u_invFullResolution;
+	return v_texcoord + a_pxOffset * u_invScreenSize;
 }
 
 float sampleDepth(vec2 a_texcoord)
@@ -32,7 +35,7 @@ float crossBilateralWeight(float a_r, float a_z, float a_z0)
 {
 	float blurSigma = (BLUR_KERNEL_RADIUS + 1.0f) * 0.5f;
 	float blurFalloff = 1.0f / (2.0f * blurSigma * blurSigma);
-	float dz = a_z0 - a_z;
+	float dz = (a_z0 - a_z) * SHARPNESS;
 	return exp2(-a_r * a_r * blurFalloff - dz * dz);
 }
 

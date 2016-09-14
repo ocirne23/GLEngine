@@ -61,7 +61,7 @@ public:
 
 private:
 
-	static void initializeDefines();
+	static void initializeShaderDefines();
 
 private:
 

@@ -8,7 +8,7 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-const uint INITIAL_WINDOW_OFFSET_X = 10;
+const uint INITIAL_WINDOW_OFFSET_X = 65;
 const uint INITIAL_WINDOW_OFFSET_Y = 30;
 
 END_UNNAMED_NAMESPACE()
@@ -83,7 +83,7 @@ void GLEngine::finish()
 	SDL_Quit();
 }
 
-#include "Graphics/Vulkan/Examples/pipelinesExample.h"
+#include "Graphics/Vulkan/Examples/skeletalanimationExample.h"
 
 void GLEngine::test()
 {

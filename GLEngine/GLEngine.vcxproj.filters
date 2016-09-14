@@ -1007,7 +1007,6 @@
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\threadPool.hpp" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanContext.hpp" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanDebug.h" />
-    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanExampleBase.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanFramebuffer.hpp" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanMeshLoader.hpp" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanShaders.h" />
@@ -1018,6 +1017,13 @@
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\base\vulkanGear.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\pipelinesExample.h" />
     <ClInclude Include="include\Public\Graphics\Vulkan\Examples\triangleRevisitedExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\textureExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\displacementExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\vulkanExampleBase.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\sphericalenvExample.h" />
+    <ClInclude Include="include\Public\Graphics\Vulkan\Examples\skeletalanimationExample.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\SSR.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

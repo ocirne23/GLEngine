@@ -13,10 +13,7 @@ void main()
 	vec3 color = sampleFBO(u_colorTex, v_texcoord).rgb;
 	float ao = singleSampleFBO(u_aoTex, v_texcoord).r;
 	vec3 bloom = singleSampleFBO(u_bloomTex, v_texcoord).rgb;
-#if 0
-	out_color = vec3(bloom) + vec3(color * ao);
-#else
-
+#if 1
 	float exposure = 2.2;
 	float brightMax = 1.2;
 	
@@ -31,4 +28,6 @@ void main()
 	
 	out_color = color;
 #endif
+	//out_color = vec3(bloom) + vec3(color * 1.0) + (1.0 - ao) * 1.0;
+
 }

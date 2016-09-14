@@ -40,11 +40,10 @@ void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, u
 		textureType = GL_TEXTURE_2D;
 		glBindTexture(textureType, m_depthTexture);
 		glTexStorage2D(textureType, 1, GLenum(a_format), a_width, a_height);
-
 		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, GLint(a_magFilter));
 		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, GLint(a_minFilter));
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
+		glTexParameteri(textureType, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+		glTexParameteri(textureType, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
 	}
 	else
 	{
@@ -54,7 +53,7 @@ void GLFramebuffer::setDepthbufferTexture(ESizedFormat a_format, uint a_width, u
 		// AMD bug?
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LESS);
-		//
+		
 		glTexImage2DMultisample(textureType, GLsizei(m_multiSampleType), GLenum(a_format), a_width, a_height, GL_TRUE);
 	}
 	CHECK_GL_ERROR();

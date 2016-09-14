@@ -72,10 +72,6 @@ eastl::array<eastl::vector<DBAtlasTexture>, DBMaterial::ETexTypes_COUNT> AtlasBu
 			continue;
 
 		eastl::vector<Page> pages = packer.pack(rects[i]);
-		print("type: %i, numPages: %i\n", i, pages.size());
-		for (Page& page : pages) 
-			print("numImages: %i, size: %i - %i\n", page.rects.size(), page.width, page.height);
-
 		atlasTextures[i].reserve(pages.size());
 		const uint atlasWidth = pages[0].width;
 		const uint atlasHeight = pages[0].height;

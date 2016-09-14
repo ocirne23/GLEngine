@@ -9,8 +9,9 @@ int main()
 	
 	GLEngine::createThread("RenderThread", [&]()
 	{
-		//GLEngine::test();
-
+#if 0
+		GLEngine::test();
+#else
 		GLEngine::createGLContext();
 		{
 			TestScreen testScreen;
@@ -22,6 +23,7 @@ int main()
 			}
 		}
 		GLEngine::destroyGLContext();
+#endif
 	});
 
 	while (!GLEngine::isShutdown())

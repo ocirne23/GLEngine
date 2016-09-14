@@ -6,10 +6,14 @@
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Graphics/GL/Scene/GLRenderer.h"
 
+#define MERGE_MESHES 0
+
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
 	DBScene* scene = dcast<DBScene*>(a_database.loadAsset(a_assetName, EAssetType::SCENE));
+#if MERGE_MESHES
 	scene->mergeMeshes();
+#endif
 	initialize(*scene);
 	a_database.unloadAsset(scene);
 }
@@ -24,6 +28,9 @@ void GLScene::initialize(const DBScene& a_dbScene)
 		m_meshes[i].initialize(a_dbScene.getMeshes()[i]);
 	m_materialBuffer.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::MaterialProperties));
 	updateMaterialBuffer();
+
+	for (DBNode& node : m_nodes)
+		node.calculateBounds(a_dbScene.getMeshes());
 
 	for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
 	{
@@ -40,35 +47,55 @@ void GLScene::initialize(const DBScene& a_dbScene)
 			m_textureArrays[i].addTexture(atlasTexture.getTexture());
 		m_textureArrays[i].finishInit();
 	}
+	m_initialized = true;
 }
 
 void GLScene::render(GLRenderer& a_renderer, const glm::mat4& a_transform, bool a_depthOnly)
 {
-	if (!a_depthOnly)
+	m_materialBuffer.bind();
+	for (uint i = (a_depthOnly ? DBMaterial::ETexTypes_Opacity : DBMaterial::ETexTypes_Diffuse); i < DBMaterial::ETexTypes_COUNT; ++i)
 	{
-		m_materialBuffer.bind();
-		for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
-		{
-			if (m_textureArrays[i].getNumComponents())
-				m_textureArrays[i].bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
-			else
-				m_textureArrays[i].unbind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
-		}
+		GLTextureArray& atlasArray = m_textureArrays[i];
+		if (atlasArray.isInitialized())
+			atlasArray.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
+		else
+			atlasArray.unbind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
 	}
 	renderNode(m_nodes[0], a_renderer, a_transform);
 }
 
+void GLScene::setAsSkybox(bool a_isSkybox)
+{
+	m_isSkybox = true;
+}
+
 void GLScene::renderNode(const DBNode& a_node, GLRenderer& a_renderer, const glm::mat4& a_parentTransform)
 {
+	const PerspectiveCamera* camera = a_renderer.getSceneCamera();
 	GLRenderer::ModelData data;
 	data.u_modelMatrix = a_parentTransform * a_node.getTransform();
-	data.u_normalMatrix = glm::inverse(glm::transpose(data.u_modelMatrix * a_renderer.getSceneCamera()->getViewMatrix()));
-	a_renderer.setModelDataUBO(data);
+	glm::vec3 min = glm::vec3(data.u_modelMatrix * glm::vec4(a_node.getBoundsMin(), 1.0));
+	glm::vec3 max = glm::vec3(data.u_modelMatrix * glm::vec4(a_node.getBoundsMax(), 1.0));
+	glm::vec3 center = (max + min) / 2.0f;
+	glm::vec3 extent = (max - min) / 2.0f;
+	if (camera->getFrustum().aabbInFrustum(center, extent) || m_isSkybox)
+	{
+		data.u_normalMatrix = glm::inverse(glm::transpose(data.u_modelMatrix * camera->getViewMatrix()));
+		a_renderer.setModelDataUBO(data);
 
-	for (uint i : a_node.getMeshIndices())
-		m_meshes[i].render();
-	for (uint i : a_node.getChildIndices())
-		renderNode(m_nodes[i], a_renderer, data.u_modelMatrix);
+		for (uint i : a_node.getMeshIndices())
+		{
+			GLMesh& mesh = m_meshes[i];
+			min = glm::vec3(data.u_modelMatrix * glm::vec4(mesh.getBoundsMin(), 1.0));
+			max = glm::vec3(data.u_modelMatrix * glm::vec4(mesh.getBoundsMax(), 1.0));
+			center = (max + min) / 2.0f;
+			extent = (max - min) / 2.0f;
+			if (camera->getFrustum().aabbInFrustum(center, extent) || m_isSkybox)
+				mesh.render();
+		}
+		for (uint i : a_node.getChildIndices())
+			renderNode(m_nodes[i], a_renderer, data.u_modelMatrix);
+	}
 }
 
 void GLScene::updateMaterialBuffer()

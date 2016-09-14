@@ -8,8 +8,7 @@
 
 #pragma once
 
-#include "base/vulkanExampleBase.h"
-
+#include "vulkanExampleBase.h"
 
 // Vertex layout for this example
 std::vector<vkx::VertexLayout> vertexLayout =

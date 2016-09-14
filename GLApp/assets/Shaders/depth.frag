@@ -10,6 +10,13 @@ layout (location = 0) out vec3 out_color;
 
 void main()
 {
-	gl_FragDepth = gl_FragCoord.z;
+	MaterialProperty material = getMaterial(v_materialID);
+	if (hasOpacityTexture(material))
+	{
+		float opacity = getOpacitySample(material, v_texcoord);
+		if (opacity < 0.5f)
+			discard;
+	}
+	// gl_FragDepth = gl_FragCoord.z; // Do NOT use this, messes up MSAA for some reason
 	out_color = vec3(0.0);
 }

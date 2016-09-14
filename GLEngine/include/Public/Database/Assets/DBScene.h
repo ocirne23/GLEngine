@@ -49,12 +49,8 @@ private:
 
 private:
 
-	// Scene graph
 	eastl::vector<DBNode> m_nodes;
-	// Geometry info
 	eastl::vector<DBMesh> m_meshes;
-	// Material/texture info
 	eastl::vector<DBMaterial> m_materials;
-	// Multiple atlas textures containing all textures in the scene
 	eastl::array<eastl::vector<DBAtlasTexture>, DBMaterial::ETexTypes_COUNT> m_atlasTextures;
 };

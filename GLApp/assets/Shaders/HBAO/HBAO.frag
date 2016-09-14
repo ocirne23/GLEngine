@@ -134,12 +134,12 @@ float horizonOcclusion(vec2 a_deltaUV, vec3 a_p, float a_numSteps,
 	return ao;
 }
 
-void main()
+float hbao(vec2 a_texcoord)
 {
 	float ao = 1.0;
 
-	vec3 p = fetchEyePos(v_texcoord);
-	vec3 rand = texture(u_noiseTex, v_texcoord.xy * u_noiseTexScale).rgb;
+	vec3 p = fetchEyePos(a_texcoord);
+	vec3 rand = texture(u_noiseTex, a_texcoord.xy * u_noiseTexScale).rgb;
 	vec2 rayRadiusUV = (0.5 * u_r * u_focalLen) / -p.z;
 	float rayRadiusPx = rayRadiusUV.x * u_aoResolution.x;
 	if (rayRadiusPx > 1.0)
@@ -150,10 +150,10 @@ void main()
 		computeSteps(stepSize, numSteps, rayRadiusPx, rand.z);
 
 		vec3 pr, pl, pt, pb;
-		pr = fetchEyePos(v_texcoord + vec2(u_invAOResolution.x, 0));
-		pl = fetchEyePos(v_texcoord + vec2(-u_invAOResolution.x, 0));
-		pt = fetchEyePos(v_texcoord + vec2(0, u_invAOResolution.y));
-		pb = fetchEyePos(v_texcoord + vec2(0, -u_invAOResolution.y));
+		pr = fetchEyePos(a_texcoord + vec2(u_invAOResolution.x, 0));
+		pl = fetchEyePos(a_texcoord + vec2(-u_invAOResolution.x, 0));
+		pt = fetchEyePos(a_texcoord + vec2(0, u_invAOResolution.y));
+		pb = fetchEyePos(a_texcoord + vec2(0, -u_invAOResolution.y));
 
 		vec3 dPdu = minDiff(p, pr, pl);
 		vec3 dPdv = minDiff(p, pt, pb) * (u_aoResolution.y * u_invAOResolution.x);
@@ -169,5 +169,10 @@ void main()
 		}
 		ao = 1.0 - ao / NUM_DIRECTIONS * u_strength;
 	}
-	out_ao = ao;
+	return ao;
+}
+
+void main()
+{
+	out_ao = hbao(v_texcoord);
 }

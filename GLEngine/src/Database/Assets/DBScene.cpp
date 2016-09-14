@@ -35,7 +35,7 @@ DBScene::DBScene(const eastl::string& a_sceneFilePath)
 	// Optimalizations
 	//| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials // We might want to swap in unused materials at runtime
 	| aiPostProcessSteps::aiProcess_ImproveCacheLocality
-	| aiPostProcessSteps::aiProcess_OptimizeMeshes
+	//| aiPostProcessSteps::aiProcess_OptimizeMeshes // Merges duplicate meshes which conflicts with culling
 	| aiPostProcessSteps::aiProcess_OptimizeGraph
 	//| aiPostProcessSteps::aiProcess_PreTransformVertices // Removes animations
 	| aiPostProcessSteps::aiProcess_FindDegenerates
@@ -72,6 +72,7 @@ void DBScene::mergeMeshes()
 	m_nodes[0].clearMeshes();
 	m_nodes[0].addMesh(0);
 	m_meshes[0] = mergedMesh;
+	m_nodes[0].calculateBounds(m_meshes);
 }
 
 void DBScene::mergeMeshes(DBMesh& mergedMesh, DBNode& node, const glm::mat4& parentTransform)

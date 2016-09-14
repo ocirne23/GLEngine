@@ -10,6 +10,8 @@ void GLMesh::initialize(const DBMesh& a_mesh)
 	const eastl::vector<DBMesh::Vertex>& vertices = a_mesh.getVertices();
 	const eastl::vector<uint>& indices = a_mesh.getIndices();
 	m_numIndices = uint(indices.size());
+	m_boundsMin = a_mesh.getBoundsMin();
+	m_boundsMax = a_mesh.getBoundsMax();
 
 	m_stateBuffer.initialize();
 	m_stateBuffer.begin();

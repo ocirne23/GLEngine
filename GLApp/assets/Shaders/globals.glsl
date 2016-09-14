@@ -37,6 +37,10 @@ layout (std140, binding = MODEL_DATA_BINDING_POINT) uniform ModelData
 {
 	mat4 u_modelMatrix;
 	mat4 u_normalMatrix;
+	vec3 u_boundsMin;
+	float padding1_ModelData;
+	vec3 u_boundsMax;
+	float padding2_ModelData;
 };
 layout (std140, binding = CAMERA_VARS_BINDING_POINT) uniform CameraVars
 {
@@ -44,6 +48,7 @@ layout (std140, binding = CAMERA_VARS_BINDING_POINT) uniform CameraVars
 	mat4 u_viewMatrix;
 	vec3 u_eyePos;
 	float u_camNear;
+	vec3 u_wsEyePos;
 	float u_camFar;
 };
 layout (std140, binding = LIGHTING_GLOBALS_BINDING_POINT) uniform LightingGlobals
@@ -52,6 +57,8 @@ layout (std140, binding = LIGHTING_GLOBALS_BINDING_POINT) uniform LightingGlobal
 	float padding_LightningGlobals;
 	vec3 u_sunDir;
 	float padding2_LightingGlobals;
+	vec3 u_cubemapPos;
+	float padding3_LightingGlobals;
 	vec4 u_sunColorIntensity;
 	mat4 u_shadowMat;
 };
@@ -104,9 +111,6 @@ layout (std140, binding = CLUSTERED_SHADING_GLOBALS_BINDING_POINT) uniform Clust
 };
 layout (std140, binding = HBAO_GLOBALS_BINDING_POINT) uniform HBAOGlobals
 {
-	vec2 u_fullResolution;
-	vec2 u_invFullResolution;
-
 	vec2 u_aoResolution;
 	vec2 u_invAOResolution;
 
@@ -129,5 +133,10 @@ layout (std140, binding = HBAO_GLOBALS_BINDING_POINT) uniform HBAOGlobals
 	vec2 u_noiseTexScale;
 	vec2 u_ndcDepthConv;
 };
+
+float linearizeDepth(float a_depth)
+{
+	return(2.0 * u_camNear) / (u_camFar + u_camNear - a_depth * (u_camFar - u_camNear));
+}
 
 #endif // GLOBALS_H

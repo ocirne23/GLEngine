@@ -7,15 +7,21 @@
 #include "Graphics/Utils/CheckGLError.h"
 #include "Utils/StringUtils.h"
 
+#include "GLEngine.h"
+#include "Graphics/Graphics.h"
+
 #include <glm/gtc/random.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 
+/* HBAO render resolution, 1 = full resolution, 2 = half resolution etc */
+const uint RESOLUTION_SCALE = 2;
+
 const char* const QUAD_VERT_SHADER_PATH = "Shaders/quad.vert";
 const char* const HBAO_FRAG_SHADER_PATH = "Shaders/HBAO/HBAO.frag";
+const char* const DOWNSAMPLE_DEPTH_FRAG_SHADER_PATH = "Shaders/downsampleDepth.frag";
 
-const float RES_RATIO          = 1.0f;
-const float AO_RADIUS          = 0.30f; // In meters
+const float AO_RADIUS          = 0.40f; // In meters
 const uint NUM_DIRS            = 6;
 const uint NUM_STEPS           = 6;
 const float AO_STRENGTH        = 0.7f;
@@ -28,10 +34,15 @@ END_UNNAMED_NAMESPACE()
 
 void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRes)
 {
+	m_screenRes = glm::ivec2(a_xRes, a_yRes);
 	const uint screenWidth = a_xRes;
 	const uint screenHeight = a_yRes;
-	const float aoWidth = screenWidth / RES_RATIO;
-	const float aoHeight = screenHeight / RES_RATIO;
+	const uint aoWidth = screenWidth / RESOLUTION_SCALE;
+	const uint aoHeight = screenHeight / RESOLUTION_SCALE;
+
+	m_downsampleDepthFBO.initialize();
+	m_downsampleDepthFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::R32F, GLFramebuffer::EAttachment::COLOR0, aoWidth, aoHeight);
+	m_downsampleDepthFBO.setDepthbufferTexture(GLFramebuffer::ESizedFormat::DEPTH24, aoWidth, aoHeight);
 
 	m_hbaoResultFBO.initialize(GLConfig::getMultisampleType());
 	m_hbaoResultFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::R8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
@@ -67,11 +78,9 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	const float far = a_camera.getFar();
 
 	GlobalsUBO globals;
-	globals.fullResolution    = glm::vec2(screenWidth, screenHeight);
-	globals.invFullResolution = 1.0f / globals.fullResolution;
 	globals.aoResolution      = glm::vec2(aoWidth, aoHeight);
 	globals.invAOResolution   = 1.0f / globals.aoResolution;
-	globals.focalLen.x        = 1.0f / tanf(fovRad * 0.5f) * (aoHeight / aoWidth);
+	globals.focalLen.x        = 1.0f / tanf(fovRad * 0.5f) * (aoHeight / float(aoWidth));
 	globals.focalLen.y        = 1.0f / tanf(fovRad * 0.5f);
 	globals.invFocalLen       = 1.0f / globals.focalLen;
 	globals.uvToViewA         = -2.0f * globals.invFocalLen;
@@ -79,19 +88,19 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	globals.r                 = AO_RADIUS;
 	globals.r2                = globals.r * globals.r;
 	globals.negInvR2          = -1.0f / globals.r2;
-	globals.maxRadiusPixels   = MAX_RADIUS_PERCENT * glm::min(globals.fullResolution.x, globals.fullResolution.y);
+	globals.maxRadiusPixels   = MAX_RADIUS_PERCENT * glm::min(globals.aoResolution.x, globals.aoResolution.y);
 	globals.angleBias         = glm::radians(AO_ANGLE_BIAS_DEG);
 	globals.tanAngleBias      = tanf(globals.angleBias);
 	globals.strength          = AO_STRENGTH;
 	globals.padding           = 0.0f;
-	globals.noiseTexScale     = glm::vec2(screenWidth / (float) noiseTexWidth, screenHeight / (float) noiseTexHeight);
+	globals.noiseTexScale     = glm::vec2(globals.aoResolution.x / (float) noiseTexWidth, globals.aoResolution.y / (float) noiseTexHeight);
 	globals.ndcDepthConv.x    = (near - far) / (2.0f * near * far);
 	globals.ndcDepthConv.y    = (near + far) / (2.0f * near * far);
 
 	m_hbaoGlobalsBuffer.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::HBAOGlobals));
 	m_hbaoGlobalsBuffer.upload(sizeof(GlobalsUBO), &globals);
 
-	m_bilateralBlur.initialize(BilateralBlur::EBlurValueType::FLOAT, screenWidth, screenHeight, BLUR_RADIUS);
+	m_bilateralBlur.initialize(BilateralBlur::EBlurValueType::FLOAT, screenWidth, screenHeight, BLUR_RADIUS, aoWidth, aoHeight);
 	reloadShader();
 
 	m_initialized = true;
@@ -104,6 +113,7 @@ void HBAO::reloadShader()
 	defines.push_back("NUM_STEPS " + StringUtils::to_string(NUM_STEPS));
 
 	m_hbaoFullShader.initialize(QUAD_VERT_SHADER_PATH, HBAO_FRAG_SHADER_PATH, &defines);
+	m_downsampleDepthShader.initialize(QUAD_VERT_SHADER_PATH, DOWNSAMPLE_DEPTH_FRAG_SHADER_PATH, &GLConfig::getGlobalShaderDefines());
 	m_bilateralBlur.reloadShader();
 }
 
@@ -111,14 +121,37 @@ GLFramebuffer& HBAO::getHBAOResultFBO(GLFramebuffer& a_sceneFBO)
 {
 	assert(m_initialized);
 
+	GLEngine::graphics->setViewportSize(m_screenRes.x / RESOLUTION_SCALE, m_screenRes.y / RESOLUTION_SCALE);
+
+	if (RESOLUTION_SCALE != 1)
+	{
+		GLEngine::graphics->setDepthWrite(true);
+		GLEngine::graphics->setDepthTest(false);
+
+		m_downsampleDepthFBO.begin();
+		GLEngine::graphics->clearDepthOnly();
+		a_sceneFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::Depth));
+		QuadDrawer::drawQuad(m_downsampleDepthShader);
+		m_downsampleDepthFBO.end();
+
+		m_downsampleDepthFBO.bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::Depth));
+	//	m_downsampleDepthFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::Depth));
+
+	}
+	else
+	{
+		a_sceneFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::Depth));
+	}
+
 	// Apply HBAO //
-	a_sceneFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::Depth));
 	m_noiseTexture.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures::HBAONoise));
 	m_hbaoGlobalsBuffer.bind();
 
 	m_hbaoResultFBO.begin();
 	QuadDrawer::drawQuad(m_hbaoFullShader);
 	m_hbaoResultFBO.end();
+
+	GLEngine::graphics->setViewportSize(m_screenRes.x, m_screenRes.y);
 
 	m_bilateralBlur.blurFBO(m_hbaoResultFBO, a_sceneFBO);
 

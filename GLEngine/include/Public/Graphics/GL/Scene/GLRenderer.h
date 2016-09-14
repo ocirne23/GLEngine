@@ -10,6 +10,7 @@
 #include "Graphics/GL/Tech/Bloom.h"
 #include "Graphics/GL/Tech/CubeMapGen.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
+#include "Graphics/GL/Scene/GLScene.h"
 
 #include "EASTL/vector.h"
 
@@ -26,6 +27,10 @@ public:
 	{
 		glm::mat4 u_modelMatrix;
 		glm::mat4 u_normalMatrix;
+		glm::vec3 u_boundsMin;
+		float padding1_ModelData;
+		glm::vec3 u_boundsMax;
+		float padding2_ModelData;
 	};
 
 	struct CameraVarsData
@@ -34,6 +39,7 @@ public:
 		glm::mat4 u_viewMatrix;
 		glm::vec3 u_eyePos;
 		float u_camNear;
+		glm::vec3 u_wsEyePos;
 		float u_camFar;
 	};
 
@@ -43,6 +49,8 @@ public:
 		float padding_LightningGlobals;
 		glm::vec3 u_sunDir;
 		float padding2_LightingGlobals;
+		glm::vec3 u_cubemapPos;
+		float padding3_LightingGlobals;
 		glm::vec4 u_sunColorIntensity;
 		glm::mat4 u_shadowMat;
 	};
@@ -90,6 +98,10 @@ public:
 
 	void setModelDataUBO(const ModelData& modelData);
 
+	void renderCubeMap() { m_cubeMapGenerated = false; }
+
+	void drawDebugSphere(const glm::vec3& position, float radius);
+
 private:
 
 	void updateLightingGlobalsUBO(const PerspectiveCamera& camera);
@@ -101,12 +113,12 @@ private:
 	eastl::vector<GLRenderObject*> m_renderObjects;
 	eastl::vector<GLRenderObject*> m_skyboxObjects;
 
-	bool m_hbaoEnabled         = true;
+	bool m_hbaoEnabled         = false;
 	bool m_fxaaEnabled         = false;
-	bool m_bloomEnabled        = true;
-	bool m_shadowsEnabled      = true;
+	bool m_bloomEnabled        = false;
+	bool m_shadowsEnabled      = false;
 	bool m_depthPrepassEnabled = false;
-	//bool m_cubeMapGenerated  = false;
+	bool m_cubeMapGenerated    = false;
 
 	HBAO m_hbao;
 	FXAA m_fxaa;
@@ -125,6 +137,7 @@ private:
 	const PerspectiveCamera* m_sceneCamera = NULL;
 
 	GLTexture m_dfvTexture;
+	GLCubeMap* m_cubeMap = NULL;
 
 	GLConstantBuffer m_modelDataUBO;
 	GLConstantBuffer m_cameraVarsUBO;
@@ -133,4 +146,6 @@ private:
 
 	glm::vec3 m_sunDir;
 	glm::vec4 m_sunColorIntensity;
+
+	GLScene m_debugSphere;
 };

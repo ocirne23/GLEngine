@@ -1,5 +1,7 @@
 #include "Database/Assets/DBNode.h"
 
+#include "Database/Assets/DBMesh.h" 
+
 #include <assimp/scene.h>
 
 DBNode::DBNode(const aiNode& a_assimpNode, uint a_parentIdx)
@@ -27,6 +29,8 @@ uint64 DBNode::getByteSize() const
 	totalSize += AssetDatabaseEntry::getValWriteSize(m_parentIdx);
 	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_childIndices);
 	totalSize += AssetDatabaseEntry::getVectorWriteSize(m_meshIndices);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_boundsMin);
+	totalSize += AssetDatabaseEntry::getValWriteSize(m_boundsMax);
 	return totalSize;
 }
 
@@ -37,6 +41,8 @@ void DBNode::write(AssetDatabaseEntry& entry)
 	entry.writeVal(m_parentIdx);
 	entry.writeVector(m_childIndices);
 	entry.writeVector(m_meshIndices);
+	entry.writeVal(m_boundsMin);
+	entry.writeVal(m_boundsMax);
 }
 
 void DBNode::read(AssetDatabaseEntry& entry)
@@ -46,6 +52,8 @@ void DBNode::read(AssetDatabaseEntry& entry)
 	entry.readVal(m_parentIdx);
 	entry.readVector(m_childIndices);
 	entry.readVector(m_meshIndices);
+	entry.readVal(m_boundsMin);
+	entry.readVal(m_boundsMax);
 }
 
 void DBNode::addChild(uint a_childIdx)
@@ -66,4 +74,16 @@ void DBNode::clearMeshes()
 void DBNode::addMesh(uint meshIdx)
 {
 	m_meshIndices.push_back(meshIdx);
+}
+
+void DBNode::calculateBounds(const eastl::vector<DBMesh>& a_meshes)
+{
+	m_boundsMin = glm::vec3(FLT_MAX);
+	m_boundsMax = glm::vec3(FLT_MIN);
+	for (uint meshIdx : m_meshIndices)
+	{
+		const DBMesh& mesh = a_meshes[meshIdx];
+		m_boundsMin = glm::min(m_boundsMin, mesh.getBoundsMin());
+		m_boundsMax = glm::max(m_boundsMax, mesh.getBoundsMax());
+	}
 }
