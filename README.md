@@ -11,3 +11,5 @@ This project is split into 3 parts:
 * GLResourceBuilder: Preprocesses various assets for efficient runtime usage.
 
 This project is mainly intended as a portfolio piece.
+
+The primairy goal of the code style is to reduce and make spotting errors easier. For example, rows of repetitive/similar assignments will  be alligned to spot missing/duplicate/wrong lines.
