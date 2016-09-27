@@ -213,9 +213,9 @@ void Graphics::setDepthFunc(EDepthFunc a_depthFunc)
 	GLenum func;
 	switch (a_depthFunc)
 	{
-	case EDepthFunc::LESS: func = GL_LESS; break;
-	case EDepthFunc::LEQUAL: func = GL_LEQUAL; break;
-	case EDepthFunc::EQUAL: func = GL_EQUAL; break;
+	case EDepthFunc::LESS:    func = GL_LESS; break;
+	case EDepthFunc::LEQUAL:  func = GL_LEQUAL; break;
+	case EDepthFunc::EQUAL:   func = GL_EQUAL; break;
 	case EDepthFunc::GREATER: func = GL_GREATER; break;
 	default: assert(false);
 	}

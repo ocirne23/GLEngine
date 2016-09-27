@@ -15,8 +15,8 @@
 
 TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 {
-	uint viewportWidth = GLEngine::graphics->getViewportWidth();
-	uint viewportHeight = GLEngine::graphics->getViewportHeight();
+	const uint viewportWidth = GLEngine::graphics->getViewportWidth();
+	const uint viewportHeight = GLEngine::graphics->getViewportHeight();
 	m_camera.initialize(float(viewportWidth), float(viewportHeight), 90.0f, 0.1f, 1000.0f);
 	m_camera.setPosition(glm::vec3(0.0f, 2.0f, 2.0f));
 
@@ -132,9 +132,25 @@ void TestScreen::initializeGUI()
 			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
 		}
 
-		optionsFrameWindow->setRolledup(true);
 		optionsFrameWindow->setDragMovingEnabled(false);
 		addWindow(optionsFrameWindow);
+
+		CEGUI::FrameWindow* controlsDisplayFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/ObjectListFrameWindow.layout"));
+		controlsDisplayFrameWindow->setDragMovingEnabled(false);
+		CEGUI::String controlsText =
+			"WASD / Shift / Space: Movement\n\
+			Left Mouse Button : Move camera\n\
+			Escape: Shutdown\n\
+			T: Place point light\n\
+			Y: Delete all point lights\n\
+			U: Set sun direction\n\
+			Keypad 5: Reload GUI\n\
+			Keypad 6: Reload Shaders\n\
+			Keypad Plus: Increase camera speed\n\
+			Keypad Minus: Decrease camera speed\n\
+			Collapse this window by doubleclicking the bar";
+		controlsDisplayFrameWindow->getChild("StaticText")->setText(controlsText);
+		addWindow(controlsDisplayFrameWindow);
 	}
 }
 
@@ -159,7 +175,6 @@ void TestScreen::initializeInputListeners()
 		case EKey::ESCAPE:   GLEngine::shutdown(); break;
 		case EKey::KP_5:     initializeGUI(); break;
 		case EKey::KP_6:     m_renderer.reloadShaders(); break;
-		case EKey::KP_7:     m_renderer.setDepthPrepassEnabled(!m_renderer.isDepthPrepassEnabled()); break;
 		case EKey::KP_PLUS:  m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 1.2f); break;
 		case EKey::KP_MINUS: m_cameraController.setCameraSpeed(m_cameraController.getCameraSpeed() * 0.8f); break;
 		case EKey::Y:        m_lightManager.deleteLights(); break;
@@ -167,7 +182,6 @@ void TestScreen::initializeInputListeners()
 		case EKey::F:        
 		{
 			m_sun.setPosition(m_camera.getPosition());
-			m_renderer.renderCubeMap(); break;
 		}
 		case EKey::T:
 		{

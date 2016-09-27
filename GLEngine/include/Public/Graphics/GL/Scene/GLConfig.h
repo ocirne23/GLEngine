@@ -9,7 +9,8 @@ class GLConfig
 {
 public:
 
-	enum class ETextures {
+	enum class ETextures 
+	{
 		DiffuseAtlasArray,
 		NormalAtlasArray,
 		MetalnessAtlasArray,
@@ -27,7 +28,8 @@ public:
 		BloomResult,
 		NUM_BINDING_POINTS
 	};
-	enum class EUBOs {
+	enum class EUBOs 
+	{
 		ModelData,
 		CameraVars,
 		LightingGlobals,
@@ -39,7 +41,8 @@ public:
 		SettingsGlobals,
 		NUM_UBOS
 	};
-	enum class EVBOs {
+	enum class EVBOs 
+	{
 		GLMeshVertex,
 		GLMeshIndice,
 		NUM_VBOS
@@ -49,6 +52,8 @@ public:
 
 	static void initialize();
 	static const eastl::vector<eastl::string>& getGlobalShaderDefines();
+	/** Reinitializes all the shader definitions, shaders should be reloaded */
+	static void setMultisampleType(GLFramebuffer::EMultiSampleType multisampleType);
 
 	static uint getTextureBindingPoint(ETextures bindingPoint);
 	static GLConstantBuffer::Config getUBOConfig(EUBOs ubo);
@@ -56,8 +61,6 @@ public:
 	static uint getMaxLights();
 	static uint getMaxMaterials();
 	static GLFramebuffer::EMultiSampleType getMultisampleType();
-
-	static void setMultisampleType(GLFramebuffer::EMultiSampleType multisampleType);
 
 private:
 

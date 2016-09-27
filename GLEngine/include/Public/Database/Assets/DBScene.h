@@ -27,6 +27,7 @@ public:
 	DBScene(const eastl::string& sceneFilePath);
 	virtual ~DBScene() {}
 
+	/** Collapse the entire scene into one node with one mesh, removes culling but greatly speeds up rendering */
 	void mergeMeshes();
 
 	virtual uint64 getByteSize() const override;
@@ -34,14 +35,14 @@ public:
 	virtual void write(AssetDatabaseEntry& entry) override;
 	virtual void read(AssetDatabaseEntry& entry) override;
 
-	const eastl::vector<DBNode>& getNodes() const                 { return m_nodes; }
-	const eastl::vector<DBMesh>& getMeshes() const               { return m_meshes; }
-	const eastl::vector<DBMaterial>& getMaterials() const         { return m_materials; }
+	const eastl::vector<DBNode>& getNodes() const         { return m_nodes; }
+	const eastl::vector<DBMesh>& getMeshes() const        { return m_meshes; }
+	const eastl::vector<DBMaterial>& getMaterials() const { return m_materials; }
 	const eastl::vector<DBAtlasTexture>& getAtlasTextures(DBMaterial::ETexTypes type) const { return m_atlasTextures[type]; }
 
-	uint numNodes() const         { return uint(m_nodes.size()); }
-	uint numMeshes() const        { return uint(m_meshes.size()); }
-	uint numMaterials() const     { return uint(m_materials.size()); }
+	uint numNodes() const     { return uint(m_nodes.size()); }
+	uint numMeshes() const    { return uint(m_meshes.size()); }
+	uint numMaterials() const { return uint(m_materials.size()); }
 
 private:
 

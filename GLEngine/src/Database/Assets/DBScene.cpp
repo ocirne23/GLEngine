@@ -23,23 +23,22 @@ uint processNodes(eastl::vector<DBNode>& a_nodes, const aiNode* a_assimpNode, ui
 
 END_UNNAMED_NAMESPACE()
 
-
 DBScene::DBScene(const eastl::string& a_sceneFilePath)
 {
 	const uint flags = 0
 	// Required flags
 	| aiPostProcessSteps::aiProcess_Triangulate
+	| aiPostProcessSteps::aiProcess_GenUVCoords // Ubershader so we'd want all the meshes to have the same properties
 	| aiPostProcessSteps::aiProcess_CalcTangentSpace
 	| aiPostProcessSteps::aiProcess_GenNormals
 	| aiPostProcessSteps::aiProcess_FlipUVs // Flip uv's because OpenGL
 	// Optimalizations
-	//| aiPostProcessSteps::aiProcess_RemoveRedundantMaterials // We might want to swap in unused materials at runtime
+	// | aiPostProcessSteps::aiProcess_RemoveRedundantMaterials // We probably want to swap in unused materials at runtime
 	| aiPostProcessSteps::aiProcess_ImproveCacheLocality
-	//| aiPostProcessSteps::aiProcess_OptimizeMeshes // Merges duplicate meshes which conflicts with culling
+	// | aiPostProcessSteps::aiProcess_OptimizeMeshes // Merges duplicate meshes which conflicts with culling
 	| aiPostProcessSteps::aiProcess_OptimizeGraph
-	//| aiPostProcessSteps::aiProcess_PreTransformVertices // Removes animations
+	// | aiPostProcessSteps::aiProcess_PreTransformVertices // Removes animations
 	| aiPostProcessSteps::aiProcess_FindDegenerates
-	| aiPostProcessSteps::aiProcess_GenUVCoords
 	| aiPostProcessSteps::aiProcess_JoinIdenticalVertices
 	| 0;
 
@@ -66,7 +65,7 @@ void DBScene::mergeMeshes()
 	DBMesh mergedMesh;
 	mergeMeshes(mergedMesh, m_nodes[0], glm::mat4(1));
 
-	m_nodes.resize(1);  // Clear all nodes except the root node
+	m_nodes.resize(1); // Clear all nodes except the root node
 	m_meshes.resize(1);
 	m_nodes[0].clearChildren();
 	m_nodes[0].clearMeshes();

@@ -6,7 +6,6 @@
 bool SceneProcessor::process(const eastl::string& a_inResourcePath, AssetDatabase& a_assetDatabase)
 {
 	owner<DBScene*> scene = new DBScene(a_inResourcePath);
-	const eastl::string fileName = FileUtils::getFileNameFromPath(a_inResourcePath);
-	a_assetDatabase.addAsset(fileName, scene);
+	a_assetDatabase.addAsset(FileUtils::getFileNameFromPath(a_inResourcePath), scene);
 	return true;
 }

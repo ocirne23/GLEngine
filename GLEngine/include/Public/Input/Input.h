@@ -18,7 +18,6 @@ Listening to input events:
 Input::KeyDownListener keyDownListener;
 keyDownListener.setFunc([this](EKey a_key, bool a_isRepeat) { onKeyDown(a_key); });
 **********************/
-
 class Input
 {
 public:
@@ -54,7 +53,9 @@ private:
 	struct Event { byte data[56]; }; // Matches SDL_Event, to avoid exposing the SDL headers.
 	ConcurrentQueue<Event> m_eventQueue;
 
-public: // Listener definitions from here on
+	// Listener definitions from here on
+public: 
+	// Unique tag to avoid identical typedefs
 	struct KeyDownTag {};
 	struct KeyUpTag {};
 	struct TextInputTag {};
@@ -65,7 +66,7 @@ public: // Listener definitions from here on
 	struct WindowResizedTag {};
 	struct WindowQuitTag {};
 	
-	//                                      Ret   Args                      Name
+	//                    Tag               Ret   Args                      Name
 	typedef InputListener<KeyDownTag,       void, EKey, bool>               KeyDownListener;
 	typedef InputListener<KeyUpTag,         void, EKey>                     KeyUpListener;
 	typedef InputListener<TextInputTag,     void, const char*>              TextInputListener;
@@ -78,19 +79,19 @@ public: // Listener definitions from here on
 
 private:
 
-#define LISTENERS_GET(TYPE, LISTNAME) \
+#define DECLARE_LISTENER_TYPE(TYPE, LISTNAME) \
 	friend class TYPE; \
 	eastl::vector<TYPE*>& getListeners(const TYPE& a_listener) { return LISTNAME; } \
 	eastl::vector<TYPE*> LISTNAME;
 
-	LISTENERS_GET(KeyDownListener, m_keyDownListeners);
-	LISTENERS_GET(KeyUpListener, m_keyUpListeners);
-	LISTENERS_GET(TextInputListener, m_textInputListeners);
-	LISTENERS_GET(MouseDownListener, m_mouseDownListeners);
-	LISTENERS_GET(MouseUpListener, m_mouseUpListeners);
-	LISTENERS_GET(MouseMovedListener, m_mouseMovedListeners);
-	LISTENERS_GET(MouseScrolledListener, m_mouseScrolledListeners);
-	LISTENERS_GET(WindowResizedListener, m_windowResizedListeners);
-	LISTENERS_GET(WindowQuitListener, m_windowQuitListeners);
-#undef LISTENERS_GET
+	DECLARE_LISTENER_TYPE(KeyDownListener, m_keyDownListeners);
+	DECLARE_LISTENER_TYPE(KeyUpListener, m_keyUpListeners);
+	DECLARE_LISTENER_TYPE(TextInputListener, m_textInputListeners);
+	DECLARE_LISTENER_TYPE(MouseDownListener, m_mouseDownListeners);
+	DECLARE_LISTENER_TYPE(MouseUpListener, m_mouseUpListeners);
+	DECLARE_LISTENER_TYPE(MouseMovedListener, m_mouseMovedListeners);
+	DECLARE_LISTENER_TYPE(MouseScrolledListener, m_mouseScrolledListeners);
+	DECLARE_LISTENER_TYPE(WindowResizedListener, m_windowResizedListeners);
+	DECLARE_LISTENER_TYPE(WindowQuitListener, m_windowQuitListeners);
+#undef DECLARE_LISTENER_TYPE
 };

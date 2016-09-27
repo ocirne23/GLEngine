@@ -19,6 +19,8 @@ public:
 	bool validateWritten() const   { return m_numBytesWritten == m_totalSize; }
 	bool validateRead() const      { return m_numBytesRead == m_totalSize; }
 
+public:
+
 	// Writeops
 	template <typename T>
 	void writeVal(const T& a_val)
@@ -125,7 +127,7 @@ public:
 	void readVal(T& a_val)
 	{
 		m_file.seekg(m_filePos + m_numBytesRead);
-		uint size = sizeof(T);
+		const uint size = sizeof(T);
 		if (m_numBytesRead + size <= m_totalSize)
 		{
 			m_file.read(rcast<char*>(&a_val), size);
@@ -139,7 +141,7 @@ public:
 		uint length;
 		readVal(length);
 		owner<T*> data = new T[length];
-		uint size = sizeof(T) * length;
+		const uint size = sizeof(T) * length;
 		if (m_numBytesRead + size <= m_totalSize && size)
 		{
 			m_file.read(rcast<char*>(data), size);
@@ -154,7 +156,7 @@ public:
 		uint length;
 		readVal(length);
 		a_vec.resize(length);
-		uint size = sizeof(T) * length;
+		const uint size = sizeof(T) * length;
 		if (m_numBytesRead + size <= m_totalSize && length)
 		{
 			m_file.read(rcast<char*>(&a_vec[0]), size);

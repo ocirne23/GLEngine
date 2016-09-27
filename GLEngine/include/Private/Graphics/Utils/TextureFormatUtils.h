@@ -7,9 +7,12 @@
 class TextureFormatUtils
 {
 public:
+
 	static GLint getInternalFormatForNumComponents(uint a_numComponents, bool a_isFloatTexture);
 	static GLenum getFormatForNumComponents(uint numComponents);
+
 private:
+
 	TextureFormatUtils() {}
 };
 

@@ -23,7 +23,6 @@ public:
 	virtual ~GLScene() {}
 
 	void initialize(const eastl::string& assetName, AssetDatabase& database);
-
 	void initialize(const DBScene& dbScene);
 	void render(GLRenderer& a_renderer, const glm::mat4& transform, bool depthOnly = false);
 	bool isInitialized() const { return m_initialized; }
@@ -31,7 +30,7 @@ public:
 
 protected:
 
-	void updateMaterialBuffer(const DBMaterial& material, uint idx);
+	void updateMaterialBuffer(const DBMaterial& material, uint materialIdx);
 	void updateMaterialBuffer();
 
 private:
@@ -41,7 +40,7 @@ private:
 protected:
 
 	bool m_initialized = false;
-	bool m_isSkybox = false;
+	bool m_isSkybox    = false; // sets position to camera position during rendering.
 	eastl::vector<DBNode> m_nodes;
 	eastl::vector<DBMaterial> m_materials;
 	eastl::vector<GLMesh> m_meshes;

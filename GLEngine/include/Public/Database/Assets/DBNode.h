@@ -23,7 +23,6 @@ public:
 	void clearChildren();
 	void clearMeshes();
 	void addMesh(uint meshIdx);
-
 	void calculateBounds(const eastl::vector<DBMesh>& a_meshes);
 
 	virtual uint64 getByteSize() const override;

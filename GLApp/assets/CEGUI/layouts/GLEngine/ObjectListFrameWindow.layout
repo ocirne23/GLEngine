@@ -1,34 +1,20 @@
 <?xml version="1.0" ?>
 <GUILayout version="4">
-	<Window name="ObjectListFrameWindow" type="TaharezLook/FrameWindow">
+	<Window name="ControlsDisplayFrameWindow" type="TaharezLook/FrameWindow">
 		<Property name="MinSize" value="{{0.15,0},{0.2,0}}" />
-		<Property name="MaxSize" value="{{0.8,0},{0.8,0}}" />
+		<Property name="MaxSize" value="{{0.3,0},{0.8,0}}" />
 		<Property name="Position" value="{{0.8,0},{0.0,0}}" />
-		<Property name="Size" value="{{0.2,0},{0.2,0}}" />
-		<Property name="Text" value="Object List" />
+		<Property name="Size" value="{{0.20,0},{0.21,0}}" />
+		<Property name="Text" value="Controls" />
 		<Property name="CloseButtonEnabled" value="False" />
-
-		<Window name="ObjectListBox" type="TaharezLook/Listbox">
-			<Property name="MaxSize" value="{{1.0,0},{1.0,0}}" />
-			<Property name="Position" value="{{0,0},{0,0}}" />
-			<Property name="Size" value="{{1,0},{1,-36}}" />
+		
+		<Window type="TaharezLook/StaticText" name="StaticText" >
+			<Property name="Area" value="{{0,0},{0,0},{1,0},{1,-15}}" />
+			<Property name="Text" value="Placeholder"/>
+			<Property name="MaxSize" value="{{1,0},{1,0}}" />
+			<Property name="HorzFormatting" value="WordWrapLeftAligned" />
+			<Property name="VertFormatting" value="TopAligned" />
 		</Window>
 
-		<Window name="Create" type="TaharezLook/Button">
-			<Property name="VerticalAlignment" value="Bottom" />
-			<Property name="MaxSize" value="{{1.0,0},{1.0,0}}" />
-			<Property name="Position" value="{{0,2},{0,-2}}" />
-			<Property name="Size" value="{{0,80},{0,30}}" />
-			<Property name="Text" value="Create" />
-		</Window>
-
-		<Window name="Delete" type="TaharezLook/Button">
-			<Property name="VerticalAlignment" value="Bottom" />
-			<Property name="HorizontalAlignment" value="Right" />
-			<Property name="MaxSize" value="{{1.0,0},{1.0,0}}" />
-			<Property name="Position" value="{{0,-2},{0,-2}}" />
-			<Property name="Size" value="{{0,80},{0,30}}" />
-			<Property name="Text" value="Delete" />
-		</Window>
 	</Window>
 </GUILayout>

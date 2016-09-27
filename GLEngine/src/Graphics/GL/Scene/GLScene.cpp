@@ -6,21 +6,15 @@
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Graphics/GL/Scene/GLRenderer.h"
 
-#define MERGE_MESHES 0
-
 void GLScene::initialize(const eastl::string& a_assetName, AssetDatabase& a_database)
 {
 	DBScene* scene = dcast<DBScene*>(a_database.loadAsset(a_assetName, EAssetType::SCENE));
-#if MERGE_MESHES
-	scene->mergeMeshes();
-#endif
 	initialize(*scene);
 	a_database.unloadAsset(scene);
 }
 
 void GLScene::initialize(const DBScene& a_dbScene)
 {
-	//print("numMeshes: %i\nnumMaterials: %i\nnumNodes: %i\n", scene->numMeshes(), scene->numMaterials(), scene->numNodes());
 	m_nodes = a_dbScene.getNodes();
 	m_materials = a_dbScene.getMaterials();
 	m_meshes.resize(a_dbScene.numMeshes());
@@ -53,6 +47,7 @@ void GLScene::initialize(const DBScene& a_dbScene)
 void GLScene::render(GLRenderer& a_renderer, const glm::mat4& a_transform, bool a_depthOnly)
 {
 	m_materialBuffer.bind();
+	// When rendering depth only, we just bind the opacity texture, otherwise every texture.
 	for (uint i = (a_depthOnly ? DBMaterial::ETexTypes_Opacity : DBMaterial::ETexTypes_Diffuse); i < DBMaterial::ETexTypes_COUNT; ++i)
 	{
 		GLTextureArray& atlasArray = m_textureArrays[i];
@@ -115,11 +110,11 @@ void GLScene::updateMaterialBuffer()
 	m_materialBuffer.unmapBuffer();
 }
 
-void GLScene::updateMaterialBuffer(const DBMaterial& material, uint idx)
+void GLScene::updateMaterialBuffer(const DBMaterial& a_material, uint a_materialIdx)
 {
 	GLMaterial mat;
-	mat.initialize(material);
-	m_materialBuffer.upload(sizeof(mat), &mat, sizeof(mat) * idx);
+	mat.initialize(a_material);
+	m_materialBuffer.upload(sizeof(mat), &mat, sizeof(mat) * a_materialIdx);
 }
 
 /*

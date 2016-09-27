@@ -3,6 +3,7 @@
 #include "Database/Assets/IAsset.h"
 #include "EASTL/string.h"
 #include "EASTL/vector.h"
+
 #include <glm/glm.hpp>
 
 class DBTexture : public IAsset

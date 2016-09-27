@@ -15,7 +15,7 @@ public:
 
 	struct WriteTime
 	{
-		unsigned long dwLowDateTime = 0;
+		unsigned long dwLowDateTime  = 0;
 		unsigned long dwHighDateTime = 0;
 	};
 

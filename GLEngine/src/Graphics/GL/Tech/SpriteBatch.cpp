@@ -86,8 +86,8 @@ void SpriteBatch::draw(const TextureRegion& a_region, float a_x, float a_y, floa
 
 	++m_drawCount;
 
-	float x2 = a_x + a_width;
-	float y2 = a_y + a_height;
+	const float x2 = a_x + a_width;
+	const float y2 = a_y + a_height;
 
 	m_vertices.push_back({ a_x, y2, a_region.u2, a_region.v2 });
 	m_vertices.push_back({ x2, y2, a_region.u, a_region.v2});

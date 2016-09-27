@@ -1,8 +1,8 @@
 #include "Graphics/GL/Scene/GLMesh.h"
 
+#include "Database/Assets/DBMesh.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLTypes.h"
-#include "Database/Assets/DBMesh.h"
 #include "Graphics/GL/Scene/GLConfig.h"
 
 void GLMesh::initialize(const DBMesh& a_mesh)

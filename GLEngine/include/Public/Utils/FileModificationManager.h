@@ -24,15 +24,8 @@ private:
 
 	static void update();
 
-	struct WriteTime
-	{
-		unsigned long dwLowDateTime;
-		unsigned long dwHighDateTime;
-	} m_lastWriteTime;
-
 private:
 	
 	// Maps filepath to a map of owner pointers to the listeners.
-	
 	static eastl::hash_map<eastl::string, owner<FileModificationListener*>> s_listeners;
 };

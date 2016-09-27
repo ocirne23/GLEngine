@@ -74,7 +74,7 @@ public:
 
 	enum class EMultiSampleType
 	{
-		NONE = 0,
+		NONE    = 0,
 		MSAA_2X = 2,
 		MSAA_4X = 4,
 		MSAA_8X = 8,

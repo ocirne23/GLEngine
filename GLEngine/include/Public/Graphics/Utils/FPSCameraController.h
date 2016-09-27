@@ -15,10 +15,10 @@ public:
 
 private:
 
-	glm::ivec2 m_mousePos = glm::ivec2(-1, -1);
-	float m_pitchDeg = 0.0f;
-	float m_yawDeg = 0.0f;
+	glm::ivec2 m_mousePos        = glm::ivec2(-1, -1);
+	float m_pitchDeg             = 0.0f;
+	float m_yawDeg               = 0.0f;
 	float m_mouseLookSensitivity = 1.0f;
-	float m_cameraSpeed = 1.0f;
-	float m_verticalLookAngle = 0.0f;
+	float m_cameraSpeed          = 1.0f;
+	float m_verticalLookAngle    = 0.0f;
 };

@@ -2,8 +2,8 @@
 
 #include "GLEngine.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/GL/Scene/GLRenderer.h"
 #include "Graphics/GL/Scene/GLMaterial.h"
+#include "Graphics/GL/Scene/GLRenderer.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
 #include "Graphics/GL/Tech/HBAO.h"
 #include "Utils/StringUtils.h"
@@ -11,11 +11,10 @@
 uint                            GLConfig::maxMaterials = 200;
 uint                            GLConfig::maxLights = 100;
 GLFramebuffer::EMultiSampleType GLConfig::multisampleType = GLFramebuffer::EMultiSampleType::NONE;
-
-eastl::vector<eastl::string> GLConfig::defines;
-uint                         GLConfig::textureBindingPoints[uint(ETextures::NUM_BINDING_POINTS)];
-GLConstantBuffer::Config     GLConfig::uboConfigs[uint(EUBOs::NUM_UBOS)];
-GLVertexBuffer::Config       GLConfig::vboConfigs[uint(EVBOs::NUM_VBOS)];
+eastl::vector<eastl::string>    GLConfig::defines;
+uint                            GLConfig::textureBindingPoints[uint(ETextures::NUM_BINDING_POINTS)];
+GLConstantBuffer::Config        GLConfig::uboConfigs[uint(EUBOs::NUM_UBOS)];
+GLVertexBuffer::Config          GLConfig::vboConfigs[uint(EVBOs::NUM_VBOS)];
 
 void GLConfig::initialize()
 {

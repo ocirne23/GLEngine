@@ -172,6 +172,9 @@ END_UNNAMED_NAMESPACE()
 
 void CEGUIManager::initialize()
 {
+	if (m_initialized)
+		CEGUI::OpenGL3Renderer::destroySystem();
+
 	CEGUI::OpenGL3Renderer::bootstrapSystem();
 
 	CEGUI::System& system = CEGUI::System::getSingleton();
@@ -224,6 +227,8 @@ void CEGUIManager::initialize()
 	m_guiContext->setRootWindow(m_rootWindow);
 
 	initializeInput();
+
+	m_initialized = true;
 }
 
 void CEGUIManager::render(float a_deltaSec)

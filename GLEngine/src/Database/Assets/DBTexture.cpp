@@ -2,6 +2,7 @@
 
 #include "stbi/stb_image.h"
 #include "stbi/stb_image_write.h"
+#include "Utils/FileHandle.h"
 
 #include <assert.h>
 
@@ -39,7 +40,7 @@ void DBTexture::createNew(uint a_width, uint a_height, uint a_numComp, EFormat a
 	m_format = a_format;
 	m_pixColSize = getPixColSize(a_format);
 
-	uint dataSize = m_width * m_height * m_numComp * m_pixColSize;
+	const uint dataSize = m_width * m_height * m_numComp * m_pixColSize;
 	m_rawData.resize(dataSize);
 
 	if (a_data)
@@ -47,8 +48,6 @@ void DBTexture::createNew(uint a_width, uint a_height, uint a_numComp, EFormat a
 
 	m_compressedDataUpToDate = false;
 }
-
-#include "Utils/FileHandle.h"
 
 void DBTexture::loadFromFile(const eastl::string& a_filePath, EFormat a_format, uint a_forcedNumComp)
 {
@@ -74,7 +73,7 @@ void DBTexture::loadFromFile(const eastl::string& a_filePath, EFormat a_format, 
 	m_height = uint(h);
 	m_numComp = a_forcedNumComp ? a_forcedNumComp : uint(c); // If a number of components was forced, use that, otherwise use the number of components in the image.
 
-	uint dataSize = m_width * m_height * m_numComp * m_pixColSize;
+	const uint dataSize = m_width * m_height * m_numComp * m_pixColSize;
 	m_rawData.resize(dataSize);
 	memcpy(m_rawData.data(), textureData, dataSize);
 	stbi_image_free(textureData);

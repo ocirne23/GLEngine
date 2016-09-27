@@ -20,16 +20,16 @@ public:
 
 private:
 
-	bool m_initialized = false;
-
-	float m_blurRadius = 0.0f;
-	float m_sharpness = 1000.0f;
-	uint m_xRes = 0;
-	uint m_yRes = 0;
-	uint m_blurTexWidth = 0;
-	uint m_blurTexHeight = 0;
+	bool m_initialized    = false;
+	float m_blurRadius    = 0.0f;
+	float m_sharpness     = 1000.0f;
+	uint m_xRes           = 0;
+	uint m_yRes           = 0;
+	uint m_blurTexWidth   = 0;
+	uint m_blurTexHeight  = 0;
 	EBlurValueType m_type = EBlurValueType::VEC3;
 	GLFramebuffer::ESizedFormat m_format = GLFramebuffer::ESizedFormat::RGB8;
+
 	GLShader m_blurXShader;
 	GLShader m_blurYShader;
 	GLFramebuffer m_blurXResultFBO;

@@ -85,7 +85,7 @@ void GLEngine::finish()
 
 #include "Graphics/Vulkan/Examples/skeletalanimationExample.h"
 
-void GLEngine::test()
+void GLEngine::vulkanTest()
 {
 	VulkanExample test;
 

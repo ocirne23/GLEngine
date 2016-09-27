@@ -7,7 +7,12 @@
 BEGIN_UNNAMED_NAMESPACE()
 
 const char* const FXAA_VERT_SHADER_PATH = "Shaders/FXAA/FXAA.vert";
-const char* const FXAA_FRAG_SHADER_PATHS[4] = {"Shaders/FXAA/FXAA_Fastest.frag", "Shaders/FXAA/FXAA_Default.frag", "Shaders/FXAA/FXAA_High_Quality.frag", "Shaders/FXAA/FXAA_Extreme_Quality.frag"};
+const char* const FXAA_FRAG_SHADER_PATHS[4] = { 
+	"Shaders/FXAA/FXAA_Fastest.frag", 
+	"Shaders/FXAA/FXAA_Default.frag", 
+	"Shaders/FXAA/FXAA_High_Quality.frag", 
+	"Shaders/FXAA/FXAA_Extreme_Quality.frag" 
+};
 
 END_UNNAMED_NAMESPACE()
 

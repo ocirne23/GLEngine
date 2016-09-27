@@ -22,12 +22,13 @@ public:
 
 	const glm::vec3& getBoundsMin() const { return m_boundsMin; }
 	const glm::vec3& getBoundsMax() const { return m_boundsMax; }
+
 private:
 
 	GLStateBuffer m_stateBuffer;
 	GLVertexBuffer m_indiceBuffer;
 	GLVertexBuffer m_vertexBuffer;
-	uint m_numIndices = 0;
-	glm::vec3 m_boundsMin;
-	glm::vec3 m_boundsMax;
+	uint m_numIndices     = 0;
+	glm::vec3 m_boundsMin = glm::vec3(FLT_MAX);
+	glm::vec3 m_boundsMax = glm::vec3(FLT_MIN);
 };

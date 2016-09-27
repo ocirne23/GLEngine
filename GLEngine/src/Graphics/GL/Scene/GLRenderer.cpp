@@ -1,5 +1,6 @@
 #include "Graphics/GL/Scene/GLRenderer.h"
 
+#include "Database/Assets/DBScene.h"
 #include "Database/Assets/DBTexture.h"
 #include "GLEngine.h"
 #include "Graphics/GL/Scene/GLConfig.h"
@@ -8,7 +9,6 @@
 #include "Graphics/Graphics.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
 #include "Graphics/Utils/LightManager.h"
-#include "Database/Assets/DBScene.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -38,7 +38,6 @@ const float SHADOW_VIEW_RANGE = 200.0f;
 const float SUN_DISTANCE = 50.0f;
 
 END_UNNAMED_NAMESPACE()
-
 
 void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 {
@@ -191,7 +190,6 @@ void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a
 	if (m_fxaaEnabled)
 		m_fxaa.endAndRender();
 
-	
 	GLEngine::graphics->setDepthTest(true);
 	m_sceneCamera = NULL;
 }
@@ -258,18 +256,11 @@ void GLRenderer::drawDebugSphere(const glm::vec3& position, float radius)
 {
 	if (!m_debugSphere.isInitialized())
 		m_debugSphere.initialize(DBScene("assets/Models/sphere/sphere.obj"));
-	/*
-	debugSphere.m_materialBuffer.bind();
-	for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
-	{
-		debugSphere.m_textureArrays[i].bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
-	}
-	*/
+
 	ModelData data;
 	data.u_modelMatrix = glm::translate(glm::mat4(), position);
 	data.u_modelMatrix = glm::scale(data.u_modelMatrix, glm::vec3(radius));
 	data.u_normalMatrix = glm::inverse(glm::transpose(data.u_modelMatrix * m_sceneCamera->getViewMatrix()));
-
 
 	setModelDataUBO(data);
 	m_debugSphere.m_meshes[0].render();

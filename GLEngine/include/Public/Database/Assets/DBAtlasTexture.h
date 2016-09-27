@@ -21,7 +21,7 @@ public:
 
 	void writeRegionTexture(const DBAtlasRegion& region);
 
-	uint getNumMipmaps() const { return m_numMipMaps; }
+	uint getNumMipmaps() const          { return m_numMipMaps; }
 	const DBTexture& getTexture() const { return m_texture; }
 
 public:

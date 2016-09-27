@@ -1,17 +1,16 @@
 #pragma once
 
-#include "Graphics/GL/Wrappers/GLFramebuffer.h"
-#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
-#include "Graphics/GL/Wrappers/GLTexture.h"
-#include "Graphics/GL/Wrappers/GLShader.h"
+#include "Graphics/GL/Scene/GLScene.h"
 #include "Graphics/GL/Tech/ClusteredShading.h"
-#include "Graphics/GL/Tech/HBAO.h"
-#include "Graphics/GL/Tech/FXAA.h"
 #include "Graphics/GL/Tech/Bloom.h"
 #include "Graphics/GL/Tech/CubeMapGen.h"
+#include "Graphics/GL/Tech/FXAA.h"
+#include "Graphics/GL/Tech/HBAO.h"
+#include "Graphics/GL/Wrappers/GLConstantBuffer.h"
+#include "Graphics/GL/Wrappers/GLFramebuffer.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
+#include "Graphics/GL/Wrappers/GLTexture.h"
 #include "Graphics/Utils/PerspectiveCamera.h"
-#include "Graphics/GL/Scene/GLScene.h"
-
 #include "EASTL/vector.h"
 
 #include <glm/glm.hpp>
@@ -77,30 +76,21 @@ public:
 
 	void reloadShaders();
 
-	void setSun(const glm::vec3& direction, const glm::vec3& color, float intensity);
-
-	void setHBAOEnabled(bool a_enabled);
-	bool isHBAOEnabled() const { return m_hbaoEnabled; }
-
-	void setBloomEnabled(bool a_enabled);
-	bool isBloomEnabled() const { return m_bloomEnabled; }
-
-	void setShadowsEnabled(bool a_enabled);
-	bool isShadowsEnabled() const { return m_shadowsEnabled; }
-
-	void setDepthPrepassEnabled(bool a_enabled) { m_depthPrepassEnabled = a_enabled; }
-	bool isDepthPrepassEnabled() const { return m_depthPrepassEnabled; }
-
-	void setFXAAEnabled(bool a_enabled) { m_fxaaEnabled = a_enabled; }
-	bool isFXAAEnabled() const { return m_fxaaEnabled; }
-
 	const PerspectiveCamera* getSceneCamera() const { return m_sceneCamera; }
 
 	void setModelDataUBO(const ModelData& modelData);
-
-	void renderCubeMap() { m_cubeMapGenerated = false; }
-
+	void setSun(const glm::vec3& direction, const glm::vec3& color, float intensity);
 	void drawDebugSphere(const glm::vec3& position, float radius);
+
+	void setHBAOEnabled(bool a_enabled);
+	void setBloomEnabled(bool a_enabled);
+	void setShadowsEnabled(bool a_enabled);
+	void setFXAAEnabled(bool a_enabled) { m_fxaaEnabled = a_enabled; }
+
+	bool isHBAOEnabled() const         { return m_hbaoEnabled; }
+	bool isBloomEnabled() const        { return m_bloomEnabled; }
+	bool isShadowsEnabled() const      { return m_shadowsEnabled; }
+	bool isFXAAEnabled() const         { return m_fxaaEnabled; }
 
 private:
 
@@ -113,18 +103,15 @@ private:
 	eastl::vector<GLRenderObject*> m_renderObjects;
 	eastl::vector<GLRenderObject*> m_skyboxObjects;
 
-	bool m_hbaoEnabled         = false;
-	bool m_fxaaEnabled         = false;
-	bool m_bloomEnabled        = false;
-	bool m_shadowsEnabled      = false;
-	bool m_depthPrepassEnabled = false;
-	bool m_cubeMapGenerated    = false;
+	bool m_hbaoEnabled    = true;
+	bool m_bloomEnabled   = true;
+	bool m_shadowsEnabled = true;
+	bool m_fxaaEnabled    = false;
 
 	HBAO m_hbao;
 	FXAA m_fxaa;
 	Bloom m_bloom;
 	ClusteredShading m_clusteredShading;
-	//CubeMapGen m_cubeMapGenerator;
 
 	GLShader m_depthPrepassShader;
 	GLShader m_skyboxShader;

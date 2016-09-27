@@ -8,7 +8,6 @@ bool FloatImageProcessor::process(const eastl::string& a_resourcePath, AssetData
 {
 	owner<DBTexture*> texture = new DBTexture();
 	texture->loadFromFile(a_resourcePath, DBTexture::EFormat::FLOAT);
-	const eastl::string fileName = FileUtils::getFileNameFromPath(a_resourcePath);
-	a_assetDatabase.addAsset(fileName, texture);
+	a_assetDatabase.addAsset(FileUtils::getFileNameFromPath(a_resourcePath), texture);
 	return true;
 }

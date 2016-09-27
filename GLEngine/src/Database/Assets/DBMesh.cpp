@@ -4,6 +4,12 @@
 
 DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 {
+	assert(a_assimpMesh.HasPositions());
+	assert(a_assimpMesh.HasTextureCoords(0));
+	assert(a_assimpMesh.HasNormals());
+	assert(a_assimpMesh.HasTangentsAndBitangents());
+	assert(a_assimpMesh.HasFaces());
+
 	m_name = a_assimpMesh.mName.C_Str();
 	
 	const uint numVertices = a_assimpMesh.mNumVertices;
@@ -27,14 +33,14 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 	for (uint i = 0; i < numVertices; ++i)
 	{
 		Vertex& v = m_vertices[i];
-		v.position =                      *rcast<glm::vec3*>(&a_assimpMesh.mVertices[i]);
-		v.texcoords = (hasTextureCoords ? *rcast<glm::vec2*>(&a_assimpMesh.mTextureCoords[0][i]) : glm::vec2(0));
-		v.normal =                        *rcast<glm::vec3*>(&a_assimpMesh.mNormals[i]);
+		v.position = *rcast<glm::vec3*>(&a_assimpMesh.mVertices[i]);
+		v.texcoords = *rcast<glm::vec2*>(&a_assimpMesh.mTextureCoords[0][i]);
+		v.normal = *rcast<glm::vec3*>(&a_assimpMesh.mNormals[i]);
 		if (hasTangentsAndBitangents)
 		{
-			glm::vec3 tangent = *rcast<glm::vec3*>(&a_assimpMesh.mTangents[i]);
-			glm::vec3 bitangent = *rcast<glm::vec3*>(&a_assimpMesh.mBitangents[i]);
-			float handedness = glm::dot(v.normal, glm::cross(tangent, bitangent)) >= 0.0f ? 1.0f : -1.0f;
+			const glm::vec3 tangent = *rcast<glm::vec3*>(&a_assimpMesh.mTangents[i]);
+			const glm::vec3 bitangent = *rcast<glm::vec3*>(&a_assimpMesh.mBitangents[i]);
+			const float handedness = glm::dot(v.normal, glm::cross(tangent, bitangent)) >= 0.0f ? 1.0f : -1.0f;
 			v.tangents = glm::vec4(tangent, handedness);
 		}
 		v.materialID = a_assimpMesh.mMaterialIndex;

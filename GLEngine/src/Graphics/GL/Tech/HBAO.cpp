@@ -20,15 +20,16 @@ const uint RESOLUTION_SCALE = 2;
 const char* const QUAD_VERT_SHADER_PATH = "Shaders/quad.vert";
 const char* const HBAO_FRAG_SHADER_PATH = "Shaders/HBAO/HBAO.frag";
 const char* const DOWNSAMPLE_DEPTH_FRAG_SHADER_PATH = "Shaders/downsampleDepth.frag";
-
-const float AO_RADIUS          = 0.40f; // In meters
-const uint NUM_DIRS            = 6;
-const uint NUM_STEPS           = 6;
-const float AO_STRENGTH        = 0.7f;
-const float AO_ANGLE_BIAS_DEG  = 30.0f;
-const uint NOISE_TEXTURE_RES   = 8;
-const uint BLUR_RADIUS         = 8;
-const float MAX_RADIUS_PERCENT = 0.2f; // Max sample distance based on screen size
+							    
+const float AO_RADIUS           = 0.40f; // In meters
+const uint NUM_DIRS             = 6;
+const uint NUM_STEPS            = 6;
+const float AO_STRENGTH         = 0.7f;
+const float AO_ANGLE_BIAS_DEG   = 30.0f;
+const uint NOISE_TEXTURE_WIDTH  = 8;
+const uint NOISE_TEXTURE_HEIGHT = 8;
+const uint BLUR_RADIUS          = 8;
+const float MAX_RADIUS_PERCENT  = 0.2f; // Max sample distance based on screen size
 
 END_UNNAMED_NAMESPACE()
 
@@ -47,18 +48,16 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	m_hbaoResultFBO.initialize(GLConfig::getMultisampleType());
 	m_hbaoResultFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::R8, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
 
-	const uint noiseTexWidth = NOISE_TEXTURE_RES;
-	const uint noiseTexHeight = NOISE_TEXTURE_RES;
-	float *noise = new float[noiseTexWidth * noiseTexHeight * 4];
-	for (uint y = 0; y < noiseTexHeight; ++y)
+	float *noise = new float[NOISE_TEXTURE_WIDTH * NOISE_TEXTURE_HEIGHT * 4];
+	for (uint y = 0; y < NOISE_TEXTURE_HEIGHT; ++y)
 	{
-		for (uint x = 0; x < noiseTexWidth; ++x)
+		for (uint x = 0; x < NOISE_TEXTURE_WIDTH; ++x)
 		{
 			const glm::vec2 xy = glm::circularRand(1.0f);
 			const float z = glm::linearRand(0.0f, 1.0f);
 			const float w = glm::linearRand(0.0f, 1.0f);
 
-			const int offset = 4 * (y * noiseTexWidth + x);
+			const int offset = 4 * (y * NOISE_TEXTURE_WIDTH + x);
 			noise[offset + 0] = xy.x;
 			noise[offset + 1] = xy.y;
 			noise[offset + 2] = z;
@@ -67,7 +66,7 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	}
 	
 	DBTexture noiseDBTex;
-	noiseDBTex.createNew(noiseTexWidth, noiseTexHeight, 4, DBTexture::EFormat::FLOAT, rcast<byte*>(noise));
+	noiseDBTex.createNew(NOISE_TEXTURE_WIDTH, NOISE_TEXTURE_HEIGHT, 4, DBTexture::EFormat::FLOAT, rcast<byte*>(noise));
 	m_noiseTexture.initialize(noiseDBTex,
 	                          0,
 	                          GLTexture::ETextureMinFilter::NEAREST, GLTexture::ETextureMagFilter::NEAREST,
@@ -78,24 +77,24 @@ void HBAO::initialize(const PerspectiveCamera& a_camera, uint a_xRes, uint a_yRe
 	const float far = a_camera.getFar();
 
 	GlobalsUBO globals;
-	globals.aoResolution      = glm::vec2(aoWidth, aoHeight);
-	globals.invAOResolution   = 1.0f / globals.aoResolution;
-	globals.focalLen.x        = 1.0f / tanf(fovRad * 0.5f) * (aoHeight / float(aoWidth));
-	globals.focalLen.y        = 1.0f / tanf(fovRad * 0.5f);
-	globals.invFocalLen       = 1.0f / globals.focalLen;
-	globals.uvToViewA         = -2.0f * globals.invFocalLen;
-	globals.uvToViewB         = 1.0f * globals.invFocalLen;
-	globals.r                 = AO_RADIUS;
-	globals.r2                = globals.r * globals.r;
-	globals.negInvR2          = -1.0f / globals.r2;
-	globals.maxRadiusPixels   = MAX_RADIUS_PERCENT * glm::min(globals.aoResolution.x, globals.aoResolution.y);
-	globals.angleBias         = glm::radians(AO_ANGLE_BIAS_DEG);
-	globals.tanAngleBias      = tanf(globals.angleBias);
-	globals.strength          = AO_STRENGTH;
-	globals.padding           = 0.0f;
-	globals.noiseTexScale     = glm::vec2(globals.aoResolution.x / (float) noiseTexWidth, globals.aoResolution.y / (float) noiseTexHeight);
-	globals.ndcDepthConv.x    = (near - far) / (2.0f * near * far);
-	globals.ndcDepthConv.y    = (near + far) / (2.0f * near * far);
+	globals.aoResolution    = glm::vec2(aoWidth, aoHeight);
+	globals.invAOResolution = 1.0f / globals.aoResolution;
+	globals.focalLen.x      = 1.0f / tanf(fovRad * 0.5f) * (aoHeight / float(aoWidth));
+	globals.focalLen.y      = 1.0f / tanf(fovRad * 0.5f);
+	globals.invFocalLen     = 1.0f / globals.focalLen;
+	globals.uvToViewA       = -2.0f * globals.invFocalLen;
+	globals.uvToViewB       = 1.0f * globals.invFocalLen;
+	globals.r               = AO_RADIUS;
+	globals.r2              = globals.r * globals.r;
+	globals.negInvR2        = -1.0f / globals.r2;
+	globals.maxRadiusPixels = MAX_RADIUS_PERCENT * glm::min(globals.aoResolution.x, globals.aoResolution.y);
+	globals.angleBias       = glm::radians(AO_ANGLE_BIAS_DEG);
+	globals.tanAngleBias    = tanf(globals.angleBias);
+	globals.strength        = AO_STRENGTH;
+	globals.padding         = 0.0f;
+	globals.noiseTexScale   = glm::vec2(globals.aoResolution.x / float(NOISE_TEXTURE_WIDTH), globals.aoResolution.y / float(NOISE_TEXTURE_HEIGHT));
+	globals.ndcDepthConv.x  = (near - far) / (2.0f * near * far);
+	globals.ndcDepthConv.y  = (near + far) / (2.0f * near * far);
 
 	m_hbaoGlobalsBuffer.initialize(GLConfig::getUBOConfig(GLConfig::EUBOs::HBAOGlobals));
 	m_hbaoGlobalsBuffer.upload(sizeof(GlobalsUBO), &globals);
@@ -135,8 +134,6 @@ GLFramebuffer& HBAO::getHBAOResultFBO(GLFramebuffer& a_sceneFBO)
 		m_downsampleDepthFBO.end();
 
 		m_downsampleDepthFBO.bindTexture(0, GLConfig::getTextureBindingPoint(GLConfig::ETextures::Depth));
-	//	m_downsampleDepthFBO.bindDepthTexture(GLConfig::getTextureBindingPoint(GLConfig::ETextures::Depth));
-
 	}
 	else
 	{

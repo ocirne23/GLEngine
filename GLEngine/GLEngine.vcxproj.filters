@@ -130,14 +130,12 @@
     <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
     <ClInclude Include="include\Public\Database\Assets\DBTexture.h" />
     <ClInclude Include="include\Public\Utils\FileUtils.h" />
-    <ClInclude Include="include\Public\Utils\Vec.h" />
     <ClInclude Include="include\Public\Database\Processors\FloatImageProcessor.h" />
     <ClInclude Include="include\Public\Database\Processors\ResourceProcessor.h" />
     <ClInclude Include="include\Public\Database\Processors\SceneProcessor.h" />
     <ClInclude Include="include\Public\Database\ResourceBuilder.h" />
     <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
     <ClInclude Include="include\Public\Database\Assets\EAssetType.h" />
-    <ClInclude Include="include\Public\Database\Utils\MeshMerger.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLScene.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
@@ -902,7 +900,6 @@
     <ClInclude Include="include\3rdparty\gsl\span.h" />
     <ClInclude Include="include\3rdparty\gsl\string_span.h" />
     <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLCubeMap.h" />
-    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLDrawCall.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\CubeMapGen.h" />
     <ClInclude Include="include\3rdparty\EASTL\array.h" />
     <ClInclude Include="include\3rdparty\EASTL\allocator_malloc.h" />

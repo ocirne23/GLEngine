@@ -54,8 +54,8 @@ void GLUniform<glm::mat4>::set(glm::mat4 value)
 	glUniformMatrix4fv(m_uniformLoc, 1, GL_FALSE, &value[0][0]);
 }
 
-template class GLUniform < float > ;
-template class GLUniform < glm::vec2 > ;
-template class GLUniform < glm::vec3 > ;
-template class GLUniform < glm::mat3 > ;
-template class GLUniform < glm::mat4 > ;
+template class GLUniform<float>;
+template class GLUniform<glm::vec2>;
+template class GLUniform<glm::vec3>;
+template class GLUniform<glm::mat3>;
+template class GLUniform<glm::mat4>;

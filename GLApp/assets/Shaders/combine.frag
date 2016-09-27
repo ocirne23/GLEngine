@@ -13,21 +13,18 @@ void main()
 	vec3 color = sampleFBO(u_colorTex, v_texcoord).rgb;
 	float ao = singleSampleFBO(u_aoTex, v_texcoord).r;
 	vec3 bloom = singleSampleFBO(u_bloomTex, v_texcoord).rgb;
-#if 1
-	float exposure = 2.2;
-	float brightMax = 1.2;
-	
+
 	if (u_hbaoEnabled != 0)
 		color *= ao;
 	if (u_bloomEnabled != 0)
 		color += bloom;
-	
+		
+	// basic tone mapping
+	float exposure = 2.2;
+	float brightMax = 1.2;
 	float Y = dot(vec3(0.30, 0.59, 0.11), color);
 	float YD = exposure * (exposure / brightMax + 1.0) / (exposure + 1.0);
 	color *= YD;
 	
 	out_color = color;
-#endif
-	//out_color = vec3(bloom) + vec3(color * 1.0) + (1.0 - ao) * 1.0;
-
 }

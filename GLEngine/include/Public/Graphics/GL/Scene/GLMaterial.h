@@ -17,11 +17,11 @@ struct GLMaterial
 	glm::vec4 roughnessMapping;
 	glm::vec4 opacityMapping;
 
-	int diffuseAtlasIdx;
-	int normalAtlasIdx;
-	int metalnessAtlasIdx;
-	int roughnessAtlasIdx;
-	int opacityAtlasIdx;
+	int diffuseAtlasIdx   = -1;
+	int normalAtlasIdx    = -1;
+	int metalnessAtlasIdx = -1;
+	int roughnessAtlasIdx = -1;
+	int opacityAtlasIdx   = -1;
 
 	int padding0, padding1, padding2;
 };

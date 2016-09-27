@@ -10,6 +10,7 @@ struct SDL_Thread;
 class ThreadManager
 {
 public:
+
 	ThreadManager();
 	~ThreadManager();
 

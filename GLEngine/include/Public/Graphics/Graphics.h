@@ -15,7 +15,9 @@ enum class EWindowMode;
 class Graphics
 {
 public:
+
 	friend class GLEngine;
+
 	enum class EFaceCulling { FRONT, BACK, NONE };
 	enum class EDepthFunc { LESS, LEQUAL, EQUAL, GREATER };
 
@@ -25,12 +27,12 @@ public:
 	void swap();
 
 	void setWindowTitle(const char* title);
-	//TODO
-	//void setWindowSize(uint screenWidth, uint screenHeight);
-	//void setWindowMaximumSize(uint maxWidth, uint maxHeight);
-	//void setWindowPosition(uint xPos, uint yPos);
-	//void setWindowResizeable(bool resizeable);
-	//void setWindowFullscreen(bool fullscreen, bool borderless);
+	// TODO
+	// void setWindowSize(uint screenWidth, uint screenHeight);
+	// void setWindowMaximumSize(uint maxWidth, uint maxHeight);
+	// void setWindowPosition(uint xPos, uint yPos);
+	// void setWindowResizeable(bool resizeable);
+	// void setWindowFullscreen(bool fullscreen, bool borderless);
 	void setViewportSize(uint viewportWidth, uint viewportHeight);
 	void setViewportPosition(uint viewportXPos, uint viewportYPos);
 	void setVsync(bool enabled);
@@ -39,7 +41,7 @@ public:
 	void setDepthWrite(bool enabled);
 	void setColorWrite(bool enabled);
 	void setFaceCulling(EFaceCulling face);
-	void setBlending(bool enabled); //TODO blend func vars
+	void setBlending(bool enabled); // TODO blend func vars
 	void setMultisample(bool enabled);
 	void clearDepthOnly();
 

@@ -8,7 +8,6 @@ bool ByteImageProcessor::process(const eastl::string& a_resourcePath, AssetDatab
 {
 	owner<DBTexture*> texture = new DBTexture();
 	texture->loadFromFile(a_resourcePath);
-	const eastl::string fileName = FileUtils::getFileNameFromPath(a_resourcePath);
-	a_assetDatabase.addAsset(fileName, texture);
+	a_assetDatabase.addAsset(FileUtils::getFileNameFromPath(a_resourcePath), texture);
 	return true;
 }

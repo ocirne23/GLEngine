@@ -18,9 +18,9 @@ public:
 	AssetDatabase() {}
 	~AssetDatabase() {}
 
-	/* Create an empty asset database with the specified name/path */
+	/* Create an empty asset database with the specified name/path to which assets can be added and written */
 	void createNew(const eastl::string& filePath);
-	/* Open an existing asset database file with the specified name/path, returns if succeeded */
+	/* Open an existing asset database file with the specified name/path, returns if succeeded, cannot write new assets */
 	bool openExisting(const eastl::string& filePath);
 	/* Add an asset to the database under the specified name, transfering ownership */
 	void addAsset(const eastl::string& databaseEntryName, owner<IAsset*> asset);

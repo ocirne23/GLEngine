@@ -20,7 +20,7 @@ public:
 	T pop_front()
 	{
 		m_semaphore.acquire();
-		bool empty = m_queue.empty();
+		const bool empty = m_queue.empty();
 		T val = empty ? m_emptyVal : m_queue.front();
 		if (!empty)
 			m_queue.pop_front();

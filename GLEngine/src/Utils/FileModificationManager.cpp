@@ -4,7 +4,6 @@
 
 eastl::hash_map<eastl::string, owner<FileModificationListener*>> FileModificationManager::s_listeners;
 
-
 FileModificationManager::~FileModificationManager()
 {
 	for (auto it : s_listeners)

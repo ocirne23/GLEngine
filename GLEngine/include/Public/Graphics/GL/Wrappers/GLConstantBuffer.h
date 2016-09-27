@@ -13,9 +13,9 @@ public:
 
 	enum class EDrawUsage
 	{
-		STATIC = 0x88E4,  // GL_STATIC_DRAW,
+		STATIC  = 0x88E4,  // GL_STATIC_DRAW,
 		DYNAMIC = 0x88E8, // GL_DYNAMIC_DRAW,
-		STREAM = 0x88E0   // GL_STREAM_DRAW
+		STREAM  = 0x88E0   // GL_STREAM_DRAW
 	};
 
 	struct Config

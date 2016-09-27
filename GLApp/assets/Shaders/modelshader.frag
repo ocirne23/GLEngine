@@ -14,7 +14,7 @@ layout (location = 0) out vec3 out_color;
 
 layout (binding = DFV_TEXTURE_BINDING_POINT) uniform sampler2D u_dfvTexture;
 
-vec3 rotateNormal(vec3 normal)
+vec3 transformNormal(vec3 normal)
 {
 	normal = normalize(normal * 2.0 - 1.0);
 	normal.y = -normal.y;
@@ -74,7 +74,7 @@ vec3 applyFog(vec3 rgb, float distance, vec3 rayOri, vec3 rayDir)
 {
 	float c = 0.3;
 	float b = 0.02;
-	vec3 fogColor = u_sunColorIntensity.rgb; //vec3(0.5, 0.6, 0.7);
+	vec3 fogColor = u_sunColorIntensity.rgb; //vec3(0.5, 0.6, 0.7); add seperate uniform for fog color?
 	float fogAmount = clamp(c * exp(-rayOri.y * b) * (1.0 - exp(-distance * rayDir.y * b)) / rayDir.y, 0.0, 1.0);
 	return mix(rgb, fogColor, fogAmount);
 }
@@ -89,8 +89,9 @@ void main()
 			discard;
 	}
 
+	// Sample textures or use defaults if a material doesnt have the textures.
 	vec3 diffuse     = hasDiffuseTexture(material) ? getDiffuseSample(material, v_texcoord) : vec3(0.8, 0.2, 0.8);
-	vec3 N           = hasNormalTexture(material) ? rotateNormal(getNormalSample(material, v_texcoord)) : v_normal;
+	vec3 N           = hasNormalTexture(material) ? transformNormal(getNormalSample(material, v_texcoord)) : v_normal;
 	float smoothness = 1.0 - (hasRoughnessTexture(material) ? getRoughnessSample(material, v_texcoord) : 0.0);
 	float metalness  = hasMetalnessTexture(material) ? getMetalnessSample(material, v_texcoord) : 0.0;
 	
@@ -99,6 +100,7 @@ void main()
 	vec3 V       = normalize(u_eyePos - v_position);
 	float NdotV  = clamp(dot(N, V), 0.0, 1.0);
 	
+	// Apply point lights
 	vec3 lightAccum = vec3(0.0);
 	FOR_LIGHT_ITERATOR(light, v_position.z)
 	{
@@ -109,15 +111,20 @@ void main()
 		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * PI * attenuation;
 		lightAccum += doLight(lightContrib, L, N, V, NdotV, F0, diffuse, smoothness, metalness);
 	}
+	
+	// Apply sun + shadow
 	float visibility = (u_shadowsEnabled == 0) ? 1.0 : pcf(v_shadowCoord);
 	if (visibility > 0.0)
 	{
 		vec3 sunContrib = u_sunColorIntensity.rgb * u_sunColorIntensity.a * PI * visibility;
 		lightAccum += visibility * doLight(sunContrib, u_sunDir, N, V, NdotV, F0, diffuse, smoothness, metalness);
 	}
+	
+	// Apply diffuse lighting and fog
 	lightAccum += diffuse * u_ambient;
 	vec3 fog = applyFog(lightAccum, length(u_eyePos - v_position), u_eyePos, V);
-
+	
 	out_color = vec3(fog);
-	//out_color = texture(u_diffuseAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas
 }
+
+// out_color = texture(u_diffuseAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas

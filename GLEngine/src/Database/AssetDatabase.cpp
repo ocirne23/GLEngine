@@ -15,11 +15,11 @@ void AssetDatabase::createNew(const eastl::string& a_filePath)
 	assert(m_file.is_open());
 	
 	// Ensure there is dummy data at the start of the file to hold asset table info
-	uint64 assetTablePos = 0;
-	uint64 assetTableByteSize = 0;
+	const uint64 assetTablePos = 0;
+	const uint64 assetTableByteSize = 0;
 	m_file.write(reinterpret_cast<const char*>(&assetTablePos), sizeof(assetTablePos));
 	m_file.write(reinterpret_cast<const char*>(&assetTableByteSize), sizeof(assetTableByteSize));
-	m_assetWritePos = sizeof(uint64) * 2;
+	m_assetWritePos = sizeof(assetTablePos) + sizeof(assetTableByteSize);
 }
 
 bool AssetDatabase::openExisting(const eastl::string& a_filePath)
@@ -39,7 +39,7 @@ bool AssetDatabase::openExisting(const eastl::string& a_filePath)
 
 	// Get the file size
 	m_file.seekg(0, std::ios::end);
-	uint64 fileSize = m_file.tellg();
+	const uint64 fileSize = m_file.tellg();
 	
 	// Read the position and size of the asset table
 	uint64 assetTablePos, assetTableByteSize;
@@ -128,7 +128,7 @@ void AssetDatabase::writeAndClose()
 
 	// Get the position and size of the asset table
 	m_file.seekg(0, std::ios::end);
-	uint64 assetTablePos = m_file.tellg();
+	const uint64 assetTablePos = m_file.tellg();
 	uint64 assetTableByteSize = AssetDatabaseEntry::getValWriteSize(uint(m_writtenAssets.size()));
 	for (const auto& pair : m_writtenAssets)
 	{
@@ -184,9 +184,9 @@ void AssetDatabase::unloadAsset(IAsset* a_asset)
 
 bool AssetDatabase::hasAsset(const eastl::string& a_databaseEntryName) const
 {
-	auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
-	auto loadedIt = m_loadedAssets.find(a_databaseEntryName);
-	bool found = (writtenIt != m_writtenAssets.end() || loadedIt != m_loadedAssets.end());
+	const auto writtenIt = m_writtenAssets.find(a_databaseEntryName);
+	const auto loadedIt = m_loadedAssets.find(a_databaseEntryName);
+	const bool found = (writtenIt != m_writtenAssets.end() || loadedIt != m_loadedAssets.end());
 	return found; 
 }
 

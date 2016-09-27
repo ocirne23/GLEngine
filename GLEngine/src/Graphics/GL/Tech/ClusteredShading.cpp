@@ -1,16 +1,18 @@
 #include "Graphics/GL/Tech/ClusteredShading.h"
 
-#include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/GL/Scene/GLConfig.h"
+#include "Graphics/GL/Wrappers/GLShader.h"
 #include "Graphics/Utils/ClusteredTiledShadingUtils.h"
-#include "Graphics/Utils/PerspectiveCamera.h"
 #include "Graphics/Utils/LightManager.h"
+#include "Graphics/Utils/PerspectiveCamera.h"
 
 #include <assert.h>
 
 BEGIN_UNNAMED_NAMESPACE()
+
 const uint CLUSTERED_SHADING_TILE_WIDTH = 64;
 const uint CLUSTERED_SHADING_TILE_HEIGHT = 64;
+
 END_UNNAMED_NAMESPACE()
 
 ClusteredShading::~ClusteredShading()

@@ -14,11 +14,13 @@ END_NAMESPACE(CEGUI)
 class CEGUIManager
 {
 public:
+
 	void initialize();
 	void render(float deltaSec);
 
 	bool isFocused() const         { return m_isFocused; }
 	CEGUI::Window* getRootWindow() { return m_rootWindow; }
+	bool isInitialized() const     { return m_initialized; }
 
 private:
 
@@ -26,6 +28,7 @@ private:
 
 private:
 
+	bool m_initialized              = false;
 	bool m_isFocused                = false;
 	CEGUI::Window* m_rootWindow     = NULL;
 	CEGUI::GUIContext* m_guiContext = NULL;
