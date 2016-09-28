@@ -33,7 +33,7 @@ Some interesting files to look at:
 * [DBScene.cpp](GLEngine/src/Database/Assets/DBScene.cpp)
 * [DBMesh.cpp](GLEngine/src/Database/Assets/DBMesh.cpp)
 * [GLScene.cpp](GLEngine/src/Graphics/GL/Scene/GLScene.cpp)
-* [GLMesh.cpp](Graphics/GL/Scene/GLMesh.cpp)
+* [GLMesh.cpp](GLEngine/src/Graphics/GL/Scene/GLMesh.cpp)
 * [modelshader.vert](GLApp/assets/Shaders/modelshader.vert)
 * [modelshader.frag](GLApp/assets/Shaders/modelshader.frag)
 * [ClusteredShading.cpp](GLEngine/src/Graphics/GL/Tech/ClusteredShading.cpp)
