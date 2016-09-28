@@ -28,10 +28,11 @@ DBScene::DBScene(const eastl::string& a_sceneFilePath)
 	const uint flags = 0
 	// Required flags
 	| aiPostProcessSteps::aiProcess_Triangulate
-	| aiPostProcessSteps::aiProcess_GenUVCoords // Ubershader so we'd want all the meshes to have the same properties
+	| aiPostProcessSteps::aiProcess_FlipUVs // Flip uv's because OpenGL
+	// Ubershader so we'd want all the meshes to have the same properties
+	| aiPostProcessSteps::aiProcess_GenUVCoords
 	| aiPostProcessSteps::aiProcess_CalcTangentSpace
 	| aiPostProcessSteps::aiProcess_GenNormals
-	| aiPostProcessSteps::aiProcess_FlipUVs // Flip uv's because OpenGL
 	// Optimalizations
 	// | aiPostProcessSteps::aiProcess_RemoveRedundantMaterials // We probably want to swap in unused materials at runtime
 	| aiPostProcessSteps::aiProcess_ImproveCacheLocality

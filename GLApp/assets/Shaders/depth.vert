@@ -12,9 +12,9 @@ flat out uint v_materialID;
 
 void main()
 {
-	vec4 pos = u_modelMatrix * vec4(in_position, 1.0);
-	gl_Position = u_vpMatrix * pos;
-	v_position	 = (u_viewMatrix * pos).xyz;
-	v_texcoord	 = in_texcoord;
+	vec4 pos     = u_modelMatrix * vec4(in_position, 1.0);
+	gl_Position  = u_vpMatrix * pos;
+	v_position   = (u_viewMatrix * pos).xyz;
+	v_texcoord   = in_texcoord;
 	v_materialID = in_materialID;
 }

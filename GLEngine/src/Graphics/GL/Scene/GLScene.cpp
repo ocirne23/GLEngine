@@ -116,10 +116,3 @@ void GLScene::updateMaterialBuffer(const DBMaterial& a_material, uint a_material
 	mat.initialize(a_material);
 	m_materialBuffer.upload(sizeof(mat), &mat, sizeof(mat) * a_materialIdx);
 }
-
-/*
-glm::mat4 scale = glm::scale(glm::mat4(1), glm::vec3(m_scale));
-glm::mat4 rotation = glm::rotate(glm::mat4(1), m_axisRotation.w, glm::vec3(m_axisRotation));
-glm::mat4 translation = glm::translate(glm::mat4(1), m_translation);
-m_baseTransform = translation * rotation * scale;
-*/

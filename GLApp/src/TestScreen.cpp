@@ -62,8 +62,8 @@ void TestScreen::render(float a_deltaSec)
 	m_timeAccum += a_deltaSec;
 	if (m_timeAccum > 1.0f)
 	{
-		m_timeAccum = 0.0f;
-		setSunDirection(glm::rotate(m_sunDir, glm::abs(m_sunDir.y) > 0.60f ? 0.02f : -1.8f, glm::normalize(glm::vec3(0.250f, 0.0f, 0.25f))));
+		m_timeAccum = 0.0f; 
+		setSunDirection(glm::rotate(m_sunDir, glm::abs(m_sunDir.y) > 0.60f ? 0.02f : -1.8f, glm::normalize(glm::vec3(0.5f, 0.0f, 0.5f))));
 	}
 	m_sun.setPosition(m_camera.getPosition() + m_sunDir * 900.0f);
 

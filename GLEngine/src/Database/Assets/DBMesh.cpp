@@ -48,7 +48,6 @@ DBMesh::DBMesh(const aiMesh& a_assimpMesh)
 		m_boundsMin = glm::min(m_boundsMin, v.position);
 		m_boundsMax = glm::max(m_boundsMax, v.position);
 	}
-	//print("mesh min: %f, %f, %f max: %f, %f, %f\n", m_boundsMin.x, m_boundsMin.y, m_boundsMin.z, m_boundsMax.x, m_boundsMax.y, m_boundsMax.z);
 }
 
 void DBMesh::merge(const DBMesh& a_mesh, const glm::mat4& a_transform)
