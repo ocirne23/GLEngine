@@ -21,11 +21,11 @@ void main()
 
 	mat3 normalMatrix = mat3(u_normalMatrix);
 
-	v_position	 = (u_viewMatrix * pos).xyz;
-	v_texcoord	 = in_texcoord;
-	v_normal	 = normalize(normalMatrix * in_normal);
+	v_position   = (u_viewMatrix * pos).xyz;
+	v_texcoord   = in_texcoord;
+	v_normal     = normalize(normalMatrix * in_normal);
 	v_tangent    = vec4(normalize(normalMatrix * in_tangent.xyz), in_tangent.w);
 	v_materialID = in_materialID;
-	
+
 	v_shadowCoord = u_shadowMat * pos;
 }

@@ -10,9 +10,9 @@ in vec4 v_tangent;
 flat in uint v_materialID;
 in vec4 v_shadowCoord;
 
-layout (location = 0) out vec3 out_color;
-
 layout (binding = DFV_TEXTURE_BINDING_POINT) uniform sampler2D u_dfvTexture;
+
+layout (location = 0) out vec3 out_color;
 
 vec3 transformNormal(vec3 normal)
 {
@@ -70,6 +70,7 @@ vec3 doLight(vec3 lightContrib, vec3 L, vec3 N, vec3 V, float NdotV, float F0, v
 	float specularContrib = specularGGX(smoothness, F0, NdotH, HdotL, NdotL);
 	return lightContrib * diffuseContrib + lightContrib * specularContrib;
 }
+
 vec3 applyFog(vec3 rgb, float distance, vec3 rayOri, vec3 rayDir) 
 {
 	float c = 0.3;
@@ -78,6 +79,7 @@ vec3 applyFog(vec3 rgb, float distance, vec3 rayOri, vec3 rayDir)
 	float fogAmount = clamp(c * exp(-rayOri.y * b) * (1.0 - exp(-distance * rayDir.y * b)) / rayDir.y, 0.0, 1.0);
 	return mix(rgb, fogColor, fogAmount);
 }
+
 void main()
 {
 	MaterialProperty material = getMaterial(v_materialID);
@@ -104,9 +106,8 @@ void main()
 	vec3 lightAccum = vec3(0.0);
 	FOR_LIGHT_ITERATOR(light, v_position.z)
 	{
-		vec3 L = light.positionRange.xyz - v_position;
 		float lightDistance = length(L);
-		L /= lightDistance;
+		vec3 L = (light.positionRange.xyz - v_position) / lightDistance;
 		float attenuation = inverseSquareFalloff(lightDistance, light.positionRange.w);
 		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * PI * attenuation;
 		lightAccum += doLight(lightContrib, L, N, V, NdotV, F0, diffuse, smoothness, metalness);
@@ -123,7 +124,6 @@ void main()
 	// Apply diffuse lighting and fog
 	lightAccum += diffuse * u_ambient;
 	vec3 fog = applyFog(lightAccum, length(u_eyePos - v_position), u_eyePos, V);
-	
 	out_color = vec3(fog);
 }
 
