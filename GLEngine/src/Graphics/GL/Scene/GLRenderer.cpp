@@ -31,7 +31,7 @@ const char* const COMBINE_FRAG_SHADER_PATH = "Shaders/combine.frag";
 const char* const FXAA_VERT_SHADER_PATH = "Shaders/FXAA/FXAA.vert";
 const char* const FXAA_FRAG_SHADER_PATH = "Shaders/FXAA/FXAA_High_Quality.frag";
 
-// TODO: parameterize
+// TODO: Settings struct
 const glm::vec3 AMBIENT(0.125f);
 const glm::ivec2 SHADOW_MAP_RES(8192);
 const glm::ivec2 CUBE_MAP_RES(4096);
