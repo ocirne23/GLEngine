@@ -106,8 +106,9 @@ void main()
 	vec3 lightAccum = vec3(0.0);
 	FOR_LIGHT_ITERATOR(light, v_position.z)
 	{
+		vec3 L = (light.positionRange.xyz - v_position);
 		float lightDistance = length(L);
-		vec3 L = (light.positionRange.xyz - v_position) / lightDistance;
+		L /= lightDistance;
 		float attenuation = inverseSquareFalloff(lightDistance, light.positionRange.w);
 		vec3 lightContrib = light.colorIntensity.rgb * light.colorIntensity.a * PI * attenuation;
 		lightAccum += doLight(lightContrib, L, N, V, NdotV, F0, diffuse, smoothness, metalness);

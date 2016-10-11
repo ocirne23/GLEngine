@@ -51,7 +51,7 @@ public:
 
 	static IBounds2D sphereToScreenSpaceBounds2D(const PerspectiveCamera& camera, const glm::vec3& lightPosWorldSpace, float lightRadius, uint screenWidth, uint screenHeight);
 	static IBounds3D sphereToScreenSpaceBounds3D(const PerspectiveCamera& camera, const glm::vec3& lightPosViewSpace, float lightRadius, uint screenWidth, uint screenHeight, 
-												 uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1);
+	    										 uint pixelsPerTileW, uint pixelsPerTileH, float recLogSD1);
 private:
 	ClusteredTiledShadingUtils() {}
 };

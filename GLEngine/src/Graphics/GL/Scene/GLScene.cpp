@@ -47,15 +47,30 @@ void GLScene::initialize(const DBScene& a_dbScene)
 void GLScene::render(GLRenderer& a_renderer, const glm::mat4& a_transform, bool a_depthOnly)
 {
 	m_materialBuffer.bind();
+	
 	// When rendering depth only, we just bind the opacity texture, otherwise every texture.
-	for (uint i = (a_depthOnly ? DBMaterial::ETexTypes_Opacity : DBMaterial::ETexTypes_Diffuse); i < DBMaterial::ETexTypes_COUNT; ++i)
+	if (a_depthOnly)
 	{
-		GLTextureArray& atlasArray = m_textureArrays[i];
+		const uint bindingPoint = GLConfig::getTextureBindingPoint(GLConfig::ETextures::OpacityAtlasArray);
+		GLTextureArray& atlasArray = m_textureArrays[uint(DBMaterial::ETexTypes_Opacity)];
 		if (atlasArray.isInitialized())
-			atlasArray.bind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
+			atlasArray.bind(bindingPoint);
 		else
-			atlasArray.unbind(GLConfig::getTextureBindingPoint(GLConfig::ETextures(uint(GLConfig::ETextures::DiffuseAtlasArray) + i)));
+			atlasArray.unbind(bindingPoint);
 	}
+	else
+	{
+		for (uint i = 0; i < DBMaterial::ETexTypes_COUNT; ++i)
+		{
+			const uint bindingPoint = GLConfig::getTextureBindingPoint(GLConfig::ETextures(i));
+			GLTextureArray& atlasArray = m_textureArrays[i];
+			if (atlasArray.isInitialized())
+				atlasArray.bind(bindingPoint);
+			else
+				atlasArray.unbind(bindingPoint);
+		}
+	}
+
 	renderNode(m_nodes[0], a_renderer, a_transform);
 }
 

@@ -42,8 +42,8 @@ END_UNNAMED_NAMESPACE()
 
 void GLRenderer::initialize(const PerspectiveCamera& a_camera)
 {
-	uint screenWidth = GLEngine::graphics->getViewportWidth();
-	uint screenHeight = GLEngine::graphics->getViewportHeight();
+	const uint screenWidth = GLEngine::graphics->getViewportWidth();
+	const uint screenHeight = GLEngine::graphics->getViewportHeight();
 
 	m_sceneFBO.initialize(GLConfig::getMultisampleType());
 	m_sceneFBO.addFramebufferTexture(GLFramebuffer::ESizedFormat::RGB32F, GLFramebuffer::EAttachment::COLOR0, screenWidth, screenHeight);
@@ -87,8 +87,8 @@ void GLRenderer::reloadShaders()
 void GLRenderer::render(const PerspectiveCamera& a_camera, const LightManager& a_lightManager)
 {
 	m_sceneCamera = &a_camera;
-	uint screenWidth = GLEngine::graphics->getViewportWidth();
-	uint screenHeight = GLEngine::graphics->getViewportHeight();
+	const uint screenWidth = GLEngine::graphics->getViewportWidth();
+	const uint screenHeight = GLEngine::graphics->getViewportHeight();
 	
 	m_clusteredShading.update(a_camera, a_lightManager);
 	m_clusteredShading.bindTextureBuffers();
