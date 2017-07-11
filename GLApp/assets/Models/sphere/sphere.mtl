@@ -1,0 +1,32 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl Placeholder
+map_Kd placeholder_diff.png
+map_bump sphere_nrm.png
+Ni 1.0
+Ns 0.15
+
+newmtl Gold
+map_Kd gold_diff.png
+map_bump sphere_nrm.png
+Ni 1.0
+Ns 0.25
+
+newmtl Iron
+map_Kd iron_diff.png
+map_bump sphere_nrm.png
+Ni 1.0
+Ns 0.75
+
+newmtl Plywood
+map_Kd plywood_diff.png
+map_bump sphere_nrm.png
+Ni 0.0
+Ns 0.1
+
+newmtl Plastic
+map_Kd plastic_diff.png
+map_bump sphere_nrm.png
+Ni 0.0
+Ns 0.85

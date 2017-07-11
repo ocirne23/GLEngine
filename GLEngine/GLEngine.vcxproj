@@ -1,0 +1,1153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="include\3rdparty\gli\core\dummy.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\allocator_eastl.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\assert.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\fixed_pool.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\hashtable.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\intrusive_list.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\numeric_limits.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\red_black_tree.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\string.cpp" />
+    <ClCompile Include="src\3rdparty\EASTL\thread_support.cpp" />
+    <ClCompile Include="src\3rdparty\stbi\stb_image_write.c" />
+    <ClCompile Include="src\Database\AssetDatabase.cpp" />
+    <ClCompile Include="src\Database\Assets\DBTexture.cpp" />
+    <ClCompile Include="src\Database\Assets\DBAtlasRegion.cpp" />
+    <ClCompile Include="src\Database\Assets\DBAtlasTexture.cpp" />
+    <ClCompile Include="src\Database\Assets\DBMaterial.cpp" />
+    <ClCompile Include="src\Database\Assets\DBMesh.cpp" />
+    <ClCompile Include="src\Database\Assets\DBNode.cpp" />
+    <ClCompile Include="src\Database\Assets\DBScene.cpp" />
+    <ClCompile Include="src\Database\Assets\IAsset.cpp" />
+    <ClCompile Include="src\Database\Utils\MaxRectsPacker.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLConfig.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLMaterial.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLRenderer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\BilateralBlur.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\Bloom.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\CubeMapGen.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\FXAA.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\GaussianBlur.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\QuadDrawer.cpp" />
+    <ClCompile Include="src\Core.cpp" />
+    <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
+    <ClCompile Include="src\3rdparty\entityx\Event.cc" />
+    <ClCompile Include="src\3rdparty\entityx\help\Pool.cc" />
+    <ClCompile Include="src\3rdparty\entityx\help\Timer.cc" />
+    <ClCompile Include="src\3rdparty\entityx\System.cc" />
+    <ClCompile Include="src\GLEngine.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLCubeMap.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLUniform.cpp" />
+    <ClCompile Include="src\Graphics\GL\GLContext.cpp" />
+    <ClCompile Include="src\Graphics\UI\CEGUIManager.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ARBDebugOutput.cpp" />
+    <ClCompile Include="src\Graphics\Utils\Frustum.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLConstantBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLFramebuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLShader.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLStateBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTexture.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureArray.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLTextureBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Wrappers\GLVertexBuffer.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLMesh.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\ClusteredShading.cpp" />
+    <ClCompile Include="src\Graphics\Graphics.cpp" />
+    <ClCompile Include="src\Graphics\Utils\LightManager.cpp" />
+    <ClCompile Include="src\Graphics\Utils\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\Graphics\GL\Scene\GLScene.cpp" />
+    <ClCompile Include="src\Input\Input.cpp" />
+    <ClCompile Include="src\3rdparty\json\json_reader.cpp" />
+    <ClCompile Include="src\3rdparty\json\json_value.cpp" />
+    <ClCompile Include="src\3rdparty\json\json_writer.cpp" />
+    <ClCompile Include="src\Database\Processors\ByteImageProcessor.cpp" />
+    <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
+    <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
+    <ClCompile Include="src\ResourceBuilder.cpp" />
+    <ClCompile Include="src\Utils\FileModificationListener.cpp" />
+    <ClCompile Include="src\Utils\ThreadManager.cpp" />
+    <ClCompile Include="src\Graphics\GL\Tech\SpriteBatch.cpp" />
+    <ClCompile Include="src\Database\Utils\AtlasBuilder.cpp" />
+    <ClCompile Include="src\Graphics\Utils\CheckGLError.cpp" />
+    <ClCompile Include="src\Database\Utils\CRC64.cpp" />
+    <ClCompile Include="src\Utils\FileHandle.cpp" />
+    <ClCompile Include="src\Utils\FileModificationManager.cpp" />
+    <ClCompile Include="src\Utils\FileUtils.cpp" />
+    <ClCompile Include="src\Graphics\Utils\FPSCameraController.cpp" />
+    <ClCompile Include="src\Graphics\Utils\TextureFormatUtils.cpp" />
+    <ClCompile Include="src\Utils\JobScheduler.cpp" />
+    <ClCompile Include="src\Graphics\Utils\ClusteredTileShadingUtils.cpp" />
+    <ClCompile Include="src\Utils\Semaphore.cpp" />
+    <ClCompile Include="src\3rdparty\stbi\stb_image.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\3rdparty\CEGUI\Affector.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Animation.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\AnimationInstance.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\AnimationManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Animation_xmlHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Base.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\BasicImage.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\BasicRenderedStringParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\BidiVisualMapping.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\BoundSlot.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CEGUI.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CentredRenderedString.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ChainedXMLHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Clipboard.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Colour.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ColourRect.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CommonDialogs\ColourPicker\ColourPicker.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CommonDialogs\ColourPicker\Controls.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CommonDialogs\ColourPicker\Conversions.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CommonDialogs\ColourPicker\Types.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CommonDialogs\Module.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CompositeResourceProvider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Config.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Config_xmlHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\CoordConverter.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\DataContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\DefaultLogger.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\DefaultRenderedStringParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\DefaultResourceProvider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\DynamicModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Element.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Event.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\EventArgs.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\EventSet.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Exceptions.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FactoryModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FactoryRegisterer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\ComponentBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\Dimensions.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\Enums.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\EventAction.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\EventLinkDefinition.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\FalagardPropertyBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\FormattingSetting.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\FrameComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\ImageryComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\ImagerySection.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\LayerSpecification.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\NamedArea.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\NamedDefinitionCollator.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\PropertyDefinition.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\PropertyDefinitionBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\PropertyInitialiser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\PropertyLinkDefinition.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\SectionSpecification.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\StateImagery.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\TextComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\WidgetComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\WidgetLookFeel.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\WidgetLookManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\XMLEnumHelper.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\falagard\XMLHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Font.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FontGlyph.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FontManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Font_xmlHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FormattedRenderedString.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ForwardRefs.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FreeFunctionSlot.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FreeTypeFont.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FribidiVisualMapping.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FunctorCopySlot.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FunctorPointerSlot.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FunctorReferenceBinder.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\FunctorReferenceSlot.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\GlobalEventSet.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\GUIContext.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\GUILayout_xmlHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\IconvStringTranscoder.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Image.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\Corona\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\Corona\ImageCodecModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\DevIL\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\DevIL\ImageCodecModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\FreeImage\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\FreeImage\ImageCodecModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\PVR\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\PVR\ImageCodecModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\SILLY\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\SILLY\ImageCodecModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\STB\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\STB\ImageCodecModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\TGA\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageCodecModules\TGA\ImageCodecModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageFactory.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ImageManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\InjectedInputReceiver.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\InputEvent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Interpolator.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\IteratorBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\JustifiedRenderedString.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\KeyFrame.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\LeftAlignedRenderedString.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\LinkedEvent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Logger.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MemberFunctionSlot.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MemoryAllocatedObject.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MemoryAllocation.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MemoryOgreAllocator.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MemoryStdAllocator.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MemorySTLWrapper.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MinibidiVisualMapping.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MinizipResourceProvider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ModuleConfig.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\MouseCursor.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\NamedElement.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\NamedXMLResourceManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\PCRERegexMatcher.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\PixmapFont.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Property.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\PropertyHelper.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\PropertySet.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Quaternion.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Rect.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RefCounted.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RegexMatcher.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderedString.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderedStringComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderedStringImageComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderedStringParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderedStringTextComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderedStringWidgetComponent.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderedStringWordWrapper.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderEffect.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderEffectFactory.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderEffectManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D10\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D10\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D10\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D10\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D10\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D10\ViewportTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D11\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D11\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D11\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D11\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D11\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D11\ViewportTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D9\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D9\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D9\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D9\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D9\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Direct3D9\ViewportTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\DirectFB\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\DirectFB\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\DirectFB\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\DirectFB\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\EventPusher.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\MemoryFile.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\RendererDef.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\ResourceProvider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Irrlicht\WindowTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Null\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Null\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Null\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Null\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Null\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\ImageCodec.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\ResourceProvider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\Ogre\WindowTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGLES\FBOTextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGLES\GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGLES\GLES.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGLES\Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGLES\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGLES\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGLES\ViewportTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\ApplePBTextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GeometryBufferBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GL.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GL3FBOTextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GL3GeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GL3Renderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GLFBOTextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GLGeometryBuffer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GlmPimpl.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GLRenderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\GLXPBTextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\RendererBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\Shader.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\ShaderManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\StandardShaderFrag.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\StandardShaderVert.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\StateChangeWrapper.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\ViewportTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RendererModules\OpenGL\WGLPBTextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderingContext.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderingSurface.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderingWindow.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderQueue.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RenderTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ResourceProvider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\RightAlignedRenderedString.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Scheme.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\SchemeManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Scheme_xmlHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ScriptModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ScriptModules\Lua\Functor.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\ScriptModules\Lua\ScriptModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\SimpleTimer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Singleton.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Size.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\SlotFunctorBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\String.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\StringTranscoder.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\SubscriberSlot.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\System.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\SystemKeys.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Texture.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TextureTarget.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TextUtils.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplInterpolators.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplProperty.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplWindowFactory.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplWindowFactoryRegisterer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplWindowProperty.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplWindowRendererFactory.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplWindowRendererProperty.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TplWRFactoryRegisterer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\TypedProperty.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\UDim.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Vector.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Version.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Vertex.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\All.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ButtonBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ClippedContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Combobox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ComboDropList.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\DefaultWindow.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\DragContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Editbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\FrameWindow.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\GridLayoutContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\GroupBox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\HorizontalLayoutContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ItemEntry.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ItemListBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ItemListbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\LayoutCell.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\LayoutContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Listbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ListboxItem.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ListboxTextItem.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ListHeader.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ListHeaderSegment.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Menubar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\MenuBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\MenuItem.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\MultiColumnList.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\MultiLineEditbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\PopupMenu.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ProgressBar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\PushButton.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\RadioButton.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ScrollablePane.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Scrollbar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ScrolledContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ScrolledItemListBase.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\SequentialLayoutContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Slider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Spinner.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\TabButton.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\TabControl.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Thumb.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Titlebar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\ToggleButton.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Tooltip.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\Tree.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\TreeItem.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\widgets\VerticalLayoutContainer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Win32StringTranscoder.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\Window.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowFactory.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowFactoryManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRenderer.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererManager.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Button.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Default.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Editbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\FrameWindow.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\ItemEntry.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\ItemListbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Listbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\ListHeader.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\ListHeaderSegment.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Menubar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\MenuItem.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Module.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\MultiColumnList.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\MultiLineEditbox.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\PopupMenu.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\ProgressBar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\ScrollablePane.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Scrollbar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Slider.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Static.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\StaticImage.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\StaticText.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\TabButton.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\TabControl.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Titlebar.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\ToggleButton.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Tooltip.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\WindowRendererSets\Core\Tree.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLAttributes.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLHandler.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\Expat\XMLParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\Expat\XMLParserModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\Libxml2\XMLParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\Libxml2\XMLParserModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\RapidXML\XMLParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\RapidXML\XMLParserModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\TinyXML\XMLParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\TinyXML\XMLParserModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\Xerces\XMLParser.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\Xerces\XMLParserModule.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLParserModules\Xerces\XMLParserProperties.h" />
+    <ClInclude Include="include\3rdparty\CEGUI\XMLSerializer.h" />
+    <ClInclude Include="include\3rdparty\EASTL\algorithm.h" />
+    <ClInclude Include="include\3rdparty\EASTL\allocator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\allocator_malloc.h" />
+    <ClInclude Include="include\3rdparty\EASTL\array.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bitset.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bitvector.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\call_traits.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\compressed_pair.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\fixed_string_abstract.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\intrusive_sdlist.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\intrusive_slist.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\list_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\ring_buffer.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\sparse_matrix.h" />
+    <ClInclude Include="include\3rdparty\EASTL\bonus\string_abstract.h" />
+    <ClInclude Include="include\3rdparty\EASTL\chrono.h" />
+    <ClInclude Include="include\3rdparty\EASTL\core_allocator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\core_allocator_adapter.h" />
+    <ClInclude Include="include\3rdparty\EASTL\deque.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_allocator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_hash_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_hash_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_slist.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_string.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_substring.h" />
+    <ClInclude Include="include\3rdparty\EASTL\fixed_vector.h" />
+    <ClInclude Include="include\3rdparty\EASTL\functional.h" />
+    <ClInclude Include="include\3rdparty\EASTL\hash_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\hash_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\heap.h" />
+    <ClInclude Include="include\3rdparty\EASTL\initializer_list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\allocator_traits.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\allocator_traits_fwd_decls.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\config.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\copy_help.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\eastl_rw.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\enable_shared.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\fill_help.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\fixed_pool.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\function.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\functional_base.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\generic_iterator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\hashtable.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\integer_sequence.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\intrusive_hashtable.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\mem_fn.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\move_help.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\pair_fwd_decls.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\red_black_tree.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\smart_ptr.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\thread_support.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\tuple_fwd_decls.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_compound.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_fundamental.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_pod.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_properties.h" />
+    <ClInclude Include="include\3rdparty\EASTL\internal\type_transformations.h" />
+    <ClInclude Include="include\3rdparty\EASTL\intrusive_hash_map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\intrusive_hash_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\intrusive_list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\intrusive_ptr.h" />
+    <ClInclude Include="include\3rdparty\EASTL\iterator.h" />
+    <ClInclude Include="include\3rdparty\EASTL\linked_array.h" />
+    <ClInclude Include="include\3rdparty\EASTL\linked_ptr.h" />
+    <ClInclude Include="include\3rdparty\EASTL\list.h" />
+    <ClInclude Include="include\3rdparty\EASTL\map.h" />
+    <ClInclude Include="include\3rdparty\EASTL\memory.h" />
+    <ClInclude Include="include\3rdparty\EASTL\numeric.h" />
+    <ClInclude Include="include\3rdparty\EASTL\numeric_limits.h" />
+    <ClInclude Include="include\3rdparty\EASTL\priority_queue.h" />
+    <ClInclude Include="include\3rdparty\EASTL\queue.h" />
+    <ClInclude Include="include\3rdparty\EASTL\random.h" />
+    <ClInclude Include="include\3rdparty\EASTL\ratio.h" />
+    <ClInclude Include="include\3rdparty\EASTL\safe_ptr.h" />
+    <ClInclude Include="include\3rdparty\EASTL\scoped_array.h" />
+    <ClInclude Include="include\3rdparty\EASTL\scoped_ptr.h" />
+    <ClInclude Include="include\3rdparty\EASTL\set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\shared_array.h" />
+    <ClInclude Include="include\3rdparty\EASTL\shared_ptr.h" />
+    <ClInclude Include="include\3rdparty\EASTL\slist.h" />
+    <ClInclude Include="include\3rdparty\EASTL\sort.h" />
+    <ClInclude Include="include\3rdparty\EASTL\stack.h" />
+    <ClInclude Include="include\3rdparty\EASTL\string.h" />
+    <ClInclude Include="include\3rdparty\EASTL\tuple.h" />
+    <ClInclude Include="include\3rdparty\EASTL\unique_ptr.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector_multimap.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector_multiset.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector_set.h" />
+    <ClInclude Include="include\3rdparty\EASTL\version.h" />
+    <ClInclude Include="include\3rdparty\EASTL\weak_ptr.h" />
+    <ClInclude Include="include\3rdparty\gli\comparison.hpp" />
+    <ClInclude Include="include\3rdparty\gli\copy.hpp" />
+    <ClInclude Include="include\3rdparty\gli\core\fetch.hpp" />
+    <ClInclude Include="include\3rdparty\gli\core\flip.hpp" />
+    <ClInclude Include="include\3rdparty\gli\core\generate_mipmaps.hpp" />
+    <ClInclude Include="include\3rdparty\gli\core\operation.hpp" />
+    <ClInclude Include="include\3rdparty\gli\core\operator.hpp" />
+    <ClInclude Include="include\3rdparty\gli\core\storage.hpp" />
+    <ClInclude Include="include\3rdparty\gli\dx.hpp" />
+    <ClInclude Include="include\3rdparty\gli\format.hpp" />
+    <ClInclude Include="include\3rdparty\gli\gl.hpp" />
+    <ClInclude Include="include\3rdparty\gli\gli.hpp" />
+    <ClInclude Include="include\3rdparty\gli\image.hpp" />
+    <ClInclude Include="include\3rdparty\gli\levels.hpp" />
+    <ClInclude Include="include\3rdparty\gli\load.hpp" />
+    <ClInclude Include="include\3rdparty\gli\load_dds.hpp" />
+    <ClInclude Include="include\3rdparty\gli\load_ktx.hpp" />
+    <ClInclude Include="include\3rdparty\gli\save.hpp" />
+    <ClInclude Include="include\3rdparty\gli\save_dds.hpp" />
+    <ClInclude Include="include\3rdparty\gli\save_ktx.hpp" />
+    <ClInclude Include="include\3rdparty\gli\target.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture1d.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture1d_array.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture2d.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture2d_array.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture3d.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture_cube.hpp" />
+    <ClInclude Include="include\3rdparty\gli\texture_cube_array.hpp" />
+    <ClInclude Include="include\3rdparty\gli\type.hpp" />
+    <ClInclude Include="include\3rdparty\gli\view.hpp" />
+    <ClInclude Include="include\3rdparty\gsl\gsl.h" />
+    <ClInclude Include="include\3rdparty\gsl\gsl_assert.h" />
+    <ClInclude Include="include\3rdparty\gsl\gsl_util.h" />
+    <ClInclude Include="include\3rdparty\gsl\span.h" />
+    <ClInclude Include="include\3rdparty\gsl\string_span.h" />
+    <ClInclude Include="include\3rdparty\stbi\stb_dxt.h" />
+    <ClInclude Include="include\3rdparty\stbi\stb_image_write.h" />
+    <ClInclude Include="include\Public\Database\Utils\MaxRectsPacker.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderPass.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\CubeMapGen.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\SSR.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLCubeMap.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderObject.h" />
+    <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
+    <ClInclude Include="include\Public\Utils\StringUtils.h" />
+    <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />
+    <ClInclude Include="include\3rdparty\EASTL\utility.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector.h" />
+    <ClInclude Include="include\3rdparty\EASTL\vector_map.h" />
+    <ClInclude Include="include\Public\Database\Processors\ByteImageProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\FloatImageProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\ResourceProcessor.h" />
+    <ClInclude Include="include\Public\Database\Processors\SceneProcessor.h" />
+    <ClInclude Include="include\Public\Database\ResourceBuilder.h" />
+    <ClInclude Include="include\Private\Utils\ThreadManager.h" />
+    <ClInclude Include="include\Public\Core.h" />
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp" />
+    <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h" />
+    <ClInclude Include="include\3rdparty\entityx\config.h" />
+    <ClInclude Include="include\3rdparty\entityx\deps\Dependencies.h" />
+    <ClInclude Include="include\3rdparty\entityx\Entity.h" />
+    <ClInclude Include="include\3rdparty\entityx\entityx.h" />
+    <ClInclude Include="include\3rdparty\entityx\Event.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\NonCopyable.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\Pool.h" />
+    <ClInclude Include="include\3rdparty\entityx\help\Timer.h" />
+    <ClInclude Include="include\3rdparty\entityx\quick.h" />
+    <ClInclude Include="include\3rdparty\entityx\System.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabase.h" />
+    <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBTexture.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBAtlasRegion.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBAtlasTexture.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBMaterial.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBMesh.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBNode.h" />
+    <ClInclude Include="include\Public\Database\Assets\DBScene.h" />
+    <ClInclude Include="include\Public\Database\Assets\EAssetType.h" />
+    <ClInclude Include="include\Public\Database\Assets\IAsset.h" />
+    <ClInclude Include="include\Public\GLEngine.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLConfig.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMaterial.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\BilateralBlur.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\Bloom.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\FXAA.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\GaussianBlur.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\Frustum.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GL.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLDefines.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\HBAO.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLScene.h" />
+    <ClInclude Include="include\Public\Input\InputListener.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Scene\GLMesh.h" />
+    <ClInclude Include="include\Private\Graphics\GL\GLTypes.h" />
+    <ClInclude Include="include\Public\Graphics\GL\GLContext.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\ClusteredShading.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\QuadDrawer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLConstantBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLFramebuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLShader.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLStateBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTexture.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureArray.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLTextureBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLUniform.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Wrappers\GLVertexBuffer.h" />
+    <ClInclude Include="include\Public\Graphics\Graphics.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\LightManager.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\PerspectiveCamera.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\ARBDebugOutput.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\TextureRegion.h" />
+    <ClInclude Include="include\Public\Input\EKey.h" />
+    <ClInclude Include="include\Public\Input\EMouseButton.h" />
+    <ClInclude Include="include\Public\Input\Input.h" />
+    <ClInclude Include="include\3rdparty\json\assertions.h" />
+    <ClInclude Include="include\3rdparty\json\autolink.h" />
+    <ClInclude Include="include\3rdparty\json\config.h" />
+    <ClInclude Include="include\3rdparty\json\features.h" />
+    <ClInclude Include="include\3rdparty\json\forwards.h" />
+    <ClInclude Include="include\3rdparty\json\json.h" />
+    <ClInclude Include="include\3rdparty\json\reader.h" />
+    <ClInclude Include="include\3rdparty\json\value.h" />
+    <ClInclude Include="include\3rdparty\json\version.h" />
+    <ClInclude Include="include\3rdparty\json\writer.h" />
+    <ClInclude Include="include\Public\Graphics\GL\Tech\SpriteBatch.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\ImageButton.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Widgets\TextButton.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\CheckGLError.h" />
+    <ClInclude Include="include\Public\Graphics\UI\Font.h" />
+    <ClInclude Include="include\Public\Database\Utils\AtlasBuilder.h" />
+    <ClInclude Include="include\Public\Utils\ConcurrentQueue.h" />
+    <ClInclude Include="include\Public\Database\Utils\CRC64.h" />
+    <ClInclude Include="include\Public\Utils\DeltaTimeMeasurer.h" />
+    <ClInclude Include="include\Public\Utils\FileHandle.h" />
+    <ClInclude Include="include\Public\Utils\FileModificationListener.h" />
+    <ClInclude Include="include\Public\Utils\FileModificationManager.h" />
+    <ClInclude Include="include\Public\Utils\FileUtils.h" />
+    <ClInclude Include="include\Public\Graphics\Utils\FPSCameraController.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\TextureFormatUtils.h" />
+    <ClInclude Include="include\Public\Utils\FPSMeasurer.h" />
+    <ClInclude Include="include\Public\Utils\JobScheduler.h" />
+    <ClInclude Include="include\Public\Utils\MatForward.h" />
+    <ClInclude Include="include\Public\Utils\Semaphore.h" />
+    <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h" />
+    <ClInclude Include="include\3rdparty\stbi\stb_image.h" />
+    <ClInclude Include="include\Public\Utils\VecForward.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\implementations\mac\macPlugins.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Lua\required.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Lua\support\tolua++bin\toluabind.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\generators\include\python_CEGUI.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\generators\include\python_CEGUINullRenderer.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\generators\include\python_CEGUIOgreRenderer.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\generators\include\python_CEGUIOpenGLRenderer.h" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUINullRenderer\NullRenderer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOgreRenderer\OgreImageCodec.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOgreRenderer\OgreRenderer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOgreRenderer\OgreResourceProvider.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGL3Renderer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGL3Shader.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGL3StateChangeWrapper.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGLGeometryBufferBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGLRenderer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGLRendererBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGLTextureTarget.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUIOpenGLRenderer\OpenGLViewportTarget.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\AbsoluteDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ActivationEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Affector.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Animation.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\AnimationEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\AnimationInstance.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\AnimationManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\AnimationNameIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\BaseDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\BasicImage.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\BasicRenderedStringParser.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\BoundSlot.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ButtonBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\CentredRenderedString.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Clipboard.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Colour.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ColourRect.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Combobox.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ComboDropList.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ComponentArea.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ComponentList.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Connection.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_23c5f09e76c89ed46f1671ac87f5d133.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_2c9936f57a2ad030e0dfadb6e79a326f.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_3dfe55a685a628d9556dccd6ce85e923.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_45e2d4f27e29c3a5b74179f6cfabbc4c.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_47ddd968107e89ff0051bf3212fbb472.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_58fce9a3b4ea911d189f971dbf4a6c9b.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_6318b664b630c5a4e45127a69c6748cb.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_663c592fa58613dab4f9509d04eb6cc1.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_6cea82a17f94b95b10c333412f843a6d.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_6da79d61dc2d4c154ee9113f9d44d174.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_6e18222775ccb39f7ec1f5c112d444ec.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_78cd23dcc51d261e1f508a899854e1a9.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_7f0012c4899354432f095ef9bb577046.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_92b3f0ef60bba0b7bc1aa08b6f3304d6.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_937e880515ad590c17d4b2b82a347310.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_99d0247943ea008baba14993d63dd301.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_9b6259ec5f5ed443accef2ab6f116fda.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_9dce73c5f5e3a55d1a66a6e740fbf48b.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_a74f832b0a98ff325f0d295bba46f58b.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_b33d7bd272dd6c97821cbd9402cb4364.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_ccf46e19ae28e4742a13388873833720.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_d0a5fcfab7d8e4121b568ec58e88f4fd.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_e31fba8abb652b91e7a416a794506e4f.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_e6837f87c747b0388313d47a6a1e8556.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_e78994bfd2b781a573fdd2cd7ca2ceae.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ConstBaseIterator_f0585fb3775a7fa1f905d29be5dc1533.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\CoordConverter.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\DefaultLogger.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\DefaultResourceProvider.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\DefaultWindow.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Dimension.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\DisplayEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\DragContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\DragDropEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Editbox.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Element.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ElementEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Event.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\EventAction.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\EventActionIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\EventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\EventIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\EventLinkDefinition.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\EventLinkDefinitionIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\EventSet.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Exception.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FalagardComponentBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FalagardMappingIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FalagardXMLHelper.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Font.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FontDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FontEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FontGlyph.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FontIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FontManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FrameComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FrameComponentIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\FrameWindow.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\GeometryBuffer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\GlobalEventSet.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\GridLayoutContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\GroupBox.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\GUIContext.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\GUIContextEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\GUIContextRenderTargetEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\HeaderSequenceEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\HorizontalLayoutContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Image.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImageCodec.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImageDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImageIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImageManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImagePropertyDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImageryComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImageryComponentIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImageryIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ImagerySection.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\algorithms.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\container_proxy.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\container_suite.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\container_traits.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\deque.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\element_proxy.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\element_proxy_traits.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\int_slice_helper.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\iterator_range.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\iterator_traits.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\list.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\map.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\methods.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\multimap.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\pair.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\proxy_iterator.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\python_iterator.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\registry_utils.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\set.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\shared_proxy_impl.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\slice.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\slice_handler.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\suite_utils.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\value_traits.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\vector.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\visitor.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\indexing_suite\workaround.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Interpolator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ItemEntry.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ItemListBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ItemListbox.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Key.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\KeyEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\KeyFrame.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LayerIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LayerSpecification.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LayoutContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LBItemList.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LineList.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LinkedEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LinkTargetIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Listbox.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ListboxItem.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ListboxTextItem.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ListHeader.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ListHeaderSegment.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\LoadableUIElementIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Logger.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MCLGridRef.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Menubar.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MenuBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MenuItem.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MouseCursor.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MouseCursorEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MouseEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MultiColumnList.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\MultiLineEditbox.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\NamedArea.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\NamedAreaIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\NamedElement.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\NamedElementEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\NamedXMLResourceManagerFont.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\NamedXMLResourceManagerScheme.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\OperatorDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PopupMenu.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ProgressBar.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Property.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyDefinitionBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyDefinitionIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyHelper.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyInitialiser.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyInitialiserIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyInitialiserVector.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertyReceiver.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PropertySet.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PushButton.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\PyCEGUI_enumerations.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Quaternion.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RadioButton.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RawDataContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Rectf.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RegexMatcher.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RegexMatchStateEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderedString.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderedStringComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderedStringImageComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderedStringParser.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderedStringTextComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderedStringWidgetComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderEffect.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderEffectFactory.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderEffectManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Renderer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderingContext.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderingSurface.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderingWindow.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderQueue.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderQueueEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderTarget.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\RenderTargetEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ResourceEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ResourceEventSet.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ResourceProvider.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Scheme.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SchemeIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SchemeManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ScriptModule.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ScrollablePane.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Scrollbar.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ScrolledContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ScrolledItemListBase.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SectionIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SectionSpecification.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SequentialLayoutContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SimpleTimer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonAnimationManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonFontManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonGlobalEventSet.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonImageManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonLogger.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonRenderEffectManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonSchemeManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonSystem.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonWidgetLookManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonWindowFactoryManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonWindowManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SingletonWindowRendererManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Sizef.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Slider.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Spinner.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\StateImagery.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\StateIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\StdPairCEGUIImageImageFactory.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\StdPairCEGUIStringString.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\StdPairFloatFloat.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\StringSet.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Subscriber.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\System.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\SystemKeys.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TabButton.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TabControl.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TargetTypeStack.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TextComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TextComponentIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Texture.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TextureTarget.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TextUtils.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Thumb.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Titlebar.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\ToggleButton.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Tooltip.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Tree.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TreeEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TreeItem.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\TypeAliasIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\UBox.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\UDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\UnifiedDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\UpdateEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\URect.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\USize.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\UVector2.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Vector2f.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Vector3f.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\vector_less__CEGUI_scope_PropertyDefinitionBase_ptr___greater_.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\vector_less__CEGUI_scope_UDim__greater_.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Vertex.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\VerticalLayoutContainer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WidgetComponent.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WidgetComponentIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WidgetDim.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WidgetLookFeel.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WidgetLookIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WidgetLookManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\Window.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowEventArgs.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowFactory.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowFactoryIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowFactoryManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowIterator.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowRenderer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowRendererFactory.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\WindowRendererManager.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\XMLAttributes.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\XMLHandler.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\XMLParser.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\XMLSerializer.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\_LineInfo__value_traits.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\_PropertyInitialiser__value_traits.pypp.hpp" />
+    <ClInclude Include="src\3rdparty\CEGUI\ScriptModules\Python\bindings\output\CEGUI\_UDim__value_traits.pypp.hpp" />
+    <ClInclude Include="src\json\json_tool.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="include\3rdparty\gli\core\comparison.inl" />
+    <None Include="include\3rdparty\gli\core\copy.inl" />
+    <None Include="include\3rdparty\gli\core\dx.inl" />
+    <None Include="include\3rdparty\gli\core\fetch.inl" />
+    <None Include="include\3rdparty\gli\core\flip.inl" />
+    <None Include="include\3rdparty\gli\core\format.inl" />
+    <None Include="include\3rdparty\gli\core\generate_mipmaps.inl" />
+    <None Include="include\3rdparty\gli\core\gl.inl" />
+    <None Include="include\3rdparty\gli\core\image.inl" />
+    <None Include="include\3rdparty\gli\core\levels.inl" />
+    <None Include="include\3rdparty\gli\core\load.inl" />
+    <None Include="include\3rdparty\gli\core\load_dds.inl" />
+    <None Include="include\3rdparty\gli\core\load_ktx.inl" />
+    <None Include="include\3rdparty\gli\core\operation.inl" />
+    <None Include="include\3rdparty\gli\core\operator.inl" />
+    <None Include="include\3rdparty\gli\core\save.inl" />
+    <None Include="include\3rdparty\gli\core\save_dds.inl" />
+    <None Include="include\3rdparty\gli\core\save_ktx.inl" />
+    <None Include="include\3rdparty\gli\core\storage.inl" />
+    <None Include="include\3rdparty\gli\core\texture.inl" />
+    <None Include="include\3rdparty\gli\core\texture1d.inl" />
+    <None Include="include\3rdparty\gli\core\texture1d_array.inl" />
+    <None Include="include\3rdparty\gli\core\texture2d.inl" />
+    <None Include="include\3rdparty\gli\core\texture2d_array.inl" />
+    <None Include="include\3rdparty\gli\core\texture3d.inl" />
+    <None Include="include\3rdparty\gli\core\texture_cube.inl" />
+    <None Include="include\3rdparty\gli\core\texture_cube_array.inl" />
+    <None Include="include\3rdparty\gli\core\view.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\Direct3D10\RenderTarget.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\Direct3D11\RenderTarget.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\Direct3D9\RenderTarget.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\Irrlicht\RenderTarget.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\Null\RenderTarget.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\Ogre\RenderTarget.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\OpenGLES\RenderTarget.inl" />
+    <None Include="src\3rdparty\CEGUI\RendererModules\OpenGL\RenderTarget.inl" />
+    <None Include="src\3rdparty\json\json_valueiterator.inl" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CE0F2368-C0DB-4372-A4BB-86FEFD09F1E6}</ProjectGuid>
+    <RootNamespace>GLEngine</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Android|x64'">
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(ProjectName)\bin\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(ProjectName)\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <AdditionalOptions>
+      </AdditionalOptions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib;glslangd.lib;HLSLd.lib;OGLCompilerd.lib;SPIRVd.lib;SPVRemapperd.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ForcedIncludeFiles>
+      </ForcedIncludeFiles>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)\$(Configuration)</OutputFile>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib;glslang.lib;HLSL.lib;OGLCompiler.lib;SPIRV.lib;SPVRemapper.lib</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+    <ProjectReference />
+    <ProjectReference />
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
