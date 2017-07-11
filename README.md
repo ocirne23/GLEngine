@@ -38,4 +38,4 @@ Some interesting files to look at:
 * [modelshader.frag](GLApp/assets/Shaders/modelshader.frag)
 * [ClusteredShading.cpp](GLEngine/src/Graphics/GL/Tech/ClusteredShading.cpp)
 
-![da](https://dl.dropboxusercontent.com/u/18555381/Permanent/glengine280916.png)
+![da](http://i.imgur.com/Bog8hb3.jpg)
