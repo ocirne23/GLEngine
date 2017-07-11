@@ -85,74 +85,73 @@ void TestScreen::setSunDirection(glm::vec3 a_direction)
 void TestScreen::initializeGUI()
 {
 	m_guiManager.initialize();
+
+	CEGUI::FrameWindow* optionsFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/OptionsFrameWindow.layout"));
 	{
-		CEGUI::FrameWindow* optionsFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/OptionsFrameWindow.layout"));
-		{
-			CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("HBAOCheckBox"));
-			checkbox->setSelected(m_renderer.isHBAOEnabled());
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{
-			CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("BloomCheckBox"));
-			checkbox->setSelected(m_renderer.isBloomEnabled());
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{
-			CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("ShadowsCheckBox"));
-			checkbox->setSelected(m_renderer.isShadowsEnabled());
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{// AA buttons
-			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("NoAARadioButton"));
-			checkbox->setGroupID(1);
-			checkbox->setSelected(!m_renderer.isFXAAEnabled() && GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::NONE);
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{
-			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("FXAARadioButton"));
-			checkbox->setGroupID(1);
-			checkbox->setSelected(m_renderer.isFXAAEnabled());
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{
-			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA2RadioButton"));
-			checkbox->setGroupID(1);
-			checkbox->setSelected(GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::MSAA_2X);
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{
-			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA4RadioButton"));
-			checkbox->setGroupID(1);
-			checkbox->setSelected(GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::MSAA_4X);
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-		{
-			CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA8RadioButton"));
-			checkbox->setGroupID(1);
-			checkbox->setSelected(GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::MSAA_8X);
-			checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
-		}
-
-		optionsFrameWindow->setDragMovingEnabled(false);
-		addWindow(optionsFrameWindow);
-
-		CEGUI::FrameWindow* controlsDisplayFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/ObjectListFrameWindow.layout"));
-		controlsDisplayFrameWindow->setDragMovingEnabled(false);
-		const CEGUI::String controlsText =
-			"WASD / Shift / Space: Movement\n\
-			Left Mouse Button : Move camera\n\
-			Escape: Shutdown\n\
-			T: Place point light\n\
-			Y: Delete all point lights\n\
-			U: Set sun direction\n\
-			Keypad 5: Reload GUI\n\
-			Keypad 6: Reload Shaders\n\
-			Keypad Plus: Increase camera speed\n\
-			Keypad Minus: Decrease camera speed\n\
-			Collapse this window by doubleclicking the bar";
-		controlsDisplayFrameWindow->getChild("StaticText")->setText(controlsText);
-		addWindow(controlsDisplayFrameWindow);
+		CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("HBAOCheckBox"));
+		checkbox->setSelected(m_renderer.isHBAOEnabled());
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
 	}
+	{
+		CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("BloomCheckBox"));
+		checkbox->setSelected(m_renderer.isBloomEnabled());
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+	}
+	{
+		CEGUI::ToggleButton* checkbox = scast<CEGUI::ToggleButton*>(optionsFrameWindow->getChild("ShadowsCheckBox"));
+		checkbox->setSelected(m_renderer.isShadowsEnabled());
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+	}
+	{// AA buttons
+		CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("NoAARadioButton"));
+		checkbox->setGroupID(1);
+		checkbox->setSelected(!m_renderer.isFXAAEnabled() && GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::NONE);
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+	}
+	{
+		CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("FXAARadioButton"));
+		checkbox->setGroupID(1);
+		checkbox->setSelected(m_renderer.isFXAAEnabled());
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+	}
+	{
+		CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA2RadioButton"));
+		checkbox->setGroupID(1);
+		checkbox->setSelected(GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::MSAA_2X);
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+	}
+	{
+		CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA4RadioButton"));
+		checkbox->setGroupID(1);
+		checkbox->setSelected(GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::MSAA_4X);
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+	}
+	{
+		CEGUI::RadioButton* checkbox = scast<CEGUI::RadioButton*>(optionsFrameWindow->getChild("MSAA8RadioButton"));
+		checkbox->setGroupID(1);
+		checkbox->setSelected(GLConfig::getMultisampleType() == GLTexture::EMultiSampleType::MSAA_8X);
+		checkbox->subscribeEvent(CEGUI::ToggleButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&TestScreen::checkboxSelectionChanged, this));
+	}
+
+	optionsFrameWindow->setDragMovingEnabled(false);
+	addWindow(optionsFrameWindow);
+
+	CEGUI::FrameWindow* controlsDisplayFrameWindow = scast<CEGUI::FrameWindow*>(CEGUI::WindowManager::getSingleton().loadLayoutFromFile("GLEngine/ObjectListFrameWindow.layout"));
+	controlsDisplayFrameWindow->setDragMovingEnabled(false);
+	const CEGUI::String controlsText =
+		"WASD / Shift / Space: Movement\n\
+		Left Mouse Button : Move camera\n\
+		Escape: Shutdown\n\
+		T: Place point light\n\
+		Y: Delete all point lights\n\
+		U: Set sun direction\n\
+		Keypad 5: Reload GUI\n\
+		Keypad 6: Reload Shaders\n\
+		Keypad Plus: Increase camera speed\n\
+		Keypad Minus: Decrease camera speed\n\
+		Collapse this window by doubleclicking the bar";
+	controlsDisplayFrameWindow->getChild("StaticText")->setText(controlsText);
+	addWindow(controlsDisplayFrameWindow);
 }
 
 void TestScreen::addWindow(CEGUI::Window* a_window)
