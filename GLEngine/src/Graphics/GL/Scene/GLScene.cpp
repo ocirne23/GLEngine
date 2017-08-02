@@ -77,7 +77,7 @@ void GLScene::render(GLRenderer& a_renderer, const glm::mat4& a_transform, bool 
 
 void GLScene::setAsSkybox(bool a_isSkybox)
 {
-	m_isSkybox = true;
+	m_isSkybox = a_isSkybox;
 }
 
 void GLScene::renderNode(const DBNode& a_node, GLRenderer& a_renderer, const glm::mat4& a_parentTransform)
