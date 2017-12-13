@@ -1,3 +1,5 @@
+#pragma once
+
 template<typename Tag, typename Tag::type M>
 struct AccessPrivate {
 	friend typename Tag::type get(Tag) {
