@@ -25,7 +25,6 @@ eastl::string getLuaFolder()
 	eastl::string path = FileUtils::getApplicationExePath();
 	path = path.substr(0, path.rfind("bin\\"));
 	path.append("assets\\lua\\");
-
 	return path;
 }
 
@@ -49,7 +48,6 @@ LogicSystem::LogicSystem(BoatGame& a_boatGame)
 		sol::string_view folder = item.second.as<sol::string_view>();
 		packagePath.append(folder.data());
 		packagePath.append("\\?.lua");
-		print("%s\n", folder.data());
 	}
 	m_lua["package"]["path"] = packagePath.c_str();
 

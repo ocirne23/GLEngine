@@ -7,9 +7,10 @@ EShapeType_Edge = 1
 EShapeType_Polygon = 2
 EShapeType_Chain = 3
 
+BodyDef = {}
 function BodyDef:new()
 	newObj = {
-		type = EBodyType_Dynamic,
+		bodyType = EBodyType_Dynamic,
 		position = {0.0, 0.0},
 		angle = 0.0,
 		linearVelocity = {0.0, 0.0},
@@ -21,13 +22,14 @@ function BodyDef:new()
 		fixedRotation = false,
 		bullet = false,
 		active = true,
-		userdata = {}
-		gravityScale = 1.0
+		userdata = {},
+		gravityScale = 1.0,
 	}
 	self.__index = self
 	return setmetatable(newObj, self)
 end
 
+FixtureDef = {}
 function FixtureDef:new(a_shape)
 	newObj = {
 		shape = a_shape,
@@ -35,17 +37,18 @@ function FixtureDef:new(a_shape)
 		friction = 0.2,
 		restitution = 0.0,
 		density = 0.0,
-		isSensor = false
+		isSensor = false,
 	}
 	self.__index = self
 	return setmetatable(newObj, self)
 end
 
+CircleShape = {}
 function CircleShape:new()
 	newObj = {
 		type = EShapeType_Circle,
-		position = {0.0, 0.0}
-		radius = 3.0
+		position = {0.0, 0.0},
+		radius = 3.0,
 	}
 	self.__index = self
 	return setmetatable(newObj, self)
