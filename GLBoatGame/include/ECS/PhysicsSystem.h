@@ -54,8 +54,9 @@ private:
 	owner<b2World*> m_physicsWorld            = NULL;
 	float m_timestepAccumulator               = 0.0f;
 
-	Semaphore m_semaphore;
+	Semaphore m_drawDebugInfoSemaphore;
+	Semaphore m_messageQueueSemaphore;
 	eastl::fixed_vector<PhysicsComponent, Entity::MAX_NUM_ENTITIES, false> m_components;
-	ConcurrentQueue<CreateBodyMessage> m_createBodyMessageQueue;
-	ConcurrentQueue<CreateJointMessage> m_createJointMessageQueue;
+	eastl::vector<CreateBodyMessage> m_createBodyMessageQueue;
+	eastl::vector<CreateJointMessage> m_createJointMessageQueue;
 };
