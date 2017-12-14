@@ -5,8 +5,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-const char* const QUAD_VERT_SHADER_PATH = "Shaders/quad.vert";
-const char* const BLOOM_FRAG_SHADER_PATH = "Shaders/Bloom/bloom.frag";
+const char* const QUAD_VERT_SHADER_PATH = "../EngineAssets/Shaders/quad.vert";
+const char* const BLOOM_FRAG_SHADER_PATH = "../EngineAssets/Shaders/Bloom/bloom.frag";
 
 END_UNNAMED_NAMESPACE()
 

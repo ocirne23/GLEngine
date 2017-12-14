@@ -49,7 +49,7 @@ void GLEngine::doMainThreadTick()
 	input->pollEvents();
 }
 
-void GLEngine::doEngineTick()
+void GLEngine::processInput()
 {
 	input->processEvents();
 }

@@ -25,6 +25,7 @@ public:
 	static eastl::string getExtensionForFilePath(const eastl::string& path);
 	static void createDirectoryForFile(const eastl::string& filePath);
 	static bool fileExists(const eastl::string& filePath);
+	static eastl::string getApplicationExePath();
 
 private:
 	FileUtils() {}

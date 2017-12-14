@@ -5,6 +5,13 @@
 
 #include <assert.h>
 
+BEGIN_UNNAMED_NAMESPACE()
+
+const char* const QUAD_VERT_SHADER_PATH = "../EngineAssets/Shaders/quad.vert";
+const char* const QUAD_FRAG_SHADER_PATH = "../EngineAssets/Shaders/quad.frag";
+
+END_UNNAMED_NAMESPACE()
+
 GLShader QuadDrawer::s_quadShader;
 GLVertexBuffer QuadDrawer::s_vertexBuffer;
 GLVertexBuffer QuadDrawer::s_indiceBuffer;
@@ -81,7 +88,7 @@ void QuadDrawer::initBuffers()
 
 void QuadDrawer::reloadShader()
 {
-	s_quadShader.initialize("Shaders/quad.vert", "Shaders/quad.frag");
+	s_quadShader.initialize(QUAD_VERT_SHADER_PATH, QUAD_FRAG_SHADER_PATH);
 	s_quadShader.begin();
 	s_quadShader.setUniform1i("u_tex", 0);
 	s_quadShader.end();

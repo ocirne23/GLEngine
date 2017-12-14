@@ -3,12 +3,11 @@
 #include "Core.h"
 #include "EASTL/string.h"
 #include "gsl/gsl.h"
+#include "Utils/FileUtils.h"
 
 #include <SDL/SDL_rwops.h>
 #include <stdlib.h>
 #include <assert.h>
-
-const eastl::string FileHandle::ASSETS_DIR("assets/");
 
 FileHandle::FileHandle(const eastl::string& a_filePath, EFileMode a_fileMode) : m_rwops(0), m_size(0), m_fileMode(a_fileMode)
 {
@@ -22,14 +21,11 @@ FileHandle::FileHandle(const char* a_filePath, EFileMode a_fileMode) : m_rwops(0
 
 void FileHandle::initialize(const char* a_filePath, EFileMode a_fileMode)
 {
-	eastl::string dir(ASSETS_DIR);
-	dir.append(a_filePath);
-	a_filePath = dir.c_str();
-
-	char fullPath[_MAX_PATH];
-	if (!_fullpath(fullPath, a_filePath, _MAX_PATH))
-		print("Could not construct full path %s \n", a_filePath);
-	m_filePath = fullPath;
+	eastl::string path = FileUtils::getApplicationExePath();	
+	path = path.substr(0, path.rfind("bin\\"));
+	path.append(a_filePath);
+	eastl::replace(path.begin(), path.end(), '/', '\\');
+	m_filePath = path;
 
 	const char* fileModeStr;
 	switch (a_fileMode)
@@ -40,11 +36,11 @@ void FileHandle::initialize(const char* a_filePath, EFileMode a_fileMode)
 	default:                    return;
 	}
 
-	m_rwops = SDL_RWFromFile(a_filePath, fileModeStr);
+	m_rwops = SDL_RWFromFile(m_filePath.c_str(), fileModeStr);
 	m_isOpen = (m_rwops != NULL);
 	if (!m_rwops)
 	{
-		print("Could not find or open the file %s \n", a_filePath);
+		print("Could not find or open the file %s, fullpath: %s\n", a_filePath, m_filePath.c_str());
 		return;
 	}
 

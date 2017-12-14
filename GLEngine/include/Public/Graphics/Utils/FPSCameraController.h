@@ -9,7 +9,7 @@ class FPSCameraController
 {
 public:
 
-	void update(PerspectiveCamera& camera, float deltaSec, bool focused);
+	void update(PerspectiveCamera& camera, float deltaSec, bool focused = true);
 	void setCameraSpeed(float a_cameraSpeed) { m_cameraSpeed = a_cameraSpeed; }
 	float getCameraSpeed() const { return m_cameraSpeed; }
 

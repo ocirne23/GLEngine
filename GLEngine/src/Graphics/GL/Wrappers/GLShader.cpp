@@ -5,6 +5,7 @@
 #include "Graphics/GL/GL.h"
 #include "Graphics/Utils/CheckGLError.h"
 #include "Utils/FileHandle.h"
+#include "Utils/FileUtils.h"
 #include "EASTL/string.h"
 
 #include <glm/glm.hpp>
@@ -18,9 +19,10 @@ eastl::string getVersionStr()
 	return eastl::string("#version 420\n");
 }
 
-eastl::string processIncludes(const eastl::string& a_str)
+eastl::string processIncludes(const eastl::string& a_path, const eastl::string& a_contents)
 {
-	eastl::string src = a_str;
+	eastl::string src = a_contents;
+	const eastl::string sourceFolder = FileUtils::getFolderPathForFile(a_path);
 	static const char* INCLUDE_STR = "#include \"";
 	static const uint INCLUDE_STR_LEN = uint(strlen(INCLUDE_STR));
 	auto includePos = src.find(INCLUDE_STR);
@@ -28,9 +30,10 @@ eastl::string processIncludes(const eastl::string& a_str)
 	{
 		auto includeStartPos = includePos + INCLUDE_STR_LEN;
 		auto includeEndPos = src.find("\"", includeStartPos);
-		uint numChars = uint(includeEndPos - includeStartPos);
+		const uint numChars = uint(includeEndPos - includeStartPos);
 		const eastl::string path = src.substr(includeStartPos, numChars);
-		const eastl::string includedFileContents = FileHandle(path).readString();
+		eastl::string includedFileContents = FileHandle(sourceFolder + path).readString();
+		includedFileContents = processIncludes(FileUtils::getFolderPathForFile(sourceFolder + path), includedFileContents);
 		const eastl::string toReplace = "#include \"" + path + "\"";
 		src.replace(src.find(toReplace), toReplace.length(), includedFileContents);
 		includePos = src.find(INCLUDE_STR);
@@ -131,7 +134,7 @@ eastl::string preprocessShaderFile(const char* a_shaderFilePath, const eastl::ve
 	FileHandle shaderFile(a_shaderFilePath);
 	assert(shaderFile.exists());
 	contents.append(shaderFile.readString());
-	contents = processIncludes(contents);
+	contents = processIncludes(a_shaderFilePath, contents);
 	return contents;
 }
 

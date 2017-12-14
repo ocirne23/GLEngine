@@ -8,7 +8,7 @@ class ConcurrentQueue
 {
 public:
 
-	ConcurrentQueue(T emptyVal = {0}) : m_emptyVal(emptyVal), m_semaphore(1) {}
+	ConcurrentQueue(T emptyVal = {}) : m_emptyVal(emptyVal), m_semaphore(1) {}
 
 	void push_back(T& val)
 	{
@@ -34,6 +34,8 @@ public:
 		m_queue.clear();
 		m_semaphore.release();
 	}
+
+	uint getSize() const { return m_queue.size(); }
 
 	void block() { m_semaphore.acquire(); }
 	void release() { m_semaphore.release(); }

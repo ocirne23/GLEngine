@@ -21,7 +21,7 @@ eastl::string FileUtils::getFolderPathForFile(const eastl::string& a_filePath)
 {
 	const auto dirIdx = std::min(a_filePath.find_last_of('/'), a_filePath.find_last_of('\\'));
 	if (dirIdx != eastl::string::npos)
-		return a_filePath.substr(0, dirIdx).append("\\");
+		return a_filePath.substr(0, dirIdx).append("/");
 	else
 		return "";
 }
@@ -146,3 +146,13 @@ FileTime FileUtils::getCurrentFileTime()
 	return ft;
 }
 
+eastl::string FileUtils::getApplicationExePath()
+{
+	char path[_MAX_PATH];
+	int len = 0;
+	int bytes = GetModuleFileName(NULL, path, ARRAY_SIZE(path));
+	if (bytes == 0)
+		return "";
+	else
+		return eastl::string(path);
+}

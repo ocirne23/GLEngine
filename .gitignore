@@ -20,11 +20,10 @@ GLEngine.VC.db
 thumbs.db
 
 ipch/
-GLEngine/gen/
 GLEngine/bin/
 GLEngine/obj/
 GLEngine/libs/
 GLApp/obj/
-GLResourceBuilder/x64/
-GLResourceBuilder/Win32/
+GLResourceBuilder/bin/
 GLResourceBuilder/obj/
+GLBoatGame/obj/

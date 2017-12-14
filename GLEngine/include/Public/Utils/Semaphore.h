@@ -9,7 +9,7 @@ class Semaphore
 {
 public:
 
-	Semaphore(uint numPermits);
+	Semaphore(uint numPermits = 1);
 	~Semaphore();
 
 	void acquire();

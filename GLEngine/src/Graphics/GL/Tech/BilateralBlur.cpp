@@ -9,9 +9,9 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-const char* const QUAD_VERT_SHADER_PATH = "Shaders/quad.vert";
-const char* const BLURX_FRAG_SHADER_PATH = "Shaders/Blur/bilateralblurx.frag";
-const char* const BLURY_FRAG_SHADER_PATH = "Shaders/Blur/bilateralblury.frag";
+const char* const QUAD_VERT_SHADER_PATH = "../EngineAssets/Shaders/quad.vert";
+const char* const BLURX_FRAG_SHADER_PATH = "../EngineAssets/Shaders/Blur/bilateralblurx.frag";
+const char* const BLURY_FRAG_SHADER_PATH = "../EngineAssets/Shaders/Blur/bilateralblury.frag";
 
 END_UNNAMED_NAMESPACE()
 

@@ -71,7 +71,7 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>
       <ImportLibrary>$(SolutionDir)$(ProjectName)\obj\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
       <AdditionalOptions>/ignore:4099 /Debug:fastlink %(AdditionalOptions)</AdditionalOptions>
@@ -92,7 +92,7 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>GLEngine.lib;</AdditionalDependencies>

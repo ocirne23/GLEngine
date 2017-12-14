@@ -17,9 +17,9 @@ BEGIN_UNNAMED_NAMESPACE()
 /* HBAO render resolution, 1 = full resolution, 2 = half resolution etc */
 const uint HBAO_RESOLUTION_SCALE = 2;
 
-const char* const QUAD_VERT_SHADER_PATH = "Shaders/quad.vert";
-const char* const HBAO_FRAG_SHADER_PATH = "Shaders/HBAO/HBAO.frag";
-const char* const DOWNSAMPLE_DEPTH_FRAG_SHADER_PATH = "Shaders/downsampleDepth.frag";
+const char* const QUAD_VERT_SHADER_PATH = "../EngineAssets/Shaders/quad.vert";
+const char* const HBAO_FRAG_SHADER_PATH = "../EngineAssets/Shaders/HBAO/HBAO.frag";
+const char* const DOWNSAMPLE_DEPTH_FRAG_SHADER_PATH = "../EngineAssets/Shaders/downsampleDepth.frag";
 							    
 const float AO_RADIUS           = 0.40f; // In meters
 const uint NUM_DIRS             = 6;

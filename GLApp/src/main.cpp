@@ -15,7 +15,7 @@ int main()
 			DeltaTimeMeasurer deltaTimeMeasurer;
 			while (!GLEngine::isShutdown())
 			{
-				GLEngine::doEngineTick();
+				GLEngine::processInput();
 				testScreen.render(deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs()));
 			}
 		}

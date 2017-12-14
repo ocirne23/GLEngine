@@ -14,19 +14,19 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-const char* const DFV_TEX_PATH = "Assets/Utils/ggx-helper-dfv.hdr";
+const char* const DFV_TEX_PATH = "../EngineAssets//Utils/ggx-helper-dfv.hdr";
 
-const char* const MODEL_VERT_SHADER_PATH = "Shaders/modelshader.vert";
-const char* const MODEL_FRAG_SHADER_PATH = "Shaders/modelshader.frag";
+const char* const MODEL_VERT_SHADER_PATH = "../EngineAssets/Shaders/modelshader.vert";
+const char* const MODEL_FRAG_SHADER_PATH = "../EngineAssets/Shaders/modelshader.frag";
 
-const char* const SKYBOX_VERT_SHADER_PATH = "Shaders/skyboxshader.vert";
-const char* const SKYBOX_FRAG_SHADER_PATH = "Shaders/skyboxshader.frag";
+const char* const SKYBOX_VERT_SHADER_PATH = "../EngineAssets/Shaders/skyboxshader.vert";
+const char* const SKYBOX_FRAG_SHADER_PATH = "../EngineAssets/Shaders/skyboxshader.frag";
 
-const char* const DEPTH_VERT_SHADER_PATH = "Shaders/depth.vert";
-const char* const DEPTH_FRAG_SHADER_PATH = "Shaders/depth.frag";
+const char* const DEPTH_VERT_SHADER_PATH = "../EngineAssets/Shaders/depth.vert";
+const char* const DEPTH_FRAG_SHADER_PATH = "../EngineAssets/Shaders/depth.frag";
 
-const char* const COMBINE_VERT_SHADER_PATH = "Shaders/quad.vert";
-const char* const COMBINE_FRAG_SHADER_PATH = "Shaders/combine.frag";
+const char* const COMBINE_VERT_SHADER_PATH = "../EngineAssets/Shaders/quad.vert";
+const char* const COMBINE_FRAG_SHADER_PATH = "../EngineAssets/Shaders/combine.frag";
 
 // TODO: Settings struct
 const glm::vec3 AMBIENT(0.125f);

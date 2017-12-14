@@ -187,12 +187,12 @@ void CEGUIManager::initialize()
 
 	// initialise the required dirs for the DefaultResourceProvider
 	CEGUI::DefaultResourceProvider* rp = scast<CEGUI::DefaultResourceProvider*>(system.getResourceProvider());
-	rp->setResourceGroupDirectory("schemes", "assets/CEGUI/schemes/");
-	rp->setResourceGroupDirectory("imagesets", "assets/CEGUI/imagesets/");
-	rp->setResourceGroupDirectory("fonts", "assets/CEGUI/fonts/");
-	rp->setResourceGroupDirectory("layouts", "assets/CEGUI/layouts/");
-	rp->setResourceGroupDirectory("looknfeels", "assets/CEGUI/looknfeel/");
-	rp->setResourceGroupDirectory("lua_scripts", "assets/CEGUI/lua_scripts/");
+	rp->setResourceGroupDirectory("schemes", "../EngineAssets/CEGUI/schemes/");
+	rp->setResourceGroupDirectory("imagesets", "../EngineAssets/CEGUI/imagesets/");
+	rp->setResourceGroupDirectory("fonts", "../EngineAssets/CEGUI/fonts/");
+	rp->setResourceGroupDirectory("layouts", "../EngineAssets/CEGUI/layouts/");
+	rp->setResourceGroupDirectory("looknfeels", "../EngineAssets/CEGUI/looknfeel/");
+	rp->setResourceGroupDirectory("lua_scripts", "../EngineAssets/CEGUI/lua_scripts/");
 	// set the default resource groups to be used
 	CEGUI::ImageManager::setImagesetDefaultResourceGroup("imagesets");
 	CEGUI::Font::setDefaultResourceGroup("fonts");

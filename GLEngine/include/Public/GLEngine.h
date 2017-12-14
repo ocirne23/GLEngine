@@ -45,7 +45,7 @@ public:
 	/** Should be called continuously on the main thread to receive input events from the OS */
 	static void doMainThreadTick();
 	/** Should be called on the logic thread to trigger input listeners */
-	static void doEngineTick();
+	static void processInput();
 
 	static void sleep(uint timeMs);
 	static uint getTimeMs();

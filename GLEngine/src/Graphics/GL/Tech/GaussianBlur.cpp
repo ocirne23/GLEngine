@@ -7,8 +7,8 @@
 
 BEGIN_UNNAMED_NAMESPACE()
 
-const char* const QUAD_VERT_SHADER_PATH = "Shaders/quad.vert";
-const char* const BLUR_FRAG_SHADER_PATH = "Shaders/Blur/gaussianblur.frag";
+const char* const QUAD_VERT_SHADER_PATH = "../EngineAssets/Shaders/quad.vert";
+const char* const BLUR_FRAG_SHADER_PATH = "../EngineAssets/Shaders/Blur/gaussianblur.frag";
 
 END_UNNAMED_NAMESPACE()
 

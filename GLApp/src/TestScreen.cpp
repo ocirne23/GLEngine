@@ -51,6 +51,9 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 
 	initializeGUI();
 	initializeInputListeners();
+
+	m_box2dDebugDraw.initialize();
+
 }
 
 TestScreen::~TestScreen()
@@ -72,6 +75,21 @@ void TestScreen::render(float a_deltaSec)
 	m_cameraController.update(m_camera, a_deltaSec, !m_guiManager.isFocused());
 	m_renderer.render(m_camera, m_lightManager);
 	m_guiManager.render(a_deltaSec);
+
+	const b2Vec2 testVertices[] =
+	{
+		{ 10, 0 },
+		{ 0, 10 },
+		{ 100, 100 },
+		{ -100, -100 },
+		{ 5, 2 },
+		{ 7, 1 },
+		{ 1000, 1000 },
+		{ -1000, -1000 }
+	};
+
+	m_box2dDebugDraw.DrawPolygon(testVertices, ARRAY_SIZE(testVertices), b2Color(0, 1, 1));
+	m_box2dDebugDraw.render(m_camera);
 
 	GLEngine::graphics->swap();
 }
