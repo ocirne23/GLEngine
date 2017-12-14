@@ -17,5 +17,6 @@
     <ClInclude Include="include\ECS\RenderSystem.h" />
     <ClInclude Include="include\ECS\LogicSystem.h" />
     <ClInclude Include="include\Physics\ContactListener.h" />
+    <ClInclude Include="include\Logic\PhysicsBindings.h" />
   </ItemGroup>
 </Project>
