@@ -38,6 +38,11 @@ function FixtureDef:new(a_shape)
 		restitution = 0.0,
 		density = 0.0,
 		isSensor = false,
+		filter = {
+			categoryBits = 0x001,
+			maskBits = 0xFFFF,
+			groupIndex = 0,
+		},
 	}
 	self.__index = self
 	return setmetatable(newObj, self)

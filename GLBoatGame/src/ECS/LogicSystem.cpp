@@ -3,6 +3,7 @@
 
 #include "Utils/FileHandle.h"
 #include "Utils/FileUtils.h"
+#include "Logic/PhysicsBindings.h"
 
 #include <Box2D/Box2D.h>
 
@@ -62,9 +63,10 @@ LogicSystem::LogicSystem(BoatGame& a_boatGame)
 	sol::usertype<b2Vec2> utype(ctor, "x", &b2Vec2::x, "y", &b2Vec2::y);
 	m_lua.set_usertype<b2Vec2>(utype);
 
-	loadLuaScript(m_lua, "assets/lua/startup.lua");
+	m_lua.set_function("spawnBody", &PhysicsBindings::createBodyMessage);
+
 	loadLuaScript(m_lua, "assets/lua/input.lua");
-	
+
 	sol::function keydown = m_lua["input"]["keydown"];
 	assert(keydown.valid());
 	sol::function keyup = m_lua["input"]["keyup"];
@@ -75,13 +77,15 @@ LogicSystem::LogicSystem(BoatGame& a_boatGame)
 		if (a_isRepeat)
 			return;
 		keydown(a_key);
-		if (a_key == EKey::ESCAPE) 
+		if (a_key == EKey::ESCAPE)
 			GLEngine::shutdown();
 	});
 	m_keyUpListener.setFunc([=](EKey a_key)
 	{
 		keyup(a_key);
 	});
+
+	loadLuaScript(m_lua, "assets/lua/startup.lua");
 }
 
 void LogicSystem::update(float a_deltaSec)

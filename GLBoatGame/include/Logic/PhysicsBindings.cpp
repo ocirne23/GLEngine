@@ -16,9 +16,52 @@ CreateBodyMessage PhysicsBindings::createBodyMessage(sol::table table)
 	m.bodyDef.linearVelocity = table["bodyDef"]["linearVelocity"];
 	m.bodyDef.position = table["bodyDef"]["position"];
 	m.bodyDef.type = table["bodyDef"]["type"];
-	m.bodyDef.userData = table["bodyDef"]["userData"];
+	m.bodyDef.userData;// = table["bodyDef"]["userData"];
 
-	
+	sol::table fixtureDefs = table["fixtureDefs"];
+	for (auto fixtureDef : fixtureDefs)
+	{
+		CreateBodyMessage::FixtureDef fd;
+		sol::table entry = fixtureDef.second;
+		sol::table entryFilter = entry["filter"];
+		sol::table entryShape = entry["shape"];
+		b2Shape::Type shapeType = entryShape["type"];
+		
+		switch (shapeType)
+		{
+		case b2Shape::e_circle:
+		{
+			auto circle = std::make_shared<b2CircleShape>();
+			circle->m_p = entryShape["position"];
+			fd.shape = circle;
+		}
+			break;
+		case b2Shape::e_polygon:
+			assert(false);
+			break;
+		case b2Shape::e_edge:
+			assert(false);
+			break;
+		case b2Shape::e_chain:
+			assert(false);
+			break;
+		default:
+			assert(false);
+			break;
+		}
+		fd.shape->m_radius = entryShape["radius"];
+		fd.fixture.density = entry["density"];
+		fd.fixture.filter.categoryBits = entryFilter["categoryBits"];
+		fd.fixture.filter.maskBits = entryFilter["maskBits"];
+		fd.fixture.filter.groupIndex = entryFilter["groupIndex"];
+		fd.fixture.friction = entry["friction"];
+		fd.fixture.isSensor = entry["isSensor"];
+		fd.fixture.restitution = entry["restitution"];
+		fd.fixture.shape = fd.shape.get();
+		fd.fixture.userData;// = entry["userData"];
+
+		m.fixtureDefs.push_back(fd);
+	}
 
 	return m;
 }
