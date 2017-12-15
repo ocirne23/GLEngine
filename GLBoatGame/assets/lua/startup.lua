@@ -1,5 +1,5 @@
-require 'playerdef'
+require 'playerbodydef'
 
 print("ello lua")
 
-player = Player:new()
+player = PlayerBodyDef:new()

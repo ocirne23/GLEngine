@@ -132,6 +132,8 @@
     <ClCompile Include="libs\include-shared\glm\detail\glm.cpp" />
     <ClCompile Include="src\Graphics\Utils\Box2DDebugDraw.cpp" />
     <ClCompile Include="include\3rdparty\sol\compatibility\compat-5.3.c" />
+    <ClCompile Include="src\Utils\ScopeLock.cpp" />
+    <ClCompile Include="src\Utils\Mutex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -1879,6 +1881,8 @@
     <ClInclude Include="include\3rdparty\sol\variadic_args.hpp" />
     <ClInclude Include="include\3rdparty\sol\variadic_results.hpp" />
     <ClInclude Include="include\3rdparty\sol\wrapper.hpp" />
+    <ClInclude Include="include\Public\Utils\ScopeLock.h" />
+    <ClInclude Include="include\Public\Utils\Mutex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

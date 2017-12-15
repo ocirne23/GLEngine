@@ -4,6 +4,8 @@
 #include "Utils/FileHandle.h"
 #include "Utils/FileUtils.h"
 
+#include <Box2D/Box2D.h>
+
 BEGIN_UNNAMED_NAMESPACE()
 
 auto loadLuaScript(sol::state& a_lua, const char* a_filePath)
@@ -55,6 +57,10 @@ LogicSystem::LogicSystem(BoatGame& a_boatGame)
 	{
 		print("lua: %s\n", str.data());
 	});
+
+	sol::constructors<b2Vec2(), void(float, float)> ctor;
+	sol::usertype<b2Vec2> utype(ctor, "x", &b2Vec2::x, "y", &b2Vec2::y);
+	m_lua.set_usertype<b2Vec2>(utype);
 
 	loadLuaScript(m_lua, "assets/lua/startup.lua");
 	loadLuaScript(m_lua, "assets/lua/input.lua");

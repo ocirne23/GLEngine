@@ -7,7 +7,7 @@ class PhysicsBindings
 {
 public:
 
-	//static CreateBodyMessage createBody
+	static CreateBodyMessage createBodyMessage(sol::table table);
 
 private:
 };

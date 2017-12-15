@@ -1,10 +1,10 @@
 require 'b2dtypes'
 
-Player = {}
-function Player:new()
+PlayerBodyDef = {}
+function PlayerBodyDef:new()
 	newObj = {
-		bodydef = BodyDef:new(),
-		fixturedefs = { 
+		bodyDef = BodyDef:new(),
+		fixtureDefs = { 
 			FixtureDef:new(CircleShape:new()),
 		}
 	}

@@ -2,15 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Overworld.cpp" />
     <ClCompile Include="src\BoatGame.cpp" />
     <ClCompile Include="src\ECS\RenderSystem.cpp" />
     <ClCompile Include="src\ECS\PhysicsSystem.cpp" />
     <ClCompile Include="src\ECS\LogicSystem.cpp" />
     <ClCompile Include="src\Physics\ContactListener.cpp" />
+    <ClCompile Include="src\ECS\EntitySystem.cpp" />
+    <ClCompile Include="include\Logic\PhysicsBindings.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Overworld.h" />
     <ClInclude Include="include\ECS\Entity.h" />
     <ClInclude Include="include\ECS\PhysicsSystem.h" />
     <ClInclude Include="include\BoatGame.h" />
@@ -18,5 +18,6 @@
     <ClInclude Include="include\ECS\LogicSystem.h" />
     <ClInclude Include="include\Physics\ContactListener.h" />
     <ClInclude Include="include\Logic\PhysicsBindings.h" />
+    <ClInclude Include="include\ECS\EntitySystem.h" />
   </ItemGroup>
 </Project>

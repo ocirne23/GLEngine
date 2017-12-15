@@ -17,10 +17,12 @@ static_assert(INDEX_BITS + VERSION_BITS == sizeof(EntityIDType) * 8, "Mismatch b
 
 END_UNNAMED_NAMESPACE()
 
-struct EntityID
+struct Entity
 {
-	EntityID() {}
-	EntityID(EntityIndex a_index, EntityVersion a_version) 
+	static constexpr EntityIndex MAX_NUM_ENTITIES = ((uint64)1 << INDEX_BITS) - (uint64)1;
+
+	Entity() : index(0), version(0) {}
+	Entity(EntityIndex a_index, EntityVersion a_version) 
 		: index(a_index)
 		, version(a_version)
 	{
@@ -29,37 +31,4 @@ struct EntityID
 
 	uint index : INDEX_BITS;
 	uint version : VERSION_BITS;
-};
-
-class Entity
-{
-public:
-
-	static constexpr EntityIndex MAX_NUM_ENTITIES = ((uint64) 1 << INDEX_BITS) - (uint64)1;
-
-	Entity(not_null<World*> a_world, EntityIndex a_index, EntityVersion a_version) 
-		: m_world(a_world)
-		, m_id({ a_index, a_version })
-	{
-	}
-
-	const World* getWorld() const
-	{
-		return m_world;
-	}
-
-	World* getWorld()
-	{
-		return m_world;
-	}
-
-	uint getID() const { return m_id.getID(); }
-
-public:
-
-	const EntityID m_id;
-
-private:
-
-	World* m_world = NULL;
 };

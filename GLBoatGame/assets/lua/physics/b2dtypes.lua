@@ -11,9 +11,9 @@ BodyDef = {}
 function BodyDef:new()
 	newObj = {
 		bodyType = EBodyType_Dynamic,
-		position = {0.0, 0.0},
+		position = b2Vec2:new(0.0, 0.0),
 		angle = 0.0,
-		linearVelocity = {0.0, 0.0},
+		linearVelocity = b2Vec2:new(0.0, 0.0),
 		angularVelocity = 0.0,
 		linearDampening = 0.0,
 		angularDampening = 0.0,
@@ -47,7 +47,7 @@ CircleShape = {}
 function CircleShape:new()
 	newObj = {
 		type = EShapeType_Circle,
-		position = {0.0, 0.0},
+		position = b2Vec2:new(0.0, 0.0),
 		radius = 3.0,
 	}
 	self.__index = self

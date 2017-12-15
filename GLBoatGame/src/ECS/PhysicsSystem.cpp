@@ -22,14 +22,12 @@ PhysicsSystem::PhysicsSystem(BoatGame& a_boatGame)
 
 	m_physicsWorld->SetContactListener(m_contactListener);
 
-	b2BodyDef bodyDef;
-	b2Body* body = m_physicsWorld->CreateBody(&bodyDef);
-	b2CircleShape shape;
-	shape.m_radius = 3.0f;
+	CreateBodyMessage message;
+	std::shared_ptr<b2Shape> circle = std::make_unique<b2CircleShape>();
+	circle->m_radius = 3.0f;
 	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &shape;
-	b2Fixture* fixture = body->CreateFixture(&fixtureDef);
-	body->SetActive(true);
+	message.addFixture(fixtureDef, circle);
+	addCreateBodyMessage(message);
 }
 
 PhysicsSystem::~PhysicsSystem()
@@ -41,38 +39,38 @@ PhysicsSystem::~PhysicsSystem()
 
 void PhysicsSystem::update(float a_deltaSec)
 {
-	m_messageQueueSemaphore.acquire();
+	m_messageQueueMutex.lock();
 	{
 		for (CreateBodyMessage& message : m_createBodyMessageQueue)
 		{
-			assert(m_components[message.id.index].body == NULL);
-			message.bodyDef.userData = rcast<void*>(scast<uint64>(message.id.index));
+			assert(m_components[message.entity.index].body == NULL);
+			message.bodyDef.userData = rcast<void*>(scast<uint64>(message.entity.index));
 			b2Body* body = m_physicsWorld->CreateBody(&message.bodyDef);
 			for (auto& fixtureDef : message.fixtureDefs)
 			{
-				b2Fixture* fixture = body->CreateFixture(&fixtureDef);
+				b2Fixture* fixture = body->CreateFixture(&fixtureDef.fixture);
 			}
-			m_components[message.id.index].body = body;
+			m_components[message.entity.index].body = body;
 		}
 		m_createBodyMessageQueue.clear();
 
 		for (CreateJointMessage& message : m_createJointMessageQueue)
 		{
-			assert(m_components[message.id.index].body != NULL);
+			assert(m_components[message.entity.index].body != NULL);
 			b2Joint* joint = m_physicsWorld->CreateJoint(message.jointDef.get());
 		}
 		m_createJointMessageQueue.clear();
 	}
-	m_messageQueueSemaphore.release();
+	m_messageQueueMutex.unlock();
 
-	m_drawDebugInfoSemaphore.acquire();
 	m_timestepAccumulator += a_deltaSec;
 	if (m_timestepAccumulator > a_deltaSec)
 	{
 		m_timestepAccumulator -= a_deltaSec;
+		m_drawDebugInfoMutex.lock();
 		m_physicsWorld->Step(TIMESTEP, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
+		m_drawDebugInfoMutex.unlock();
 	}
-	m_drawDebugInfoSemaphore.release();
 }
 
 void PhysicsSystem::initializeDebugDraw()
@@ -85,8 +83,24 @@ void PhysicsSystem::initializeDebugDraw()
 
 void PhysicsSystem::drawDebugInfo(PerspectiveCamera& a_camera)
 {
-	m_drawDebugInfoSemaphore.acquire();
+	m_drawDebugInfoMutex.lock();
 	m_physicsWorld->DrawDebugData();
 	m_debugDraw->render(a_camera);
-	m_drawDebugInfoSemaphore.release();
+	m_drawDebugInfoMutex.unlock();
+}
+
+void PhysicsSystem::addCreateBodyMessage(const CreateBodyMessage& a_message)
+{
+	m_messageQueueMutex.lock();
+	m_createBodyMessageQueue.push_back(a_message);
+	m_messageQueueMutex.unlock();
+}
+
+void CreateBodyMessage::addFixture(b2FixtureDef fixture, std::shared_ptr<b2Shape>& shape)
+{
+	fixture.shape = shape.get();
+	FixtureDef def;
+	def.fixture = fixture;
+	def.shape = shape;
+	fixtureDefs.push_back(def);
 }

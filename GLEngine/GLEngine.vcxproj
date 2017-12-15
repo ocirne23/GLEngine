@@ -128,6 +128,8 @@
     <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
+    <ClCompile Include="src\Utils\Mutex.cpp" />
+    <ClCompile Include="src\Utils\ScopeLock.cpp" />
     <ClCompile Include="src\Utils\ThreadManager.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\SpriteBatch.cpp" />
     <ClCompile Include="src\Database\Utils\AtlasBuilder.cpp" />
@@ -774,6 +776,8 @@
     <ClInclude Include="include\Public\Graphics\Utils\Box2DDebugDraw.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
     <ClInclude Include="include\Public\Utils\AccessPrivate.h" />
+    <ClInclude Include="include\Public\Utils\Mutex.h" />
+    <ClInclude Include="include\Public\Utils\ScopeLock.h" />
     <ClInclude Include="include\Public\Utils\Stopwatch.h" />
     <ClInclude Include="include\Public\Utils\StringUtils.h" />
     <ClInclude Include="include\3rdparty\EASTL\type_traits.h" />

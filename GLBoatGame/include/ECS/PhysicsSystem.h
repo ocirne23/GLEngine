@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Utils/ConcurrentQueue.h"
-#include "Utils/Semaphore.h"
+#include "Utils/Mutex.h"
 #include "ECS/Entity.h"
 
 #include <Box2D/Box2D.h>
@@ -16,16 +16,24 @@ class ContactListener;
 struct CreateBodyMessage
 {
 	CreateBodyMessage() {}
-	EntityID id;
+	Entity entity;
 	b2BodyDef bodyDef;
-	eastl::vector<b2FixtureDef> fixtureDefs;
+
+	struct FixtureDef
+	{
+		b2FixtureDef fixture;
+		std::shared_ptr<b2Shape> shape;
+	};
+	eastl::vector<FixtureDef> fixtureDefs;
+
+	void addFixture(b2FixtureDef fixture, std::shared_ptr<b2Shape>& shape);
 };
 
 struct CreateJointMessage
 {
 	CreateJointMessage() {}
-	EntityID id;
-	std::shared_ptr<b2JointDef> jointDef;
+	Entity entity;
+	std::unique_ptr<b2JointDef> jointDef;
 };
 
 struct PhysicsComponent
@@ -44,6 +52,7 @@ public:
 
 	void initializeDebugDraw();
 	void drawDebugInfo(PerspectiveCamera& a_camera);
+	void addCreateBodyMessage(const CreateBodyMessage& message);
 
 private:
 
@@ -54,8 +63,8 @@ private:
 	owner<b2World*> m_physicsWorld            = NULL;
 	float m_timestepAccumulator               = 0.0f;
 
-	Semaphore m_drawDebugInfoSemaphore;
-	Semaphore m_messageQueueSemaphore;
+	Mutex m_drawDebugInfoMutex;
+	Mutex m_messageQueueMutex;
 	eastl::fixed_vector<PhysicsComponent, Entity::MAX_NUM_ENTITIES, false> m_components;
 	eastl::vector<CreateBodyMessage> m_createBodyMessageQueue;
 	eastl::vector<CreateJointMessage> m_createJointMessageQueue;
