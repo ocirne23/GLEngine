@@ -4,6 +4,7 @@
 #include "Utils/DeltaTimeMeasurer.h"
 #include "ECS/Entity.h"
 
+#include "ECS/EntitySystem.h"
 #include "ECS/RenderSystem.h"
 #include "ECS/LogicSystem.h"
 #include "ECS/PhysicsSystem.h"
@@ -12,8 +13,9 @@
 
 BoatGame::BoatGame()
 {
-	m_logicSystem = new LogicSystem(*this);
+	m_entitySystem = new EntitySystem();
 	m_physicsSystem = new PhysicsSystem(*this);
+	m_logicSystem = new LogicSystem(*this);
 
 	GLEngine::createThread("RenderThread", [this]()
 	{
@@ -68,4 +70,10 @@ BoatGame::BoatGame()
 
 BoatGame::~BoatGame()
 {
+	GLEngine::waitForAllThreadShutdown();
+
+	SAFE_DELETE(m_renderSystem);
+	SAFE_DELETE(m_logicSystem);
+	SAFE_DELETE(m_physicsSystem);
+	SAFE_DELETE(m_entitySystem);
 }

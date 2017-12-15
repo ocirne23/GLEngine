@@ -29,6 +29,6 @@ struct Entity
 	}
 	uint getID() const { return *(uint*) this; }
 
-	uint index : INDEX_BITS;
-	uint version : VERSION_BITS;
+	EntityIndex index;
+	EntityVersion version;
 };

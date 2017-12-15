@@ -14,7 +14,6 @@ public:
 	EntitySystem() {}
 
 	Entity createEntity();
-
 	void deleteEntity(Entity& e);
 
 private:

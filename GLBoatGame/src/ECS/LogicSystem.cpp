@@ -3,25 +3,13 @@
 
 #include "Utils/FileHandle.h"
 #include "Utils/FileUtils.h"
-#include "Logic/PhysicsBindings.h"
+#include "Logic/LuaPhysicsBindings.h"
+#include "BoatGame.h"
+#include "ECS/PhysicsSystem.h"
 
 #include <Box2D/Box2D.h>
 
 BEGIN_UNNAMED_NAMESPACE()
-
-auto loadLuaScript(sol::state& a_lua, const char* a_filePath)
-{
-	const eastl::string script = FileHandle(a_filePath).readString();	
-	auto result = a_lua.safe_script(script.c_str());
-	if (!result.valid())
-	{
-		sol::error err = result;
-		auto status = result.status();
-		print("loadLuaScript error: %s: %s\n", err.what(), sol::to_string(status));
-	}
-	assert(result.valid());
-	return result;
-}
 
 eastl::string getLuaFolder()
 {
@@ -33,9 +21,48 @@ eastl::string getLuaFolder()
 
 END_UNNAMED_NAMESPACE()
 
-
 LogicSystem::LogicSystem(BoatGame& a_boatGame)
 	: m_boatGame(a_boatGame)
+	, m_entityBindings(m_lua, a_boatGame.getEntitySystem())
+	, m_physicsBindings(m_lua, a_boatGame.getPhysicsSystem())
+	, m_inputBindings(m_lua, *this)
+{
+	initializeLuaState();
+	m_entityBindings.initialize();
+	m_physicsBindings.initialize();
+	m_inputBindings.initialize();
+
+	m_keyDownListener.setFunc([&](EKey a_key, bool a_isRepeat)
+	{
+		if (a_isRepeat)
+			return;
+		m_inputBindings.keyDown(a_key);
+		if (a_key == EKey::ESCAPE)
+			GLEngine::shutdown();
+	});
+	m_keyUpListener.setFunc([&](EKey a_key)
+	{
+		m_inputBindings.keyUp(a_key);
+	});
+
+	loadLuaScript(m_lua, "assets/lua/startup.lua");
+}
+
+sol::protected_function_result LogicSystem::loadLuaScript(sol::state& a_lua, const char * a_filePath)
+{
+	const eastl::string script = FileHandle(a_filePath).readString();
+	auto result = a_lua.safe_script(script.c_str());
+	if (!result.valid())
+	{
+		sol::error err = result;
+		auto status = result.status();
+		print("loadLuaScript error: %s: %s\n", err.what(), sol::to_string(status));
+	}
+	assert(result.valid());
+	return result;
+}
+
+void LogicSystem::initializeLuaState()
 {
 	m_lua.open_libraries(sol::lib::base, sol::lib::package);
 	const eastl::string luaFolderPath = getLuaFolder();
@@ -58,39 +85,12 @@ LogicSystem::LogicSystem(BoatGame& a_boatGame)
 	{
 		print("lua: %s\n", str.data());
 	});
-
-	sol::constructors<b2Vec2(), void(float, float)> ctor;
-	sol::usertype<b2Vec2> utype(ctor, "x", &b2Vec2::x, "y", &b2Vec2::y);
-	m_lua.set_usertype<b2Vec2>(utype);
-
-	m_lua.set_function("spawnBody", &PhysicsBindings::createBodyMessage);
-
-	loadLuaScript(m_lua, "assets/lua/input.lua");
-
-	sol::function keydown = m_lua["input"]["keydown"];
-	assert(keydown.valid());
-	sol::function keyup = m_lua["input"]["keyup"];
-	assert(keyup.valid());
-
-	m_keyDownListener.setFunc([=](EKey a_key, bool a_isRepeat)
-	{
-		if (a_isRepeat)
-			return;
-		keydown(a_key);
-		if (a_key == EKey::ESCAPE)
-			GLEngine::shutdown();
-	});
-	m_keyUpListener.setFunc([=](EKey a_key)
-	{
-		keyup(a_key);
-	});
-
-	loadLuaScript(m_lua, "assets/lua/startup.lua");
 }
+
 
 void LogicSystem::update(float a_deltaSec)
 {
 	GLEngine::processInput();
-	sol::function update = m_lua["input"]["update"];
-	update(a_deltaSec);
+	m_inputBindings.update(a_deltaSec);
 }
+

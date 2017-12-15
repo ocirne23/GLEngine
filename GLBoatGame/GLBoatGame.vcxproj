@@ -153,7 +153,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="include\Logic\PhysicsBindings.cpp" />
+    <ClCompile Include="src\Logic\LuaEntityBindings.cpp" />
+    <ClCompile Include="src\Logic\LuaInputBindings.cpp" />
+    <ClCompile Include="src\Logic\LuaPhysicsBindings.cpp" />
     <ClCompile Include="src\BoatGame.cpp" />
     <ClCompile Include="src\ECS\EntitySystem.cpp" />
     <ClCompile Include="src\ECS\LogicSystem.cpp" />
@@ -169,7 +171,9 @@
     <ClInclude Include="include\ECS\LogicSystem.h" />
     <ClInclude Include="include\ECS\PhysicsSystem.h" />
     <ClInclude Include="include\ECS\RenderSystem.h" />
-    <ClInclude Include="include\Logic\PhysicsBindings.h" />
+    <ClInclude Include="include\Logic\LuaEntityBindings.h" />
+    <ClInclude Include="include\Logic\LuaInputBindings.h" />
+    <ClInclude Include="include\Logic\LuaPhysicsBindings.h" />
     <ClInclude Include="include\Physics\ContactListener.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

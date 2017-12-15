@@ -2,6 +2,9 @@
 
 #include "Input/Input.h"
 #include "Input/InputListener.h"
+#include "Logic/LuaPhysicsBindings.h"
+#include "Logic/LuaInputBindings.h"
+#include "Logic/LuaEntityBindings.h"
 
 #include <sol/sol.hpp>
 
@@ -13,9 +16,14 @@ public:
 
 	LogicSystem(BoatGame& boatGame);
 
+
 	void update(float deltaSec);
 
+	static sol::protected_function_result loadLuaScript(sol::state& a_lua, const char* a_filePath);
 
+private:
+
+	void initializeLuaState();
 
 private:
 
@@ -29,4 +37,8 @@ private:
 	Input::MouseUpListener m_mouseUpListener;
 	Input::MouseMovedListener m_mouseMovedListener;
 	Input::MouseScrolledListener m_mouseScrolledListener;
+
+	LuaPhysicsBindings m_physicsBindings;
+	LuaInputBindings m_inputBindings;
+	LuaEntityBindings m_entityBindings;
 };

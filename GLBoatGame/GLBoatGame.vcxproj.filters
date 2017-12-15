@@ -8,7 +8,9 @@
     <ClCompile Include="src\ECS\LogicSystem.cpp" />
     <ClCompile Include="src\Physics\ContactListener.cpp" />
     <ClCompile Include="src\ECS\EntitySystem.cpp" />
-    <ClCompile Include="include\Logic\PhysicsBindings.cpp" />
+    <ClCompile Include="src\Logic\LuaPhysicsBindings.cpp" />
+    <ClCompile Include="src\Logic\LuaInputBindings.cpp" />
+    <ClCompile Include="src\Logic\LuaEntityBindings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ECS\Entity.h" />
@@ -17,7 +19,9 @@
     <ClInclude Include="include\ECS\RenderSystem.h" />
     <ClInclude Include="include\ECS\LogicSystem.h" />
     <ClInclude Include="include\Physics\ContactListener.h" />
-    <ClInclude Include="include\Logic\PhysicsBindings.h" />
     <ClInclude Include="include\ECS\EntitySystem.h" />
+    <ClInclude Include="include\Logic\LuaPhysicsBindings.h" />
+    <ClInclude Include="include\Logic\LuaInputBindings.h" />
+    <ClInclude Include="include\Logic\LuaEntityBindings.h" />
   </ItemGroup>
 </Project>

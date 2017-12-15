@@ -76,9 +76,14 @@ void GLEngine::destroyGLContext()
 
 void GLEngine::finish()
 {
-	s_threadManager->waitForAllThreadShutdown();
+	waitForAllThreadShutdown();
 	SAFE_DELETE(input);
 	SAFE_DELETE(graphics);
 	SAFE_DELETE(s_threadManager);
 	SDL_Quit();
+}
+
+void GLEngine::waitForAllThreadShutdown()
+{
+	s_threadManager->waitForAllThreadShutdown();
 }

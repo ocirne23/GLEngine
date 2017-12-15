@@ -21,13 +21,14 @@ PhysicsSystem::PhysicsSystem(BoatGame& a_boatGame)
 	m_physicsWorld = new b2World(b2Vec2(0.0f, 0.0f));
 
 	m_physicsWorld->SetContactListener(m_contactListener);
-
+	/*
 	CreateBodyMessage message;
+	message.entity.index = 2;
 	std::shared_ptr<b2Shape> circle = std::make_unique<b2CircleShape>();
 	circle->m_radius = 3.0f;
 	b2FixtureDef fixtureDef;
 	message.addFixture(fixtureDef, circle);
-	addCreateBodyMessage(message);
+	addCreateBodyMessage(message);*/
 }
 
 PhysicsSystem::~PhysicsSystem()
