@@ -19,7 +19,6 @@ PhysicsSystem::PhysicsSystem(BoatGame& a_boatGame)
 {
 	m_contactListener = new ContactListener(*this);
 	m_physicsWorld = new b2World(b2Vec2(0.0f, 0.0f));
-
 	m_physicsWorld->SetContactListener(m_contactListener);
 	/*
 	CreateBodyMessage message;
