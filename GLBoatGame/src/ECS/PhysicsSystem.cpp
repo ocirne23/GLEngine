@@ -17,6 +17,8 @@ END_UNNAMED_NAMESPACE()
 PhysicsSystem::PhysicsSystem(BoatGame& a_boatGame)
 	: m_boatGame(a_boatGame)
 {
+	m_components.resize(Entity::MAX_NUM_ENTITIES);
+	print("size: %i\n", m_components.size());
 	m_contactListener = new ContactListener(*this);
 	m_physicsWorld = new b2World(b2Vec2(0.0f, 0.0f));
 	m_physicsWorld->SetContactListener(m_contactListener);
@@ -46,6 +48,7 @@ void PhysicsSystem::update(float a_deltaSec)
 			assert(m_components[message.entity.index].body != NULL);
 			b2Joint* joint = m_physicsWorld->CreateJoint(message.jointDef.get());
 		}
+		m_createJointMessageQueue.clear();
 		for (const ApplyForceMessage& message : m_applyForceMessageQueue)
 		{
 			b2Body*& body = m_components[message.entity.index].body;
@@ -54,6 +57,7 @@ void PhysicsSystem::update(float a_deltaSec)
 				body->ApplyForce(message.force, message.location, true);
 			}
 		}
+		m_applyForceMessageQueue.clear();
 		for (const DestroyBodyMessage& message : m_destroyBodyMessageQueue)
 		{
 			b2Body*& body = m_components[message.entity.index].body;
@@ -63,9 +67,11 @@ void PhysicsSystem::update(float a_deltaSec)
 				body = NULL;
 			}
 		}
+		m_destroyBodyMessageQueue.clear();
 		for (const CreateBodyMessage& message : m_createBodyMessageQueue)
 		{
-			assert(m_components[message.entity.index].body == NULL);
+			;
+			assert(m_components.at(message.entity.index).body == NULL);
 			b2Body* body = m_physicsWorld->CreateBody(&message.bodyDef);
 			for (auto& fixtureDef : message.fixtureDefs)
 			{
@@ -110,6 +116,13 @@ void PhysicsSystem::addCreateBodyMessage(const CreateBodyMessage& a_message)
 {
 	m_messageQueueMutex.lock();
 	m_createBodyMessageQueue.push_back(a_message);
+	m_messageQueueMutex.unlock();
+}
+
+void PhysicsSystem::addDestroyBodyMessage(const DestroyBodyMessage& a_message)
+{
+	m_messageQueueMutex.lock();
+	m_destroyBodyMessageQueue.push_back(a_message);
 	m_messageQueueMutex.unlock();
 }
 

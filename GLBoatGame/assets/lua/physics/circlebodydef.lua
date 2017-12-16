@@ -1,12 +1,13 @@
 require 'b2dtypes'
 
-PlayerBodyDef = {}
-function PlayerBodyDef:new()
-	newObj = {
+CircleBodyDef = {}
+function CircleBodyDef:new(a_entity)
+	local newObj = {
+		entity = a_entity,
 		bodyDef = BodyDef:new(),
-		fixtureDefs = { 
+		fixtureDefs = {
 			FixtureDef:new(CircleShape:new()),
-		}
+		},
 	}
 	self.__index = self
 	return setmetatable(newObj, self)

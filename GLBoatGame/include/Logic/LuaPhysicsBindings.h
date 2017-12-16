@@ -16,6 +16,7 @@ public:
 private:
 
 	CreateBodyMessage createBodyMessage(sol::table table);
+	DestroyBodyMessage destroyBodyMessage(sol::table table);
 
 private:
 

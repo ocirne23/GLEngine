@@ -1,6 +1,6 @@
 Entity = {}
 function Entity:new()
-	newObj = {
+	local newObj = {
 		index = 0
 		version = 0
 	}

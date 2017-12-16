@@ -9,7 +9,7 @@ EShapeType_Chain = 3
 
 BodyDef = {}
 function BodyDef:new()
-	newObj = {
+	local newObj = {
 		bodyType = EBodyType_Dynamic,
 		position = b2Vec2:new(0.0, 0.0),
 		angle = 0.0,
@@ -31,7 +31,7 @@ end
 
 FixtureDef = {}
 function FixtureDef:new(a_shape)
-	newObj = {
+	local newObj = {
 		shape = a_shape,
 		userData = {},
 		friction = 0.2,
@@ -50,10 +50,10 @@ end
 
 CircleShape = {}
 function CircleShape:new()
-	newObj = {
+	local newObj = {
 		type = EShapeType_Circle,
 		position = b2Vec2:new(0.0, 0.0),
-		radius = 3.0,
+		radius = 1.0,
 	}
 	self.__index = self
 	return setmetatable(newObj, self)

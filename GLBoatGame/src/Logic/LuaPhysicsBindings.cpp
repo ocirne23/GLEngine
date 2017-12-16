@@ -6,28 +6,41 @@ void LuaPhysicsBindings::initialize()
 	sol::usertype<b2Vec2> utype(ctor, "x", &b2Vec2::x, "y", &b2Vec2::y);
 	m_lua.set_usertype<b2Vec2>(utype);
 
-	m_lua.set_function("spawnBody", [this](sol::table args)
+	m_lua.set_function("createBody", [this](sol::table args)
 	{
-		CreateBodyMessage message = createBodyMessage(args);
-		m_physicsSystem.addCreateBodyMessage(message);
+		m_physicsSystem.addCreateBodyMessage(createBodyMessage(args));
+		args["bodyDef"] = nullptr;
+	});
+
+	m_lua.set_function("destroyBody", [this](sol::table args)
+	{
+		m_physicsSystem.addDestroyBodyMessage(destroyBodyMessage(args));
 	});
 }
 
 CreateBodyMessage LuaPhysicsBindings::createBodyMessage(sol::table a_table)
 {
 	CreateBodyMessage m;
-	m.bodyDef.active = a_table["bodyDef"]["active"];
-	m.bodyDef.allowSleep = a_table["bodyDef"]["allowSleep"];
-	m.bodyDef.angle = a_table["bodyDef"]["angle"];
-	m.bodyDef.angularDamping = a_table["bodyDef"]["angularDampening"];
-	m.bodyDef.angularVelocity = a_table["bodyDef"]["angularVelocity"];
-	m.bodyDef.awake = a_table["bodyDef"]["awake"];
-	m.bodyDef.bullet = a_table["bodyDef"]["bullet"];
-	m.bodyDef.fixedRotation = a_table["bodyDef"]["fixedRotation"];
-	m.bodyDef.gravityScale = a_table["bodyDef"]["gravityScale"];
-	m.bodyDef.linearDamping = a_table["bodyDef"]["linearDamping"];
-	m.bodyDef.linearVelocity = a_table["bodyDef"]["linearVelocity"];
-	m.bodyDef.position = a_table["bodyDef"]["position"];
+	sol::optional<Entity> e = a_table["entity"];
+	assert(e);
+	m.entity = e.value();
+
+	sol::optional<sol::table> bodyDefOpt = a_table["bodyDef"];
+	assert(bodyDefOpt); 
+	sol::table bodyDef = bodyDefOpt.value();
+
+	m.bodyDef.active = bodyDef["active"];
+	m.bodyDef.allowSleep = bodyDef["allowSleep"];
+	m.bodyDef.angle = bodyDef["angle"];
+	m.bodyDef.angularDamping = bodyDef["angularDampening"];
+	m.bodyDef.angularVelocity = bodyDef["angularVelocity"];
+	m.bodyDef.awake = bodyDef["awake"];
+	m.bodyDef.bullet = bodyDef["bullet"];
+	m.bodyDef.fixedRotation = bodyDef["fixedRotation"];
+	m.bodyDef.gravityScale = bodyDef["gravityScale"];
+	m.bodyDef.linearDamping = bodyDef["linearDamping"];
+	m.bodyDef.linearVelocity = bodyDef["linearVelocity"];
+	m.bodyDef.position = bodyDef["position"];
 	m.bodyDef.type = a_table["bodyDef"]["type"];
 	m.bodyDef.userData;// = table["bodyDef"]["userData"];
 
@@ -72,9 +85,14 @@ CreateBodyMessage LuaPhysicsBindings::createBodyMessage(sol::table a_table)
 		fd.fixture.restitution = entry["restitution"];
 		fd.fixture.shape = fd.shape.get();
 		fd.fixture.userData;// = entry["userData"];
-
 		m.fixtureDefs.push_back(fd);
 	}
 
 	return m;
+}
+
+DestroyBodyMessage LuaPhysicsBindings::destroyBodyMessage(sol::table table)
+{
+	Entity entity = table["entity"];
+	return DestroyBodyMessage({ entity });
 }

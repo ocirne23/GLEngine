@@ -1,17 +1,15 @@
-require 'playerbodydef'
+require 'player'
+
+function bind(t, k)
+    return function(...) return t[k](t, ...) end
+end
 
 print("ello lua")
 
-player = PlayerBodyDef:new()
+local player = Player:new()
+createBody(player.bodyDef)
 
-spawnBody(player)
-
-for i=1, 10 do
-entity = createEntity()
-
-print(entity.index)
-print(entity.version)
-
-deleteEntity(entity)
-end
+local player2 = Player:new()
+player2.bodyDef.position.x = 2.0
+createBody(player2.bodyDef)
 

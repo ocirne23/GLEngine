@@ -65,6 +65,7 @@ public:
 	void initializeDebugDraw();
 	void drawDebugInfo(PerspectiveCamera& a_camera);
 	void addCreateBodyMessage(const CreateBodyMessage& message);
+	void addDestroyBodyMessage(const DestroyBodyMessage& message);
 
 private:
 

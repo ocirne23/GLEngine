@@ -87,7 +87,6 @@ void LogicSystem::initializeLuaState()
 	});
 }
 
-
 void LogicSystem::update(float a_deltaSec)
 {
 	GLEngine::processInput();

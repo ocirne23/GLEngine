@@ -4,11 +4,11 @@
 
 void LuaInputBindings::initialize()
 {
-	m_logicSystem.loadLuaScript(m_lua, "assets/lua/input.lua");
+	m_logicSystem.loadLuaScript(m_lua, "assets/lua/input/input.lua");
 
-	m_keyDown = m_lua["input"]["keydown"];
+	m_keyDown = m_lua["input"]["keyDown"];
 	assert(m_keyDown.valid());
-	m_keyUp = m_lua["input"]["keyup"];
+	m_keyUp = m_lua["input"]["keyUp"];
 	assert(m_keyUp.valid());
 	m_update = m_lua["input"]["update"];
 	assert(m_update.valid());

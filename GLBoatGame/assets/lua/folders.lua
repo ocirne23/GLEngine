@@ -1,4 +1,5 @@
 folders = {
+	"entities",
 	"physics",
 	"rendering",
 	"input",
