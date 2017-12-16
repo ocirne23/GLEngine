@@ -5,13 +5,11 @@
 #include "Utils/Mutex.h"
 #include <EASTL/bonus/ring_buffer.h>
 
-#include <EASTL/vector.h>
-
 class EntitySystem
 {
 public:
 
-	EntitySystem() {}
+	EntitySystem() : m_freeIDs(8) {}
 
 	Entity createEntity();
 	void deleteEntity(Entity& e);

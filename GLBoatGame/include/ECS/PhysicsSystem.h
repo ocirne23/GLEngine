@@ -41,6 +41,18 @@ struct PhysicsComponent
 	b2Body* body = NULL;
 };
 
+struct DestroyBodyMessage
+{
+	Entity entity;
+};
+
+struct ApplyForceMessage
+{
+	Entity entity;
+	b2Vec2 force;
+	b2Vec2 location;
+};
+
 class PhysicsSystem
 {
 public:
@@ -68,4 +80,6 @@ private:
 	eastl::fixed_vector<PhysicsComponent, Entity::MAX_NUM_ENTITIES, false> m_components;
 	eastl::vector<CreateBodyMessage> m_createBodyMessageQueue;
 	eastl::vector<CreateJointMessage> m_createJointMessageQueue;
+	eastl::vector<DestroyBodyMessage> m_destroyBodyMessageQueue;
+	eastl::vector<ApplyForceMessage> m_applyForceMessageQueue;
 };

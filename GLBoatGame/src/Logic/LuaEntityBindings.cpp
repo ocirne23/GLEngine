@@ -11,5 +11,11 @@ void LuaEntityBindings::initialize()
 	m_lua.set_function("createEntity", [&]()
 	{
 		Entity e = m_entitySystem.createEntity();
+		return e;
+	});
+
+	m_lua.set_function("deleteEntity", [&](Entity e)
+	{
+		m_entitySystem.deleteEntity(e);
 	});
 }

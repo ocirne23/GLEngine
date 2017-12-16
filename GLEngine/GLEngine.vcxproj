@@ -11,57 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\3rdparty\gli\core\dummy.cpp" />
     <ClCompile Include="include\3rdparty\sol\compatibility\compat-5.3.c" />
     <ClCompile Include="src\Graphics\Utils\Box2DDebugDraw.cpp" />
-    <ClCompile Include="libs\include-shared\glm\detail\dummy.cpp" />
     <ClCompile Include="libs\include-shared\glm\detail\glm.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2BroadPhase.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2CollideCircle.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2CollideEdge.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2CollidePolygon.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2Collision.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2Distance.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2DynamicTree.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\b2TimeOfImpact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\Shapes\b2ChainShape.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\Shapes\b2CircleShape.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\Shapes\b2EdgeShape.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Collision\Shapes\b2PolygonShape.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Common\b2BlockAllocator.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Common\b2Draw.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Common\b2Math.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Common\b2Settings.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Common\b2StackAllocator.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Common\b2Timer.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\b2Body.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\b2ContactManager.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\b2Fixture.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\b2Island.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\b2World.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\b2WorldCallbacks.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2ChainAndCircleContact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2ChainAndPolygonContact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2CircleContact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2Contact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2ContactSolver.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2EdgeAndCircleContact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2EdgeAndPolygonContact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2PolygonAndCircleContact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Contacts\b2PolygonContact.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2DistanceJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2FrictionJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2GearJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2Joint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2MotorJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2MouseJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2PrismaticJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2PulleyJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2RevoluteJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2RopeJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2WeldJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Dynamics\Joints\b2WheelJoint.cpp" />
-    <ClCompile Include="src\3rdparty\Box2D\Rope\b2Rope.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\allocator_eastl.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\assert.cpp" />
     <ClCompile Include="src\3rdparty\EASTL\fixed_pool.cpp" />
@@ -92,11 +44,6 @@
     <ClCompile Include="src\Graphics\GL\Tech\GaussianBlur.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\QuadDrawer.cpp" />
     <ClCompile Include="src\Core.cpp" />
-    <ClCompile Include="src\3rdparty\entityx\Entity.cc" />
-    <ClCompile Include="src\3rdparty\entityx\Event.cc" />
-    <ClCompile Include="src\3rdparty\entityx\help\Pool.cc" />
-    <ClCompile Include="src\3rdparty\entityx\help\Timer.cc" />
-    <ClCompile Include="src\3rdparty\entityx\System.cc" />
     <ClCompile Include="src\GLEngine.cpp" />
     <ClCompile Include="src\Graphics\GL\Tech\HBAO.cpp" />
     <ClCompile Include="src\Graphics\GL\Wrappers\GLCubeMap.cpp" />
@@ -791,18 +738,6 @@
     <ClInclude Include="include\Public\Database\ResourceBuilder.h" />
     <ClInclude Include="include\Private\Utils\ThreadManager.h" />
     <ClInclude Include="include\Public\Core.h" />
-    <ClInclude Include="include\3rdparty\entityx\3rdparty\catch.hpp" />
-    <ClInclude Include="include\3rdparty\entityx\3rdparty\simplesignal.h" />
-    <ClInclude Include="include\3rdparty\entityx\config.h" />
-    <ClInclude Include="include\3rdparty\entityx\deps\Dependencies.h" />
-    <ClInclude Include="include\3rdparty\entityx\Entity.h" />
-    <ClInclude Include="include\3rdparty\entityx\entityx.h" />
-    <ClInclude Include="include\3rdparty\entityx\Event.h" />
-    <ClInclude Include="include\3rdparty\entityx\help\NonCopyable.h" />
-    <ClInclude Include="include\3rdparty\entityx\help\Pool.h" />
-    <ClInclude Include="include\3rdparty\entityx\help\Timer.h" />
-    <ClInclude Include="include\3rdparty\entityx\quick.h" />
-    <ClInclude Include="include\3rdparty\entityx\System.h" />
     <ClInclude Include="include\Public\Database\AssetDatabase.h" />
     <ClInclude Include="include\Public\Database\AssetDatabaseEntry.h" />
     <ClInclude Include="include\Public\Database\Assets\DBShader.h" />
@@ -2069,12 +2004,6 @@
     <CharacterSet>MultiByte</CharacterSet>
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
-    <PlatformToolset>v120</PlatformToolset>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Android|x64'">
-    <PlatformToolset>v120</PlatformToolset>
-  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -2093,11 +2022,6 @@
     <OutDir>$(SolutionDir)$(ProjectName)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -2116,7 +2040,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib;glslangd.lib;HLSLd.lib;OGLCompilerd.lib;SPIRVd.lib;SPVRemapperd.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib;glslangd.lib;HLSLd.lib;OGLCompilerd.lib;SPIRVd.lib;SPVRemapperd.lib;Box2D_d.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -2142,22 +2066,11 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib;glslang.lib;HLSL.lib;OGLCompiler.lib;SPIRV.lib;SPVRemapper.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib;glslang.lib;HLSL.lib;OGLCompiler.lib;SPIRV.lib;SPVRemapper.lib;Box2D.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
     <ProjectReference />
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(ProjectDir)\libs\include;$(ProjectDir)..\GLEngine\libs\include-shared;</AdditionalIncludeDirectories>
-      <WarningLevel>Level3</WarningLevel>
-    </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-    </ClCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

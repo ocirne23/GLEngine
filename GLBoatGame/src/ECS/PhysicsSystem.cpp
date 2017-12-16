@@ -42,10 +42,31 @@ void PhysicsSystem::update(float a_deltaSec)
 {
 	m_messageQueueMutex.lock();
 	{
-		for (CreateBodyMessage& message : m_createBodyMessageQueue)
+		for (const CreateJointMessage& message : m_createJointMessageQueue)
+		{
+			assert(m_components[message.entity.index].body != NULL);
+			b2Joint* joint = m_physicsWorld->CreateJoint(message.jointDef.get());
+		}
+		for (const ApplyForceMessage& message : m_applyForceMessageQueue)
+		{
+			b2Body*& body = m_components[message.entity.index].body;
+			if (body)
+			{
+				body->ApplyForce(message.force, message.location, true);
+			}
+		}
+		for (const DestroyBodyMessage& message : m_destroyBodyMessageQueue)
+		{
+			b2Body*& body = m_components[message.entity.index].body;
+			if (body)
+			{
+				m_physicsWorld->DestroyBody(body);
+				body = NULL;
+			}
+		}
+		for (const CreateBodyMessage& message : m_createBodyMessageQueue)
 		{
 			assert(m_components[message.entity.index].body == NULL);
-			message.bodyDef.userData = rcast<void*>(scast<uint64>(message.entity.index));
 			b2Body* body = m_physicsWorld->CreateBody(&message.bodyDef);
 			for (auto& fixtureDef : message.fixtureDefs)
 			{
@@ -55,11 +76,7 @@ void PhysicsSystem::update(float a_deltaSec)
 		}
 		m_createBodyMessageQueue.clear();
 
-		for (CreateJointMessage& message : m_createJointMessageQueue)
-		{
-			assert(m_components[message.entity.index].body != NULL);
-			b2Joint* joint = m_physicsWorld->CreateJoint(message.jointDef.get());
-		}
+		
 		m_createJointMessageQueue.clear();
 	}
 	m_messageQueueMutex.unlock();

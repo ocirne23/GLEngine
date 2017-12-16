@@ -19,7 +19,7 @@ public:
 
 	void update(float deltaSec);
 
-	static sol::protected_function_result loadLuaScript(sol::state& a_lua, const char* a_filePath);
+	sol::protected_function_result loadLuaScript(sol::state& a_lua, const char* a_filePath);
 
 private:
 
