@@ -6,24 +6,24 @@ movement[EKey_A] = false
 movement[EKey_S] = false
 movement[EKey_D] = false
 
-input = {}
-input.listeners = {}
+Input = {}
+Input.listeners = {}
 
-input["addListener"] = function(key, entity, func)
-	if input.listeners[key] == nil then
-		input.listeners[key] = {}
+Input["addListener"] = function(key, entity, func)
+	if Input.listeners[key] == nil then
+		Input.listeners[key] = {}
 	end
-	input.listeners[key][entity] = func;
+	Input.listeners[key][entity] = func;
 end
 
-input["removeListener"] = function(key, entity)
-	if input.listeners[key] then
-		input.listeners[key][entity] = nil
+Input["removeListener"] = function(key, entity)
+	if Input.listeners[key] then
+		Input.listeners[key][entity] = nil
 	end
 end
 
-input["keyDown"] = function(key)
-	local listeners = input.listeners[key]
+Input["keyDown"] = function(key)
+	local listeners = Input.listeners[key]
 	if listeners then
 		for k, v in pairs(listeners) do
 			v(key, 1)
@@ -35,8 +35,8 @@ input["keyDown"] = function(key)
 	end
 end
 
-input["keyUp"] = function(key)
-	local listeners = input.listeners[key]
+Input["keyUp"] = function(key)
+	local listeners = Input.listeners[key]
 	if listeners then
 		for k, v in pairs(listeners) do
 			v(key, 0)
@@ -48,7 +48,7 @@ input["keyUp"] = function(key)
 	end
 end
 
-input["update"] = function(deltaSec)
+Input["update"] = function(deltaSec)
 	if movement[EKey_W] then
 		if movement[EKey_A] then
 			--print("wa")

@@ -22,7 +22,7 @@
 #ifndef SOL_HPP
 #define SOL_HPP
 
-#define SOL_NO_EXCEPTIONS 1
+#define SOL_NO_EXCEPTIONS 0
 
 #if defined(UE_BUILD_DEBUG) || defined(UE_BUILD_DEVELOPMENT) || defined(UE_BUILD_TEST) || defined(UE_BUILD_SHIPPING) || defined(UE_SERVER)
 #define SOL_INSIDE_UNREAL

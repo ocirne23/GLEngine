@@ -82,7 +82,7 @@ void Box2DDebugDraw::DrawSolidPolygon(const b2Vec2* a_vertices, int32 a_vertexCo
 
 void Box2DDebugDraw::DrawCircle(const b2Vec2& a_center, float32 a_radius, const b2Color& a_color)
 {
-	const int32 segments = glm::max(int32(5.0f * a_radius), 10);
+	const int32 segments = glm::max(int32(5.0f * a_radius), 15);
 	const float angle = 2 * glm::pi<float>() / segments;
 	const float cos = glm::cos(angle);
 	const float sin = glm::sin(angle);

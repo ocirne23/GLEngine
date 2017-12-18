@@ -49,15 +49,17 @@ void PhysicsSystem::update(float a_deltaSec)
 			b2Joint* joint = m_physicsWorld->CreateJoint(message.jointDef.get());
 		}
 		m_createJointMessageQueue.clear();
+
 		for (const ApplyForceMessage& message : m_applyForceMessageQueue)
 		{
-			b2Body*& body = m_components[message.entity.index].body;
+			b2Body* body = m_components[message.entity.index].body;
 			if (body)
 			{
 				body->ApplyForce(message.force, message.location, true);
 			}
 		}
 		m_applyForceMessageQueue.clear();
+
 		for (const DestroyBodyMessage& message : m_destroyBodyMessageQueue)
 		{
 			b2Body*& body = m_components[message.entity.index].body;
@@ -68,9 +70,9 @@ void PhysicsSystem::update(float a_deltaSec)
 			}
 		}
 		m_destroyBodyMessageQueue.clear();
+
 		for (const CreateBodyMessage& message : m_createBodyMessageQueue)
 		{
-			;
 			assert(m_components.at(message.entity.index).body == NULL);
 			b2Body* body = m_physicsWorld->CreateBody(&message.bodyDef);
 			for (auto& fixtureDef : message.fixtureDefs)
@@ -80,9 +82,6 @@ void PhysicsSystem::update(float a_deltaSec)
 			m_components[message.entity.index].body = body;
 		}
 		m_createBodyMessageQueue.clear();
-
-		
-		m_createJointMessageQueue.clear();
 	}
 	m_messageQueueMutex.unlock();
 
@@ -123,6 +122,13 @@ void PhysicsSystem::addDestroyBodyMessage(const DestroyBodyMessage& a_message)
 {
 	m_messageQueueMutex.lock();
 	m_destroyBodyMessageQueue.push_back(a_message);
+	m_messageQueueMutex.unlock();
+}
+
+void PhysicsSystem::addApplyForceMessage(const ApplyForceMessage& a_message)
+{
+	m_messageQueueMutex.lock();
+	m_applyForceMessageQueue.push_back(a_message);
 	m_messageQueueMutex.unlock();
 }
 

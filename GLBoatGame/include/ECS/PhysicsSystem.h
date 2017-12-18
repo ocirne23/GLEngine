@@ -66,6 +66,7 @@ public:
 	void drawDebugInfo(PerspectiveCamera& a_camera);
 	void addCreateBodyMessage(const CreateBodyMessage& message);
 	void addDestroyBodyMessage(const DestroyBodyMessage& message);
+	void addApplyForceMessage(const ApplyForceMessage& message);
 
 private:
 

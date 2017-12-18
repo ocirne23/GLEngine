@@ -1,21 +1,35 @@
 #include "Logic/LuaPhysicsBindings.h"
 
+#include "ECS/LogicSystem.h"
+
 void LuaPhysicsBindings::initialize()
 {
 	sol::constructors<b2Vec2(), void(float, float)> ctor;
 	sol::usertype<b2Vec2> utype(ctor, "x", &b2Vec2::x, "y", &b2Vec2::y);
 	m_lua.set_usertype<b2Vec2>(utype);
 
-	m_lua.set_function("createBody", [this](sol::table args)
+	m_logicSystem.loadLuaScript(m_lua, "assets/lua/physics/physics.lua");
+	
+	m_lua["Physics"] = m_lua.create_named_table("Physics");
+	m_lua["Physics"]["createBody"] = [this](sol::table args)
 	{
 		m_physicsSystem.addCreateBodyMessage(createBodyMessage(args));
 		args["bodyDef"] = nullptr;
-	});
-
-	m_lua.set_function("destroyBody", [this](sol::table args)
+		args["fixtureDefs"] = nullptr;
+	};
+	m_lua["Physics"]["destroyBody"] = [this](sol::table args)
 	{
 		m_physicsSystem.addDestroyBodyMessage(destroyBodyMessage(args));
-	});
+	};
+
+	m_lua["Physics"]["applyForce"] = [this](Entity entity, b2Vec2 force, b2Vec2 location)
+	{
+		ApplyForceMessage m;
+		m.entity = entity;
+		m.force = force;
+		m.location = location;
+		m_physicsSystem.addApplyForceMessage(m);
+	};
 }
 
 CreateBodyMessage LuaPhysicsBindings::createBodyMessage(sol::table a_table)
@@ -32,7 +46,7 @@ CreateBodyMessage LuaPhysicsBindings::createBodyMessage(sol::table a_table)
 	m.bodyDef.active = bodyDef["active"];
 	m.bodyDef.allowSleep = bodyDef["allowSleep"];
 	m.bodyDef.angle = bodyDef["angle"];
-	m.bodyDef.angularDamping = bodyDef["angularDampening"];
+	m.bodyDef.angularDamping = bodyDef["angularDamping"];
 	m.bodyDef.angularVelocity = bodyDef["angularVelocity"];
 	m.bodyDef.awake = bodyDef["awake"];
 	m.bodyDef.bullet = bodyDef["bullet"];
@@ -41,8 +55,8 @@ CreateBodyMessage LuaPhysicsBindings::createBodyMessage(sol::table a_table)
 	m.bodyDef.linearDamping = bodyDef["linearDamping"];
 	m.bodyDef.linearVelocity = bodyDef["linearVelocity"];
 	m.bodyDef.position = bodyDef["position"];
-	m.bodyDef.type = a_table["bodyDef"]["type"];
-	m.bodyDef.userData;// = table["bodyDef"]["userData"];
+	m.bodyDef.type = bodyDef["bodyType"];
+	m.bodyDef.userData;// = bodyDef["bodyDef"]["userData"];
 
 	sol::table fixtureDefs = a_table["fixtureDefs"];
 	for (auto fixtureDef : fixtureDefs)
@@ -93,6 +107,16 @@ CreateBodyMessage LuaPhysicsBindings::createBodyMessage(sol::table a_table)
 
 DestroyBodyMessage LuaPhysicsBindings::destroyBodyMessage(sol::table table)
 {
-	Entity entity = table["entity"];
-	return DestroyBodyMessage({ entity });
+	DestroyBodyMessage m;
+	m.entity = table["entity"];
+	return m;
+}
+
+ApplyForceMessage LuaPhysicsBindings::createApplyForceMessage(sol::table table)
+{
+	ApplyForceMessage m;
+	m.entity = table["entity"];
+	m.force = table["force"];
+	m.location = table["location"];
+	return m;
 }

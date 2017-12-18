@@ -24,7 +24,7 @@ END_UNNAMED_NAMESPACE()
 LogicSystem::LogicSystem(BoatGame& a_boatGame)
 	: m_boatGame(a_boatGame)
 	, m_entityBindings(m_lua, a_boatGame.getEntitySystem())
-	, m_physicsBindings(m_lua, a_boatGame.getPhysicsSystem())
+	, m_physicsBindings(m_lua, a_boatGame.getPhysicsSystem(), *this)
 	, m_inputBindings(m_lua, *this)
 {
 	initializeLuaState();
@@ -71,6 +71,13 @@ void LogicSystem::initializeLuaState()
 	m_lua["package"]["path"] = packagePath.c_str();
 	loadLuaScript(m_lua, "assets/lua/folders.lua");
 	sol::table folders = m_lua["folders"];
+	m_lua.script(R"(
+		function bind(t, k)
+			return function(...) return t[k](t, ...) end
+		end
+	)");
+
+
 	for (auto item : folders)
 	{
 		packagePath.append(";;");
@@ -80,7 +87,6 @@ void LogicSystem::initializeLuaState()
 		packagePath.append("\\?.lua");
 	}
 	m_lua["package"]["path"] = packagePath.c_str();
-
 	m_lua.set_function("print", [](sol::string_view str)
 	{
 		print("lua: %s\n", str.data());
