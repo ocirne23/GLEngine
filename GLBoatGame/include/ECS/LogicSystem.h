@@ -5,6 +5,8 @@
 #include "Logic/LuaPhysicsBindings.h"
 #include "Logic/LuaInputBindings.h"
 #include "Logic/LuaEntityBindings.h"
+#include "Physics/ContactListener.h"
+#include "Utils/Mutex.h"
 
 #include <sol/sol.hpp>
 
@@ -20,6 +22,9 @@ public:
 	void update(float deltaSec);
 
 	sol::protected_function_result loadLuaScript(sol::state& a_lua, const char* a_filePath);
+
+	void addBeginContactMessage(const ContactMessage& contactMessage);
+	void addEndContactMessage(const ContactMessage& contactMessage);
 
 private:
 
@@ -41,4 +46,8 @@ private:
 	LuaPhysicsBindings m_physicsBindings;
 	LuaInputBindings m_inputBindings;
 	LuaEntityBindings m_entityBindings;
+
+	Mutex m_contactMutex;
+	eastl::vector<ContactMessage> m_beginContactMessages;
+	eastl::vector<ContactMessage> m_endContactMessages;
 };

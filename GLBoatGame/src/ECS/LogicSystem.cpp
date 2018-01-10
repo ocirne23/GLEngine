@@ -1,6 +1,5 @@
 #include "ECS/LogicSystem.h"
 
-
 #include "Utils/FileHandle.h"
 #include "Utils/FileUtils.h"
 #include "Logic/LuaPhysicsBindings.h"
@@ -31,7 +30,7 @@ LogicSystem::LogicSystem(BoatGame& a_boatGame)
 	m_entityBindings.initialize();
 	m_physicsBindings.initialize();
 	m_inputBindings.initialize();
-
+	
 	m_keyDownListener.setFunc([&](EKey a_key, bool a_isRepeat)
 	{
 		if (a_isRepeat)
@@ -46,6 +45,7 @@ LogicSystem::LogicSystem(BoatGame& a_boatGame)
 	});
 
 	loadLuaScript(m_lua, "assets/lua/startup.lua");
+	m_boatGame.getPhysicsSystem().setupContactListener(*this);
 }
 
 sol::protected_function_result LogicSystem::loadLuaScript(sol::state& a_lua, const char * a_filePath)
@@ -62,9 +62,23 @@ sol::protected_function_result LogicSystem::loadLuaScript(sol::state& a_lua, con
 	return result;
 }
 
+void LogicSystem::addBeginContactMessage(const ContactMessage& a_contactMessage)
+{
+	m_contactMutex.lock();
+	m_beginContactMessages.push_back(a_contactMessage);
+	m_contactMutex.unlock();
+}
+
+void LogicSystem::addEndContactMessage(const ContactMessage& a_contactMessage)
+{
+	m_contactMutex.lock();
+	m_endContactMessages.push_back(a_contactMessage);
+	m_contactMutex.unlock();
+}
+
 void LogicSystem::initializeLuaState()
 {
-	m_lua.open_libraries(sol::lib::base, sol::lib::package);
+	m_lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::math);
 	const eastl::string luaFolderPath = getLuaFolder();
 	eastl::string packagePath = luaFolderPath;
 	packagePath.append("?.lua");
@@ -97,5 +111,20 @@ void LogicSystem::update(float a_deltaSec)
 {
 	GLEngine::processInput();
 	m_inputBindings.update(a_deltaSec);
+
+	m_contactMutex.lock();
+	for (ContactMessage& m : m_beginContactMessages)
+	{
+
+	}
+	m_beginContactMessages.clear();
+	for (ContactMessage& m : m_endContactMessages)
+	{
+
+	}
+	m_endContactMessages.clear();
+	m_contactMutex.unlock();
+
+	m_lua["Update"]["update"](a_deltaSec);
 }
 

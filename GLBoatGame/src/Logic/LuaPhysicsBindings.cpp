@@ -30,6 +30,7 @@ void LuaPhysicsBindings::initialize()
 		m.location = location;
 		m_physicsSystem.addApplyForceMessage(m);
 	};
+
 }
 
 CreateBodyMessage LuaPhysicsBindings::createBodyMessage(sol::table a_table)

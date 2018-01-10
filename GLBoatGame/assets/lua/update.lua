@@ -1,4 +1,3 @@
-
 Update = {}
 Update.listeners = {}
 Update["addListener"] = function(entity, func)

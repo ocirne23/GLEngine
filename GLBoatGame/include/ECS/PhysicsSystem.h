@@ -12,6 +12,7 @@ class BoatGame;
 class PerspectiveCamera;
 class Box2DDebugDraw;
 class ContactListener;
+class LogicSystem;
 
 struct CreateBodyMessage
 {
@@ -60,6 +61,7 @@ public:
 	PhysicsSystem(BoatGame& boatGame);
 	~PhysicsSystem();
 
+	void setupContactListener(LogicSystem& logicSystem);
 	void update(float a_deltaSec);
 
 	void initializeDebugDraw();

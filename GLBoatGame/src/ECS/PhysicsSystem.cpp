@@ -2,6 +2,7 @@
 
 #include "Physics/ContactListener.h"
 #include "Graphics/Utils/Box2DDebugDraw.h"
+#include "ECS/LogicSystem.h"
 
 #include <assert.h>
 #include <Box2D/Box2D.h>
@@ -19,7 +20,6 @@ PhysicsSystem::PhysicsSystem(BoatGame& a_boatGame)
 {
 	m_components.resize(Entity::MAX_NUM_ENTITIES);
 	print("size: %i\n", m_components.size());
-	m_contactListener = new ContactListener(*this);
 	m_physicsWorld = new b2World(b2Vec2(0.0f, 0.0f));
 	m_physicsWorld->SetContactListener(m_contactListener);
 	/*
@@ -37,6 +37,12 @@ PhysicsSystem::~PhysicsSystem()
 	SAFE_DELETE(m_contactListener);
 	SAFE_DELETE(m_debugDraw);
 	SAFE_DELETE(m_physicsWorld);
+}
+
+void PhysicsSystem::setupContactListener(LogicSystem& a_logicSystem)
+{
+	assert(m_contactListener == NULL);
+	m_contactListener = new ContactListener(*this, a_logicSystem);
 }
 
 void PhysicsSystem::update(float a_deltaSec)
@@ -71,13 +77,17 @@ void PhysicsSystem::update(float a_deltaSec)
 		}
 		m_destroyBodyMessageQueue.clear();
 
-		for (const CreateBodyMessage& message : m_createBodyMessageQueue)
+		for (CreateBodyMessage& message : m_createBodyMessageQueue)
 		{
 			assert(m_components.at(message.entity.index).body == NULL);
 			b2Body* body = m_physicsWorld->CreateBody(&message.bodyDef);
-			for (auto& fixtureDef : message.fixtureDefs)
+			int entityID = message.entity.getID();
+			body->SetUserData(rcast<void*>(size_t(entityID)));
+			for (uint i = 0; i < message.fixtureDefs.size(); ++i)
 			{
-				b2Fixture* fixture = body->CreateFixture(&fixtureDef.fixture);
+				auto* fixture = &message.fixtureDefs[i].fixture;
+				fixture->userData = rcast<void*>(size_t(i));
+				body->CreateFixture(fixture);
 			}
 			m_components[message.entity.index].body = body;
 		}
