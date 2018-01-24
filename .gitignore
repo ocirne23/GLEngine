@@ -27,4 +27,6 @@ GLApp/obj/
 GLResourceBuilder/bin/
 GLResourceBuilder/obj/
 GLBoatGame/obj/
+GLEditor/bin/
+GLEditor/obj/
 .vs/
