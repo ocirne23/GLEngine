@@ -73,6 +73,7 @@
     <ClCompile Include="src\Database\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
+    <ClCompile Include="src\Net\TCPSocket.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
     <ClCompile Include="src\Utils\Mutex.cpp" />
@@ -722,6 +723,7 @@
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Box2DDebugDraw.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
+    <ClInclude Include="include\Public\Network\TCPSocket.h" />
     <ClInclude Include="include\Public\Utils\AccessPrivate.h" />
     <ClInclude Include="include\Public\Utils\Mutex.h" />
     <ClInclude Include="include\Public\Utils\ScopeLock.h" />
@@ -2040,7 +2042,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;winmm.lib;glslangd.lib;HLSLd.lib;OGLCompilerd.lib;SPIRVd.lib;SPVRemapperd.lib;Box2D_d.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona_d.lib;FreeImage_d.lib;freetype_d.lib;glew32.lib;glfw_d.lib;IL_d.lib;ILU_d.lib;jpeg_d.lib;libexpat_d.lib;libmng_d.lib;libpng_d.lib;libtiff_d.lib;lua_d.lib;minizip_d.lib;pcre_d.lib;SDL2.lib;SILLY_d.lib;tinyxml_d.lib;toluapp_d.lib;xerces-c_3_d.lib;zlib_d.lib;dbghelp.lib;glslangd.lib;OGLCompilerd.lib;Box2D_d.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />
@@ -2066,7 +2068,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)$(ProjectName)\libs\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;vulkan-1.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib;glslang.lib;HLSL.lib;OGLCompiler.lib;SPIRV.lib;SPVRemapper.lib;Box2D.lib</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;assimp.lib;opengl32.lib;glu32.lib;CEGUIWrapper.lib;corona.lib;FreeImage.lib;freetype.lib;glew32.lib;glfw.lib;IL.lib;ILU.lib;jpeg.lib;libexpat.lib;libmng.lib;libpng.lib;libtiff.lib;lua.lib;minizip.lib;pcre.lib;SDL2.lib;SILLY.lib;tinyxml.lib;toluapp.lib;xerces-c_3.lib;zlib.lib;dbghelp.lib;winmm.lib;glslang.lib;HLSL.lib;OGLCompiler.lib;SPIRV.lib;SPVRemapper.lib;Box2D.lib</AdditionalDependencies>
       <AdditionalOptions>/ignore:4006 /ignore:4221 /ignore:4996 /ignore:4244 /ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Lib>
     <ProjectReference />

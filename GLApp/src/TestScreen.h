@@ -12,8 +12,6 @@
 #include "Input/Input.h"
 #include "Utils/FPSMeasurer.h"
 
-#include "Graphics/Utils/Box2DDebugDraw.h"
-
 
 class DBScene;
 BEGIN_NAMESPACE(CEGUI)
@@ -56,6 +54,4 @@ private:
 
 	float m_timeAccum = 0.0f;
 	glm::vec3 m_sunDir;
-
-	Box2DDebugDraw m_box2dDebugDraw;
 };

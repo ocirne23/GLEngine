@@ -39,7 +39,7 @@ eastl::string FileUtils::getFileTime(const eastl::string& a_filePath)
 {
 	const LPCWSTR filePath = eastl::wstring(a_filePath.c_str()).c_str();
 
-	WIN32_FILE_ATTRIBUTE_DATA fileAttrData = {0};
+	WIN32_FILE_ATTRIBUTE_DATA fileAttrData = {};
 	GetFileAttributesExW(filePath, GetFileExInfoStandard, &fileAttrData);
 
 	SYSTEMTIME sysWriteTime;
