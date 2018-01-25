@@ -82,6 +82,7 @@
     <ClCompile Include="src\Utils\ScopeLock.cpp" />
     <ClCompile Include="src\Utils\Mutex.cpp" />
     <ClCompile Include="src\Net\TCPSocket.cpp" />
+    <ClCompile Include="src\Net\Network.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -1820,6 +1821,7 @@
     <ClInclude Include="libs\include\SDL\SDL_types.h" />
     <ClInclude Include="libs\include\SDL\SDL_version.h" />
     <ClInclude Include="libs\include\SDL\SDL_video.h" />
+    <ClInclude Include="include\Public\Network\Network.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

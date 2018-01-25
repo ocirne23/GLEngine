@@ -6,150 +6,150 @@
 #include <WS2tcpip.h>
 #include <stdio.h>
 
-void TCPSocket::listen(Address a_ip, Port a_port, uint a_maxNumConnections)
+TCPSocket::~TCPSocket()
 {
-	assert(ip && port);
-	assert(m_socket == 0 && m_connectedSocket == 0);
+	disconnect();
+}
 
-	WSADATA wsaData;
-	int result = ::WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (result != 0)
+void TCPSocket::listen(Address a_ip, Port a_port)
+{
+	assert(a_ip && a_port);
+	assert(m_socket == 0);
+
+	eastl::string portString = StringUtils::to_string(a_port);
+	eastl::string ipString = a_ip;
+	int result = 0;
+	
+	ADDRINFOA hints = {};
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	PADDRINFOA info = {};
+	::getaddrinfo(ipString.c_str(), portString.c_str(), &hints, &info);
+
+	SOCKET listenSocket = ::socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+	if (listenSocket == INVALID_SOCKET)
 	{
-		print("WSAStartup failed: %i\n", result);
+		print("Socket creation failed: %i\n", WSAGetLastError());
+		::freeaddrinfo(info);
 		assert(false);
 		return;
 	}
 
-	eastl::string portString = StringUtils::to_string(a_port);
-	eastl::string ipString = a_ip;
-
-	{
-		ADDRINFOA hints = {};
-		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
-		hints.ai_protocol = IPPROTO_TCP;
-		PADDRINFOA info = {};
-		::getaddrinfo(ipString.c_str(), portString.c_str(), &hints, &info);
-	
-		SOCKET tcpSocket = ::socket(info->ai_family, info->ai_socktype, info->ai_protocol);
-		if (tcpSocket == INVALID_SOCKET)
-		{
-			print("Error creating socket: %i\n", WSAGetLastError());
-			::freeaddrinfo(info);
-			::WSACleanup();
-			assert(false);
-			return;
-		}
-
-		result = ::bind(tcpSocket, info->ai_addr, int(info->ai_addrlen));
-		if (result == SOCKET_ERROR) {
-			print("Socket bind failed: %i\n", WSAGetLastError());
-			::freeaddrinfo(info);
-			closesocket(tcpSocket);
-			::WSACleanup();
-			return;
-		}
-		m_socket = tcpSocket;
-		freeaddrinfo(info);
-	}
-
-	if (::listen(m_socket, SOMAXCONN_HINT(a_maxNumConnections)) == SOCKET_ERROR) {
-		printf("Socket listen failed: %i\n", WSAGetLastError());
-		::closesocket(m_socket);
-		m_socket = 0;
-		::WSACleanup();
-		return;
-	}
-
-	SOCKET connectedSocket = ::accept(m_socket, NULL, NULL);
-	if (connectedSocket == INVALID_SOCKET) {
-		printf("Socket accept failed: %i\n", WSAGetLastError());
-		::closesocket(m_socket);
-		::WSACleanup();
-		return;
-	}
-	m_connectedSocket = connectedSocket;
-
-	while (true)
-	{
-		result = ::recv(m_socket, m_receiveBuffer, BUFFER_SIZE, 0);
-		if (result > 0) 
-		{
-			printf("Bytes received: %d\n", result);
-		}
-		else
-		{
-			printf("Connection closing: %i\n", result < 0 ? WSAGetLastError() : 0);
-			::closesocket(m_socket);
-			m_socket = 0;
-			::WSACleanup();
-			break;
-		}
-	}
-
-	result = ::shutdown(m_connectedSocket, SD_SEND);
+	result = ::bind(listenSocket, info->ai_addr, int(info->ai_addrlen));
 	if (result == SOCKET_ERROR) {
-		printf("Socket shutdown failed: %i\n", WSAGetLastError());
-		::closesocket(m_connectedSocket);
-		m_connectedSocket = 0;
-		::WSACleanup();
+		print("Socket bind failed: %i\n", WSAGetLastError());
+		::freeaddrinfo(info);
+		closesocket(listenSocket);
 		return;
 	}
-	::closesocket(m_connectedSocket);
-	m_connectedSocket = 0;
-	::WSACleanup();
+	::freeaddrinfo(info);
+	
+	result = ::listen(listenSocket, SOMAXCONN_HINT(1));
+	if (result == SOCKET_ERROR) 
+	{
+		print("Socket listen failed: %i\n", WSAGetLastError());
+		::closesocket(listenSocket);
+		return;
+	}
+
+	SOCKET connectedSocket = ::accept(listenSocket, NULL, NULL);
+	if (connectedSocket == INVALID_SOCKET) 
+	{
+		print("Socket accept failed: %i\n", WSAGetLastError());
+		::closesocket(connectedSocket);
+		return;
+	}
+
+	print("Socket connection opened: %i\n", m_socket);
+
+	result = ::closesocket(listenSocket);
+	if (result == SOCKET_ERROR)
+	{
+		print("Socket close failed: %i\n", WSAGetLastError());
+	}
+	m_socket = connectedSocket;
 }
 
 void TCPSocket::connect(Address a_ip, Port a_port)
 {
-	//----------------------
-	// Initialize Winsock
-	WSADATA wsaData;
-	int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-	if (iResult != NO_ERROR) {
-		print("WSAStartup function failed with error: %d\n", iResult);
-		return;
-	}
-	//----------------------
-	// Create a SOCKET for connecting to server
-	SOCKET ConnectSocket;
-	ConnectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (ConnectSocket == INVALID_SOCKET) {
-		print("socket function failed with error: %ld\n", WSAGetLastError());
-		WSACleanup();
-		return;
-	}
+	assert(a_ip && a_port);
+	assert(m_socket == 0);
 
+	eastl::string portString = StringUtils::to_string(a_port);
 	eastl::string ipString = a_ip;
 
-	//----------------------
-	// The sockaddr_in structure specifies the address family,
-	// IP address, and port of the server to be connected to.
-	sockaddr_in clientService;
-	clientService.sin_family = AF_INET;
-	clientService.sin_addr.s_addr = inet_addr(ipString.c_str());
-	clientService.sin_port = htons(a_port);
+	ADDRINFOA hints = {};
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	PADDRINFOA info = {};
+	::getaddrinfo(ipString.c_str(), portString.c_str(), &hints, &info);
 
-	//----------------------
-	// Connect to server.
-	iResult = connect(ConnectSocket, (SOCKADDR *)& clientService, sizeof(clientService));
-	if (iResult == SOCKET_ERROR) {
-		wprintf(L"connect function failed with error: %ld\n", WSAGetLastError());
-		iResult = closesocket(ConnectSocket);
-		if (iResult == SOCKET_ERROR)
-			wprintf(L"closesocket function failed with error: %ld\n", WSAGetLastError());
-		WSACleanup();
-		return 1;
+	SOCKET tcpSocket = ::socket(info->ai_family, info->ai_socktype, info->ai_protocol);
+	if (tcpSocket == INVALID_SOCKET)
+	{
+		print("Socket creation failed: %i\n", WSAGetLastError());
+		::freeaddrinfo(info);
+		assert(false);
+		return;
 	}
+	m_socket = tcpSocket;
 
-	wprintf(L"Connected to server.\n");
-
-	iResult = closesocket(ConnectSocket);
-	if (iResult == SOCKET_ERROR) {
-		wprintf(L"closesocket function failed with error: %ld\n", WSAGetLastError());
-		WSACleanup();
-		return 1;
+	int result = ::connect(m_socket, info->ai_addr, int(info->ai_addrlen));
+	::freeaddrinfo(info);
+	if (result == SOCKET_ERROR) 
+	{
+		print("Socket connect failed: %i\n", WSAGetLastError());
+		disconnect();
+		return;
 	}
+}
 
-	WSACleanup();
+void TCPSocket::disconnect()
+{
+	if (m_socket)
+	{
+		int result = ::shutdown(m_socket, SD_SEND);
+		if (result == SOCKET_ERROR) 
+			print("Socket shutdown failed: %i\n", WSAGetLastError());
+		result = ::closesocket(m_socket);
+		if (result == SOCKET_ERROR)
+			print("Socket close failed: %i\n", WSAGetLastError());
+		else
+			print("Socket connection closed: %i\n", m_socket);
+		m_socket = 0;
+	}
+}
+
+void TCPSocket::send(gsl::span<const byte> a_data)
+{
+	assert(m_socket);
+	int result = ::send(m_socket, rcast<const char*>(a_data.data()), int(a_data.length_bytes()), 0);
+	if (result == SOCKET_ERROR)
+	{
+		print("Socket send failed: %i\n", result);
+		disconnect();
+		return;
+	}
+}
+
+bool TCPSocket::receive(gsl::span<byte> receiveBuffer, std::function<void(gsl::span<byte>)> callback)
+{
+	if (!m_socket)
+		return false;
+
+	int result = ::recv(m_socket, rcast<char*>(receiveBuffer.data()), int(receiveBuffer.size_bytes()), 0);
+	if (result > 0)
+	{
+		callback(gsl::as_span<byte>(receiveBuffer.data(), result));
+		return true;
+	}
+	else
+	{
+		if (result < 0)
+			print("Socket receive failed\n");
+		disconnect();
+		return false;
+	}
 }

@@ -12,5 +12,6 @@
     <Grid>
         <ListBox x:Name="listBox" HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="200" Margin="1" />
         <Button x:Name="WindowCloseButton" Content="x" HorizontalAlignment="Right" VerticalAlignment="Top" Width="20" Height="18" TextBlock.TextAlignment="Center" Click="WindowCloseButton_Click"/>
+        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="674,360,0,0" VerticalAlignment="Top" Width="258" Height="134" Click="button_Click"/>
     </Grid>
 </Window>

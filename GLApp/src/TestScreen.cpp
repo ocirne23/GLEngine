@@ -5,6 +5,8 @@
 #include "Graphics/GL/Scene/GLConfig.h"
 #include "Utils/StringUtils.h"
 
+#include "Network/TCPSocket.h"
+
 #include <CEGUI/EventArgs.h>
 #include <CEGUI/Window.h>
 #include <CEGUI/WindowManager.h>
@@ -15,6 +17,31 @@
 
 TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 {
+	/*
+	GLEngine::createThread("TCPListenThread", []()
+	{
+		byte buffer[512];
+
+		TCPSocket s;
+		s.listen("localhost", 23232);
+		while (s.receive(buffer, [](gsl::span<byte> data)
+		{
+			print("received: %i - %s\n", data.length_bytes(), rcast<const char*>(data.data()));
+		}));
+	});
+	
+	GLEngine::createThread("TCPSendThread", []()
+	{
+		byte data[] = "ehuehue";
+
+		TCPSocket s;
+		s.connect("localhost", 23232);
+		for (uint i = 0; i < 10; ++i)
+		{
+			s.send(data);
+		}
+	});
+	*/
 	GLEngine::graphics->setVsync(false);
 	const uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	const uint viewportHeight = GLEngine::graphics->getViewportHeight();

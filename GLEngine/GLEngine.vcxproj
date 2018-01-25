@@ -73,6 +73,7 @@
     <ClCompile Include="src\Database\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
+    <ClCompile Include="src\Net\Network.cpp" />
     <ClCompile Include="src\Net\TCPSocket.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
@@ -723,6 +724,7 @@
     <ClInclude Include="include\Public\Graphics\UI\CEGUIManager.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Box2DDebugDraw.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
+    <ClInclude Include="include\Public\Network\Network.h" />
     <ClInclude Include="include\Public\Network\TCPSocket.h" />
     <ClInclude Include="include\Public\Utils\AccessPrivate.h" />
     <ClInclude Include="include\Public\Utils\Mutex.h" />

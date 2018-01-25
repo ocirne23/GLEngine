@@ -2,6 +2,7 @@
 
 #include "Graphics/Graphics.h"
 #include "Input/Input.h"
+#include "Network/Network.h"
 #include "Utils/ThreadManager.h"
 
 #include <SDL/SDL.h>
@@ -15,6 +16,7 @@ END_UNNAMED_NAMESPACE()
 
 owner<Input*> GLEngine::input                   = NULL;
 owner<Graphics*> GLEngine::graphics             = NULL;
+owner<Network*> GLEngine::s_network             = NULL;
 bool GLEngine::s_shutdown                       = false;
 owner<ThreadManager*> GLEngine::s_threadManager = NULL;
 
@@ -26,6 +28,7 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 		SDL_Quit();
 		return;
 	}
+	s_threadManager = new ThreadManager();
 	if (a_windowMode != EWindowMode::NONE)
 	{
 		graphics = new Graphics(a_windowName, 
@@ -36,7 +39,7 @@ void GLEngine::initialize(const char* a_windowName, uint a_width, uint a_height,
 		                        a_windowMode);
 	}
 	input = new Input();
-	s_threadManager = new ThreadManager();
+	s_network = new Network();
 }
 
 void GLEngine::createThread(const char* a_threadName, std::function<void()> a_func)
@@ -77,6 +80,7 @@ void GLEngine::destroyGLContext()
 void GLEngine::finish()
 {
 	waitForAllThreadShutdown();
+	SAFE_DELETE(s_network);
 	SAFE_DELETE(input);
 	SAFE_DELETE(graphics);
 	SAFE_DELETE(s_threadManager);

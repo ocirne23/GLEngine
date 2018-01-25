@@ -8,6 +8,7 @@
 class Input;
 class Graphics;
 class ThreadManager;
+class Network;
 
 enum class EWindowMode { WINDOWED, BORDERLESS, FULLSCREEN, NONE };
 
@@ -73,4 +74,5 @@ private:
 
 	static bool s_shutdown;
 	static owner<ThreadManager*> s_threadManager;
+	static owner<Network*> s_network;
 };

@@ -6,21 +6,20 @@ class TCPSocket
 {
 public:
 
-	enum { BUFFER_SIZE = 512 };
-
-	typedef const char* Address;
+	typedef gsl::not_null<const char*> Address;
 	typedef int Port;
 
 	TCPSocket() {}
-	~TCPSocket() {}
+	~TCPSocket();
 
-	void listen(Address ip, Port port, uint maxNumConnections);
+	void listen(Address ip, Port port);
 	void connect(Address ip, Port port);
+	void disconnect();
+
+	void send(gsl::span<const byte> data);
+	bool receive(gsl::span<byte> receiveBuffer, std::function<void(gsl::span<byte>)> callback);
 
 private:
 
 	uint64 m_socket = 0;
-	uint64 m_connectedSocket = 0;
-
-	char m_receiveBuffer[BUFFER_SIZE];
 };
