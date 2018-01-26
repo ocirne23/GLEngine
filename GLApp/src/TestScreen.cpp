@@ -24,7 +24,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 
 		TCPSocket s;
 		s.listen("localhost", 23232);
-		while (s.receive(buffer, [](gsl::span<byte> data)
+		while (!GLEngine::isShutdown() && s.receive(buffer, [](gsl::span<byte> data)
 		{
 			print("received: %i - %s\n", data.length_bytes(), rcast<const char*>(data.data()));
 		}));
@@ -42,6 +42,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 		}
 	});
 	*/
+	
 	GLEngine::graphics->setVsync(false);
 	const uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	const uint viewportHeight = GLEngine::graphics->getViewportHeight();

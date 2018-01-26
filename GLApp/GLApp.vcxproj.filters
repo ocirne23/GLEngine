@@ -4,9 +4,11 @@
     <ClCompile Include="src\TestScreen.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\GameObject.cpp" />
+    <ClCompile Include="src\NetworkTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\TestScreen.h" />
     <ClInclude Include="src\GameObject.h" />
+    <ClInclude Include="src\NetworkTest.h" />
   </ItemGroup>
 </Project>

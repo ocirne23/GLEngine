@@ -1822,6 +1822,7 @@
     <ClInclude Include="libs\include\SDL\SDL_version.h" />
     <ClInclude Include="libs\include\SDL\SDL_video.h" />
     <ClInclude Include="include\Public\Network\Network.h" />
+    <ClInclude Include="include\Public\Utils\DeferredFunction.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

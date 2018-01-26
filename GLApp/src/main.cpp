@@ -1,7 +1,37 @@
 #include "GLEngine.h"
 
-#include "TestScreen.h"
 #include "Utils/DeltaTimeMeasurer.h"
+
+#include "NetworkTest.h"
+
+int main()
+{
+	GLEngine::initialize("GLApp", 192, 108, EWindowMode::WINDOWED);
+	
+	GLEngine::createThread("NetworkTestThread", [&]()
+	{
+		NetworkTest networkTest;
+		DeltaTimeMeasurer deltaTimeMeasurer;
+		while (!GLEngine::isShutdown())
+		{
+			GLEngine::processInput();
+			networkTest.update(deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs()));
+		}
+	});
+
+	while (!GLEngine::isShutdown())
+		GLEngine::doMainThreadTick();
+
+	GLEngine::finish();
+
+	print("bai\n");
+	GLEngine::sleep(1000);
+
+	return 0;
+}
+
+/*
+#include "TestScreen.h"
 
 int main()
 {
@@ -29,3 +59,4 @@ int main()
 
 	return 0;
 }
+*/

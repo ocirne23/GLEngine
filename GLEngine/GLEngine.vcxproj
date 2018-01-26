@@ -821,6 +821,7 @@
     <ClInclude Include="include\Public\Utils\Semaphore.h" />
     <ClInclude Include="include\Private\Graphics\Utils\ClusteredTiledShadingUtils.h" />
     <ClInclude Include="include\3rdparty\stbi\stb_image.h" />
+    <ClInclude Include="include\Public\Utils\DeferredFunction.h" />
     <ClInclude Include="include\Public\Utils\VecForward.h" />
     <ClInclude Include="libs\include-shared\CEGUI\Affector.h" />
     <ClInclude Include="libs\include-shared\CEGUI\Animation.h" />
