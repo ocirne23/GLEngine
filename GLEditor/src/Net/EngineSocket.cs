@@ -32,7 +32,7 @@ namespace GLEditor.src.Net
                     addr = IPAddress.Parse(ipAddrStr);
                 }
             }
-            catch (FormatException e)
+            catch (FormatException)
             {
                 return;
             }
@@ -43,7 +43,7 @@ namespace GLEditor.src.Net
                 senderSock.NoDelay = false;
                 senderSock.Connect(ipEndPoint);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 if (senderSock.Connected)
                 {
@@ -67,7 +67,7 @@ namespace GLEditor.src.Net
         {
             if (senderSock.Connected)
             {
-                senderSock.Send(buffer, size, SocketFlags.None)
+                senderSock.Send(buffer, size, SocketFlags.None);
             }
         }
 

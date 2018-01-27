@@ -77,21 +77,25 @@ public:
 	typedef InputListener<WindowResizedTag, void, uint, uint>               WindowResizedListener;
 	typedef InputListener<WindowQuitTag,    void>                           WindowQuitListener;
 
+	eastl::vector<KeyDownListener*>& getListeners(const KeyDownListener& a_listener) { return m_keyDownListeners; }
+	eastl::vector<KeyUpListener*>& getListeners(const KeyUpListener& a_listener) { return m_keyUpListeners; }
+	eastl::vector<TextInputListener*>& getListeners(const TextInputListener& a_listener) { return m_textInputListeners; }
+	eastl::vector<MouseDownListener*>& getListeners(const MouseDownListener& a_listener) { return m_mouseDownListeners; }
+	eastl::vector<MouseUpListener*>& getListeners(const MouseUpListener& a_listener) { return m_mouseUpListeners; }
+	eastl::vector<MouseMovedListener*>& getListeners(const MouseMovedListener& a_listener) { return m_mouseMovedListeners; }
+	eastl::vector<MouseScrolledListener*>& getListeners(const MouseScrolledListener& a_listener) { return m_mouseScrolledListeners; }
+	eastl::vector<WindowResizedListener*>& getListeners(const WindowResizedListener& a_listener) { return m_windowResizedListeners; }
+	eastl::vector<WindowQuitListener*>& getListeners(const WindowQuitListener& a_listener) { return m_windowQuitListeners; }
+
 private:
 
-#define DECLARE_LISTENER_TYPE(TYPE, LISTNAME) \
-	friend class TYPE; \
-	eastl::vector<TYPE*>& getListeners(const TYPE& a_listener) { return LISTNAME; } \
-	eastl::vector<TYPE*> LISTNAME;
-
-	DECLARE_LISTENER_TYPE(KeyDownListener, m_keyDownListeners);
-	DECLARE_LISTENER_TYPE(KeyUpListener, m_keyUpListeners);
-	DECLARE_LISTENER_TYPE(TextInputListener, m_textInputListeners);
-	DECLARE_LISTENER_TYPE(MouseDownListener, m_mouseDownListeners);
-	DECLARE_LISTENER_TYPE(MouseUpListener, m_mouseUpListeners);
-	DECLARE_LISTENER_TYPE(MouseMovedListener, m_mouseMovedListeners);
-	DECLARE_LISTENER_TYPE(MouseScrolledListener, m_mouseScrolledListeners);
-	DECLARE_LISTENER_TYPE(WindowResizedListener, m_windowResizedListeners);
-	DECLARE_LISTENER_TYPE(WindowQuitListener, m_windowQuitListeners);
-#undef DECLARE_LISTENER_TYPE
+	eastl::vector<KeyDownListener*> m_keyDownListeners;
+	eastl::vector<KeyUpListener*> m_keyUpListeners;
+	eastl::vector<TextInputListener*> m_textInputListeners;
+	eastl::vector<MouseDownListener*> m_mouseDownListeners;
+	eastl::vector<MouseUpListener*> m_mouseUpListeners;
+	eastl::vector<MouseMovedListener*> m_mouseMovedListeners;
+	eastl::vector<MouseScrolledListener*> m_mouseScrolledListeners;
+	eastl::vector<WindowResizedListener*> m_windowResizedListeners;
+	eastl::vector<WindowQuitListener*> m_windowQuitListeners;
 };

@@ -21,24 +21,20 @@ namespace GLEditor
     /// </summary>
     public partial class MainWindow : Window
     {
-        Socket senderSock;
 
         public MainWindow()
         {
             InitializeComponent();
-
         }
 
         private void WindowCloseButton_Click(object sender, RoutedEventArgs e)
         {
-            senderSock.Close();
             Close();
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes("eheuheuehue" + Char.MinValue);
-            senderSock.Send(buffer);
+
         }
             
     }
