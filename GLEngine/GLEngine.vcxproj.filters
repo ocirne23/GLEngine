@@ -83,6 +83,7 @@
     <ClCompile Include="src\Utils\Mutex.cpp" />
     <ClCompile Include="src\Net\TCPSocket.cpp" />
     <ClCompile Include="src\Net\Network.cpp" />
+    <ClCompile Include="src\Net\Protocol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -1823,6 +1824,8 @@
     <ClInclude Include="libs\include\SDL\SDL_video.h" />
     <ClInclude Include="include\Public\Network\Network.h" />
     <ClInclude Include="include\Public\Utils\DeferredFunction.h" />
+    <ClInclude Include="include\Public\Network\Protocol.h" />
+    <ClInclude Include="include\Public\Utils\RingQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

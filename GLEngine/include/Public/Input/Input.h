@@ -65,7 +65,6 @@ public:
 	struct MouseScrolledTag {};
 	struct WindowResizedTag {};
 	struct WindowQuitTag {};
-	
 	//                    Tag               Ret   Args                      Name
 	typedef InputListener<KeyDownTag,       void, EKey, bool>               KeyDownListener;
 	typedef InputListener<KeyUpTag,         void, EKey>                     KeyUpListener;
@@ -77,25 +76,25 @@ public:
 	typedef InputListener<WindowResizedTag, void, uint, uint>               WindowResizedListener;
 	typedef InputListener<WindowQuitTag,    void>                           WindowQuitListener;
 
-	eastl::vector<KeyDownListener*>& getListeners(const KeyDownListener& a_listener) { return m_keyDownListeners; }
-	eastl::vector<KeyUpListener*>& getListeners(const KeyUpListener& a_listener) { return m_keyUpListeners; }
-	eastl::vector<TextInputListener*>& getListeners(const TextInputListener& a_listener) { return m_textInputListeners; }
-	eastl::vector<MouseDownListener*>& getListeners(const MouseDownListener& a_listener) { return m_mouseDownListeners; }
-	eastl::vector<MouseUpListener*>& getListeners(const MouseUpListener& a_listener) { return m_mouseUpListeners; }
-	eastl::vector<MouseMovedListener*>& getListeners(const MouseMovedListener& a_listener) { return m_mouseMovedListeners; }
+	eastl::vector<KeyDownListener*>& getListeners(const KeyDownListener& a_listener)             { return m_keyDownListeners; }
+	eastl::vector<KeyUpListener*>& getListeners(const KeyUpListener& a_listener)                 { return m_keyUpListeners; }
+	eastl::vector<TextInputListener*>& getListeners(const TextInputListener& a_listener)         { return m_textInputListeners; }
+	eastl::vector<MouseDownListener*>& getListeners(const MouseDownListener& a_listener)         { return m_mouseDownListeners; }
+	eastl::vector<MouseUpListener*>& getListeners(const MouseUpListener& a_listener)             { return m_mouseUpListeners; }
+	eastl::vector<MouseMovedListener*>& getListeners(const MouseMovedListener& a_listener)       { return m_mouseMovedListeners; }
 	eastl::vector<MouseScrolledListener*>& getListeners(const MouseScrolledListener& a_listener) { return m_mouseScrolledListeners; }
 	eastl::vector<WindowResizedListener*>& getListeners(const WindowResizedListener& a_listener) { return m_windowResizedListeners; }
-	eastl::vector<WindowQuitListener*>& getListeners(const WindowQuitListener& a_listener) { return m_windowQuitListeners; }
+	eastl::vector<WindowQuitListener*>& getListeners(const WindowQuitListener& a_listener)       { return m_windowQuitListeners; }
 
 private:
 
-	eastl::vector<KeyDownListener*> m_keyDownListeners;
-	eastl::vector<KeyUpListener*> m_keyUpListeners;
-	eastl::vector<TextInputListener*> m_textInputListeners;
-	eastl::vector<MouseDownListener*> m_mouseDownListeners;
-	eastl::vector<MouseUpListener*> m_mouseUpListeners;
-	eastl::vector<MouseMovedListener*> m_mouseMovedListeners;
+	eastl::vector<KeyDownListener*>       m_keyDownListeners;
+	eastl::vector<KeyUpListener*>         m_keyUpListeners;
+	eastl::vector<TextInputListener*>     m_textInputListeners;
+	eastl::vector<MouseDownListener*>     m_mouseDownListeners;
+	eastl::vector<MouseUpListener*>       m_mouseUpListeners;
+	eastl::vector<MouseMovedListener*>    m_mouseMovedListeners;
 	eastl::vector<MouseScrolledListener*> m_mouseScrolledListeners;
 	eastl::vector<WindowResizedListener*> m_windowResizedListeners;
-	eastl::vector<WindowQuitListener*> m_windowQuitListeners;
+	eastl::vector<WindowQuitListener*>    m_windowQuitListeners;
 };

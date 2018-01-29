@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "Utils/RingQueue.h"
 
 class Protocol
 {
@@ -11,7 +12,7 @@ public:
 	typedef std::function<uint(PacketID)> PacketSizeParser;
 	typedef std::function<void(span<const byte>)> PacketReceiver;
 
-	enum { MAX_PACKET_SIZE = 512, BUFFER_SIZE = MAX_PACKET_SIZE * 2 };
+	enum { MAX_PACKET_SIZE = 256, BUFFER_SIZE = MAX_PACKET_SIZE * 2 };
 
 	Protocol();
 	~Protocol();
@@ -26,5 +27,6 @@ private:
 	PacketSizeParser m_packetSizeParser;
 	PacketReceiver m_packetReceiver;
 
-	size_t m_usedSize = 0;
+	byte m_outputBuffer[MAX_PACKET_SIZE];
+	RingQueue<byte, BUFFER_SIZE> m_ringQueue;
 };
