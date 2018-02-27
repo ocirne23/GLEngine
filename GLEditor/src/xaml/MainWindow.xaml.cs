@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,28 +15,30 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 
-namespace GLEditor
+public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
+    Thread mainThread;
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        mainThread = new Thread(mainThreadFunc);
+        mainThread.Start(this);
+    }
+
+    private static void mainThreadFunc(Object mainWindow)
+    {
+        new Editor((MainWindow) mainWindow);
+    }
+
+    private void WindowCloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void button_Click(object sender, RoutedEventArgs e)
     {
 
-        public MainWindow()
-        {
-            InitializeComponent();
-        }
-
-        private void WindowCloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-            
-    }
+    } 
 }
+

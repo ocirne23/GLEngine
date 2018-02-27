@@ -1,9 +1,5 @@
 #include "Network/Protocol.h"
 
-Protocol::Protocol()
-{
-}
-
 void Protocol::process(span<const byte> a_data)
 {
 	bool fits = m_ringQueue.push_back(a_data.data(), a_data.size_bytes());
@@ -13,24 +9,28 @@ void Protocol::process(span<const byte> a_data)
 
 void Protocol::tryFlush()
 {
-	if (!m_ringQueue.size())
-		return;
-	uint nextPacketSize = uint(*m_ringQueue.peek_front());
-	assert(nextPacketSize > 0);
-	if (nextPacketSize <= m_ringQueue.size())
+	if (!m_header.size && m_ringQueue.size() >= sizeof(m_header))
 	{
-		bool ret = m_ringQueue.pop_front(m_outputBuffer, nextPacketSize);
-		assert(ret);
-		m_packetReceiver(gsl::span<byte>(m_outputBuffer, nextPacketSize));
-	}
-}
+		bool result = m_ringQueue.pop_front(rcast<byte*>(&m_header), sizeof(m_header));
+		assert(result);
+	}		
 
-void Protocol::setPacketSizeParser(PacketSizeParser a_parser)
-{
-	m_packetSizeParser = a_parser;
+	if (m_header.size && m_ringQueue.size() >= m_header.size)
+	{
+		bool result = m_ringQueue.pop_front(m_outputBuffer, m_header.size);
+		assert(result);
+		m_packetReceiver(gsl::span<byte>(m_outputBuffer, m_header.size));
+		m_header.size = 0;
+	}
 }
 
 void Protocol::setPacketReceiver(PacketReceiver a_receiver)
 {
 	m_packetReceiver = a_receiver;
+}
+
+void Protocol::clear()
+{
+	m_header.size = 0;
+	m_ringQueue.clear();
 }

@@ -82,6 +82,43 @@ public:
 		return true;
 	}
 
+	T* getTail()
+	{
+		size_t tailIdx = (m_headIdx + m_count) % Size;
+		return m_data + tailIdx;
+	}
+
+	void appendToTail(size_t a_num)
+	{
+		if (m_headIdx + m_count + a_num <= Size)
+		{
+			m_count += a_num;
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+	size_t getNumEmptyFromTailToEnd() const 
+	{
+		size_t tailIdx = (m_headIdx + m_count) % Size;
+		if (tailIdx <= m_headIdx)
+		{
+			return Size - m_count;
+		}
+		else
+		{
+			return Size - tailIdx;
+		}
+	}
+
+	void clear()
+	{
+		m_headIdx = 0;
+		m_count = 0;
+	}
+
 	size_t size() const { return m_count; }
 	size_t capacity() const { return Size; }
 

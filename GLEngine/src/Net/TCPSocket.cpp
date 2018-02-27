@@ -139,10 +139,10 @@ bool TCPSocket::receive(gsl::span<byte> receiveBuffer, std::function<void(gsl::s
 	if (!m_socket)
 		return false;
 
-	int result = ::recv(m_socket, rcast<char*>(receiveBuffer.data()), int(receiveBuffer.size_bytes()), 0);
+	int result = ::recv(m_socket, rcast<char*>(m_ringQueue.getTail()), int(m_ringQueue.getNumEmptyFromTailToEnd()), 0);
 	if (result > 0)
 	{
-		callback(gsl::as_span<byte>(receiveBuffer.data(), result));
+		m_ringQueue.appendToTail(size_t(result));
 		return true;
 	}
 	else

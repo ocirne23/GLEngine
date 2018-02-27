@@ -7,26 +7,27 @@ class Protocol
 {
 public:
 
-	typedef ushort PacketID;
+	struct Header
+	{
+		short size = 0;
+	};
 
-	typedef std::function<uint(PacketID)> PacketSizeParser;
-	typedef std::function<void(span<const byte>)> PacketReceiver;
+	typedef std::function<void(span<byte>)> PacketReceiver;
 
-	enum { MAX_PACKET_SIZE = 256, BUFFER_SIZE = MAX_PACKET_SIZE * 2 };
+	enum { MAX_PACKET_SIZE = 512, BUFFER_SIZE = MAX_PACKET_SIZE * 2 };
 
-	Protocol();
-	~Protocol();
+	Protocol() {}
+	~Protocol() {}
 
 	void process(span<const byte> data);
-	void setPacketSizeParser(PacketSizeParser sizeParser);
 	void setPacketReceiver(PacketReceiver receiver);
 	void tryFlush();
+	void clear();
 
 private:
 
-	PacketSizeParser m_packetSizeParser;
+	Header m_header;
 	PacketReceiver m_packetReceiver;
-
 	byte m_outputBuffer[MAX_PACKET_SIZE];
 	RingQueue<byte, BUFFER_SIZE> m_ringQueue;
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "Utils/RingQueue.h"
 
 class TCPSocket
 {
@@ -22,4 +23,5 @@ public:
 private:
 
 	uint64 m_socket = 0;
+	RingQueue<byte, 512> m_ringQueue;
 };
