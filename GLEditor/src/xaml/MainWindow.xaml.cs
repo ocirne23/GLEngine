@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -38,7 +39,14 @@ public partial class MainWindow : Window
 
     private void button_Click(object sender, RoutedEventArgs e)
     {
-
+        string path = Directory.GetCurrentDirectory();
+        const string editorPath = @"GLEditor\bin\Release";
+        string workingDirectory = path.Substring(0, path.Length - editorPath.Length) + "GLApp";
+        string exePath = workingDirectory + @"\bin\x64\Release\GLApp.exe";
+        string cmdText = @"/C cd /d " + workingDirectory + " && " + exePath;
+        System.Diagnostics.Process process = System.Diagnostics.Process.Start("cmd.exe", cmdText);
+        Thread.Sleep(10000);
+        process.CloseMainWindow();
     } 
 }
 

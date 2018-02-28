@@ -14,9 +14,12 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/string_cast.hpp>
-
+#include <direct.h>
 TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 {
+	char cCurrentPath[FILENAME_MAX];
+	_getcwd(cCurrentPath, sizeof(cCurrentPath));
+	print("Working directory: %s\n", cCurrentPath);
 	/*
 	GLEngine::createThread("TCPListenThread", []()
 	{
@@ -41,8 +44,7 @@ TestScreen::TestScreen() : m_lightManager(GLConfig::getMaxLights())
 			s.send(data);
 		}
 	});
-	*/
-	
+	*/	
 	GLEngine::graphics->setVsync(false);
 	const uint viewportWidth = GLEngine::graphics->getViewportWidth();
 	const uint viewportHeight = GLEngine::graphics->getViewportHeight();
