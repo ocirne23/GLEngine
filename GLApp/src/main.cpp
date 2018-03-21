@@ -1,7 +1,9 @@
 #include "GLEngine.h"
 
 #include "Utils/DeltaTimeMeasurer.h"
-/*
+
+#if 1
+
 #include "NetworkTest.h"
 
 int main()
@@ -29,7 +31,8 @@ int main()
 
 	return 0;
 }
-*/
+
+#else
 
 #include "TestScreen.h"
 
@@ -59,3 +62,4 @@ int main()
 
 	return 0;
 }
+#endif

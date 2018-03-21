@@ -18,7 +18,13 @@ public:
 	void disconnect();
 
 	void send(gsl::span<const byte> data);
-	bool receive(gsl::span<byte> receiveBuffer, std::function<void(gsl::span<byte>)> callback);
+	bool receive();
+
+	size_t getMessageQueueSize() const { return m_ringQueue.size(); }
+	bool readFromMessageQueue(span<byte> data)
+	{
+		return m_ringQueue.pop_front(data.data(), data.length_bytes());
+	}
 
 private:
 

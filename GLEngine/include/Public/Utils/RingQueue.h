@@ -68,11 +68,13 @@ public:
 		if (numUntillEnd > 0)
 		{
 			std::memcpy(a_outData, m_data + m_headIdx, numUntillEnd * sizeof(T));
+			m_headIdx += numUntillEnd;
 		}
 		if (numUntillEnd < int64(a_numElements))
 		{
-			m_headIdx = (m_headIdx + numUntillEnd) % Size;
-			std::memcpy(a_outData + numUntillEnd, m_data + m_headIdx, (a_numElements - numUntillEnd) * sizeof(T));
+			int64 numRemaining = int64(a_numElements) - numUntillEnd;
+			m_headIdx = (m_headIdx + numRemaining) % Size;
+			std::memcpy(a_outData + numUntillEnd, m_data + m_headIdx, numRemaining * sizeof(T));
 		}
 		m_count -= a_numElements;
 

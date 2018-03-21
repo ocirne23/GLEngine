@@ -1,17 +1,17 @@
 #include "Utils/ThreadManager.h"
 
-#include "Core.h"
-
 #include <assert.h>
 #include <SDL/SDL.h>
+#include <windows.h>
 
 BEGIN_UNNAMED_NAMESPACE()
 
 // Because you cannot cast a std::function<void()> to a void* and back...
-struct FuncWrapper
+struct ThreadFuncWrapper
 {
-	FuncWrapper(std::function<void()> a_func) : func(a_func) {}
+	ThreadFuncWrapper(const char* a_threadName, std::function<void()> a_func) : threadName(a_threadName), func(a_func) {}
 	std::function<void()> func;
+	std::string threadName;
 };
 
 END_UNNAMED_NAMESPACE()
@@ -26,16 +26,40 @@ ThreadManager::~ThreadManager()
 	assert(m_threads.empty());
 }
 
-int ThreadManager::threadFunc(void* a_ptr)
+int ThreadManager::threadFunc(owner<void*> a_ptr)
 {
-	scast<FuncWrapper*>(a_ptr)->func();
+	ThreadFuncWrapper* func = scast<ThreadFuncWrapper*>(a_ptr);
+
+	const DWORD MS_VC_EXCEPTION = 0x406D1388;
+#pragma pack(push,8)  
+	typedef struct tagTHREADNAME_INFO
+	{
+		DWORD dwType; // Must be 0x1000.  
+		LPCSTR szName; // Pointer to name (in user addr space).  
+		DWORD dwThreadID; // Thread ID (-1=caller thread).  
+		DWORD dwFlags; // Reserved for future use, must be zero.  
+	} THREADNAME_INFO;
+#pragma pack(pop)  
+
+	THREADNAME_INFO info;
+	info.dwType = 0x1000;
+	info.szName = func->threadName.c_str();
+	info.dwThreadID = -1;
+	info.dwFlags = 0;
+#pragma warning(push)  
+#pragma warning(disable: 6320 6322)  
+	__try { RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info); }
+	__except (EXCEPTION_EXECUTE_HANDLER) { }
+	
+	func->func();
+
 	delete a_ptr;
 	return 0;
 }
 
 void ThreadManager::createThread(const char* a_threadName, std::function<void()> a_func)
 {
-	SDL_Thread* thread = SDL_CreateThread(&ThreadManager::threadFunc, a_threadName, new FuncWrapper(a_func));
+	SDL_Thread* thread = SDL_CreateThread(&ThreadManager::threadFunc, a_threadName, new ThreadFuncWrapper(a_threadName, a_func));
 	assert(thread);
 	m_threads.push_back(thread);
 }

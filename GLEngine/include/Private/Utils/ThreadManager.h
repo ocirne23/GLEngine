@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core.h"
+
 #include "EASTL/vector.h"
 
 #include <functional>
@@ -19,7 +21,7 @@ public:
 
 private:
 
-	static int threadFunc(void* ptr);
+	static int threadFunc(owner<void*> ptr);
 
 private:
 

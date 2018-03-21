@@ -61,7 +61,7 @@ void TCPSocket::listen(Address a_ip, Port a_port)
 		return;
 	}
 
-	print("Socket connection opened: %i\n", m_socket);
+	print("Socket connection opened: %i\n", connectedSocket);
 
 	result = ::closesocket(listenSocket);
 	if (result == SOCKET_ERROR)
@@ -104,6 +104,8 @@ void TCPSocket::connect(Address a_ip, Port a_port)
 		disconnect();
 		return;
 	}
+
+	print("Socket connected: %i\n", m_socket);
 }
 
 void TCPSocket::disconnect()
@@ -134,15 +136,15 @@ void TCPSocket::send(gsl::span<const byte> a_data)
 	}
 }
 
-bool TCPSocket::receive(gsl::span<byte> receiveBuffer, std::function<void(gsl::span<byte>)> callback)
+bool TCPSocket::receive()
 {
 	if (!m_socket)
 		return false;
-
-	int result = ::recv(m_socket, rcast<char*>(m_ringQueue.getTail()), int(m_ringQueue.getNumEmptyFromTailToEnd()), 0);
+	byte buf[512];
+	int result = ::recv(m_socket, rcast<char*>(buf), m_ringQueue.capacity() - m_ringQueue.size(), 0);
 	if (result > 0)
 	{
-		m_ringQueue.appendToTail(size_t(result));
+		m_ringQueue.push_back(buf, result);
 		return true;
 	}
 	else

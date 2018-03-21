@@ -126,6 +126,7 @@ void main()
 	lightAccum += diffuse * u_ambient;
 	vec3 fog = applyFog(lightAccum, length(u_eyePos - v_position), u_eyePos, V);
 	out_color = vec3(fog);
+	//out_color = texture(u_diffuseAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb;
 }
 
 // out_color = texture(u_diffuseAtlasArray, vec3(gl_FragCoord.xy / vec2(1200, 720), 0)).rgb; // Visualize atlas
