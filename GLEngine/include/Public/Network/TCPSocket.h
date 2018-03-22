@@ -7,6 +7,8 @@ class TCPSocket
 {
 public:
 
+	enum { BUFFER_SIZE = 64 };
+
 	typedef gsl::not_null<const char*> Address;
 	typedef int Port;
 
@@ -26,8 +28,10 @@ public:
 		return m_ringQueue.pop_front(data.data(), data.length_bytes());
 	}
 
+	uint64 m_socket = 0;
+	RingQueue<byte, BUFFER_SIZE> m_ringQueue;
+
 private:
 
-	uint64 m_socket = 0;
-	RingQueue<byte, 512> m_ringQueue;
+
 };

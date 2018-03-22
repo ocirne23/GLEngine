@@ -71,7 +71,7 @@ NetworkTest::NetworkTest()
 					DataA a;
 					if (s.readFromMessageQueue(span<byte>(rcast<byte*>(&a), sizeof(a))))
 					{
-						print("Read packet: %i, %i\n", h.id, h.size);
+						print("Read packet: %i, %i, %i\n", h.id, h.size, s.m_ringQueue.headIdx());
 						h.header = 0;
 					}
 					break;
@@ -81,7 +81,7 @@ NetworkTest::NetworkTest()
 					DataB b;
 					if (s.readFromMessageQueue(span<byte>(rcast<byte*>(&b), sizeof(b))))
 					{
-						print("Read packet: %i, %i\n", h.id, h.size);
+						print("Read packet: %i, %i, %i\n", h.id, h.size, s.m_ringQueue.headIdx());
 						h.header = 0;
 					}
 					break;
@@ -96,7 +96,7 @@ NetworkTest::NetworkTest()
 			}
 			else if(s.readFromMessageQueue(span<byte>(rcast<byte*>(&h), sizeof(h))))
 			{
-				print("Read header: %i %i %i %i\n", h.header, h.id, h.size, s.getMessageQueueSize());
+				print("Read header: %i, %i, %i, %i\n", h.header, h.id, h.size, s.m_ringQueue.headIdx());
 			}
 		}
 	});
@@ -109,7 +109,7 @@ NetworkTest::NetworkTest()
 		
 		while (!GLEngine::isShutdown())
 		{
-			GLEngine::sleep(100);
+			//GLEngine::sleep(100);
 			PacketA p;
 			PacketB p2;
 			if (glm::linearRand(0, 1))

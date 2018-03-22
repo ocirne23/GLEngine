@@ -23,11 +23,13 @@ public:
 		if (numFreeAtEnd > 0)
 		{
 			std::memcpy(m_data + tailIdx, a_data, numFreeAtEnd * sizeof(T));
+			print("add1: %i, num: %i\n", tailIdx, numFreeAtEnd);
 		}
 		if (numFreeAtEnd < int64(a_numElements))
 		{
 			tailIdx = (tailIdx + numFreeAtEnd) % Size;
 			std::memcpy(m_data + tailIdx, a_data + numFreeAtEnd, (a_numElements - numFreeAtEnd) * sizeof(T));
+			print("add2: %i, num: %i\n", tailIdx, (a_numElements - numFreeAtEnd));
 		}
 		m_count += a_numElements;
 
@@ -68,6 +70,7 @@ public:
 		if (numUntillEnd > 0)
 		{
 			std::memcpy(a_outData, m_data + m_headIdx, numUntillEnd * sizeof(T));
+			print("get1: %i, num: %i\n", m_headIdx, numUntillEnd);
 			m_headIdx += numUntillEnd;
 		}
 		if (numUntillEnd < int64(a_numElements))
@@ -75,6 +78,7 @@ public:
 			int64 numRemaining = int64(a_numElements) - numUntillEnd;
 			m_headIdx = (m_headIdx + numRemaining) % Size;
 			std::memcpy(a_outData + numUntillEnd, m_data + m_headIdx, numRemaining * sizeof(T));
+			print("get2: %i, num: %i\n", numUntillEnd, numRemaining);
 		}
 		m_count -= a_numElements;
 
@@ -123,6 +127,7 @@ public:
 
 	size_t size() const { return m_count; }
 	size_t capacity() const { return Size; }
+	size_t headIdx() const { return m_headIdx; }
 
 private:
 

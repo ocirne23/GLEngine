@@ -140,8 +140,8 @@ bool TCPSocket::receive()
 {
 	if (!m_socket)
 		return false;
-	byte buf[512];
-	int result = ::recv(m_socket, rcast<char*>(buf), m_ringQueue.capacity() - m_ringQueue.size(), 0);
+	byte buf[BUFFER_SIZE / 2];
+	int result = ::recv(m_socket, rcast<char*>(buf), eastl::min(m_ringQueue.capacity() - m_ringQueue.size(), ARRAY_SIZE(buf)), 0);
 	if (result > 0)
 	{
 		m_ringQueue.push_back(buf, result);
