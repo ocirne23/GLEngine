@@ -18,6 +18,8 @@
 *.pdb
 GLEngine.VC.db
 thumbs.db
+PredictedInputCache_Debug_x64.dat
+PredictedInputCache_Release_x64.dat
 
 ipch/
 GLEngine/bin/
