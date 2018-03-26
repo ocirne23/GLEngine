@@ -127,6 +127,7 @@ void TCPSocket::disconnect()
 void TCPSocket::send(gsl::span<const byte> a_data)
 {
 	assert(m_socket);
+	assert(a_data.length_bytes());
 	int result = ::send(m_socket, rcast<const char*>(a_data.data()), int(a_data.length_bytes()), 0);
 	if (result == SOCKET_ERROR)
 	{
@@ -140,18 +141,42 @@ bool TCPSocket::receive()
 {
 	if (!m_socket)
 		return false;
-	byte buf[BUFFER_SIZE / 2];
-	int result = ::recv(m_socket, rcast<char*>(buf), eastl::min(m_ringQueue.capacity() - m_ringQueue.size(), ARRAY_SIZE(buf)), 0);
-	if (result > 0)
+#if USE_COPY_BUFFER
+	char buf[BUFFER_SIZE / 2];
+	size_t maxReceivable = eastl::min(m_ringQueue.capacity() - m_ringQueue.size(), ARRAY_SIZE(buf));
+#else
+	char* buf = rcast<char*>(m_ringQueue.getTail());
+	size_t maxReceivable = m_ringQueue.getNumEmptyFromTailToEnd();
+#endif
+	if (maxReceivable > 0)
 	{
-		m_ringQueue.push_back(buf, result);
-		return true;
+		int result = ::recv(m_socket, buf, (int) maxReceivable, 0);
+		if (result > 0)
+		{
+#if USE_COPY_BUFFER
+			bool r = m_ringQueue.push_back(buf, result);
+			assert(r);
+#else
+			m_ringQueue.appendToTail(result);
+#endif
+			return true;
+		}
+		else
+		{
+			if (result < 0)
+				print("Socket receive failed, err: %i\n", result);
+			disconnect();
+			return false;
+		}
 	}
 	else
 	{
-		if (result < 0)
-			print("Socket receive failed\n");
-		disconnect();
+		print("Socket receive failed because queue is full!\n");
 		return false;
 	}
+}
+
+bool TCPSocket::read(span<byte> data)
+{
+	return m_ringQueue.pop_front(data.data(), data.length_bytes());
 }

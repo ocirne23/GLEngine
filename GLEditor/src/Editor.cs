@@ -18,7 +18,7 @@ public class Editor
         this.mainWindow = mainWindow;
         mainWindow.button.Click += Button_Click;
         socket = new EngineSocket();
-        socket.Connect("localhost", 23232);
+        socket.Connect("localhost", 23235);
         MainLoop();
     }
 
@@ -35,6 +35,7 @@ public class Editor
     {
         while (isRunning)
         {
+            
             Thread.Sleep(1);
         }
     }
