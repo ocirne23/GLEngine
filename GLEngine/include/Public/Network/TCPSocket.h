@@ -7,26 +7,22 @@ class TCPSocket
 {
 public:
 
-	enum { BUFFER_SIZE = 512 };
 
 	typedef not_null<const char*> Address;
 	typedef int Port;
 
 	TCPSocket() {}
-	~TCPSocket();
+	virtual ~TCPSocket();
 
 	void listen(Address ip, Port port);
 	void connect(Address ip, Port port);
 	void disconnect();
+	bool isConnected() const { return m_socket != 0; }
 
 	void send(span<const byte> data);
-	bool receive();
-	bool read(span<byte> data);
+	int receive(span<byte> buffer);
 
-	size_t getMessageQueueSize() const { return m_ringQueue.size(); }
-
-private:
+protected:
 
 	uint64 m_socket = 0;
-	RingQueue<byte, BUFFER_SIZE> m_ringQueue;
 };

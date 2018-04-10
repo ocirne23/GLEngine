@@ -137,46 +137,26 @@ void TCPSocket::send(gsl::span<const byte> a_data)
 	}
 }
 
-bool TCPSocket::receive()
+int TCPSocket::receive(span<byte> buffer)
 {
 	if (!m_socket)
-		return false;
-#if USE_COPY_BUFFER
-	char buf[BUFFER_SIZE / 2];
-	size_t maxReceivable = eastl::min(m_ringQueue.capacity() - m_ringQueue.size(), ARRAY_SIZE(buf));
-#else
-	char* buf = rcast<char*>(m_ringQueue.getTail());
-	size_t maxReceivable = m_ringQueue.getNumEmptyFromTailToEnd();
-#endif
-	if (maxReceivable > 0)
+		return 0;
+
+	size_t maxReceivable = buffer.size_bytes();
+	if (maxReceivable)
 	{
-		int result = ::recv(m_socket, buf, (int) maxReceivable, 0);
-		if (result > 0)
+		char* buf = rcast<char*>(buffer.data());
+		int result = ::recv(m_socket, buf, int(maxReceivable), 0);
+		if (result)
 		{
-#if USE_COPY_BUFFER
-			bool r = m_ringQueue.push_back(buf, result);
-			assert(r);
-#else
-			m_ringQueue.appendToTail(result);
-#endif
-			return true;
+			return result;
 		}
 		else
 		{
 			if (result < 0)
 				print("Socket receive failed, err: %i\n", result);
 			disconnect();
-			return false;
 		}
 	}
-	else
-	{
-		print("Socket receive failed because queue is full!\n");
-		return false;
-	}
-}
-
-bool TCPSocket::read(span<byte> data)
-{
-	return m_ringQueue.pop_front(data.data(), data.length_bytes());
+	return 0;
 }

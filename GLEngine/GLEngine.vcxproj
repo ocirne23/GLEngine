@@ -73,9 +73,9 @@
     <ClCompile Include="src\Database\Processors\ByteImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
-    <ClCompile Include="src\Net\Network.cpp" />
-    <ClCompile Include="src\Net\Protocol.cpp" />
-    <ClCompile Include="src\Net\TCPSocket.cpp" />
+    <ClCompile Include="src\Network\Network.cpp" />
+    <ClCompile Include="src\Network\Protocol.cpp" />
+    <ClCompile Include="src\Network\TCPSocket.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
     <ClCompile Include="src\Utils\Mutex.cpp" />
@@ -727,6 +727,7 @@
     <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
     <ClInclude Include="include\Public\Network\Network.h" />
     <ClInclude Include="include\Public\Network\Protocol.h" />
+    <ClInclude Include="include\Public\Network\TCPReceiveSocket.h" />
     <ClInclude Include="include\Public\Network\TCPSocket.h" />
     <ClInclude Include="include\Public\Utils\AccessPrivate.h" />
     <ClInclude Include="include\Public\Utils\Mutex.h" />

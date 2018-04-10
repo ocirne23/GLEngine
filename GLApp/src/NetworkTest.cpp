@@ -4,7 +4,7 @@
 
 #include "GLEngine.h"
 #include "Input/Input.h"
-#include "Network/TCPSocket.h"
+#include "Network/TCPReceiveSocket.h"
 #include <glm/gtc/random.hpp>
 
 static int ctr = 1;
@@ -54,7 +54,7 @@ NetworkTest::NetworkTest()
 
 	GLEngine::createThread("TCPListenThread", []()
 	{
-		TCPSocket s;
+		TCPReceiveSocket<512> s;
 		s.listen("localhost", 23235);
 
 		Header h;
