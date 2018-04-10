@@ -82,8 +82,8 @@
     <ClCompile Include="src\Utils\ScopeLock.cpp" />
     <ClCompile Include="src\Utils\Mutex.cpp" />
     <ClCompile Include="src\Network\Network.cpp" />
-    <ClCompile Include="src\Network\Protocol.cpp" />
     <ClCompile Include="src\Network\TCPSocket.cpp" />
+    <ClCompile Include="src\Network\PacketSplitter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -1824,9 +1824,9 @@
     <ClInclude Include="libs\include\SDL\SDL_video.h" />
     <ClInclude Include="include\Public\Network\Network.h" />
     <ClInclude Include="include\Public\Utils\DeferredFunction.h" />
-    <ClInclude Include="include\Public\Network\Protocol.h" />
     <ClInclude Include="include\Public\Utils\RingQueue.h" />
     <ClInclude Include="include\Public\Network\TCPReceiveSocket.h" />
+    <ClInclude Include="include\Public\Network\PacketSplitter.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />
