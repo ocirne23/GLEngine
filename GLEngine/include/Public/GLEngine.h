@@ -60,6 +60,8 @@ public:
 
 	static void waitForAllThreadShutdown();
 
+	static size_t getStackUsage();
+
 private:
 
 	GLEngine() {}

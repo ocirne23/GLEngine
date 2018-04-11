@@ -74,7 +74,6 @@
     <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
     <ClCompile Include="src\Network\Network.cpp" />
-    <ClCompile Include="src\Network\PacketSplitter.cpp" />
     <ClCompile Include="src\Network\TCPSocket.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
@@ -726,7 +725,7 @@
     <ClInclude Include="include\Public\Graphics\Utils\Box2DDebugDraw.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
     <ClInclude Include="include\Public\Network\Network.h" />
-    <ClInclude Include="include\Public\Network\PacketSplitter.h" />
+    <ClInclude Include="include\Public\Network\Protocol.h" />
     <ClInclude Include="include\Public\Network\TCPReceiveSocket.h" />
     <ClInclude Include="include\Public\Network\TCPSocket.h" />
     <ClInclude Include="include\Public\Utils\AccessPrivate.h" />

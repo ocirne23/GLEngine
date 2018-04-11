@@ -14,11 +14,13 @@ int main()
 	{
 		NetworkTest networkTest;
 		DeltaTimeMeasurer deltaTimeMeasurer;
+
 		while (!GLEngine::isShutdown())
 		{
 			GLEngine::processInput();
 			networkTest.update(deltaTimeMeasurer.calcDeltaSec(GLEngine::getTimeMs()));
 		}
+
 	});
 
 	while (!GLEngine::isShutdown())
