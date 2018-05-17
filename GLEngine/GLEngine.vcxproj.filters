@@ -1828,9 +1828,7 @@
 <<<<<<< HEAD
     <ClInclude Include="include\Public\Network\PacketSplitter.h" />
     <ClInclude Include="include\Public\Graphics\EWindowMode.h" />
-=======
     <ClInclude Include="include\Public\Network\Protocol.h" />
->>>>>>> 3e2382940de008c4a2e2dba842ee8b80d8c82e93
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />
