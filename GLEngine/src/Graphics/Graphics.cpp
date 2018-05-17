@@ -1,6 +1,6 @@
 ﻿#include "Graphics/Graphics.h"
 
-#include "GLEngine.h"
+#include "Graphics/EWindowMode.h"
 #include "Graphics/GL/GL.h"
 #include "Graphics/GL/GLContext.h"
 #include "Graphics/Utils/ARBDebugOutput.h"
@@ -78,7 +78,7 @@ void Graphics::createGLContext()
 	}
 	SDL_GL_DeleteContext(context);
 
-	m_context = new GLContext();
+	m_context = new GLContext(m_hdc);
 
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError()) 
 	{

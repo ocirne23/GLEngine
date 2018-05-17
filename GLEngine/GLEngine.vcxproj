@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -74,7 +74,6 @@
     <ClCompile Include="src\Database\Processors\FloatImageProcessor.cpp" />
     <ClCompile Include="src\Database\Processors\SceneProcessor.cpp" />
     <ClCompile Include="src\Network\Network.cpp" />
-    <ClCompile Include="src\Network\PacketSplitter.cpp" />
     <ClCompile Include="src\Network\TCPSocket.cpp" />
     <ClCompile Include="src\ResourceBuilder.cpp" />
     <ClCompile Include="src\Utils\FileModificationListener.cpp" />
@@ -717,6 +716,7 @@
     <ClInclude Include="include\3rdparty\stbi\stb_dxt.h" />
     <ClInclude Include="include\3rdparty\stbi\stb_image_write.h" />
     <ClInclude Include="include\Public\Database\Utils\MaxRectsPacker.h" />
+    <ClInclude Include="include\Public\Graphics\EWindowMode.h" />
     <ClInclude Include="include\Public\Graphics\GL\Scene\GLRenderPass.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\CubeMapGen.h" />
     <ClInclude Include="include\Public\Graphics\GL\Tech\SSR.h" />
@@ -726,7 +726,7 @@
     <ClInclude Include="include\Public\Graphics\Utils\Box2DDebugDraw.h" />
     <ClInclude Include="include\Public\Graphics\Utils\Plane.h" />
     <ClInclude Include="include\Public\Network\Network.h" />
-    <ClInclude Include="include\Public\Network\PacketSplitter.h" />
+    <ClInclude Include="include\Public\Network\Protocol.h" />
     <ClInclude Include="include\Public\Network\TCPReceiveSocket.h" />
     <ClInclude Include="include\Public\Network\TCPSocket.h" />
     <ClInclude Include="include\Public\Utils\AccessPrivate.h" />
@@ -2002,13 +2002,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <ConfigurationType>StaticLibrary</ConfigurationType>

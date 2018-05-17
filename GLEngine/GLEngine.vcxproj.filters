@@ -83,7 +83,6 @@
     <ClCompile Include="src\Utils\Mutex.cpp" />
     <ClCompile Include="src\Network\Network.cpp" />
     <ClCompile Include="src\Network\TCPSocket.cpp" />
-    <ClCompile Include="src\Network\PacketSplitter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\3rdparty\EASTL\bonus\sort_extra.h" />
@@ -1826,7 +1825,12 @@
     <ClInclude Include="include\Public\Utils\DeferredFunction.h" />
     <ClInclude Include="include\Public\Utils\RingQueue.h" />
     <ClInclude Include="include\Public\Network\TCPReceiveSocket.h" />
+<<<<<<< HEAD
     <ClInclude Include="include\Public\Network\PacketSplitter.h" />
+    <ClInclude Include="include\Public\Graphics\EWindowMode.h" />
+=======
+    <ClInclude Include="include\Public\Network\Protocol.h" />
+>>>>>>> 3e2382940de008c4a2e2dba842ee8b80d8c82e93
   </ItemGroup>
   <ItemGroup>
     <None Include="src\3rdparty\json\json_valueiterator.inl" />

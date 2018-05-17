@@ -16,6 +16,9 @@ public:
 	struct Header
 	{
 		short id = 0;
+
+		bool isValid() const { return id != 0; }
+		void invalidate() { id = 0; }
 	};
 
 	typedef std::function<void(span<byte>)> PacketReceiver;
@@ -33,4 +36,5 @@ public:
 private:
 
 	ReceiveSocket& m_receiveSocket;
+	Header m_header;
 };

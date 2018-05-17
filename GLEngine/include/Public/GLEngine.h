@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "Graphics/EWindowMode.h"
 #include "gsl/gsl.h"
 
 #include <functional>
@@ -9,8 +10,6 @@ class Input;
 class Graphics;
 class ThreadManager;
 class Network;
-
-enum class EWindowMode { WINDOWED, BORDERLESS, FULLSCREEN, NONE };
 
 /**********************
 Main class providing basic functions and static access to input and graphics
@@ -59,6 +58,8 @@ public:
 	static void finish();
 
 	static void waitForAllThreadShutdown();
+
+	static size_t getStackUsage();
 
 private:
 

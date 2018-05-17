@@ -5,7 +5,6 @@
 #include "Graphics/Utils/CheckGLError.h"
 
 #include <assert.h>
-#include <CEGUI/RendererModules/OpenGL/GL3Renderer.h>
 
 bool GLFramebuffer::s_begun = false;
 

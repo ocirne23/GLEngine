@@ -121,7 +121,7 @@ public:
 	}
 
 	size_t size() const { return m_count; }
-	size_t capacity() const { return Size; }
+	constexpr size_t capacity() const { return Size; }
 	size_t headIdx() const { return m_headIdx; }
 
 private:

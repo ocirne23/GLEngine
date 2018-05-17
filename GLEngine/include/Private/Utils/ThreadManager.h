@@ -19,6 +19,8 @@ public:
 	void createThread(const char* threadName, std::function<void()> func);
 	void waitForAllThreadShutdown();
 
+	static size_t getStackUsage();
+
 private:
 
 	static int threadFunc(owner<void*> ptr);

@@ -69,3 +69,23 @@ void ThreadManager::waitForAllThreadShutdown()
 	}
 	m_threads.clear();
 }
+
+size_t ThreadManager::getStackUsage()
+{
+	MEMORY_BASIC_INFORMATION mbi;
+	VirtualQuery(&mbi, &mbi, sizeof(mbi));
+	// now mbi.AllocationBase = reserved stack memory base address
+
+	VirtualQuery(mbi.AllocationBase, &mbi, sizeof(mbi));
+	// now (mbi.BaseAddress, mbi.RegionSize) describe reserved (uncommitted) portion of the stack
+	// skip it
+
+	VirtualQuery((char*)mbi.BaseAddress + mbi.RegionSize, &mbi, sizeof(mbi));
+	// now (mbi.BaseAddress, mbi.RegionSize) describe the guard page
+	// skip it
+
+	VirtualQuery((char*)mbi.BaseAddress + mbi.RegionSize, &mbi, sizeof(mbi));
+	// now (mbi.BaseAddress, mbi.RegionSize) describe the committed (i.e. accessed) portion of the stack
+
+	return mbi.RegionSize;
+}

@@ -7,6 +7,7 @@
 #include "Utils/FileHandle.h"
 #include "Utils/FileUtils.h"
 #include "EASTL/string.h"
+#include "EASTL/vector.h"
 
 #include <glm/glm.hpp>
 

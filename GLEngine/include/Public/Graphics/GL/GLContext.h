@@ -26,7 +26,7 @@ public:
 
 private:
 
-	GLContext();
+	GLContext(void* hdc);
 	GLContext(const GLContext& copy) = delete;
 
 private:

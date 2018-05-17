@@ -53,6 +53,11 @@ public:
 		return m_ringQueue.size(); 
 	}
 
+	constexpr size_t getMessageQueueCapacity() const 
+	{ 
+		return m_ringQueue.capacity(); 
+	}
+
 private:
 
 	RingQueue<byte, BufferSize> m_ringQueue;

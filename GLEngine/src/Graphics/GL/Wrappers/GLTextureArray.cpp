@@ -3,7 +3,6 @@
 #include "Graphics/GL/GL.h"
 #include "Graphics/Utils/TextureFormatUtils.h"
 #include "Database/Assets/DBTexture.h"
-#include "EASTL/vector.h"
 
 #include <assert.h>
 

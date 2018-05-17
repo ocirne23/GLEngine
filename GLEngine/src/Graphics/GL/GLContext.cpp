@@ -1,6 +1,5 @@
 #include "Graphics/GL/GLContext.h"
 
-#include "GLEngine.h"
 #include "Graphics/Graphics.h"
 #include "Graphics/GL/GL.h"
 
@@ -54,12 +53,10 @@ breakLoop:
 
 END_UNNAMED_NAMESPACE()
 
-GLContext::GLContext()
+GLContext::GLContext(void* a_hdc)
 {
-	HDC hdc = scast<HDC>(GLEngine::graphics->getHDC());
-
 	assert(!m_glContext);
-	m_glContext = createHighestGLContext(hdc, MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
+	m_glContext = createHighestGLContext(scast<HDC>(a_hdc), MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
 	m_glVendor = rcast<const char*>(glGetString(GL_VENDOR));
 	m_glRenderer = rcast<const char*>(glGetString(GL_RENDERER));
 	m_glDriverVersion = rcast<const char*>(glGetString(GL_VERSION));

@@ -6,8 +6,14 @@ void PacketSplitter::process()
 {
 	if (m_receiveSocket.isConnected())
 	{
-		Header h;
-		
+		if (m_header.isValid())
+		{
+
+		}
+		else
+		{
+			m_receiveSocket.read(as_span(rcast<byte*>(&m_header), sizeof(m_header)));
+		}
 	}
 }
 

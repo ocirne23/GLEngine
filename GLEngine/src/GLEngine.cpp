@@ -91,3 +91,8 @@ void GLEngine::waitForAllThreadShutdown()
 {
 	s_threadManager->waitForAllThreadShutdown();
 }
+
+size_t GLEngine::getStackUsage()
+{
+	return ThreadManager::getStackUsage();
+}
