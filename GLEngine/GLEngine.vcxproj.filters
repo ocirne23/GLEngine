@@ -1825,7 +1825,6 @@
     <ClInclude Include="include\Public\Utils\DeferredFunction.h" />
     <ClInclude Include="include\Public\Utils\RingQueue.h" />
     <ClInclude Include="include\Public\Network\TCPReceiveSocket.h" />
-<<<<<<< HEAD
     <ClInclude Include="include\Public\Network\PacketSplitter.h" />
     <ClInclude Include="include\Public\Graphics\EWindowMode.h" />
     <ClInclude Include="include\Public\Network\Protocol.h" />
