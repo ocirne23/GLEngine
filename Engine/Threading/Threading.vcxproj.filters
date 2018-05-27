@@ -4,7 +4,7 @@
     <ClCompile Include="Private\Threading.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Public\IThreading.h" />
     <ClInclude Include="Private\Threading.h" />
+    <ClInclude Include="Public\Threading\IThreading.h" />
   </ItemGroup>
 </Project>

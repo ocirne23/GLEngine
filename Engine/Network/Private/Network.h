@@ -1,6 +1,6 @@
 #pragma once
 
-#include "INetwork.h"
+#include "Network/INetwork.h"
 
 class Network final : public INetwork
 {

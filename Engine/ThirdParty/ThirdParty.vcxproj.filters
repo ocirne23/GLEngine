@@ -1,11 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="Public\gsl\gsl.h" />
-    <ClInclude Include="Public\gsl\gsl_assert.h" />
-    <ClInclude Include="Public\gsl\gsl_util.h" />
-    <ClInclude Include="Public\gsl\span.h" />
-    <ClInclude Include="Public\gsl\string_span.h" />
     <ClInclude Include="Public\EASTL\bonus\adaptors.h" />
     <ClInclude Include="Public\EASTL\bonus\call_traits.h" />
     <ClInclude Include="Public\EASTL\bonus\compressed_pair.h" />
@@ -129,6 +124,7 @@
     <ClInclude Include="Public\EABase\eaunits.h" />
     <ClInclude Include="Public\EABase\nullptr.h" />
     <ClInclude Include="Public\EABase\version.h" />
+    <ClInclude Include="Public\gsl\gsl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EASTL\allocator_eastl.cpp" />
@@ -140,5 +136,15 @@
     <ClCompile Include="Private\EASTL\red_black_tree.cpp" />
     <ClCompile Include="Private\EASTL\string.cpp" />
     <ClCompile Include="Private\EASTL\thread_support.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Public\gsl\gsl_algorithm.h" />
+    <None Include="Public\gsl\gsl_assert.h" />
+    <None Include="Public\gsl\gsl_byte.h" />
+    <None Include="Public\gsl\gsl_util.h" />
+    <None Include="Public\gsl\multi_span.h" />
+    <None Include="Public\gsl\pointers.h" />
+    <None Include="Public\gsl\span.h" />
+    <None Include="Public\gsl\string_span.h" />
   </ItemGroup>
 </Project>

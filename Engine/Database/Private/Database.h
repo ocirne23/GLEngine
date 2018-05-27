@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IDatabase.h"
+#include "Database/IDatabase.h"
 
 class Database final : public IDatabase
 {

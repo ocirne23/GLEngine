@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IInput.h"
+#include "Input/IInput.h"
 
 class Input final : public IInput
 {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gsl/gsl.h"
+using namespace gsl;
 
 #undef NULL
 #define NULL nullptr

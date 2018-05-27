@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "gsl/gsl_byte.h"
+
 void print(const char* a_format, ...)
 {
 	va_list args;
