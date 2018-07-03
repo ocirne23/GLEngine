@@ -142,7 +142,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Private\App.cpp" />
     <ClCompile Include="Private\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Public\App.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

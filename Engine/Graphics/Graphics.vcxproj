@@ -99,7 +99,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -110,7 +110,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)Private;$(ProjectDir)libs;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,7 +121,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)Private;$(ProjectDir)libs;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -138,7 +138,7 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(ProjectDir)libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -243,11 +243,15 @@
     <ClInclude Include="libs\vulkan\vulkan_xcb.h" />
     <ClInclude Include="libs\vulkan\vulkan_xlib.h" />
     <ClInclude Include="libs\vulkan\vulkan_xlib_xrandr.h" />
+    <ClInclude Include="Private\GL\GL.h" />
+    <ClInclude Include="Private\GL\GLContext.h" />
     <ClInclude Include="Private\Window.h" />
     <ClInclude Include="Public\Graphics\Graphics.h" />
+    <ClInclude Include="Public\Graphics\IContext.h" />
     <ClInclude Include="Public\Graphics\IWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Private\GL\GLContext.cpp" />
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />
   </ItemGroup>

@@ -2,20 +2,27 @@
 
 #include "Core.h"
 
-class IDatabase;
-class IFilesystem;
-class IGraphics;
-class IInput;
-class INetwork;
-class IThreading;
+class Database;
+class Filesystem;
+class Graphics;
+class Input;
+class Network;
+class Threading;
 
 class Engine
 {
 public:
-	owner<IDatabase*> m_database;
-	owner<IFilesystem*> m_filesystem;
-	owner<IGraphics*> m_graphics;
-	owner<IInput*> m_input;
-	owner<INetwork*> m_network;
-	owner<IThreading*> m_threading;
+
+	Engine();
+	Engine(Engine&) = delete;
+	~Engine();
+
+public:
+
+	owner<Database*> m_database;
+	owner<Filesystem*> m_filesystem;
+	owner<Graphics*> m_graphics;
+	owner<Input*> m_input;
+	owner<Network*> m_network;
+	owner<Threading*> m_threading;
 };

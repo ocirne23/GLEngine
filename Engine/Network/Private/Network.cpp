@@ -1,6 +1,2 @@
-#include "Network.h"
+#include "Network/Network.h"
 
-owner<INetwork*> Network::create()
-{
-	return owner<INetwork*>();
-}

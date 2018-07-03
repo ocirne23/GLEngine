@@ -1,6 +1,2 @@
-#include "Filesystem.h"
+#include "Filesystem/Filesystem.h"
 
-owner<IFilesystem*> Filesystem::create()
-{
-	return owner<IFilesystem*>();
-}

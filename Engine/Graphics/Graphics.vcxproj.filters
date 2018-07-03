@@ -105,9 +105,13 @@
     <ClInclude Include="libs\vulkan\vulkan_xlib_xrandr.h" />
     <ClInclude Include="Private\Window.h" />
     <ClInclude Include="Public\Graphics\Graphics.h" />
+    <ClInclude Include="Public\Graphics\IContext.h" />
+    <ClInclude Include="Private\GL\GLContext.h" />
+    <ClInclude Include="Private\GL\GL.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />
+    <ClCompile Include="Private\GL\GLContext.cpp" />
   </ItemGroup>
 </Project>

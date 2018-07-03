@@ -1,6 +1,2 @@
-#include "Database.h"
+#include "Database/Database.h"
 
-owner<IDatabase*> Database::create()
-{
-	return owner<IDatabase*>();
-}

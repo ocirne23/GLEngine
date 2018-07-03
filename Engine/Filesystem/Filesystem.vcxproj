@@ -98,6 +98,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -106,6 +109,9 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
     </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -114,6 +120,9 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
     </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -128,10 +137,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Private\Filesystem.h" />
-    <ClInclude Include="Public\Filesystem\IFilesystem.h" />
+    <ClInclude Include="Public\Filesystem\Filesystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Filesystem.cpp" />

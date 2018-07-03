@@ -1,6 +1,2 @@
-#include "Input.h"
+#include "Input/Input.h"
 
-owner<IInput*> Input::create()
-{
-	return owner<IInput*>();
-}

@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="Private\Input.h" />
-    <ClInclude Include="Public\Input\IInput.h" />
+    <ClCompile Include="Private\Input.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Private\Input.cpp" />
+    <ClInclude Include="Public\Input\Input.h" />
   </ItemGroup>
 </Project>

@@ -9,6 +9,7 @@ class Window final : public IWindow
 public:
 
 	Window(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
+	Window(const Window&) = delete;
 	~Window();
 
 private:
