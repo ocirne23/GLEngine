@@ -35,19 +35,14 @@ GLEditor/obj/
 
 Apps/App/bin/
 Apps/App/obj/
-Engine/Core/bin/
+Engine/bin/
 Engine/Core/obj/
-Engine/Database/bin/
 Engine/Database/obj/
-Engine/Filesystem/bin/
 Engine/Filesystem/obj/
-Engine/Graphics/bin/
 Engine/Graphics/obj/
-Engine/Input/bin/
 Engine/Input/obj/
-Engine/Network/bin/
 Engine/Network/obj/
-Engine/ThirdParty/bin/
 Engine/ThirdParty/obj/
-Engine/Threading/bin/
 Engine/Threading/obj/
+Dependencies/obj/
+Dependencies/bin/
