@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="Public\Filesystem\Filesystem.h" />
+    <ClInclude Include="Public\Filesystem\FilesystemAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Filesystem.cpp" />

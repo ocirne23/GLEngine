@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Core.h"
+#include "ThreadingAPI.h"
 
-class Threading
+class THREADING_API Threading
 {
 public:
 

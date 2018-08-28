@@ -3,9 +3,12 @@
   <ItemGroup>
     <ClInclude Include="Public\Core.h" />
     <ClInclude Include="Public\Engine.h" />
+    <ClInclude Include="Public\Utils.h" />
+    <ClInclude Include="Public\CoreAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core.cpp" />
     <ClCompile Include="Private\Engine.cpp" />
+    <ClCompile Include="Private\Utils.cpp" />
   </ItemGroup>
 </Project>

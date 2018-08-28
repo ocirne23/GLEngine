@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Core.h"
+#include "InputAPI.h"
 
-class Input
+class INPUT_API Input
 {
 public:
 

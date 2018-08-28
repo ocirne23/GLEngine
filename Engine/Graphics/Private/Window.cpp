@@ -4,11 +4,38 @@
 #include <SDL/SDL_syswm.h>
 #include <Windows.h>
 
-Window::Window(const char* a_name, uint a_width, uint a_height, uint a_xPos, uint a_yPos, const EWindowMode& a_mode)
-	: m_width(a_width)
-	, m_height(a_height)
-	, m_xPos(a_xPos)
-	, m_yPos(a_yPos)
+#include "GL/GLContext.h"
+
+owner<IContext*> Window::createContext(const EContextType& type)
+{
+	switch (type)
+	{
+	case EContextType::OPENGL:
+		return owner<GLContext*>(new GLContext());
+	default:
+		assert(false);
+		return nullptr;
+	}
+}
+
+void Window::destroyContext(owner<IContext*> context)
+{
+	switch (context->getType())
+	{
+	case EContextType::OPENGL:
+		delete static_cast<GLContext*>(context);
+		break;
+	default:
+		assert(false);
+		break;
+	}
+}
+
+Window::Window(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode)
+	: m_width(width)
+	, m_height(height)
+	, m_xPos(xPos)
+	, m_yPos(yPos)
 {
 	uint flags = SDL_WINDOW_SHOWN;
 
@@ -20,12 +47,12 @@ Window::Window(const char* a_name, uint a_width, uint a_height, uint a_xPos, uin
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	flags |= SDL_WINDOW_OPENGL;
 
-	if (a_mode == EWindowMode::BORDERLESS)
+	if (mode == EWindowMode::BORDERLESS)
 		flags |= SDL_WINDOW_BORDERLESS;
-	else if (a_mode == EWindowMode::FULLSCREEN)
+	else if (mode == EWindowMode::FULLSCREEN)
 		flags |= SDL_WINDOW_FULLSCREEN;
 
-	m_window = SDL_CreateWindow(a_name, a_xPos, a_yPos, a_width, a_height, flags);
+	m_window = SDL_CreateWindow(name, xPos, yPos, width, height, flags);
 
 	SDL_SysWMinfo winInfo;
 	SDL_GetVersion(&winInfo.version);

@@ -18,7 +18,6 @@ using namespace gsl;
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
-typedef unsigned char byte;
 typedef long long int64;
 typedef unsigned long long uint64;
 

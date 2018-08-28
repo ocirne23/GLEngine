@@ -8,9 +8,15 @@ class Window final : public IWindow
 {
 public:
 
+	virtual owner<IContext*> createContext(const EContextType& type) override;
+	virtual void destroyContext(owner<IContext*> context) override;
+
+private:
+
+	friend class Graphics;
 	Window(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
 	Window(const Window&) = delete;
-	~Window();
+	~Window() override;
 
 private:
 

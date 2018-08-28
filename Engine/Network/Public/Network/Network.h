@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Core.h"
+#include "NetworkAPI.h"
 
-class Network
+class NETWORK_API Network
 {
 public:
 

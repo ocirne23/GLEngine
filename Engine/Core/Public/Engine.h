@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "CoreAPI.h"
 
 class Database;
 class Filesystem;
@@ -9,7 +10,7 @@ class Input;
 class Network;
 class Threading;
 
-class Engine
+class CORE_API Engine
 {
 public:
 

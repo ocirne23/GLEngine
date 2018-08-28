@@ -5,5 +5,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Threading\Threading.h" />
+    <ClInclude Include="Public\Threading\ThreadingAPI.h" />
   </ItemGroup>
 </Project>

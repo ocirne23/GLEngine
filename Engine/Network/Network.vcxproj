@@ -1,20 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
+    <ProjectConfiguration Include="DebugDLL|Win32">
+      <Configuration>DebugDLL</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
+    <ProjectConfiguration Include="DebugDLL|x64">
+      <Configuration>DebugDLL</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64">
-      <Configuration>Release</Configuration>
+    <ProjectConfiguration Include="DebugLib|Win32">
+      <Configuration>DebugLib</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|Win32">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDLL|x64">
+      <Configuration>ReleaseDLL</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLib|Win32">
+      <Configuration>ReleaseLib</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DebugLib|x64">
+      <Configuration>DebugLib</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseLib|x64">
+      <Configuration>ReleaseLib</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -25,27 +41,53 @@
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -56,98 +98,235 @@
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(ProjectDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
+    <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;RELEASE_BUILD;LIB_BUILD;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
     </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
-    </Lib>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;RELEASE_BUILD;DLL_BUILD;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+    </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;DEBUG_BUILD;LIB_BUILD;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;DEBUG_BUILD;DLL_BUILD;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+    </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;DEBUG_BUILD;LIB_BUILD;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;DEBUG_BUILD;DLL_BUILD;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
+    </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;RELEASE_BUILD;LIB_BUILD;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
     <Lib>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NETWORK_PROJECT;RELEASE_BUILD;DLL_BUILD;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+    </Link>
+    <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
     </Lib>
+    <BuildLog>
+      <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Public\Network\Network.h" />
+    <ClInclude Include="Public\Network\NetworkAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Network.cpp" />
   </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   </ImportGroup>
 </Project>
