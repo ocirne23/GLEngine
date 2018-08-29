@@ -475,7 +475,7 @@ void * memcpy ( void * destination, const void * source, size_t num )
 }
 #endif /* _MSC_VER == 1600 && defined(_WIN64) && !defined(_DEBUG) */
 
-#if (!defined(_M_IX86_FP) || _M_IX86_FP == 0)
+#if defined(_M_IX86)
 
 /* Float to long */
 void
