@@ -33,9 +33,8 @@ GLBoatGame/obj/
 GLEditor/bin/
 GLEditor/obj/
 
-Apps/App/bin/
+bin/
 Apps/App/obj/
-Engine/bin/
 Engine/Core/obj/
 Engine/Database/obj/
 Engine/Filesystem/obj/
@@ -45,4 +44,3 @@ Engine/Network/obj/
 Engine/ThirdParty/obj/
 Engine/Threading/obj/
 Dependencies/obj/
-Dependencies/bin/
