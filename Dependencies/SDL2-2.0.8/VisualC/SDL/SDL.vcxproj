@@ -122,20 +122,20 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">$(SolutionDir)Engine\bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">$(SolutionDir)Dependencies\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <CodeAnalysisRuleSet Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">AllRules.ruleset</CodeAnalysisRuleSet>
@@ -402,7 +402,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <ResourceCompile>
