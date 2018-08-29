@@ -3,8 +3,8 @@
   <ItemGroup>
     <ClInclude Include="Public\Core.h" />
     <ClInclude Include="Public\Engine.h" />
-    <ClInclude Include="Public\Utils.h" />
     <ClInclude Include="Public\CoreAPI.h" />
+    <ClInclude Include="Public\Core\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core.cpp" />

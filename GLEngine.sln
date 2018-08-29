@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GLEngine", "GLEngine\GLEngine.vcxproj", "{CE0F2368-C0DB-4372-A4BB-86FEFD09F1E6}"
 EndProject
@@ -28,16 +28,29 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apps", "Apps", "{EC14B05F-6
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Engine\Graphics\Graphics.vcxproj", "{72F40585-557E-420E-9280-7CA4ABFB5055}"
 	ProjectSection(ProjectDependencies) = postProject
+		{CBD32F00-FB91-48C4-AC0A-D82C3D839B1D} = {CBD32F00-FB91-48C4-AC0A-D82C3D839B1D}
 		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Network", "Engine\Network\Network.vcxproj", "{CF4291D7-AAA7-4DB8-9379-F7B1C122556D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBD32F00-FB91-48C4-AC0A-D82C3D839B1D} = {CBD32F00-FB91-48C4-AC0A-D82C3D839B1D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Input", "Engine\Input\Input.vcxproj", "{C3CAD7FA-AF32-497F-A663-072EDB67868B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBD32F00-FB91-48C4-AC0A-D82C3D839B1D} = {CBD32F00-FB91-48C4-AC0A-D82C3D839B1D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Database", "Engine\Database\Database.vcxproj", "{496B1D15-D950-4485-B562-4DFB9698D703}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBD32F00-FB91-48C4-AC0A-D82C3D839B1D} = {CBD32F00-FB91-48C4-AC0A-D82C3D839B1D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Filesystem", "Engine\Filesystem\Filesystem.vcxproj", "{046DF223-A61D-4229-A823-A01DA5688B2E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBD32F00-FB91-48C4-AC0A-D82C3D839B1D} = {CBD32F00-FB91-48C4-AC0A-D82C3D839B1D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Engine\Core\Core.vcxproj", "{522212F3-4A54-46B7-AE41-258DA92F42AC}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -58,6 +71,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "App", "Apps\App\App.vcxproj
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading", "Engine\Threading\Threading.vcxproj", "{C7AC6FEE-68ED-431F-95E3-9BC98B456582}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBD32F00-FB91-48C4-AC0A-D82C3D839B1D} = {CBD32F00-FB91-48C4-AC0A-D82C3D839B1D}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{F86B7390-B23F-4400-8BDC-FB67E22A2857}"
 EndProject

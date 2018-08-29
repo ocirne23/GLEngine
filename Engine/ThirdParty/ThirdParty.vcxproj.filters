@@ -125,6 +125,20 @@
     <ClInclude Include="Public\EABase\nullptr.h" />
     <ClInclude Include="Public\EABase\version.h" />
     <ClInclude Include="Public\gsl\gsl.h" />
+    <ClInclude Include="Public\EAStdC\EAAlignment.h" />
+    <ClInclude Include="Public\EAStdC\EADateTime.h" />
+    <ClInclude Include="Public\EAStdC\EAMemory.h" />
+    <ClInclude Include="Public\EAStdC\EAProcess.h" />
+    <ClInclude Include="Public\EAStdC\EASprintf.h" />
+    <ClInclude Include="Public\EAStdC\EAStopwatch.h" />
+    <ClInclude Include="Public\EAStdC\EAString.h" />
+    <ClInclude Include="Public\EAStdC\EATextUtil.h" />
+    <ClInclude Include="Public\EASTL\bonus\fixed_tuple_vector.h" />
+    <ClInclude Include="Public\EASTL\bonus\tuple_vector.h" />
+    <ClInclude Include="Public\EASTL\internal\function_detail.h" />
+    <ClInclude Include="Public\EASTL\meta.h" />
+    <ClInclude Include="Public\EASTL\span.h" />
+    <ClInclude Include="Public\EAAssert\eaassert.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EASTL\allocator_eastl.cpp" />
@@ -136,6 +150,8 @@
     <ClCompile Include="Private\EASTL\red_black_tree.cpp" />
     <ClCompile Include="Private\EASTL\string.cpp" />
     <ClCompile Include="Private\EASTL\thread_support.cpp" />
+    <ClCompile Include="Private\EAStdC\EAMemory.cpp" />
+    <ClCompile Include="Private\EAStdC\EASprintf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\gsl\gsl_algorithm.h" />

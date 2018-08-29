@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(_WINDLL)
+#if defined(DLL_BUILD)
 #if defined(FILESYSTEM_PROJECT)
 #define FILESYSTEM_API __declspec(dllexport)
 #else

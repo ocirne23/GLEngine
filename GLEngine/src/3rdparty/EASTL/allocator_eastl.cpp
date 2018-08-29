@@ -15,7 +15,7 @@
 // you can define EASTL_USER_DEFINED_ALLOCATOR below to ignore this file,
 // or you can modify the EASTL config.h file to redefine how allocators work.
 ///////////////////////////////////////////////////////////////////////////////
-#define EASTL_USER_DEFINED_ALLOCATOR
+//#define EASTL_USER_DEFINED_ALLOCATOR
 
 #include <stdio.h>
 

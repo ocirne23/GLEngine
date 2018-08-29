@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(_WINDLL)
+#if defined(DLL_BUILD)
 #if defined(GRAPHICS_PROJECT)
 #define GRAPHICS_API __declspec(dllexport)
 #else
