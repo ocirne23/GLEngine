@@ -166,7 +166,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;RELEASE_BUILD;LIB_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -175,6 +175,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ThirdParty.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -187,7 +188,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;RELEASE_BUILD;DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -208,12 +209,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;DEBUG_BUILD;LIB_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ThirdParty.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -224,7 +226,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;DEBUG_BUILD;DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
@@ -244,11 +246,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;DEBUG_BUILD;LIB_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ThirdParty.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -259,7 +262,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;DEBUG_BUILD;DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Lib>
@@ -280,7 +283,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;RELEASE_BUILD;LIB_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
@@ -290,6 +293,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)bin\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ThirdParty.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -302,7 +306,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Private;$(SolutionDir)Dependencies\include;$(SolutionDir)Engine\Core\Public;$(SolutionDir)Engine\ThirdParty\Public;$(SolutionDir)Engine\Database\Public;$(SolutionDir)Engine\Filesystem\Public;$(SolutionDir)Engine\Graphics\Public;$(SolutionDir)Engine\Input\Public;$(SolutionDir)Engine\Network\Public;$(SolutionDir)Engine\Threading\Public;$(SolutionDir)Engine\EntitySystem\Public</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>CORE_PROJECT;RELEASE_BUILD;DLL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <WholeProgramOptimization>true</WholeProgramOptimization>

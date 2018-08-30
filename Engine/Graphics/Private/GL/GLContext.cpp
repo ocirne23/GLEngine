@@ -5,6 +5,8 @@
 #include "GLConstantBuffer.h"
 #include "GLTextureBuffer.h"
 
+#include "GL/GL.h"
+
 owner<IBuffer*> GLContext::createBuffer(const EBufferType& type)
 {
 	switch (type)
@@ -48,6 +50,7 @@ void GLContext::destroyBuffer(owner<IBuffer*> buffer)
 
 GLContext::GLContext()
 {
+	glewInit();
 }
 
 GLContext::~GLContext()
