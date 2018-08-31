@@ -34,6 +34,7 @@ GLEditor/bin/
 GLEditor/obj/
 
 bin/
+lib/
 Apps/App/obj/
 Engine/Core/obj/
 Engine/Database/obj/

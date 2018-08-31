@@ -1,0 +1,7 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Target Name="CleanupSolution" AfterTargets="Clean">
+		<RemoveDir Directories="$(SolutionDir)bin\$(Platform)\$(Configuration)\" />
+		<RemoveDir Directories="$(SolutionDir)lib\$(Platform)\$(Configuration)\" />
+		<RemoveDir Directories="$(SolutionDir)Dependencies\obj\$(Platform)\$(Configuration)\" />
+	</Target>
+</Project>

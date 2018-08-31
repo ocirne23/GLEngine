@@ -1,7 +1,5 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Target Name="CleanupBuild" AfterTargets="Clean">
+	<Target Name="CleanupProject" AfterTargets="Clean">
 		<RemoveDir Directories="$(ProjectDir)obj\$(Platform)\$(Configuration)\" />
-		<RemoveDir Directories="$(ProjectDir)obj\$(Platform)\" />
-		<RemoveDir Directories="$(ProjectDir)obj\" />
 	</Target>
 </Project>
