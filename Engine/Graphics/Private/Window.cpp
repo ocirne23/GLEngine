@@ -8,10 +8,13 @@
 
 owner<IContext*> Window::createContext(const EContextType& type)
 {
+#ifdef DEBUG_BUILD
+	md_numContextsCreated++;
+#endif
 	switch (type)
 	{
 	case EContextType::OPENGL:
-		return owner<GLContext*>(new GLContext());
+		return owner<GLContext*>(new GLContext(*this));
 	default:
 		assert(false);
 		return nullptr;
@@ -20,6 +23,9 @@ owner<IContext*> Window::createContext(const EContextType& type)
 
 void Window::destroyContext(owner<IContext*> context)
 {
+#ifdef DEBUG_BUILD
+	md_numContextsCreated--;
+#endif
 	switch (context->getType())
 	{
 	case EContextType::OPENGL:
@@ -67,4 +73,8 @@ Window::Window(const char* name, uint width, uint height, uint xPos, uint yPos, 
 Window::~Window()
 {
 	SDL_DestroyWindow(m_window);
+
+#ifdef DEBUG_BUILD
+	assert(md_numContextsCreated == 0);
+#endif
 }

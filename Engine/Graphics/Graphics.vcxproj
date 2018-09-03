@@ -175,7 +175,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -195,7 +195,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
       <OutputFile>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
@@ -217,7 +217,7 @@
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -242,7 +242,7 @@
     </BuildLog>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
       <OutputFile>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
@@ -257,7 +257,7 @@
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -280,7 +280,7 @@
     </BuildLog>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
       <OutputFile>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
@@ -302,7 +302,7 @@
     </Link>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
     </Lib>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
@@ -324,7 +324,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
-      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ThirdParty.lib;SDL2.lib;glew.lib;opengl32.lib;gdi32.lib;user32.lib;</AdditionalDependencies>
       <OutputFile>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
@@ -336,23 +336,33 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Private\Camera.h" />
+    <ClInclude Include="Private\Frustum.h" />
     <ClInclude Include="Private\GL\GL.h" />
     <ClInclude Include="Private\GL\GLConstantBuffer.h" />
     <ClInclude Include="Private\GL\GLContext.h" />
+    <ClInclude Include="Private\GL\GLFramebuffer.h" />
     <ClInclude Include="Private\GL\GLTextureBuffer.h" />
     <ClInclude Include="Private\GL\GLVertexBuffer.h" />
     <ClInclude Include="Private\Window.h" />
-    <ClInclude Include="Public\Graphics\Graphics.h" />
+    <ClInclude Include="Private\Graphics.h" />
     <ClInclude Include="Public\Graphics\GraphicsAPI.h" />
+    <ClInclude Include="Public\Graphics\GraphicsModule.h" />
     <ClInclude Include="Public\Graphics\IBuffer.h" />
+    <ClInclude Include="Public\Graphics\ICamera.h" />
     <ClInclude Include="Public\Graphics\IContext.h" />
+    <ClInclude Include="Public\Graphics\IFramebuffer.h" />
+    <ClInclude Include="Public\Graphics\IGraphics.h" />
     <ClInclude Include="Public\Graphics\IWindow.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Private\Camera.cpp" />
+    <ClCompile Include="Private\Frustum.cpp" />
     <ClCompile Include="Private\GL\GLContext.cpp" />
     <ClCompile Include="Private\GL\GLIndexBuffer.h" />
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />
+    <ClCompile Include="Public\Graphics\GraphicsModule.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />

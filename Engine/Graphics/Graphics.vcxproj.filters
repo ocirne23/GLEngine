@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClInclude Include="Public\Graphics\IWindow.h" />
     <ClInclude Include="Private\Window.h" />
-    <ClInclude Include="Public\Graphics\Graphics.h" />
     <ClInclude Include="Public\Graphics\IContext.h" />
     <ClInclude Include="Private\GL\GLContext.h" />
     <ClInclude Include="Private\GL\GL.h" />
@@ -12,11 +11,22 @@
     <ClInclude Include="Private\GL\GLConstantBuffer.h" />
     <ClInclude Include="Private\GL\GLTextureBuffer.h" />
     <ClInclude Include="Public\Graphics\GraphicsAPI.h" />
+    <ClInclude Include="Public\Graphics\IFramebuffer.h" />
+    <ClInclude Include="Private\GL\GLFramebuffer.h" />
+    <ClInclude Include="Public\Graphics\ICamera.h" />
+    <ClInclude Include="Private\Camera.h" />
+    <ClInclude Include="Private\Frustum.h" />
+    <ClInclude Include="Public\Graphics\GraphicsModule.h" />
+    <ClInclude Include="Public\Graphics\IGraphics.h" />
+    <ClInclude Include="Private\Graphics.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />
     <ClCompile Include="Private\GL\GLContext.cpp" />
     <ClCompile Include="Private\GL\GLIndexBuffer.h" />
+    <ClCompile Include="Private\Camera.cpp" />
+    <ClCompile Include="Private\Frustum.cpp" />
+    <ClCompile Include="Public\Graphics\GraphicsModule.cpp" />
   </ItemGroup>
 </Project>

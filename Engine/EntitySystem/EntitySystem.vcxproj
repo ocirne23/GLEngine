@@ -35,11 +35,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Public\EntitySystem\EntitySystem.h" />
+    <ClInclude Include="Private\EntityWorld.h" />
+    <ClInclude Include="Private\EntitySystem.h" />
     <ClInclude Include="Public\EntitySystem\EntitySystemAPI.h" />
+    <ClInclude Include="Public\EntitySystem\EntitySystemModule.h" />
+    <ClInclude Include="Public\EntitySystem\IEntitySystem.h" />
+    <ClInclude Include="Public\EntitySystem\IEntityWorld.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EntitySystem.cpp" />
+    <ClCompile Include="Public\EntitySystem\EntitySystemModule.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Module Interface Class</Title>
+      <Author>Author</Author>
+      <Description>Description</Description>
+      <Shortcut>dai</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+      </Imports>
+      <Declarations>
+        <Literal>
+          <ID>typename</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+        </Literal>
+		<Literal>
+          <ID>typename2</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="cpp"><![CDATA[#pragma once
+
+class $typename$
+{
+public:
+	
+protected:
+	
+	friend class $typename2$;
+	virtual ~$typename$() {}
+};]]></Code>
+    </Snippet>
+  </CodeSnippet>
+  <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Module Interface Class Implementation</Title>
+      <Author>Author</Author>
+      <Description>Description</Description>
+      <Shortcut>dai2</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+      </Imports>
+      <Declarations>
+        <Literal>
+          <ID>typename</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+        </Literal>
+		<Literal>
+          <ID>typename2</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+		</Literal>
+		<Literal>
+          <ID>typename3</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="cpp"><![CDATA[#pragma once
+
+#include "$typename2$.h"
+	  
+class $typename$ : public $typename2$
+{
+public:
+	
+private:
+	
+	friend class $typename3$;
+	virtual ~$typename$() override {}
+};]]></Code>
+    </Snippet>
+  </CodeSnippet>
+  
+    <CodeSnippet Format="1.0.0">
+    <Header>
+      <Title>Module Interface Factory</Title>
+      <Author>Author</Author>
+      <Description>Description</Description>
+      <Shortcut>daifac</Shortcut>
+    </Header>
+    <Snippet>
+      <Imports>
+      </Imports>
+      <Declarations>
+        <Literal>
+          <ID>typename</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+        </Literal>
+		<Literal>
+          <ID>typename2</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+        </Literal>
+		<Literal>
+          <ID>typename3</ID>
+          <Type></Type>
+          <ToolTip>Replace with the name of the class.</ToolTip>
+          <Default>_</Default>
+        </Literal>
+      </Declarations>
+      <Code Language="cpp"><![CDATA[owner<$typename$*> create$typename2$();
+void destroy$typename2$(owner<$typename$*> typename3);]]></Code>
+    </Snippet>
+  </CodeSnippet>
+  
+  
+</CodeSnippets>

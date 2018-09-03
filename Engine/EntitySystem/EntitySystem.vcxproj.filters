@@ -1,10 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="Public\EntitySystem\EntitySystem.h" />
     <ClInclude Include="Public\EntitySystem\EntitySystemAPI.h" />
+    <ClInclude Include="Private\EntityWorld.h" />
+    <ClInclude Include="Public\EntitySystem\IEntityWorld.h" />
+    <ClInclude Include="Public\EntitySystem\EntitySystemModule.h" />
+    <ClInclude Include="Private\EntitySystem.h" />
+    <ClInclude Include="Public\EntitySystem\IEntitySystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EntitySystem.cpp" />
+    <ClCompile Include="Public\EntitySystem\EntitySystemModule.cpp" />
   </ItemGroup>
 </Project>

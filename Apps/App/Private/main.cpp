@@ -1,20 +1,23 @@
 #include "App.h"
 
 #include "Core/Utils.h"
-#include "Graphics/Graphics.h"
+#include "Graphics/GraphicsModule.h"
+#include "Graphics/IGraphics.h"
 #include "Graphics/IWindow.h"
-
-#include "EASTL/string.h"
+#include "Graphics/IContext.h"
 
 #include <iostream>
 #include <stdio.h>
 
 int main()
 {
-	App app;
-	owner<IWindow*> window = app.graphics.createWindow("da", 200, 200, 0, 0, EWindowMode::WINDOWED);
+	auto graphics = GraphicsModule::createGraphics();
+	owner<IWindow*> window = graphics->createWindow("da", 640, 480, 700, 250, EWindowMode::WINDOWED);
+	owner<IContext*> context = window->createContext(EContextType::OPENGL);
 	std::cin.get();
-	app.graphics.destroyWindow(window);
+	window->destroyContext(context);
+	graphics->destroyWindow(window);
+	GraphicsModule::destroyGraphics(graphics);
 	return 0;
 }
 

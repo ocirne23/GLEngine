@@ -2,9 +2,12 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Private\Input.cpp" />
+    <ClCompile Include="Public\Input\InputModule.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Public\Input\Input.h" />
     <ClInclude Include="Public\Input\InputAPI.h" />
+    <ClInclude Include="Public\Input\InputModule.h" />
+    <ClInclude Include="Private\Input.h" />
+    <ClInclude Include="Public\Input\IInput.h" />
   </ItemGroup>
 </Project>

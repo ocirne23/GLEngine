@@ -333,11 +333,14 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Public\Filesystem\Filesystem.h" />
+    <ClInclude Include="Private\Filesystem.h" />
     <ClInclude Include="Public\Filesystem\FilesystemAPI.h" />
+    <ClInclude Include="Public\Filesystem\FilesystemModule.h" />
+    <ClInclude Include="Public\Filesystem\IFilesystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Filesystem.cpp" />
+    <ClCompile Include="Public\Filesystem\FilesystemModule.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />
