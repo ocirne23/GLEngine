@@ -19,6 +19,7 @@
     <ClInclude Include="Public\Graphics\GraphicsModule.h" />
     <ClInclude Include="Public\Graphics\IGraphics.h" />
     <ClInclude Include="Private\Graphics.h" />
+    <ClInclude Include="Private\GL\GLUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
@@ -28,5 +29,9 @@
     <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Frustum.cpp" />
     <ClCompile Include="Public\Graphics\GraphicsModule.cpp" />
+    <ClCompile Include="Private\GL\GLVertexBuffer.cpp" />
+    <ClCompile Include="Private\GL\GLIndexBuffer.cpp" />
+    <ClCompile Include="Private\GL\GLTextureBuffer.cpp" />
+    <ClCompile Include="Private\GL\GLUtils.cpp" />
   </ItemGroup>
 </Project>

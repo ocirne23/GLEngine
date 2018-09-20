@@ -15,7 +15,7 @@
 BEGIN_UNNAMED_NAMESPACE()
 
 static const uint MAX_GL_MAJOR_VERSION = 4;
-static const uint MAX_GL_MINOR_VERSION = 4;
+static const uint MAX_GL_MINOR_VERSION = 5;
 
 HGLRC createHighestGLContext(HDC hdc, uint a_maxMajorVersion, uint a_maxMinorVersion)
 {
