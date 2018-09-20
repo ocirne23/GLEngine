@@ -2,6 +2,8 @@
 
 #include "Core.h"
 
+#include <glm/fwd.hpp>
+
 class IBuffer;
 enum class EBufferType;
 
@@ -17,6 +19,9 @@ class IContext
 public:
 	
 	virtual EContextType getType() const = 0;
+
+	virtual void setViewportSize(uint width, uint height) = 0;
+	virtual void clearColor(const glm::vec4& color, bool clearDepth) = 0;
 	
 	virtual owner<IBuffer*> createBuffer(const EBufferType& type) = 0;
 	virtual void destroyBuffer(owner<IBuffer*> buffer) = 0;

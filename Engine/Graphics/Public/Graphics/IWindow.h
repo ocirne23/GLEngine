@@ -19,6 +19,7 @@ public:
 
 	virtual owner<IContext*> createContext(const EContextType& type) = 0;
 	virtual void destroyContext(owner<IContext*> context) = 0;
+	virtual void swapBuffer() = 0;
 
 protected:
 

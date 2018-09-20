@@ -10,6 +10,7 @@ public:
 
 	virtual owner<IContext*> createContext(const EContextType& type) override;
 	virtual void destroyContext(owner<IContext*> context) override;
+	virtual void swapBuffer() override;
 
 	SDL_Window* getSDLWindow() { return m_window; }
 	void* getHDC()             { return m_hdc; }

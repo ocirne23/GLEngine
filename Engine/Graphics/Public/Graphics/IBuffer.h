@@ -10,6 +10,13 @@ enum class EBufferType
 	TEXBUF
 };
 
+enum class EBufferDataAccessType
+{
+	STATIC,
+	DYNAMIC,
+	STREAM
+};
+
 class IBuffer
 {
 public:

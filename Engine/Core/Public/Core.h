@@ -15,13 +15,28 @@ using namespace gsl;
 #define dcast dynamic_cast
 #define rcast reinterpret_cast
 
+template <typename CastType, typename SourceType>
+constexpr CastType alias_cast(SourceType arg)
+{
+	static_assert(sizeof(CastType) == sizeof(SourceType));
+	union
+	{
+		CastType type;
+		SourceType source;
+	} u;
+	u.source = arg;
+	return u.type;
+}
+
+#define acast alias_cast
+
 using uint = unsigned int;
 using ushort = unsigned short;
 using int64 = long long;
 using uint64 = unsigned long long;
 
 template <typename T, std::size_t N>
-constexpr std::size_t ARRAY_SIZE(T const (&)[N]) noexcept
+constexpr std::size_t ARRAY_SIZE(T const (&)[N])
 {
 	return N;
 }

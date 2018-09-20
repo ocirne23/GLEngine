@@ -14,6 +14,7 @@ int main()
 	auto graphics = GraphicsModule::createGraphics();
 	owner<IWindow*> window = graphics->createWindow("da", 640, 480, 700, 250, EWindowMode::WINDOWED);
 	owner<IContext*> context = window->createContext(EContextType::OPENGL);
+	window->swapBuffer();
 	std::cin.get();
 	window->destroyContext(context);
 	graphics->destroyWindow(window);

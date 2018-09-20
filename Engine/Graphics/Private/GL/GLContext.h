@@ -10,6 +10,9 @@ public:
 
 	virtual EContextType getType() const override { return EContextType::OPENGL; }
 
+	virtual void setViewportSize(uint width, uint height) override;
+	virtual void clearColor(const glm::vec4 & color, bool clearDepth) override;
+
 	virtual owner<IBuffer*> createBuffer(const EBufferType& type) override;
 	virtual void destroyBuffer(owner<IBuffer*> buffer) override;
 
@@ -31,5 +34,4 @@ private:
 
 private:
 	ContextHandle m_context = nullptr;
-	void* m_hdc = nullptr;
 };

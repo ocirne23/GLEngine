@@ -2079,6 +2079,7 @@
       </AdditionalOptions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2102,6 +2103,7 @@
       </AdditionalOptions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2125,6 +2127,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -2152,6 +2155,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;VK_USE_PLATFORM_WIN32_KHR;</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\include\3rdparty;$(ProjectDir)\include\Private;$(ProjectDir)\include\Public;$(ProjectDir)\libs\include;$(ProjectDir)\libs\include-shared;</AdditionalIncludeDirectories>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

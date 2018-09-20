@@ -10,6 +10,7 @@
 #include "GL/GL.h"
 
 #include <SDL/SDL_video.h>
+#include <glm/glm.hpp>
 
 BEGIN_UNNAMED_NAMESPACE()
 
@@ -57,8 +58,6 @@ END_UNNAMED_NAMESPACE()
 
 GLContext::GLContext(Window& window)
 {
-	m_hdc = window.getHDC();
-
 	SDL_GLContext context = SDL_GL_CreateContext(window.getSDLWindow());
 	glewInit();
 	glewExperimental = GL_TRUE;
@@ -70,19 +69,15 @@ GLContext::GLContext(Window& window)
 	}
 	SDL_GL_DeleteContext(context);
 
-	m_context = createHighestGLContext(scast<HDC>(m_hdc), MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
+	m_context = createHighestGLContext(scast<HDC>(window.getHDC()), MAX_GL_MAJOR_VERSION, MAX_GL_MINOR_VERSION);
 
 	for (GLenum glErr = glGetError(); glErr != GL_NO_ERROR; glErr = glGetError())
 	{
 		printf("GLEW error: %s\n", glewGetErrorString(glErr));
 	};
 
-	int windowWidth, windowHeight;
-	SDL_GetWindowSize(window.getSDLWindow(), &windowWidth, &windowHeight);
-	glViewport(0, 0, windowWidth, windowHeight);
-	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	SwapBuffers(scast<HDC>(m_hdc));
+	setViewportSize(window.getWidth(), window.getHeight());
+	clearColor(glm::vec4(1.0f, 1.0f, 0.0f, 1.0f), true);
 }
 
 GLContext::~GLContext()
@@ -93,6 +88,18 @@ GLContext::~GLContext()
 #endif
 	assert(m_context);
 	wglDeleteContext(scast<HGLRC>(m_context));
+}
+
+void GLContext::setViewportSize(uint width, uint height)
+{
+	glViewport(0, 0, width, height);
+}
+
+void GLContext::clearColor(const glm::vec4& color, bool clearDepth)
+{
+	const GLbitfield flags = clearDepth ? (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) : GL_COLOR_BUFFER_BIT;
+	glClearColor(color.r, color.g, color.b, color.a);
+	glClear(flags);
 }
 
 owner<IBuffer*> GLContext::createBuffer(const EBufferType& type)
