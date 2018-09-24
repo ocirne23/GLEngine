@@ -343,11 +343,13 @@
     <ClInclude Include="Private\Camera.h" />
     <ClInclude Include="Private\Frustum.h" />
     <ClInclude Include="Private\GL\GL.h" />
+    <ClInclude Include="Private\GL\GLBuffer.h" />
     <ClInclude Include="Private\GL\GLConstantBuffer.h" />
     <ClInclude Include="Private\GL\GLContext.h" />
     <ClInclude Include="Private\GL\GLFramebuffer.h" />
     <ClInclude Include="Private\GL\GLTextureBuffer.h" />
     <ClInclude Include="Private\GL\GLUtils.h" />
+    <ClInclude Include="Private\GL\GLVertexAttributes.h" />
     <ClInclude Include="Private\GL\GLVertexBuffer.h" />
     <ClInclude Include="Private\Window.h" />
     <ClInclude Include="Private\Graphics.h" />
@@ -358,16 +360,19 @@
     <ClInclude Include="Public\Graphics\IContext.h" />
     <ClInclude Include="Public\Graphics\IFramebuffer.h" />
     <ClInclude Include="Public\Graphics\IGraphics.h" />
+    <ClInclude Include="Public\Graphics\IVertexAttributes.h" />
     <ClInclude Include="Public\Graphics\IWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Frustum.cpp" />
+    <ClCompile Include="Private\GL\GLBuffer.cpp" />
     <ClCompile Include="Private\GL\GLContext.cpp" />
     <ClCompile Include="Private\GL\GLIndexBuffer.cpp" />
     <ClCompile Include="Private\GL\GLIndexBuffer.h" />
     <ClCompile Include="Private\GL\GLTextureBuffer.cpp" />
     <ClCompile Include="Private\GL\GLUtils.cpp" />
+    <ClCompile Include="Private\GL\GLVertexAttributes.cpp" />
     <ClCompile Include="Private\GL\GLVertexBuffer.cpp" />
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />

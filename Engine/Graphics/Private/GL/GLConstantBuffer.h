@@ -1,15 +1,12 @@
 #pragma once
 
-#include "Graphics/IBuffer.h"
+#include "GLBuffer.h"
 
-class GLConstantBuffer : public IBuffer
+class GLConstantBuffer : public GLBuffer
 {
 public:
 
 	virtual EBufferType getType() const override { return EBufferType::CONSTANT; }
-	virtual void initialize(uint64 sizeBytes, EBufferUsageType usageType) override;
-	virtual void upload(span<const byte> data) override;
-	virtual void bind() override;
 
 private:
 
