@@ -6,8 +6,8 @@ class GLShader : public IShader
 {
 public:
 
-	virtual void initialize() = 0;
-	virtual void addShaderStage() = 0;
+	virtual void initialize();
+	virtual void addShaderStage();
 
 private:
 
