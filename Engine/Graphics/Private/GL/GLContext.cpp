@@ -1,13 +1,14 @@
 #include "GLContext.h"
 
 #include "Window.h"
+#include "GL/GL.h"
 #include "GLVertexBuffer.h"
 #include "GLIndexBuffer.h"
 #include "GLConstantBuffer.h"
 #include "GLTextureBuffer.h"
 #include "GLFramebuffer.h"
-
-#include "GL/GL.h"
+#include "GLVertexAttributes.h"
+#include "GLShader.h"
 
 #include <SDL/SDL_video.h>
 #include <glm/glm.hpp>
@@ -85,6 +86,7 @@ GLContext::~GLContext()
 #ifdef DEBUG_BUILD
 	assert(md_numBuffersCreated == 0);
 	assert(md_numFramebuffersCreated == 0);
+	assert(md_numVertexAttributesCreated == 0);
 #endif
 	assert(m_context);
 	wglDeleteContext(scast<HGLRC>(m_context));
@@ -132,16 +134,16 @@ void GLContext::destroyBuffer(owner<IBuffer*> buffer)
 	switch (buffer->getType())
 	{
 	case EBufferType::VERTEX:
-		delete static_cast<GLVertexBuffer*>(buffer);
+		delete scast<GLVertexBuffer*>(buffer);
 		break;
 	case EBufferType::INDEX:
-		delete static_cast<GLIndexBuffer*>(buffer);
+		delete scast<GLIndexBuffer*>(buffer);
 		break;
 	case EBufferType::CONSTANT:
-		delete static_cast<GLConstantBuffer*>(buffer);
+		delete scast<GLConstantBuffer*>(buffer);
 		break;
 	case EBufferType::TEXBUF:
-		delete static_cast<GLTextureBuffer*>(buffer);
+		delete scast<GLTextureBuffer*>(buffer);
 		break;
 	default:
 		assert(false);
@@ -163,5 +165,39 @@ void GLContext::destroyFramebuffer(owner<IFramebuffer*> framebuffer)
 	md_numFramebuffersCreated--;
 #endif
 	assert(framebuffer);
-	delete static_cast<GLFramebuffer*>(framebuffer);
+	delete scast<GLFramebuffer*>(framebuffer);
+}
+
+owner<IVertexAttributes*> GLContext::createVertexAttributes()
+{
+#ifdef DEBUG_BUILD
+	md_numVertexAttributesCreated++;
+#endif
+	return new GLVertexAttributes();
+}
+
+void GLContext::destroyVertexAttributes(owner<IVertexAttributes*> vertexAttributes)
+{
+#ifdef DEBUG_BUILD
+	md_numVertexAttributesCreated--;
+#endif
+	assert(vertexAttributes);
+	delete scast<GLVertexAttributes*>(vertexAttributes);
+}
+
+owner<IShader*> GLContext::createShader()
+{
+#ifdef DEBUG_BUILD
+	md_numShadersCreated++;
+#endif
+	return new GLShader();
+}
+
+void GLContext::destroyShader(owner<IShader*> shader)
+{
+#ifdef DEBUG_BUILD
+	md_numShadersCreated--;
+#endif
+	assert(shader);
+	delete scast<GLShader*>(shader);
 }

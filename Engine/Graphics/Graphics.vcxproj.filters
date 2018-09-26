@@ -23,6 +23,9 @@
     <ClInclude Include="Private\GL\GLBuffer.h" />
     <ClInclude Include="Public\Graphics\IVertexAttributes.h" />
     <ClInclude Include="Private\GL\GLVertexAttributes.h" />
+    <ClInclude Include="Public\Graphics\IShader.h" />
+    <ClInclude Include="Private\GL\GLShader.h" />
+    <ClInclude Include="Private\GL\GLVertexShaderStage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
@@ -38,5 +41,6 @@
     <ClCompile Include="Private\GL\GLUtils.cpp" />
     <ClCompile Include="Private\GL\GLBuffer.cpp" />
     <ClCompile Include="Private\GL\GLVertexAttributes.cpp" />
+    <ClCompile Include="Private\GL\GLShader.cpp" />
   </ItemGroup>
 </Project>

@@ -43,5 +43,5 @@ void Graphics::destroyCamera(owner<ICamera*> camera)
 	md_numCamerasCreated--;
 #endif
 	assert(camera);
-	delete static_cast<ICamera*>(camera);
+	delete scast<ICamera*>(camera);
 }

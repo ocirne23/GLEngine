@@ -8,6 +8,8 @@ class IBuffer;
 enum class EBufferType;
 
 class IFramebuffer;
+class IVertexAttributes;
+class IShader;
 
 enum class EContextType
 {
@@ -28,6 +30,12 @@ public:
 
 	virtual owner<IFramebuffer*> createFramebuffer() = 0;
 	virtual void destroyFramebuffer(owner<IFramebuffer*> framebuffer) = 0;
+
+	virtual owner<IVertexAttributes*> createVertexAttributes() = 0;
+	virtual void destroyVertexAttributes(owner<IVertexAttributes*> vertexAttributes) = 0;
+
+	virtual owner<IShader*> createShader() = 0;
+	virtual void destroyShader(owner<IShader*> shader) = 0;
 
 protected:
 

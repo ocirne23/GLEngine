@@ -3,17 +3,14 @@
 #include "Graphics/IVertexAttributes.h"
 #include "EASTL/vector.h"
 
-class GLVertexBuffer;
-
 class GLVertexAttributes : public IVertexAttributes
 {
 public:
 
 	void initialize();
-	virtual void addVertexAttribute(EVertexAttributeFormat format, uint numElements, bool normalize) override;
+	virtual void addVertexAttribute(EVertexAttributeFormat format, uint numElements, bool normalize = false) override;
 	virtual void reset() override;
-
-	void bind(GLVertexBuffer& buffer);
+	virtual void bind(IBuffer& vertexBuffer) override;
 
 private:
 
@@ -34,4 +31,11 @@ private:
 	bool m_initialized = false;
 	uint m_vaoID = 0;
 	eastl::vector<GLVertexAttribute> m_attributes;
+
+private:
+
+	friend class GLContext;
+	GLVertexAttributes() {}
+	~GLVertexAttributes() override {}
+	GLVertexAttributes(const GLVertexAttributes&) = delete;
 };

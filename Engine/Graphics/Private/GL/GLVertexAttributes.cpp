@@ -25,8 +25,12 @@ void GLVertexAttributes::reset()
 	m_attributes.clear();
 }
 
-void GLVertexAttributes::bind(GLVertexBuffer& buffer)
+void GLVertexAttributes::bind(IBuffer& vertexBuffer)
 {
+	if (!m_initialized)
+		initialize();
+	assert(vertexBuffer.getType() == EBufferType::VERTEX);
+
 	uint stride = 0;
 	for (const auto& attrib : m_attributes)
 		stride += GLUtils::getGLVertexAttributeSize(attrib.format) * attrib.numElements;
@@ -38,7 +42,7 @@ void GLVertexAttributes::bind(GLVertexBuffer& buffer)
 		uint elemSize = GLUtils::getGLVertexAttributeSize(attrib.format);
 		glEnableVertexArrayAttrib(m_vaoID, i);
 		glVertexArrayAttribFormat(m_vaoID, i, attrib.numElements, GLUtils::getGLVertexAttributeType(attrib.format), attrib.normalize, offset);
-		glVertexArrayVertexBuffer(m_vaoID, i, buffer.getID(), offset, stride);
+		glVertexArrayVertexBuffer(m_vaoID, i, scast<GLVertexBuffer&>(vertexBuffer).getID(), offset, stride);
 		offset += attrib.numElements * elemSize;
 	}
 }

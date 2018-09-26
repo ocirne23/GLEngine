@@ -29,7 +29,7 @@ void Window::destroyContext(owner<IContext*> context)
 	switch (context->getType())
 	{
 	case EContextType::OPENGL:
-		delete static_cast<GLContext*>(context);
+		delete scast<GLContext*>(context);
 		break;
 	default:
 		assert(false);

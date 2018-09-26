@@ -19,6 +19,12 @@ public:
 	virtual owner<IFramebuffer*> createFramebuffer() override;
 	virtual void destroyFramebuffer(owner<IFramebuffer*> framebuffer) override;
 
+	virtual owner<IVertexAttributes*> createVertexAttributes() override;
+	virtual void destroyVertexAttributes(owner<IVertexAttributes*> vertexAttributes) override;
+
+	virtual owner<IShader*> createShader() override;
+	virtual void destroyShader(owner<IShader*> shader) override;
+
 private:
 
 	friend class Window;
@@ -30,6 +36,8 @@ private:
 private:
 	int md_numBuffersCreated = 0;
 	int md_numFramebuffersCreated = 0;
+	int md_numVertexAttributesCreated = 0;
+	int md_numShadersCreated = 0;
 #endif
 
 private:
