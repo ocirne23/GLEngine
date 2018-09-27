@@ -87,6 +87,9 @@ GLContext::~GLContext()
 	assert(md_numBuffersCreated == 0);
 	assert(md_numFramebuffersCreated == 0);
 	assert(md_numVertexAttributesCreated == 0);
+	assert(md_numShadersCreated == 0);
+	assert(md_numVertexShaderStagesCreated == 0);
+	assert(md_numFragmentShaderStagesCreated == 0);
 #endif
 	assert(m_context);
 	wglDeleteContext(scast<HGLRC>(m_context));
@@ -200,4 +203,32 @@ void GLContext::destroyShader(owner<IShader*> shader)
 #endif
 	assert(shader);
 	delete scast<GLShader*>(shader);
+}
+
+owner<IVertexShaderStage*> GLContext::createVertexShaderStage()
+{
+#ifdef DEBUG_BUILD
+	md_numVertexShaderStagesCreated++;
+#endif
+}
+
+void GLContext::destroyVertexShaderStage(owner<IVertexShaderStage*> shaderStage)
+{
+#ifdef DEBUG_BUILD
+	md_numVertexShaderStagesCreated--;
+#endif
+}
+
+owner<IFragmentShaderStage*> GLContext::createFragmentShaderStage()
+{
+#ifdef DEBUG_BUILD
+	md_numFragmentShaderStagesCreated++;
+#endif
+}
+
+void GLContext::destroyFragmentShaderStageShader(owner<IFragmentShaderStage*> shaderStage)
+{
+#ifdef DEBUG_BUILD
+	md_numFragmentShaderStagesCreated--;
+#endif
 }

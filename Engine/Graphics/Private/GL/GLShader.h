@@ -6,8 +6,12 @@ class GLShader : public IShader
 {
 public:
 
-	virtual void initialize();
-	virtual void addShaderStage();
+	virtual void initialize() override;
+	virtual void setShaderStage(IVertexShaderStage& stage) override;
+	virtual void setShaderStage(IFragmentShaderStage& stage) override;
+
+private:
+
 
 private:
 

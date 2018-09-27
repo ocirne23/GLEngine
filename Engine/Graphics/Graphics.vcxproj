@@ -346,6 +346,7 @@
     <ClInclude Include="Private\GL\GLBuffer.h" />
     <ClInclude Include="Private\GL\GLConstantBuffer.h" />
     <ClInclude Include="Private\GL\GLContext.h" />
+    <ClInclude Include="Private\GL\GLFragmentShaderStage.h" />
     <ClInclude Include="Private\GL\GLFramebuffer.h" />
     <ClInclude Include="Private\GL\GLShader.h" />
     <ClInclude Include="Private\GL\GLTextureBuffer.h" />
@@ -360,10 +361,13 @@
     <ClInclude Include="Public\Graphics\IBuffer.h" />
     <ClInclude Include="Public\Graphics\ICamera.h" />
     <ClInclude Include="Public\Graphics\IContext.h" />
+    <ClInclude Include="Public\Graphics\IFragmentShaderStage.h" />
     <ClInclude Include="Public\Graphics\IFramebuffer.h" />
     <ClInclude Include="Public\Graphics\IGraphics.h" />
     <ClInclude Include="Public\Graphics\IShader.h" />
+    <ClInclude Include="Public\Graphics\IShaderStage.h" />
     <ClInclude Include="Public\Graphics\IVertexAttributes.h" />
+    <ClInclude Include="Public\Graphics\IVertexShaderStage.h" />
     <ClInclude Include="Public\Graphics\IWindow.h" />
   </ItemGroup>
   <ItemGroup>

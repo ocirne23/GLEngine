@@ -25,6 +25,12 @@ public:
 	virtual owner<IShader*> createShader() override;
 	virtual void destroyShader(owner<IShader*> shader) override;
 
+	virtual owner<IVertexShaderStage*> createVertexShaderStage() override;
+	virtual void destroyVertexShaderStage(owner<IVertexShaderStage*> shaderStage) override;
+
+	virtual owner<IFragmentShaderStage*> createFragmentShaderStage() override;
+	virtual void destroyFragmentShaderStageShader(owner<IFragmentShaderStage*> shaderStage) override;
+
 private:
 
 	friend class Window;
@@ -38,6 +44,8 @@ private:
 	int md_numFramebuffersCreated = 0;
 	int md_numVertexAttributesCreated = 0;
 	int md_numShadersCreated = 0;
+	int md_numVertexShaderStagesCreated = 0;
+	int md_numFragmentShaderStagesCreated = 0;
 #endif
 
 private:

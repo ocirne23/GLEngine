@@ -39,6 +39,9 @@ int main()
 	owner<IBuffer*> indexBuffer = context->createBuffer(EBufferType::INDEX);
 	owner<IVertexAttributes*> vertexAttributes = context->createVertexAttributes();
 	owner<ICamera*> camera = graphics->createCamera();
+	owner<IShader*> quadShader = context->createShader();
+	// owner<IFragmentShaderStage*> fragmentStage = context->createFragmentShaderStageShader();
+	// fragmentStage->setDefines({{"OUT_LOC", "1"}, {"
 
 	vertexBuffer->initialize(sizeof(quad), EBufferUsageType::STATIC);
 	indexBuffer->initialize(sizeof(indices), EBufferUsageType::STATIC);
@@ -53,6 +56,7 @@ int main()
 	window->swapBuffer();
 	std::cin.get();
 
+	context->destroyShader(quadShader);
 	graphics->destroyCamera(camera);
 	context->destroyVertexAttributes(vertexAttributes);
 	context->destroyBuffer(indexBuffer);

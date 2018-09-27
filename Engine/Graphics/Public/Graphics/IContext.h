@@ -10,6 +10,8 @@ enum class EBufferType;
 class IFramebuffer;
 class IVertexAttributes;
 class IShader;
+class IVertexShaderStage;
+class IFragmentShaderStage;
 
 enum class EContextType
 {
@@ -36,6 +38,12 @@ public:
 
 	virtual owner<IShader*> createShader() = 0;
 	virtual void destroyShader(owner<IShader*> shader) = 0;
+
+	virtual owner<IVertexShaderStage*> createVertexShaderStage() = 0;
+	virtual void destroyVertexShaderStage(owner<IVertexShaderStage*> shaderStage) = 0;
+
+	virtual owner<IFragmentShaderStage*> createFragmentShaderStage() = 0;
+	virtual void destroyFragmentShaderStageShader(owner<IFragmentShaderStage*> shaderStage) = 0;
 
 protected:
 

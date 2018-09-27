@@ -1,20 +1,15 @@
 #pragma once
 
-enum class EShaderStageType
-{
-	Vertex,
-	Fragment,
-	Geometry
-};
-
-class IShaderStage;
+class IVertexShaderStage;
+class IFragmentShaderStage;
 
 class IShader
 {
 public:
 
 	virtual void initialize() = 0;
-	virtual void addShaderStage(IShaderStage& stage, EShaderStageType type) = 0;
+	virtual void setShaderStage(IVertexShaderStage& stage) = 0;
+	virtual void setShaderStage(IFragmentShaderStage& stage) = 0;
 
 protected:
 

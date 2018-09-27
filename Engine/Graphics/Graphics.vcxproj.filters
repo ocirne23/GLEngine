@@ -26,12 +26,16 @@
     <ClInclude Include="Public\Graphics\IShader.h" />
     <ClInclude Include="Private\GL\GLShader.h" />
     <ClInclude Include="Private\GL\GLVertexShaderStage.h" />
+    <ClInclude Include="Private\GL\GLIndexBuffer.h" />
+    <ClInclude Include="Public\Graphics\IVertexShaderStage.h" />
+    <ClInclude Include="Public\Graphics\IFragmentShaderStage.h" />
+    <ClInclude Include="Private\GL\GLFragmentShaderStage.h" />
+    <ClInclude Include="Public\Graphics\IShaderStage.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />
     <ClCompile Include="Private\GL\GLContext.cpp" />
-    <ClCompile Include="Private\GL\GLIndexBuffer.h" />
     <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Frustum.cpp" />
     <ClCompile Include="Public\Graphics\GraphicsModule.cpp" />
