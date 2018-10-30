@@ -340,11 +340,9 @@
     <ClInclude Include="Private\Input.h" />
     <ClInclude Include="Public\Input\IInput.h" />
     <ClInclude Include="Public\Input\InputAPI.h" />
-    <ClInclude Include="Public\Input\InputModule.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Input.cpp" />
-    <ClCompile Include="Public\Input\InputModule.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />

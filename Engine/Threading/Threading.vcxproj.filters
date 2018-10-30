@@ -2,11 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Private\Threading.cpp" />
-    <ClCompile Include="Public\Threading\ThreadingModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Threading\ThreadingAPI.h" />
-    <ClInclude Include="Public\Threading\ThreadingModule.h" />
     <ClInclude Include="Public\Threading\IThreading.h" />
     <ClInclude Include="Private\Threading.h" />
   </ItemGroup>

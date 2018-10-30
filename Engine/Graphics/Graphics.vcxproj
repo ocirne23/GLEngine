@@ -382,6 +382,13 @@
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Graphics\IBuffer.cpp" />
     <ClCompile Include="Private\Graphics\ICamera.cpp" />
+    <ClCompile Include="Private\Graphics\IContext.cpp" />
+    <ClCompile Include="Private\Graphics\IFramebuffer.cpp" />
+    <ClCompile Include="Private\Graphics\IGraphics.cpp" />
+    <ClCompile Include="Private\Graphics\IShader.cpp" />
+    <ClCompile Include="Private\Graphics\IShaderStage.cpp" />
+    <ClCompile Include="Private\Graphics\IVertexAttributes.cpp" />
+    <ClCompile Include="Private\Graphics\IWindow.cpp" />
     <ClCompile Include="Private\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

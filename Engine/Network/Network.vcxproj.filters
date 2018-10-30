@@ -2,11 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Private\Network.cpp" />
-    <ClCompile Include="Public\Network\NetworkModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Network\NetworkAPI.h" />
-    <ClInclude Include="Public\Network\NetworkModule.h" />
     <ClInclude Include="Private\Network.h" />
     <ClInclude Include="Public\Network\INetwork.h" />
   </ItemGroup>

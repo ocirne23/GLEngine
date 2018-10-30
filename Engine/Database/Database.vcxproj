@@ -339,12 +339,10 @@
   <ItemGroup>
     <ClInclude Include="Private\Database.h" />
     <ClInclude Include="Public\Database\DatabaseAPI.h" />
-    <ClInclude Include="Public\Database\DatabaseModule.h" />
     <ClInclude Include="Public\Database\IDatabase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Database.cpp" />
-    <ClCompile Include="Public\Database\DatabaseModule.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />

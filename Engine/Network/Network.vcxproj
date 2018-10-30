@@ -340,11 +340,9 @@
     <ClInclude Include="Private\Network.h" />
     <ClInclude Include="Public\Network\INetwork.h" />
     <ClInclude Include="Public\Network\NetworkAPI.h" />
-    <ClInclude Include="Public\Network\NetworkModule.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Network.cpp" />
-    <ClCompile Include="Public\Network\NetworkModule.cpp" />
   </ItemGroup>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
