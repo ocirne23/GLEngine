@@ -38,7 +38,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{046DF223-A61D-4229-A823-A01DA5688B2E}</ProjectGuid>
     <RootNamespace>Filesystem</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'" Label="Configuration">
@@ -338,6 +338,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Private\Filesystem.h" />
+    <ClInclude Include="Public\Filesystem\FilePath.h" />
     <ClInclude Include="Public\Filesystem\FilesystemAPI.h" />
     <ClInclude Include="Public\Filesystem\FilesystemModule.h" />
     <ClInclude Include="Public\Filesystem\IFilesystem.h" />

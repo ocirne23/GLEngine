@@ -4,13 +4,17 @@
 
 struct SDL_Window;
 
-class Window final : public IWindow
+class Window
 {
 public:
 
-	virtual owner<IContext*> createContext(const EContextType& type) override;
-	virtual void destroyContext(owner<IContext*> context) override;
-	virtual void swapBuffer() override;
+	Window(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
+	Window(const Window&) = delete;
+	~Window();
+
+	owner<IContext*> createContext(const EContextType& type);
+	void destroyContext(owner<IContext*> context);
+	void swapBuffer();
 
 	SDL_Window* getSDLWindow() { return m_window; }
 	void* getHDC()             { return m_hdc; }
@@ -23,10 +27,6 @@ public:
 
 private:
 
-	friend class Graphics;
-	Window(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
-	Window(const Window&) = delete;
-	~Window() override;
 
 #ifdef DEBUG_BUILD
 private:

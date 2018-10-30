@@ -4,10 +4,15 @@
 
 using ContextHandle = void*;
 
-class GLContext : public IContext
+class GLContext
 {
 public:
 
+	GLContext();
+	~GLContext();
+	GLContext(const GLContext&) = delete;
+
+	/*
 	virtual EContextType getType() const override { return EContextType::OPENGL; }
 
 	virtual void setViewportSize(uint width, uint height) override;
@@ -30,13 +35,9 @@ public:
 
 	virtual owner<IFragmentShaderStage*> createFragmentShaderStage() override;
 	virtual void destroyFragmentShaderStageShader(owner<IFragmentShaderStage*> shaderStage) override;
+	*/
 
 private:
-
-	friend class Window;
-	GLContext(Window& window);
-	~GLContext() override;
-	GLContext(const GLContext&) = delete;
 
 #ifdef DEBUG_BUILD
 private:

@@ -2,17 +2,17 @@
 
 #include "Graphics/IBuffer.h"
 
-class GLBuffer : public IBuffer
+class GLBuffer
 {
 public:
 
-	virtual EBufferType getType() const override = 0;
+	 //EBufferType getType() const;
 
-	virtual void initialize(uint64 sizeBytes, EBufferUsageType usageType) override;
-	virtual void upload(span<const byte> data) override;
-	virtual span<byte> map() override;
-	virtual void unmap() override;
-	virtual uint64 getSizeBytes() const override { return m_sizeBytes; }
+	 void initialize(uint64 sizeBytes, EBufferUsageType usageType);
+	 void upload(span<const byte> data);
+	 span<byte> map();
+	 void unmap();
+	 uint64 getSizeBytes() const  { return m_sizeBytes; }
 
 	uint getID() { return m_id; }
 
@@ -22,11 +22,4 @@ private:
 	uint64 m_sizeBytes = 0;
 	uint m_id = 0;
 	uint m_usageFlags = 0;
-
-protected:
-
-	friend class GLContext;
-	GLBuffer() {}
-	virtual ~GLBuffer() override {}
-	GLBuffer(const GLBuffer&) = delete;
 };

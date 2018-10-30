@@ -1,48 +1,56 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "GraphicsAPI.h"
+
+#include <glm/fwd.hpp>
 
 class Frustum;
+class Camera;
 
-class ICamera
+class GRAPHICS_API ICamera
 {
 public:
 	enum class EProjection { PERSPECTIVE, ORTHOGRAPHIC };
 
-	virtual void initialize(float width, float height, float horizontalFov, float near, float far, EProjection projection, const glm::vec3& worldUp) = 0;
-	virtual void updateMatrices() = 0;
+	ICamera();
+	ICamera(const ICamera&) = delete;
+	~ICamera();
+	explicit operator Camera&() { return *m_impl; }
 
-	virtual void setPosition(const glm::vec3& position) = 0;
-	virtual void setDirection(const glm::vec3& direction) = 0;
-	virtual void setHorizontalFov(float hFov) = 0;
-	virtual void setWorldUp(const glm::vec3& worldUp) = 0;
-	virtual void lookAtPoint(const glm::vec3& position) = 0;
 
-	virtual void translateAbsolute(const glm::vec3& translation) = 0;
-	virtual void translateRelative(const glm::vec3& translation) = 0;
-	virtual void rotateAbsolute(float angle, const glm::vec3& axis) = 0;
-	virtual void rotateRelative(float xRot, float yRot) = 0;
+	void initialize(float width, float height, float horizontalFov, float near, float far, EProjection projection, const glm::vec3& worldUp);
+	void updateMatrices();
 
-	virtual float getRotationRadXY() const = 0;
-	virtual float getRotationRadXZ() const = 0;
-	virtual float getRotationRadYZ() const = 0;
+	void setPosition(const glm::vec3& position);
+	void setDirection(const glm::vec3& direction);
+	void setHorizontalFov(float hFov);
+	void setWorldUp(const glm::vec3& worldUp);
+	void lookAtPoint(const glm::vec3& position);
 
-	virtual const Frustum& getFrustum()	const = 0;
-	virtual const glm::mat4& getCombinedMatrix() const = 0;
-	virtual const glm::mat4& getProjectionMatrix() const = 0;
-	virtual const glm::mat4& getViewMatrix() const = 0;
-	virtual const glm::vec3& getPosition() const = 0;
-	virtual const glm::vec3& getDirection() const = 0;
-	virtual const glm::vec3& getUp() const = 0;
-	virtual float getWidth() const = 0;
-	virtual float getHeight() const = 0;
-	virtual float getVFov() const = 0;
-	virtual float getHFov() const = 0;
-	virtual float getNear() const = 0;
-	virtual float getFar() const = 0;
+	void translateAbsolute(const glm::vec3& translation);
+	void translateRelative(const glm::vec3& translation);
+	void rotateAbsolute(float angle, const glm::vec3& axis);
+	void rotateRelative(float xRot, float yRot);
 
-protected:
+	float getRotationRadXY() const;
+	float getRotationRadXZ() const;
+	float getRotationRadYZ() const;
 
-	friend class Graphics;
-	virtual ~ICamera() {}
+	const Frustum& getFrustum()	const;
+	const glm::mat4& getCombinedMatrix() const;
+	const glm::mat4& getProjectionMatrix() const;
+	const glm::mat4& getViewMatrix() const;
+	const glm::vec3& getPosition() const;
+	const glm::vec3& getDirection() const;
+	const glm::vec3& getUp() const;
+	float getWidth() const;
+	float getHeight() const;
+	float getVFov() const;
+	float getHFov() const;
+	float getNear() const;
+	float getFar() const;
+
+private:
+
+	owner<Camera*> m_impl = nullptr;
 };

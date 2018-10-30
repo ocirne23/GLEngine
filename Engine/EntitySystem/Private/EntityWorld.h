@@ -1,13 +1,16 @@
 #pragma once
 
-#include "EntitySystem/IEntityWorld.h"
+class EntitySystem;
 
-class EntityWorld : public IEntityWorld
+class EntityWorld
 {
 public:
 
+	EntityWorld(EntitySystem& system);
+	EntityWorld(const EntityWorld&) = delete;
+	~EntityWorld();
+
 private:
 
-	friend class EntitySystem;
-	virtual ~EntityWorld() override {}
+	EntitySystem& m_system;
 };

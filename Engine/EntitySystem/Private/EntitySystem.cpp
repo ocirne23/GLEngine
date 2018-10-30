@@ -1,10 +1,16 @@
 #include "EntitySystem.h"
 
-owner<IEntityWorld*> EntitySystem::createEntityWorld()
+EntitySystem::EntitySystem()
 {
-	return owner<IEntityWorld*>();
+
 }
 
-void EntitySystem::destroyEntityWorld(owner<IEntityWorld*> entityWorld)
+EntitySystem::~EntitySystem()
 {
+
+}
+
+void EntitySystem::doStuff()
+{
+
 }

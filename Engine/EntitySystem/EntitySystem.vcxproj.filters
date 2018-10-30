@@ -4,12 +4,13 @@
     <ClInclude Include="Public\EntitySystem\EntitySystemAPI.h" />
     <ClInclude Include="Private\EntityWorld.h" />
     <ClInclude Include="Public\EntitySystem\IEntityWorld.h" />
-    <ClInclude Include="Public\EntitySystem\EntitySystemModule.h" />
     <ClInclude Include="Private\EntitySystem.h" />
     <ClInclude Include="Public\EntitySystem\IEntitySystem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EntitySystem.cpp" />
-    <ClCompile Include="Public\EntitySystem\EntitySystemModule.cpp" />
+    <ClCompile Include="Private\EntityWorld.cpp" />
+    <ClCompile Include="Private\EntitySystem\IEntitySystem.cpp" />
+    <ClCompile Include="Private\EntitySystem\IEntityWorld.cpp" />
   </ItemGroup>
 </Project>

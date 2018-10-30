@@ -1,6 +1,11 @@
 #include "App.h"
 
 #include "Core/Utils.h"
+
+#include "Filesystem/FilesystemModule.h"
+#include "Filesystem/IFilesystem.h"
+#include "Filesystem/FilePath.h"
+
 #include "Graphics/GraphicsModule.h"
 #include "Graphics/IGraphics.h"
 #include "Graphics/IWindow.h"
@@ -31,7 +36,10 @@ END_UNNAMED_NAMESPACE()
 
 int main()
 {
-	auto graphics = GraphicsModule::createGraphics();
+	auto filesystem = FilesystemModule::createFilesystem();
+	auto graphics = GraphicsModule::createGraphics(filesystem);
+
+	FilePath path = filesystem->createFilePath();
 	
 	owner<IWindow*> window = graphics->createWindow("da", 640, 480, 700, 250, EWindowMode::WINDOWED);
 	owner<IContext*> context = window->createContext(EContextType::OPENGL);
@@ -40,8 +48,10 @@ int main()
 	owner<IVertexAttributes*> vertexAttributes = context->createVertexAttributes();
 	owner<ICamera*> camera = graphics->createCamera();
 	owner<IShader*> quadShader = context->createShader();
-	// owner<IFragmentShaderStage*> fragmentStage = context->createFragmentShaderStageShader();
-	// fragmentStage->setDefines({{"OUT_LOC", "1"}, {"
+	// owner<IFragmentShaderStage*> fragmentStage = context->createFragmentShaderStageShader(file);
+	// quadShader->addStage(fragmentStage);
+	// quadShader->addStage(vertexStage);
+	// quadShader->addDefines({"a", "b"});
 
 	vertexBuffer->initialize(sizeof(quad), EBufferUsageType::STATIC);
 	indexBuffer->initialize(sizeof(indices), EBufferUsageType::STATIC);

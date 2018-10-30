@@ -1,14 +1,16 @@
 #pragma once
 
 #include "Core.h"
+#include "GraphicsAPI.h"
 
+/*
 enum class EBufferType
 {
 	VERTEX,
 	INDEX,
 	CONSTANT,
 	TEXBUF
-};
+};*/
 
 enum class EBufferUsageType
 {
@@ -17,19 +19,24 @@ enum class EBufferUsageType
 	STREAM
 };
 
-class IBuffer
+class GLBuffer;
+
+class GRAPHICS_API IBuffer
 {
 public:
 
-	virtual EBufferType getType() const = 0;
-	virtual void initialize(uint64 sizeBytes, EBufferUsageType usageType) = 0;
-	virtual void upload(span<const byte> data) = 0;
-	virtual span<byte> map() = 0;
-	virtual void unmap() = 0;
-	virtual uint64 getSizeBytes() const = 0;
+	IBuffer();
+	IBuffer(const IBuffer&) = delete;
+	~IBuffer();
+	explicit operator GLBuffer&() { return *m_impl; }
 
-protected:
+	void initialize(uint64 sizeBytes, EBufferUsageType usageType);
+	void upload(span<const byte> data);
+	span<byte> map();
+	void unmap();
+	uint64 getSizeBytes() const;
 
-	friend class IContext;
-	virtual ~IBuffer() {}
+private:
+
+	owner<GLBuffer*> m_impl = nullptr;
 };

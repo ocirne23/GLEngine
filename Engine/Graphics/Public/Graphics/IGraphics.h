@@ -1,23 +1,27 @@
 #pragma once
 
 #include "Core.h"
+#include "GraphicsAPI.h"
 
 class IWindow;
 enum class EWindowMode;
 class ICamera;
 
-class IGraphics
+class Graphics;
+
+class GRAPHICS_API IGraphics
 {
 public:
 
-	virtual owner<IWindow*> createWindow(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode) = 0;
-	virtual void destroyWindow(owner<IWindow*> window) = 0;
+	IGraphics();
+	IGraphics(const IGraphics&) = delete;
+	IGraphics(IGraphics&& move);
+	~IGraphics();
+	explicit operator Graphics&() { return *m_impl; }
 
-	virtual owner<ICamera*> createCamera() = 0;
-	virtual void destroyCamera(owner<ICamera*> camera) = 0;
+	IWindow createWindow(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
 
-protected:
+private:
 
-	friend class GraphicsModule;
-	virtual ~IGraphics() {}
+	owner<Graphics*> m_impl = nullptr;
 };

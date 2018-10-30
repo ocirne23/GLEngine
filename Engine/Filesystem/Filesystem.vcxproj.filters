@@ -5,6 +5,7 @@
     <ClInclude Include="Public\Filesystem\FilesystemModule.h" />
     <ClInclude Include="Private\Filesystem.h" />
     <ClInclude Include="Public\Filesystem\IFilesystem.h" />
+    <ClInclude Include="Public\Filesystem\FilePath.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Filesystem.cpp" />

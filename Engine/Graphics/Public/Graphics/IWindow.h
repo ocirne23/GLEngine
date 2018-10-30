@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "GraphicsAPI.h"
 
 class IContext;
 enum class EContextType;
@@ -13,16 +14,23 @@ enum class EWindowMode
 	NONE
 };
 
-class IWindow
+class Window;
+
+class GRAPHICS_API IWindow
 {
 public:
 
-	virtual owner<IContext*> createContext(const EContextType& type) = 0;
-	virtual void destroyContext(owner<IContext*> context) = 0;
-	virtual void swapBuffer() = 0;
+	IWindow();
+	IWindow(const IWindow&) = delete;
+	IWindow(IWindow&& move);
+	~IWindow();
 
-protected:
+	explicit operator Window&() { return *m_impl; }
 
-	friend class Graphics;
-	virtual ~IWindow() {}
+	IContext createContext(const EContextType& type);
+	void swapBuffer();
+
+private:
+
+	owner<Window*> m_impl = nullptr;
 };

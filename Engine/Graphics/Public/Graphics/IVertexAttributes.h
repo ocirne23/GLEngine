@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "GraphicsAPI.h"
 
 class IBuffer;
 
@@ -12,16 +13,20 @@ enum class EVertexAttributeFormat
 	INT
 };
 
-class IVertexAttributes
+class GRAPHICS_API IVertexAttributes
 {
 public:
 
-	virtual void reset() = 0;
-	virtual void addVertexAttribute(EVertexAttributeFormat format, uint numElements, bool normalize = false) = 0;
-	virtual void bind(IBuffer& vertexBuffer) = 0;
+	IVertexAttributes();
+	IVertexAttributes(const IVertexAttributes&) = delete;
+	~IVertexAttributes();
+	explicit operator GLVertexAttributes&() { return *m_impl; }
 
-protected:
+	void reset();
+	void addVertexAttribute(EVertexAttributeFormat format, uint numElements, bool normalize = false);
+	void bind(IBuffer& vertexBuffer);
 
-	friend class IContext;
-	virtual ~IVertexAttributes() {}
+private:
+
+	owner<GLVertexAttributes*> m_impl = nullptr;
 };

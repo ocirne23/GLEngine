@@ -1,13 +1,13 @@
 #include "GLShader.h"
 
+#include "GL/GL.h"
+
 void GLShader::initialize()
 {
+	m_id = glCreateProgram();
 }
 
-void GLShader::setShaderStage(IVertexShaderStage & stage)
+void GLShader::addShaderStage(IShaderStage& stage)
 {
-}
-
-void GLShader::setShaderStage(IFragmentShaderStage & stage)
-{
+	glAttachShader(m_id, 1);
 }

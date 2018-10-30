@@ -1,11 +1,20 @@
 #pragma once
 
-class IEntityWorld
+#include "EntitySystemAPI.h"
+
+class EntityWorld;
+class IEntitySystem;
+
+class ENTITYSYSTEM_API IEntityWorld
 {
 public:
 
-protected:
+	IEntityWorld(IEntitySystem& system);
+	IEntityWorld(const IEntityWorld&) = delete;
+	~IEntityWorld();
+	explicit operator EntityWorld&() { return *m_impl; }
+
+private:
 	
-	friend class EntitySystem;
-	virtual ~IEntityWorld() {}
+	EntityWorld* m_impl;
 };

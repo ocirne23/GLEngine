@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "GraphicsAPI.h"
 
 #include <glm/fwd.hpp>
 
@@ -18,35 +19,21 @@ enum class EContextType
 	OPENGL
 };
 
-class IContext
+class GLContext;
+
+class GRAPHICS_API IContext
 {
 public:
+
+	IContext();
+	IContext(const IContext&) = delete;
+	IContext(IContext&& move);
+	~IContext();
+	explicit operator GLContext&() { return *m_impl; }
 	
-	virtual EContextType getType() const = 0;
+	//EContextType getType() const;
 
-	virtual void setViewportSize(uint width, uint height) = 0;
-	virtual void clearColor(const glm::vec4& color, bool clearDepth) = 0;
-	
-	virtual owner<IBuffer*> createBuffer(const EBufferType& type) = 0;
-	virtual void destroyBuffer(owner<IBuffer*> buffer) = 0;
+private:
 
-	virtual owner<IFramebuffer*> createFramebuffer() = 0;
-	virtual void destroyFramebuffer(owner<IFramebuffer*> framebuffer) = 0;
-
-	virtual owner<IVertexAttributes*> createVertexAttributes() = 0;
-	virtual void destroyVertexAttributes(owner<IVertexAttributes*> vertexAttributes) = 0;
-
-	virtual owner<IShader*> createShader() = 0;
-	virtual void destroyShader(owner<IShader*> shader) = 0;
-
-	virtual owner<IVertexShaderStage*> createVertexShaderStage() = 0;
-	virtual void destroyVertexShaderStage(owner<IVertexShaderStage*> shaderStage) = 0;
-
-	virtual owner<IFragmentShaderStage*> createFragmentShaderStage() = 0;
-	virtual void destroyFragmentShaderStageShader(owner<IFragmentShaderStage*> shaderStage) = 0;
-
-protected:
-
-	friend class IWindow;
-	virtual ~IContext() {}
+	owner<GLContext*> m_impl = nullptr;
 };

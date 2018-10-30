@@ -7,41 +7,36 @@ class Camera : public ICamera
 {
 public:
 
-	virtual void initialize(float width, float height, float horizontalFov, float near, float far, EProjection projection, const glm::vec3& worldUp) override;
-	virtual void updateMatrices() override;
+	void initialize(float width, float height, float horizontalFov, float near, float far, EProjection projection, const glm::vec3& worldUp);
+	void updateMatrices();
 
-	virtual void setPosition(const glm::vec3& position) override;
-	virtual void setDirection(const glm::vec3& direction) override;
-	virtual void setHorizontalFov(float hFov) override;
-	virtual void setWorldUp(const glm::vec3& worldUp) override;
-	virtual void lookAtPoint(const glm::vec3& position) override;
+	void setPosition(const glm::vec3& position);
+	void setDirection(const glm::vec3& direction);
+	void setHorizontalFov(float hFov);
+	void setWorldUp(const glm::vec3& worldUp);
+	void lookAtPoint(const glm::vec3& position);
 
-	virtual void translateAbsolute(const glm::vec3& translation) override;
-	virtual void translateRelative(const glm::vec3& translation) override;
-	virtual void rotateAbsolute(float angle, const glm::vec3& axis) override;
-	virtual void rotateRelative(float xRot, float yRot) override;
+	void translateAbsolute(const glm::vec3& translation);
+	void translateRelative(const glm::vec3& translation);
+	void rotateAbsolute(float angle, const glm::vec3& axis);
+	void rotateRelative(float xRot, float yRot);
 
-	virtual const Frustum& getFrustum() const override            { return m_frustum; }
-	virtual float getRotationRadXY() const override               { return std::atan2(m_direction.x, m_direction.y); }
-	virtual float getRotationRadXZ() const override               { return std::atan2(m_direction.x, m_direction.z); }
-	virtual float getRotationRadYZ() const override               { return std::atan2(m_direction.y, m_direction.z); }
-	virtual const glm::mat4& getCombinedMatrix() const override   { return m_combinedMatrix; }
-	virtual const glm::mat4& getProjectionMatrix() const override { return m_projectionMatrix; }
-	virtual const glm::mat4& getViewMatrix() const override       { return m_viewMatrix; }
-	virtual const glm::vec3& getPosition() const override         { return m_position; }
-	virtual const glm::vec3& getDirection() const override        { return m_direction; }
-	virtual const glm::vec3& getUp() const override               { return m_up; }
-	virtual float getWidth() const override                       { return m_width; }
-	virtual float getHeight() const override                      { return m_height; }
-	virtual float getVFov() const override                        { return m_vFieldOfView; }
-	virtual float getHFov() const override                        { return m_hFieldOfView; }
-	virtual float getNear() const override                        { return m_near; }
-	virtual float getFar() const override                         { return m_far; }
-
-private:
-
-	friend class Graphics;
-	virtual ~Camera() override {}
+	const Frustum& getFrustum() const            { return m_frustum; }
+	float getRotationRadXY() const               { return std::atan2(m_direction.x, m_direction.y); }
+	float getRotationRadXZ() const               { return std::atan2(m_direction.x, m_direction.z); }
+	float getRotationRadYZ() const               { return std::atan2(m_direction.y, m_direction.z); }
+	const glm::mat4& getCombinedMatrix() const   { return m_combinedMatrix; }
+	const glm::mat4& getProjectionMatrix() const { return m_projectionMatrix; }
+	const glm::mat4& getViewMatrix() const       { return m_viewMatrix; }
+	const glm::vec3& getPosition() const         { return m_position; }
+	const glm::vec3& getDirection() const        { return m_direction; }
+	const glm::vec3& getUp() const               { return m_up; }
+	float getWidth() const                       { return m_width; }
+	float getHeight() const                      { return m_height; }
+	float getVFov() const                        { return m_vFieldOfView; }
+	float getHFov() const                        { return m_hFieldOfView; }
+	float getNear() const                        { return m_near; }
+	float getFar() const                         { return m_far; }
 
 private:
 

@@ -38,19 +38,20 @@
     <ClInclude Include="Private\EntityWorld.h" />
     <ClInclude Include="Private\EntitySystem.h" />
     <ClInclude Include="Public\EntitySystem\EntitySystemAPI.h" />
-    <ClInclude Include="Public\EntitySystem\EntitySystemModule.h" />
     <ClInclude Include="Public\EntitySystem\IEntitySystem.h" />
     <ClInclude Include="Public\EntitySystem\IEntityWorld.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EntitySystem.cpp" />
-    <ClCompile Include="Public\EntitySystem\EntitySystemModule.cpp" />
+    <ClCompile Include="Private\EntitySystem\IEntitySystem.cpp" />
+    <ClCompile Include="Private\EntitySystem\IEntityWorld.cpp" />
+    <ClCompile Include="Private\EntityWorld.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9568FDDD-9F20-48C9-9FEB-BDAE1E714332}</ProjectGuid>
     <RootNamespace>EntitySystem</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'" Label="Configuration">

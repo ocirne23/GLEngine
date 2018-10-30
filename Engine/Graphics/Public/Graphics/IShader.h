@@ -1,18 +1,22 @@
 #pragma once
 
-class IVertexShaderStage;
-class IFragmentShaderStage;
+#include "GraphicsAPI.h"
 
-class IShader
+class GLShader;
+
+class GRAPHICS_API IShader
 {
 public:
 
-	virtual void initialize() = 0;
-	virtual void setShaderStage(IVertexShaderStage& stage) = 0;
-	virtual void setShaderStage(IFragmentShaderStage& stage) = 0;
+	IShader();
+	IShader(const IShader&) = delete;
+	~IShader();
+	explicit operator GLShader&() { return *m_impl; }
 
-protected:
+	void initialize();
+	void addShaderStage(IShaderStage& stage);
 
-	friend class IContext;
-	virtual ~IShader() {}
+private:
+
+	owner<GLShader*> m_impl = nullptr;
 };

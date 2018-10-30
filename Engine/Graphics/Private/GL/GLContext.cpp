@@ -210,6 +210,7 @@ owner<IVertexShaderStage*> GLContext::createVertexShaderStage()
 #ifdef DEBUG_BUILD
 	md_numVertexShaderStagesCreated++;
 #endif
+	return 0;
 }
 
 void GLContext::destroyVertexShaderStage(owner<IVertexShaderStage*> shaderStage)
@@ -224,6 +225,7 @@ owner<IFragmentShaderStage*> GLContext::createFragmentShaderStage()
 #ifdef DEBUG_BUILD
 	md_numFragmentShaderStagesCreated++;
 #endif
+	return 0;
 }
 
 void GLContext::destroyFragmentShaderStageShader(owner<IFragmentShaderStage*> shaderStage)

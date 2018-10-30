@@ -2,12 +2,15 @@
 
 #include "Core.h"
 
-class IEntityWorld;
+class EntityWorld;
 
 class EntitySystem
 {
 public:
-	owner<IEntityWorld*> createEntityWorld();
-	void destroyEntityWorld(owner<IEntityWorld*> entityWorld);
 
+	EntitySystem();
+	EntitySystem(const EntitySystem&) = delete;
+	~EntitySystem();
+
+	void doStuff();
 };
