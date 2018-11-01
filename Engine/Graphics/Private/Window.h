@@ -12,8 +12,6 @@ public:
 	Window(const Window&) = delete;
 	~Window();
 
-	owner<IContext*> createContext(const EContextType& type);
-	void destroyContext(owner<IContext*> context);
 	void swapBuffer();
 
 	SDL_Window* getSDLWindow() { return m_window; }

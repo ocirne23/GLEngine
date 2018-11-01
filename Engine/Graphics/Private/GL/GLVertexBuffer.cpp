@@ -1,2 +1,0 @@
-#include "GLVertexBuffer.h"
-

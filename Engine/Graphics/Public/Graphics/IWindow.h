@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
+#include "Core/PimplPtr.h"
 
 class IContext;
 enum class EContextType;
@@ -18,19 +19,19 @@ class Window;
 
 class GRAPHICS_API IWindow
 {
-public:
+private:
 
-	IWindow();
-	IWindow(const IWindow&) = delete;
-	IWindow(IWindow&& move);
-	~IWindow();
+	friend class IGraphics;
+	IWindow(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
+
+public:
 
 	explicit operator Window&() { return *m_impl; }
 
-	IContext createContext(const EContextType& type);
+	//IContext createContext(const EContextType& type);
 	void swapBuffer();
 
 private:
 
-	owner<Window*> m_impl = nullptr;
+	PimplPtr<Window> m_impl;
 };

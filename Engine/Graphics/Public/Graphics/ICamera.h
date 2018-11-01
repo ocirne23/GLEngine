@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GraphicsAPI.h"
-
+#include "Core/PimplPtr.h"
 #include <glm/fwd.hpp>
 
 class Frustum;
@@ -13,10 +13,7 @@ public:
 	enum class EProjection { PERSPECTIVE, ORTHOGRAPHIC };
 
 	ICamera();
-	ICamera(const ICamera&) = delete;
-	~ICamera();
 	explicit operator Camera&() { return *m_impl; }
-
 
 	void initialize(float width, float height, float horizontalFov, float near, float far, EProjection projection, const glm::vec3& worldUp);
 	void updateMatrices();
@@ -52,5 +49,5 @@ public:
 
 private:
 
-	owner<Camera*> m_impl = nullptr;
+	PimplPtr<Camera> m_impl;
 };

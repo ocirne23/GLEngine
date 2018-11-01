@@ -2,17 +2,8 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
-
+#include "Core/PimplPtr.h"
 #include <glm/fwd.hpp>
-
-class IBuffer;
-enum class EBufferType;
-
-class IFramebuffer;
-class IVertexAttributes;
-class IShader;
-class IVertexShaderStage;
-class IFragmentShaderStage;
 
 enum class EContextType
 {
@@ -23,17 +14,14 @@ class GLContext;
 
 class GRAPHICS_API IContext
 {
-public:
-
-	IContext();
-	IContext(const IContext&) = delete;
-	IContext(IContext&& move);
-	~IContext();
-	explicit operator GLContext&() { return *m_impl; }
-	
-	//EContextType getType() const;
-
 private:
 
-	owner<GLContext*> m_impl = nullptr;
+	friend class IWindow;
+	IContext(const EContextType& type);
+	PimplPtr<GLContext> m_impl;
+
+public:
+
+	~IContext() = default;
+	explicit operator GLContext&() { return *m_impl; }
 };

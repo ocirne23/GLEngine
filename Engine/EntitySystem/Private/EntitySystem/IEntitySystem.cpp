@@ -7,11 +7,6 @@ IEntitySystem::IEntitySystem()
 {
 }
 
-IEntitySystem::~IEntitySystem() 
-{ 
-	delete m_impl;
-}
-
 void IEntitySystem::doStuff() 
 { 
 	m_impl->doStuff();

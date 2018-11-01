@@ -2,14 +2,8 @@
 
 #include "GL/GLContext.h"
 
-IContext::IContext()
-	: m_impl(new GLContext())
+IContext::IContext(const EContextType& type)
+	: m_impl(make_pimpl<GLContext>())
 {
-
-}
-
-IContext::IContext(IContext&& move)
-{
-	m_impl = move.m_impl;
-	move.m_impl = nullptr;
+	assert(type == EContextType::OPENGL);
 }

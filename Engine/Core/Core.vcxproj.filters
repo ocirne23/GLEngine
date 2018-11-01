@@ -7,5 +7,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Utils.cpp" />
+    <ClCompile Include="Public\Core\PimplPtr.h" />
   </ItemGroup>
 </Project>

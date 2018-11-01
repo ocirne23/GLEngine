@@ -8,8 +8,3 @@ IEntityWorld::IEntityWorld(IEntitySystem& system)
 	: m_impl(new EntityWorld(scast<EntitySystem&>(system)))
 {
 }
-
-IEntityWorld::~IEntityWorld() 
-{ 
-	delete m_impl;
-}

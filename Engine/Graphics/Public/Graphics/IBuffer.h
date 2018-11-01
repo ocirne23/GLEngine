@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
+#include "Core/PimplPtr.h"
 
 /*
 enum class EBufferType
@@ -26,8 +27,6 @@ class GRAPHICS_API IBuffer
 public:
 
 	IBuffer();
-	IBuffer(const IBuffer&) = delete;
-	~IBuffer();
 	explicit operator GLBuffer&() { return *m_impl; }
 
 	void initialize(uint64 sizeBytes, EBufferUsageType usageType);
@@ -38,5 +37,5 @@ public:
 
 private:
 
-	owner<GLBuffer*> m_impl = nullptr;
+	PimplPtr<GLBuffer> m_impl;
 };

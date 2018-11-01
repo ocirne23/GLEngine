@@ -1,16 +1,15 @@
 #pragma once
 
-#include "Graphics/IVertexAttributes.h"
 #include "EASTL/vector.h"
 
-class GLVertexAttributes : public IVertexAttributes
+class GLVertexAttributes
 {
 public:
 
 	void initialize();
-	virtual void addVertexAttribute(EVertexAttributeFormat format, uint numElements, bool normalize = false) override;
-	virtual void reset() override;
-	virtual void bind(IBuffer& vertexBuffer) override;
+	void addVertexAttribute(EVertexAttributeFormat format, uint numElements, bool normalize = false);
+	void reset();
+	void bind(IBuffer& vertexBuffer);
 
 private:
 
@@ -31,11 +30,4 @@ private:
 	bool m_initialized = false;
 	uint m_vaoID = 0;
 	eastl::vector<GLVertexAttribute> m_attributes;
-
-private:
-
-	friend class GLContext;
-	GLVertexAttributes() {}
-	~GLVertexAttributes() override {}
-	GLVertexAttributes(const GLVertexAttributes&) = delete;
 };

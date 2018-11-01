@@ -2,13 +2,8 @@
 #include "Camera.h"
 
 ICamera::ICamera()
-	: m_impl(new Camera())
+	: m_impl(make_pimpl<Camera>())
 {
-}
-
-ICamera::~ICamera()
-{
-	SAFE_DELETE(m_impl);
 }
 
 void ICamera::initialize(float width, float height, float horizontalFov, float near, float far, EProjection projection, const glm::vec3& worldUp)

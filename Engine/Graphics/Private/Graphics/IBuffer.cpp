@@ -2,13 +2,8 @@
 
 #include "GL/GLBuffer.h"
 
-IBuffer::IBuffer() : m_impl(new GLBuffer())
+IBuffer::IBuffer() : m_impl(make_pimpl<GLBuffer>())
 {
-}
-
-IBuffer::~IBuffer()
-{
-	SAFE_DELETE(m_impl);
 }
 
 void IBuffer::initialize(uint64 sizeBytes, EBufferUsageType usageType)

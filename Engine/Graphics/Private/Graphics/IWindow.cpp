@@ -1,19 +1,19 @@
 #include "Graphics/IWindow.h"
 
 #include "Window.h"
+#include "Graphics/IContext.h"
 
-IWindow::IWindow()
-	: m_impl(new Window("", 512, 512, 0, 0, EWindowMode::WINDOWED))
+IWindow::IWindow(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode)
+	: m_impl(make_pimpl<Window>(name, width, height, xPos, yPos, mode))
 {
 }
-
-IWindow::~IWindow()
+/*
+IContext IWindow::createContext(const EContextType& type)
 {
-	SAFE_DELETE(m_impl);
-}
+	;
+}*/
 
-IWindow::IWindow(IWindow&& move)
+void IWindow::swapBuffer()
 {
-	m_impl = move.m_impl;
-	move.m_impl = nullptr;
+	m_impl->swapBuffer();
 }

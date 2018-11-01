@@ -2,6 +2,7 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
+#include "Core/PimplPtr.h"
 
 class IBuffer;
 
@@ -13,13 +14,13 @@ enum class EVertexAttributeFormat
 	INT
 };
 
+class GLVertexAttributes;
+
 class GRAPHICS_API IVertexAttributes
 {
 public:
 
 	IVertexAttributes();
-	IVertexAttributes(const IVertexAttributes&) = delete;
-	~IVertexAttributes();
 	explicit operator GLVertexAttributes&() { return *m_impl; }
 
 	void reset();
@@ -28,5 +29,5 @@ public:
 
 private:
 
-	owner<GLVertexAttributes*> m_impl = nullptr;
+	PimplPtr<GLVertexAttributes> m_impl;
 };

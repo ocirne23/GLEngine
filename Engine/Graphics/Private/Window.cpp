@@ -6,38 +6,6 @@
 
 #include "GL/GLContext.h"
 
-owner<IContext*> Window::createContext(const EContextType& type)
-{
-#ifdef DEBUG_BUILD
-	md_numContextsCreated++;
-#endif
-	switch (type)
-	{
-	case EContextType::OPENGL:
-		return owner<GLContext*>(new GLContext(*this));
-	default:
-		assert(false);
-		return nullptr;
-	}
-}
-
-void Window::destroyContext(owner<IContext*> context)
-{
-#ifdef DEBUG_BUILD
-	md_numContextsCreated--;
-#endif
-	switch (context->getType())
-	{
-	case EContextType::OPENGL:
-		delete scast<GLContext*>(context);
-		break;
-	default:
-		assert(false);
-		break;
-	}
-}
-
-
 void Window::swapBuffer()
 {
 	SwapBuffers(scast<HDC>(m_hdc));
