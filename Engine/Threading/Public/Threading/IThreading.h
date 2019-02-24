@@ -1,7 +1,9 @@
 #pragma once
 
-class IThreading
+#include "ThreadingAPI.h"
+
+class THREADING_API IThreading
 {
 public:
-
+	IThreading();
 };

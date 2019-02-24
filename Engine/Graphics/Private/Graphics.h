@@ -14,9 +14,9 @@ public:
 
 	Graphics() {}
 	Graphics(const Graphics&) = delete;
-	~Graphics();
+	~Graphics() {}
 
-	IWindow createWindow(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
+	//IWindow createWindow(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
 
 private:
 

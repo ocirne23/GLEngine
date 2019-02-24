@@ -3,8 +3,6 @@
   <ItemGroup>
     <ClInclude Include="Public\Graphics\IWindow.h" />
     <ClInclude Include="Private\Window.h" />
-    <ClInclude Include="Public\Graphics\IContext.h" />
-    <ClInclude Include="Private\GL\GLContext.h" />
     <ClInclude Include="Private\GL\GL.h" />
     <ClInclude Include="Public\Graphics\IBuffer.h" />
     <ClInclude Include="Private\GL\GLConstantBuffer.h" />
@@ -18,8 +16,6 @@
     <ClInclude Include="Private\Graphics.h" />
     <ClInclude Include="Private\GL\GLUtils.h" />
     <ClInclude Include="Private\GL\GLBuffer.h" />
-    <ClInclude Include="Public\Graphics\IVertexAttributes.h" />
-    <ClInclude Include="Private\GL\GLVertexAttributes.h" />
     <ClInclude Include="Public\Graphics\IShader.h" />
     <ClInclude Include="Private\GL\GLShader.h" />
     <ClInclude Include="Public\Graphics\IShaderStage.h" />
@@ -28,22 +24,18 @@
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />
-    <ClCompile Include="Private\GL\GLContext.cpp" />
     <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Frustum.cpp" />
     <ClCompile Include="Private\GL\GLUtils.cpp" />
     <ClCompile Include="Private\GL\GLBuffer.cpp" />
-    <ClCompile Include="Private\GL\GLVertexAttributes.cpp" />
     <ClCompile Include="Private\GL\GLShader.cpp" />
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
-    <ClCompile Include="Private\Graphics\IBuffer.cpp" />
-    <ClCompile Include="Private\Graphics\ICamera.cpp" />
-    <ClCompile Include="Private\Graphics\IContext.cpp" />
-    <ClCompile Include="Private\Graphics\IFramebuffer.cpp" />
-    <ClCompile Include="Private\Graphics\IGraphics.cpp" />
-    <ClCompile Include="Private\Graphics\IShader.cpp" />
-    <ClCompile Include="Private\Graphics\IShaderStage.cpp" />
-    <ClCompile Include="Private\Graphics\IVertexAttributes.cpp" />
-    <ClCompile Include="Private\Graphics\IWindow.cpp" />
+    <ClCompile Include="Private\IWindow.cpp" />
+    <ClCompile Include="Private\IBuffer.cpp" />
+    <ClCompile Include="Private\ICamera.cpp" />
+    <ClCompile Include="Private\IFramebuffer.cpp" />
+    <ClCompile Include="Private\IGraphics.cpp" />
+    <ClCompile Include="Private\IShader.cpp" />
+    <ClCompile Include="Private\IShaderStage.cpp" />
   </ItemGroup>
 </Project>

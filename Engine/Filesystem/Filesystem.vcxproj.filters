@@ -8,5 +8,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Filesystem.cpp" />
+    <ClCompile Include="Private\IFilesystem.cpp" />
   </ItemGroup>
 </Project>

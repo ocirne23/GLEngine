@@ -4,8 +4,6 @@
 #include <SDL/SDL_syswm.h>
 #include <Windows.h>
 
-#include "GL/GLContext.h"
-
 void Window::swapBuffer()
 {
 	SwapBuffers(scast<HDC>(m_hdc));

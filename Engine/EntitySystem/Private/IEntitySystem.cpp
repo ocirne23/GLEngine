@@ -3,7 +3,7 @@
 #include "EntitySystem.h"
 
 IEntitySystem::IEntitySystem()
-	: m_impl(new EntitySystem())
+	: m_impl(make_pimpl<EntitySystem>())
 {
 }
 

@@ -5,4 +5,6 @@
 class CORE_API Utils
 {
 public:
+
+	Utils();
 };

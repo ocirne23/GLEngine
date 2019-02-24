@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GraphicsAPI.h"
-#include "Core/PimplPtr.h"
+#include "Core/Pimpl.h"
 #include <glm/fwd.hpp>
 
 class Frustum;
@@ -49,5 +49,5 @@ public:
 
 private:
 
-	PimplPtr<Camera> m_impl;
+	Pimpl<Camera> m_impl;
 };

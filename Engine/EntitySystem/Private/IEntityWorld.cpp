@@ -5,6 +5,6 @@
 #include "EntitySystem.h"
 
 IEntityWorld::IEntityWorld(IEntitySystem& system)
-	: m_impl(new EntityWorld(scast<EntitySystem&>(system)))
+	: m_impl(make_pimpl<EntityWorld>(scast<EntitySystem&>(system)))
 {
 }

@@ -1,7 +1,9 @@
 #pragma once
 
-class IDatabase
+#include "DatabaseAPI.h"
+
+class DATABASE_API IDatabase
 {
 public:
-
+	IDatabase();
 };

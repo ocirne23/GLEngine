@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GraphicsAPI.h"
-#include "Core/PimplPtr.h"
+#include "Core/Pimpl.h"
 
 class GLShader;
 class IShaderStage;
@@ -18,5 +18,5 @@ public:
 
 private:
 
-	PimplPtr<GLShader> m_impl;
+	Pimpl<GLShader> m_impl;
 };

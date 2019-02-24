@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
-#include "Core/PimplPtr.h"
+#include "Core/Pimpl.h"
 
 /*
 enum class EBufferType
@@ -37,5 +37,5 @@ public:
 
 private:
 
-	PimplPtr<GLBuffer> m_impl;
+	Pimpl<GLBuffer> m_impl;
 };

@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Private\Database.cpp" />
+    <ClCompile Include="Private\IDatabase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Public\Database\DatabaseAPI.h" />

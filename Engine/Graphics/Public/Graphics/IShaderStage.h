@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GraphicsAPI.h"
-#include "Core/PimplPtr.h"
+#include "Core/Pimpl.h"
 #include <EASTL/string.h>
 #include <EASTL/vector.h>
 
@@ -35,5 +35,5 @@ public:
 	*/
 private:
 
-	PimplPtr<GLShaderStage> m_impl;
+	Pimpl<GLShaderStage> m_impl;
 };

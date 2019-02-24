@@ -1,10 +1,12 @@
 #pragma once
 
+#include "FilesystemAPI.h"
+
 class FilePath;
 
-class IFilesystem
+class FILESYSTEM_API IFilesystem
 {
 public:
 
-	FilePath createFilePath();
+	IFilesystem();
 };

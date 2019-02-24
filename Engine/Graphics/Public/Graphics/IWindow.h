@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
-#include "Core/PimplPtr.h"
+#include "Core/Pimpl.h"
 
 class IContext;
 enum class EContextType;
@@ -33,5 +33,5 @@ public:
 
 private:
 
-	PimplPtr<Window> m_impl;
+	Pimpl<Window> m_impl;
 };

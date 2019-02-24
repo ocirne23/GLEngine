@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Graphics/IShaderStage.h"
-
+/*
 class GLShaderStage : public IShaderStage
 {
 public:
@@ -18,4 +18,4 @@ private:
 
 	eastl::vector<RequiredDefine> m_requiredDefines;
 	uint m_id = 0;
-};
+};*/

@@ -1,7 +1,9 @@
 #pragma once
 
-class INetwork
+#include "NetworkAPI.h"
+
+class NETWORK_API INetwork
 {
 public:
-
+	INetwork();
 };

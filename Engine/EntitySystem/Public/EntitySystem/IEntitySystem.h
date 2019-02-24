@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EntitySystemAPI.h"
-#include <EASTL/unique_ptr.h>
+#include "Core/Pimpl.h"
 
 class EntitySystem;
 
@@ -16,5 +16,5 @@ public:
 
 private:
 
-	eastl::unique_ptr<EntitySystem> m_impl;
+	Pimpl<EntitySystem> m_impl;
 };

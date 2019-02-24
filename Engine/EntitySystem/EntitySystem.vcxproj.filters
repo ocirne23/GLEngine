@@ -10,7 +10,7 @@
   <ItemGroup>
     <ClCompile Include="Private\EntitySystem.cpp" />
     <ClCompile Include="Private\EntityWorld.cpp" />
-    <ClCompile Include="Private\EntitySystem\IEntitySystem.cpp" />
-    <ClCompile Include="Private\EntitySystem\IEntityWorld.cpp" />
+    <ClCompile Include="Private\IEntityWorld.cpp" />
+    <ClCompile Include="Private\IEntitySystem.cpp" />
   </ItemGroup>
 </Project>

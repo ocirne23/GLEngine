@@ -1,7 +1,7 @@
 #include "GLUtils.h"
 
 #include "Graphics/IBuffer.h"
-#include "GLVertexAttributes.h"
+//#include "GLVertexAttributes.h"
 #include "GL.h"
 
 BEGIN_NAMESPACE(GLUtils)
@@ -16,7 +16,7 @@ uint getGLUsageFlags(const EBufferUsageType& usageType)
 	default: assert(false); return 0;
 	}
 }
-
+/*
 uint getGLVertexAttributeSize(const EVertexAttributeFormat& attribute)
 {
 	switch (attribute)
@@ -41,5 +41,5 @@ uint getGLVertexAttributeType(const EVertexAttributeFormat& attribute)
 	}
 }
 
-
+*/
 END_NAMESPACE(GLUtils)

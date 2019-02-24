@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
-#include "Core/PimplPtr.h"
+#include "Core/Pimpl.h"
 
 class IWindow;
 enum class EWindowMode;
@@ -19,5 +19,5 @@ public:
 
 private:
 
-	PimplPtr<Graphics> m_impl;
+	Pimpl<Graphics> m_impl;
 };

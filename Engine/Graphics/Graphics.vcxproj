@@ -38,58 +38,58 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{72F40585-557E-420E-9280-7CA4ABFB5055}</ProjectGuid>
     <RootNamespace>Graphics</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -345,44 +345,36 @@
     <ClInclude Include="Private\GL\GL.h" />
     <ClInclude Include="Private\GL\GLBuffer.h" />
     <ClInclude Include="Private\GL\GLConstantBuffer.h" />
-    <ClInclude Include="Private\GL\GLContext.h" />
     <ClInclude Include="Private\GL\GLFramebuffer.h" />
     <ClInclude Include="Private\GL\GLShader.h" />
     <ClInclude Include="Private\GL\GLShaderStage.h" />
     <ClInclude Include="Private\GL\GLUtils.h" />
-    <ClInclude Include="Private\GL\GLVertexAttributes.h" />
     <ClInclude Include="Private\Window.h" />
     <ClInclude Include="Private\Graphics.h" />
     <ClInclude Include="Public\Graphics\GraphicsAPI.h" />
     <ClInclude Include="Public\Graphics\IBuffer.h" />
     <ClInclude Include="Public\Graphics\ICamera.h" />
-    <ClInclude Include="Public\Graphics\IContext.h" />
     <ClInclude Include="Public\Graphics\IFramebuffer.h" />
     <ClInclude Include="Public\Graphics\IGraphics.h" />
     <ClInclude Include="Public\Graphics\IShader.h" />
     <ClInclude Include="Public\Graphics\IShaderStage.h" />
-    <ClInclude Include="Public\Graphics\IVertexAttributes.h" />
     <ClInclude Include="Public\Graphics\IWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Camera.cpp" />
     <ClCompile Include="Private\Frustum.cpp" />
     <ClCompile Include="Private\GL\GLBuffer.cpp" />
-    <ClCompile Include="Private\GL\GLContext.cpp" />
     <ClCompile Include="Private\GL\GLShader.cpp" />
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
     <ClCompile Include="Private\GL\GLUtils.cpp" />
-    <ClCompile Include="Private\GL\GLVertexAttributes.cpp" />
     <ClCompile Include="Private\Graphics.cpp" />
-    <ClCompile Include="Private\Graphics\IBuffer.cpp" />
-    <ClCompile Include="Private\Graphics\ICamera.cpp" />
-    <ClCompile Include="Private\Graphics\IContext.cpp" />
-    <ClCompile Include="Private\Graphics\IFramebuffer.cpp" />
-    <ClCompile Include="Private\Graphics\IGraphics.cpp" />
-    <ClCompile Include="Private\Graphics\IShader.cpp" />
-    <ClCompile Include="Private\Graphics\IShaderStage.cpp" />
-    <ClCompile Include="Private\Graphics\IVertexAttributes.cpp" />
-    <ClCompile Include="Private\Graphics\IWindow.cpp" />
+    <ClCompile Include="Private\IBuffer.cpp" />
+    <ClCompile Include="Private\ICamera.cpp" />
+    <ClCompile Include="Private\IFramebuffer.cpp" />
+    <ClCompile Include="Private\IGraphics.cpp" />
+    <ClCompile Include="Private\IShader.cpp" />
+    <ClCompile Include="Private\IShaderStage.cpp" />
+    <ClCompile Include="Private\IWindow.cpp" />
     <ClCompile Include="Private\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

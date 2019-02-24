@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GraphicsAPI.h"
-#include "Core/PimplPtr.h"
+#include "Core/Pimpl.h"
 
 class GLFramebuffer;
 
@@ -14,5 +14,5 @@ public:
 
 private:
 
-	PimplPtr<GLFramebuffer> m_impl;
+	Pimpl<GLFramebuffer> m_impl;
 };

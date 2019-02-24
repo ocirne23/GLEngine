@@ -1,11 +1,8 @@
 #include "App.h"
 
 #include "Core/Utils.h"
-
-
 #include "Graphics/IGraphics.h"
 #include "Graphics/IWindow.h"
-#include "Graphics/IContext.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -32,7 +29,6 @@ int main()
 {
 	IGraphics graphics;
 	IWindow window = graphics.createWindow("Da", 512, 512, 0, 0, EWindowMode::WINDOWED);
-//	IContext context = window.createContext(EContextType::OPENGL);
 	return 0;
 }
 

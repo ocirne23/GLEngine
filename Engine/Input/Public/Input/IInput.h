@@ -1,7 +1,9 @@
 #pragma once
 
-class IInput
+#include "InputAPI.h"
+
+class INPUT_API IInput
 {
 public:
-
+	IInput();
 };

@@ -5,16 +5,16 @@
 #include <memory>
 
 template<class T, class Deleter = void(*)(T*)>
-class PimplPtr 
+class Pimpl 
 {
 public:
 
 	template<class U, class D>
-	PimplPtr(U *u, D&& deleter) noexcept
+	Pimpl(U *u, D&& deleter) noexcept
 		: m_ptr(u, std::forward<D>(deleter))
 	{}
 
-	PimplPtr(PimplPtr&&) noexcept = default;
+	Pimpl(Pimpl&&) noexcept = default;
 
 	T* operator->() const { return m_ptr.get(); }
 	T& operator*() const  { return *m_ptr; }
@@ -27,7 +27,7 @@ private:
 };
 
 template<class T, class... Args>
-inline PimplPtr<T> make_pimpl(Args&&... args) 
+inline Pimpl<T> make_pimpl(Args&&... args)
 {
-	return PimplPtr<T>(new T(std::forward<Args>(args)...), &PimplPtr<T>::defaultDelete);
+	return Pimpl<T>(new T(std::forward<Args>(args)...), &Pimpl<T>::defaultDelete);
 }
