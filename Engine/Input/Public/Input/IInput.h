@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Core.h"
 #include "InputAPI.h"
 
 class INPUT_API IInput
 {
 public:
-	IInput();
+	
+	static owner<IInput*> create();
 };

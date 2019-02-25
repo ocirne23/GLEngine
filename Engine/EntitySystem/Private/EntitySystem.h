@@ -1,16 +1,10 @@
 #pragma once
 
 #include "Core.h"
+#include "EntitySystem/IEntitySystem.h"
 
-class EntityWorld;
-
-class EntitySystem
+class EntitySystem : public IEntitySystem
 {
 public:
 
-	EntitySystem();
-	EntitySystem(const EntitySystem&) = delete;
-	~EntitySystem();
-
-	void doStuff();
 };

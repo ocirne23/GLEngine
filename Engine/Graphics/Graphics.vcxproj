@@ -368,13 +368,6 @@
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
     <ClCompile Include="Private\GL\GLUtils.cpp" />
     <ClCompile Include="Private\Graphics.cpp" />
-    <ClCompile Include="Private\IBuffer.cpp" />
-    <ClCompile Include="Private\ICamera.cpp" />
-    <ClCompile Include="Private\IFramebuffer.cpp" />
-    <ClCompile Include="Private\IGraphics.cpp" />
-    <ClCompile Include="Private\IShader.cpp" />
-    <ClCompile Include="Private\IShaderStage.cpp" />
-    <ClCompile Include="Private\IWindow.cpp" />
     <ClCompile Include="Private\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -343,7 +343,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Database.cpp" />
-    <ClCompile Include="Private\IDatabase.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />

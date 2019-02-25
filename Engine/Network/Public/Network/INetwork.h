@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Core.h"
 #include "NetworkAPI.h"
 
 class NETWORK_API INetwork
 {
 public:
-	INetwork();
+	
+	static owner<INetwork*> create();
 };

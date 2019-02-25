@@ -1,16 +1,6 @@
 #include "EntitySystem.h"
 
-EntitySystem::EntitySystem()
+owner<IEntitySystem*> IEntitySystem::create()
 {
-
-}
-
-EntitySystem::~EntitySystem()
-{
-
-}
-
-void EntitySystem::doStuff()
-{
-
+	return new EntitySystem();
 }

@@ -1,6 +1,6 @@
-#include "Threading/IThreading.h"
+#include "Threading.h"
 
-IThreading::IThreading()
+owner<IThreading*> IThreading::create()
 {
-
+	return new Threading();
 }

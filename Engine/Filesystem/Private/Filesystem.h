@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Core.h"
+#include "Filesystem/IFilesystem.h"
 
-class Filesystem
+class Filesystem : public IFilesystem
 {
 public:
 

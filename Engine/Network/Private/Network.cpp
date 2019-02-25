@@ -1,8 +1,6 @@
 #include "Network.h"
 
-#include "Network/INetwork.h"
-
-INetwork::INetwork()
+owner<INetwork*> INetwork::create()
 {
-
+	return new Network();
 }

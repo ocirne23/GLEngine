@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core.h"
 #include "FilesystemAPI.h"
 
 class FilePath;
@@ -8,5 +9,5 @@ class FILESYSTEM_API IFilesystem
 {
 public:
 
-	IFilesystem();
+	static owner<IFilesystem*> create();
 };

@@ -2,7 +2,6 @@
 
 #include "Core.h"
 #include "GraphicsAPI.h"
-#include "Core/Pimpl.h"
 
 /*
 enum class EBufferType
@@ -20,22 +19,18 @@ enum class EBufferUsageType
 	STREAM
 };
 
-class GLBuffer;
-
 class GRAPHICS_API IBuffer
 {
 public:
 
-	IBuffer();
-	explicit operator GLBuffer&() { return *m_impl; }
-
-	void initialize(uint64 sizeBytes, EBufferUsageType usageType);
-	void upload(span<const byte> data);
-	span<byte> map();
-	void unmap();
-	uint64 getSizeBytes() const;
+	virtual void initialize(uint64 sizeBytes, EBufferUsageType usageType) = 0;
+	virtual void upload(span<const byte> data) = 0;
+	virtual span<byte> map() = 0;
+	virtual void unmap() = 0;
+	virtual uint64 getSizeBytes() const = 0;
 
 private:
 
-	Pimpl<GLBuffer> m_impl;
+	friend class IContext;
+	IBuffer();
 };

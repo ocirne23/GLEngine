@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Core.h"
 #include "DatabaseAPI.h"
 
 class DATABASE_API IDatabase
 {
 public:
-	IDatabase();
+
+	static owner<IDatabase*> create();
 };

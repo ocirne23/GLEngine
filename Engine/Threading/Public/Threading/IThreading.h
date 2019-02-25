@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Core.h"
 #include "ThreadingAPI.h"
 
 class THREADING_API IThreading
 {
 public:
-	IThreading();
+	
+	static owner<IThreading*> create();
 };

@@ -27,8 +27,8 @@ END_UNNAMED_NAMESPACE()
 
 int main()
 {
-	IGraphics graphics;
-	IWindow window = graphics.createWindow("Da", 512, 512, 0, 0, EWindowMode::WINDOWED);
+	printf("Ello\n");
+	std::cin.get();
 	return 0;
 }
 

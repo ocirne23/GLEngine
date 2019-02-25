@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Core.h"
+#include "Input/IInput.h"
 
-class Input
+class Input : public IInput
 {
 public:
 

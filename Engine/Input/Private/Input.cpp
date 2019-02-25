@@ -1,8 +1,6 @@
 #include "Input.h"
 
-#include "Input/IInput.h"
-
-IInput::IInput()
+owner<IInput*> IInput::create()
 {
-
+	return new Input();
 }
