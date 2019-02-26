@@ -2,34 +2,24 @@
 
 #include "Graphics/IWindow.h"
 
-struct SDL_Window;
-
-class Window
+class Window : public IWindow
 {
 public:
 
 	Window(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode);
 	Window(const Window&) = delete;
-	~Window();
+	virtual ~Window() override;
 
-	void swapBuffer();
-
-	SDL_Window* getSDLWindow() { return m_window; }
-	void* getHDC()             { return m_hdc; }
-	void* getHWND()            { return m_hwnd; }
-	void* getHINSTANCE()       { return m_hinstance; }
-	void* getWNDPROC()         { return m_wndproc; }
-
-	uint getWidth() const      { return m_width; }
-	uint getHeight() const     { return m_height; }
-
-private:
-
-
-#ifdef DEBUG_BUILD
-private:
-	int md_numContextsCreated = 0;
-#endif
+	virtual owner<IContext*> createContext(const EContextType& contextType) override;
+	virtual void             destroyContext(owner<IContext*>& context) override;
+	virtual void             swapBuffers() override;
+	virtual SDL_Window*      getSDLWindow() override    { return m_window; }
+	virtual void*            getHDC() override          { return m_hdc; }
+	virtual void*            getHWND() override         { return m_hwnd; }
+	virtual void*            getHINSTANCE() override    { return m_hinstance; }
+	virtual void*            getWNDPROC() override      { return m_wndproc; }
+	virtual uint             getWidth() const override  { return m_width; }
+	virtual uint             getHeight() const override { return m_height; }
 
 private:
 

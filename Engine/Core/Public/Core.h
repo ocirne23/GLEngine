@@ -1,6 +1,8 @@
 #pragma once
 
+#include "CoreAPI.h"
 #include "gsl/gsl.h"
+
 using namespace gsl;
 
 #undef NULL
@@ -34,6 +36,8 @@ using uint = unsigned int;
 using ushort = unsigned short;
 using int64 = long long;
 using uint64 = unsigned long long;
+
+void CORE_API print(const char* format, ...);
 
 template <typename T, std::size_t N>
 constexpr std::size_t ARRAY_SIZE(T const (&)[N])

@@ -27,8 +27,13 @@ END_UNNAMED_NAMESPACE()
 
 int main()
 {
+	owner<IGraphics*> graphics = IGraphics::createGraphics();
+	owner<IWindow*> window = graphics->createWindow("da", 512, 512, 1920 / 2 - 256, 1080 / 2 - 256, EWindowMode::WINDOWED);
 	printf("Ello\n");
+	window->swapBuffers();
 	std::cin.get();
+	graphics->destroyWindow(window);
+	IGraphics::destroyGraphics(graphics);
 	return 0;
 }
 

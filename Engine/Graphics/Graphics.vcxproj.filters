@@ -20,6 +20,8 @@
     <ClInclude Include="Private\GL\GLShader.h" />
     <ClInclude Include="Public\Graphics\IShaderStage.h" />
     <ClInclude Include="Private\GL\GLShaderStage.h" />
+    <ClInclude Include="Public\Graphics\IContext.h" />
+    <ClInclude Include="Private\GL\GLContext.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
@@ -30,5 +32,6 @@
     <ClCompile Include="Private\GL\GLBuffer.cpp" />
     <ClCompile Include="Private\GL\GLShader.cpp" />
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
+    <ClCompile Include="Private\GL\GLContext.cpp" />
   </ItemGroup>
 </Project>

@@ -1,13 +1,10 @@
 #include "Window.h"
 
+#include "GL/GLContext.h"
+
 #include <SDL/SDL_video.h>
 #include <SDL/SDL_syswm.h>
 #include <Windows.h>
-
-void Window::swapBuffer()
-{
-	SwapBuffers(scast<HDC>(m_hdc));
-}
 
 Window::Window(const char* name, uint width, uint height, uint xPos, uint yPos, const EWindowMode& mode)
 	: m_width(width)
@@ -46,8 +43,27 @@ Window::Window(const char* name, uint width, uint height, uint xPos, uint yPos, 
 Window::~Window()
 {
 	SDL_DestroyWindow(m_window);
+}
 
-#ifdef DEBUG_BUILD
-	assert(md_numContextsCreated == 0);
-#endif
+owner<IContext*> Window::createContext(const EContextType& contextType)
+{
+	switch (contextType)
+	{
+	case EContextType::OPENGL:
+		return new GLContext(m_hdc);
+	default:
+		assert(false);
+		return nullptr;
+	}
+}
+
+void Window::destroyContext(owner<IContext*>& context)
+{
+	delete context;
+	context = nullptr;
+}
+
+void Window::swapBuffers()
+{
+	SwapBuffers(scast<HDC>(m_hdc));
 }
