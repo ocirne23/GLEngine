@@ -2,7 +2,7 @@
 
 #include "Graphics/IWindow.h"
 
-class Window : public IWindow
+class Window final : public IWindow
 {
 public:
 
@@ -24,13 +24,12 @@ public:
 private:
 
 	SDL_Window* m_window = NULL;
-	void* m_hinstance = NULL;
-	void* m_hwnd = NULL;
-	void* m_hdc = NULL;
-	void* m_wndproc = NULL;
-
-	uint m_width = 0;
-	uint m_height = 0;
-	uint m_xPos = 0;
-	uint m_yPos = 0;
+	void* m_hinstance    = NULL;
+	void* m_hwnd         = NULL;
+	void* m_hdc          = NULL;
+	void* m_wndproc      = NULL;
+	uint m_width         = 0;
+	uint m_height        = 0;
+	uint m_xPos          = 0;
+	uint m_yPos          = 0;
 };

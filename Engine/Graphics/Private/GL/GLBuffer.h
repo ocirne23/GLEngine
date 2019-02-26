@@ -2,24 +2,23 @@
 
 #include "Graphics/IBuffer.h"
 
-class GLBuffer
+class GLBuffer final : public IBuffer
 {
 public:
 
-	 //EBufferType getType() const;
+	 GLBuffer(uint64 sizeBytes, EBufferUsageType usageType);
+	 virtual ~GLBuffer() override;
 
-	 void initialize(uint64 sizeBytes, EBufferUsageType usageType);
-	 void upload(span<const byte> data);
-	 span<byte> map();
-	 void unmap();
-	 uint64 getSizeBytes() const  { return m_sizeBytes; }
+	 virtual void       upload(span<const byte> data) override;
+	 virtual span<byte> map() override;
+	 virtual void       unmap() override;
+	 virtual uint64     getSizeBytes() const override { return m_sizeBytes; }
 
-	uint getID() { return m_id; }
+	 uint               getID() { return m_id; }
 
 private:
 
-	bool m_initialized = false;
 	uint64 m_sizeBytes = 0;
-	uint m_id = 0;
-	uint m_usageFlags = 0;
+	uint m_id          = 0;
+	uint m_usageFlags  = 0;
 };

@@ -59,7 +59,13 @@ owner<IContext*> Window::createContext(const EContextType& contextType)
 
 void Window::destroyContext(owner<IContext*>& context)
 {
-	delete context;
+	switch (context->getContextType())
+	{
+	case EContextType::OPENGL:
+		delete static_cast<GLContext*>(context);
+	default:
+		assert(false);
+	}
 	context = nullptr;
 }
 

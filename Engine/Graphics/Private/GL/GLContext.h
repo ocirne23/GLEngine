@@ -6,7 +6,7 @@
 struct SDL_Window;
 typedef void* ContextHandle;
 
-class GLContext : public IContext
+class GLContext final : public IContext
 {
 public:
 
@@ -14,7 +14,10 @@ public:
 	GLContext(const GLContext& copy) = delete;
 	virtual ~GLContext() override;
 
-	virtual EContextType getContextType() const override { return EContextType::OPENGL; }
+	virtual owner<IBuffer*> createBuffer(uint64 size, const EBufferUsageType& type) override;
+	virtual void            destroyBuffer(owner<IBuffer*>& buffer) override;
+	virtual EContextType    getContextType() const override { return EContextType::OPENGL; }
+
 	uint                 getGLMajorVersion() const       { return m_glMajorVersion; }
 	uint                 getGLMinorVersion() const       { return m_glMinorVersion; }
 	uint                 getMaxTextureUnits() const      { return m_maxTextureUnits; }

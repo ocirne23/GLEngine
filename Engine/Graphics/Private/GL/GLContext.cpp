@@ -2,6 +2,8 @@
 
 #include "GL.h"
 
+#include "GL/GLBuffer.h"
+
 #include <assert.h>
 #include <Windows.h>
 
@@ -77,4 +79,15 @@ GLContext::~GLContext()
 {
 	assert(m_glContext);
 	wglDeleteContext(scast<HGLRC>(m_glContext));
+}
+
+owner<IBuffer*> GLContext::createBuffer(uint64 size, const EBufferUsageType& type)
+{
+	return new GLBuffer(size, type);
+}
+
+void GLContext::destroyBuffer(owner<IBuffer*>& buffer)
+{
+	delete static_cast<GLBuffer*>(buffer);
+	buffer = nullptr;
 }

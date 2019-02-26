@@ -32,6 +32,5 @@ public:
 
 protected:
 
-	friend class Graphics;
 	virtual ~IWindow() {}
 };

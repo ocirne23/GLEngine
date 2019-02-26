@@ -5,17 +5,17 @@
 
 #include <EASTL/algorithm.h>
 
-void GLBuffer::initialize(uint64 sizeBytes, EBufferUsageType usageType)
+GLBuffer::GLBuffer(uint64 sizeBytes, EBufferUsageType usageType)
 {
-	if (m_initialized)
-	{
-		glDeleteBuffers(1, &m_id);
-	}
 	glCreateBuffers(1, &m_id);
 	m_usageFlags = GLUtils::getGLUsageFlags(usageType);
 	glNamedBufferStorage(m_id, sizeBytes, nullptr, m_usageFlags);
 	m_sizeBytes = sizeBytes;
-	m_initialized = true;
+}
+
+GLBuffer::~GLBuffer()
+{
+	glDeleteBuffers(1, &m_id);
 }
 
 void GLBuffer::upload(span<const byte> data)

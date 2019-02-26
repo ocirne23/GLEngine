@@ -20,6 +20,6 @@ owner<IWindow*> Graphics::createWindow(const char* name, uint width, uint height
 
 void Graphics::destroyWindow(owner<IWindow*>& window)
 {
-	delete window;
+	delete static_cast<Window*>(window);
 	window = nullptr;
 }
