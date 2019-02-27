@@ -22,6 +22,8 @@
     <ClInclude Include="Private\GL\GLShaderStage.h" />
     <ClInclude Include="Public\Graphics\IContext.h" />
     <ClInclude Include="Private\GL\GLContext.h" />
+    <ClInclude Include="Private\GL\GLTexture.h" />
+    <ClInclude Include="Public\Graphics\ITexture.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Graphics.cpp" />
@@ -33,5 +35,6 @@
     <ClCompile Include="Private\GL\GLShader.cpp" />
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
     <ClCompile Include="Private\GL\GLContext.cpp" />
+    <ClCompile Include="Private\GL\GLFramebuffer.cpp" />
   </ItemGroup>
 </Project>

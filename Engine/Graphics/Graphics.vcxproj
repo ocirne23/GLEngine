@@ -353,6 +353,7 @@
     <ClInclude Include="Private\GL\GLFramebuffer.h" />
     <ClInclude Include="Private\GL\GLShader.h" />
     <ClInclude Include="Private\GL\GLShaderStage.h" />
+    <ClInclude Include="Private\GL\GLTexture.h" />
     <ClInclude Include="Private\GL\GLUtils.h" />
     <ClInclude Include="Private\Window.h" />
     <ClInclude Include="Private\Graphics.h" />
@@ -364,6 +365,7 @@
     <ClInclude Include="Public\Graphics\IGraphics.h" />
     <ClInclude Include="Public\Graphics\IShader.h" />
     <ClInclude Include="Public\Graphics\IShaderStage.h" />
+    <ClInclude Include="Public\Graphics\ITexture.h" />
     <ClInclude Include="Public\Graphics\IWindow.h" />
   </ItemGroup>
   <ItemGroup>
@@ -371,6 +373,7 @@
     <ClCompile Include="Private\Frustum.cpp" />
     <ClCompile Include="Private\GL\GLBuffer.cpp" />
     <ClCompile Include="Private\GL\GLContext.cpp" />
+    <ClCompile Include="Private\GL\GLFramebuffer.cpp" />
     <ClCompile Include="Private\GL\GLShader.cpp" />
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
     <ClCompile Include="Private\GL\GLUtils.cpp" />
