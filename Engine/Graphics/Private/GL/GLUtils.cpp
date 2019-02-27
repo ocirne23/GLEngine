@@ -1,6 +1,7 @@
 #include "GLUtils.h"
 
 #include "Graphics/IBuffer.h"
+#include "Graphics/IFramebuffer.h"
 //#include "GLVertexAttributes.h"
 #include "GL.h"
 
@@ -16,6 +17,23 @@ uint getGLUsageFlags(const EBufferUsageType& usageType)
 	default: assert(false); return 0;
 	}
 }
+
+uint getGLAttachment(const ETextureAttachment& attachment)
+{
+	switch (attachment)
+	{
+	case ETextureAttachment::DEPTH:   return GL_DEPTH_ATTACHMENT;
+	case ETextureAttachment::STENCIL: return GL_STENCIL_ATTACHMENT;
+	case ETextureAttachment::COLOR0:  return GL_COLOR_ATTACHMENT0;
+	case ETextureAttachment::COLOR1:  return GL_COLOR_ATTACHMENT1;
+	case ETextureAttachment::COLOR2:  return GL_COLOR_ATTACHMENT2;
+	case ETextureAttachment::COLOR3:  return GL_COLOR_ATTACHMENT3;
+	case ETextureAttachment::COLOR4:  return GL_COLOR_ATTACHMENT4;
+	case ETextureAttachment::COLOR5:  return GL_COLOR_ATTACHMENT5;
+	default: assert(false); return 0;
+	}
+}
+
 /*
 uint getGLVertexAttributeSize(const EVertexAttributeFormat& attribute)
 {
