@@ -349,6 +349,11 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Private\stb\stb_dxt.cpp" />
+    <ClCompile Include="Private\stb\stb_image.cpp" />
+    <ClCompile Include="Private\stb\stb_image_resize.cpp" />
+    <ClCompile Include="Private\stb\stb_image_write.cpp" />
+    <ClInclude Include="Private\stb\stb_rect_pack.cpp" />
     <ClInclude Include="Public\EAAssert\eaassert.h" />
     <ClInclude Include="Public\EABase\config\eacompiler.h" />
     <ClInclude Include="Public\EABase\config\eacompilertraits.h" />
@@ -632,6 +637,11 @@
     <ClInclude Include="Public\glm\vec4.hpp" />
     <ClInclude Include="Public\glm\vector_relational.hpp" />
     <ClInclude Include="Public\gsl\gsl.h" />
+    <ClInclude Include="Public\stb\stb_dxt.h" />
+    <ClInclude Include="Public\stb\stb_image.h" />
+    <ClInclude Include="Public\stb\stb_image_resize.h" />
+    <ClInclude Include="Public\stb\stb_image_write.h" />
+    <ClInclude Include="Public\stb\stb_rect_pack.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EAStdC\EAMemory.cpp" />

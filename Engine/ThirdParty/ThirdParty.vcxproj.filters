@@ -284,6 +284,16 @@
     <ClInclude Include="Public\glm\vec3.hpp" />
     <ClInclude Include="Public\glm\vec4.hpp" />
     <ClInclude Include="Public\glm\vector_relational.hpp" />
+    <ClInclude Include="Public\stb\stb_image.h" />
+    <ClInclude Include="Public\stb\stb_image_write.h" />
+    <ClInclude Include="Public\stb\stb_image_resize.h" />
+    <ClInclude Include="Public\stb\stb_dxt.h" />
+    <ClInclude Include="Public\stb\stb_rect_pack.h" />
+    <ClInclude Include="Private\stb\stb_rect_pack.cpp" />
+    <ClInclude Include="Private\stb\stb_image_write.cpp" />
+    <ClInclude Include="Private\stb\stb_image_resize.cpp" />
+    <ClInclude Include="Private\stb\stb_image.cpp" />
+    <ClInclude Include="Private\stb\stb_dxt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EASTL\allocator_eastl.cpp" />

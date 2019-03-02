@@ -2,9 +2,24 @@
 
 #include "Graphics/ITexture.h"
 
-class GLTexture : public ITexture
+class GLTexture final : public ITexture
 {
 public:
 
-	uint getID() const { return 0; }
+	GLTexture(ETextureType type);
+	virtual ~GLTexture();
+
+	virtual void setOptions(const ITextureSettings& options) override;
+
+	uint getID() const { return m_id; }
+
+private:
+
+	void setupTextureStorage(const ITextureSettings& options);
+
+private:
+
+	uint m_id = 0;
+	ETextureType m_type;
+	ITextureSettings m_settings;
 };

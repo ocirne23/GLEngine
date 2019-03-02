@@ -36,5 +36,6 @@
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
     <ClCompile Include="Private\GL\GLContext.cpp" />
     <ClCompile Include="Private\GL\GLFramebuffer.cpp" />
+    <ClCompile Include="Private\GL\GLTexture.cpp" />
   </ItemGroup>
 </Project>

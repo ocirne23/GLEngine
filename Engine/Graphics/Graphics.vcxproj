@@ -376,6 +376,7 @@
     <ClCompile Include="Private\GL\GLFramebuffer.cpp" />
     <ClCompile Include="Private\GL\GLShader.cpp" />
     <ClCompile Include="Private\GL\GLShaderStage.cpp" />
+    <ClCompile Include="Private\GL\GLTexture.cpp" />
     <ClCompile Include="Private\GL\GLUtils.cpp" />
     <ClCompile Include="Private\Graphics.cpp" />
     <ClCompile Include="Private\Window.cpp" />
