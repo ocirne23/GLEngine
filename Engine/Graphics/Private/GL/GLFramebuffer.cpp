@@ -24,3 +24,9 @@ void GLFramebuffer::attachTexture(const ITexture& tex, ETextureAttachment attach
 		m_drawBuffers.push_back(glAttachment);
 	glNamedFramebufferDrawBuffers(m_id, m_drawBuffers.size(), m_drawBuffers.data());
 }
+
+void GLFramebuffer::bind(EFramebufferTarget target)
+{
+	GLUtils::getGLFramebufferTarget(target)
+	glBindFramebuffer(GLUtils::getGLFramebufferTarget(target), m_id);
+}

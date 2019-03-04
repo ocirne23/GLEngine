@@ -2,7 +2,8 @@
 
 #include "GL.h"
 
-#include "GL/GLBuffer.h"
+#include "GLBuffer.h"
+#include "GLTexture.h"
 
 #include <assert.h>
 #include <Windows.h>
@@ -90,4 +91,15 @@ void GLContext::destroyBuffer(owner<IBuffer*>& buffer)
 {
 	delete static_cast<GLBuffer*>(buffer);
 	buffer = nullptr;
+}
+
+owner<ITexture*> GLContext::createTexture(const ETextureType& type)
+{
+	return new GLTexture(type);
+}
+
+void GLContext::destroyTexture(owner<ITexture*>& texture)
+{
+	delete static_cast<GLTexture*>(texture);
+	texture = nullptr;
 }

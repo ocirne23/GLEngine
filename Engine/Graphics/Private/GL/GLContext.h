@@ -14,9 +14,11 @@ public:
 	GLContext(const GLContext& copy) = delete;
 	virtual ~GLContext() override;
 
-	virtual owner<IBuffer*> createBuffer(uint64 size, const EBufferUsageType& type) override;
-	virtual void            destroyBuffer(owner<IBuffer*>& buffer) override;
-	virtual EContextType    getContextType() const override { return EContextType::OPENGL; }
+	virtual EContextType     getContextType() const override { return EContextType::OPENGL; }
+	virtual owner<IBuffer*>  createBuffer(uint64 size, const EBufferUsageType& type) override;
+	virtual void             destroyBuffer(owner<IBuffer*>& buffer) override;
+	virtual owner<ITexture*> createTexture(const ETextureType& type) override;
+	virtual void             destroyTexture(owner<ITexture*>& texture) override;
 
 	uint                 getGLMajorVersion() const       { return m_glMajorVersion; }
 	uint                 getGLMinorVersion() const       { return m_glMinorVersion; }

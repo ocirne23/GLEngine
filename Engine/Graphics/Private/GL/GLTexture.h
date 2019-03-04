@@ -9,17 +9,18 @@ public:
 	GLTexture(ETextureType type);
 	virtual ~GLTexture();
 
-	virtual void setOptions(const ITextureSettings& options) override;
+	virtual void setOptions(const TextureSettings& options) override;
+	virtual void loadTexture(void* data, ETexturePixelDataFormat format) override;
 
 	uint getID() const { return m_id; }
 
 private:
 
-	void setupTextureStorage(const ITextureSettings& options);
+	void setupTextureStorage(const TextureSizeSettings& options);
 
 private:
 
 	uint m_id = 0;
 	ETextureType m_type;
-	ITextureSettings m_settings;
+	TextureSettings m_settings;
 };

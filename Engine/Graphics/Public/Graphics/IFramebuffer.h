@@ -15,11 +15,19 @@ enum class ETextureAttachment
 	COLOR5
 };
 
+enum class EFramebufferTarget
+{
+	DRAW,
+	READ,
+	DRAWREAD,
+};
+
 class GRAPHICS_API IFramebuffer
 {
 public:
 
 	virtual void attachTexture(const ITexture& tex, ETextureAttachment attachment) = 0;
+	virtual void bind(EFramebufferTarget target) = 0;
 
 protected:
 

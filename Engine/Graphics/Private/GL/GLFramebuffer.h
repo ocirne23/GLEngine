@@ -14,9 +14,13 @@ public:
 	~GLFramebuffer();
 
 	virtual void attachTexture(const ITexture& tex, ETextureAttachment attachment) override;
+	virtual void bind(EFramebufferTarget target) override;
+
+	
 
 private:
 
 	uint m_id = 0;
+	EFramebufferTarget m_target = EFramebufferTarget::DRAWREAD;
 	eastl::vector<uint> m_drawBuffers;
 };

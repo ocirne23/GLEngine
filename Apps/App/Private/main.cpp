@@ -4,6 +4,7 @@
 #include "Graphics/IGraphics.h"
 #include "Graphics/IWindow.h"
 #include "Graphics/IContext.h"
+#include "Graphics/ITexture.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -31,9 +32,15 @@ int main()
 	owner<IGraphics*> graphics = IGraphics::createGraphics();
 	owner<IWindow*> window = graphics->createWindow("da", 512, 512, 1920 / 2 - 256, 1080 / 2 - 256, EWindowMode::WINDOWED);
 	owner<IContext*> context = window->createContext(EContextType::OPENGL);
+	owner<ITexture*> texture = context->createTexture(ETextureType::TEX2D);
+	texture->setOptions(TextureSettings());
+	texture->loadTexture(nullptr, ETexturePixelDataFormat::BYTE);
+
 	printf("Ello\n");
 	window->swapBuffers();
 	std::cin.get();
+
+	context->destroyTexture(texture);
 	window->destroyContext(context);
 	graphics->destroyWindow(window);
 	IGraphics::destroyGraphics(graphics);
