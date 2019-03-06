@@ -290,10 +290,6 @@
     <ClInclude Include="Public\stb\stb_dxt.h" />
     <ClInclude Include="Public\stb\stb_rect_pack.h" />
     <ClInclude Include="Private\stb\stb_rect_pack.cpp" />
-    <ClInclude Include="Private\stb\stb_image_write.cpp" />
-    <ClInclude Include="Private\stb\stb_image_resize.cpp" />
-    <ClInclude Include="Private\stb\stb_image.cpp" />
-    <ClInclude Include="Private\stb\stb_dxt.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\EASTL\allocator_eastl.cpp" />
@@ -309,6 +305,10 @@
     <ClCompile Include="Private\EAStdC\EASprintf.cpp" />
     <ClCompile Include="Public\glm\detail\dummy.cpp" />
     <ClCompile Include="Public\glm\detail\glm.cpp" />
+    <ClCompile Include="Private\stb\stb_dxt.cpp" />
+    <ClCompile Include="Private\stb\stb_image.cpp" />
+    <ClCompile Include="Private\stb\stb_image_resize.cpp" />
+    <ClCompile Include="Private\stb\stb_image_write.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\gsl\gsl_algorithm.h" />

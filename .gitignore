@@ -16,6 +16,7 @@
 *.opensdf
 *.ilk
 *.pdb
+*.ifc
 GLEngine.VC.db
 thumbs.db
 PredictedInputCache_Debug_x64.dat

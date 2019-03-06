@@ -9,5 +9,7 @@
     <ClCompile Include="Private\Utils.cpp" />
     <ClCompile Include="Public\Core\Pimpl.h" />
     <ClCompile Include="Private\Core.cpp" />
+    <ClCompile Include="Public\CoreModule.ixx" />
+    <ClCompile Include="Public\STLUtils.ixx" />
   </ItemGroup>
 </Project>

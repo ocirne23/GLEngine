@@ -21,7 +21,7 @@ public:
 	virtual owner<IBuffer*>  createBuffer(uint64 size, const EBufferUsageType& type) = 0;
 	virtual void             destroyBuffer(owner<IBuffer*>& buffer) = 0;
 	virtual owner<ITexture*> createTexture(const ETextureType& type) = 0;
-	virtual void             destroyTexture(owner<ITexture*> texture) = 0;
+	virtual void             destroyTexture(owner<ITexture*>& texture) = 0;
 
 protected:
 
