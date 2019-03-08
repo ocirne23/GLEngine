@@ -2,6 +2,8 @@
 #include <iostream>
 #include "CoreAPI.h"
 
+export module STLUtils;
+
 export void CORE_API foo()
 {
 	std::cout << "foo" << std::endl;

@@ -8,4 +8,7 @@
     <ClInclude Include="Public\Database\IDatabase.h" />
     <ClInclude Include="Private\Database.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Private\DBModule.ixx" />
+  </ItemGroup>
 </Project>

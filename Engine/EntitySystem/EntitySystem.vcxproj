@@ -180,6 +180,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -193,6 +194,9 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
     <ClCompile>
@@ -207,6 +211,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -222,6 +227,9 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
     <ClCompile>
@@ -235,6 +243,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -244,6 +253,9 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
     <ClCompile>
@@ -257,6 +269,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
@@ -270,6 +283,9 @@
       <OutputFile>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
     <ClCompile>
@@ -282,6 +298,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -291,6 +308,9 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
     <ClCompile>
@@ -303,6 +323,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)Engine\ThirdParty\libs</AdditionalLibraryDirectories>
@@ -316,6 +337,9 @@
       <OutputFile>$(SolutionDir)bin\$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\$(Platform)\$(Configuration)\$(TargetName).lib</ImportLibrary>
     </Link>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
     <ClCompile>
@@ -331,6 +355,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -344,6 +369,9 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
     <ClCompile>
@@ -360,6 +388,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -375,6 +404,9 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>"$(SolutionDir)Dependencies\ModuleLister.exe"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />

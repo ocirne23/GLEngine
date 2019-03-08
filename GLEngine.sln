@@ -60,8 +60,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Filesystem", "Engine\Filesy
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Engine\Core\Core.vcxproj", "{522212F3-4A54-46B7-AE41-258DA92F42AC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0} = {2EF1BB7E-355B-4C3C-BF07-C54231C105C0}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ThirdParty", "Engine\ThirdParty\ThirdParty.vcxproj", "{CBD32F00-FB91-48C4-AC0A-D82C3D839B1D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0} = {2EF1BB7E-355B-4C3C-BF07-C54231C105C0}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "App", "Apps\App\App.vcxproj", "{DD33D3D6-909C-414B-8E09-C12C99E13B54}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -97,6 +103,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glew_static", "Dependencies\glew\build\vc15\glew_static.vcxproj", "{664E6F0D-6784-4760-9565-D54F8EB1EDF4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Old", "Old", "{B5F55833-6362-4079-8E76-8B69AD24B9EA}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ModuleLister", "Dependencies\ModuleLister\ModuleLister.vcxproj", "{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -437,6 +445,28 @@ Global
 		{664E6F0D-6784-4760-9565-D54F8EB1EDF4}.ReleaseLib|x64.Build.0 = ReleaseLib|x64
 		{664E6F0D-6784-4760-9565-D54F8EB1EDF4}.ReleaseLib|x86.ActiveCfg = ReleaseLib|Win32
 		{664E6F0D-6784-4760-9565-D54F8EB1EDF4}.ReleaseLib|x86.Build.0 = ReleaseLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugDLL|Any CPU.ActiveCfg = DebugLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugDLL|Any CPU.Build.0 = DebugLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugDLL|x64.ActiveCfg = DebugLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugDLL|x64.Build.0 = DebugLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugDLL|x86.ActiveCfg = DebugLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugDLL|x86.Build.0 = DebugLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugLib|Any CPU.ActiveCfg = DebugLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugLib|x64.ActiveCfg = DebugLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugLib|x64.Build.0 = DebugLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugLib|x86.ActiveCfg = DebugLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.DebugLib|x86.Build.0 = DebugLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseDLL|Any CPU.ActiveCfg = ReleaseLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseDLL|Any CPU.Build.0 = ReleaseLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseDLL|x64.ActiveCfg = ReleaseLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseDLL|x64.Build.0 = ReleaseLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseDLL|x86.ActiveCfg = ReleaseLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseDLL|x86.Build.0 = ReleaseLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseLib|Any CPU.ActiveCfg = ReleaseLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseLib|x64.ActiveCfg = ReleaseLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseLib|x64.Build.0 = ReleaseLib|x64
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseLib|x86.ActiveCfg = ReleaseLib|Win32
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0}.ReleaseLib|x86.Build.0 = ReleaseLib|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -460,6 +490,7 @@ Global
 		{9568FDDD-9F20-48C9-9FEB-BDAE1E714332} = {1DC4F22D-C50C-4D19-B459-8755E67EF3FA}
 		{55AE3D72-7DE6-F19F-AEF2-9AE8CA26CF3D} = {F86B7390-B23F-4400-8BDC-FB67E22A2857}
 		{664E6F0D-6784-4760-9565-D54F8EB1EDF4} = {F86B7390-B23F-4400-8BDC-FB67E22A2857}
+		{2EF1BB7E-355B-4C3C-BF07-C54231C105C0} = {F86B7390-B23F-4400-8BDC-FB67E22A2857}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F8A47901-D3C3-4110-A63F-61E156458D08}

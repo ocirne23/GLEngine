@@ -168,7 +168,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -193,7 +193,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -217,7 +217,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Core.lib;Database.lib;Filesystem.lib;Graphics.lib;Input.lib;Network.lib;ThirdParty.lib;Threading.lib;EntitySystem.lib;SDL2.lib;glew.lib;opengl32.lib;winmm.lib;version.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -239,7 +239,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -262,7 +262,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Core.lib;Database.lib;Filesystem.lib;Graphics.lib;Input.lib;Network.lib;ThirdParty.lib;Threading.lib;EntitySystem.lib;SDL2.lib;glew.lib;opengl32.lib;winmm.lib;version.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -283,7 +283,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -309,7 +309,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -336,7 +336,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>/module:reference "..\..\Engine\Core\CoreModule.ifc" </AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -357,6 +357,14 @@
   <ItemGroup>
     <ClCompile Include="Private\App.ixx">
       <FileType>Document</FileType>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
     </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

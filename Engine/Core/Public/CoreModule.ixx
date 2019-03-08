@@ -8,7 +8,3 @@ export void CORE_API bar()
 {
 	std::cout << "bar" << std::endl;
 }
-
-export void CORE_API foo();
-
-export class CORE_API Thing;

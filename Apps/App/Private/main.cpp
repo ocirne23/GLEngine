@@ -1,5 +1,7 @@
-import M1;
 import CoreModule;
+import STLUtils;
+import DBModule;
+import App2;
 
 int main()
 {
@@ -7,5 +9,7 @@ int main()
 	t.derp();
 	foo();
 	bar();
+	hue();
+	blah();
 	App app;
 }
