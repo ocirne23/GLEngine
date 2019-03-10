@@ -1,41 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="Public\Graphics\IWindow.h" />
-    <ClInclude Include="Private\Window.h" />
     <ClInclude Include="Private\GL\GL.h" />
-    <ClInclude Include="Public\Graphics\IBuffer.h" />
-    <ClInclude Include="Private\GL\GLConstantBuffer.h" />
     <ClInclude Include="Public\Graphics\GraphicsAPI.h" />
-    <ClInclude Include="Public\Graphics\IFramebuffer.h" />
-    <ClInclude Include="Private\GL\GLFramebuffer.h" />
-    <ClInclude Include="Public\Graphics\ICamera.h" />
-    <ClInclude Include="Private\Camera.h" />
-    <ClInclude Include="Private\Frustum.h" />
-    <ClInclude Include="Public\Graphics\IGraphics.h" />
-    <ClInclude Include="Private\Graphics.h" />
-    <ClInclude Include="Private\GL\GLUtils.h" />
-    <ClInclude Include="Private\GL\GLBuffer.h" />
-    <ClInclude Include="Public\Graphics\IShader.h" />
-    <ClInclude Include="Private\GL\GLShader.h" />
-    <ClInclude Include="Public\Graphics\IShaderStage.h" />
-    <ClInclude Include="Private\GL\GLShaderStage.h" />
-    <ClInclude Include="Public\Graphics\IContext.h" />
-    <ClInclude Include="Private\GL\GLContext.h" />
-    <ClInclude Include="Private\GL\GLTexture.h" />
-    <ClInclude Include="Public\Graphics\ITexture.h" />
+    <ClInclude Include="Private\GL\GLBuffer.ixx" />
+    <ClInclude Include="Private\GL\GLContext.ixx" />
+    <ClInclude Include="Private\GL\GLFramebuffer.ixx" />
+    <ClInclude Include="Private\GL\GLShader.ixx" />
+    <ClInclude Include="Private\GL\GLTexture.ixx" />
+    <ClInclude Include="Private\GL\GLUtils.ixx" />
+    <ClInclude Include="Private\Platform\PlatformWindows.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Private\Graphics.cpp" />
-    <ClCompile Include="Private\Window.cpp" />
-    <ClCompile Include="Private\Camera.cpp" />
-    <ClCompile Include="Private\Frustum.cpp" />
-    <ClCompile Include="Private\GL\GLUtils.cpp" />
-    <ClCompile Include="Private\GL\GLBuffer.cpp" />
-    <ClCompile Include="Private\GL\GLShader.cpp" />
-    <ClCompile Include="Private\GL\GLShaderStage.cpp" />
-    <ClCompile Include="Private\GL\GLContext.cpp" />
-    <ClCompile Include="Private\GL\GLFramebuffer.cpp" />
-    <ClCompile Include="Private\GL\GLTexture.cpp" />
+    <ClCompile Include="Private\Camera.ixx" />
+    <ClCompile Include="Private\Frustum.ixx" />
+    <ClCompile Include="Private\Window.ixx" />
+    <ClCompile Include="Private\Graphics.ixx" />
+    <ClCompile Include="Public\Graphics\IGraphics.ixx" />
+    <ClCompile Include="Public\Graphics\IWindow.ixx" />
+    <ClCompile Include="Public\Graphics\IBuffer.ixx" />
+    <ClCompile Include="Public\Graphics\ICamera.ixx" />
+    <ClCompile Include="Public\Graphics\IContext.ixx" />
+    <ClCompile Include="Public\Graphics\IFramebuffer.ixx" />
+    <ClCompile Include="Public\Graphics\IShader.ixx" />
+    <ClCompile Include="Public\Graphics\IShaderStage.ixx" />
+    <ClCompile Include="Public\Graphics\ITexture.ixx" />
+    <ClCompile Include="Private\Platform\PlatformWindows.cpp" />
   </ItemGroup>
 </Project>

@@ -3,13 +3,13 @@
   <ItemGroup>
     <ClInclude Include="Public\Core.h" />
     <ClInclude Include="Public\CoreAPI.h" />
-    <ClInclude Include="Public\Core\Utils.h" />
+    <ClInclude Include="Public\Core\WindowsInclude.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Private\Utils.cpp" />
-    <ClCompile Include="Public\Core\Pimpl.h" />
     <ClCompile Include="Private\Core.cpp" />
-    <ClCompile Include="Public\CoreModule.ixx" />
-    <ClCompile Include="Public\STLUtils.ixx" />
+    <ClCompile Include="Public\Core\Pimpl.ixx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Public\Core\Span.ixx" />
   </ItemGroup>
 </Project>

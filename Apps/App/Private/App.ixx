@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include <iostream>
-
 export module App2;
+
+import std.core;
 
 export void blah()
 {
@@ -14,6 +13,5 @@ public:
 	App()
 	{
 		printf("App\n");
-		getchar();
 	}
 };

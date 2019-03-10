@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <iostream>
 #include "Database/DatabaseAPI.h"
+
+import std.core;
 
 export module DBModule;
 
 export void DATABASE_API hue()
 {
-	std::cout << "hue" << std::endl;
+	printf("hue\n");
 }

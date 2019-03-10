@@ -236,6 +236,7 @@
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
       <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
+      <ShowIncludes>true</ShowIncludes>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -293,6 +294,7 @@
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
       <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
+      <ShowIncludes>true</ShowIncludes>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -404,42 +406,67 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Private\Camera.h" />
-    <ClInclude Include="Private\Frustum.h" />
+    <ClCompile Include="Private\Camera.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\Frustum.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
     <ClInclude Include="Private\GL\GL.h" />
-    <ClInclude Include="Private\GL\GLBuffer.h" />
-    <ClInclude Include="Private\GL\GLConstantBuffer.h" />
-    <ClInclude Include="Private\GL\GLContext.h" />
-    <ClInclude Include="Private\GL\GLFramebuffer.h" />
-    <ClInclude Include="Private\GL\GLShader.h" />
-    <ClInclude Include="Private\GL\GLShaderStage.h" />
-    <ClInclude Include="Private\GL\GLTexture.h" />
-    <ClInclude Include="Private\GL\GLUtils.h" />
-    <ClInclude Include="Private\Window.h" />
-    <ClInclude Include="Private\Graphics.h" />
+    <ClCompile Include="Private\GL\GLBuffer.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\GL\GLContext.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\GL\GLFramebuffer.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\Platform\PlatformWindows.cpp" />
+    <ClCompile Include="Private\GL\GLShader.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\GL\GLTexture.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\GL\GLUtils.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\Window.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Private\Graphics.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClInclude Include="Private\Platform\PlatformWindows.h" />
     <ClInclude Include="Public\Graphics\GraphicsAPI.h" />
-    <ClInclude Include="Public\Graphics\IBuffer.h" />
-    <ClInclude Include="Public\Graphics\ICamera.h" />
-    <ClInclude Include="Public\Graphics\IContext.h" />
-    <ClInclude Include="Public\Graphics\IFramebuffer.h" />
-    <ClInclude Include="Public\Graphics\IGraphics.h" />
-    <ClInclude Include="Public\Graphics\IShader.h" />
-    <ClInclude Include="Public\Graphics\IShaderStage.h" />
-    <ClInclude Include="Public\Graphics\ITexture.h" />
-    <ClInclude Include="Public\Graphics\IWindow.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Private\Camera.cpp" />
-    <ClCompile Include="Private\Frustum.cpp" />
-    <ClCompile Include="Private\GL\GLBuffer.cpp" />
-    <ClCompile Include="Private\GL\GLContext.cpp" />
-    <ClCompile Include="Private\GL\GLFramebuffer.cpp" />
-    <ClCompile Include="Private\GL\GLShader.cpp" />
-    <ClCompile Include="Private\GL\GLShaderStage.cpp" />
-    <ClCompile Include="Private\GL\GLTexture.cpp" />
-    <ClCompile Include="Private\GL\GLUtils.cpp" />
-    <ClCompile Include="Private\Graphics.cpp" />
-    <ClCompile Include="Private\Window.cpp" />
+    <ClCompile Include="Public\Graphics\IBuffer.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\ICamera.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\IContext.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\IFramebuffer.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\IGraphics.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\IShader.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\IShaderStage.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\ITexture.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
+    <ClCompile Include="Public\Graphics\IWindow.ixx">
+      <FileType>Document</FileType>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />

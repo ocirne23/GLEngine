@@ -332,7 +332,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <EnableModules>true</EnableModules>
       <FloatingPointModel />
-      <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
@@ -471,16 +471,14 @@
   <ItemGroup>
     <ClInclude Include="Public\Core.h" />
     <ClInclude Include="Public\CoreAPI.h" />
-    <ClInclude Include="Public\Core\Utils.h" />
+    <ClInclude Include="Public\Core\WindowsInclude.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core.cpp" />
-    <ClCompile Include="Private\Utils.cpp" />
-    <ClCompile Include="Public\Core\Pimpl.h" />
-    <ClCompile Include="Public\STLUtils.ixx" />
+    <ClCompile Include="Public\Core\Pimpl.ixx" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Public\CoreModule.ixx">
+    <ClCompile Include="Public\Core\ArrayView.ixx">
       <FileType>Document</FileType>
     </ClCompile>
   </ItemGroup>

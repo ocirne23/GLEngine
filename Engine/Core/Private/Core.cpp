@@ -1,12 +1,8 @@
 #include "Core.h"
 
-#include <stdarg.h>
-#include <stdio.h>
-
-void print(const char* a_format, ...)
+int CORE_API assert_handler(const char* str, const char* function, const char* file, int line)
 {
-	va_list args;
-	va_start(args, a_format);
-	vprintf(a_format, args);
-	va_end(args);
+	printf("assertion failed: (%s), %s : file %s L %d.\n", str, function, file, line);
+	__debugbreak();
+	return 0;
 }

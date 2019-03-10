@@ -4,5 +4,6 @@
 #define GLEW_STATIC
 #endif
 
+#define GLEW_NO_GLU
+
 #include <GLEW/glew.h>
-#include <GLEW/wglew.h>

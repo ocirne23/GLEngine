@@ -1,15 +1,6 @@
-import CoreModule;
-import STLUtils;
-import DBModule;
-import App2;
+import Core.ArrayView;
 
 int main()
 {
-	Thing t;
-	t.derp();
-	foo();
-	bar();
-	hue();
-	blah();
-	App app;
+	return 0;
 }

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CoreAPI.h"
-#include "gsl/gsl.h"
 
-using namespace gsl;
+import std.core;
+
+template <class T, class = std::enable_if_t<std::is_pointer<T>::value>>
+using owner = T;
 
 #undef NULL
 #define NULL nullptr
@@ -32,15 +34,20 @@ constexpr CastType alias_cast(SourceType arg)
 
 #define acast alias_cast
 
+using byte = unsigned char;
 using uint = unsigned int;
 using ushort = unsigned short;
 using int64 = long long;
 using uint64 = unsigned long long;
 
-void CORE_API print(const char* format, ...);
+void print(const char* a_format, ...);
 
-template <typename T, std::size_t N>
-constexpr std::size_t ARRAY_SIZE(T const (&)[N])
+#define assert(x) ((void)(!(x) && assert_handler(#x, __FUNCTION__, __FILE__, __LINE__)))
+
+int CORE_API assert_handler(const char* str, const char* function, const char* file, int line);
+
+template <typename T, size_t N>
+constexpr size_t ARRAY_SIZE(T const (&)[N])
 {
 	return N;
 }
