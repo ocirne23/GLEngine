@@ -1,12 +1,15 @@
 export module App2;
 
-import std.core;
+struct b; import std.core; //import std.filesystem;
 
 export void blah()
 {
 	printf("blah\n");
 }
-
+//asdasd
+/*
+claasdasd
+*/
 export class App
 {
 public:

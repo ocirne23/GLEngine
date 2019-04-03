@@ -170,6 +170,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
     <TargetExt>.lib</TargetExt>
+    <CustomBuildBeforeTargets>ClCompile</CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
     <TargetExt>.lib</TargetExt>
@@ -349,6 +350,12 @@
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
+    <CustomBuildStep>
+      <Command>echo ELLO %(Inputs)</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>AAAAARGH Performing Custom Build Step </Message>
+    </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
     <PreBuildEvent>

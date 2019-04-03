@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="MyTarget">
+    <SimpleTask MyProperty="Value for MyProperty" />
+  </Target>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugDLL|Win32">
       <Configuration>DebugDLL</Configuration>
@@ -142,18 +145,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
+    <CustomBuildBeforeTargets>
+    </CustomBuildBeforeTargets>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">
     <ClCompile>
@@ -173,12 +184,18 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Core.lib;Database.lib;Filesystem.lib;Graphics.lib;Input.lib;Network.lib;ThirdParty.lib;Threading.lib;EntitySystem.lib;SDL2.lib;glew.lib;opengl32.lib;winmm.lib;version.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">
     <ClCompile>
@@ -198,12 +215,18 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Core.lib;Database.lib;Filesystem.lib;Graphics.lib;Input.lib;Network.lib;ThirdParty.lib;Threading.lib;EntitySystem.lib;SDL2.lib;glew.lib;opengl32.lib;winmm.lib;version.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">
     <ClCompile>
@@ -226,6 +249,11 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
     <ClCompile>
@@ -250,6 +278,11 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">
     <ClCompile>
@@ -265,12 +298,18 @@
       <AdditionalOptions>/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database /module:search $(SolutionDir)Engine\EntitySystem /module:search $(SolutionDir)Engine\Filesystem /module:search $(SolutionDir)Engine\Graphics /module:search $(SolutionDir)Engine\Input /module:search $(SolutionDir)Engine\Network /module:search $(SolutionDir)Engine\Threading</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Core.lib;Database.lib;Filesystem.lib;Graphics.lib;Input.lib;Network.lib;ThirdParty.lib;Threading.lib;EntitySystem.lib;SDL2.lib;glew.lib;opengl32.lib;winmm.lib;version.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">
     <ClCompile>
@@ -289,11 +328,17 @@
       <AdditionalLibraryDirectories>$(SolutionDir)lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
-      <AdditionalDependencies>Core.lib;Database.lib;Filesystem.lib;Graphics.lib;Input.lib;Network.lib;ThirdParty.lib;Threading.lib;EntitySystem.lib;SDL2.lib;glew.lib;opengl32.lib;winmm.lib;version.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">
     <ClCompile>
@@ -320,6 +365,11 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
     <ClCompile>
@@ -347,6 +397,11 @@
     <BuildLog>
       <Path>$(SolutionDir)BuildLogs\$(Platform)\$(Configuration)\$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <CustomBuild>
+      <Message>EHUEHUEHEU</Message>
+      <Command>notepad %(FullPath)</Command>
+      <Outputs>%(Directory)\%(Filename).lol;</Outputs>
+    </CustomBuild>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Private\main2.cpp" />
@@ -355,17 +410,9 @@
     <ClCompile Include="Private\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Private\App.ixx">
+    <CustomBuild Include="Private\App.ixx">
       <FileType>Document</FileType>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugLib|Win32'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='ReleaseLib|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugDLL|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='DebugLib|x64'">/module:reference @modulelist /module:search $(SolutionDir)Engine\Core /module:search $(SolutionDir)Engine\Database</AdditionalOptions>
-    </ClCompile>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="..\..\CleanupProject.targets" />
